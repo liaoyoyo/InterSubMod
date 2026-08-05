@@ -1,8 +1,16 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-06-11 (🎯 主軸轉向：Subclonal reconstruction 取代 G6；G6/G1 降支撐；見固定焦點區塊 + foundation doc) | 2026-06-02 (固定焦點區塊 + G6/G1 cycle); 5/30: SoT reconcile
-狀態: validated
+更新時間: 2026-08-05 (工程交接驗收：證據鏈 19/19 hash MATCH、clean build exit 0、C++ 258/258 tests PASS；四項工程 gate 未過〔pytest 缺、磁碟 617GB、580 未提交、GitHub 落後 268 commits〕，皆非科學問題) | 2026-08-01 (Exact-PS 全 7 資料集 HTML observation report = VALIDATED_DERIVED_OBSERVATION) | 2026-07-24 (全 sSNV Task-B 科學分析已驗證；signed release因nested v29 finalizer blocker依bounded policy停止，無authority/receipt/signature) | 2026-07-23 (exact-PS strict completion audit：L1 read-linkage 7/7；production strict directed topology 0/7；clone/parent/fusion 0/7) | 2026-07-22 (全 sSNV Task-B：v7 source authority已簽署；primary v6與singleton audit v2 PASS；102,842-task raw-identity preflight v9執行中)
+狀態: in_progress（全sSNV正式release與Read-linked Hypercube M2兩條Task-B）+ validated（下方明示之已驗證結果）
 資料來源:
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md
+  - InterSubMod/state/cycles/cycle_20260716-0618-read-linked-hypercube-exact-likelihood/audit.json
+  - InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/implementation-notes.md
+  - InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/results/all_ssnv_input_manifest.json
+  - research/20260715_single_fp_alt_multicluster_subclone_validation/20260715_跨session研究交接與資料位置_01.md
+  - research/20260715_single_fp_alt_multicluster_subclone_validation/results/report_dataset_v1/report_dataset.json
+  - research/20260710_layered_reconstruction_v2/20260714_LongPhaseS_PASS_sSNV共現與拓撲最新分析_01.md
+  - research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
   - docs/standards/20260228_output軟連結與版本控管規範_01.md
   - scripts/analysis/check_ai_agent_readiness.sh
@@ -12,7 +20,219 @@
 
 # 當前目標
 
-## 2026-07-10 — 🔴 census/PI 3個P0 誠實修正 + 六層 funnel + 7樣本擴充 ⭐ 最新
+## 2026-08-05 — 工程交接驗收：科學證據鏈完好，四項工程 gate 未過
+
+> **本輪性質**：read-only 工程稽核 ＋ 一次 from-scratch clean build。
+> **未改動任何科學結論或 canonical 數值**；科學層權威仍為 20260801 的 `authority_manifest.json`。
+
+**已驗證通過（2026-08-05 實跑，非清單）**：
+
+- **證據鏈完整** — 對 20260801 authority manifest 登記的 19 個路徑重算 SHA-256
+  （13 authority artifacts ＋ 1 frozen binary ＋ 5 源碼快照）→ **19/19 MATCH**，0 遺失、0 不符。
+- **可從零編譯** — `cmake -S . -B build_handoff_verify -DCMAKE_BUILD_TYPE=Release` ＋ build
+  → 兩者 exit 0、真實編譯錯誤 0、6/6 binary 產出。此 build **包含工作區 1,501 行未 commit 的 C++ 改動**。
+- **C++ 測試** — 由本輪新建 binary 執行 `run_tests` → **258 tests / 37 suites 全過**（2,766 ms）。
+- **最新 release 測試重現** — 20260801 observation report 的 unittest → **12/12 PASS**（10.077 s），
+  與 08-01 原始記錄（12 tests / 9.735 s）一致。
+- **C++ 品質** — 排除 vendored 依賴後自身程式碼僅 **7 個編譯警告**。
+
+**未通過（阻擋正式交接；四項全為工程可重現性問題，無一為科學問題）**：
+
+1. **測試可執行性** — 143 個 Python 測試檔中 **63 個（44.06%）為 pytest 風格，但當前兩個 Python 環境皆無 pytest**。
+   連帶使 20260801 manifest 宣稱的「37 passed」測試證據在此環境不可重現。
+   → 本日已補 `requirements.txt`（同時補上先前漏列的 `pysam`／`scikit-learn`／`python-pptx`／
+   `statsmodels`／`Pillow`／`lxml`／`PyYAML` 等實際依賴）。
+2. **磁碟餘量** — `/big7_disk` 僅剩 **617 GB（99% 已用）**。7 個 paired_full tagged BAM 合計
+   **1,840,983,466,353 bytes（1.67 TiB）**，單一最大 HCC1937 416.5 GiB
+   → **P0-4 clean rerun 在清理前無法執行**。
+3. **版本可指認** — working tree **580 項未提交**（368 新增／202 修改／10 刪除）；
+   frozen binary 與當前源碼仍為 `not_proven_byte_reproducible`；`environment_lock` 仍未建立。
+4. **GitHub 落後** — 本地領先 `origin` **268 commits**（remote 最後 commit 為 2026-06-15 `b761336`）；
+   且 tracked 內混入大型衍生資料（單一最大 66.4 MB HTML ＋ 5 個 18–28 MB JSON/CSV），
+   根因為 `.gitignore` 未擋 `docs/methodology/_assets/`。
+
+**程式可觀察性缺口（本輪新盤點）**：
+`Config::print()` 只印 13 個欄位、CLI 實有 **28 個選項**且**完全無 JSON 落檔**；
+`RegionProcessor.cpp`（3,571 行）僅 2 行 `[CovM]` log、`ScopedLogger` 使用次數為 **0**
+→ read 解析／過濾／甲基矩陣／距離／分群／檢定／建樹七個階段全程無法觀察。
+
+**新增交接文件**（工程層，補 20260801 科學層之不足）：
+`InterSubMod/docs/handoff/20260805_系統交接與驗收_01/` —
+README ＋ 4 份分冊（資料／程式／輸出／收斂驗收）＋ 2 份機器可讀 JSON
+（`handoff_manifest.json`、`acceptance_receipt.json`）＋ 2 份 standalone HTML（含 11 張手刻 SVG）。
+
+**下一步（依序執行中）**：D 文件同步 → A repo 瘦身 → B＋C（C++ 參數落檔與步驟可觀察性）→ A4-A5 commit 並推送。
+
+## 2026-08-01 — Exact-PS 全 7 資料集 HTML observation report 已 validated
+
+> `release_status = VALIDATED_DERIVED_OBSERVATION`；由 13 個 hash-verified authority artifacts 與
+> 19 列 denominator registry 產生；1440／1024／390／320 px ＋ no-JS ＋ A4 print QA 全 PASS，
+> console errors 0、page errors 0、external requests 0；12 個 Python 契約測試 OK。
+
+**canonical 分母鏈**（不變）：
+
+```text
+98,955 final groups
+├─ 13,014 no active ALT
+└─ 85,941 mutation-bearing
+   ├─ 75,224 complete minimum families（87.53%）
+   │  ├─ 71,955 read-AF ranked
+   │  │  ├─ 39,648 unique best tree（55.1011%）
+   │  │  ├─ 23,858 tied, same rooted-unlabeled topology（33.1568%）
+   │  │  └─  8,449 tied, cross topology（11.7421%）
+   │  ├─  3,224 zero denominator
+   │  └─     45 AF recurrence-screen abstain
+   └─ 10,717 resource abstain（search-node guard，非隨機缺失）
+```
+
+單一 rooted-unlabeled 拓撲＝**63,506 / 71,955 ＝ 88.2579%**（model-conditional graph shape，非生物 prevalence）。
+
+**甲基輔助層**：1,045 formal／811 evaluable／**3 robust association**／627 no-robust／181 confounded／
+234 not evaluable；full RR/RA/AR/AA ＝ 0、exact two-bit RA robust ＝ 0 → 僅能稱
+pattern-conditioned regional methylation association。
+
+**claim ceiling 不變**：CN/LOH `NOT_INTEGRATED`、甲基 `association-only`、
+`confirmed cellular subclone = 0`、`linear ancestry = 0`。
+
+**入口**：`InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/README.md`
+（machine-readable 權威索引為同目錄 `authority_manifest.json`）
+
+## 2026-07-24 — 全 469,849 sSNV 科學分析完成；正式 signed release 停止
+
+> **狀態**：7 datasets / 469,849 個同次 LongPhase-S recalibrated `FILTER=PASS` biallelic sSNV 的
+> focal-ALT methyl multigroup、latest HP/PS read-tag join、sSNV共現、four-state、tumor-REF、matched-normal、
+> CN/CCF與singleton重算結果已完成。正式簽章發布未完成，且依bounded-attempt政策停止，不再進第四輪
+> schema-recovery修補。
+>
+> **停止原因**：第三輪Mendel唯讀審查發現report builder仍遞迴呼叫v29 finalizer及已撤離的
+> result/report-v6 keys；verdict=`REQUEST_CHANGES`（1 HIGH、1 MEDIUM）。雖然頂層C的3 path + 2 digest
+> rebase、direct v30 finalizer、exact probe `733/733`與sidecar `775/775`均PASS，現有測試仍未覆蓋此nested
+> dependency，因此不得建立authority或聲稱signed Task-B release完成。
+>
+> **科學結論不變**：M1=`102,842/469,849=21.8883%`；M2 all-site operational yield=
+> `919/469,849=0.1956%`，conditional=`919/1,867=49.2234%`；singleton M2 PASS=
+> `30/50,432=0.05949%`。正式pair family為7 pairs/7 focal sites、全部focal TP；joint family沒有G2候選。
+> 這些支持共同ancestral ALT reads內可重現的latent molecular substructure候選，但confirmed cellular
+> subclone=`0`、linear ancestry=`0`。
+>
+> **發布狀態**：formal reviews、v30 authority bundle、result/report receipts與signatures全部不存在；兩個
+> signer已停止且未簽署。完整停止證據：
+> `InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/rejected_pre_authority_reviews/20260724_v30_round3_transitive_report_builder_finalizer_split_brain/SUMMARY.md`。
+>
+> **讀者版代表位點圖解（2026-07-24）**：已將停止判定、M1/M2/singleton/UPGMA定義、30個M2 PASS
+> 位點身份，以及HCC1395 chr14/chr22的read×read distance、read×CpG與UPGMA原圖整理成F類
+> illustration companion。全量數字仍為7 datasets / 469,849 sites；圖像為purposive subset，不可估計
+> prevalence。入口：
+> `InterSubMod/research/20260724_all_ssnv_representative_locus_explanation/00_INDEX.md`；
+> final Playwright desktop/mobile QA=`PASS`、6/6 images、external requests=0。
+
+## 2026-07-23 — L1 exact PS × HP strict read-linkage 7/7 完成；L2/L3/L4 尚未完成
+
+> **最新完成層級**：L1 strict read-linkage=`7/7`；current production strict directed topology=`0/7`；cellular clone count=`0/7`；exact cellular parent→child=`0/7`；cross-HP/cross-technical fusion tree=`0/7`。HCC1395 較早的 exact-PS topology 是 upstream `PARTIAL`、`validation_evidence_eligible=false` 的 non-binding technical pilot；舊全 7 樣本 candidate-tree census 使用 legacy/50-kb-era grouping 且含 mixed PS，只可作歷史參考。
+>
+> **L1 已驗證分支**：7 technical datasets / 6 biological cell lines / chr1–22 共 154 個 dataset×chromosome records 已完成 exact nonmissing PS × HP1/HP2 strict fixed-endpoint read-linkage 重算。154/154 extraction receipts、154/154 strict receipts、report-data 25 項守恆與 completion 檢查、Python 32 tests、C++ strict graph、artifact validator、官方 1440/390 browser QA 與 JS on/off Playwright QA 全 PASS。正式總數：`S=469,849`、`components=255,752`、`k1 abstain=170,131`、`W=85,621`、`direct edges=1,197,530`。
+>
+> **50 kb 決策**：距離不進 primary edge/component rule，只作 QC。`16,537` 條 direct edges >50 kb；移除後 `1,172` 個 W partition 改變、`228` 個 W 完全失格、`961` memberships 回到 k=1；W 加總因 component splitting 由 `85,621` 變 `85,872`。正式 HTML 與 READY：`InterSubMod/research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/`。
+>
+> **claim ceiling**：W 是 read-linkage region；endpoint edge 是無向 linkage，不是 evolutionary parent→child。不可宣稱唯一 mutation-state tree、clone 數、subclone truth、祖先順序或融合樹。前 6 組的 132 chromosome artifacts 與 HCC1954 22 個 artifacts 為不同 builder SHA；已證明 missing-PS hotfix 對前 6 組資料 no-trigger 且 HCC1937 chr21 byte-identical，但若外部 release 要求 same-builder provenance，仍須另建新 roots 重跑 132 chromosomes。
+>
+> **HCC1395 跨技術固定比較口徑**：21 組 dataset pairs 中只有 HCC1395–HCC1395_DORADO 在 candidate、active、W、direct edge、exact component 五層全為 rank 1；其餘皆為不同 biological ID negative controls。共同 candidate 母群下 DORADO→HCC 的無向 direct-edge／co-membership containment 為 98.28%／90.05%，證明的是 biological-ID-specific **局部結構骨架**，不是已完成的有向 clone-tree topology。合理預期共同可辨識區域的主要 trunk 會接近，且 DORADO 較像 HCC 高解析樹的 contraction；但 strict-bound DORADO topology、parent→child、CN/CCF 與 candidate-tree-set 比較未完成前，不得宣稱完整樹相同。完整證據：`InterSubMod/research/20260723_hcc1395_crosssource_topology_resolution/strict_pair_validation/20260723_HCC1395_DORADO_嚴格區域與拓撲可辨識性驗證_01.md`。
+
+## 2026-07-22 — 全 469,849 sSNV Task-B：source authority 已授權；正式 raw-identity preflight 執行中
+
+> **最新接續入口與固定範圍**：`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/implementation-notes.md`。Task Type B scope仍固定為7 datasets / 6 biological samples / chr1-22 / `469,849`個同一次LongPhase-S recalibrated `FILTER=PASS` biallelic dataset-sites；不得退回舊ClairS PASS、FP-only subset或BAM內舊HP。
+>
+> **release authority 已完成**：final canonical JUnit v27為`743/743` PASS、0 failure/error/skip，XML SHA-256=`2b191fd358d68098abdeab0664466f56061071326a60c0a28c84a4d96dce2a58`；兩位獨立外部Claude Reviewer A/B均以`claude-opus-4-8`、max effort、唯讀模式對同一HEAD/source-set判定`APPROVE`且blocking findings為空。現行source-set SHA-256=`f5ba8a9e786971c4261b51e283a0f9df6e807a8aca695bf5041271fee5420f58`；signed authority為`InterSubMod/docs/provenance/source_authorities/20260722_all_ssnv_focal_alt_release_source_authority.v7.json`，authority SHA-256=`ab68a9d3e8578545e6f930e8f8c79912a132f02692adec3b19542276605b6a0c`，獨立consumer已驗證23/23 sources、兩份review signatures與FD lease全部PASS。
+>
+> **正式執行狀態**：primary artifact audit v6已對`102,842` stable sites / `102,842` assignment objects / `308,526/308,526` artifacts重算PASS，receipt=`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/results/stable_primary_artifact_audit.v6_strict_command_parity_pre_downstream.json`。current session `7921`正以40 workers執行全部`102,842` tasks的raw-identity preflight v9，預定receipt=`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/results/cooccurrence_task_contract_preflight.v9_command_parity_full_runtime.json`。只有該receipt `pass=true`且source identity before/after一致，才可啟動v8 full cooccurrence及後續strict、matched-normal、CN/CCF、post-audits、signed final dataset/report與HTML QA。
+>
+> **singleton supplemental 已重建**：v7 test inventory recovery的canonical JUnit v29為`743/743` PASS、0 failure/error/skip；signed test-evidence v5經獨立OpenSSL與report consumer驗證，private key已退役為mode`0000`。fresh schema-2 audit使用修補後auditor與v7 authority原子發布至`/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/positional_singleton_methyl_multigroup_audit_v2_source_authority_v7`，50,432 rows、30 M2-PASS cases、39項checks與`_SUCCESS` hashes全部PASS；四個輸出皆mode`0444`。獨立agent Meitner對identity-schema修補與test-evidence transitive binding判定`APPROVE`、無blocking/high/medium，且確認不需再旋轉v5 key；正式supplemental report與receipt仍須等待main final receipts後建立。
+>
+> **尚未發布科學終值**：截至本段更新，v8 cooccurrence、terminal downstream、result/report/supplemental簽章與最終HTML仍未完成；不得稱Task-B全部完成，也不得發布final G1/G2/R1/B1/C1比例。既有M1=`102,842/469,849`、M2=`919/1,867`與singleton數據仍是已重算的screen/補充觀察，但不是cellular subclone或linear ancestry證明；`confirmed cellular subclone=0`、`linear ancestry=0`的claim ceiling不變。
+
+## 2026-07-18 — 全 469,849 sSNV Task-B：上游與 singleton 結論已確認；正式 release 尚未完成
+
+> **本線最高優先入口**：`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/implementation-notes.md`。固定 scope 是 7 datasets / 6 biological samples / chr1-22 / 469,849 dataset-sites；tree 與本輪 focal-ALT 分析均使用同一次 LongPhase-S recalibrated `FILTER=PASS` sSNV，不使用舊 ClairS PASS、FP-only subset 或 BAM 內舊 HP。
+>
+> **已確認的上游契約**：normalized ClairS raw-all `638,259` 筆完整進 LongPhase-S，LongPhase-S all-output仍為 `638,259`，其中 PASS=`582,820`；本輪 autosomal biallelic subset=`469,849 = 335,296 TP + 7,745 FP + 126,808 UNASSESSED`。38,345,639 筆 site-read observations全部以 same-run sidecar exact join latest HP/PS，HP replacement=`33,693,248`、projection multimatch=`0`。BAM-named producer輸出是非持久化FIFO；沒有新的regular tagged BAM，也沒有覆寫canonical/original BAM。
+>
+> **已確認的 singleton 觀察**：singleton定義為同dataset/chrom、相鄰gap≤50 kb傳遞component size=1，代表不能做該近距離component內的sSNV共現，不代表全基因組read-sharing degree=0。共有 `50,432/469,849=10.7337%`；M1甲基可評估 `48,347/50,432=95.8657%`，stable multigroup `5,961/50,432=11.8199%`（或evaluated分母 `12.3296%`）。M2套用於全部 `5,961` 個M1 flags，其中只有48個取得完整determinate結果：PASS=`30`、FAIL=`18`；另 `5,913` 個M1 flags為NOT_EVALUABLE，`44,471` 個M1未標記位點為M2 NOT_RUN。`30/50,432=0.05949%`是observed operational M2-PASS yield，不是biological/subclone prevalence下限；`30/48=62.5%`只能稱M2-determinate conditional rate，不能外推盛行率。
+>
+> **生物解釋上限**：30個M2 PASS支持「共同focal ALT下仍存在read-level residual epigenetic partition，與latent molecular substructure相容」；目前 `confirmed cellular subclone=0`、`linear ancestry=0`。單位點甲基多群不能單獨證明兩個clone、clone 1→clone 2、HP1/HP2 cellular pairing或唯一演化樹；需要至少第二個獨立genetic marker的group-specific co-membership、matched-normal/REF對照與CN/purity/CCF等正交證據。
+>
+> **正式release狀態**：第一次v5 authority與後續四組v2 signer均已證實未簽署；舊key完整封存為`UNSIGNED / NOT_AUTHORIZED / NEVER_USED`或`ARCHIVED_UNUSED_NEVER_SIGNED`，未啟動任何formal producer。Raman指出的v2 failure-propagation、same-FD/no-clobber與v6 review split-read三個HIGH blocker已由v3 FD-bound signer、v7 standalone FD-bound assembler修補；v14 normalizer另拒絕non-finite JSON。現行23個producer sources全mode `0444`，source-set SHA-256=`1d7166f0a192848a9b6ad812e93dac4404b65caaffaa6509fb53156c2ca8eab4`；source/result/report/supplemental四把新v3 public-key SHA依序為`e4a09d9e...e5b6c`、`2d37e58d...3d318`、`3fb508f6...9e585`、`a67d41ff...0aca3`，四個signer仍等待、private皆`0400`。v18 canonical JUnit=`544/544` PASS、0 fail/error/skip、SHA-256=`2bce0db2...8dff7`；current supplemental test evidence v3另為已簽章的`489/489` PASS。fresh外部Claude v14 Reviewer A/B attempt2與internal Raman/Pascal正在審查同一新digest；v5 live authority/approval/signature仍不存在。尚未完成的是v14雙審與source-authority簽章、fresh primary/preflight、全量cooccurrence/topology、matched-normal/CN downstream、final dataset/report/supplemental簽章與HTML QA；20個預期formal artifacts與1個completion log仍不存在。因此本線仍是 **scientific release NO-GO**，不得稱「全部完成」或發布最終G1/G2/R1/B1/C1比例。
+>
+> **逐步完成條件**：1. 外部A/B均對同一HEAD與source-set明示APPROVE → 驗證：strict-normalized JSON與v5 signed authority通過；2. fresh全量producer鏈 → 驗證：102,842/102,842 cooccurrence tasks與所有receipt PASS；3. final dataset/report → 驗證：簽章、獨立重算、多agent/Claude終審與桌機/手機/print HTML QA全部通過。
+
+## 2026-07-18 — Read-linked Hypercube exact＋likelihood：修補已通過，scale verdict仍為PROBE
+
+> **本線第一入口**：`InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md`。最新方法教學是`InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/20260717_聯合GroupConstraints到Likelihood排序方法教學_01.html`，明示`DEMO／正式ranking pilot NO-GO／非全量驗證證據`；第一pilot驗證摘要是`20260717_M2_frozen_v2_pilot_NO_GO驗證報告_01.html`。
+>
+> **正式pilot結果**：`HCC1395_DORADO × chr6` extraction receipt PASS；B0 ranking達8小時上限後exit 124，沒有完成receipt，獨立verifier=`NO_GO`。四個ranking gzip均截斷，只能作效能diagnostic；未啟動B20、H2009 chr2、154-task full或FINAL topology HTML。
+>
+> **方法定案與教學QA**：partial pattern有`u`個X時概念上相容`2^u` states，但每條pattern只形成一個symbolic group constraint；全部groups由同一個candidate set聯合滿足。先求`h*`並只在`complete=true`時稱「全部minimum-extra vertex sets」，再以BQ/error-aware molecule likelihood排序不同`V`；同一`V`內的不同parent edges `T`仍不可辨。Targeted method tests 23/23 PASS；HTML在1440／1024／390／320 px與print QA全部通過。
+>
+> **2026-07-18修補結果**：Python端fixed predecessor/group constraints改為每個enumeration只prepared一次；`AAAA,k=4`完整24 optima的base build由25降為1，ordered candidate digest不變，MILP solve仍為25。新增process-local、full-tuple、`complete=true`限定的structural cache，store/hit各deep-copy；likelihood、BQ、fixed-error與bootstrap每unit重算。Cache on/off四個科學輸出semantic SHA相同；完整研究套件341/341 PASS。這不是persistent HiGHS backend，也尚未證明真實長尾已消失。
+>
+> **下一步**：current入口是`InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/20260718_M2_exact_preserving修補正式執行Runbook_03.md`；先建立新v3 frozen contract並依序跑HCC1395_DORADO chr6＋H2009 chr2雙pilot。只有雙pilot receipts與wall/incomplete/coverage gates全PASS才可進full 154。Persistent `highspy`、checkpoint/resume、shared likelihood cache與per-unit deadline均未實作、須另案；不得resume或清空v2失敗root。
+>
+> **Claim ceiling**：目前只能稱solver-certified regional mutation-state candidate sets與read-pattern discrimination；不能稱真實clone數、HP1/HP2 cellular pairing、唯一parent edge或完整癌症演化史。
+
+## 2026-07-17 — 全 469,849 sSNV focal-ALT methyl multigroup完成；cooccurrence/control正式收尾中〔歷史快照，以上方7/18狀態取代〕
+
+> **新 session 第一入口**：`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/implementation-notes.md`。Task Type B scope固定為7 datasets / 6 biological samples / chr1-22 / `469,849` dataset-sites；輸入是同一次 LongPhase-S recalibrated `FILTER=PASS` frozen subset，不是舊 ClairS PASS或FP-only subset。
+>
+> **上游已驗證**：`638,259` normalized ClairS raw-all records完整進LongPhase-S all-output ledger；LongPhase-S PASS=`582,820`，本輪chr1-22 biallelic focal subset=`469,849 = 335,296 TP + 7,745 FP + 126,808 UNASSESSED`。tree input與同run LongPhase-S PASS VCF byte-identical的獨立receipt為`InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/results/latest_tree_input_contract_audit.json`。latest HP/PS以same-run sidecar逐alignment exact join，不使用BAM內舊HP；producer BAM-named輸出是FIFO，沒有regular tagged BAM、沒有覆寫原始BAM。
+>
+> **正式screen已完成**：唯一正式screen為`/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/all_ssnv_focal_alt_multigroup_v10_source_locked_thread_pinned_recovered_full`；469,849/469,849 keys exact，38,345,639 site-read observations全數latest HP/PS exact join、projection multimatch=0。M1 operational flags=`102,842/469,849=21.8883%`；M2=`919/1,867=49.2234%`只是在M2-evaluable M1 sites中的screen eligibility，不是生物prevalence或subclone比例。唯一K=11位點為`HCC1954 chr5:751076 G>A`，M2 NOT_EVALUABLE。
+>
+> **active downstream**：tumor-REF recovered producer已`pass=true`完成102,842/102,842（prefix 102,307 + suffix 535；gzip/header+rows exact）。Source-attestation fresh strict probe亦PASS：relative analyzer token必須完整等於repo-relative path，final builder會獨立重驗command binding與可信v2 verifier身份；正式receipt仍只由completion runner建立。cooccurrence v5 session `96734`在`HCC1395 chr1:13200585 A>C`發現2個raw projection各有2筆eligible records而fail-closed；逐欄位重算證明SAM core、sequence/quality/CIGAR/MM/ML及除`RG`外所有typed tags完全一致，formal v5 output不存在。attempts 1-5均為`ABORTED_EXCLUDED`。partial raw-identity preflight v4 session `58967`只完成24,000/102,842即因release-contract review主動停止，沒有JSON receipt，狀態固定為`PRECHECK_ABORTED_EXCLUDED`。current source另修補typed B-array subtype、逐位點count/digest invariants、hard-fail policy語意、5-source before/after attestation與稀疏duplicate audit；`336 passed`。唯一下一個precheck是fresh `cooccurrence_task_contract_preflight.v5_dependency_attested_raw_identity_full_runtime.json`，必須102,842/102,842且`pass=true`才可啟動fresh v6路徑`methyl_ssnv_cooccurrence_v6_m2v5_raw_identity_contract_source_locked`。其後只允許current `run_m2v5_recovered_completion_chain.sh`依序跑strict、matched-normal、CN/CCF、post audits、final dataset、Markdown/HTML、result-level multiagent與Claude Code終審。G2仍只稱`multi-marker molecular-haplotype base candidate`，不能自動稱cellular subclone；目前**不得發布最終G1/G2/R1/B1/C1比例**。
+
+## 2026-07-15 — 🟢 單一 FP focal-ALT 甲基多群全量驗證完成；subclone / linear claim 不成立
+
+> **新 session 入口**：`research/20260715_single_fp_alt_multicluster_subclone_validation/20260715_跨session研究交接與資料位置_01.md`。主輸入仍是 `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5` 的同一次 LongPhase-S recalibrated `FILTER=PASS` sSNV；focal ALT 固定取 `reads.tsv:alt_support=ALT`，HP tag不可代替。
+>
+> **全量 verdict**：FP `7,745`、evaluable `4,967`、primary stable `583/4,967=11.74%`、high threshold `103/4,967=2.07%`。1:1 matched TP high threshold為 `1.265%` vs FP `1.330%`，`p=0.772`，無 FP specificity。所有 strict gates交集只剩 `10 sites / 9 unique ALT readsets / 6 regional components`；focal linear identifiable=`0`、orthogonal subclone confirmed=`0`。
+>
+> **Claim ceiling**：只能稱 `read-level epigenetic heterogeneity candidate`，不能稱 high-probability subclone或linear evolution。先前 InterSubMod heatmaps可作共同位點 pattern-level歷史驗證，但legacy stable `687/3,188=21.55%` 不可當current prevalence。完整報告與HTML位於 `research/20260715_single_fp_alt_multicluster_subclone_validation/`；外部Claude Code 15項重算PASS，browser QA與14/14 tests PASS。
+>
+> **下一個生物 gate**：matched-normal methylation + 至少2個獨立 genetic markers的group-specific co-membership + purity/CN-adjusted CCF；再有獨立 cellular identity後才可升級 subclone claim。這些是後續新 cycle，不是本輪未完成工作。
+
+## 2026-07-14 — 🔵 Historical pre-strict candidate-tree census〔已由 7/23 exact-PS strict 定義取代「最新」地位〕
+
+> **歷史用途限定**：`research/20260710_layered_reconstruction_v2/20260714_LongPhaseS_PASS_sSNV共現與拓撲最新分析_01.md` + `research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 保留為 pre-strict candidate census。它使用 legacy coordinate grouping、PS 只作 QC 且含 mixed-PS regions；不是 7/23 exact-PS strict L2/L3 production 結果，數字不得與 W=85,621 合併或相減。
+>
+> **全流程 terminal state**：raw/all ClairS 638,259 = LongPhase-S input/all-output ledger 638,259；LongPhase-S PASS 582,820；chr1-22 biallelic sSNV 469,849；retained 194,149；51,815 groups = 51,815 regions。Canonical verifier與ClairS-PASS sensitivity verifier皆 `all_pass=true,n_pass=7,n_fail=0`；canonical read-tag exposures/exact matches=11,513,224/11,513,224，missing/conflict/extra/malformed/allele-conflict全0；post-run canonical BAM identity 7/7 match。
+>
+> **當時的 candidate census**：W_primary=50,215；candidate-complete=42,240；capped/incomplete=7,975；`C=1/Topo=1`=11,582、`C>1/Topo=1`=10,737、`C>1/Topo>1`=19,921、impossible=0。這些只描述 historical regional mutation-state candidates，不能作 current strict directed topology 或 cellular clone truth。
+>
+> **Backbone 差異**：ClairS PASS sensitivity root為 `20260713_layered_reconstruction_v3_raw_all_clairs_pass_sensitivity_v6`；comparison verdict=`backbone_sensitive`（min site J=0.577257、unit J=0.474027、shared topology digest concordance=0.936110）。主結果固定使用LongPhase-S recalibrated PASS；ClairS PASS只作sensitivity。
+>
+> **後續最新分析入口**：全7-dataset cross-HP候選稽核在 `research/20260714_cross_hp_clone_state_inverse_audit/`；HCC1395/DORADO unknown-K state bounds在 `research/20260714_hcc1395_unknown_k_clone_state_consistency/`。兩者均使用canonical v5，但結論維持regional state/candidate scope；bulk HP marginals、VAF與methylation仍不能確認cellular clone或真祖先關係。
+
+## 2026-07-12 — 🟠 producer contract 7/7 已完成；fresh downstream 未完成〔歷史執行快照，已由 7/14 closeout 取代〕
+
+> **已關閉的 gate**：`20260711_longphase_s_raw_all_production_sidecars_v2` 已有 aggregate `_SUCCESS` 與 `_RAW_ALL_RECEIPTS_SUCCESS`，7/7 receipt `all_pass=true`。總計 638,259 normalized raw-all biallelic sSNVs、582,820 LongPhase-S PASS、LowQual→PASS 32,184、PASS→LowQual 17,444、164,253,537 sidecar rows；unknown HP 與 identity conflict 均為 0。這可支撐 raw-all → LongPhase-S FILTER/HP/PS producer contract，不支撐 caller truth或 biological clone。
+>
+> **仍開放的 gate（截至 2026-07-12 18:16 +08:00）**：canonical `20260712_layered_reconstruction_v3_raw_all_lps_pass_v3` 已有 COLO829、H1437、H2009、HCC1395 4/7 sample完成，HCC1395_DORADO與HCC1937執行中，HCC1954未啟動；root無 `_SUCCESS`。四個完成sample的71,783 non-capped eligible units通過V1–V7，另7,590 capped明示n/a，但尚未經run-level final verifier。ClairS-PASS sensitivity、backbone comparison與post-run immutable readback均未完成。因此`ISM-R03`與正式funnel/determinacy/topology rates維持`pending_rerun` / scientific release **NO-GO**。
+>
+> **新增方法口徑**：region 先按 positional adjacent-gap≤50 kb 成 component，樹可由互相重疊的 partial reads 約束；model-determined不保證有單一 read全跨所有位點。正式寫法是 **partial-read-constrained、model-determined regional mutation-state tree**，不是 observed clone 或每棵皆 full-span single-molecule tree。CN仍只作region midpoint的post-hoc recurrence annotation；SAVANA未列位置=neutral的來源語意尚未獨立驗證，missing/misfit必維持 unavailable。
+>
+> **本輪完整外部方法驗證**：`/big7_disk/liaoyoyo2001/external_validation/_landscape/12_intersubmod_full_method_process_external_validation_20260712.md`；claim status以 `/big7_disk/liaoyoyo2001/external_validation/_schema/paper_claims.tsv` 為機械真值。
+
+## 2026-07-11 — 🔴 ClairS→LongPhase-S contract override；舊 7/7 downstream rates 暫停
+
+> **最高優先 SoT**：`research/20260710_layered_reconstruction_v2/20260711_ClairS_LongPhaseS_sSNV位點與ReadTag契約稽核_01.md` + `research/20260710_layered_reconstruction_v2/00_INDEX.md`。7/7 raw ClairS PASS record keys 都完整進 LongPhase-S，且 input=`_sc.vcf` all keys；但 primary tree input 是 **LongPhase-S `_sc.vcf` PASS**，不是 ClairS PASS input 原封不動直接建樹。歷史 tagged BAM 只有 COLO829 genome-wide，其餘 6/7 受 `--truth-bed` 限制，因此 7/10 layered 7/7 PASS 只能稱 **upstream-mismatched engineering baseline**。
+>
+> **仍可寫**：operational-universe/HP-family/solver/CN-readAF-methylation 角色定義；7/7 record continuity；18,103 full V4/V5 + 4,000 stress 的 solver consistency（非 biological truth）；region tree ≠ biological clone。**暫停作正式 Results**：舊 funnel、mutation-bearing determinacy、multi-HP、regional-tree/CN-stratified rates，等 clean no-truth HP/PS sidecar consumer 與 U0–U7 gates 7/7 完成。論文 claim/search/memory router：`/big7_disk/liaoyoyo2001/external_validation/_landscape/10_paper_claim_evidence_search_and_memory_20260711.md`；KB：`knowledge/11_external_literature/12_20260711_paper_claim_search_and_memory_router.md`。
+>
+> **2026-07-11 09:00 更新**：PASS-only production probe 已以 `E_METHOD_SCOPE_PASS_ONLY` fail-closed並封存為 `20260711_longphase_s_production_sidecars_PASS_ONLY_ABORTED_v1`。raw-all HCC1954 chr22／patched regression／HCC1395 whole-chrX probes均通過，pre-decision verdict=`GO_WITH_FAIL_CLOSED`。canonical+sensitivity contract gate **84/84 PASS**、跨版本 **45/45 PASS**；7 個歷史 paired-full tagged BAM sampled identity baseline已凍結（set SHA-256=`ce6c63d42e3f334d6847a1a6d3e46ead165b59a03197acb098319be5c67fcf90`）。正式 7-dataset producer已於 `09:00:28+08:00` 在20/20 launch authority hash PASS後啟動；HCC1395 normalized raw-all `134,122→134,122`，truth VCF/BED空、tag region=all、normal extraction 1280s完成，tumor extraction進行中；**尚無任一 dataset terminal PASS、無 aggregate `_SUCCESS`**。BAM-named output已實測為 FIFO、size=0，不是regular BAM。one-shot supervisor正在等待producer，通過後依序跑 receipt v2、LongPhase-S PASS canonical tree、ClairS PASS sensitivity tree、比較器與 post-run BAM不變性驗證。教授版工程觀察 HTML 位於 `docs/reports/in_progress/2026/07/20260711_分層重建數據全景觀察_01/`，artifact/browser QA PASS但 scientific release仍 NO-GO。
+>
+> **2026-07-11 15:15 更新**：raw-all producer 已有 **3/7 terminal PASS**（HCC1395、HCC1395_DORADO、COLO829），H1437 執行中、其餘 3 datasets 尚未啟動；仍無 producer aggregate `_SUCCESS`、無 layered-v3 canonical/sensitivity root，所以不得替換現有 historical funnel/topology rates。教授重點 PPT-style HTML 已凍結此進度與輸入 hash，位於 `/big7_disk/liaoyoyo2001/Meeting/interSubMod_reports_workspace/20260711_分層重建教授重點簡報_01/`；10 slides、official chart/browser/no-JS/print QA PASS，scientific release仍 NO-GO。
+>
+> **2026-07-11 23:58 更新**：教授重點 HTML 已更新為 **11 slides / 7 charts**，第 2/5/8/10 頁已分開 W_all、k>1 candidate、complete T>1 與 VAF evaluable 分母；第 11 頁新增逐樣本 complete-region 粗拓撲與 full-read-state endpoint sensitivity。Coarse-topology census **65/65 PASS**，artifact/browser/no-JS/**11-page print** 全 PASS。生產批次截點為 **6 PASS / 1 active / 0 pending**，仍無 aggregate `_SUCCESS` / verification，所以全套數字仍僅能稱 historical engineering snapshot，scientific release 維持 NO-GO。
+
+## 2026-07-10 — census/PI 3個P0 修正 + 六層 funnel + 7樣本擴充〔7/11 scope override；downstream 數字只作 engineering baseline〕
 
 > **新 session 先讀**：memory `project_census_p0_funnel_reclassification`。
 > **背景**：peer-review（Task B 驗證）揪出 census（`20260710_full_census_hierarchy`）+ PI 報告 3 個 P0，**我獨立從原始資料重算、數字精確吻合**後修正（非採信審查）。
@@ -27,6 +247,7 @@
 > **canonical 分母**：`funnel_census_HCC1395.py` / `funnel_census_7samples.py`（單一真值，只讀 somatic_pass.vcf.gz + layered JSON）。
 > **CCF+CN 補齊**（commit 1e5aa37，`ccf_and_cn_multisample.py`）：6 樣本 CCF read 加權（HCC1395 重現 66.8% 驗證）+ SAVANA CN 07-05 已跑套用（**5/7 可用**；COLO829/HCC1937 mis-fit→unavailable）。🔴 **raw reach 31–69% 誤導，strictly-neutral 可信 reach 只 0.4–11%**（CN-gain 佔 ambiguous 35–82%）；recurrence 多數是 CN-gain artifact/LOH 非真收斂（=為何需要 CN 的實證）。
 > **待辦**：COLO829/HCC1937 CN 無外部真值裁決（非可補）；single-cell/multi-region 正交確認（⭐3→⭐4）。
+> **外部文獻/知識同步（2026-07-10）**：`/big7_disk/liaoyoyo2001/external_validation/` 已對帳為 **96 CONTEXT cards / 95 entity keys**（A21/B47/C28；77 primary/19 secondary），補 paired ClairS、SEQC2、LongPhase-TO、CITUP、SAVANA、Blood 2026 lineage review；current bridge = `/big7_disk/liaoyoyo2001/external_validation/_landscape/09_intersubmod_research_bridge_20260710.md`，repo 內知識入口 = `knowledge/11_external_literature/11_20260710_layered_reconstruction_external_bridge.md`。舊 74/82/90 數與六月 methylation novelty framing 均為歷史。
 
 ## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）
 
@@ -35,7 +256,7 @@
 ## 2026-07-07 — 🧬 分層 per-HP-家族樹枚舉重建 + 工作站
 
 > **新 session 先讀**：memory `project_layered_perHPfamily_tree_enumeration_solver` + 資料模型 spec `InterSubMod/docs/methodology/20260706_layered_data_model_units_proportions_spec_01.md`（使用者確認的單位/分母/關係）。
-> **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + 四配子判 recurrence；golden 8 手算 case + seeded 隨機 stress〔2026-07-10 補實：`full_v4v5_verification.py` 5 seed×800，取代原無憑據「3723」〕；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。
+> **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + **rooted three-gamete** 判 recurrence；因 ROOT=`0^k` 明示加入，亦可等價寫成 **root-augmented four-gamete**；golden 8 手算 case + seeded 隨機 stress〔2026-07-10 補實：`full_v4v5_verification.py` 5 seed×800，取代原無憑據「3723」〕；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。
 > **HCC1395 結果（region 主分母 7100）**：**多-HP 3992/7100=56.2%**（過半區雙 germline 家族各一樹）；region all-determined **2317(32.6%)**（全 germline lineage 唯一樹才算）；lineage-unit determined 6883/12475=55.2%；V1-V7 ALL PASS。🔴 三者分母不同不可比。
 > **🔴 sSNV 數修正（§13.0 抓到，影響本檔下方 07-01 line）**：「35,332 sSNV」是**總 census 位點非 somatic**；重建骨幹 somatic sSNV(census somatic==True)=**23,810**。handoff/master_spec 的「35,332 sSNV=somatic骨幹」待更正。
 > **工作站**：standalone `docs/methodology/_assets/20260706_layered_reconstruction_workstation.standalone.html`（dashboard 4表+region瀏覽器+逐HP家族色框樹+**樹切換器**〔◀▶+thumbnail,一次一大圖,標「N樹=M形狀」如125樹=5形狀〕+L0-L3軌跡；反捏造數字全從json）；可攜 per-sample `layered_workstation/{S}.html`+index（builder `build_layered_per_sample.py`）。

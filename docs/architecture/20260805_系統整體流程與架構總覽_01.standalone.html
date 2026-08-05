@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InterSubMod 系統整體流程與架構總覽 — 2026-08-05</title>
+<style>
+:root{
+  --c-bg:#FAF9F5; --c-surface:#FFFFFF; --c-text:#141413; --c-muted:#6B6B66;
+  --c-border:#E3DACC; --c-accent:#D97757; --c-accent-soft:#FBEEE8;
+  --c-red:#C2410C; --c-red-deep:#7F1D1D; --c-red-tint:#FEF2F0;
+  --c-green:#15803D; --c-green-tint:#DCFCE7;
+  --c-yellow:#A16207; --c-yellow-deep:#78350F; --c-yellow-tint:#FEF3C7;
+  --c-blue:#1E3A8A; --c-blue-tint:#DBEAFE;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --ff-body:system-ui,-apple-system,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Microsoft JhengHei","Droid Sans Fallback",sans-serif;
+  --ff-mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.06);
+  --shadow-md:0 2px 8px rgba(20,20,19,.08);
+  --radius:8px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);
+     font-family:var(--ff-body);font-size:15px;line-height:1.7;
+     overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+.layout{max-width:1320px;margin:0 auto;display:grid;
+        grid-template-columns:238px 1fr;gap:var(--sp-5);padding:var(--sp-5)}
+aside.toc{position:sticky;top:var(--sp-4);align-self:start;
+          max-height:calc(100vh - var(--sp-7));overflow-y:auto;
+          background:var(--c-surface);border:1px solid var(--c-border);
+          border-radius:var(--radius);padding:var(--sp-4);box-shadow:var(--shadow-sm)}
+aside.toc h3{margin:0 0 var(--sp-3);font-size:13px;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--c-muted)}
+aside.toc ol{margin:0;padding-left:1.35em;font-size:13.5px;line-height:1.85}
+aside.toc a{color:var(--c-text);text-decoration:none}
+aside.toc a:hover{color:var(--c-accent);text-decoration:underline}
+aside.toc li.core>a{font-weight:700;color:var(--c-accent)}
+aside.toc li.core>a::after{content:" ★";font-size:11px}
+aside.toc .toc-foot{margin-top:var(--sp-4);padding-top:var(--sp-3);
+                    border-top:1px solid var(--c-border);
+                    font-size:12px;color:var(--c-muted);line-height:1.6}
+main.report{background:var(--c-surface);border:1px solid var(--c-border);
+            border-radius:var(--radius);padding:var(--sp-6);box-shadow:var(--shadow-md);
+            min-width:0}
+.report-header{border-bottom:2px solid var(--c-border);padding-bottom:var(--sp-5);
+               margin-bottom:var(--sp-5)}
+.pretitle{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+          color:var(--c-accent);font-weight:700;margin-bottom:var(--sp-2)}
+h1{font-size:31px;line-height:1.3;margin:0 0 var(--sp-4);letter-spacing:-.01em}
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-4);
+        margin:0 0 var(--sp-4);font-size:13.5px}
+dl.meta dt{color:var(--c-muted);font-weight:600;white-space:nowrap}
+dl.meta dd{margin:0;min-width:0}
+.verdict-banner{background:linear-gradient(90deg,#1E3A8A 0%,#3B5BA5 100%);
+                color:#fff;padding:var(--sp-4) var(--sp-5);border-radius:var(--radius);
+                font-size:15.5px;font-weight:600;line-height:1.6}
+h2{font-size:21px;margin:var(--sp-7) 0 var(--sp-3);padding-top:var(--sp-2);
+   border-top:1px solid var(--c-border);line-height:1.4}
+h2:first-of-type{border-top:none;margin-top:var(--sp-4)}
+h3{font-size:16.5px;margin:var(--sp-5) 0 var(--sp-2)}
+h4{font-size:14.5px;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-muted)}
+p{margin:0 0 var(--sp-3)}
+code{font-family:var(--ff-mono);font-size:.88em;background:var(--c-accent-soft);
+     padding:1px 5px;border-radius:4px;overflow-wrap:anywhere;word-break:break-word}
+pre{font-family:var(--ff-mono);font-size:12.5px;line-height:1.65;
+    background:#F4F2ED;border:1px solid var(--c-border);border-radius:var(--radius);
+    padding:var(--sp-4);overflow-x:auto;margin:0 0 var(--sp-4)}
+pre code{background:none;padding:0}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+           gap:var(--sp-3);margin:var(--sp-4) 0 var(--sp-5)}
+.stat-box{border:1px solid var(--c-border);border-radius:var(--radius);
+          padding:var(--sp-4);background:var(--c-bg);text-align:center}
+.stat-box .number{font-family:var(--ff-mono);font-size:25px;font-weight:700;
+                  color:var(--c-accent);line-height:1.2;letter-spacing:-.02em}
+.stat-box .number.bug{color:var(--c-red-deep)}
+.stat-box .number.success{color:var(--c-green)}
+.stat-box .number.warning{color:var(--c-yellow)}
+.stat-box .number.neutral{color:var(--c-blue)}
+.stat-box .label{font-size:12px;color:var(--c-muted);margin-top:var(--sp-2);line-height:1.45}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 var(--sp-4)}
+.table-wrap{overflow-x:auto;margin-bottom:var(--sp-4)}
+.table-wrap table{margin-bottom:0}
+th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);
+      text-align:left;vertical-align:top}
+th{background:#F4F2ED;font-weight:700;font-size:12.5px;
+   letter-spacing:.02em;white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--ff-mono);white-space:nowrap}
+tr.row-bug{background:var(--c-red-tint)}
+tr.row-safe{background:var(--c-green-tint)}
+tr.row-warn{background:var(--c-yellow-tint)}
+.mark{font-weight:700;font-family:var(--ff-mono)}
+.mark.ok{color:var(--c-green)}
+.mark.no{color:var(--c-red-deep)}
+.mark.warn{color:var(--c-yellow-deep)}
+details.card{border:1px solid var(--c-border);border-left:4px solid var(--c-muted);
+             border-radius:var(--radius);margin-bottom:var(--sp-3);background:var(--c-bg)}
+details.card.core{border-left-color:var(--c-accent);background:var(--c-surface)}
+details.card.risk{border-left-color:var(--c-red)}
+details.card>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);
+                     font-weight:600;font-size:14.5px;list-style:none;
+                     display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:baseline}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-muted);font-size:12px}
+details.card[open]>summary::before{content:"▾"}
+details.card .card-body{padding:0 var(--sp-4) var(--sp-4);
+                        border-top:1px solid var(--c-border);padding-top:var(--sp-3)}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;
+       padding:2px 8px;border-radius:20px;white-space:nowrap;
+       border:1px solid currentColor}
+.badge.core{color:var(--c-accent)}
+.badge.risk{color:var(--c-red-deep)}
+.badge.ok{color:var(--c-green)}
+.badge.stop{color:var(--c-red-deep);background:var(--c-red-tint)}
+.badge.abstain{color:var(--c-yellow-deep);background:var(--c-yellow-tint)}
+.badge.id{color:var(--c-muted);font-family:var(--ff-mono)}
+.callout{border:1px solid var(--c-red);border-left:5px solid var(--c-red);
+         background:var(--c-red-tint);border-radius:var(--radius);
+         padding:var(--sp-4);margin:var(--sp-4) 0}
+.callout.info{border-color:var(--c-blue);border-left-color:var(--c-blue);
+              background:var(--c-blue-tint)}
+.callout.warn{border-color:var(--c-yellow);border-left-color:var(--c-yellow);
+              background:var(--c-yellow-tint)}
+.callout .callout-title{font-weight:700;margin-bottom:var(--sp-2);font-size:14.5px}
+.callout p:last-child{margin-bottom:0}
+figure.svg-figure{margin:var(--sp-5) 0;border:1px solid var(--c-border);
+                  border-radius:var(--radius);padding:var(--sp-4);background:var(--c-bg)}
+figure.svg-figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:12.5px;color:var(--c-muted);margin-top:var(--sp-3);
+           padding-top:var(--sp-2);border-top:1px solid var(--c-border);line-height:1.55}
+ul,ol{margin:0 0 var(--sp-4);padding-left:1.5em}
+li{margin-bottom:var(--sp-1)}
+.lede{font-size:16px;color:var(--c-text);border-left:3px solid var(--c-accent);
+      padding-left:var(--sp-4);margin:var(--sp-4) 0}
+footer.provenance{margin-top:var(--sp-7);padding-top:var(--sp-4);
+                  border-top:2px solid var(--c-border);font-size:12.5px;
+                  color:var(--c-muted);line-height:1.7}
+footer.provenance code{font-size:11.5px}
+footer.provenance h4{color:var(--c-text);margin-top:var(--sp-4)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:var(--sp-3)}
+  aside.toc{position:static;max-height:none}
+  main.report{padding:var(--sp-4)}
+  h1{font-size:25px}
+}
+@media (max-width:560px){
+  dl.meta{grid-template-columns:1fr;gap:0}
+  dl.meta dt{margin-top:var(--sp-2)}
+  main.report{padding:var(--sp-3)}
+  footer.provenance ul{padding-left:1.1em}
+}
+@media print{
+  body{background:#fff}
+  .layout{display:block;max-width:100%;padding:0}
+  aside.toc{display:none}
+  main.report{box-shadow:none;border:none;padding:0}
+  details.card{page-break-inside:avoid;border-color:#999}
+  details>summary{list-style:none}
+  details:not([open])>*{display:block !important}
+  details:not([open])>summary{background:#fff !important}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.85em;color:#666}
+  pre,table,blockquote,details.card,figure.svg-figure,svg{page-break-inside:avoid}
+  h1,h2,h3{page-break-after:avoid}
+  .verdict-banner{background:#1E3A8A !important;-webkit-print-color-adjust:exact;
+                  print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="toc">
+  <h3>章節導航</h3>
+  <ol>
+    <li class="core"><a href="#tldr">總結與關鍵數字</a></li>
+    <li class="core"><a href="#s1">三層系統總覽</a></li>
+    <li class="core"><a href="#s2">科學管線端到端流程</a></li>
+    <li class="core"><a href="#s3">Canonical 分母鏈</a></li>
+    <li class="core"><a href="#s4">Claim ceiling L1–L7</a></li>
+    <li><a href="#s5">甲基輔助層</a></li>
+    <li><a href="#s6">程式資產</a></li>
+    <li><a href="#s7">治理 Harness</a></li>
+    <li><a href="#s8">目前狀態盤點</a></li>
+    <li class="core"><a href="#s9">五個實測漂移風險</a></li>
+    <li class="core"><a href="#s10">論文凍結路徑 P0–P1</a></li>
+    <li><a href="#s11">不應重踩的舊方向</a></li>
+    <li><a href="#prov">來源與 Provenance</a></li>
+  </ol>
+  <div class="toc-foot">
+    ★ = 核心章節（預設展開）<br>
+    本檔為 standalone 單檔，離線可讀、可列印，無外部依賴。
+  </div>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+  <div class="pretitle">System Overview · Architecture &amp; Pipeline</div>
+  <h1>InterSubMod 系統整體流程與架構總覽</h1>
+  <dl class="meta">
+    <dt>建立日期</dt><dd>2026-08-05</dd>
+    <dt>受眾</dt><dd>研究者本人 / 指導教授 / 無前情接手的 AI</dd>
+    <dt>資料範圍</dt><dd>7 technical datasets · 6 biological IDs · chr1–22</dd>
+    <dt>Git 分支</dt><dd><code>research/subclonal-reconstruction-202606</code> @ <code>387a101</code></dd>
+    <dt>狀態</dt><dd>盤點快照（read-only 稽核；未修改任何 canonical 數值）</dd>
+    <dt>權威來源</dt><dd><code>InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/</code></dd>
+  </dl>
+  <div class="verdict-banner">
+    系統 = 一條凍結到 L5（拓撲）的科學管線 ＋ 兩套 C++ 程式庫 ＋ 一套 50-skill 治理 harness。
+    科學鏈已做到「候選拓撲可稽核」，生物層（真實 cellular clone lineage）明示 abstain；
+    工程面有兩個明確漂移：CURRENT_FOCUS 落後 12 天、工作區 580 個未提交變更含 1,501 行未 commit 的 C++ 改動。
+  </div>
+</header>
+
+<h2 id="tldr">一、總結：系統做到哪裡、卡在哪裡</h2>
+
+<p class="lede">
+本專案利用 ONT 長讀長「同一條 DNA 分子同時跨越多個 somatic SNV」的能力，建立局部
+mutation-state constraints，再把每個區塊轉成有向布林超立方體上的群組 Steiner arborescence 問題求解。
+它的定位是<strong>可稽核的區域 mutation-state candidate reconstruction</strong>，
+<strong>不是</strong>已恢復每個樣本真實的 cellular clone genealogy。
+</p>
+
+<div class="stat-grid">
+  <div class="stat-box">
+    <div class="number">469,849</div>
+    <div class="label">autosomal sSNV dataset-records（總分母）</div>
+  </div>
+  <div class="stat-box">
+    <div class="number neutral">71,955</div>
+    <div class="label">read-AF ranked units（可排序分析單元）</div>
+  </div>
+  <div class="stat-box">
+    <div class="number success">88.2579%</div>
+    <div class="label">單一 rooted-unlabeled 拓撲形狀<br>（63,506 / 71,955）</div>
+  </div>
+  <div class="stat-box">
+    <div class="number warning">10,717</div>
+    <div class="label">resource abstain（非隨機缺失）</div>
+  </div>
+  <div class="stat-box">
+    <div class="number bug">0</div>
+    <div class="label">confirmed cellular subclone<br>／linear ancestry</div>
+  </div>
+  <div class="stat-box">
+    <div class="number bug">580</div>
+    <div class="label">工作區未提交變更<br>（368 新增 + 202 修改 + 10 刪除）</div>
+  </div>
+</div>
+
+<div class="callout info">
+  <div class="callout-title">五秒版本</div>
+  <p><strong>科學上</strong>：從 469,849 個 sSNV 出發，經 read-linkage 與超立方體求解，
+  最後有 71,955 個單元可用 read-AF 排序，其中 88.26% 收斂到單一拓撲形狀。
+  但 CN／LOH 尚未整合、甲基只作 association，因此<strong>生物層必須 abstain</strong>。</p>
+  <p><strong>工程上</strong>：最新已驗證產出是 2026-08-01 的 exact-PS observation report
+  （<code>VALIDATED_DERIVED_OBSERVATION</code>，12 tests OK、全 viewport QA PASS）；
+  但 <code>CURRENT_FOCUS.md</code> 停在 07-24，且 8 個 C++ 檔案共 1,501 行新增尚未 commit。</p>
+</div>
+
+<h2 id="s1">二、三層系統總覽：治理支撐程式、程式實作科學</h2>
+
+<p>整個系統可 MECE 拆成三個互斥層面。下層為上層提供保證：治理層約束 AI 與人的行為，
+程式層把方法固化成可重現的二進位與腳本，科學層才產出可宣稱的結論。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 340" role="img" aria-labelledby="s1-title s1-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="s1-title">InterSubMod 三層系統架構</title>
+    <desc id="s1-desc">由下而上為治理 harness 層（50 skills、18 agents、45 hooks、evidence ledger 142 筆）、
+    程式資產層（InterSubMod C++ 27,653 行、LongLineage C++、229 個 Python 分析腳本、視覺化工具）、
+    以及科學管線層（exact PS×HP 分區、strict read linkage、超立方體 solver、read-AF 排序、拓撲普查）。</desc>
+    <g font-family="var(--ff-body, system-ui)" font-size="12" fill="#141413">
+
+      <text x="400" y="22" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6B6B66">
+        下層保證上層：治理 → 程式 → 科學</text>
+
+      <!-- Band 1: science -->
+      <rect x="20" y="42" width="115" height="82" rx="8" fill="#FBEEE8" stroke="#D97757" stroke-width="1.5"/>
+      <text x="77" y="72" text-anchor="middle" font-weight="700" fill="#8A3F22" font-size="13">科學管線層</text>
+      <text x="77" y="90" text-anchor="middle" fill="#8A3F22" font-size="10.5">L1 → L6</text>
+      <text x="77" y="107" text-anchor="middle" fill="#8A3F22" font-size="10.5">產出可宣稱結論</text>
+
+      <rect x="148" y="42" width="118" height="82" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="207" y="70" text-anchor="middle" font-weight="600" font-size="11.5">exact PS×HP</text>
+      <text x="207" y="88" text-anchor="middle" font-size="10" fill="#6B6B66">分區投影</text>
+      <text x="207" y="105" text-anchor="middle" font-size="10" fill="#6B6B66">禁跨 phase set</text>
+
+      <rect x="276" y="42" width="118" height="82" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="335" y="70" text-anchor="middle" font-weight="600" font-size="11.5">strict linkage</text>
+      <text x="335" y="88" text-anchor="middle" font-size="10" fill="#6B6B66">support ≥ 3</text>
+      <text x="335" y="105" text-anchor="middle" font-size="10" fill="#6B6B66">85,621 個 W</text>
+
+      <rect x="404" y="42" width="118" height="82" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="463" y="70" text-anchor="middle" font-weight="600" font-size="11.5">超立方體 solver</text>
+      <text x="463" y="88" text-anchor="middle" font-size="10" fill="#6B6B66">minimum vertex set</text>
+      <text x="463" y="105" text-anchor="middle" font-size="10" fill="#6B6B66">75,224 完整 family</text>
+
+      <rect x="532" y="42" width="118" height="82" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="591" y="70" text-anchor="middle" font-weight="600" font-size="11.5">read-AF 排序</text>
+      <text x="591" y="88" text-anchor="middle" font-size="10" fill="#6B6B66">ALT/(REF+ALT)</text>
+      <text x="591" y="105" text-anchor="middle" font-size="10" fill="#6B6B66">71,955 ranked</text>
+
+      <rect x="660" y="42" width="118" height="82" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="719" y="70" text-anchor="middle" font-weight="600" font-size="11.5">拓撲 signature</text>
+      <text x="719" y="88" text-anchor="middle" font-size="10" fill="#6B6B66">exact census</text>
+      <text x="719" y="105" text-anchor="middle" font-size="10" fill="#6B6B66">88.26% 單一形狀</text>
+
+      <!-- Band 2: code -->
+      <rect x="20" y="146" width="115" height="82" rx="8" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="77" y="176" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="13">程式資產層</text>
+      <text x="77" y="194" text-anchor="middle" fill="#1E3A8A" font-size="10.5">C++ / Python</text>
+      <text x="77" y="211" text-anchor="middle" fill="#1E3A8A" font-size="10.5">方法固化與重現</text>
+
+      <rect x="148" y="146" width="150" height="82" rx="6" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.2"/>
+      <text x="223" y="174" text-anchor="middle" font-weight="600" font-size="11.5">InterSubMod C++</text>
+      <text x="223" y="192" text-anchor="middle" font-size="10" fill="#6B6B66">27,653 行 · 24 modules</text>
+      <text x="223" y="209" text-anchor="middle" font-size="10" fill="#6B6B66">論文唯一可引軟體</text>
+
+      <rect x="308" y="146" width="150" height="82" rx="6" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.2"/>
+      <text x="383" y="174" text-anchor="middle" font-weight="600" font-size="11.5">LongLineage C++</text>
+      <text x="383" y="192" text-anchor="middle" font-size="10" fill="#6B6B66">獨立 repo · HTSlib</text>
+      <text x="383" y="209" text-anchor="middle" font-size="10" fill="#6B6B66">truth-isolated 重建</text>
+
+      <rect x="468" y="146" width="150" height="82" rx="6" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.2"/>
+      <text x="543" y="174" text-anchor="middle" font-weight="600" font-size="11.5">Python 分析層</text>
+      <text x="543" y="192" text-anchor="middle" font-size="10" fill="#6B6B66">229 個 analysis 腳本</text>
+      <text x="543" y="209" text-anchor="middle" font-size="10" fill="#6B6B66">5 步標準 pipeline</text>
+
+      <rect x="628" y="146" width="150" height="82" rx="6" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.2"/>
+      <text x="703" y="174" text-anchor="middle" font-weight="600" font-size="11.5">視覺化 / 工作站</text>
+      <text x="703" y="192" text-anchor="middle" font-size="10" fill="#6B6B66">standalone HTML</text>
+      <text x="703" y="209" text-anchor="middle" font-size="10" fill="#6B6B66">Playwright QA</text>
+
+      <!-- Band 3: governance -->
+      <rect x="20" y="250" width="115" height="76" rx="8" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+      <text x="77" y="278" text-anchor="middle" font-weight="700" fill="#15803D" font-size="13">治理 Harness</text>
+      <text x="77" y="296" text-anchor="middle" fill="#15803D" font-size="10.5">Hard Gate + SoT</text>
+      <text x="77" y="313" text-anchor="middle" fill="#15803D" font-size="10.5">防捏造 / 防漂移</text>
+
+      <rect x="148" y="250" width="150" height="76" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.2"/>
+      <text x="223" y="278" text-anchor="middle" font-weight="600" font-size="11.5">50 Skills</text>
+      <text x="223" y="298" text-anchor="middle" font-size="10" fill="#6B6B66">7-Phase Waterfall</text>
+      <text x="223" y="314" text-anchor="middle" font-size="10" fill="#6B6B66">+ 元方法論 11</text>
+
+      <rect x="308" y="250" width="150" height="76" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.2"/>
+      <text x="383" y="278" text-anchor="middle" font-weight="600" font-size="11.5">18 Agents</text>
+      <text x="383" y="298" text-anchor="middle" font-size="10" fill="#6B6B66">fresh-context 評審</text>
+      <text x="383" y="314" text-anchor="middle" font-size="10" fill="#6B6B66">generator / evaluator 分離</text>
+
+      <rect x="468" y="250" width="150" height="76" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.2"/>
+      <text x="543" y="278" text-anchor="middle" font-weight="600" font-size="11.5">45 Hooks</text>
+      <text x="543" y="298" text-anchor="middle" font-size="10" fill="#6B6B66">6 個真 exit-2 Gate</text>
+      <text x="543" y="314" text-anchor="middle" font-size="10" fill="#6B6B66">數字 provenance 檢查</text>
+
+      <rect x="628" y="250" width="150" height="76" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.2"/>
+      <text x="703" y="278" text-anchor="middle" font-weight="600" font-size="11.5">Evidence Ledger</text>
+      <text x="703" y="298" text-anchor="middle" font-size="10" fill="#6B6B66">142 筆 append-only</text>
+      <text x="703" y="314" text-anchor="middle" font-size="10" fill="#6B6B66">跨 cycle 歷史真值</text>
+
+      <!-- upward support arrows -->
+      <defs>
+        <marker id="s1-up" viewBox="0 0 10 10" refX="5" refY="1"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,10 L5,0 L10,10 z" fill="#6B6B66"/>
+        </marker>
+      </defs>
+      <line x1="400" y1="248" x2="400" y2="232" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#s1-up)"/>
+      <line x1="400" y1="144" x2="400" y2="128" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#s1-up)"/>
+    </g>
+  </svg>
+  <figcaption>圖 1：三層系統架構 — 治理 harness 保證程式行為，程式資產固化科學方法，科學管線層才產出結論。
+  三層各自有獨立的 SoT 與稽核機制。</figcaption>
+</figure>
+
+<h2 id="s2">三、科學管線：12 步端到端流程，每步都有對應驗證</h2>
+
+<p>流程的核心設計原則是<strong>「不混合」</strong>：不混合不同 phase set、不混合兩個 homolog、
+不用距離取代 read 證據。每一步都綁一個可機械檢查的驗證條件（Step → Verify），
+任何一步 abstain 都是正式輸出，不是資料遺漏。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 400" role="img" aria-labelledby="s2-title s2-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="s2-title">Exact-PS×HP 端到端 12 步流程</title>
+    <desc id="s2-desc">從 LongPhase-S PASS sSNV 開始，經 exact PS×HP 投影、strict read linkage、
+    W component、ordered partition、R/A/X pattern、active-bit 壓縮、minimum vertex-set family、
+    Hamming-1 parent mapping、read-AF 排序、拓撲 signature census，最後接甲基 association sidecar，
+    輸出報告與 receipts。蛇形排列，箭頭表示執行順序。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="24" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6B6B66">
+        分析粒度：dataset × chromosome × exact PS × primary HP × strict component × local block</text>
+
+      <defs>
+        <marker id="s2-arr" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8A3F22"/>
+        </marker>
+      </defs>
+
+      <!-- Row 1 -->
+      <rect x="12" y="46" width="180" height="72" rx="6" fill="#FBEEE8" stroke="#D97757" stroke-width="1.4"/>
+      <text x="24" y="66" font-size="10" font-weight="700" fill="#8A3F22">①</text>
+      <text x="102" y="80" text-anchor="middle" font-size="11.5" font-weight="600">LongPhase-S PASS sSNV</text>
+      <text x="102" y="99" text-anchor="middle" font-size="10" fill="#6B6B66">469,849 biallelic autosomal</text>
+
+      <rect x="202" y="46" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="214" y="66" font-size="10" font-weight="700" fill="#8A3F22">②</text>
+      <text x="367" y="66" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L1</text>
+      <text x="292" y="80" text-anchor="middle" font-size="11.5" font-weight="600">exact PS × primary HP</text>
+      <text x="292" y="99" text-anchor="middle" font-size="10" fill="#6B6B66">multimatch = 0</text>
+
+      <rect x="392" y="46" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="404" y="66" font-size="10" font-weight="700" fill="#8A3F22">③</text>
+      <text x="557" y="66" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L1</text>
+      <text x="482" y="80" text-anchor="middle" font-size="11.5" font-weight="600">strict endpoint linkage</text>
+      <text x="482" y="99" text-anchor="middle" font-size="9.5" fill="#6B6B66">support ≥ 3 · 154/154 receipts</text>
+
+      <rect x="582" y="46" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="594" y="66" font-size="10" font-weight="700" fill="#8A3F22">④</text>
+      <text x="747" y="66" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L1</text>
+      <text x="672" y="80" text-anchor="middle" font-size="11.5" font-weight="600">k ≥ 2 的 W component</text>
+      <text x="672" y="99" text-anchor="middle" font-size="10" fill="#6B6B66">85,621 個 W</text>
+
+      <!-- Row 2 (right to left) -->
+      <rect x="582" y="151" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="594" y="171" font-size="10" font-weight="700" fill="#8A3F22">⑤</text>
+      <text x="672" y="185" text-anchor="middle" font-size="11.5" font-weight="600">ordered partition</text>
+      <text x="672" y="204" text-anchor="middle" font-size="9.5" fill="#6B6B66">k &gt; 12 · 每 block original ≤ 12</text>
+
+      <rect x="392" y="151" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="404" y="171" font-size="10" font-weight="700" fill="#8A3F22">⑥</text>
+      <text x="482" y="185" text-anchor="middle" font-size="11.5" font-weight="600">R / A / X supported pattern</text>
+      <text x="482" y="204" text-anchor="middle" font-size="9.5" fill="#6B6B66">X 形成 subcube terminal group</text>
+
+      <rect x="202" y="151" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="214" y="171" font-size="10" font-weight="700" fill="#8A3F22">⑦</text>
+      <text x="367" y="171" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L2</text>
+      <text x="292" y="185" text-anchor="middle" font-size="11.5" font-weight="600">active-bit 壓縮</text>
+      <text x="292" y="204" text-anchor="middle" font-size="10" fill="#6B6B66">active k 才是真 solver 維度</text>
+
+      <rect x="12" y="151" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="24" y="171" font-size="10" font-weight="700" fill="#8A3F22">⑧</text>
+      <text x="177" y="171" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L2</text>
+      <text x="102" y="185" text-anchor="middle" font-size="11.5" font-weight="600">minimum vertex-set</text>
+      <text x="102" y="204" text-anchor="middle" font-size="9.5" fill="#6B6B66">75,224 完整 family（87.53%）</text>
+
+      <!-- Row 3 -->
+      <rect x="12" y="256" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="24" y="276" font-size="10" font-weight="700" fill="#8A3F22">⑨</text>
+      <text x="177" y="276" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L3</text>
+      <text x="102" y="290" text-anchor="middle" font-size="11.5" font-weight="600">Hamming-1 parent map</text>
+      <text x="102" y="309" text-anchor="middle" font-size="10" fill="#6B6B66">每非根節點少一個 bit</text>
+
+      <rect x="202" y="256" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="214" y="276" font-size="10" font-weight="700" fill="#8A3F22">⑩</text>
+      <text x="367" y="276" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L4</text>
+      <text x="292" y="290" text-anchor="middle" font-size="11.5" font-weight="600">read-AF 排序</text>
+      <text x="292" y="309" text-anchor="middle" font-size="9.5" fill="#6B6B66">71,955 ranked · CN 未校正</text>
+
+      <rect x="392" y="256" width="180" height="72" rx="6" fill="#FFFFFF" stroke="#D97757" stroke-width="1.2"/>
+      <text x="404" y="276" font-size="10" font-weight="700" fill="#8A3F22">⑪</text>
+      <text x="557" y="276" font-size="9.5" font-weight="700" text-anchor="end" fill="#1E3A8A">L5</text>
+      <text x="482" y="290" text-anchor="middle" font-size="11.5" font-weight="600">topology signature</text>
+      <text x="482" y="309" text-anchor="middle" font-size="9.5" fill="#6B6B66">63,506 / 71,955 單一形狀</text>
+
+      <rect x="582" y="256" width="180" height="72" rx="6" fill="#FEF3C7" stroke="#A16207" stroke-width="1.4"/>
+      <text x="594" y="276" font-size="10" font-weight="700" fill="#78350F">⑫</text>
+      <text x="747" y="276" font-size="9.5" font-weight="700" text-anchor="end" fill="#A16207">L6</text>
+      <text x="672" y="290" text-anchor="middle" font-size="11.5" font-weight="600" fill="#78350F">methyl sidecar</text>
+      <text x="672" y="309" text-anchor="middle" font-size="9.5" fill="#78350F">association-only · 不改 edge</text>
+
+      <!-- Output bar -->
+      <rect x="12" y="352" width="750" height="34" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.4"/>
+      <text x="387" y="374" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">
+        輸出：reports · receipts · denominator registry · standalone workstation HTML</text>
+
+      <!-- Arrows row1 -->
+      <line x1="192" y1="82" x2="199" y2="82" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="382" y1="82" x2="389" y2="82" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="572" y1="82" x2="579" y2="82" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <!-- wrap 1→2 -->
+      <path d="M672,118 L672,148" stroke="#8A3F22" stroke-width="1.5" fill="none" marker-end="url(#s2-arr)"/>
+      <!-- Arrows row2 (leftward) -->
+      <line x1="582" y1="187" x2="575" y2="187" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="392" y1="187" x2="385" y2="187" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="202" y1="187" x2="195" y2="187" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <!-- wrap 2→3 -->
+      <path d="M102,223 L102,253" stroke="#8A3F22" stroke-width="1.5" fill="none" marker-end="url(#s2-arr)"/>
+      <!-- Arrows row3 -->
+      <line x1="192" y1="292" x2="199" y2="292" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="382" y1="292" x2="389" y2="292" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <line x1="572" y1="292" x2="579" y2="292" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#s2-arr)"/>
+      <!-- to output -->
+      <path d="M672,328 L672,349" stroke="#15803D" stroke-width="1.5" fill="none" marker-end="url(#s2-arr)"/>
+    </g>
+  </svg>
+  <figcaption>圖 2：端到端 12 步流程（蛇形閱讀：①→④ 向右，⑤→⑧ 向左，⑨→⑫ 向右）。
+  右上角 L1–L6 標籤對應第四節的 claim ceiling 層級。</figcaption>
+</figure>
+
+<h3>Step → Verify 對照</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>步驟</th><th>做什麼</th><th>驗證條件（機械可查）</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 1</td><td>sSNV 與 read identity join</td><td>projection multimatch = 0；每 record 綁 same-run PS/HP authority</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 2</td><td>Strict linkage</td><td>154/154 dataset×chromosome receipts；W、edge、component 守恆</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 3</td><td>Partition</td><td>跨 cut constraints 明確記錄；每 block original k ≤ 12</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 4</td><td>Solver</td><td>只有 objective／family exhausted 才發布 complete family；guard hit 一律 abstain</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 5</td><td>Parent mapping</td><td>每非根節點 parent 少一個 bit；tree count 使用 exact integer</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 6</td><td>read-AF</td><td>Python／C++ exact score、tie count parity；zero denominator fail-closed</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 7</td><td>Topology census</td><td>71,955 rows 全重現 canonical score／tie；680,527 global-best trees</td></tr>
+<tr class="row-safe"><td><span class="mark ok">✓</span> 8</td><td>Methyl sidecar</td><td>authority 與 topology 分開；association halo 不改 edge incidence</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s3">三之二、Canonical 分母鏈：每個百分比都要問「分母是哪一層」</h2>
+
+<p>這是整個專案最容易被誤讀的地方。同一個「比例」在不同層有完全不同的意義，
+因此官方定義了 19 列 denominator registry。下圖把每一層的拆分畫成等寬堆疊條 ——
+<strong>每條的 100% 就是它上一層的那個數字</strong>，比例真實不失真。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 372" role="img" aria-labelledby="s3-title s3-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="s3-title">Canonical 分母鏈六層堆疊分解</title>
+    <desc id="s3-desc">第一層 469,849 個 sSNV records；第二層 255,752 strict components 拆成 170,131 個 k=1 abstain
+    與 85,621 個 W；第三層 98,955 final groups 拆成 13,014 no active ALT 與 85,941 mutation-bearing；
+    第四層 85,941 拆成 75,224 complete family 與 10,717 resource abstain；
+    第五層 75,224 拆成 71,955 read-AF ranked、3,224 zero denominator 與 45 recurrence abstain；
+    第六層 71,955 拆成 39,648 unique best tree、23,858 同拓撲並列與 8,449 跨拓撲並列。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <!-- Row 1 -->
+      <text x="16" y="38" font-size="11.5" font-weight="700">① 全 autosomal sSNV dataset-records</text>
+      <rect x="16" y="44" width="768" height="28" rx="4" fill="#FBEEE8" stroke="#D97757" stroke-width="1.3"/>
+      <text x="400" y="63" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A3F22">469,849</text>
+
+      <!-- Row 2 -->
+      <text x="16" y="96" font-size="11.5" font-weight="700">② strict components = 255,752</text>
+      <rect x="16" y="102" width="511" height="28" rx="4" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.2"/>
+      <text x="271" y="121" text-anchor="middle" font-size="11.5">170,131　k=1 abstain（66.52%）</text>
+      <rect x="527" y="102" width="257" height="28" rx="4" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="655" y="121" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1E3A8A">85,621　W（33.48%）</text>
+
+      <!-- Row 3 -->
+      <text x="16" y="154" font-size="11.5" font-weight="700">③ final topology groups = 98,955　（左格 13,014 ＝ no active ALT）</text>
+      <rect x="16" y="160" width="101" height="28" rx="4" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.2"/>
+      <text x="66" y="179" text-anchor="middle" font-size="10.5">13,014</text>
+      <rect x="117" y="160" width="667" height="28" rx="4" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="450" y="179" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1E3A8A">85,941　mutation-bearing（86.85%）</text>
+
+      <!-- Row 4 -->
+      <text x="16" y="212" font-size="11.5" font-weight="700">④ mutation-bearing = 85,941　（右側黃格 10,717 ＝ resource abstain）</text>
+      <rect x="16" y="218" width="672" height="28" rx="4" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="352" y="237" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1E3A8A">75,224　complete minimum family（87.53%）</text>
+      <rect x="688" y="218" width="96" height="28" rx="4" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="736" y="237" text-anchor="middle" font-size="10.5" fill="#78350F">10,717</text>
+
+      <!-- Row 5 -->
+      <text x="16" y="270" font-size="11.5" font-weight="700">⑤ complete minimum family = 75,224　（右側窄格 3,224 zero-denominator ＋ 45 recurrence abstain）</text>
+      <rect x="16" y="276" width="735" height="28" rx="4" fill="#DCFCE7" stroke="#15803D" stroke-width="1.3"/>
+      <text x="383" y="295" text-anchor="middle" font-size="11.5" font-weight="600" fill="#15803D">71,955　read-AF ranked（95.65%）</text>
+      <rect x="751" y="276" width="31" height="28" rx="4" fill="#FEF3C7" stroke="#A16207" stroke-width="1.2"/>
+      <rect x="782" y="276" width="2" height="28" rx="1" fill="#FEF2F0" stroke="#C2410C" stroke-width=".8"/>
+      <text x="766" y="295" text-anchor="middle" font-size="9" fill="#78350F">3,224</text>
+
+      <!-- Row 6 -->
+      <text x="16" y="328" font-size="11.5" font-weight="700">⑥ read-AF ranked = 71,955　（綠 ＋ 黃 ＝ 63,506 ＝ 88.2579% 單一拓撲形狀）</text>
+      <rect x="16" y="334" width="423" height="28" rx="4" fill="#DCFCE7" stroke="#15803D" stroke-width="1.4"/>
+      <text x="227" y="353" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803D">39,648　unique（55.1011%）</text>
+      <rect x="439" y="334" width="255" height="28" rx="4" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="566" y="353" text-anchor="middle" font-size="11" fill="#78350F">23,858　同拓撲並列（33.1568%）</text>
+      <rect x="694" y="334" width="90" height="28" rx="4" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="739" y="353" text-anchor="middle" font-size="10" fill="#7F1D1D">8,449</text>
+    </g>
+  </svg>
+  <figcaption>圖 3：Canonical 分母鏈。每一列的總寬度＝該列標題的那個數字（100%），內部分割為<strong>真實比例、未經放大</strong>。
+  因此第 ⑤ 列最右側代表 45 個 recurrence-abstain 單元的紅色細條僅佔 0.06%，在圖上近乎不可見 —— 這是比例誠實的代價，數值已寫在該列標題。
+  第 ⑥ 列的綠 ＋ 黃 ＝ 63,506 ＝ 88.2579%，即「單一 rooted-unlabeled 拓撲形狀」。</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>指標</th><th class="num">數量</th><th>分母／解釋</th></tr></thead>
+<tbody>
+<tr><td>Final groups</td><td class="num">98,955</td><td>全部 local groups</td></tr>
+<tr><td>No active ALT</td><td class="num">13,014</td><td>不作 mutation tree inference</td></tr>
+<tr><td>Mutation-bearing</td><td class="num">85,941</td><td>active k ≥ 1</td></tr>
+<tr class="row-safe"><td>Family complete</td><td class="num">75,224</td><td>87.53% of mutation-bearing</td></tr>
+<tr class="row-warn"><td>Resource abstain</td><td class="num">10,717</td><td><span class="mark warn">⚠</span> search-node guard；<strong>非隨機缺失</strong>，不可與 ranked subset 互推</td></tr>
+<tr class="row-safe"><td>read-AF ranked</td><td class="num">71,955</td><td>complete、通過 AF recurrence screen、非 zero denominator</td></tr>
+<tr class="row-warn"><td>Zero denominator</td><td class="num">3,224</td><td><span class="mark warn">⚠</span> structure 可有，AF 不可算</td></tr>
+<tr class="row-warn"><td>AF recurrence-screen abstain</td><td class="num">45</td><td><span class="mark warn">⚠</span> structure 保留；全部 minimum sets recurrence-required</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>AF 到底幫了多少？</h3>
+
+<p>這是一個容易 overclaim 的點，官方數字如下：</p>
+
+<ul>
+  <li>AF <strong>之前</strong>就已只有一棵 structural candidate 的 ranked units＝<strong>28,693</strong>。</li>
+  <li>AF <strong>真正</strong>把原本 multi-tree 的單元縮成唯一者＝<strong>10,955 / 43,262 ＝ 25.32%</strong>。</li>
+</ul>
+
+<div class="callout warn">
+  <div class="callout-title">結論邊界</div>
+  <p>read-AF 有幫助，但<strong>不能說它解決了所有多樹問題</strong>。
+  39,648 個 unique AF winner 只能稱 <code>RAW_AF_UNIQUE_REPRESENTATIVE</code>；
+  23,858 個同拓撲並列只能稱 <code>TOPOLOGY_REPRESENTATIVE_ONLY</code>；
+  8,449 個跨拓撲並列只能輸出 candidate set／consensus backbone。</p>
+</div>
+
+<h4>粗分類幾何（coarse geometry）</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>形狀類別</th><th class="num">數量</th></tr></thead>
+<tbody>
+<tr><td>Direct-only</td><td class="num">36,267</td></tr>
+<tr><td>Single-only</td><td class="num">22,135</td></tr>
+<tr><td>Sister + direct</td><td class="num">2,890</td></tr>
+<tr><td>Sister-only</td><td class="num">2,219</td></tr>
+<tr><td>單一 coarse class 合計</td><td class="num">63,511</td></tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:13.5px;color:var(--c-muted)">
+註：coarse class（63,511）比 exact topology（63,506）多 5 個單元 —— 這 5 個是 cross-exact 但 same-coarse。</p>
+
+<h2 id="s4">四、Claim ceiling：七層階梯，每層不替下一層背書</h2>
+
+<p>這是整份研究最重要的紀律。一個 stage 通過<strong>不能</strong>替下一個 stage 背書；
+最高的 L7 生物層目前<strong>沒有輸出</strong>，必須 abstain。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 300" role="img" aria-labelledby="s4-title s4-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="s4-title">L1 到 L7 的 claim ceiling 階梯</title>
+    <desc id="s4-desc">七層階梯由左至右遞升：L1 read linkage、L2 state selection、L3 parent mapping、
+    L4 read-AF、L5 topology、L6 methyl，六層皆有輸出；最高的 L7 biology 以紅色虛線框標示 ABSTAIN，目前無輸出。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="22" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6B6B66">
+        推論階梯：可稽核性由左至右遞增，生物結論在頂端 abstain</text>
+
+      <!-- baseline -->
+      <line x1="10" y1="272" x2="790" y2="272" stroke="#E3DACC" stroke-width="1.5"/>
+
+      <!-- L1 -->
+      <rect x="10" y="212" width="105" height="55" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="62" y="234" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A8A">L1</text>
+      <text x="62" y="252" text-anchor="middle" font-size="10.5" fill="#1E3A8A">read linkage</text>
+      <!-- L2 -->
+      <rect x="122" y="187" width="105" height="55" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="174" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A8A">L2</text>
+      <text x="174" y="227" text-anchor="middle" font-size="10.5" fill="#1E3A8A">state selection</text>
+      <!-- L3 -->
+      <rect x="234" y="162" width="105" height="55" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="286" y="184" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A8A">L3</text>
+      <text x="286" y="202" text-anchor="middle" font-size="10.5" fill="#1E3A8A">parent mapping</text>
+      <!-- L4 -->
+      <rect x="346" y="137" width="105" height="55" rx="6" fill="#FBEEE8" stroke="#D97757" stroke-width="1.3"/>
+      <text x="398" y="159" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A3F22">L4</text>
+      <text x="398" y="177" text-anchor="middle" font-size="10.5" fill="#8A3F22">read-AF 排序</text>
+      <!-- L5 -->
+      <rect x="458" y="112" width="105" height="55" rx="6" fill="#FBEEE8" stroke="#D97757" stroke-width="1.3"/>
+      <text x="510" y="134" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A3F22">L5</text>
+      <text x="510" y="152" text-anchor="middle" font-size="10.5" fill="#8A3F22">topology census</text>
+      <!-- L6 -->
+      <rect x="570" y="87" width="105" height="55" rx="6" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="622" y="109" text-anchor="middle" font-size="12.5" font-weight="700" fill="#78350F">L6</text>
+      <text x="622" y="127" text-anchor="middle" font-size="10.5" fill="#78350F">methyl 關聯</text>
+      <!-- L7 abstain -->
+      <rect x="682" y="62" width="105" height="55" rx="6" fill="#FEF2F0" stroke="#C2410C"
+            stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="734" y="84" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7F1D1D">L7</text>
+      <text x="734" y="102" text-anchor="middle" font-size="10.5" fill="#7F1D1D">biology</text>
+
+      <text x="787" y="46" text-anchor="end" font-size="11.5" font-weight="700" fill="#7F1D1D">尚無輸出 · 必須 ABSTAIN</text>
+
+      <text x="400" y="292" text-anchor="middle" font-size="11" fill="#6B6B66">
+        confirmed cellular subclone ＝ 0　·　linear ancestry ＝ 0</text>
+    </g>
+  </svg>
+  <figcaption>圖 4：Claim ceiling 七層階梯。L1–L3（藍）為結構層、L4–L5（橘）為排序與幾何層、
+  L6（黃）為輔助關聯層、L7（紅虛線）為生物層，目前無輸出。</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>層級</th><th>問題</th><th>現行輸出</th><th>最高可說到哪裡</th></tr></thead>
+<tbody>
+<tr><td><strong>L1</strong> read linkage</td><td>哪些 sSNV 被相同 molecules 局部連結？</td><td>W components／blocks</td><td>local read-linked region</td></tr>
+<tr><td><strong>L2</strong> state selection</td><td>哪些完整 R/A mutation states 可共同滿足 reads？</td><td>minimum vertex-set family</td><td>read-compatible candidate states</td></tr>
+<tr><td><strong>L3</strong> parent mapping</td><td>這些 states 有哪些 Hamming-1 parent assignments？</td><td>candidate arborescences</td><td>model-compatible parent trees</td></tr>
+<tr><td><strong>L4</strong> read-AF</td><td>哪些候選較符合高 fraction mutation 較早的先驗？</td><td>AF-preferred candidates</td><td><strong>CN／LOH 未校正</strong>的 ordering</td></tr>
+<tr><td><strong>L5</strong> topology</td><td>AF-best trees 有幾種 rooted graph shapes？</td><td>exact signature census</td><td>純數學圖形幾何</td></tr>
+<tr><td><strong>L6</strong> methyl</td><td>R/A pattern 是否與區域甲基結構相關？</td><td>association sidecar</td><td>pattern-conditioned association</td></tr>
+<tr class="row-bug"><td><strong>L7</strong> biology</td><td>是否為真實 cell clone／subclone lineage？</td><td><span class="mark no">✗</span> 尚無</td><td><span class="badge abstain">必須 ABSTAIN</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>九個「尚未成立」的前提（不可當作已知）</h3>
+
+<details class="card risk" id="unproven">
+  <summary><span class="badge id">UNPROVEN</span> 展開九項尚未成立的前提 <span class="badge risk">不可假設為真</span></summary>
+  <div class="card-body">
+    <ol>
+      <li>read-AF 可準確代表 cell prevalence。</li>
+      <li>allele-specific CN／LOH、purity、multiplicity 已校正。</li>
+      <li>arithmetic unique winner 具有統計穩定性。</li>
+      <li>minimum states 等於真實 clone 數。</li>
+      <li>hidden state 是已存在的細胞 clone。</li>
+      <li>Sister／Direct geometry 可直接翻成多 clone／subclone。</li>
+      <li>local PS×HP blocks 可拼成 whole-sample lineage。</li>
+      <li>methyl association 可決定 edge、方向或 clone。</li>
+      <li>10,717 resource abstains 與 ranked subset 可互換外推。</li>
+    </ol>
+  </div>
+</details>
+
+<h3>八個已成立的前提</h3>
+
+<details class="card" id="proven">
+  <summary><span class="badge id">ESTABLISHED</span> 展開已驗證成立的前提 <span class="badge ok">可作為推論基礎</span></summary>
+  <div class="card-body">
+    <ol>
+      <li>exact PS×primary HP 分區與 strict linkage 已完成 chr1–22 全範圍執行。</li>
+      <li>C++ 對 frozen read-AF 公式、minimum family 與 tie count 通過小型 exhaustive oracle 與 HCC1395 parity。</li>
+      <li>family complete 時，minimum vertex-set family 是在現行 recurrence-allowed model 下的 exact 結果。</li>
+      <li>固定 vertex set 後，每個非根節點選一個 Hamming-1 predecessor 可形成 rooted arborescence。</li>
+      <li>exact topology signature census 只對 71,955 ranked units 成立。</li>
+    </ol>
+  </div>
+</details>
+
+<h2 id="s5">五、甲基輔助層：association-only，不進 topology 打分</h2>
+
+<p>甲基層在早期曾被期待作為 subclone 的獨立確認證據，最終定案為
+<strong>bounded auxiliary</strong> —— 它是 pattern-conditioned regional association，
+<strong>不改 edge、不重新打分 topology、不決定方向</strong>。</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>指標</th><th class="num">數量</th><th>說明</th></tr></thead>
+<tbody>
+<tr><td>Formal units</td><td class="num">1,045</td><td>正式進入評估的單元</td></tr>
+<tr><td>Evaluable</td><td class="num">811</td><td>可評估</td></tr>
+<tr class="row-safe"><td><strong>Robust association</strong></td><td class="num">3</td><td><span class="mark ok">✓</span> 通過所有 gate 的穩健關聯</td></tr>
+<tr><td>Evaluable 但無穩健關聯</td><td class="num">627</td><td>—</td></tr>
+<tr class="row-warn"><td>Confounded</td><td class="num">181</td><td><span class="mark warn">⚠</span> 有混淆因子</td></tr>
+<tr class="row-warn"><td>Not evaluable</td><td class="num">234</td><td><span class="mark warn">⚠</span> 不可評估</td></tr>
+<tr class="row-bug"><td>Full RR/RA/AR/AA</td><td class="num">0</td><td><span class="mark no">✗</span> 無完整四格</td></tr>
+<tr class="row-bug"><td>Exact two-bit RA robust</td><td class="num">0</td><td><span class="mark no">✗</span> 無</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">為什麼甲基不能當 subclone 確認器</div>
+  <p>用甲基確認 subclone 會形成<strong>循環論證</strong>：甲基本身受 germline haplotype（cis-ASM）與
+  CN-gain 影響。HP tag 可以消掉 germline ASM，但消不掉 CN-gain 造成的假象。
+  因此甲基的正式定位只有兩個：<strong>負向篩選</strong>與 <strong>L3 旗標</strong>。</p>
+</div>
+
+<h2 id="s6">六、程式資產：兩套 C++ ＋ Python 分析層</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>資產</th><th>位置</th><th>規模／狀態</th></tr></thead>
+<tbody>
+<tr><td><strong>InterSubMod C++</strong></td><td><code>InterSubMod/src/</code> ＋ <code>InterSubMod/include/</code></td>
+    <td>27,653 行；24 個 core module；<code>RegionProcessor.cpp</code> 3,571 行為核心編排器</td></tr>
+<tr><td><strong>LongLineage C++</strong></td><td>獨立 repo（本 repo 之外）</td>
+    <td>C++17 + HTSlib 全流程重建，production truth-isolated</td></tr>
+<tr><td>Python 分析層</td><td><code>InterSubMod/scripts/analysis/</code></td><td>229 個腳本</td></tr>
+<tr><td>標準 pipeline</td><td><code>InterSubMod/scripts/pipeline/steps/</code></td>
+    <td>5 步：<code>00_prepare_germline</code> → <code>01_longphase_s</code> → <code>02_intersubmod</code> → <code>03_filter_analysis</code> → <code>04_cleanup</code></td></tr>
+<tr><td>視覺化／工作站</td><td><code>InterSubMod/tools/</code></td>
+    <td><code>render_html_shot.py</code>、<code>strict_endpoint_graph.py</code>、<code>batch_render_qa.py</code>、<code>ppt_toolkit</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="callout-title">論文引用鐵則</div>
+  <p>論文中的軟體引用<strong>只引 InterSubMod ＋ commit hash</strong>，
+  <strong>絕不可引 LongLineage</strong>。LongLineage 是方法重建與交叉驗證用的獨立實作，不是本論文的發表軟體。</p>
+</div>
+
+<h4>已編譯產物（<code>InterSubMod/build/bin/</code>）</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>二進位</th><th>建置日期</th><th>用途</th></tr></thead>
+<tbody>
+<tr class="row-warn"><td><code>inter_sub_mod</code></td><td>2026-07-15</td><td><span class="mark warn">⚠</span> 主程式 — 早於目前源碼改動</td></tr>
+<tr><td><code>exact_ps_partition</code></td><td>2026-07-23</td><td>exact-PS 分割工具</td></tr>
+<tr><td><code>run_tests</code></td><td>2026-07-27</td><td>測試套件</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s7">七、治理 Harness：把「不可捏造」寫進機械層</h2>
+
+<p>這一層的存在理由是：純文字規則對 AI 無效（2026-06-01 事件證實同一 session 內失效三次）。
+因此所有關鍵約束都有 <strong>hook 層的 exit-2 阻擋</strong>或<strong>由構造使其不可能</strong>。</p>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number">50</div><div class="label">Skills</div></div>
+  <div class="stat-box"><div class="number">18</div><div class="label">Agents</div></div>
+  <div class="stat-box"><div class="number">45</div><div class="label">Hooks（6 個真 exit-2）</div></div>
+  <div class="stat-box"><div class="number">2</div><div class="label">Dynamic Workflows</div></div>
+  <div class="stat-box"><div class="number">142</div><div class="label">Evidence ledger 筆數</div></div>
+  <div class="stat-box"><div class="number">95</div><div class="label">研究專案目錄<br>（其中 50 個為 2026 日期前綴）</div></div>
+</div>
+
+<h3>三層防捏造機制</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>層</th><th>機制</th><th>強度</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td><strong>A 由構造防止</strong></td>
+    <td>數字從 <code>data.json</code> 注入 template，缺 key 直接 refuse 不 render</td>
+    <td><span class="mark ok">★★★</span> 物理上無法捏造</td></tr>
+<tr><td><strong>B 寫入時 gate</strong></td>
+    <td><code>number_provenance_check.sh</code> 抽 metric 形數字 → grep bounded 來源；validated 路徑找不到來源即 exit 2</td>
+    <td><span class="mark ok">★★</span> 抓手打捏造</td></tr>
+<tr><td><strong>C 結束溯源表</strong></td>
+    <td><code>number_provenance.py audit</code> 產「metric → 檔案:行 + 狀態」表</td>
+    <td><span class="mark ok">★★</span> 紀錄 + 邊界攔截</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>雙層 SoT 分工</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>SoT</th><th>負責什麼</th><th>目前狀態</th></tr></thead>
+<tbody>
+<tr class="row-warn"><td><code>docs/CURRENT_FOCUS.md</code> ＋ <code>evidence_ledger.jsonl</code></td>
+    <td>多週論文主軸的<strong>敘述層</strong>權威</td>
+    <td><span class="mark warn">⚠</span> CURRENT_FOCUS 停在 2026-07-24</td></tr>
+<tr class="row-warn"><td><code>state/cycles/</code> ＋ <code>state/active.json</code></td>
+    <td>短驗證 hypothesis cycle 的<strong>機械狀態機</strong></td>
+    <td><span class="mark warn">⚠</span> <code>active.json</code> 的 <code>cycles</code> 為空且停在 2026-06-23，但 <code>state/cycles/</code> 內有到 08-01 的 cycle</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s8">八、目前狀態盤點：已完成、已停止、進行中</h2>
+
+<details class="card core" id="done" open>
+  <summary><span class="badge id">DONE</span> 最近已完成並通過驗證 <span class="badge ok">VALIDATED</span></summary>
+  <div class="card-body">
+    <p><strong>2026-08-01 Exact-PS 全資料最終 HTML observation report</strong></p>
+    <ul>
+      <li><code>release_status = VALIDATED_DERIVED_OBSERVATION</code></li>
+      <li>Python 契約測試：<code>Ran 12 tests in 9.735s — OK</code></li>
+      <li>Browser／print QA：desktop 1440×1000、laptop 1024×900、mobile 390×844、narrow 320×700、no-JS 1024×900 全 PASS；A4 PDF 12 頁 PASS</li>
+      <li>console errors 0、page errors 0、<strong>external requests 0</strong></li>
+      <li>13 個 hash-verified authority artifacts ＋ 19 列 denominator registry</li>
+    </ul>
+    <p><strong>2026-07-30 碩士口試正式版 deck</strong> 已產出（含 30 分鐘講稿 PDF／PPTX）。</p>
+  </div>
+</details>
+
+<details class="card risk" id="stopped">
+  <summary><span class="badge id">STOPPED</span> 依 bounded-attempt 政策停止的線 <span class="badge stop">NO-GO</span></summary>
+  <div class="card-body">
+    <p><strong>全 469,849 sSNV Task-B signed release</strong>（2026-07-24 停止）</p>
+    <ul>
+      <li>停止原因：第三輪唯讀審查發現 report builder 仍遞迴呼叫 v29 finalizer 及已撤離的 result/report-v6 keys；verdict = <code>REQUEST_CHANGES</code>（1 HIGH、1 MEDIUM）。</li>
+      <li>科學數字本身有效且已重算，但 formal reviews、authority bundle、receipts 與 signatures <strong>全部不存在</strong>。</li>
+      <li>不得聲稱 signed Task-B release 完成，也不得發布 final G1/G2/R1/B1/C1 比例。</li>
+    </ul>
+  </div>
+</details>
+
+<h2 id="s9">九、五個實測漂移風險（本輪 read-only 稽核發現）</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>問題</th><th>證據</th><th>影響</th></tr></thead>
+<tbody>
+<tr class="row-bug"><td>1</td><td><strong>CURRENT_FOCUS 落後 12 天</strong></td>
+    <td>最新段落＝2026-07-24；實際最新產出＝2026-08-01</td>
+    <td><span class="mark no">✗</span> 新 session 會載入過期主軸</td></tr>
+<tr class="row-bug"><td>2</td><td><strong>580 個未提交變更</strong></td>
+    <td>368 untracked ＋ 202 modified ＋ 10 deleted</td>
+    <td><span class="mark no">✗</span> 工作成果未進版本控制</td></tr>
+<tr class="row-bug"><td>3</td><td><strong>1,501 行 C++ 改動未 commit</strong></td>
+    <td><code>CMakeLists.txt</code> ＋ 4 headers ＋ <code>RegionProcessor.cpp</code>(+765) ／ <code>SubcloneAnalyzer.cpp</code> ／ <code>StructureTest.cpp</code>；共 8 檔 1,501 新增 457 刪除</td>
+    <td><span class="mark no">✗</span> C++ commit 是 Hard Gate（必先編譯通過）</td></tr>
+<tr class="row-warn"><td>4</td><td>binary 早於源碼</td>
+    <td><code>inter_sub_mod</code> 建於 2026-07-15；<code>CMakeCache.txt</code> 停在 2026-03-26</td>
+    <td><span class="mark warn">⚠</span> 現有 binary 不含上述改動</td></tr>
+<tr class="row-warn"><td>5</td><td>KB 時間敏感檔 51 天未驗證</td>
+    <td><code>01_current_focus_snapshot</code> 等 5 份（最後驗證 2026-06-15）</td>
+    <td><span class="mark warn">⚠</span> 知識庫快照與實況脫節</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="callout-title">風險 3 的處理順序不可顛倒</div>
+  <p>C++ 那批變更<strong>必須先通過編譯</strong>才能 commit（pre-commit hook 為 exit-2 Hard Gate，不可繞過）。
+  正確順序：<code>cd build &amp;&amp; cmake .. &amp;&amp; make -j$(nproc)</code> → <code>ctest</code> →
+  確認結果合理 → 才 commit。由於 <code>CMakeCache.txt</code> 停在 3 月，建議重新 configure。</p>
+</div>
+
+<h2 id="s10">十、論文凍結路徑：P0 五步嚴格依賴鏈</h2>
+
+<p>這是官方交接手冊定義的固定順序，<strong>不可跳步</strong>：後一步只能使用前一步產出的 clean authority。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 248" role="img" aria-labelledby="s5-title s5-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="s5-title">論文凍結前 P0 五步依賴鏈</title>
+    <desc id="s5-desc">P0-1 建立 clean release manifest；P0-2 拆分 caller-VAF、read-AF ordering 與 CN/LOH
+    applicability 並落地 tree_decision；P0-3 實作 CN、LOH、coverage、population-size 與 AF stability gates；
+    P0-4 clean rerun 全七資料產 frozen evidence bundle；P0-5 更新論文 Methods、Results、Discussion 與 figures。
+    箭頭表示嚴格依賴，後step只能使用前step的 frozen 產出。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="24" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6B6B66">
+        嚴格依賴：P0-2 依賴 P0-1 · P0-3 依賴 P0-2 · P0-4 依賴 1–3 · P0-5 只可用 P0-4 的 frozen evidence</text>
+
+      <defs>
+        <marker id="s5-arr" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1E3A8A"/>
+        </marker>
+      </defs>
+
+      <rect x="15" y="52" width="140" height="76" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="85" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A8A">P0-1</text>
+      <text x="85" y="96" text-anchor="middle" font-size="10.5" fill="#1E3A8A">clean release</text>
+      <text x="85" y="113" text-anchor="middle" font-size="10.5" fill="#1E3A8A">manifest</text>
+
+      <rect x="175" y="52" width="140" height="76" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="245" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A8A">P0-2</text>
+      <text x="245" y="96" text-anchor="middle" font-size="10.5" fill="#6B6B66">拆分 VAF / AF / CN</text>
+      <text x="245" y="113" text-anchor="middle" font-size="10.5" fill="#6B6B66">落地 tree_decision</text>
+
+      <rect x="335" y="52" width="140" height="76" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="405" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A8A">P0-3</text>
+      <text x="405" y="96" text-anchor="middle" font-size="10.5" fill="#6B6B66">CN / LOH / coverage</text>
+      <text x="405" y="113" text-anchor="middle" font-size="10.5" fill="#6B6B66">AF stability gates</text>
+
+      <rect x="495" y="52" width="140" height="76" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="565" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A8A">P0-4</text>
+      <text x="565" y="96" text-anchor="middle" font-size="10.5" fill="#6B6B66">clean rerun 全七資料</text>
+      <text x="565" y="113" text-anchor="middle" font-size="10.5" fill="#6B6B66">frozen evidence bundle</text>
+
+      <rect x="655" y="52" width="140" height="76" rx="7" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+      <text x="725" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#15803D">P0-5</text>
+      <text x="725" y="96" text-anchor="middle" font-size="10.5" fill="#15803D">更新論文 Methods</text>
+      <text x="725" y="113" text-anchor="middle" font-size="10.5" fill="#15803D">Results / figures</text>
+
+      <line x1="155" y1="90" x2="172" y2="90" stroke="#1E3A8A" stroke-width="1.6" marker-end="url(#s5-arr)"/>
+      <line x1="315" y1="90" x2="332" y2="90" stroke="#1E3A8A" stroke-width="1.6" marker-end="url(#s5-arr)"/>
+      <line x1="475" y1="90" x2="492" y2="90" stroke="#1E3A8A" stroke-width="1.6" marker-end="url(#s5-arr)"/>
+      <line x1="635" y1="90" x2="652" y2="90" stroke="#1E3A8A" stroke-width="1.6" marker-end="url(#s5-arr)"/>
+
+      <rect x="15" y="152" width="770" height="82" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="30" y="174" font-size="11.5" font-weight="700" fill="#78350F">P1（論文凍結後、投稿前）：</text>
+      <text x="30" y="196" font-size="11" fill="#78350F">① consensus backbone／edge-support　　② unique winner 的 bootstrap 穩定性</text>
+      <text x="30" y="218" font-size="11" fill="#78350F">③ HCC1395 SEQC2 CNV/LOH benchmark pilot　　④ ranked-only selection bias 分析</text>
+    </g>
+  </svg>
+  <figcaption>圖 5：P0 五步嚴格依賴鏈 ＋ P1 後續工作。目前所有五步皆尚未開始，
+  下一個動作是 P0-1（clean source／binary／parameter release manifest）。</figcaption>
+</figure>
+
+<h4>論文後的長期工作（不阻擋本次凍結）</h4>
+<ol>
+  <li>完成 10,717 個 resource-limit families。</li>
+  <li>CN／purity／multiplicity-aware CCF 或 joint likelihood。</li>
+  <li>跨 block bridging-read union solver。</li>
+  <li>methyl same-node clustering 的 held-out validation。</li>
+  <li>single-cell／multi-region／timepoint orthogonal lineage validation。</li>
+  <li>chrX/Y 專用 ploidy／CN model。</li>
+</ol>
+
+<h2 id="s11">十一、不應重踩的八個舊方向</h2>
+
+<div class="callout">
+  <div class="callout-title">這八條是已付出代價換來的邊界，重踩即浪費</div>
+  <ol>
+    <li>以舊 50 kb adjacency 取代 strict read linkage。</li>
+    <li>混合不同 PS 或跨 HP 建樹。</li>
+    <li>把 recurrence-allowed model 寫成已強制 strict perfect phylogeny。</li>
+    <li>用 deterministic representative 當成 tied family 的真實唯一樹。</li>
+    <li>把 HCC1395 與 HCC1395_DORADO 當兩個 biological replicates（它們是同一 cell line 的 technical pair）。</li>
+    <li>用 methyl difference 直接重排 topology。</li>
+    <li>把 read cluster 或 molecule pattern 當成 cell clone。</li>
+    <li>用 2026-07-25 的 h* recovery 更新完整 topology（該結果尚未列完 candidate family）。</li>
+  </ol>
+</div>
+
+<h3>新接手者回答問題前的八個檢查</h3>
+<ol>
+  <li>問題談的是 read、molecule、mutation state、copy 還是 <strong>cell</strong>？</li>
+  <li>分母是全部 groups、mutation-bearing、family complete、ranked 還是 topology-resolved？</li>
+  <li>family 是否完整？</li>
+  <li>model 是 recurrence-allowed 還是 strict infinite-sites？</li>
+  <li>CN／LOH 是否 assessed？</li>
+  <li>tree 是 exact candidate、AF representative、topology-only 還是 consensus？</li>
+  <li>使用的結果是否有 path、SHA-256、schema 與 receipt？</li>
+  <li>來源是否列於過期登錄？</li>
+</ol>
+<p>任一項不清楚 → <strong>先 abstain</strong>，查 <code>authority_manifest.json</code>，不要自行補完。</p>
+
+<footer class="provenance" id="prov">
+  <h4>Provenance（本檔數字來源）</h4>
+  <p>本檔為 <strong>read-only 稽核快照</strong>，未修改任何 canonical JSON／receipt，也未建立第二份數值 SoT。
+  所有數字均於 2026-08-05 由下列來源實際讀回後寫入，無估算值、無「合理範圍」填補。</p>
+  <ul>
+    <li><strong>科學數字</strong>（469,849 / 98,955 / 85,941 / 75,224 / 71,955 / 39,648 / 23,858 / 8,449 / 63,506 / 88.2579% / 13,014 / 10,717 / 3,224 / 45 / 28,693 / 10,955 / 43,262 / 25.32% / coarse geometry / methyl 1,045-811-3-627-181-234）：
+      <code>InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/20260801_研究狀態與AI交接手冊_01.md</code>
+      ＋ <code>InterSubMod/research/20260801_exact_ps_observation_report/00_INDEX.md</code></li>
+    <li><strong>85,621 W / 255,752 components / 170,131 k=1 abstain / 154 receipts / 1,197,530 direct edges</strong>：
+      <code>InterSubMod/docs/CURRENT_FOCUS.md</code>（2026-07-23 段）</li>
+    <li><strong>QA 數字</strong>（12 tests / 9.735s / viewport PASS / A4 12 pages / external requests 0）：
+      <code>InterSubMod/research/20260801_exact_ps_observation_report/00_INDEX.md</code> §6</li>
+    <li><strong>程式規模</strong>（27,653 行 / 24 modules / 3,571 行 / 229 腳本 / 5 pipeline steps）：
+      <code>wc -l</code>、<code>ls</code> 於 <code>InterSubMod/src/</code>、<code>InterSubMod/include/</code>、<code>InterSubMod/scripts/</code></li>
+    <li><strong>Harness 計數</strong>（50 skills / 18 agents / 45 hooks / 2 workflows / 142 ledger / 95 research dirs）：
+      <code>find</code> ＋ <code>ls</code> ＋ <code>wc -l</code> 於 <code>InterSubMod/.claude/</code>、<code>InterSubMod/scripts/hooks/</code>、<code>InterSubMod/research/</code></li>
+    <li><strong>工作區狀態</strong>（580 = 368 + 202 + 10；C++ 8 檔 1,501 新增 457 刪除）：
+      <code>git status --porcelain</code> ＋ <code>git diff --stat</code></li>
+    <li><strong>停止判定</strong>（Task-B signed release NO-GO）：
+      <code>InterSubMod/docs/CURRENT_FOCUS.md</code>（2026-07-24 段）</li>
+  </ul>
+
+  <h4>Build 資訊</h4>
+  <p>
+    Git branch：<code>research/subclonal-reconstruction-202606</code>　·
+    HEAD：<code>387a101</code>　·
+    生成日期：2026-08-05　·
+    輸出：<code>InterSubMod/docs/architecture/20260805_系統整體流程與架構總覽_01.standalone.html</code>
+  </p>
+  <p>
+    Claim ceiling 提醒：本檔所有科學數字皆為 <strong>model-conditional technical results</strong>。
+    CN／LOH 標記為 <code>NOT_INTEGRATED</code>，甲基標記為 <code>association-only</code>，
+    L7 生物層 <code>confirmed cellular subclone = 0</code>、<code>linear ancestry = 0</code>。
+  </p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>

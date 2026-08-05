@@ -1,0 +1,187 @@
+{
+  "$comment": "工程交接清單。定義『要交接什麼、在哪裡、怎麼驗、達到什麼條件才算收斂』。科學結論的權威索引是 20260801 的 authority_manifest.json，本檔不重複也不覆寫。",
+  "schema_name": "intersubmod.handoff.engineering_manifest",
+  "schema_version": "1.0.0",
+  "handoff_id": "intersubmod-engineering-handoff-20260805",
+  "as_of_date": "2026-08-05",
+  "task_type": "D_handoff",
+  "primary_audience": "實驗室接手者（需要能 build、能跑、能續開發）",
+  "secondary_audience": "驗收者（教授／口試委員），走 L0 路徑只讀結論與證據狀態",
+
+  "relationship_to_prior_handoff": {
+    "parent": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/",
+    "parent_covers": ["科學結論", "claim ceiling", "分母定義", "authority artifacts 與 SHA-256", "不可重踩方向"],
+    "this_covers": ["build 與環境", "資料位置與規模", "輸出目錄語意與信任度", "測試可執行性", "驗收 gate", "收斂待辦順序"],
+    "rule": "科學數字一律回 parent；本包不建立第二份科學數值 SoT"
+  },
+
+  "package_contents": [
+    {"file": "README.md", "role": "入口：30 秒結論 + 閱讀順序 + 第一天該做什麼"},
+    {"file": "00_交接總覽與驗收.standalone.html", "role": "主視覺文件：四層架構 + 驗收儀表板 + SVG 解釋圖，離線單檔"},
+    {"file": "01_資料層.md", "role": "資料在哪、多大、哪些可信、哪些可刪"},
+    {"file": "02_程式層.md", "role": "build、執行、CLI、程式地圖、環境相依"},
+    {"file": "03_輸出層.md", "role": "輸出目錄語意、信任度分級、receipt 體系"},
+    {"file": "04_收斂驗收清單.md", "role": "驗收 gate 定義 + 收斂待辦（依序）"},
+    {"file": "acceptance_receipt.json", "role": "2026-08-05 實跑驗收真值（機器可讀）"},
+    {"file": "handoff_manifest.json", "role": "本檔"}
+  ],
+
+  "four_layers": {
+    "data": {
+      "canonical_root": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical",
+      "repo_symlink": "InterSubMod/output -> /big7_disk/liaoyoyo2001/big7_disk_output/",
+      "index_of_record": "/big7_disk/liaoyoyo2001/big7_disk_output/OUTPUT_INDEX.md",
+      "run_registry": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/master_run_manifest.tsv",
+      "samples": ["COLO829", "H1437", "H2009", "HCC1395", "HCC1395_DORADO", "HCC1937", "HCC1954"],
+      "biological_ids": 6,
+      "technical_pair": "HCC1395 與 HCC1395_DORADO 是同一 cell line 的 technical pair，不是生物重複",
+      "modes": {
+        "paired_full": "ClairS full_alignment + normal BAM + LongPhase-S（主線）",
+        "paired_pileup": "ClairS pileup + normal BAM + LongPhase-S",
+        "to_pileup": "ClairS-TO + 無 normal + LongPhase-TO self-phasing（已結論為 NEGATIVE 軸）"
+      },
+      "size_constraint": {
+        "tagged_bam_paired_full_total_bytes": 1840983466353,
+        "tagged_bam_paired_full_total_tib": 1.67,
+        "transferable": false,
+        "transfer_rule": "只交接路徑 + 大小 + checksum + 重生方法，絕不複製 BAM 進交接包"
+      }
+    },
+    "program": {
+      "cpp": {
+        "root": ["InterSubMod/src", "InterSubMod/include"],
+        "lines": 27653,
+        "core_modules": 24,
+        "entry": "InterSubMod/src/main.cpp",
+        "orchestrator": "InterSubMod/src/core/RegionProcessor.cpp",
+        "build_system": "CMake (>=3.14), C++17, OpenMP, bundled jemalloc",
+        "targets": ["inter_sub_mod", "exact_ps_partition", "run_tests", "test_phase1_2", "test_phase3", "test_phase4_5"],
+        "citation_rule": "論文軟體引用只引 InterSubMod + commit hash；絕不引 LongLineage"
+      },
+      "python": {
+        "analysis_scripts": 229,
+        "analysis_root": "InterSubMod/scripts/analysis",
+        "pipeline_steps": [
+          "scripts/pipeline/steps/00_prepare_germline.sh",
+          "scripts/pipeline/steps/01_longphase_s.sh",
+          "scripts/pipeline/steps/02_intersubmod.sh",
+          "scripts/pipeline/steps/03_filter_analysis.py",
+          "scripts/pipeline/steps/04_cleanup.sh"
+        ],
+        "declared_deps": "InterSubMod/requirements.txt",
+        "deps_defect": "requirements.txt 未列 pytest，但 63 個測試檔需要它"
+      },
+      "external_repo": {
+        "name": "LongLineage",
+        "path": "/big7_disk/liaoyoyo2001/LongLineage",
+        "head_at_handoff": "0167f7e66868500c6cd188e801e168f65a51bcfc",
+        "role": "C++17+HTSlib truth-isolated 方法重建，用於交叉驗證",
+        "not_citable_in_paper": true
+      },
+      "frozen_binary": {
+        "path": "/bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af",
+        "sha256": "ba13ccf23d091854c191f81dd97fa891368d11179df9a69e915f0340b7233b2e",
+        "warning": "產生論文核心數字的 binary，位於 /bip7_disk（與 repo 不同磁碟）。與當前 dirty 源碼的關係為 not_proven_byte_reproducible — 交接時必須連同保存"
+      }
+    },
+    "output": {
+      "classes": ["canonical", "synthesis", "archive", "standalone"],
+      "trust_levels": ["CURRENT", "PRE-FIX", "SUPERSEDED", "DEPRECATED"],
+      "current_release": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260801_exact_ps_observation_report/all7_v1/",
+      "current_release_status": "VALIDATED_DERIVED_OBSERVATION",
+      "receipt_pattern": "每個正式產出都有 build receipt + QA receipt + release receipt，三者以 SHA-256 互綁"
+    },
+    "governance": {
+      "agent_rules": ["InterSubMod/AGENTS.md", "InterSubMod/.claude/CLAUDE.md"],
+      "live_state": "InterSubMod/docs/CURRENT_FOCUS.md",
+      "evidence_ledger": "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+      "skills": 50,
+      "agents": 18,
+      "hooks": 45,
+      "hard_gates": ["pre_commit_compile_check", "kb_schema_check", "pipeline_block_check", "no_binary_commit", "search_scope_guard", "pre_tier_upgrade_check", "number_provenance_check", "git_branch_commit_guard"]
+    }
+  },
+
+  "acceptance_gates": [
+    {
+      "gate_id": "G1",
+      "name": "可編譯",
+      "criterion": "從零 clean build，configure 與 build 皆 exit 0，真實編譯錯誤 0",
+      "status": "PASS",
+      "evidence": "acceptance_receipt.json#checks[A1_clean_build]"
+    },
+    {
+      "gate_id": "G2",
+      "name": "證據鏈完整",
+      "criterion": "authority_manifest.json 登記的所有 artifact 路徑存在且 SHA-256 一致",
+      "status": "PASS",
+      "evidence": "acceptance_receipt.json#checks[B1_artifact_integrity] — 19/19 MATCH"
+    },
+    {
+      "gate_id": "G3",
+      "name": "測試可執行",
+      "criterion": "接手者能在乾淨環境跑完全部宣稱的測試（Python + C++），且結果與記錄一致",
+      "status": "FAIL",
+      "blocking": true,
+      "passed_portion": "C++ run_tests 258/258 PASS（37 suites, 2766 ms）；20260801 release unittest 12/12 PASS",
+      "gap": "pytest 未安裝且未列於 requirements.txt → 63/143 Python 測試檔（44.06%）不可執行",
+      "fix": "① requirements.txt 補 pytest（與實際版本）② 建立 environment lock（conda env export 或 pip freeze）③ 跑一次完整 Python 測試並落 receipt"
+    },
+    {
+      "gate_id": "G4",
+      "name": "資料可定位",
+      "criterion": "所有輸入資料有明確路徑、大小、checksum，且接手者知道哪些可信、哪些已 superseded",
+      "status": "PASS_WITH_CONSTRAINT",
+      "gap": "canonical 19 runs 全部 completeness_state=partial（blocking_reason=missing_tagged_bam），此狀態自 2026-04 未更新，與現況（tagged BAM 明明存在）不一致",
+      "fix": "重新核對 master_run_manifest.tsv 的 tagged_bam_ready / completeness_state 欄位"
+    },
+    {
+      "gate_id": "G5",
+      "name": "有作業餘裕",
+      "criterion": "磁碟餘量足以做一次 clean rerun（保守估計需 ≥2 TB）",
+      "status": "FAIL",
+      "blocking": true,
+      "gap": "/big7_disk 剩 617 GB（99% 已用）",
+      "fix": "依 OUTPUT_INDEX.md §9 清理：先刪 archive/duplicates/（7 目錄，SAFE_DELETE），再評估 bip8_output_archive/（39 目錄）"
+    },
+    {
+      "gate_id": "G6",
+      "name": "新人可上手",
+      "criterion": "照文件操作可在一天內完成 build + 跑通一個小樣例 + 找到所有關鍵路徑",
+      "status": "FAIL",
+      "blocking": false,
+      "gap": "QUICKSTART.md:41 路徑過期（/big8_disk）；CURRENT_FOCUS.md 落後 12 天",
+      "fix": "修正路徑；更新 CURRENT_FOCUS 到 08-01"
+    },
+    {
+      "gate_id": "G7",
+      "name": "版本可指認",
+      "criterion": "交接的程式狀態有明確、不可變的版本識別（commit hash 或 tag），且與產生結果的 binary 對應關係已證明",
+      "status": "FAIL",
+      "blocking": true,
+      "gap": "working tree DIRTY（580 項未提交，含 1,501 行 C++）；frozen binary 與當前源碼 not_proven_byte_reproducible",
+      "fix": "① C++ 那批先過編譯 Hard Gate 再 commit ② 其餘分批 commit ③ 打 tag ④ 用該 tag 重建 binary 並與 frozen binary 比對，證明或明確記錄差異"
+    }
+  ],
+
+  "convergence_order": [
+    {"step": 1, "action": "跑 C++ run_tests", "gate": "G3", "effort": "分鐘級", "status": "DONE_2026-08-05", "result": "258/258 PASS"},
+    {"step": 2, "action": "修 QUICKSTART.md 路徑 + 更新 CURRENT_FOCUS.md", "gate": "G6", "effort": "分鐘級"},
+    {"step": 3, "action": "建立 environment lock（pip freeze / conda export）並補 pytest 進 requirements.txt", "gate": "G3", "effort": "小時級"},
+    {"step": 4, "action": "跑完整測試（Python 143 + C++ 21）並落 receipt", "gate": "G3", "effort": "小時級", "depends_on": [3]},
+    {"step": 5, "action": "磁碟清理至 ≥2 TB 可用", "gate": "G5", "effort": "小時級", "risk": "需人工確認刪除清單，屬 Hard Gate"},
+    {"step": 6, "action": "C++ 改動過編譯後 commit，其餘分批 commit，打 release tag", "gate": "G7", "effort": "小時級"},
+    {"step": 7, "action": "用 tag 重建 binary 與 frozen binary 比對，記錄 byte-reproducibility 結論", "gate": "G7", "effort": "小時級", "depends_on": [6]},
+    {"step": 8, "action": "更新 master_run_manifest.tsv 的 completeness 欄位", "gate": "G4", "effort": "小時級"},
+    {"step": 9, "action": "以上全綠後，才進 parent handoff 的 P0-1（clean release manifest）", "gate": "ALL", "depends_on": [1,2,3,4,5,6,7,8]}
+  ],
+
+  "overall_verdict": {
+    "status": "NOT_READY_FOR_FORMAL_HANDOFF",
+    "passed_gates": ["G1", "G2"],
+    "constrained_gates": ["G4"],
+    "failed_gates": ["G3", "G5", "G6", "G7"],
+    "assessment": "核心科學證據鏈完好（G2：19/19 hash 一致）、程式可編譯（G1）、C++ 測試 258/258 全過、最新 release 測試 12/12 重現。阻擋交接的四項全是工程可重現性問題，沒有一項是科學問題，且全部可在數小時到一兩天內修完。",
+    "estimated_effort_to_green": "1-2 個工作天（不含磁碟清理的人工確認時間）"
+  }
+}

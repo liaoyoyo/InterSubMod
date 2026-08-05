@@ -38,7 +38,7 @@ make -j$(nproc)
 
 ```bash
 # 回到專案根目錄
-cd /big8_disk/liaoyoyo2001/InterSubMod
+cd /big7_disk/liaoyoyo2001/InterSubMod
 
 # 執行全流程測試 (包含 reads 過濾、矩陣建構、視覺化)
 ./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance

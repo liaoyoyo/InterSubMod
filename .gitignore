@@ -310,3 +310,24 @@ state/focus_board.html
 docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_matrix.tsv
 docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_meta.tsv
 docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/per_chr/
+
+# === docs/methodology/_assets — 大型衍生資料（added 2026-08-05）===
+# 背景：research/**/ 早已有 *.json 以外的資料排除規則，但 docs/methodology/_assets/
+#       一直是缺口，導致大量分析衍生資料進了 git。
+# 實測（2026-08-05）：該目錄 714 個已追蹤檔案共 399.7 MB —
+#       JSON 251 檔 255.8 MB · HTML 39 檔 111.1 MB · TSV 36 檔 16.1 MB · PNG 70 檔 13.9 MB
+#       · Python 285 檔 2.7 MB（← 這些是重生腳本，必須保留）
+# 政策：腳本與說明（*.py / *.sh / *.md）留在 git；衍生資料（*.json / *.tsv）不再追蹤。
+# ⚠ .gitignore 不影響「已追蹤」檔案 — 既有 251 個 JSON 需另行 `git rm --cached` 才會生效，
+#    處理清單與後果分析見 InterSubMod/docs/handoff/20260805_系統交接與驗收_01/05_*.standalone.html
+# ⚠ .standalone.html 依 2026-05-19 用戶決策維持 tracked（PI 終版、含 provenance footer），
+#    故不在此排除；但 >10 MB 的 workstation HTML 建議改為外部載入資料而非內嵌。
+docs/methodology/_assets/**/*.json
+docs/methodology/_assets/**/*.tsv
+
+# === 根目錄一次性執行輸出（added 2026-08-05）===
+# gb_poc.* 為 2026-07-05 的 HP-oriented matched-normal cis-control PoC 輸出，
+# 內容已無下游依賴；檔案保留在工作區，只是不進版本控制。
+/gb_poc.out
+/gb_poc.err
+/gb_poc.done

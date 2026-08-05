@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InterSubMod repo 整理 · GitHub 上傳 · 程式與可觀察性盤點 — 2026-08-05</title>
+<style>
+:root{
+  --c-bg:#FAF9F5; --c-surface:#FFFFFF; --c-text:#141413; --c-muted:#6B6B66;
+  --c-border:#E3DACC; --c-accent:#D97757; --c-accent-soft:#FBEEE8;
+  --c-red:#C2410C; --c-red-deep:#7F1D1D; --c-red-tint:#FEF2F0;
+  --c-green:#15803D; --c-green-tint:#DCFCE7;
+  --c-yellow:#A16207; --c-yellow-deep:#78350F; --c-yellow-tint:#FEF3C7;
+  --c-blue:#1E3A8A; --c-blue-tint:#DBEAFE;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px;
+  --ff-body:system-ui,-apple-system,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Microsoft JhengHei","Droid Sans Fallback",sans-serif;
+  --ff-mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.06);
+  --shadow-md:0 2px 8px rgba(20,20,19,.08);
+  --radius:8px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);
+     font-size:15px;line-height:1.7;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+.layout{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:238px 1fr;
+        gap:var(--sp-5);padding:var(--sp-5)}
+aside.toc{position:sticky;top:var(--sp-4);align-self:start;max-height:calc(100vh - var(--sp-7));
+          overflow-y:auto;background:var(--c-surface);border:1px solid var(--c-border);
+          border-radius:var(--radius);padding:var(--sp-4);box-shadow:var(--shadow-sm)}
+aside.toc h3{margin:0 0 var(--sp-3);font-size:13px;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--c-muted)}
+aside.toc ol{margin:0;padding-left:1.35em;font-size:13.5px;line-height:1.85}
+aside.toc a{color:var(--c-text);text-decoration:none}
+aside.toc a:hover{color:var(--c-accent);text-decoration:underline}
+aside.toc li.core>a{font-weight:700;color:var(--c-accent)}
+aside.toc li.core>a::after{content:" ★";font-size:11px}
+aside.toc .toc-foot{margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px solid var(--c-border);
+                    font-size:12px;color:var(--c-muted);line-height:1.6}
+main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);
+            padding:var(--sp-6);box-shadow:var(--shadow-md);min-width:0}
+.report-header{border-bottom:2px solid var(--c-border);padding-bottom:var(--sp-5);margin-bottom:var(--sp-5)}
+.pretitle{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c-accent);
+          font-weight:700;margin-bottom:var(--sp-2)}
+h1{font-size:29px;line-height:1.3;margin:0 0 var(--sp-4);letter-spacing:-.01em}
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-4);
+        margin:0 0 var(--sp-4);font-size:13.5px}
+dl.meta dt{color:var(--c-muted);font-weight:600;white-space:nowrap}
+dl.meta dd{margin:0;min-width:0}
+.verdict-banner{background:linear-gradient(90deg,#1E3A8A 0%,#3B5BA5 100%);color:#fff;
+                padding:var(--sp-4) var(--sp-5);border-radius:var(--radius);
+                font-size:15.5px;font-weight:600;line-height:1.6}
+h2{font-size:21px;margin:var(--sp-7) 0 var(--sp-3);padding-top:var(--sp-2);
+   border-top:1px solid var(--c-border);line-height:1.4}
+h2:first-of-type{border-top:none;margin-top:var(--sp-4)}
+h3{font-size:16.5px;margin:var(--sp-5) 0 var(--sp-2)}
+h4{font-size:14.5px;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-muted)}
+p{margin:0 0 var(--sp-3)}
+code{font-family:var(--ff-mono);font-size:.88em;background:var(--c-accent-soft);padding:1px 5px;
+     border-radius:4px;overflow-wrap:anywhere;word-break:break-word}
+pre{font-family:var(--ff-mono);font-size:12.5px;line-height:1.65;background:#F4F2ED;
+    border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);
+    overflow-x:auto;margin:0 0 var(--sp-4)}
+pre code{background:none;padding:0}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:var(--sp-3);
+           margin:var(--sp-4) 0 var(--sp-5)}
+.stat-box{border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);
+          background:var(--c-bg);text-align:center}
+.stat-box .number{font-family:var(--ff-mono);font-size:24px;font-weight:700;color:var(--c-accent);
+                  line-height:1.2;letter-spacing:-.02em}
+.stat-box .number.bug{color:var(--c-red-deep)}
+.stat-box .number.success{color:var(--c-green)}
+.stat-box .number.warning{color:var(--c-yellow)}
+.stat-box .number.neutral{color:var(--c-blue)}
+.stat-box .label{font-size:12px;color:var(--c-muted);margin-top:var(--sp-2);line-height:1.45}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 var(--sp-4)}
+.table-wrap{overflow-x:auto;margin-bottom:var(--sp-4)}
+.table-wrap table{margin-bottom:0}
+th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top}
+th{background:#F4F2ED;font-weight:700;font-size:12.5px;letter-spacing:.02em;white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--ff-mono);white-space:nowrap}
+tr.row-bug{background:var(--c-red-tint)}
+tr.row-safe{background:var(--c-green-tint)}
+tr.row-warn{background:var(--c-yellow-tint)}
+.mark{font-weight:700;font-family:var(--ff-mono)}
+.mark.ok{color:var(--c-green)}
+.mark.no{color:var(--c-red-deep)}
+.mark.warn{color:var(--c-yellow-deep)}
+details.card{border:1px solid var(--c-border);border-left:4px solid var(--c-muted);
+             border-radius:var(--radius);margin-bottom:var(--sp-3);background:var(--c-bg)}
+details.card.core{border-left-color:var(--c-accent);background:var(--c-surface)}
+details.card.risk{border-left-color:var(--c-red)}
+details.card.ok{border-left-color:var(--c-green)}
+details.card>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-weight:600;font-size:14.5px;
+                     list-style:none;display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:baseline}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-muted);font-size:12px}
+details.card[open]>summary::before{content:"▾"}
+details.card .card-body{padding:0 var(--sp-4) var(--sp-4);border-top:1px solid var(--c-border);
+                        padding-top:var(--sp-3)}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 8px;
+       border-radius:20px;white-space:nowrap;border:1px solid currentColor}
+.badge.core{color:var(--c-accent)}
+.badge.risk{color:var(--c-red-deep);background:var(--c-red-tint)}
+.badge.ok{color:var(--c-green);background:var(--c-green-tint)}
+.badge.warn{color:var(--c-yellow-deep);background:var(--c-yellow-tint)}
+.badge.id{color:var(--c-muted);font-family:var(--ff-mono)}
+.callout{border:1px solid var(--c-red);border-left:5px solid var(--c-red);background:var(--c-red-tint);
+         border-radius:var(--radius);padding:var(--sp-4);margin:var(--sp-4) 0}
+.callout.info{border-color:var(--c-blue);border-left-color:var(--c-blue);background:var(--c-blue-tint)}
+.callout.warn{border-color:var(--c-yellow);border-left-color:var(--c-yellow);background:var(--c-yellow-tint)}
+.callout.good{border-color:var(--c-green);border-left-color:var(--c-green);background:var(--c-green-tint)}
+.callout .callout-title{font-weight:700;margin-bottom:var(--sp-2);font-size:14.5px}
+.callout p:last-child{margin-bottom:0}
+figure.svg-figure{margin:var(--sp-5) 0;border:1px solid var(--c-border);border-radius:var(--radius);
+                  padding:var(--sp-4);background:var(--c-bg)}
+figure.svg-figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:12.5px;color:var(--c-muted);margin-top:var(--sp-3);padding-top:var(--sp-2);
+           border-top:1px solid var(--c-border);line-height:1.55}
+ul,ol{margin:0 0 var(--sp-4);padding-left:1.5em}
+li{margin-bottom:var(--sp-1)}
+.lede{font-size:16px;border-left:3px solid var(--c-accent);padding-left:var(--sp-4);margin:var(--sp-4) 0}
+footer.provenance{margin-top:var(--sp-7);padding-top:var(--sp-4);border-top:2px solid var(--c-border);
+                  font-size:12.5px;color:var(--c-muted);line-height:1.7}
+footer.provenance h4{color:var(--c-text);margin-top:var(--sp-4)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:var(--sp-3)}
+  aside.toc{position:static;max-height:none}
+  main.report{padding:var(--sp-4)}
+  h1{font-size:24px}
+}
+@media (max-width:560px){
+  dl.meta{grid-template-columns:1fr;gap:0}
+  dl.meta dt{margin-top:var(--sp-2)}
+  main.report{padding:var(--sp-3)}
+  footer.provenance ul{padding-left:1.1em}
+}
+@media print{
+  body{background:#fff}
+  .layout{display:block;max-width:100%;padding:0}
+  aside.toc{display:none}
+  main.report{box-shadow:none;border:none;padding:0}
+  details.card{page-break-inside:avoid;border-color:#999}
+  details>summary{list-style:none}
+  details:not([open])>*{display:block !important}
+  details:not([open])>summary{background:#fff !important}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.85em;color:#666}
+  pre,table,blockquote,details.card,figure.svg-figure,svg{page-break-inside:avoid}
+  h1,h2,h3{page-break-after:avoid}
+  .verdict-banner{background:#1E3A8A !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="toc">
+  <h3>章節導航</h3>
+  <ol>
+    <li class="core"><a href="#tldr">四件事的現況總表</a></li>
+    <li class="core"><a href="#s1">程式碼在做什麼（背景）</a></li>
+    <li class="core"><a href="#s2">怎麼用（參數與執行）</a></li>
+    <li class="core"><a href="#s3">缺口一：步驟不可觀察</a></li>
+    <li class="core"><a href="#s4">缺口二：參數不落檔</a></li>
+    <li class="core"><a href="#s5">缺口三：GitHub 落後與肥大</a></li>
+    <li><a href="#s6">C++ 程式品質現況</a></li>
+    <li class="core"><a href="#s7">處理方案（四條線）</a></li>
+    <li class="core"><a href="#s8">驗收清單</a></li>
+    <li><a href="#prov">來源與 Provenance</a></li>
+  </ol>
+  <div class="toc-foot">
+    ★ = 核心章節<br>
+    前提：同一台機器使用 → 大資料不打包，只交路徑。<br>
+    本檔聚焦 repo 整理、GitHub、C++ 與可觀察性。
+  </div>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+  <div class="pretitle">Repo Hygiene · GitHub Readiness · Code Observability</div>
+  <h1>repo 整理、GitHub 上傳與程式可觀察性盤點</h1>
+  <dl class="meta">
+    <dt>盤點日期</dt><dd>2026-08-05（所有數字為當日實測）</dd>
+    <dt>使用前提</dt><dd>同一台機器 → 大檔案<strong>不打包不壓縮</strong>，只需清楚說明路徑與用法</dd>
+    <dt>盤點四軸</dt><dd>① GitHub 上傳　② C++ 程式整理　③ 步驟輸出可觀察　④ 參數可見</dd>
+    <dt>Git remote</dt><dd><code>https://github.com/liaoyoyo/InterSubMod.git</code></dd>
+    <dt>本檔定位</dt><dd>交接包分冊 05；與 01–04 分冊互補（那四份講交接，本份講整理）</dd>
+  </dl>
+  <div class="verdict-banner">
+    程式本體健康（27,653 行、258 測試全過、僅 7 個編譯警告），
+    但有三個明確缺口：<strong>本地領先 GitHub 268 commits</strong>、
+    <strong>3,571 行的核心模組只有 2 行步驟 log</strong>、
+    <strong>28 個 CLI 參數只印 13 個且完全不落檔</strong>。三者都可補，且互不阻擋。
+  </div>
+</header>
+
+<h2 id="tldr">一、四件事的現況總表</h2>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number bug">268</div><div class="label">本地領先 GitHub 的 commits<br>（remote 停在 2026-06-15）</div></div>
+  <div class="stat-box"><div class="number bug">2 / 3,571</div><div class="label">RegionProcessor 的步驟 log 行數<br>／總行數</div></div>
+  <div class="stat-box"><div class="number bug">13 / 28</div><div class="label">實際印出的參數<br>／CLI 提供的參數</div></div>
+  <div class="stat-box"><div class="number bug">66.4 MB</div><div class="label">已 commit 的<br>單一最大檔案</div></div>
+  <div class="stat-box"><div class="number success">7</div><div class="label">C++ 編譯警告<br>（排除 vendored 依賴）</div></div>
+  <div class="stat-box"><div class="number success">258/258</div><div class="label">C++ 測試通過</div></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>軸</th><th>現況</th><th>問題</th><th>嚴重度</th></tr></thead>
+<tbody>
+<tr class="row-bug"><td><strong>① GitHub</strong></td>
+    <td>remote 已設定；本地 5,023 tracked 檔案／pack 149.62 MiB</td>
+    <td>領先 <strong>268 commits</strong>（兩個月未推）；<strong>大型衍生資料被 commit 進 git</strong>（66.4 MB HTML ＋ 5 個 18–28 MB JSON/CSV）</td>
+    <td><span class="mark no">高</span></td></tr>
+<tr class="row-safe"><td><strong>② C++ 程式</strong></td>
+    <td>27,653 行／24 core modules／6 build targets</td>
+    <td>本身健康（僅 7 警告、258 測試全過）；<strong>1,501 行未 commit 的改動恰好就是在做輸出結構化</strong></td>
+    <td><span class="mark ok">低</span></td></tr>
+<tr class="row-bug"><td><strong>③ 步驟可觀察</strong></td>
+    <td><code>main.cpp</code> 有 2 個步驟標記；<code>RegionProcessor.cpp</code> 僅 2 行 <code>[CovM]</code> log、<strong>0 個 ScopedLogger</strong></td>
+    <td>read 解析→過濾→甲基矩陣→距離→分群→顯著性→樹，<strong>中間全程無法觀察</strong>；無 per-step 計數／耗時</td>
+    <td><span class="mark no">高</span></td></tr>
+<tr class="row-bug"><td><strong>④ 參數可見</strong></td>
+    <td><code>Config::print()</code> 印 13 個欄位到 stdout</td>
+    <td>CLI 有 28 個選項 → <strong>15 個從不顯示</strong>；<strong>完全沒有 JSON 落檔</strong>，無法機器讀取或審計</td>
+    <td><span class="mark no">高</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s1">二、這套程式在做什麼（給新讀者的背景）</h2>
+
+<p class="lede">
+一句話：<strong>把「同一條 ONT 長讀」上同時觀測到的體細胞變異與甲基化，整理成 read × 位點的矩陣，
+再算 read 之間的距離、分群、檢定，最後嘗試組出區域內的突變狀態關係。</strong>
+它不是變異偵測器（那是上游的 ClairS），也不是定相工具（那是 LongPhase）—— 它是接在那兩者之後的<strong>讀取層整合分析器</strong>。
+</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 388" role="img" aria-labelledby="a1t a1d" xmlns="http://www.w3.org/2000/svg">
+    <title id="a1t">InterSubMod 程式架構與資料流</title>
+    <desc id="a1d">上游輸入為 tumor BAM、reference FASTA 與 somatic VCF。main.cpp 解析參數後建立 RegionProcessor，
+    對每個 SNV 開一個視窗，依序經過 ReadParser 讀取解析、過濾、MethylationParser 建甲基矩陣、
+    DistanceMatrix 算 read 間距離、HierarchicalClustering 分群、四種統計檢定、以及 PhyloLabeler 與 TreeStructure，
+    最後由 RegionWriter 與 TreeWriter 輸出每個 region 的檔案。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="19" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6B6B66">
+        InterSubMod ＝ 接在 ClairS（找變異）與 LongPhase（定相）之後的「讀取層整合分析器」</text>
+
+      <defs>
+        <marker id="a1arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8A3F22"/>
+        </marker>
+        <marker id="a1gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#6B6B66"/>
+        </marker>
+      </defs>
+
+      <!-- inputs -->
+      <rect x="12" y="34" width="150" height="86" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.4"/>
+      <text x="87" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E3A8A">輸入（3 個必要）</text>
+      <text x="22" y="74" font-size="10.5" fill="#1E3A8A">-t tumor BAM（含 MM/ML 甲基標籤）</text>
+      <text x="22" y="92" font-size="10.5" fill="#1E3A8A">-r reference FASTA</text>
+      <text x="22" y="110" font-size="10.5" fill="#1E3A8A">-v somatic VCF（ClairS 產）</text>
+
+      <!-- main -->
+      <rect x="182" y="34" width="128" height="86" rx="7" fill="#FBEEE8" stroke="#D97757" stroke-width="1.5"/>
+      <text x="246" y="56" text-anchor="middle" font-size="11.5" font-weight="700" fill="#8A3F22">main.cpp</text>
+      <text x="246" y="76" text-anchor="middle" font-size="10" fill="#8A3F22">ArgParser 解析 28 參數</text>
+      <text x="246" y="93" text-anchor="middle" font-size="10" fill="#8A3F22">Config::validate()</text>
+      <text x="246" y="110" text-anchor="middle" font-size="10" fill="#8A3F22">Config::print() ← 只印 13 個</text>
+
+      <!-- region loop -->
+      <rect x="330" y="34" width="458" height="86" rx="7" fill="#FFFFFF" stroke="#D97757" stroke-width="1.5"/>
+      <text x="559" y="55" text-anchor="middle" font-size="11.5" font-weight="700" fill="#8A3F22">RegionProcessor（3,571 行，核心編排器）</text>
+      <text x="345" y="76" font-size="10.5">[1] load_snvs_from_vcf → 得到 N 個 SNV</text>
+      <text x="345" y="94" font-size="10.5">[2] 對每個 SNV 開 ±window 視窗，OpenMP 平行處理 N 個 region</text>
+      <text x="345" y="112" font-size="10.5" fill="#7F1D1D">↑ 目前整支程式只有這 2 行步驟 log</text>
+
+      <!-- inner pipeline title -->
+      <text x="400" y="146" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6B6B66">
+        每個 region 內部依序做的事（← 這一整層目前沒有任何 log）</text>
+
+      <!-- inner boxes row 1 -->
+      <rect x="12" y="158" width="148" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="86" y="178" text-anchor="middle" font-size="11" font-weight="600">ReadParser</text>
+      <text x="86" y="195" text-anchor="middle" font-size="9.5" fill="#6B6B66">取 read、讀 HP tag</text>
+      <text x="86" y="209" text-anchor="middle" font-size="9.5" fill="#6B6B66">判斷 REF/ALT 支持</text>
+
+      <rect x="170" y="158" width="148" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="244" y="178" text-anchor="middle" font-size="11" font-weight="600">過濾</text>
+      <text x="244" y="195" text-anchor="middle" font-size="9.5" fill="#6B6B66">MAPQ / 讀長 / BASEQ</text>
+      <text x="244" y="209" text-anchor="middle" font-size="9.5" fill="#6B6B66">被濾掉幾條？看不到</text>
+
+      <rect x="328" y="158" width="148" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="402" y="178" text-anchor="middle" font-size="11" font-weight="600">MethylationParser</text>
+      <text x="402" y="195" text-anchor="middle" font-size="9.5" fill="#6B6B66">解 MM/ML → 甲基矩陣</text>
+      <text x="402" y="209" text-anchor="middle" font-size="9.5" fill="#6B6B66">Read × CpG</text>
+
+      <rect x="486" y="158" width="148" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="560" y="178" text-anchor="middle" font-size="11" font-weight="600">DistanceMatrix</text>
+      <text x="560" y="195" text-anchor="middle" font-size="9.5" fill="#6B6B66">6 種距離可選</text>
+      <text x="560" y="209" text-anchor="middle" font-size="9.5" fill="#6B6B66">NHD/L1/L2/CORR…</text>
+
+      <rect x="644" y="158" width="144" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="716" y="178" text-anchor="middle" font-size="11" font-weight="600">Clustering</text>
+      <text x="716" y="195" text-anchor="middle" font-size="9.5" fill="#6B6B66">階層式分群</text>
+      <text x="716" y="209" text-anchor="middle" font-size="9.5" fill="#6B6B66">得到 read 群組</text>
+
+      <!-- inner boxes row 2 -->
+      <rect x="12" y="230" width="188" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="106" y="250" text-anchor="middle" font-size="11" font-weight="600">四種統計檢定</text>
+      <text x="106" y="267" text-anchor="middle" font-size="9.5" fill="#6B6B66">GlobalTest / LocalTest</text>
+      <text x="106" y="281" text-anchor="middle" font-size="9.5" fill="#6B6B66">LabelTest / StructureTest</text>
+
+      <rect x="210" y="230" width="188" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="304" y="250" text-anchor="middle" font-size="11" font-weight="600">PerCpgAsm ＋ LOH 註記</text>
+      <text x="304" y="267" text-anchor="middle" font-size="9.5" fill="#6B6B66">每 CpG 的等位不對稱</text>
+      <text x="304" y="281" text-anchor="middle" font-size="9.5" fill="#6B6B66">LohBedAnnotator</text>
+
+      <rect x="408" y="230" width="188" height="56" rx="6" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.1"/>
+      <text x="502" y="250" text-anchor="middle" font-size="11" font-weight="600">PhyloLabeler ＋ TreeStructure</text>
+      <text x="502" y="267" text-anchor="middle" font-size="9.5" fill="#6B6B66">組區域內突變狀態關係</text>
+      <text x="502" y="281" text-anchor="middle" font-size="9.5" fill="#6B6B66">SubcloneAnalyzer</text>
+
+      <rect x="606" y="230" width="182" height="56" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.3"/>
+      <text x="697" y="250" text-anchor="middle" font-size="11" font-weight="700" fill="#15803D">RegionWriter / TreeWriter</text>
+      <text x="697" y="267" text-anchor="middle" font-size="9.5" fill="#15803D">寫出每個 region 的檔案</text>
+      <text x="697" y="281" text-anchor="middle" font-size="9.5" fill="#15803D">（見右下輸出清單）</text>
+
+      <!-- outputs -->
+      <rect x="12" y="302" width="776" height="74" rx="7" fill="#DCFCE7" stroke="#15803D" stroke-width="1.4"/>
+      <text x="26" y="322" font-size="11.5" font-weight="700" fill="#15803D">每個 region 目錄的輸出</text>
+      <text x="26" y="342" font-size="10.5" fill="#15803D">metadata.txt（區域統計）· reads.tsv（每條 read 含 alt_support/HP）· methylation.csv（Read×CpG 矩陣）</text>
+      <text x="26" y="362" font-size="10.5" fill="#15803D">distance_matrix_&lt;METRIC&gt;.csv（Read×Read）· significance_summary.csv（檢定結果）· *.png（熱圖）</text>
+
+      <!-- arrows -->
+      <line x1="162" y1="77" x2="179" y2="77" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#a1arr)"/>
+      <line x1="310" y1="77" x2="327" y2="77" stroke="#8A3F22" stroke-width="1.5" marker-end="url(#a1arr)"/>
+      <line x1="160" y1="186" x2="167" y2="186" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="318" y1="186" x2="325" y2="186" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="476" y1="186" x2="483" y2="186" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="634" y1="186" x2="641" y2="186" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="200" y1="258" x2="207" y2="258" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="398" y1="258" x2="405" y2="258" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <line x1="596" y1="258" x2="603" y2="258" stroke="#6B6B66" stroke-width="1.2" marker-end="url(#a1gray)"/>
+      <path d="M716,214 L716,224 L106,224 L106,228" stroke="#6B6B66" stroke-width="1.2" fill="none" marker-end="url(#a1gray)"/>
+    </g>
+  </svg>
+  <figcaption>圖 1：程式架構與資料流。灰色方塊是每個 region 內部依序執行的步驟 ——
+  <strong>這一整層目前沒有任何 log 輸出</strong>，是本次盤點的最大缺口（見第四節）。
+  綠色是實際落地的輸出檔案。</figcaption>
+</figure>
+
+<h2 id="s2">三、怎麼用（28 個參數的分組意義）</h2>
+
+<p>CLI 由 <code>include/utils/ArgParser.hpp</code> 定義，共 <strong>28 個選項</strong>，可分成六組。
+理解分組比背參數重要 —— 每一組控制流程中的一個環節。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 356" role="img" aria-labelledby="a2t a2d" xmlns="http://www.w3.org/2000/svg">
+    <title id="a2t">28 個 CLI 參數的六組分類與顯示狀態</title>
+    <desc id="a2d">參數分為輸入輸出 6 個、視窗與平行 2 個、read 過濾 3 個、甲基閾值 2 個、
+    距離矩陣 6 個、進階與除錯 9 個。綠色代表目前會被 Config::print 印出，紅色代表從不顯示。
+    28 個中只有 13 個會顯示。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6B6B66">
+        綠＝執行時會印出　·　紅＝從不顯示（跑完也不知道用了什麼值）</text>
+
+      <!-- group 1 -->
+      <rect x="12" y="30" width="380" height="96" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="24" y="50" font-size="11.5" font-weight="700" fill="#1E3A8A">① 輸入／輸出（6）— 決定「分析誰、寫到哪」</text>
+      <rect x="24" y="58" width="86" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="67" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-t tumor-bam</text>
+      <rect x="116" y="58" width="86" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="159" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-r reference</text>
+      <rect x="208" y="58" width="70" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="243" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-v vcf</text>
+      <rect x="284" y="58" width="98" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="333" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-o output-dir</text>
+      <rect x="24" y="82" width="98" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="73" y="95" text-anchor="middle" font-size="9.5" fill="#15803D">-n normal-bam</text>
+      <rect x="128" y="82" width="80" height="18" rx="3" fill="#FEF2F0" stroke="#C2410C"/><text x="168" y="95" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--loh-bed</text>
+      <text x="24" y="118" font-size="10" fill="#6B6B66">意義：tumor BAM 需含 MM/ML 甲基標籤與 HP tag；VCF 來自上游 caller</text>
+
+      <!-- group 2 -->
+      <rect x="402" y="30" width="386" height="96" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="414" y="50" font-size="11.5" font-weight="700" fill="#1E3A8A">② 視窗與平行（2）＋ ③ read 過濾（3）</text>
+      <rect x="414" y="58" width="90" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="459" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-w window-size</text>
+      <rect x="510" y="58" width="70" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="545" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">-j threads</text>
+      <rect x="586" y="58" width="90" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="631" y="71" text-anchor="middle" font-size="9.5" fill="#15803D">--min-mapq</text>
+      <rect x="414" y="82" width="112" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="470" y="95" text-anchor="middle" font-size="9.5" fill="#15803D">--min-read-length</text>
+      <rect x="532" y="82" width="116" height="18" rx="3" fill="#FEF2F0" stroke="#C2410C"/><text x="590" y="95" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--min-base-quality</text>
+      <text x="414" y="118" font-size="10" fill="#6B6B66">意義：視窗大小決定每個 SNV 前後取多少 bp 的 CpG 進矩陣</text>
+
+      <!-- group 4 -->
+      <rect x="12" y="136" width="380" height="80" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="24" y="156" font-size="11.5" font-weight="700" fill="#1E3A8A">④ 甲基二值化閾值（2）</text>
+      <rect x="24" y="164" width="92" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="70" y="177" text-anchor="middle" font-size="9.5" fill="#15803D">--methyl-high</text>
+      <rect x="122" y="164" width="92" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="168" y="177" text-anchor="middle" font-size="9.5" fill="#15803D">--methyl-low</text>
+      <text x="24" y="200" font-size="10" fill="#6B6B66">意義：把 ML 機率轉成 0/1；介於兩閾值之間視為未定</text>
+
+      <!-- group 5 -->
+      <rect x="402" y="136" width="386" height="80" rx="7" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="1.3"/>
+      <text x="414" y="156" font-size="11.5" font-weight="700" fill="#1E3A8A">⑤ 距離矩陣（6）— 決定 read 怎麼比較</text>
+      <rect x="414" y="164" width="102" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="465" y="177" text-anchor="middle" font-size="9.5" fill="#15803D">--distance-metric</text>
+      <rect x="522" y="164" width="130" height="18" rx="3" fill="#FEF2F0" stroke="#C2410C"/><text x="587" y="177" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--min-common-coverage</text>
+      <rect x="658" y="164" width="122" height="18" rx="3" fill="#FEF2F0" stroke="#C2410C"/><text x="719" y="177" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--nan-distance-strategy</text>
+      <text x="414" y="200" font-size="10" fill="#6B6B66">＋ 另 3 個 flag（max-distance-value／compute／output-strand）也不顯示</text>
+
+      <!-- group 6 -->
+      <rect x="12" y="226" width="776" height="86" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="24" y="246" font-size="11.5" font-weight="700" fill="#7F1D1D">⑥ 進階與除錯（9）— 全部不顯示，卻最會改變結果</text>
+      <rect x="24" y="254" width="118" height="18" rx="3" fill="#FFFFFF" stroke="#C2410C"/><text x="83" y="267" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--expected-coverage</text>
+      <rect x="148" y="254" width="112" height="18" rx="3" fill="#FFFFFF" stroke="#C2410C"/><text x="204" y="267" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--germline-hp-only</text>
+      <rect x="266" y="254" width="110" height="18" rx="3" fill="#FFFFFF" stroke="#C2410C"/><text x="321" y="267" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--permute-hp-seed</text>
+      <rect x="382" y="254" width="76" height="18" rx="3" fill="#FFFFFF" stroke="#C2410C"/><text x="420" y="267" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--no-filter</text>
+      <rect x="464" y="254" width="84" height="18" rx="3" fill="#DCFCE7" stroke="#15803D"/><text x="506" y="267" text-anchor="middle" font-size="9.5" fill="#15803D">--full-read</text>
+      <rect x="554" y="254" width="86" height="18" rx="3" fill="#FFFFFF" stroke="#C2410C"/><text x="597" y="267" text-anchor="middle" font-size="9.5" fill="#7F1D1D">--log-level</text>
+      <text x="24" y="290" font-size="10.5" fill="#7F1D1D">
+        ＋ --debug-output-dir、--output-filtered-reads　│　例：<tspan font-weight="700">--germline-hp-only</tspan> 會整個改變 HP 判讀，但事後從 log 完全看不出來有沒有開</text>
+      <text x="24" y="306" font-size="10.5" font-weight="700" fill="#7F1D1D">
+        這就是「同一份輸出，事後無法確認當初參數」的根源</text>
+
+      <!-- tally -->
+      <rect x="12" y="322" width="776" height="26" rx="5" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="400" y="339" text-anchor="middle" font-size="11.5" font-weight="700" fill="#78350F">
+        合計 28 個參數：13 個會印（46%）· 15 個從不顯示（54%）· 0 個落成機器可讀檔案</text>
+    </g>
+  </svg>
+  <figcaption>圖 2：28 個 CLI 參數的六組分類。綠＝會印出、紅＝從不顯示。
+  第 ⑥ 組（進階與除錯）最危險 —— 像 <code>--germline-hp-only</code>、<code>--permute-hp-seed</code>
+  這種會根本改變結果的開關，跑完之後從輸出完全看不出來有沒有啟用。</figcaption>
+</figure>
+
+<h3>標準執行方式</h3>
+
+<pre><code># 整合腳本（推薦，會自動接 Python 繪圖）
+./scripts/run_vcf_all_snv.sh --mode all-with-w5000
+
+# 快速驗證（chr19，&lt; 30 秒）
+./scripts/run_vcf_all_snv.sh --mode chr19-verification
+
+# 直接呼叫 C++ 核心（只產數據，不繪圖）
+./build/bin/inter_sub_mod \
+    --tumor-bam &lt;tumor.bam&gt; --reference &lt;ref.fa&gt; --vcf &lt;somatic.vcf&gt; \
+    --output-dir &lt;results&gt; --threads 32 --window-size 1000 --log-level debug</code></pre>
+
+<h2 id="s3">四、缺口一：跑起來看不到中間發生什麼</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 300" role="img" aria-labelledby="a3t a3d" xmlns="http://www.w3.org/2000/svg">
+    <title id="a3t">實際執行的步驟與目前可觀察範圍的落差</title>
+    <desc id="a3d">程式實際執行九個階段，但目前只有載入 SNV 與開始處理 region 兩處有 log。
+    中間七個階段包含 read 解析、過濾、甲基矩陣、距離矩陣、分群、統計檢定、樹建構，全部沒有輸出任何進度或計數。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6B6B66">
+        上排＝程式實際做的事　·　下排＝你在終端機看得到的</text>
+
+      <!-- actual steps -->
+      <text x="14" y="46" font-size="11.5" font-weight="700">實際步驟</text>
+      <rect x="96" y="34" width="72" height="34" rx="5" fill="#DCFCE7" stroke="#15803D" stroke-width="1.3"/>
+      <text x="132" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#15803D">載入 SNV</text>
+      <text x="132" y="62" text-anchor="middle" font-size="8.5" fill="#15803D">✓ 有 log</text>
+
+      <rect x="174" y="34" width="72" height="34" rx="5" fill="#DCFCE7" stroke="#15803D" stroke-width="1.3"/>
+      <text x="210" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#15803D">開始 region</text>
+      <text x="210" y="62" text-anchor="middle" font-size="8.5" fill="#15803D">✓ 有 log</text>
+
+      <rect x="252" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="288" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">read 解析</text>
+      <text x="288" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="330" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="366" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">過濾</text>
+      <text x="366" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="408" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="444" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">甲基矩陣</text>
+      <text x="444" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="486" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="522" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">距離矩陣</text>
+      <text x="522" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="564" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="600" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">分群</text>
+      <text x="600" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="642" y="34" width="72" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="678" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">統計檢定</text>
+      <text x="678" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <rect x="720" y="34" width="68" height="34" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="754" y="48" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7F1D1D">建樹/輸出</text>
+      <text x="754" y="62" text-anchor="middle" font-size="8.5" fill="#7F1D1D">✕ 無</text>
+
+      <!-- terminal view -->
+      <text x="14" y="112" font-size="11.5" font-weight="700">終端機所見</text>
+      <rect x="96" y="86" width="692" height="60" rx="6" fill="#141413" stroke="#6B6B66" stroke-width="1.2"/>
+      <text x="110" y="106" font-size="10.5" font-family="var(--ff-mono, monospace)" fill="#DCFCE7">[1] Loading SNVs from VCF...</text>
+      <text x="110" y="124" font-size="10.5" font-family="var(--ff-mono, monospace)" fill="#DCFCE7">[2] Processing 35332 regions...</text>
+      <text x="110" y="140" font-size="10" font-family="var(--ff-mono, monospace)" fill="#A16207">（然後就是長時間空白，直到全部跑完）</text>
+
+      <!-- consequences -->
+      <rect x="14" y="162" width="774" height="124" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.4"/>
+      <text x="28" y="182" font-size="12" font-weight="700" fill="#78350F">實際造成的四個問題</text>
+      <text x="28" y="204" font-size="11" fill="#78350F">① <tspan font-weight="700">跑到哪不知道</tspan> — 35,332 個 region 要跑幾小時，中途沒有任何進度，無法判斷是在跑還是卡住</text>
+      <text x="28" y="224" font-size="11" fill="#78350F">② <tspan font-weight="700">濾掉多少不知道</tspan> — MAPQ／讀長／BASEQ 三道過濾各刷掉幾條 read？沒有計數</text>
+      <text x="28" y="244" font-size="11" fill="#78350F">③ <tspan font-weight="700">哪一步慢不知道</tspan> — 沒有 per-step 耗時，無從優化（<tspan font-family="var(--ff-mono, monospace)">ScopedLogger</tspan> 類別存在但使用次數為 0）</text>
+      <text x="28" y="264" font-size="11" fill="#78350F">④ <tspan font-weight="700">出錯難定位</tspan> — 某個 region 產出異常時，無法知道是哪一階段出的問題</text>
+      <text x="28" y="280" font-size="10.5" fill="#6B6B66">實測依據：<tspan font-family="var(--ff-mono, monospace)">grep 'LOG_INFO("\['</tspan> 在 main.cpp 命中 2 處、RegionProcessor.cpp 命中 2 處（皆為 [CovM]）；<tspan font-family="var(--ff-mono, monospace)">grep -c ScopedLogger</tspan> 在 RegionProcessor.cpp ＝ 0</text>
+    </g>
+  </svg>
+  <figcaption>圖 3：實際步驟（上排）與可觀察範圍（下排）的落差。九個階段只有前兩個有 log，
+  中間七個完全靜默。<code>ScopedLogger</code> 這個計時工具類別在專案中已存在，但在核心模組使用次數為 <strong>0</strong>。</figcaption>
+</figure>
+
+<h2 id="s4">五、缺口二：參數只印在螢幕上，跑完就沒了</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>現況</th><th>問題</th></tr></thead>
+<tbody>
+<tr><td><code>Config::print()</code> 印 13 個欄位到 <code>std::cout</code></td><td>15 個參數從不出現</td></tr>
+<tr class="row-bug"><td>沒有任何 JSON／YAML 落檔</td><td><span class="mark no">✗</span> 事後無法用程式讀取、無法比對兩次執行的差異、無法納入 receipt</td></tr>
+<tr class="row-warn"><td>現有 <code>run_context.json</code> 是 <strong>pipeline 腳本手填的 metadata</strong></td><td><span class="mark warn">⚠</span> 只有 sample / platform / VCF 路徑等 14 個欄位，<strong>不含 C++ 實際使用的參數</strong>，且 <code>test_focus</code>／<code>changes</code>／<code>conclusion</code> 等欄位為 <code>null</code></td></tr>
+<tr class="row-bug"><td>沒有記錄 binary 版本／commit</td><td><span class="mark no">✗</span> 無法確認某份輸出是哪一版程式產生的</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="callout-title">為什麼這件事對論文很致命</div>
+  <p>審查者問「這個結果是用什麼參數跑的？」時，目前唯一的答案來源是<strong>當時終端機的畫面</strong>（已消失）
+  或<strong>腳本裡寫死的值</strong>（可能已改）。<code>--germline-hp-only</code>、<code>--permute-hp-seed</code>、
+  <code>--nan-distance-strategy</code> 這些會根本改變結果的開關，跑完後<strong>在輸出目錄裡找不到任何痕跡</strong>。</p>
+</div>
+
+<h2 id="s5">六、缺口三：GitHub 落後兩個月，且混入大型衍生資料</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 292" role="img" aria-labelledby="a4t a4d" xmlns="http://www.w3.org/2000/svg">
+    <title id="a4t">GitHub 同步落差與 repo 肥大來源</title>
+    <desc id="a4d">remote 最後 commit 停在 2026-06-15，本地領先 268 個 commit。
+    已被 commit 的檔案中，最大的是 66.4 MB 的 standalone HTML，另有五個 18 到 28 MB 的 JSON 與 CSV 衍生資料。
+    這些屬於分析產物，不應進入版本控制。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6B6B66">
+        兩個獨立問題：① 沒推上去　② 推上去的內容裡混了不該進 git 的東西</text>
+
+      <!-- timeline -->
+      <text x="14" y="46" font-size="11.5" font-weight="700">① 同步落差</text>
+      <line x1="120" y1="52" x2="770" y2="52" stroke="#E3DACC" stroke-width="3"/>
+      <circle cx="180" cy="52" r="8" fill="#15803D"/>
+      <text x="180" y="36" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803D">2026-06-15</text>
+      <text x="180" y="74" text-anchor="middle" font-size="10" fill="#15803D">remote 最後 commit</text>
+      <text x="180" y="88" text-anchor="middle" font-size="9.5" font-family="var(--ff-mono, monospace)" fill="#6B6B66">b761336</text>
+
+      <line x1="188" y1="52" x2="700" y2="52" stroke="#C2410C" stroke-width="4"/>
+      <text x="444" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">268 個 commit 未推送</text>
+      <text x="444" y="74" text-anchor="middle" font-size="10.5" fill="#7F1D1D">兩個月的工作只存在於這台機器</text>
+
+      <circle cx="708" cy="52" r="8" fill="#C2410C"/>
+      <text x="708" y="36" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7F1D1D">2026-08-05</text>
+      <text x="708" y="74" text-anchor="middle" font-size="10" fill="#7F1D1D">本地 HEAD</text>
+      <text x="708" y="88" text-anchor="middle" font-size="9.5" font-family="var(--ff-mono, monospace)" fill="#6B6B66">387a101</text>
+
+      <!-- big files -->
+      <text x="14" y="126" font-size="11.5" font-weight="700">② repo 肥大</text>
+      <text x="120" y="126" font-size="11" fill="#6B6B66">已 tracked 的最大檔案（皆為<tspan font-weight="700">分析衍生產物</tspan>，非原始碼）</text>
+
+      <!-- bars: scale 66.4 -> 480px, origin 300 -->
+      <text x="120" y="150" font-size="10" font-family="var(--ff-mono, monospace)">…_multisample_topology_workstation.html</text>
+      <rect x="418" y="139" width="348" height="15" rx="3" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="770" y="151" text-anchor="end" font-size="10" font-weight="700" fill="#7F1D1D">66.4 MB</text>
+
+      <text x="120" y="172" font-size="10" font-family="var(--ff-mono, monospace)">phylo_cpp_wg_full_records_v6.json</text>
+      <rect x="418" y="161" width="148" height="15" rx="3" fill="#FEF3C7" stroke="#A16207" stroke-width="1.1"/>
+      <text x="574" y="173" font-size="10" fill="#78350F">28.3 MB</text>
+
+      <text x="120" y="194" font-size="10" font-family="var(--ff-mono, monospace)">sm_linkage_genomewide.json</text>
+      <rect x="418" y="183" width="133" height="15" rx="3" fill="#FEF3C7" stroke="#A16207" stroke-width="1.1"/>
+      <text x="559" y="195" font-size="10" fill="#78350F">25.3 MB</text>
+
+      <text x="120" y="216" font-size="10" font-family="var(--ff-mono, monospace)">tp_significance_summary.csv</text>
+      <rect x="418" y="205" width="115" height="15" rx="3" fill="#FEF3C7" stroke="#A16207" stroke-width="1.1"/>
+      <text x="541" y="217" font-size="10" fill="#78350F">22.0 MB</text>
+
+      <text x="120" y="238" font-size="10" font-family="var(--ff-mono, monospace)">phylo_cpp_wg_full_records_v5.json ＋ v4 ＋ percpg</text>
+      <rect x="418" y="227" width="304" height="15" rx="3" fill="#FEF3C7" stroke="#A16207" stroke-width="1.1"/>
+      <text x="730" y="239" font-size="10" fill="#78350F">58.1 MB（3 檔）</text>
+
+      <!-- root cause -->
+      <rect x="14" y="252" width="774" height="34" rx="6" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="28" y="272" font-size="11" fill="#78350F">
+        根因：<tspan font-family="var(--ff-mono, monospace)">.gitignore</tspan> 有擋 <tspan font-family="var(--ff-mono, monospace)">research/**/data/</tspan> 與 <tspan font-family="var(--ff-mono, monospace)">research/**/figures/</tspan>，但<tspan font-weight="700">沒有擋 docs/methodology/_assets/</tspan> — 大型 JSON/CSV/HTML 就從這個缺口進了 git</text>
+    </g>
+  </svg>
+  <figcaption>圖 4：GitHub 的兩個獨立問題。上半是同步落差（268 commits／兩個月）；
+  下半是 repo 肥大來源 —— 全部集中在 <code>docs/methodology/_assets/</code> 這個 <code>.gitignore</code> 沒擋到的目錄。</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>指標</th><th class="num">實測值</th><th>評價</th></tr></thead>
+<tbody>
+<tr><td>Git remote</td><td><code>github.com/liaoyoyo/InterSubMod.git</code></td><td><span class="mark ok">✓</span> 已設定</td></tr>
+<tr class="row-bug"><td>本地領先 remote</td><td class="num">268 commits</td><td><span class="mark no">✗</span> 兩個月未推</td></tr>
+<tr><td>已追蹤檔案</td><td class="num">5,023</td><td>—</td></tr>
+<tr class="row-warn"><td>Git pack 大小</td><td class="num">149.62 MiB</td><td><span class="mark warn">⚠</span> clone 會慢；主因是大型衍生資料</td></tr>
+<tr class="row-bug"><td>單一最大 tracked 檔案</td><td class="num">66.4 MB</td><td><span class="mark no">✗</span> 逼近 GitHub 單檔 100 MB 上限</td></tr>
+<tr class="row-warn"><td>未提交項目</td><td class="num">580</td><td><span class="mark warn">⚠</span> 含 <code>gb_poc.out</code>／<code>.err</code>／<code>.done</code> 等暫存檔</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s6">七、C++ 程式品質：其實比預期健康</h2>
+
+<div class="callout good">
+  <div class="callout-title">好消息：程式本體不需要大整理</div>
+  <p>從零 clean build <strong>exit 0</strong>、258 個測試<strong>全過</strong>、
+  排除 vendored 依賴後<strong>只有 7 個編譯警告</strong>（3 個 unused-parameter、1 個 unused-variable、1 個 unused-function 等）。
+  以 27,653 行的專案來說，這是相當乾淨的狀態。</p>
+</div>
+
+<details class="card ok" id="cpp-uncommitted" open>
+  <summary><span class="badge id">發現</span> 那 1,501 行未 commit 的改動，正好就是在做「輸出結構化」 <span class="badge ok">方向一致</span></summary>
+  <div class="card-body">
+    <p>從 diff 抽出的新增函式顯示，未提交的改動集中在三件事：</p>
+    <ul>
+      <li><strong>原子寫入與發布狀態</strong>：<code>write_atomic_text</code>、<code>atomic_temp_path</code>、
+        <code>write_region_stratification_artifacts_atomic</code>、<code>write_region_stratification_status_atomic</code>、
+        <code>mark_published</code>、<code>ensure_output_parent</code></li>
+      <li><strong>輸出驗證</strong>：<code>validate_region_status_record</code>、
+        <code>is_region_stratification_eligible</code>、<code>valid_stratum</code></li>
+      <li><strong>統計與分類</strong>：<code>StructureTest::permute_labels</code>、
+        <code>validate_permutation_options</code>、<code>determine_loh_subtype_legacy_vc</code></li>
+    </ul>
+    <p>而且對應測試已經存在並通過 —— C++ 測試輸出中可看到
+    <code>RegionStratificationArtifactsTest</code> 的 5 個測試（含「狀態與內容矛盾時應在發布前失敗」、
+    「rename 失敗時應清掉自己的暫存檔」）。</p>
+    <p><strong>意義</strong>：你現在想要的「輸出可觀察、可驗證」，程式裡已經開了頭，只是還沒 commit，
+    也還沒延伸到 log 與參數層。</p>
+  </div>
+</details>
+
+<h2 id="s7">八、處理方案：四條線，互不阻擋</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 330" role="img" aria-labelledby="a5t a5d" xmlns="http://www.w3.org/2000/svg">
+    <title id="a5t">四條處理路線與相依關係</title>
+    <desc id="a5d">路線 A 為 repo 瘦身與 GitHub 推送，含補 gitignore、處理大檔案、分批 commit、推送。
+    路線 B 為參數落檔，實作 Config to_json 與 run_params.json。
+    路線 C 為步驟可觀察，加入 ScopedLogger 計時與各階段計數。
+    路線 D 為文件同步。A 與 D 可立即做，B 與 C 屬 C++ 改動需先過編譯 Hard Gate。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6B6B66">
+        四條線可平行；只有 B 與 C 需動 C++（先過編譯 Hard Gate）</text>
+
+      <defs>
+        <marker id="a5arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1E3A8A"/>
+        </marker>
+      </defs>
+
+      <!-- Line A -->
+      <rect x="12" y="30" width="380" height="128" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="26" y="50" font-size="12.5" font-weight="700" fill="#1E3A8A">A｜repo 瘦身 ＋ 推上 GitHub</text>
+      <text x="26" y="72" font-size="10.5" fill="#1E3A8A">A1 補 .gitignore：擋 docs/methodology/_assets/ 大型衍生資料</text>
+      <text x="26" y="90" font-size="10.5" fill="#1E3A8A">A2 已 commit 的大檔案 → git rm --cached ＋ 留重生腳本</text>
+      <text x="26" y="108" font-size="10.5" fill="#1E3A8A">A3 清暫存檔（gb_poc.out/.err/.done）</text>
+      <text x="26" y="126" font-size="10.5" fill="#1E3A8A">A4 580 項分批 commit（C++ 那批先過編譯）</text>
+      <text x="26" y="146" font-size="10.5" font-weight="700" fill="#1E3A8A">A5 push 268+ commits → GitHub</text>
+
+      <!-- Line B -->
+      <rect x="402" y="30" width="386" height="128" rx="7" fill="#FBEEE8" stroke="#D97757" stroke-width="1.5"/>
+      <text x="416" y="50" font-size="12.5" font-weight="700" fill="#8A3F22">B｜參數落檔（C++ 小改動）</text>
+      <text x="416" y="72" font-size="10.5" fill="#8A3F22">B1 Config 加 to_json()：輸出全部 28 個參數</text>
+      <text x="416" y="90" font-size="10.5" fill="#8A3F22">B2 啟動時寫 &lt;output-dir&gt;/run_params.json</text>
+      <text x="416" y="108" font-size="10.5" fill="#8A3F22">B3 同檔記錄 binary 版本／commit／執行時間</text>
+      <text x="416" y="126" font-size="10.5" fill="#8A3F22">B4 Config::print() 補齊缺的 15 個欄位</text>
+      <text x="416" y="146" font-size="10.5" font-weight="700" fill="#8A3F22">效益：任何輸出都能反查當初參數</text>
+
+      <!-- Line C -->
+      <rect x="12" y="168" width="380" height="128" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.5"/>
+      <text x="26" y="188" font-size="12.5" font-weight="700" fill="#78350F">C｜步驟可觀察（C++ 小改動）</text>
+      <text x="26" y="210" font-size="10.5" fill="#78350F">C1 九個階段各加 ScopedLogger（類別已存在，用 0 次）</text>
+      <text x="26" y="228" font-size="10.5" fill="#78350F">C2 過濾階段輸出計數：讀入 N → 通過 M（各原因幾條）</text>
+      <text x="26" y="246" font-size="10.5" fill="#78350F">C3 region 迴圈加進度（每 1000 個報一次）</text>
+      <text x="26" y="264" font-size="10.5" fill="#78350F">C4 收尾寫 &lt;output-dir&gt;/run_summary.json（各階段耗時＋計數）</text>
+      <text x="26" y="284" font-size="10.5" font-weight="700" fill="#78350F">效益：跑到哪、濾掉多少、哪步慢，一目了然</text>
+
+      <!-- Line D -->
+      <rect x="402" y="168" width="386" height="128" rx="7" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+      <text x="416" y="188" font-size="12.5" font-weight="700" fill="#15803D">D｜文件同步（零風險，可立刻做）</text>
+      <text x="416" y="210" font-size="10.5" fill="#15803D">D1 修 QUICKSTART.md:41 的 /big8_disk 過期路徑</text>
+      <text x="416" y="228" font-size="10.5" fill="#15803D">D2 更新 CURRENT_FOCUS.md（補 07-25 → 08-01 空窗）</text>
+      <text x="416" y="246" font-size="10.5" fill="#15803D">D3 requirements.txt 補 pytest ＋ 建 environment lock</text>
+      <text x="416" y="264" font-size="10.5" fill="#15803D">D4 README 補「參數表 ＋ 輸出結構」章節</text>
+      <text x="416" y="284" font-size="10.5" font-weight="700" fill="#15803D">效益：新人照文件能真的跑起來</text>
+
+      <!-- bottom note -->
+      <rect x="12" y="304" width="776" height="22" rx="5" fill="#FFFFFF" stroke="#6B6B66" stroke-width="1.1" stroke-dasharray="5 3"/>
+      <text x="400" y="319" text-anchor="middle" font-size="10.5" fill="#6B6B66">
+        建議順序：D（零風險先做）→ A1–A3（瘦身）→ B＋C（C++ 改動，一起過編譯與測試）→ A4–A5（commit 並推送）</text>
+    </g>
+  </svg>
+  <figcaption>圖 5：四條處理路線。D 零風險可立刻做；A 是 repo 衛生；B 與 C 需要動 C++
+  （屬本專案的編譯 Hard Gate，改完必須重編＋跑 258 個測試）。建議把 B 與 C 合併成一次 C++ 改動。</figcaption>
+</figure>
+
+<h3>建議的目標輸出結構（B ＋ C 完成後）</h3>
+
+<pre><code>&lt;output-dir&gt;/
+├── run_params.json          ← 新增：28 個參數全記錄 ＋ binary 版本 ＋ 時間
+├── run_summary.json         ← 新增：各階段耗時、read 計數、過濾統計、region 完成數
+├── full_execution_analysis.log
+├── significance_summary.csv
+└── &lt;vcf_class&gt;/&lt;chrom&gt;/&lt;region&gt;/
+    ├── metadata.txt
+    ├── reads.tsv
+    ├── methylation.csv
+    ├── distance_matrix_&lt;METRIC&gt;.csv
+    └── significance_summary.csv</code></pre>
+
+<h2 id="s8">九、驗收清單</h2>
+
+<p>每一項都綁一條可重跑的驗證命令 —— 做完要能<strong>證明</strong>，不是宣稱。</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>項目</th><th>線</th><th>驗證方式</th><th>現況</th></tr></thead>
+<tbody>
+<tr class="row-warn"><td>1</td><td>QUICKSTART 路徑正確</td><td>D</td><td><code>grep -n big8_disk QUICKSTART.md</code> 回傳空</td><td><span class="mark no">✗</span> 未做</td></tr>
+<tr class="row-warn"><td>2</td><td>CURRENT_FOCUS 補到 08-01</td><td>D</td><td>最新段落日期 ≥ 2026-08-01</td><td><span class="mark no">✗</span> 停在 07-24</td></tr>
+<tr class="row-warn"><td>3</td><td>pytest 可執行</td><td>D</td><td><code>python3 -m pytest --version</code> 有輸出</td><td><span class="mark no">✗</span> 未安裝</td></tr>
+<tr class="row-warn"><td>4</td><td>.gitignore 擋住大型衍生資料</td><td>A</td><td>新增大 JSON 到 <code>_assets/</code> 後 <code>git status</code> 不顯示</td><td><span class="mark no">✗</span> 有缺口</td></tr>
+<tr class="row-warn"><td>5</td><td>tracked 內無 &gt;10 MB 檔案</td><td>A</td><td>最大 tracked 檔案 &lt; 10 MB</td><td><span class="mark no">✗</span> 最大 66.4 MB</td></tr>
+<tr class="row-warn"><td>6</td><td>工作區乾淨</td><td>A</td><td><code>git status --porcelain</code> 行數為 0</td><td><span class="mark no">✗</span> 580 項</td></tr>
+<tr class="row-warn"><td>7</td><td>GitHub 已同步</td><td>A</td><td><code>git rev-list --count origin/&lt;branch&gt;..HEAD</code> ＝ 0</td><td><span class="mark no">✗</span> 領先 268</td></tr>
+<tr class="row-warn"><td>8</td><td>參數落檔</td><td>B</td><td>跑一次後 <code>&lt;output-dir&gt;/run_params.json</code> 存在且含 28 個參數</td><td><span class="mark no">✗</span> 無此檔</td></tr>
+<tr class="row-warn"><td>9</td><td>參數含版本識別</td><td>B</td><td><code>run_params.json</code> 內有 binary commit hash</td><td><span class="mark no">✗</span> 無</td></tr>
+<tr class="row-warn"><td>10</td><td>步驟有進度輸出</td><td>C</td><td>跑 chr19 驗證時終端機出現 ≥ 8 個階段標記</td><td><span class="mark no">✗</span> 只有 2 個</td></tr>
+<tr class="row-warn"><td>11</td><td>過濾有計數</td><td>C</td><td>log 或 summary 顯示「讀入 N → 通過 M」與各過濾原因</td><td><span class="mark no">✗</span> 無</td></tr>
+<tr class="row-warn"><td>12</td><td>執行摘要落檔</td><td>C</td><td><code>&lt;output-dir&gt;/run_summary.json</code> 含各階段耗時</td><td><span class="mark no">✗</span> 無</td></tr>
+<tr class="row-safe"><td>13</td><td>C++ 可從零編譯</td><td>—</td><td><code>cmake -S . -B build &amp;&amp; cmake --build build</code> 皆 exit 0</td><td><span class="mark ok">✓</span> 已驗</td></tr>
+<tr class="row-safe"><td>14</td><td>C++ 測試全過</td><td>—</td><td><code>./build/bin/run_tests</code> → 258 PASSED</td><td><span class="mark ok">✓</span> 已驗</td></tr>
+<tr class="row-safe"><td>15</td><td>編譯警告受控</td><td>—</td><td>自身程式碼警告數 ≤ 10</td><td><span class="mark ok">✓</span> 7 個</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout info">
+  <div class="callout-title">現況總結：15 項中 3 項已通過</div>
+  <p>已通過的 3 項全是<strong>程式本體</strong>（可編譯、測試全過、警告受控）——
+  這代表核心程式碼健康。未通過的 12 項全是<strong>周邊工程</strong>：版本同步、repo 衛生、可觀察性、文件正確性。
+  這 12 項沒有一項需要改動科學邏輯。</p>
+</div>
+
+<footer class="provenance" id="prov">
+  <h4>Provenance（本檔數字來源）</h4>
+  <p>全部數字為 2026-08-05 實際執行取得，無估計值。</p>
+  <ul>
+    <li><strong>GitHub 狀態</strong>（remote URL、268 commits、5,023 tracked、149.62 MiB pack、最大檔案清單）：
+      <code>git remote -v</code>、<code>git rev-list --count</code>、<code>git count-objects -vH</code>、<code>git ls-files | xargs ls -la</code></li>
+    <li><strong>參數清單</strong>（28 個選項及其分組）：逐行閱讀 <code>InterSubMod/include/utils/ArgParser.hpp</code></li>
+    <li><strong>參數顯示數</strong>（13 個欄位）：<code>InterSubMod/src/core/Config.cpp</code> 的 <code>Config::print()</code>（121–140 行）</li>
+    <li><strong>步驟 log 數</strong>（main.cpp 2 處、RegionProcessor 2 處 [CovM]、ScopedLogger 使用 0 次）：
+      <code>grep -n 'LOG_INFO("\['</code> 與 <code>grep -c ScopedLogger</code></li>
+    <li><strong>C++ 規模與品質</strong>（27,653 行、24 modules、7 警告、258 tests）：
+      <code>wc -l</code>、clean build log 分析、<code>./build_handoff_verify/bin/run_tests</code></li>
+    <li><strong>未提交 C++ 改動內容</strong>：<code>git diff include/core src/core</code> 抽取新增函式簽名</li>
+    <li><strong>run_context.json 欄位</strong>：實際讀取 HCC1395 canonical run 的該檔案</li>
+    <li><strong>.gitignore 覆蓋範圍</strong>：完整閱讀 <code>InterSubMod/.gitignore</code></li>
+  </ul>
+
+  <h4>Build 資訊</h4>
+  <p>
+    Git branch：<code>research/subclonal-reconstruction-202606</code>　·　HEAD：<code>387a101</code>（working tree DIRTY）　·
+    盤點日期：2026-08-05　·
+    輸出：<code>InterSubMod/docs/handoff/20260805_系統交接與驗收_01/05_repo整理與可觀察性盤點.standalone.html</code>
+  </p>
+  <p>
+    本檔只涉及<strong>工程層</strong>（版本控制、程式結構、可觀察性），不涉及科學結論。
+    科學 claim ceiling 見同目錄 <code>README.md</code> 與 20260801 交接包。
+  </p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>

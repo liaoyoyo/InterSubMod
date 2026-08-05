@@ -1,0 +1,178 @@
+{
+  "$comment": "本輪交接驗收的實跑真值。read-only 探測 + 一次 from-scratch clean build。不建立第二份科學數值 SoT — 科學數字一律以 20260801 authority_manifest.json 為準。",
+  "schema_name": "intersubmod.handoff.acceptance_receipt",
+  "schema_version": "1.0.0",
+  "receipt_id": "intersubmod-handoff-acceptance-20260805",
+  "probe_date": "2026-08-05",
+  "probe_mode": "read_only_plus_one_clean_build",
+  "parent_handoff": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/",
+  "scope_note": "本 receipt 驗收的是『工程可交接性』（build / 證據完整性 / 測試可執行性 / 資料可定位性），不是科學結論。科學 claim ceiling 見 parent_handoff。",
+
+  "repo": {
+    "root": "/big7_disk/liaoyoyo2001/InterSubMod",
+    "branch": "research/subclonal-reconstruction-202606",
+    "head": "387a101e6a3292e0d7f230ba8d20271c7434972a",
+    "working_tree_status": "DIRTY",
+    "working_tree_entries": {
+      "total": 580,
+      "untracked": 368,
+      "modified": 202,
+      "deleted": 10
+    },
+    "uncommitted_cpp": {
+      "files": 8,
+      "insertions": 1501,
+      "deletions": 457,
+      "files_list": [
+        "CMakeLists.txt",
+        "include/core/RegionProcessor.hpp",
+        "include/core/Stats.hpp",
+        "include/core/StructureTest.hpp",
+        "include/core/SubcloneAnalyzer.hpp",
+        "src/core/RegionProcessor.cpp",
+        "src/core/StructureTest.cpp",
+        "src/core/SubcloneAnalyzer.cpp"
+      ]
+    }
+  },
+
+  "checks": [
+    {
+      "check_id": "A1_clean_build",
+      "layer": "program",
+      "question": "當前源碼（含未 commit 改動）能否從零編譯？",
+      "command": "cmake -S . -B build_handoff_verify -DCMAKE_BUILD_TYPE=Release && cmake --build build_handoff_verify -j 16",
+      "result": {"configure_exit": 0, "build_exit": 0, "real_compile_errors": 0},
+      "verdict": "PASS",
+      "evidence": "cmake_configure.log / cmake_build.log",
+      "note": "刻意使用新目錄 build_handoff_verify/，不污染既有 build/；同時測試『接手者從零 build』的真實情境"
+    },
+    {
+      "check_id": "A2_binaries",
+      "layer": "program",
+      "question": "CMake 宣告的 target 是否全部產出？",
+      "expected_targets": 6,
+      "produced": [
+        {"name": "inter_sub_mod", "bytes": 7067640},
+        {"name": "exact_ps_partition", "bytes": 212136},
+        {"name": "run_tests", "bytes": 9535872},
+        {"name": "test_phase1_2", "bytes": 5822944},
+        {"name": "test_phase3", "bytes": 5920640},
+        {"name": "test_phase4_5", "bytes": 6653584}
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "check_id": "B1_artifact_integrity",
+      "layer": "evidence",
+      "question": "20260801 authority manifest 登記的每個 artifact 是否仍存在且雜湊一致？",
+      "method": "逐檔重算 SHA-256 並與 manifest 宣告值比對",
+      "total_probed": 19,
+      "breakdown": {"authority_artifacts": 13, "frozen_binary": 1, "source_snapshots": 5},
+      "tally": {"MATCH": 19, "MISSING": 0, "HASH_MISMATCH": 0},
+      "verdict": "PASS",
+      "note": "這是本次驗收最強的一項 — 論文核心證據鏈四天後仍逐位元一致"
+    },
+    {
+      "check_id": "C1_reproduce_latest_release_tests",
+      "layer": "test",
+      "question": "最新一份 validated release（20260801 observation report）的測試能否重現？",
+      "command": "python3 -m unittest research/20260801_exact_ps_observation_report/tests/*.py",
+      "result": {"tests_run": 12, "duration_seconds": 10.077, "exit": 0},
+      "verdict": "PASS",
+      "note": "2026-08-01 原始記錄為 12 tests / 9.735s，本輪重現一致"
+    },
+    {
+      "check_id": "C2_test_executability",
+      "layer": "test",
+      "question": "全專案測試在當前環境有多少比例可執行？",
+      "python_test_files": 143,
+      "by_style": {"unittest": 68, "pytest": 63, "other": 12},
+      "cpp_test_files": 21,
+      "pytest_available": false,
+      "pytest_probe": [
+        {"interpreter": "/bip7_disk/liaoyoyo2001/miniconda3/bin/python3", "result": "No module named pytest"},
+        {"interpreter": "/usr/bin/python3", "result": "No module named pytest"}
+      ],
+      "pytest_declared_in_requirements": false,
+      "unexecutable_ratio": 0.4406,
+      "verdict": "FAIL",
+      "blocking": true,
+      "impact": "63/143 = 44.06% 的 Python 測試無法執行；parent manifest 宣稱的『37 passed』測試證據在此環境不可重現"
+    },
+    {
+      "check_id": "C3_cpp_test_run",
+      "layer": "test",
+      "question": "C++ run_tests 是否通過？",
+      "binary": "build_handoff_verify/bin/run_tests",
+      "result": {
+        "tests_run": 258,
+        "test_suites": 37,
+        "passed": 258,
+        "failed": 0,
+        "duration_ms": 2766
+      },
+      "verdict": "PASS",
+      "note": "由本輪 clean build 產出的 binary 執行（非既有 build/ 的 2026-07-27 舊 binary），因此同時驗證了未 commit 的 1,501 行 C++ 改動沒有破壞既有行為"
+    },
+    {
+      "check_id": "D1_data_presence",
+      "layer": "data",
+      "question": "7 個樣本的 tagged BAM 是否都在？",
+      "canonical_root": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical",
+      "mode_probed": "paired_full",
+      "samples": [
+        {"sample": "COLO829", "bytes": 95383318947},
+        {"sample": "H1437", "bytes": 230102027224},
+        {"sample": "H2009", "bytes": 310760045641},
+        {"sample": "HCC1395", "bytes": 278270281041},
+        {"sample": "HCC1395_DORADO", "bytes": 238424953796},
+        {"sample": "HCC1937", "bytes": 447202916068},
+        {"sample": "HCC1954", "bytes": 240839923636}
+      ],
+      "present": 7,
+      "expected": 7,
+      "total_bytes": 1840983466353,
+      "total_gib": 1714.5,
+      "total_tib": 1.67,
+      "verdict": "PASS_WITH_CONSTRAINT",
+      "constraint": "僅 paired_full 一種模式就 1.67 TiB — 資料不可隨交接包複製，只能交接路徑 + checksum + 重生方法"
+    },
+    {
+      "check_id": "D2_disk_headroom",
+      "layer": "data",
+      "question": "是否有足夠空間做 P0-4 的 clean rerun？",
+      "big7_disk": {"size": "42T", "used": "39T", "avail_gb": 617, "use_percent": 99},
+      "bip7_disk": {"size": "28T", "used": "26T", "avail": "1.8T", "use_percent": 94},
+      "verdict": "FAIL",
+      "blocking": true,
+      "impact": "/big7_disk 僅剩 617 GB（99% 已用）。單一樣本 tagged BAM 就達 416 GB，無法安全 rerun",
+      "mitigation_available": "OUTPUT_INDEX.md §9 已列出 SAFE_DELETE 與 LOW_RISK 清理候選"
+    },
+    {
+      "check_id": "E1_onboarding_doc_accuracy",
+      "layer": "documentation",
+      "question": "新人照 QUICKSTART.md 操作會成功嗎？",
+      "defect": "QUICKSTART.md:41 寫 `cd /big8_disk/liaoyoyo2001/InterSubMod`，實際 repo 在 /big7_disk/",
+      "verdict": "FAIL",
+      "blocking": false,
+      "impact": "接手者第一步就會走錯目錄"
+    }
+  ],
+
+  "verdict_summary": {
+    "PASS": ["A1_clean_build", "A2_binaries", "B1_artifact_integrity", "C1_reproduce_latest_release_tests", "C3_cpp_test_run"],
+    "PASS_WITH_CONSTRAINT": ["D1_data_presence"],
+    "FAIL": ["C2_test_executability", "D2_disk_headroom", "E1_onboarding_doc_accuracy"],
+    "NOT_RUN": [],
+    "overall": "NOT_READY_FOR_FORMAL_HANDOFF",
+    "overall_reason": "證據鏈（19/19 hash）、可編譯性、C++ 測試（258/258）與最新 release 測試（12/12）全數通過。阻擋交接的是：Python 測試可執行性（44% 需 pytest 但未安裝）、磁碟餘量（僅剩 617 GB）、新人文件路徑錯誤。三項都是工程可重現性問題，不是科學問題。"
+  },
+
+  "inherited_blockers_from_20260801": [
+    {"key": "working_tree_status", "value": "DIRTY_NOT_RELEASE_AUTHORITY", "still_true": true},
+    {"key": "environment_lock", "value": "REQUIRED_BEFORE_RELEASE", "still_true": true},
+    {"key": "frozen_binary.relationship_to_current_dirty_sources", "value": "not_proven_byte_reproducible", "still_true": true},
+    {"key": "paper_status", "value": "7/12 骨架、內容過期，不可直接送審", "still_true": true}
+  ]
+}

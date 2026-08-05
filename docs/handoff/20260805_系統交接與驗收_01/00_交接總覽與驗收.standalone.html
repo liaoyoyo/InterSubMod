@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InterSubMod 系統交接與驗收總覽 — 2026-08-05</title>
+<style>
+:root{
+  --c-bg:#FAF9F5; --c-surface:#FFFFFF; --c-text:#141413; --c-muted:#6B6B66;
+  --c-border:#E3DACC; --c-accent:#D97757; --c-accent-soft:#FBEEE8;
+  --c-red:#C2410C; --c-red-deep:#7F1D1D; --c-red-tint:#FEF2F0;
+  --c-green:#15803D; --c-green-tint:#DCFCE7;
+  --c-yellow:#A16207; --c-yellow-deep:#78350F; --c-yellow-tint:#FEF3C7;
+  --c-blue:#1E3A8A; --c-blue-tint:#DBEAFE;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --ff-body:system-ui,-apple-system,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Microsoft JhengHei","Droid Sans Fallback",sans-serif;
+  --ff-mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.06);
+  --shadow-md:0 2px 8px rgba(20,20,19,.08);
+  --radius:8px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);
+     font-family:var(--ff-body);font-size:15px;line-height:1.7;
+     overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+.layout{max-width:1320px;margin:0 auto;display:grid;
+        grid-template-columns:240px 1fr;gap:var(--sp-5);padding:var(--sp-5)}
+aside.toc{position:sticky;top:var(--sp-4);align-self:start;
+          max-height:calc(100vh - var(--sp-7));overflow-y:auto;
+          background:var(--c-surface);border:1px solid var(--c-border);
+          border-radius:var(--radius);padding:var(--sp-4);box-shadow:var(--shadow-sm)}
+aside.toc h3{margin:0 0 var(--sp-3);font-size:13px;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--c-muted)}
+aside.toc ol{margin:0;padding-left:1.35em;font-size:13.5px;line-height:1.85}
+aside.toc a{color:var(--c-text);text-decoration:none}
+aside.toc a:hover{color:var(--c-accent);text-decoration:underline}
+aside.toc li.core>a{font-weight:700;color:var(--c-accent)}
+aside.toc li.core>a::after{content:" ★";font-size:11px}
+aside.toc .toc-foot{margin-top:var(--sp-4);padding-top:var(--sp-3);
+                    border-top:1px solid var(--c-border);
+                    font-size:12px;color:var(--c-muted);line-height:1.6}
+main.report{background:var(--c-surface);border:1px solid var(--c-border);
+            border-radius:var(--radius);padding:var(--sp-6);box-shadow:var(--shadow-md);min-width:0}
+.report-header{border-bottom:2px solid var(--c-border);padding-bottom:var(--sp-5);
+               margin-bottom:var(--sp-5)}
+.pretitle{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+          color:var(--c-accent);font-weight:700;margin-bottom:var(--sp-2)}
+h1{font-size:30px;line-height:1.3;margin:0 0 var(--sp-4);letter-spacing:-.01em}
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-4);
+        margin:0 0 var(--sp-4);font-size:13.5px}
+dl.meta dt{color:var(--c-muted);font-weight:600;white-space:nowrap}
+dl.meta dd{margin:0;min-width:0}
+.verdict-banner{background:linear-gradient(90deg,#A16207 0%,#C08420 100%);
+                color:#fff;padding:var(--sp-4) var(--sp-5);border-radius:var(--radius);
+                font-size:15.5px;font-weight:600;line-height:1.6}
+h2{font-size:21px;margin:var(--sp-7) 0 var(--sp-3);padding-top:var(--sp-2);
+   border-top:1px solid var(--c-border);line-height:1.4}
+h2:first-of-type{border-top:none;margin-top:var(--sp-4)}
+h3{font-size:16.5px;margin:var(--sp-5) 0 var(--sp-2)}
+h4{font-size:14.5px;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-muted)}
+p{margin:0 0 var(--sp-3)}
+code{font-family:var(--ff-mono);font-size:.88em;background:var(--c-accent-soft);
+     padding:1px 5px;border-radius:4px;overflow-wrap:anywhere;word-break:break-word}
+pre{font-family:var(--ff-mono);font-size:12.5px;line-height:1.65;
+    background:#F4F2ED;border:1px solid var(--c-border);border-radius:var(--radius);
+    padding:var(--sp-4);overflow-x:auto;margin:0 0 var(--sp-4)}
+pre code{background:none;padding:0}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+           gap:var(--sp-3);margin:var(--sp-4) 0 var(--sp-5)}
+.stat-box{border:1px solid var(--c-border);border-radius:var(--radius);
+          padding:var(--sp-4);background:var(--c-bg);text-align:center}
+.stat-box .number{font-family:var(--ff-mono);font-size:24px;font-weight:700;
+                  color:var(--c-accent);line-height:1.2;letter-spacing:-.02em}
+.stat-box .number.bug{color:var(--c-red-deep)}
+.stat-box .number.success{color:var(--c-green)}
+.stat-box .number.warning{color:var(--c-yellow)}
+.stat-box .number.neutral{color:var(--c-blue)}
+.stat-box .label{font-size:12px;color:var(--c-muted);margin-top:var(--sp-2);line-height:1.45}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 var(--sp-4)}
+.table-wrap{overflow-x:auto;margin-bottom:var(--sp-4)}
+.table-wrap table{margin-bottom:0}
+th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);
+      text-align:left;vertical-align:top}
+th{background:#F4F2ED;font-weight:700;font-size:12.5px;letter-spacing:.02em;white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--ff-mono);white-space:nowrap}
+tr.row-bug{background:var(--c-red-tint)}
+tr.row-safe{background:var(--c-green-tint)}
+tr.row-warn{background:var(--c-yellow-tint)}
+.mark{font-weight:700;font-family:var(--ff-mono)}
+.mark.ok{color:var(--c-green)}
+.mark.no{color:var(--c-red-deep)}
+.mark.warn{color:var(--c-yellow-deep)}
+details.card{border:1px solid var(--c-border);border-left:4px solid var(--c-muted);
+             border-radius:var(--radius);margin-bottom:var(--sp-3);background:var(--c-bg)}
+details.card.core{border-left-color:var(--c-accent);background:var(--c-surface)}
+details.card.risk{border-left-color:var(--c-red)}
+details.card.ok{border-left-color:var(--c-green)}
+details.card>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);
+                     font-weight:600;font-size:14.5px;list-style:none;
+                     display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:baseline}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-muted);font-size:12px}
+details.card[open]>summary::before{content:"▾"}
+details.card .card-body{padding:0 var(--sp-4) var(--sp-4);
+                        border-top:1px solid var(--c-border);padding-top:var(--sp-3)}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;
+       padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid currentColor}
+.badge.core{color:var(--c-accent)}
+.badge.risk{color:var(--c-red-deep);background:var(--c-red-tint)}
+.badge.ok{color:var(--c-green);background:var(--c-green-tint)}
+.badge.warn{color:var(--c-yellow-deep);background:var(--c-yellow-tint)}
+.badge.id{color:var(--c-muted);font-family:var(--ff-mono)}
+.callout{border:1px solid var(--c-red);border-left:5px solid var(--c-red);
+         background:var(--c-red-tint);border-radius:var(--radius);
+         padding:var(--sp-4);margin:var(--sp-4) 0}
+.callout.info{border-color:var(--c-blue);border-left-color:var(--c-blue);background:var(--c-blue-tint)}
+.callout.warn{border-color:var(--c-yellow);border-left-color:var(--c-yellow);background:var(--c-yellow-tint)}
+.callout.good{border-color:var(--c-green);border-left-color:var(--c-green);background:var(--c-green-tint)}
+.callout .callout-title{font-weight:700;margin-bottom:var(--sp-2);font-size:14.5px}
+.callout p:last-child{margin-bottom:0}
+figure.svg-figure{margin:var(--sp-5) 0;border:1px solid var(--c-border);
+                  border-radius:var(--radius);padding:var(--sp-4);background:var(--c-bg)}
+figure.svg-figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:12.5px;color:var(--c-muted);margin-top:var(--sp-3);
+           padding-top:var(--sp-2);border-top:1px solid var(--c-border);line-height:1.55}
+ul,ol{margin:0 0 var(--sp-4);padding-left:1.5em}
+li{margin-bottom:var(--sp-1)}
+.lede{font-size:16px;border-left:3px solid var(--c-accent);
+      padding-left:var(--sp-4);margin:var(--sp-4) 0}
+.checklist{list-style:none;padding-left:0}
+.checklist li{padding-left:1.8em;position:relative;margin-bottom:var(--sp-2)}
+.checklist li::before{content:"☐";position:absolute;left:0;font-size:15px;color:var(--c-muted)}
+.checklist li.done::before{content:"☑";color:var(--c-green)}
+footer.provenance{margin-top:var(--sp-7);padding-top:var(--sp-4);
+                  border-top:2px solid var(--c-border);font-size:12.5px;
+                  color:var(--c-muted);line-height:1.7}
+footer.provenance h4{color:var(--c-text);margin-top:var(--sp-4)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:var(--sp-3)}
+  aside.toc{position:static;max-height:none}
+  main.report{padding:var(--sp-4)}
+  h1{font-size:24px}
+}
+@media (max-width:560px){
+  dl.meta{grid-template-columns:1fr;gap:0}
+  dl.meta dt{margin-top:var(--sp-2)}
+  main.report{padding:var(--sp-3)}
+  footer.provenance ul{padding-left:1.1em}
+}
+@media print{
+  body{background:#fff}
+  .layout{display:block;max-width:100%;padding:0}
+  aside.toc{display:none}
+  main.report{box-shadow:none;border:none;padding:0}
+  details.card{page-break-inside:avoid;border-color:#999}
+  details>summary{list-style:none}
+  details:not([open])>*{display:block !important}
+  details:not([open])>summary{background:#fff !important}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.85em;color:#666}
+  pre,table,blockquote,details.card,figure.svg-figure,svg{page-break-inside:avoid}
+  h1,h2,h3{page-break-after:avoid}
+  .verdict-banner{background:#A16207 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="toc">
+  <h3>章節導航</h3>
+  <ol>
+    <li class="core"><a href="#verdict">總判定與關鍵數字</a></li>
+    <li class="core"><a href="#s1">交接邊界：什麼跟著走</a></li>
+    <li class="core"><a href="#s2">驗收儀表板（7 Gate）</a></li>
+    <li class="core"><a href="#s3">本輪實跑了什麼</a></li>
+    <li><a href="#s4">資料層與磁碟限制</a></li>
+    <li><a href="#s5">程式層與測試缺口</a></li>
+    <li><a href="#s6">輸出層與 receipt 體系</a></li>
+    <li class="core"><a href="#s7">收斂順序（9 步）</a></li>
+    <li><a href="#s8">交接不可省略的五件事</a></li>
+    <li><a href="#s9">給驗收者的三個提問</a></li>
+    <li><a href="#s10">第一天該做什麼</a></li>
+    <li><a href="#prov">來源與 Provenance</a></li>
+  </ol>
+  <div class="toc-foot">
+    ★ = 核心章節<br>
+    本檔為 standalone 單檔：離線可讀、可列印、零外部依賴。<br>
+    深度分冊見同目錄 01–04 的 .md。
+  </div>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+  <div class="pretitle">Engineering Handoff &amp; Acceptance · Task Type D</div>
+  <h1>InterSubMod 系統交接與驗收總覽</h1>
+  <dl class="meta">
+    <dt>驗收日期</dt><dd>2026-08-05（所有數字為當日實跑，非清單或估計）</dd>
+    <dt>主要對象</dt><dd>實驗室接手者（需能 build、能跑、能續開發）</dd>
+    <dt>次要對象</dt><dd>驗收者（教授／口試委員）— 走 §2 與 §9 兩節即可</dd>
+    <dt>科學層 parent</dt><dd><code>InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/</code></dd>
+    <dt>Git 狀態</dt><dd><code>research/subclonal-reconstruction-202606</code> @ <code>387a101</code>（working tree DIRTY）</dd>
+    <dt>本包定位</dt><dd>補工程面（build／資料／輸出／驗收）；科學數字一律回 parent，不建第二份 SoT</dd>
+  </dl>
+  <div class="verdict-banner">
+    總判定：<strong>NOT_READY_FOR_FORMAL_HANDOFF</strong> —
+    科學證據鏈完好（19/19 雜湊一致）、程式可從零編譯、C++ 測試 258/258 全過；
+    但測試可執行性、磁碟餘量、版本可指認性、新人文件四項未通過。
+    <strong>四項全是工程問題，沒有一項是科學問題</strong>，估 1–2 個工作天可全部轉綠。
+  </div>
+</header>
+
+<h2 id="verdict">一、總判定：好的部分與卡住的部分，各是什麼</h2>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number success">19/19</div><div class="label">Authority artifact 雜湊<br>四天後仍逐位元一致</div></div>
+  <div class="stat-box"><div class="number success">258/258</div><div class="label">C++ 測試通過<br>37 suites · 2,766 ms</div></div>
+  <div class="stat-box"><div class="number success">exit 0</div><div class="label">從零 clean build<br>含 1,501 行未 commit 改動</div></div>
+  <div class="stat-box"><div class="number bug">63/143</div><div class="label">Python 測試<b>跑不了</b><br>（44.06%，缺 pytest）</div></div>
+  <div class="stat-box"><div class="number bug">617 GB</div><div class="label">磁碟僅剩<br>（99% 已用，需 ≥2 TB）</div></div>
+  <div class="stat-box"><div class="number bug">580</div><div class="label">未提交變更<br>版本無法指認</div></div>
+</div>
+
+<div class="callout good">
+  <div class="callout-title">先講好消息：科學資產是健康的</div>
+  <p>本輪對 <code>authority_manifest.json</code> 登記的每一個路徑重算 SHA-256 —— <strong>13 個 authority artifact
+  ＋ 1 個 frozen binary ＋ 5 個源碼快照，共 19 項全部 MATCH</strong>，零遺失、零不符。
+  這代表論文核心證據鏈在四天後仍然逐位元可驗證。程式也能從零編譯並通過全部 258 個 C++ 測試。</p>
+</div>
+
+<div class="callout">
+  <div class="callout-title">卡住的是「別人能不能重現」，不是「結果對不對」</div>
+  <p>四個未通過的 Gate 全部指向同一件事：<strong>當前狀態只有在這台機器、這個人手上才跑得動</strong>。
+  pytest 沒裝也沒宣告、磁碟滿到無法 rerun、580 項未提交讓版本說不清楚、新人文件的路徑是錯的。
+  這些都不影響已有結論的正確性，但會讓接手者無法獨立驗證或繼續。</p>
+</div>
+
+<h2 id="s1">二、交接邊界：什麼跟著交接包走，什麼留在原地</h2>
+
+<p>這是交接最容易出錯的地方。本專案的資料量遠超任何可攜形式，
+因此必須明確區分「隨包交付的東西」與「留在磁碟上、只交路徑與指紋的東西」。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 372" role="img" aria-labelledby="s1-t s1-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s1-t">四層交接邊界圖</title>
+    <desc id="s1-d">四層由上而下為資料層、程式層、輸出層、治理層。左欄列出隨交接包交付的項目（文件、清單、checksum、原始碼），
+    右欄列出留在原地只交指標的項目（1.67 TiB 的 tagged BAM、frozen binary、canonical 輸出、大型工作區）。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        交接包是「地圖與指紋」，不是「貨物本身」</text>
+
+      <rect x="130" y="34" width="310" height="24" rx="5" fill="#DCFCE7" stroke="#15803D" stroke-width="1.3"/>
+      <text x="285" y="51" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">✔ 隨交接包交付</text>
+      <rect x="450" y="34" width="338" height="24" rx="5" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="619" y="51" text-anchor="middle" font-size="12" font-weight="700" fill="#78350F">➤ 留在原地，只交路徑＋SHA-256</text>
+
+      <!-- Row 1: data -->
+      <rect x="12" y="66" width="112" height="66" rx="6" fill="#FBEEE8" stroke="#D97757" stroke-width="1.4"/>
+      <text x="68" y="94" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A3F22">資料層</text>
+      <text x="68" y="113" text-anchor="middle" font-size="10" fill="#8A3F22">7 datasets</text>
+      <rect x="130" y="66" width="310" height="66" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.1"/>
+      <text x="142" y="88" font-size="11">樣本矩陣表 · 路徑清單 · 每檔 bytes</text>
+      <text x="142" y="107" font-size="11">信任度分級 · 已知缺口說明</text>
+      <text x="142" y="124" font-size="10.5" fill="#6B6B66">→ 01_資料層.md</text>
+      <rect x="450" y="66" width="338" height="66" rx="6" fill="#FFFFFF" stroke="#A16207" stroke-width="1.1"/>
+      <text x="462" y="88" font-size="11" font-weight="600" fill="#78350F">tagged BAM ×7 ＝ 1.67 TiB</text>
+      <text x="462" y="107" font-size="11" fill="#78350F">canonical/ 全部 19 runs</text>
+      <text x="462" y="124" font-size="10.5" fill="#6B6B66">單一樣本最大 416 GiB，不可能隨包走</text>
+
+      <!-- Row 2: program -->
+      <rect x="12" y="140" width="112" height="66" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.4"/>
+      <text x="68" y="168" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A8A">程式層</text>
+      <text x="68" y="187" text-anchor="middle" font-size="10" fill="#1E3A8A">27,653 行 C++</text>
+      <rect x="130" y="140" width="310" height="66" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.1"/>
+      <text x="142" y="162" font-size="11">原始碼（git） · build 指令 · CLI 參數</text>
+      <text x="142" y="181" font-size="11">程式地圖 · 環境需求 · 測試清單</text>
+      <text x="142" y="198" font-size="10.5" fill="#6B6B66">→ 02_程式層.md</text>
+      <rect x="450" y="140" width="338" height="66" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.4"/>
+      <text x="462" y="162" font-size="11" font-weight="700" fill="#7F1D1D">frozen binary（在 /bip7_disk，不同磁碟）</text>
+      <text x="462" y="181" font-size="10.5" fill="#7F1D1D">exact_ps_topology_af · sha ba13ccf2…</text>
+      <text x="462" y="198" font-size="10.5" fill="#7F1D1D">產生論文核心數字 — 最易遺失，務必一起交</text>
+
+      <!-- Row 3: output -->
+      <rect x="12" y="214" width="112" height="66" rx="6" fill="#FBEEE8" stroke="#D97757" stroke-width="1.4"/>
+      <text x="68" y="242" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A3F22">輸出層</text>
+      <text x="68" y="261" text-anchor="middle" font-size="10" fill="#8A3F22">receipt 體系</text>
+      <rect x="130" y="214" width="310" height="66" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.1"/>
+      <text x="142" y="236" font-size="11">authority_manifest · denominator_registry</text>
+      <text x="142" y="255" font-size="11">13 個 artifact 的 SHA-256 · 導航表</text>
+      <text x="142" y="272" font-size="10.5" fill="#6B6B66">→ 03_輸出層.md</text>
+      <rect x="450" y="214" width="338" height="66" rx="6" fill="#FFFFFF" stroke="#A16207" stroke-width="1.1"/>
+      <text x="462" y="236" font-size="11" font-weight="600" fill="#78350F">observation workspaces 全部產物</text>
+      <text x="462" y="255" font-size="11" fill="#78350F">research_rounds · archive（39+5 目錄）</text>
+      <text x="462" y="272" font-size="10.5" fill="#6B6B66">以 OUTPUT_INDEX.md 為唯一入口索引</text>
+
+      <!-- Row 4: governance -->
+      <rect x="12" y="288" width="112" height="66" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.4"/>
+      <text x="68" y="316" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803D">治理層</text>
+      <text x="68" y="335" text-anchor="middle" font-size="10" fill="#15803D">AI 協作護欄</text>
+      <rect x="130" y="288" width="310" height="66" rx="6" fill="#FFFFFF" stroke="#15803D" stroke-width="1.1"/>
+      <text x="142" y="310" font-size="11">AGENTS.md · CLAUDE.md · 50 skills</text>
+      <text x="142" y="329" font-size="11">45 hooks（8 個 exit-2 Hard Gate）</text>
+      <text x="142" y="346" font-size="10.5" fill="#6B6B66">全在 git，隨 repo 走</text>
+      <rect x="450" y="288" width="338" height="66" rx="6" fill="#FFFFFF" stroke="#A16207" stroke-width="1.1"/>
+      <text x="462" y="310" font-size="11" font-weight="600" fill="#78350F">evidence_ledger.jsonl（142 筆 append-only）</text>
+      <text x="462" y="329" font-size="11" fill="#78350F">state/cycles/ 歷史狀態機</text>
+      <text x="462" y="346" font-size="10.5" fill="#6B6B66">在 git 內，但體積大且僅供回溯</text>
+    </g>
+  </svg>
+  <figcaption>圖 1：四層交接邊界。左欄（綠）是交接包實際攜帶的內容；右欄（黃／紅）留在磁碟上，
+  只交路徑與 SHA-256。<strong>紅框的 frozen binary 位於 /bip7_disk，與 repo 不同磁碟，是最容易在搬遷時遺失的資產。</strong></figcaption>
+</figure>
+
+<h2 id="s2">二之二、驗收儀表板：七個 Gate 的實測狀態</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 340" role="img" aria-labelledby="s2-t s2-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s2-t">七個驗收 Gate 的狀態儀表板</title>
+    <desc id="s2-d">G1 可編譯 PASS、G2 證據鏈完整 PASS、G3 測試可執行 FAIL 且阻擋、G4 資料可定位附條件通過、
+    G5 有作業餘裕 FAIL 且阻擋、G6 新人可上手 FAIL 不阻擋、G7 版本可指認 FAIL 且阻擋。
+    底部總判定為 NOT_READY_FOR_FORMAL_HANDOFF。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        通過 2 · 附條件 1 · 未通過 4（其中 3 項阻擋交接）</text>
+
+      <!-- G1 -->
+      <rect x="15" y="34" width="185" height="112" rx="7" fill="#DCFCE7" stroke="#15803D" stroke-width="1.6"/>
+      <circle cx="36" cy="55" r="8" fill="#15803D"/>
+      <text x="36" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✓</text>
+      <text x="52" y="59" font-size="12.5" font-weight="700" fill="#15803D">G1 可編譯</text>
+      <text x="28" y="82" font-size="11">從零 clean build</text>
+      <text x="28" y="101" font-size="11" font-weight="700" fill="#15803D">configure/build exit 0</text>
+      <text x="28" y="119" font-size="10.5" fill="#6B6B66">6/6 binary 產出</text>
+      <text x="28" y="136" font-size="10" fill="#6B6B66">含 1,501 行未 commit 改動</text>
+
+      <!-- G2 -->
+      <rect x="210" y="34" width="185" height="112" rx="7" fill="#DCFCE7" stroke="#15803D" stroke-width="1.6"/>
+      <circle cx="231" cy="55" r="8" fill="#15803D"/>
+      <text x="231" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✓</text>
+      <text x="247" y="59" font-size="12.5" font-weight="700" fill="#15803D">G2 證據鏈</text>
+      <text x="223" y="82" font-size="11">artifact 雜湊一致</text>
+      <text x="223" y="103" font-size="14" font-weight="700" fill="#15803D">19 / 19 MATCH</text>
+      <text x="223" y="121" font-size="10.5" fill="#6B6B66">13 authority + 1 binary + 5 源碼</text>
+      <text x="223" y="138" font-size="10" fill="#6B6B66">0 missing · 0 mismatch</text>
+
+      <!-- G3 -->
+      <rect x="405" y="34" width="185" height="112" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.8"/>
+      <circle cx="426" cy="55" r="8" fill="#7F1D1D"/>
+      <text x="426" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✕</text>
+      <text x="442" y="59" font-size="12.5" font-weight="700" fill="#7F1D1D">G3 測試可執行</text>
+      <text x="418" y="82" font-size="11" fill="#15803D">C++ 258/258 ✓</text>
+      <text x="418" y="102" font-size="12" font-weight="700" fill="#7F1D1D">Python 63/143 跑不了</text>
+      <text x="418" y="120" font-size="10.5" fill="#7F1D1D">環境無 pytest 且未宣告</text>
+      <text x="418" y="137" font-size="10" font-weight="700" fill="#7F1D1D">▲阻擋交接</text>
+
+      <!-- G4 -->
+      <rect x="600" y="34" width="185" height="112" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.6"/>
+      <circle cx="621" cy="55" r="8" fill="#A16207"/>
+      <text x="621" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">!</text>
+      <text x="637" y="59" font-size="12.5" font-weight="700" fill="#78350F">G4 資料可定位</text>
+      <text x="613" y="82" font-size="11" fill="#15803D">7/7 BAM 全在（1.67 TiB）</text>
+      <text x="613" y="102" font-size="11" fill="#78350F">但 manifest completeness</text>
+      <text x="613" y="119" font-size="11" fill="#78350F">欄位自 2026-04 未更新</text>
+      <text x="613" y="137" font-size="10" fill="#6B6B66">附條件通過</text>
+
+      <!-- G5 -->
+      <rect x="15" y="158" width="185" height="112" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.8"/>
+      <circle cx="36" cy="179" r="8" fill="#7F1D1D"/>
+      <text x="36" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✕</text>
+      <text x="52" y="183" font-size="12.5" font-weight="700" fill="#7F1D1D">G5 作業餘裕</text>
+      <text x="28" y="206" font-size="11">需 ≥2 TB 才能 rerun</text>
+      <text x="28" y="227" font-size="14" font-weight="700" fill="#7F1D1D">僅剩 617 GB</text>
+      <text x="28" y="245" font-size="10.5" fill="#7F1D1D">/big7_disk 已用 99%</text>
+      <text x="28" y="262" font-size="10" font-weight="700" fill="#7F1D1D">▲阻擋 P0-4 clean rerun</text>
+
+      <!-- G6 -->
+      <rect x="210" y="158" width="185" height="112" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.4"/>
+      <circle cx="231" cy="179" r="8" fill="#C2410C"/>
+      <text x="231" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✕</text>
+      <text x="247" y="183" font-size="12.5" font-weight="700" fill="#7F1D1D">G6 新人可上手</text>
+      <text x="223" y="206" font-size="11">QUICKSTART:41 寫</text>
+      <text x="223" y="224" font-size="10.5" font-family="var(--ff-mono, monospace)" fill="#7F1D1D">/big8_disk/…</text>
+      <text x="223" y="243" font-size="11">實際在 /big7_disk</text>
+      <text x="223" y="261" font-size="10" fill="#6B6B66">不阻擋，但第一步就走錯</text>
+
+      <!-- G7 -->
+      <rect x="405" y="158" width="185" height="112" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.8"/>
+      <circle cx="426" cy="179" r="8" fill="#7F1D1D"/>
+      <text x="426" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">✕</text>
+      <text x="442" y="183" font-size="12.5" font-weight="700" fill="#7F1D1D">G7 版本可指認</text>
+      <text x="418" y="206" font-size="12" font-weight="700" fill="#7F1D1D">580 項未提交</text>
+      <text x="418" y="225" font-size="10.5" fill="#7F1D1D">frozen binary 與源碼</text>
+      <text x="418" y="242" font-size="10.5" fill="#7F1D1D">not_proven_byte_reproducible</text>
+      <text x="418" y="261" font-size="10" font-weight="700" fill="#7F1D1D">▲阻擋 release</text>
+
+      <!-- legend / summary -->
+      <rect x="600" y="158" width="185" height="112" rx="7" fill="#FFFFFF" stroke="#6B6B66" stroke-width="1.2" stroke-dasharray="5 3"/>
+      <text x="612" y="180" font-size="12" font-weight="700" fill="#6B6B66">判讀方式</text>
+      <circle cx="620" cy="200" r="6" fill="#15803D"/><text x="634" y="204" font-size="10.5">通過，可交接</text>
+      <circle cx="620" cy="222" r="6" fill="#A16207"/><text x="634" y="226" font-size="10.5">附條件，需補說明</text>
+      <circle cx="620" cy="244" r="6" fill="#7F1D1D"/><text x="634" y="248" font-size="10.5">未通過，需修正</text>
+      <text x="612" y="264" font-size="10" fill="#6B6B66">▲＝ 不修就無法交接</text>
+
+      <!-- overall bar -->
+      <rect x="15" y="284" width="770" height="42" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.6"/>
+      <text x="400" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#78350F">
+        總判定：NOT_READY_FOR_FORMAL_HANDOFF</text>
+      <text x="400" y="319" text-anchor="middle" font-size="11" fill="#78350F">
+        四個未通過項全是工程可重現性問題，沒有一項是科學問題 · 估 1–2 個工作天可全部轉綠</text>
+    </g>
+  </svg>
+  <figcaption>圖 2：七個驗收 Gate 的實測狀態。綠＝通過、黃＝附條件、紅＝未通過；
+  標 <strong>▲</strong> 者為阻擋交接項（G3／G5／G7）。注意 G3 內部是混合的：C++ 測試全過，卡住的只有 Python 環境。</figcaption>
+</figure>
+
+<h2 id="s3">三、本輪實跑了什麼（不是清單，是真的跑）</h2>
+
+<p>驗收的每個數字都來自 2026-08-05 的實際執行。下圖是四道驗證的流程與結果。</p>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 268" role="img" aria-labelledby="s3-t s3-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s3-t">本輪四道驗收流程與實測結果</title>
+    <desc id="s3-d">第一道 from-scratch clean build 得 exit 0；第二道執行新建的 run_tests 得 258/258 PASS；
+    第三道重算 19 個 authority artifact 的 SHA-256 全部 MATCH；第四道重現 20260801 release 的 unittest 得 12/12 PASS。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        read-only 探測 ＋ 一次 from-scratch clean build（刻意不動既有 build/）</text>
+
+      <defs>
+        <marker id="s3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1E3A8A"/>
+        </marker>
+      </defs>
+
+      <rect x="15" y="42" width="180" height="96" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="105" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">① Clean Build</text>
+      <text x="105" y="86" text-anchor="middle" font-size="10" fill="#1E3A8A">cmake -S . -B build_verify</text>
+      <text x="105" y="102" text-anchor="middle" font-size="10" fill="#1E3A8A">cmake --build -j 16</text>
+      <rect x="30" y="110" width="150" height="20" rx="4" fill="#DCFCE7" stroke="#15803D"/>
+      <text x="105" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803D">exit 0 · 0 errors · 6/6 bin</text>
+
+      <rect x="210" y="42" width="180" height="96" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="300" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">② C++ 測試</text>
+      <text x="300" y="86" text-anchor="middle" font-size="10" fill="#1E3A8A">執行本輪新建的</text>
+      <text x="300" y="102" text-anchor="middle" font-size="10" fill="#1E3A8A">run_tests（非舊 binary）</text>
+      <rect x="225" y="110" width="150" height="20" rx="4" fill="#DCFCE7" stroke="#15803D"/>
+      <text x="300" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803D">258/258 · 37 suites · 2.77 s</text>
+
+      <rect x="405" y="42" width="180" height="96" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="495" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">③ 證據鏈重算</text>
+      <text x="495" y="86" text-anchor="middle" font-size="10" fill="#1E3A8A">逐檔重算 SHA-256</text>
+      <text x="495" y="102" text-anchor="middle" font-size="10" fill="#1E3A8A">比對 authority_manifest</text>
+      <rect x="420" y="110" width="150" height="20" rx="4" fill="#DCFCE7" stroke="#15803D"/>
+      <text x="495" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803D">19/19 MATCH</text>
+
+      <rect x="600" y="42" width="185" height="96" rx="7" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="692" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">④ Release 測試重現</text>
+      <text x="692" y="86" text-anchor="middle" font-size="10" fill="#1E3A8A">python3 -m unittest</text>
+      <text x="692" y="102" text-anchor="middle" font-size="10" fill="#1E3A8A">20260801 observation report</text>
+      <rect x="615" y="110" width="155" height="20" rx="4" fill="#DCFCE7" stroke="#15803D"/>
+      <text x="692" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803D">12/12 PASS · 10.08 s</text>
+
+      <line x1="195" y1="90" x2="207" y2="90" stroke="#1E3A8A" stroke-width="1.5" marker-end="url(#s3-arr)"/>
+      <line x1="390" y1="90" x2="402" y2="90" stroke="#1E3A8A" stroke-width="1.5" marker-end="url(#s3-arr)"/>
+      <line x1="585" y1="90" x2="597" y2="90" stroke="#1E3A8A" stroke-width="1.5" marker-end="url(#s3-arr)"/>
+
+      <!-- what was NOT verified -->
+      <rect x="15" y="156" width="770" height="96" rx="7" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="30" y="178" font-size="12.5" font-weight="700" fill="#7F1D1D">本輪「沒能」驗證的 —— 這才是卡住交接的原因</text>
+      <text x="30" y="200" font-size="11" fill="#7F1D1D">✕ 63 個 pytest 風格的 Python 測試：環境沒有 pytest，且 requirements.txt 也沒宣告它</text>
+      <text x="30" y="219" font-size="11" fill="#7F1D1D">✕ parent manifest 宣稱的「37 passed in 21.89 s」測試證據：在此環境不可重現</text>
+      <text x="30" y="238" font-size="11" fill="#7F1D1D">✕ frozen binary 與當前源碼的 byte-reproducibility：需先 commit＋打 tag 才能比對</text>
+    </g>
+  </svg>
+  <figcaption>圖 3：四道實跑驗證全數通過（上排藍框），但下方紅框列出的三件事本輪無法驗證 ——
+  它們正是 G3 與 G7 未通過的具體內容。</figcaption>
+</figure>
+
+<h2 id="s4">四、資料層：為什麼資料不能跟著交接包走</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 300" role="img" aria-labelledby="s4-t s4-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s4-t">七樣本 tagged BAM 規模與磁碟餘量對比</title>
+    <desc id="s4-d">七個樣本的 tagged BAM 依大小排序，HCC1937 最大 416.5 GiB，COLO829 最小 88.8 GiB，
+    合計 1714.5 GiB。下方對比條顯示需求 1.67 TiB 遠大於 /big7_disk 剩餘的 617 GB。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        paired_full 模式的 tagged BAM（2026-08-05 實測，條長按真實比例）</text>
+
+      <!-- bars: scale 416.5 GiB -> 550 px, bars start at x=136 -->
+      <text x="12" y="46" font-size="11" font-weight="600">HCC1937</text>
+      <rect x="136" y="34" width="550" height="17" rx="3" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.2"/>
+      <text x="694" y="47" font-size="11" font-family="var(--ff-mono, monospace)" font-weight="700" fill="#7F1D1D">416.5 GiB</text>
+
+      <text x="12" y="72" font-size="11" font-weight="600">H2009</text>
+      <rect x="136" y="60" width="382" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="526" y="73" font-size="11" font-family="var(--ff-mono, monospace)">289.4 GiB</text>
+
+      <text x="12" y="98" font-size="11" font-weight="600">HCC1395</text>
+      <rect x="136" y="86" width="342" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="486" y="99" font-size="11" font-family="var(--ff-mono, monospace)">259.2 GiB</text>
+
+      <text x="12" y="124" font-size="11" font-weight="600">HCC1954</text>
+      <rect x="136" y="112" width="296" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="440" y="125" font-size="11" font-family="var(--ff-mono, monospace)">224.3 GiB</text>
+
+      <text x="12" y="150" font-size="10.5" font-weight="600">HCC1395_DORADO</text>
+      <rect x="136" y="138" width="293" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="437" y="151" font-size="11" font-family="var(--ff-mono, monospace)">222.0 GiB</text>
+
+      <text x="12" y="176" font-size="11" font-weight="600">H1437</text>
+      <rect x="136" y="164" width="283" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="427" y="177" font-size="11" font-family="var(--ff-mono, monospace)">214.3 GiB</text>
+
+      <text x="12" y="202" font-size="11" font-weight="600">COLO829</text>
+      <rect x="136" y="190" width="117" height="17" rx="3" fill="#FBEEE8" stroke="#D97757" stroke-width="1.2"/>
+      <text x="261" y="203" font-size="11" font-family="var(--ff-mono, monospace)">88.8 GiB</text>
+
+      <line x1="136" y1="216" x2="788" y2="216" stroke="#E3DACC" stroke-width="1.2"/>
+      <text x="12" y="234" font-size="11.5" font-weight="700">合計</text>
+      <text x="136" y="234" font-size="12" font-family="var(--ff-mono, monospace)" font-weight="700" fill="#7F1D1D">1,714.5 GiB ＝ 1.67 TiB（1,840,983,466,353 bytes）</text>
+
+      <!-- disk comparison: scale 1714.5 GiB -> 650px, same origin -->
+      <text x="12" y="264" font-size="11.5" font-weight="700" fill="#7F1D1D">磁碟現況</text>
+      <rect x="136" y="252" width="650" height="18" rx="3" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.3"/>
+      <text x="461" y="265" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7F1D1D">上述資料需要的空間（1.67 TiB）</text>
+      <rect x="136" y="274" width="229" height="18" rx="3" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="250" y="287" text-anchor="middle" font-size="10.5" font-weight="700" fill="#78350F">剩餘 617 GB</text>
+      <text x="373" y="287" font-size="10.5" fill="#7F1D1D">← /big7_disk 已用 99%；連現有資料的一半都放不下，遑論 clean rerun</text>
+    </g>
+  </svg>
+  <figcaption>圖 4：七樣本 tagged BAM 規模（條長按真實比例，以最大的 HCC1937 為滿刻度）與磁碟餘量對比。
+  這是「資料只交路徑與 checksum、不交檔案」的直接原因，也是 G5 未通過的量化依據。</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>樣本</th><th class="num">bytes</th><th class="num">GiB</th></tr></thead>
+<tbody>
+<tr class="row-bug"><td>HCC1937</td><td class="num">447,202,916,068</td><td class="num">416.5</td></tr>
+<tr><td>H2009</td><td class="num">310,760,045,641</td><td class="num">289.4</td></tr>
+<tr><td>HCC1395</td><td class="num">278,270,281,041</td><td class="num">259.2</td></tr>
+<tr><td>HCC1954</td><td class="num">240,839,923,636</td><td class="num">224.3</td></tr>
+<tr><td>HCC1395_DORADO</td><td class="num">238,424,953,796</td><td class="num">222.0</td></tr>
+<tr><td>H1437</td><td class="num">230,102,027,224</td><td class="num">214.3</td></tr>
+<tr><td>COLO829</td><td class="num">95,383,318,947</td><td class="num">88.8</td></tr>
+<tr class="row-warn"><td><strong>合計</strong></td><td class="num"><strong>1,840,983,466,353</strong></td><td class="num"><strong>1,714.5</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<details class="card risk" id="data-gap">
+  <summary><span class="badge id">G4 缺口</span> canonical run 狀態表與現況矛盾 <span class="badge warn">需人工核對</span></summary>
+  <div class="card-body">
+    <p><code>synthesis/master_run_manifest.tsv</code> 的 <strong>19 個 canonical run 全部標記
+    <code>completeness_state=partial</code>、<code>blocking_reason=missing_tagged_bam</code></strong>，
+    而這個狀態自 2026-04 起未再更新。</p>
+    <p>但本輪實測顯示 <strong>7/7 tagged BAM 都存在</strong>，而且 2026-07 的全部分析都是以它們為輸入。
+    這代表狀態表落後於現實 —— 接手者若照表判斷，會誤以為資料不完整而重跑。</p>
+    <p><strong>修法</strong>：重新核對並更新該表的 <code>tagged_bam_ready</code> 與 <code>completeness_state</code> 欄位。</p>
+  </div>
+</details>
+
+<h2 id="s5">五、程式層：可編譯、測試全過，但環境無法重現</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 226" role="img" aria-labelledby="s5-t s5-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s5-t">測試可執行性拆解</title>
+    <desc id="s5-d">C++ 21 個測試檔全部可執行且 258 個測試全過。Python 143 個測試檔中，
+    68 個 unittest 風格可執行、63 個 pytest 風格因環境缺 pytest 不可執行、12 個其他，不可執行比例為 44.06%。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        測試不是「沒寫」，是「在這個環境跑不起來」</text>
+
+      <!-- C++ row -->
+      <text x="14" y="52" font-size="12" font-weight="700">C++（21 檔）</text>
+      <rect x="150" y="38" width="620" height="30" rx="5" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+      <text x="460" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">
+        全部可執行 → 258 tests / 37 suites 全過（2,766 ms）</text>
+
+      <!-- Python row : 143 -> 620px; 68=295, 63=273, 12=52 -->
+      <text x="14" y="102" font-size="12" font-weight="700">Python（143 檔）</text>
+      <rect x="150" y="88" width="295" height="30" rx="5" fill="#DCFCE7" stroke="#15803D" stroke-width="1.4"/>
+      <text x="297" y="108" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803D">68 unittest ✓ 可執行</text>
+      <rect x="445" y="88" width="273" height="30" rx="5" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.6"/>
+      <text x="581" y="108" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">63 pytest ✕ 跑不了</text>
+      <rect x="718" y="88" width="52" height="30" rx="5" fill="#F4F2ED" stroke="#6B6B66" stroke-width="1.2"/>
+      <text x="744" y="108" text-anchor="middle" font-size="10" fill="#6B6B66">12 其他</text>
+
+      <text x="150" y="136" font-size="10.5" fill="#6B6B66">↑ 本輪抽驗 20260801 release：12/12 PASS（10.077 s）</text>
+      <text x="581" y="136" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7F1D1D">= 44.06% 不可執行</text>
+
+      <!-- root cause -->
+      <rect x="14" y="150" width="756" height="64" rx="7" fill="#FEF3C7" stroke="#A16207" stroke-width="1.4"/>
+      <text x="28" y="172" font-size="12" font-weight="700" fill="#78350F">根因（兩個環境都試過）</text>
+      <text x="28" y="192" font-size="11" font-family="var(--ff-mono, monospace)" fill="#78350F">
+        /bip7_disk/…/miniconda3/bin/python3 → No module named pytest</text>
+      <text x="28" y="208" font-size="11" font-family="var(--ff-mono, monospace)" fill="#78350F">
+        /usr/bin/python3 → No module named pytest　　│　requirements.txt 也沒列 pytest</text>
+    </g>
+  </svg>
+  <figcaption>圖 5：測試可執行性拆解。C++ 完全健康；Python 有 44.06% 因為環境缺 pytest 而無法執行 ——
+  這連帶讓 parent manifest 宣稱的「37 passed」測試證據在此環境不可重現。</figcaption>
+</figure>
+
+<h3>五個必修的程式／文件缺陷</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>缺陷</th><th>位置</th><th>影響</th></tr></thead>
+<tbody>
+<tr class="row-bug"><td>1</td><td><strong>pytest 未安裝且未宣告</strong></td><td><code>requirements.txt</code></td><td><span class="mark no">✗</span> 63 個測試跑不了；宣稱的測試證據不可重現</td></tr>
+<tr class="row-bug"><td>2</td><td><strong>QUICKSTART 路徑過期</strong></td><td><code>QUICKSTART.md:41</code> 寫 <code>/big8_disk/…</code></td><td><span class="mark no">✗</span> 新人第一步就走錯目錄</td></tr>
+<tr class="row-warn"><td>3</td><td>無 environment lock</td><td>專案根</td><td><span class="mark warn">⚠</span> manifest 自述 <code>REQUIRED_BEFORE_RELEASE</code>，至今未做</td></tr>
+<tr class="row-bug"><td>4</td><td><strong>working tree 髒</strong></td><td>580 項未提交</td><td><span class="mark no">✗</span> 無法用 commit hash 指認交接版本</td></tr>
+<tr class="row-warn"><td>5</td><td>既有 <code>build/</code> 已過期</td><td>binary 建於 07-15，cache 停在 03-26</td><td><span class="mark warn">⚠</span> 用舊 binary 跑會得到不含新改動的結果</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="callout-title">兩個 C++ 專案 — 論文引用鐵則</div>
+  <p><strong>InterSubMod</strong>（本 repo）＝ 論文的發表軟體，<strong>只引這個 ＋ commit hash</strong>。<br>
+  <strong>LongLineage</strong>（<code>/big7_disk/liaoyoyo2001/LongLineage</code>）＝ truth-isolated 的方法重建，用於交叉驗證，
+  <strong>絕不可在論文引用</strong>。</p>
+</div>
+
+<h2 id="s6">六、輸出層：technical PASS 不等於科學完成</h2>
+
+<p>這是驗收時最容易誤讀的一組狀態。最新 release 同時具有這兩個欄位，而且<strong>不矛盾</strong>：</p>
+
+<pre><code>"report_build_status":           "PASS"                              ← 報告技術上正確呈現了資料
+"scientific_completeness_status":"INCOMPLETE_WITH_ABSTAIN"           ← 資料本身有 10,717 個 abstain 未解
+"release_status":                "VALIDATED_DERIVED_OBSERVATION"</code></pre>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>狀態</th><th>意思</th><th>不代表</th></tr></thead>
+<tbody>
+<tr><td><code>technical_all_pass=true</code></td><td>命令、schema、hash、守恆檢查通過</td><td><span class="mark no">✗</span> 不代表可作為 biological validation evidence</td></tr>
+<tr><td><code>VALIDATED_DERIVED_OBSERVATION</code></td><td>從 authority 正確衍生的觀察視圖</td><td><span class="mark no">✗</span> 不代表建立了新的科學結論</td></tr>
+<tr><td><code>INCOMPLETE_WITH_ABSTAIN</code></td><td>有明確標記的未解部分</td><td><span class="mark no">✗</span> 不是資料遺漏，也不是 bug</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>每個正式產出都被三層 receipt 綁定：<code>build receipt</code> → <code>QA receipt</code> → <code>release receipt</code>，
+三者以 SHA-256 互綁。詳見 <code>InterSubMod/docs/handoff/20260805_系統交接與驗收_01/03_輸出層.md</code>。</p>
+
+<h2 id="s7">七、收斂順序：九步，不要跳</h2>
+
+<figure class="svg-figure">
+  <svg viewBox="0 0 800 320" role="img" aria-labelledby="s7-t s7-d" xmlns="http://www.w3.org/2000/svg">
+    <title id="s7-t">九步收斂順序與依賴關係</title>
+    <desc id="s7-d">步驟一跑 C++ 測試已完成。步驟二修文件路徑、步驟三建環境鎖、步驟五清磁碟、步驟六 commit 打 tag、
+    步驟八更新 manifest 可平行。步驟四依賴步驟三，步驟七依賴步驟六。全部完成後才能進入步驟九的 P0-1。</desc>
+    <g font-family="var(--ff-body, system-ui)" fill="#141413">
+
+      <text x="400" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#6B6B66">
+        箭頭 ＝ 硬依賴；同層可平行</text>
+
+      <defs>
+        <marker id="s7-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#6B6B66"/>
+        </marker>
+      </defs>
+
+      <!-- step 1 done -->
+      <rect x="14" y="34" width="170" height="52" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.6"/>
+      <text x="99" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803D">① 跑 C++ run_tests</text>
+      <text x="99" y="72" text-anchor="middle" font-size="10" fill="#15803D">✔ 已完成 · 258/258 PASS</text>
+
+      <!-- parallel lane -->
+      <rect x="204" y="34" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#A16207" stroke-width="1.3"/>
+      <text x="289" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#78350F">② 修文件</text>
+      <text x="289" y="72" text-anchor="middle" font-size="10" fill="#6B6B66">QUICKSTART 路徑 · CURRENT_FOCUS</text>
+
+      <rect x="394" y="34" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="479" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">③ 建 environment lock</text>
+      <text x="479" y="72" text-anchor="middle" font-size="10" fill="#6B6B66">pip freeze ＋ 補 pytest</text>
+
+      <rect x="584" y="34" width="186" height="52" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="677" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">⑤ 磁碟清理 ≥2 TB</text>
+      <text x="677" y="72" text-anchor="middle" font-size="10" fill="#6B6B66">⚠ Hard Gate 需人工確認</text>
+
+      <!-- row 2 -->
+      <rect x="394" y="112" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="479" y="132" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">④ 跑完整測試</text>
+      <text x="479" y="150" text-anchor="middle" font-size="10" fill="#6B6B66">Python 143 ＋ C++ 21 · 落 receipt</text>
+
+      <rect x="14" y="112" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="99" y="132" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">⑥ commit ＋ 打 tag</text>
+      <text x="99" y="150" text-anchor="middle" font-size="10" fill="#6B6B66">C++ 需先過編譯 Hard Gate</text>
+
+      <rect x="204" y="112" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#A16207" stroke-width="1.3"/>
+      <text x="289" y="132" text-anchor="middle" font-size="11.5" font-weight="700" fill="#78350F">⑧ 更新 run manifest</text>
+      <text x="289" y="150" text-anchor="middle" font-size="10" fill="#6B6B66">completeness 欄位</text>
+
+      <!-- row 3 -->
+      <rect x="14" y="190" width="170" height="52" rx="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>
+      <text x="99" y="210" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7F1D1D">⑦ binary 比對</text>
+      <text x="99" y="228" text-anchor="middle" font-size="10" fill="#6B6B66">用 tag 重建 vs frozen binary</text>
+
+      <!-- arrows -->
+      <line x1="479" y1="86" x2="479" y2="109" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#s7-arr)"/>
+      <line x1="99" y1="164" x2="99" y2="187" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#s7-arr)"/>
+
+      <!-- final gate -->
+      <rect x="204" y="190" width="566" height="52" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.8"/>
+      <text x="487" y="211" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A8A">
+        ⑨ 全綠後 → 才進 20260801 handoff 的 P0-1（clean source/binary/parameter release manifest）</text>
+      <text x="487" y="230" text-anchor="middle" font-size="10.5" fill="#1E3A8A">
+        P0-1 → P0-2 → P0-3 → P0-4（clean rerun）→ P0-5（更新論文）</text>
+
+      <!-- note -->
+      <rect x="14" y="256" width="756" height="52" rx="6" fill="#FEF3C7" stroke="#A16207" stroke-width="1.3"/>
+      <text x="28" y="276" font-size="11.5" font-weight="700" fill="#78350F">為什麼順序不能亂</text>
+      <text x="28" y="296" font-size="11" fill="#78350F">
+        ⑥ 必須在 ⑦ 之前（沒有可指認版本就無從重建比對）　·　③ 必須在 ④ 之前（沒裝 pytest 測試根本跑不起來）　·　⑤ 必須在任何 rerun 之前（否則寫爆磁碟）</text>
+    </g>
+  </svg>
+  <figcaption>圖 6：九步收斂順序。綠框為已完成；同一列的步驟可平行處理；
+  箭頭代表硬依賴（③→④、⑥→⑦）。全部轉綠後才進入 parent handoff 的 P0 論文凍結流程。</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>動作</th><th>Gate</th><th>工作量</th><th>怎麼證明做完了</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td>1</td><td>跑 C++ <code>run_tests</code></td><td>G3</td><td>分鐘</td><td><span class="mark ok">✓</span> 已完成：258/258 PASS</td></tr>
+<tr><td>2</td><td>修 QUICKSTART 路徑 ＋ 更新 CURRENT_FOCUS</td><td>G6</td><td>分鐘</td><td><code>grep -n big8_disk QUICKSTART.md</code> 回傳空</td></tr>
+<tr><td>3</td><td>建 environment lock ＋ 補 pytest</td><td>G3</td><td>小時</td><td><code>python3 -m pytest --version</code> 有輸出</td></tr>
+<tr><td>4</td><td>跑完整測試並落 receipt</td><td>G3</td><td>小時</td><td>receipt JSON 含 total/passed/failed，且 failed=0</td></tr>
+<tr><td>5</td><td>磁碟清理至 ≥2 TB</td><td>G5</td><td>小時</td><td><code>df -h</code> avail ≥ 2T ＋ 刪除紀錄</td></tr>
+<tr><td>6</td><td>commit ＋ 打 release tag</td><td>G7</td><td>小時</td><td><code>git status --porcelain</code> 為空；有新 tag</td></tr>
+<tr><td>7</td><td>用 tag 重建 binary 與 frozen binary 比對</td><td>G7</td><td>小時</td><td>比對紀錄：兩個 SHA-256 ＋ 結論</td></tr>
+<tr><td>8</td><td>更新 <code>master_run_manifest.tsv</code></td><td>G4</td><td>小時</td><td>completeness 欄位不再全是 partial</td></tr>
+<tr><td>9</td><td>進 P0-1</td><td>ALL</td><td>—</td><td>前 8 步全綠</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s8">八、交接時不可省略的五件事</h2>
+
+<details class="card core" id="must1" open>
+  <summary><span class="badge id">1</span> frozen binary 要一起交 <span class="badge risk">最易遺失</span></summary>
+  <div class="card-body">
+    <p>產生論文核心數字（71,955 ranked units、拓撲 census）的 binary <strong>不在 repo 內，也不在 /big7_disk</strong>：</p>
+    <pre><code>路徑   : /bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af
+SHA-256: ba13ccf23d091854c191f81dd97fa891368d11179df9a69e915f0340b7233b2e
+狀態   : 與當前 dirty 源碼 = not_proven_byte_reproducible</code></pre>
+    <p>本輪已驗證它與 5 個源碼快照的雜湊全部一致。搬遷、清理或換機時極易遺失，務必連同 SHA-256 一起交付。</p>
+  </div>
+</details>
+
+<details class="card core" id="must2">
+  <summary><span class="badge id">2</span> claim ceiling 要一起交</summary>
+  <div class="card-body">
+    <p>接手者必須知道：<code>confirmed cellular subclone = 0</code>、<code>linear ancestry = 0</code>、
+    CN/LOH 為 <code>NOT_INTEGRATED</code>、甲基為 <code>association-only</code>。
+    L7 生物層必須 abstain。詳見 parent handoff。</p>
+  </div>
+</details>
+
+<details class="card core" id="must3">
+  <summary><span class="badge id">3</span> 分母登錄要一起交</summary>
+  <div class="card-body">
+    <p>沒有 <code>denominator_registry.tsv</code>（19 個 metric × numerator/denominator/excluded/authority），
+    任何百分比都會被誤讀。回答任何百分比前，必須能指出它在這張表的哪一列。</p>
+  </div>
+</details>
+
+<details class="card core" id="must4">
+  <summary><span class="badge id">4</span> 不可重踩的八個舊方向要一起交</summary>
+  <div class="card-body">
+    <p>例如：不可用舊 50 kb adjacency 取代 strict read linkage、不可混合不同 PS 或跨 HP 建樹、
+    不可把 HCC1395 與 HCC1395_DORADO 當兩個生物重複、不可用甲基差異重排 topology。
+    完整八條見 parent handoff §9。</p>
+  </div>
+</details>
+
+<details class="card core" id="must5">
+  <summary><span class="badge id">5</span> 論文狀態要說清楚</summary>
+  <div class="card-body">
+    <p><code>7/12 骨架、內容過期，不可直接送審</code>。章節骨架可保留，
+    但 Methods / Results / NO-GO 狀態必須依 P0-4 的 frozen evidence 重寫。</p>
+  </div>
+</details>
+
+<h2 id="s9">九、給驗收者的三個提問</h2>
+
+<p>如果只有 10 分鐘驗收，問這三題最有鑑別力 —— 它們直接測試對方有沒有理解 claim boundary。</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th style="width:38%">提問</th><th>正確回答</th><th>答錯代表</th></tr></thead>
+<tbody>
+<tr><td><strong>「這個百分比的分母是哪一層？」</strong></td>
+    <td>能立刻指出 <code>denominator_registry.tsv</code> 的那一列，說出 numerator / denominator / excluded</td>
+    <td>會在論文中混用不同層的比例</td></tr>
+<tr><td><strong>「10,717 個 abstain 是資料遺漏還是正式輸出？」</strong></td>
+    <td><span class="mark ok">✓</span> <strong>正式輸出</strong>（search-node guard 觸發），且為<strong>非隨機缺失</strong>，不可與 ranked subset 互相外推</td>
+    <td>沒理解 abstain 的設計意圖</td></tr>
+<tr><td><strong>「這棵樹是生物學上的 clone 譜系嗎？」</strong></td>
+    <td><span class="mark ok">✓</span> <strong>不是</strong>。只能說 model-conditional 的 read-compatible candidate states 與其 graph geometry；L7 abstain</td>
+    <td>overclaim — 這是本專案最嚴重的錯誤類型</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s10">十、第一天該做什麼</h2>
+
+<pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+
+# ① 確認能 build（約 10-20 分鐘，含 jemalloc）
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j $(nproc)
+
+# ② 確認 C++ 測試全過（應為 258 tests PASSED）
+./build/bin/run_tests
+
+# ③ 確認證據鏈仍完整（19/19 應全部 MATCH）
+#    方法見 04_收斂驗收清單.md §1 G2
+
+# ④ 跑任何長 pipeline 之前先看磁碟
+df -h /big7_disk</code></pre>
+
+<ul class="checklist">
+  <li class="done">跑 C++ run_tests（本輪已代跑：258/258 PASS）</li>
+  <li>讀 <code>02_程式層.md</code> §6 的五個已知缺陷</li>
+  <li>讀 <code>01_資料層.md</code> §3 確認 7 個 BAM 的位置與大小</li>
+  <li>確認 frozen binary（<code>/bip7_disk/…/exact_ps_topology_af</code>）仍在</li>
+  <li>讀 <code>AGENTS.md</code> 與 <code>.claude/CLAUDE.md</code> 了解 8 個 Hard Gate</li>
+  <li>讀 parent handoff 的 claim ceiling 與八個不可重踩方向</li>
+</ul>
+
+<h3>交接包內的其他文件</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>檔案</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td><code>README.md</code></td><td>入口：30 秒結論、閱讀順序、第一天該做什麼</td></tr>
+<tr><td><code>01_資料層.md</code></td><td>資料在哪、多大、信任度分級、清理候選</td></tr>
+<tr><td><code>02_程式層.md</code></td><td>build、執行、程式地圖、環境缺陷、frozen binary</td></tr>
+<tr><td><code>03_輸出層.md</code></td><td>輸出分類、receipt 體系、分母登錄、導航速查</td></tr>
+<tr><td><code>04_收斂驗收清單.md</code></td><td>7 個 Gate 詳述 ＋ 9 步收斂 ＋ 驗證方法</td></tr>
+<tr><td><code>handoff_manifest.json</code></td><td>機器可讀：四層清單、Gate 定義、收斂順序</td></tr>
+<tr><td><code>acceptance_receipt.json</code></td><td>機器可讀：本輪實跑驗收真值</td></tr>
+</tbody>
+</table>
+</div>
+
+<footer class="provenance" id="prov">
+  <h4>Provenance（本檔數字來源）</h4>
+  <p>本檔所有數字均為 <strong>2026-08-05 實際執行</strong>取得，無估算值、無「合理範圍」填補。
+  本包為<strong>工程</strong>交接，不建立第二份科學數值 SoT —— 科學數字一律以
+  <code>InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json</code> 為準。</p>
+  <ul>
+    <li><strong>build 驗收</strong>（configure/build exit 0、6 binary、0 編譯錯誤）：
+      新建 <code>build_handoff_verify/</code> 執行 from-scratch build，log 落 <code>cmake_configure.log</code> / <code>cmake_build.log</code></li>
+    <li><strong>C++ 測試</strong>（258 tests / 37 suites / 2,766 ms）：執行本輪 build 產出的 <code>run_tests</code></li>
+    <li><strong>artifact 完整性</strong>（19/19 MATCH）：逐檔重算 SHA-256 與 <code>authority_manifest.json</code> 比對</li>
+    <li><strong>Python 測試</strong>（12 tests / 10.077 s；143 檔分佈 68/63/12）：
+      <code>python3 -m unittest</code> ＋ 逐檔掃描 import 風格</li>
+    <li><strong>資料規模</strong>（7 樣本 bytes、合計 1,840,983,466,353）：<code>ls -la</code> 逐一量測 tagged BAM</li>
+    <li><strong>磁碟</strong>（617 GB / 99%）：<code>df -h</code></li>
+    <li><strong>git 狀態</strong>（580 = 368 + 202 + 10；C++ 8 檔 1,501 新增 457 刪除）：
+      <code>git status --porcelain</code> ＋ <code>git diff --stat</code></li>
+    <li><strong>資料層背景</strong>（19 canonical runs、信任度分級、清理候選）：
+      <code>/big7_disk/liaoyoyo2001/big7_disk_output/OUTPUT_INDEX.md</code></li>
+    <li><strong>parent 自述阻擋項</strong>（DIRTY_NOT_RELEASE_AUTHORITY、environment_lock、not_proven_byte_reproducible）：
+      <code>authority_manifest.json#implementation</code></li>
+  </ul>
+
+  <h4>Build 資訊</h4>
+  <p>
+    Git branch：<code>research/subclonal-reconstruction-202606</code>　·
+    HEAD：<code>387a101</code>（working tree DIRTY，非 release authority）　·
+    驗收日期：2026-08-05　·
+    輸出：<code>InterSubMod/docs/handoff/20260805_系統交接與驗收_01/00_交接總覽與驗收.standalone.html</code>
+  </p>
+  <p>
+    Claim ceiling 提醒：本檔驗收的是<strong>工程可交接性</strong>，不是科學結論。
+    科學層的 <code>confirmed cellular subclone = 0</code>、<code>linear ancestry = 0</code>、
+    CN/LOH <code>NOT_INTEGRATED</code>、甲基 <code>association-only</code> 等界線不因本次驗收而改變。
+  </p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
