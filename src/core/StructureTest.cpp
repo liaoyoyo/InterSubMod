@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <numeric>
 #include <set>
@@ -25,6 +26,56 @@ StructureTest::StructureTest(const StructureTestConfig& config) : config_(config
 void StructureTest::set_seed(uint64_t seed) {
     config_.seed = seed;
     rng_.seed(seed);
+}
+
+const char* StructureTest::permutation_mode_name(PermutationMode mode) {
+    return mode == PermutationMode::kWithinStrata ? "within_strata" : "unrestricted";
+}
+
+bool StructureTest::validate_permutation_options(int n, const std::vector<int>& group_labels,
+                                                 const PermutationOptions& permutation_options,
+                                                 std::string& invalid_reason) {
+    if (permutation_options.mode == PermutationMode::kUnrestricted) return true;
+
+    if (static_cast<int>(permutation_options.strata.size()) != n) {
+        invalid_reason = "strata_size_mismatch";
+        return false;
+    }
+
+    std::map<int, std::set<int>> labels_by_stratum;
+    for (int i = 0; i < n; ++i) {
+        labels_by_stratum[permutation_options.strata[i]].insert(group_labels[i]);
+    }
+
+    const bool has_exchangeable_labels =
+        std::any_of(labels_by_stratum.begin(), labels_by_stratum.end(),
+                    [](const auto& entry) { return entry.second.size() >= 2; });
+    if (!has_exchangeable_labels) {
+        invalid_reason = "no_exchangeable_labels";
+        return false;
+    }
+    return true;
+}
+
+void StructureTest::permute_labels(std::vector<int>& labels, const PermutationOptions& permutation_options) {
+    if (permutation_options.mode == PermutationMode::kUnrestricted) {
+        std::shuffle(labels.begin(), labels.end(), rng_);
+        return;
+    }
+
+    std::map<int, std::vector<int>> indices_by_stratum;
+    for (int i = 0; i < static_cast<int>(labels.size()); ++i) {
+        indices_by_stratum[permutation_options.strata[i]].push_back(i);
+    }
+
+    for (const auto& [stratum, indices] : indices_by_stratum) {
+        (void)stratum;
+        std::vector<int> stratum_labels;
+        stratum_labels.reserve(indices.size());
+        for (int index : indices) stratum_labels.push_back(labels[index]);
+        std::shuffle(stratum_labels.begin(), stratum_labels.end(), rng_);
+        for (size_t i = 0; i < indices.size(); ++i) labels[indices[i]] = stratum_labels[i];
+    }
 }
 
 bool StructureTest::filter_reads_for_complete_matrix(const Eigen::MatrixXd& dist_matrix,
@@ -150,14 +201,24 @@ double StructureTest::compute_pseudo_f(double ss_between, double ss_within, int 
     return (ss_between / df_between) / (ss_within / df_within);
 }
 
-PermanovaResult StructureTest::run_permanova(const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels) {
+PermanovaResult StructureTest::run_permanova(const Eigen::MatrixXd& dist_matrix,
+                                             const std::vector<int>& group_labels) {
+    return run_permanova(dist_matrix, group_labels, PermutationOptions());
+}
+
+PermanovaResult StructureTest::run_permanova(const Eigen::MatrixXd& dist_matrix,
+                                             const std::vector<int>& group_labels,
+                                             const PermutationOptions& permutation_options) {
     PermanovaResult result;
     result.n_permutations = config_.n_permutations;
+    result.permutation_mode = permutation_mode_name(permutation_options.mode);
 
     int n = dist_matrix.rows();
-    if (n < config_.min_reads_for_permanova || static_cast<int>(group_labels.size()) != n) {
+    if (dist_matrix.cols() != n || n < config_.min_reads_for_permanova ||
+        static_cast<int>(group_labels.size()) != n) {
         result.valid = false;
         result.invalid_reason = "insufficient_reads";
+        result.evaluation_status = "NOT_EVALUABLE";
         return result;
     }
 
@@ -166,6 +227,7 @@ PermanovaResult StructureTest::run_permanova(const Eigen::MatrixXd& dist_matrix,
             if (std::isnan(dist_matrix(i, j))) {
                 result.valid = false;
                 result.invalid_reason = "incomplete_distance_matrix";
+                result.evaluation_status = "NOT_EVALUABLE";
                 return result;
             }
         }
@@ -177,25 +239,39 @@ PermanovaResult StructureTest::run_permanova(const Eigen::MatrixXd& dist_matrix,
     if (k < 2) {
         result.valid = false;
         result.invalid_reason = "insufficient_groups";
+        result.evaluation_status = "NOT_EVALUABLE";
+        return result;
+    }
+
+    std::string permutation_invalid_reason;
+    if (!validate_permutation_options(n, group_labels, permutation_options, permutation_invalid_reason)) {
+        result.valid = false;
+        result.invalid_reason = permutation_invalid_reason;
+        result.evaluation_status = "NOT_EVALUABLE";
         return result;
     }
 
     double ss_total, ss_within, ss_between;
     compute_ss(dist_matrix, group_labels, ss_total, ss_within, ss_between);
     result.pseudo_f = compute_pseudo_f(ss_between, ss_within, n, k);
+    if (ss_total > 0.0) {
+        result.r_squared = std::clamp(ss_between / ss_total, 0.0, 1.0);
+    }
 
     std::vector<int> permuted_labels = group_labels;
     int n_extreme = 1;
 
     for (int perm = 0; perm < config_.n_permutations; ++perm) {
-        std::shuffle(permuted_labels.begin(), permuted_labels.end(), rng_);
+        permute_labels(permuted_labels, permutation_options);
         double perm_ss_total, perm_ss_within, perm_ss_between;
         compute_ss(dist_matrix, permuted_labels, perm_ss_total, perm_ss_within, perm_ss_between);
         double perm_f = compute_pseudo_f(perm_ss_between, perm_ss_within, n, k);
         if (perm_f >= result.pseudo_f) ++n_extreme;
+        ++result.n_permutations_realized;
     }
 
-    result.p_value = static_cast<double>(n_extreme) / static_cast<double>(config_.n_permutations + 1);
+    result.p_value =
+        static_cast<double>(n_extreme) / static_cast<double>(result.n_permutations_realized + 1);
     result.valid = true;
     return result;
 }
@@ -229,6 +305,41 @@ std::vector<double> StructureTest::compute_mean_distances_to_centroid(const Eige
     return mean_distances;
 }
 
+std::vector<double> StructureTest::compute_distances_to_centroid_per_sample(
+    const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels) {
+    const int n = dist_matrix.rows();
+    std::map<int, std::vector<int>> groups;
+    for (int i = 0; i < n; ++i) groups[group_labels[i]].push_back(i);
+
+    std::vector<double> distances(n, 0.0);
+    for (const auto& [group_id, members] : groups) {
+        (void)group_id;
+        const int n_group = static_cast<int>(members.size());
+        if (n_group <= 1) continue;
+
+        double group_pair_sum = 0.0;
+        for (int i : members) {
+            for (int j : members) {
+                const double d = dist_matrix(i, j);
+                group_pair_sum += d * d;
+            }
+        }
+        const double centroid_correction =
+            group_pair_sum / (2.0 * static_cast<double>(n_group) * static_cast<double>(n_group));
+
+        for (int i : members) {
+            double row_sum = 0.0;
+            for (int j : members) {
+                const double d = dist_matrix(i, j);
+                row_sum += d * d;
+            }
+            const double squared_distance = row_sum / static_cast<double>(n_group) - centroid_correction;
+            distances[i] = std::sqrt(std::max(0.0, squared_distance));
+        }
+    }
+    return distances;
+}
+
 double StructureTest::anova_f_test(const std::vector<double>& values, const std::vector<int>& group_labels) {
     if (values.empty() || values.size() != group_labels.size()) return 0.0;
 
@@ -255,7 +366,12 @@ double StructureTest::anova_f_test(const std::vector<double>& values, const std:
         for (double v : vals) ss_within += (v - gm) * (v - gm);
     }
 
-    if (ss_within <= 0.0 || n <= k) return 0.0;
+    if (n <= k) return 0.0;
+    double scale = 0.0;
+    for (double value : values) scale += value * value;
+    const double zero_tolerance =
+        128.0 * std::numeric_limits<double>::epsilon() * std::max(1.0, scale);
+    if (ss_within <= zero_tolerance) return ss_between > zero_tolerance ? 1e9 : 0.0;
     return (ss_between / (k - 1)) / (ss_within / (n - k));
 }
 
@@ -355,6 +471,86 @@ DispersionResult StructureTest::check_dispersion(const Eigen::MatrixXd& dist_mat
     result.anova_p = (df1 >= 1 && df2 >= 1) ? f_dist_sf(result.anova_f, df1, df2) : 1.0;
     result.warning = (result.anova_p < config_.dispersion_alpha);
 
+    return result;
+}
+
+DispersionResult StructureTest::check_dispersion(const Eigen::MatrixXd& dist_matrix,
+                                                 const std::vector<int>& group_labels,
+                                                 const PermutationOptions& permutation_options) {
+    DispersionResult result;
+    result.n_permutations = config_.n_permutations;
+    result.permutation_mode = permutation_mode_name(permutation_options.mode);
+
+    const int n = dist_matrix.rows();
+    if (dist_matrix.cols() != n || n < 2 || static_cast<int>(group_labels.size()) != n) {
+        result.valid = false;
+        result.invalid_reason = "invalid_dimensions";
+        result.evaluation_status = "NOT_EVALUABLE";
+        return result;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            if (std::isnan(dist_matrix(i, j))) {
+                result.valid = false;
+                result.invalid_reason = "incomplete_distance_matrix";
+                result.evaluation_status = "NOT_EVALUABLE";
+                return result;
+            }
+        }
+    }
+
+    std::map<int, int> group_sizes;
+    for (int label : group_labels) ++group_sizes[label];
+    if (group_sizes.size() < 2) {
+        result.valid = false;
+        result.invalid_reason = "insufficient_groups";
+        result.evaluation_status = "NOT_EVALUABLE";
+        return result;
+    }
+    if (std::any_of(group_sizes.begin(), group_sizes.end(),
+                    [](const auto& entry) { return entry.second < 2; })) {
+        result.valid = false;
+        result.invalid_reason = "insufficient_group_size";
+        result.evaluation_status = "NOT_EVALUABLE";
+        return result;
+    }
+
+    std::string permutation_invalid_reason;
+    if (!validate_permutation_options(n, group_labels, permutation_options, permutation_invalid_reason)) {
+        result.valid = false;
+        result.invalid_reason = permutation_invalid_reason;
+        result.evaluation_status = "NOT_EVALUABLE";
+        return result;
+    }
+
+    const std::vector<double> observed_distances =
+        compute_distances_to_centroid_per_sample(dist_matrix, group_labels);
+    result.anova_f = anova_f_test(observed_distances, group_labels);
+
+    for (const auto& [group_id, group_size] : group_sizes) {
+        double sum = 0.0;
+        for (int i = 0; i < n; ++i) {
+            if (group_labels[i] == group_id) sum += observed_distances[i];
+        }
+        result.mean_distances_to_centroid.push_back(sum / static_cast<double>(group_size));
+    }
+
+    int n_extreme = 1;
+    std::vector<int> permuted_labels = group_labels;
+    for (int permutation = 0; permutation < config_.n_permutations; ++permutation) {
+        permute_labels(permuted_labels, permutation_options);
+        const std::vector<double> permuted_distances =
+            compute_distances_to_centroid_per_sample(dist_matrix, permuted_labels);
+        const double permuted_f = anova_f_test(permuted_distances, permuted_labels);
+        if (permuted_f >= result.anova_f) ++n_extreme;
+        ++result.n_permutations_realized;
+    }
+
+    result.anova_p =
+        static_cast<double>(n_extreme) / static_cast<double>(result.n_permutations_realized + 1);
+    result.warning = result.anova_p < config_.dispersion_alpha;
+    result.valid = true;
     return result;
 }
 

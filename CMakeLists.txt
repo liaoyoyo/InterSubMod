@@ -130,6 +130,13 @@ target_include_directories(inter_sub_mod_core PUBLIC
 add_executable(inter_sub_mod src/main.cpp)
 target_link_libraries(inter_sub_mod PRIVATE inter_sub_mod_core)
 
+# Exact-PS topology preprocessor.  This is intentionally a separate executable:
+# inter_sub_mod remains the single-anchor methylation analyzer, while this
+# target validates and partitions multi-sSNV exact-PS evidence for tree input.
+add_executable(exact_ps_partition
+    research/20260722_exact_ps_k12_hcc1395_pilot/cpp/exact_ps_k12_partition.cpp
+)
+
 # --- Dev Tools / Ad-hoc Tests ---
 add_executable(test_phase1_2 src/test/test_phase1_2.cpp)
 target_link_libraries(test_phase1_2 PRIVATE inter_sub_mod_core)
@@ -171,6 +178,9 @@ add_executable(run_tests
     tests/test_methylation_parser.cpp
     tests/test_diploid_coverage.cpp
     tests/test_hp_permutation.cpp
+    tests/test_verification_schema_v2.cpp
+    tests/test_region_stratifier.cpp
+    tests/test_region_stratification_artifacts.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 

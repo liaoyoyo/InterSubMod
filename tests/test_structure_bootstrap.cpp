@@ -461,3 +461,152 @@ TEST(PermanovaSSTest, CatastrophicCancellation_PseudoFNonNegative) {
     EXPECT_GE(res.pseudo_f, 0.0)
         << "Direct ss_between formula must not produce negative pseudo-F";
 }
+
+// ============================================================================
+// Restricted permutation audit tests
+// ============================================================================
+
+TEST(RestrictedPermutationTest, PermanovaReportsEffectAndRealizedPermutations) {
+    const int n = 8;
+    std::vector<int> labels = {0, 1, 0, 1, 0, 1, 0, 1};
+    std::vector<int> strata = {0, 0, 1, 1, 2, 2, 3, 3};
+    auto D = make_dist(n, [&](int i, int j) { return labels[i] == labels[j] ? 0.1 : 0.9; });
+
+    StructureTestConfig cfg;
+    cfg.seed = 20260727;
+    cfg.n_permutations = 49;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    PermutationOptions options;
+    options.mode = PermutationMode::kWithinStrata;
+    options.strata = strata;
+    const auto result = st.run_permanova(D, labels, options);
+
+    EXPECT_TRUE(result.valid);
+    EXPECT_EQ(result.permutation_mode, "within_strata");
+    EXPECT_EQ(result.n_permutations, 49);
+    EXPECT_EQ(result.n_permutations_realized, 49);
+    EXPECT_EQ(result.evaluation_status, "EVALUABLE");
+    EXPECT_GT(result.r_squared, 0.9);
+    EXPECT_LE(result.r_squared, 1.0);
+}
+
+TEST(RestrictedPermutationTest, NoExchangeableLabelsIsNotEvaluable) {
+    const int n = 8;
+    std::vector<int> labels = {0, 0, 0, 0, 1, 1, 1, 1};
+    std::vector<int> strata = {0, 0, 0, 0, 1, 1, 1, 1};
+    auto D = make_dist(n, [&](int i, int j) { return labels[i] == labels[j] ? 0.1 : 0.9; });
+
+    StructureTestConfig cfg;
+    cfg.seed = 20260727;
+    cfg.n_permutations = 49;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    PermutationOptions options;
+    options.mode = PermutationMode::kWithinStrata;
+    options.strata = strata;
+    const auto result = st.run_permanova(D, labels, options);
+
+    EXPECT_FALSE(result.valid);
+    EXPECT_EQ(result.invalid_reason, "no_exchangeable_labels");
+    EXPECT_EQ(result.evaluation_status, "NOT_EVALUABLE");
+    EXPECT_EQ(result.n_permutations_realized, 0);
+    EXPECT_DOUBLE_EQ(result.p_value, 1.0);
+}
+
+TEST(RestrictedPermutationTest, StrataLengthMismatchFailsClosed) {
+    const int n = 8;
+    std::vector<int> labels = {0, 1, 0, 1, 0, 1, 0, 1};
+    auto D = make_dist(n, [&](int i, int j) { return labels[i] == labels[j] ? 0.2 : 0.8; });
+
+    StructureTestConfig cfg;
+    cfg.seed = 20260727;
+    cfg.n_permutations = 19;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    PermutationOptions options;
+    options.mode = PermutationMode::kWithinStrata;
+    options.strata = {0, 0, 1};
+    const auto result = st.run_permanova(D, labels, options);
+
+    EXPECT_FALSE(result.valid);
+    EXPECT_EQ(result.invalid_reason, "strata_size_mismatch");
+    EXPECT_EQ(result.evaluation_status, "NOT_EVALUABLE");
+}
+
+TEST(RestrictedPermutationTest, LegacyUnrestrictedModeRemainsDeterministic) {
+    const int n = 10;
+    std::vector<int> labels = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
+    auto D = make_dist(n, [&](int i, int j) { return labels[i] == labels[j] ? 0.2 : 0.7; });
+
+    StructureTestConfig cfg;
+    cfg.seed = 777;
+    cfg.n_permutations = 99;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest first(cfg);
+    StructureTest second(cfg);
+
+    const auto first_result = first.run_permanova(D, labels);
+    const auto second_result = second.run_permanova(D, labels);
+
+    EXPECT_TRUE(first_result.valid);
+    EXPECT_EQ(first_result.permutation_mode, "unrestricted");
+    EXPECT_EQ(first_result.n_permutations_realized, 99);
+    EXPECT_DOUBLE_EQ(first_result.p_value, second_result.p_value);
+    EXPECT_DOUBLE_EQ(first_result.pseudo_f, second_result.pseudo_f);
+}
+
+TEST(RestrictedPermutationTest, PermdispRecomputesCentroidsAndAuditsRestriction) {
+    const int n = 12;
+    std::vector<int> labels = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+    std::vector<int> strata = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+    auto D = make_dist(n, [&](int i, int j) {
+        if (labels[i] != labels[j]) return 0.5;
+        return labels[i] == 0 ? 0.05 : 0.8;
+    });
+
+    StructureTestConfig cfg;
+    cfg.seed = 20260727;
+    cfg.n_permutations = 49;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    PermutationOptions options;
+    options.mode = PermutationMode::kWithinStrata;
+    options.strata = strata;
+    const auto result = st.check_dispersion(D, labels, options);
+
+    EXPECT_TRUE(result.valid);
+    EXPECT_EQ(result.permutation_mode, "within_strata");
+    EXPECT_EQ(result.n_permutations_realized, 49);
+    EXPECT_EQ(result.mean_distances_to_centroid.size(), 2);
+    EXPECT_LT(result.mean_distances_to_centroid[0], result.mean_distances_to_centroid[1]);
+    EXPECT_GE(result.anova_p, 0.0);
+    EXPECT_LE(result.anova_p, 1.0);
+}
+
+TEST(RestrictedPermutationTest, PermdispNoExchangeabilityFailsClosed) {
+    const int n = 8;
+    std::vector<int> labels = {0, 0, 0, 0, 1, 1, 1, 1};
+    std::vector<int> strata = {0, 0, 0, 0, 1, 1, 1, 1};
+    auto D = make_dist(n, [&](int i, int j) { return labels[i] == labels[j] ? 0.2 : 0.6; });
+
+    StructureTestConfig cfg;
+    cfg.seed = 20260727;
+    cfg.n_permutations = 19;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    PermutationOptions options;
+    options.mode = PermutationMode::kWithinStrata;
+    options.strata = strata;
+    const auto result = st.check_dispersion(D, labels, options);
+
+    EXPECT_FALSE(result.valid);
+    EXPECT_EQ(result.invalid_reason, "no_exchangeable_labels");
+    EXPECT_EQ(result.evaluation_status, "NOT_EVALUABLE");
+    EXPECT_EQ(result.n_permutations_realized, 0);
+}

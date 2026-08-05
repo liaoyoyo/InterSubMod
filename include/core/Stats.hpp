@@ -255,6 +255,10 @@ struct PermanovaResult {
     double pseudo_f = 0.0;
     double p_value = 1.0;
     int n_permutations = 0;
+    double r_squared = 0.0;
+    int n_permutations_realized = 0;
+    std::string permutation_mode = "unrestricted";
+    std::string evaluation_status = "EVALUABLE";
 
     bool valid = true;
     std::string invalid_reason;
@@ -268,6 +272,12 @@ struct DispersionResult {
     double anova_f = 0.0;
     double anova_p = 1.0;
     bool warning = false;  // True if significant heterogeneity
+    int n_permutations = 0;
+    int n_permutations_realized = 0;
+    std::string permutation_mode = "analytic_f";
+    std::string evaluation_status = "EVALUABLE";
+    bool valid = true;
+    std::string invalid_reason;
 };
 
 /**

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <limits>
 #include <memory>
 #include <string>
@@ -26,6 +27,81 @@
 #include "utils/FastaReader.hpp"
 
 namespace InterSubMod {
+
+constexpr int VERIFICATION_SCHEMA_VERSION = 2;
+
+/**
+ * @brief Inputs to the pure Verification schema-v2 ordered decision tree.
+ */
+struct VerificationV2Input {
+    std::string legacy_class = "Noise";
+    bool dbeta_sig = false;
+    bool hp_auc_struct = false;
+    bool potential_loh = false;
+    bool within_hp = false;
+    bool clean_location_permanova = false;
+    bool dispersion_structure = false;
+    bool dispersion_warning = false;
+    double per_cpg_epipoly_hp1 = std::numeric_limits<double>::quiet_NaN();
+    double pairwise_mean_distance = 0.0;
+};
+
+struct VerificationV2Decision {
+    int schema_version = VERIFICATION_SCHEMA_VERSION;
+    std::string verification_class;
+    std::string verification_class_v1_deprecated;
+    std::string verification_class_legacy;
+    bool label_first_support = false;
+    bool cluster_first_support = false;
+    bool within_hp_support = false;
+    bool dispersion_warning = false;
+    std::string evidence_path;
+    std::string evidence_derivation = "LIVE";
+    bool significant = false;
+};
+
+VerificationV2Decision classify_verification_v2(const VerificationV2Input& input);
+std::string resolve_verification_legacy_input(const std::string& current_class,
+                                              const std::string& existing_legacy_class);
+std::string determine_loh_subtype_legacy_vc(bool potential_loh,
+                                            const std::string& verification_class_legacy);
+
+struct RegionStratificationArtifactRow {
+    std::size_t result_index = 0;
+    int region_id = -1;
+    std::string chromosome;
+    uint32_t position = 0;
+    char reference = 'N';
+    char alternate = 'N';
+    int stratum_id = -1;
+    std::string stratum_label;
+    std::string stratum_reason;
+    int schema_version = REGION_STRATIFICATION_SCHEMA_VERSION;
+};
+
+struct RegionStratificationStatusRecord {
+    RegionStratificationStatus status = RegionStratificationStatus::Failed;
+    std::string reason = "RUN_IN_PROGRESS";
+    int schema_version = REGION_STRATIFICATION_SCHEMA_VERSION;
+    int eligible_region_count = 0;
+    int min_regions_required = DEFAULT_MIN_REGIONS_FOR_STRATIFICATION;
+    int assignment_count = 0;
+    int n_occupied_region_strata = 0;
+    int warning_count = 0;
+    std::string generated_at;
+};
+
+std::string rfc3339_utc_now();
+bool write_region_stratification_status_atomic(
+    const std::string& output_dir,
+    const RegionStratificationStatusRecord& status,
+    std::string& error);
+bool write_region_stratification_artifacts_atomic(
+    const std::string& output_dir,
+    const std::vector<RegionStratificationArtifactRow>& rows,
+    const std::vector<SubcloneSummary>& summaries,
+    const RegionStratificationStatusRecord& status,
+    std::string& error);
 
 /**
  * @brief Statistics result for processing a single SNV region
@@ -234,8 +310,12 @@ struct RegionResult {
     double per_cpg_epipoly_hp2;      ///< Epipolymorphism for HP2-family
     double per_cpg_epipoly_delta;    ///< |epipoly_hp1 - epipoly_hp2|
 
-    // Cross-region subclone assignment (Phase D)
-    int subclone_id;             ///< Subclone group assignment (-1 = unassigned)
+    // Cross-region ASM region stratification (Phase D)
+    int region_stratification_schema_version;  ///< Fixed schema version 1
+    int region_stratum_id;                     ///< Fixed region-stratum ID (-1 = unassigned)
+    std::string region_stratum_label;           ///< Canonical enum label or Unassigned
+    std::string region_stratum_reason;          ///< Assignment reason or whole-phase sentinel
+    int subclone_id;  ///< Deprecated exact alias of region_stratum_id for one migration release
 
     // Cluster stability results (NEW)
     double cluster_stability;    ///< Stability score from subsampling [0-1]
@@ -243,8 +323,17 @@ struct RegionResult {
     int n_clusters;              ///< Number of clusters found
 
     // Bidirectional verification classification (NEW)
-    std::string verification_class;  ///< [Stage④ overridden] Strong/LabelShift/StructureNoLabel/LOH-Structure/Noise_{Uniform,Chaotic,Uncorrelated}
+    std::string verification_class;  ///< Canonical Verification schema-v2 11-class enum
+    int verification_schema_version;  ///< Fixed schema version 2
+    std::string verification_class_v1_deprecated;  ///< Exact v1 compatibility projection
     std::string verification_class_legacy;  ///< original 2x2(label×cluster) class (Strong/Subclone/Weak/Noise) for audit
+    bool verification_label_first_support;
+    bool verification_cluster_first_support;
+    bool verification_within_hp_support;
+    bool verification_dispersion_warning;
+    std::string verification_evidence_path;
+    std::string verification_evidence_derivation;
+    bool verification_significant;
 
     // Multi-Layer Validation Quality Metrics (NEW - Phase 5)
     double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
@@ -279,7 +368,8 @@ struct RegionResult {
     double coverage_multiple;        ///< NumReads / diploid_coverage (auto-estimated per sample)
     double diploid_coverage_used;    ///< Actual diploid coverage baseline used for CovM (audit column)
     std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
-    std::string loh_subtype;         ///< "None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"
+    std::string loh_subtype;         ///< Deprecated exact alias of loh_subtype_legacy_vc
+    std::string loh_subtype_legacy_vc;  ///< Legacy-verification-derived LOH subtype
     float quality_score;             ///< Composite quality score [0-100]
     std::string quality_tier;        ///< "High" (>=70), "Medium" (40-69), "Low" (<40)
 
@@ -433,12 +523,27 @@ struct RegionResult {
           per_cpg_epipoly_hp1(std::numeric_limits<double>::quiet_NaN()),
           per_cpg_epipoly_hp2(std::numeric_limits<double>::quiet_NaN()),
           per_cpg_epipoly_delta(std::numeric_limits<double>::quiet_NaN()),
+          region_stratification_schema_version(REGION_STRATIFICATION_SCHEMA_VERSION),
+          region_stratum_id(-1),
+          region_stratum_label("Unassigned"),
+          region_stratum_reason("FAILED"),
           subclone_id(-1),
           cluster_stability(0.0),
           has_outlier_cluster(false),
           n_clusters(0),
-          verification_class("Noise"),
+          verification_class("Noise_Uncorrelated"),
+          verification_schema_version(VERIFICATION_SCHEMA_VERSION),
+          verification_class_v1_deprecated("Noise_Uncorrelated"),
           verification_class_legacy("Noise"),
+          verification_label_first_support(false),
+          verification_cluster_first_support(false),
+          verification_within_hp_support(false),
+          verification_dispersion_warning(false),
+          verification_evidence_path("NOISE_UNCORRELATED"),
+          verification_evidence_derivation("LIVE"),
+          verification_significant(false),
+          hp_ratio(0.5),
+          potential_loh(false),
           within_hp1_ngroups(1),
           within_hp2_ngroups(1),
           within_hp_level_bimodal(false),
@@ -462,12 +567,11 @@ struct RegionResult {
           strength_somatic(0.0),
           strength_assoc(0.0),
           strength_germline(0.0),
-          hp_ratio(0.5),
-          potential_loh(false),
           coverage_multiple(1.0),
           diploid_coverage_used(75.0),
           coverage_category("Normal"),
           loh_subtype("None"),
+          loh_subtype_legacy_vc("None"),
           quality_score(50.0f),
           quality_tier("Medium") {
     }
@@ -560,7 +664,7 @@ private:
     /**
      * @brief Write significance summary CSV and statistics report
      */
-    void write_significance_summary(const std::vector<RegionResult>& results) const;
+    bool write_significance_summary(const std::vector<RegionResult>& results, std::string& error) const;
 
     // ========== Refactored Helper Methods ==========
 

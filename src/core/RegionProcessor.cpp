@@ -4,20 +4,28 @@
 #include <sys/stat.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cmath>
-#include <random>
+#include <cstdio>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <mutex>
 #include <numeric>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <tuple>
 #include <unordered_set>
+#include <utility>
+
+#include <unistd.h>
 
 #include "core/HierarchicalClustering.hpp"
 #include "core/PhyloLabeler.hpp"
@@ -30,6 +38,365 @@
 #include "utils/Logger.hpp"
 
 namespace InterSubMod {
+
+namespace {
+
+bool is_valid_verification_legacy_class(const std::string& value) {
+    return value == "Strong" || value == "Subclone" || value == "Weak" || value == "Noise";
+}
+
+}  // namespace
+
+VerificationV2Decision classify_verification_v2(const VerificationV2Input& input) {
+    if (!is_valid_verification_legacy_class(input.legacy_class)) {
+        throw std::invalid_argument("INVALID_VERIFICATION_CLASS_LEGACY: " + input.legacy_class);
+    }
+    VerificationV2Decision decision;
+    decision.verification_class_legacy = input.legacy_class;
+    decision.label_first_support = input.legacy_class == "Strong" || input.legacy_class == "Weak";
+    decision.cluster_first_support =
+        input.legacy_class == "Strong" || input.legacy_class == "Subclone";
+    decision.within_hp_support = input.within_hp;
+    decision.dispersion_warning = input.dispersion_warning;
+
+    const bool loh_struct = input.potential_loh && (input.hp_auc_struct || input.dbeta_sig);
+    if (decision.cluster_first_support && input.legacy_class == "Strong") {
+        decision.verification_class = "Strong_Bidirectional";
+        decision.evidence_path = "BIDIRECTIONAL";
+        decision.significant = true;
+    } else if (decision.cluster_first_support && input.legacy_class == "Subclone") {
+        decision.verification_class = "ClusterFirstOnly";
+        decision.evidence_path = "CLUSTER_FIRST_ONLY";
+        decision.significant = true;
+    } else if (loh_struct) {
+        decision.verification_class = "LOH-Structure";
+        decision.evidence_path = "LOH_STRUCTURE";
+        decision.significant = true;
+    } else if (input.within_hp) {
+        decision.verification_class = "MultiGroupNoLabel";
+        decision.evidence_path = "WITHIN_HP_MULTIGROUP";
+        decision.significant = true;
+    } else if (input.dbeta_sig) {
+        decision.verification_class = "LabelShift";
+        decision.evidence_path = "LABEL_SHIFT";
+        decision.significant = true;
+    } else if (input.clean_location_permanova) {
+        decision.verification_class = "PermanovaLocation";
+        decision.evidence_path = "PERMANOVA_LOCATION";
+        decision.significant = true;
+    } else if (input.hp_auc_struct) {
+        decision.verification_class = "StructureNoLabel";
+        decision.evidence_path = "HP_AUC_STRUCTURE_NO_LABEL";
+        decision.significant = true;
+    } else if (input.dispersion_structure) {
+        decision.verification_class = "DispersionStructure";
+        decision.evidence_path = "DISPERSION_STRUCTURE";
+    } else if (input.pairwise_mean_distance < 0.15 ||
+               (!std::isnan(input.per_cpg_epipoly_hp1) && input.per_cpg_epipoly_hp1 < 0.2)) {
+        decision.verification_class = "Noise_Uniform";
+        decision.evidence_path = "NOISE_UNIFORM";
+    } else if ((!std::isnan(input.per_cpg_epipoly_hp1) && input.per_cpg_epipoly_hp1 > 0.5) ||
+               input.pairwise_mean_distance > 0.35) {
+        decision.verification_class = "Noise_Chaotic";
+        decision.evidence_path = "NOISE_CHAOTIC";
+    } else {
+        decision.verification_class = "Noise_Uncorrelated";
+        decision.evidence_path = "NOISE_UNCORRELATED";
+    }
+
+    decision.verification_class_v1_deprecated =
+        (decision.verification_class == "Strong_Bidirectional" ||
+         decision.verification_class == "ClusterFirstOnly")
+            ? "Strong"
+            : decision.verification_class;
+    return decision;
+}
+
+std::string resolve_verification_legacy_input(const std::string& current_class,
+                                              const std::string& existing_legacy_class) {
+    if (is_valid_verification_legacy_class(current_class)) return current_class;
+    if (is_valid_verification_legacy_class(existing_legacy_class)) return existing_legacy_class;
+    throw std::invalid_argument("INVALID_VERIFICATION_CLASS_LEGACY: current=" + current_class +
+                                ", existing=" + existing_legacy_class);
+}
+
+std::string determine_loh_subtype_legacy_vc(bool potential_loh,
+                                            const std::string& verification_class_legacy) {
+    if (!is_valid_verification_legacy_class(verification_class_legacy)) {
+        throw std::invalid_argument("INVALID_VERIFICATION_CLASS_LEGACY: " +
+                                    verification_class_legacy);
+    }
+    if (!potential_loh) return "None";
+    if (verification_class_legacy == "Noise") return "LOH_Noise";
+    if (verification_class_legacy == "Weak") return "LOH_Weak";
+    if (verification_class_legacy == "Strong") return "LOH_Strong";
+    if (verification_class_legacy == "Subclone") return "LOH_Subclone";
+    throw std::logic_error("UNREACHABLE_VERIFICATION_CLASS_LEGACY");
+}
+
+namespace {
+
+std::atomic<unsigned long long> atomic_file_counter{0};
+
+std::string atomic_temp_path(const std::string& final_path) {
+    return final_path + ".tmp." + std::to_string(static_cast<long long>(::getpid())) + "." +
+           std::to_string(atomic_file_counter.fetch_add(1));
+}
+
+bool ensure_output_parent(const std::string& path, std::string& error) {
+    std::error_code ec;
+    const auto parent = std::filesystem::path(path).parent_path();
+    if (!parent.empty()) std::filesystem::create_directories(parent, ec);
+    if (ec) {
+        error = "CREATE_OUTPUT_DIRECTORY_FAILED: " + ec.message();
+        return false;
+    }
+    return true;
+}
+
+bool validate_region_status_record(const RegionStratificationStatusRecord& status,
+                                   std::string& error) {
+    if (status.schema_version != REGION_STRATIFICATION_SCHEMA_VERSION) {
+        error = "INVALID_REGION_STATUS_SCHEMA_VERSION";
+        return false;
+    }
+    if (status.reason.empty()) {
+        error = "EMPTY_REGION_STATUS_REASON";
+        return false;
+    }
+    if (status.eligible_region_count < 0 || status.min_regions_required < 0 ||
+        status.assignment_count < 0 || status.n_occupied_region_strata < 0 ||
+        status.warning_count < 0) {
+        error = "NEGATIVE_REGION_STATUS_COUNT";
+        return false;
+    }
+    if (status.n_occupied_region_strata > status.assignment_count ||
+        status.n_occupied_region_strata > static_cast<int>(REGION_STRATUM_SLOT_COUNT)) {
+        error = "INVALID_REGION_STATUS_OCCUPIED_COUNT";
+        return false;
+    }
+
+    if (status.status == RegionStratificationStatus::Valid) {
+        if (status.eligible_region_count == 0 ||
+            status.eligible_region_count < status.min_regions_required ||
+            status.assignment_count != status.eligible_region_count ||
+            status.n_occupied_region_strata == 0) {
+            error = "INCONSISTENT_VALID_REGION_STATUS";
+            return false;
+        }
+    } else if (status.assignment_count != 0 || status.n_occupied_region_strata != 0) {
+        error = "NONVALID_REGION_STATUS_HAS_ASSIGNMENTS";
+        return false;
+    }
+    return true;
+}
+
+class TempFileGuard {
+   public:
+    explicit TempFileGuard(std::string path) : path_(std::move(path)) {}
+    ~TempFileGuard() {
+        if (!published_) std::remove(path_.c_str());
+    }
+
+    void mark_published() { published_ = true; }
+
+   private:
+    std::string path_;
+    bool published_ = false;
+};
+
+bool write_atomic_text(const std::string& final_path,
+                       const std::function<bool(std::ostream&, std::string&)>& writer,
+                       std::string& error) {
+    if (!ensure_output_parent(final_path, error)) return false;
+    const std::string temp_path = atomic_temp_path(final_path);
+    TempFileGuard temp_guard(temp_path);
+    std::ofstream output(temp_path, std::ios::out | std::ios::trunc);
+    if (!output) {
+        error = "OPEN_TEMP_FAILED: " + temp_path;
+        return false;
+    }
+    if (!writer(output, error)) return false;
+    output.flush();
+    if (!output) {
+        error = "FLUSH_TEMP_FAILED: " + temp_path;
+        return false;
+    }
+    output.close();
+    if (!output) {
+        error = "CLOSE_TEMP_FAILED: " + temp_path;
+        return false;
+    }
+    if (std::rename(temp_path.c_str(), final_path.c_str()) != 0) {
+        error = "ATOMIC_RENAME_FAILED: " + temp_path + " -> " + final_path;
+        return false;
+    }
+    temp_guard.mark_published();
+    return true;
+}
+
+}  // namespace
+
+std::string rfc3339_utc_now() {
+    const std::time_t now = std::time(nullptr);
+    std::tm utc{};
+    gmtime_r(&now, &utc);
+    char buffer[21] = {};
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%SZ", &utc);
+    return buffer;
+}
+
+bool write_region_stratification_status_atomic(
+    const std::string& output_dir,
+    const RegionStratificationStatusRecord& status,
+    std::string& error) {
+    if (!validate_region_status_record(status, error)) return false;
+    const std::string path = output_dir + "/region_stratification_status.tsv";
+    return write_atomic_text(path, [&](std::ostream& output, std::string&) {
+        const std::string generated_at = status.generated_at.empty() ? rfc3339_utc_now() : status.generated_at;
+        output << "status\treason\tschema_version\teligible_region_count\tmin_regions_required\t"
+                  "assignment_count\tn_occupied_region_strata\twarning_count\tgenerated_at\n";
+        output << region_stratification_status_string(status.status) << "\t" << status.reason << "\t"
+               << status.schema_version << "\t" << status.eligible_region_count << "\t"
+               << status.min_regions_required << "\t" << status.assignment_count << "\t"
+               << status.n_occupied_region_strata << "\t" << status.warning_count << "\t"
+               << generated_at << "\n";
+        return true;
+    }, error);
+}
+
+bool write_region_stratification_artifacts_atomic(
+    const std::string& output_dir,
+    const std::vector<RegionStratificationArtifactRow>& rows,
+    const std::vector<SubcloneSummary>& summaries,
+    const RegionStratificationStatusRecord& status,
+    std::string& error) {
+    if (!validate_region_status_record(status, error)) return false;
+    const bool is_valid = status.status == RegionStratificationStatus::Valid;
+    const std::string status_text = region_stratification_status_string(status.status);
+
+    if ((!is_valid && !rows.empty()) ||
+        (is_valid && rows.size() != static_cast<std::size_t>(status.assignment_count))) {
+        error = "REGION_ARTIFACT_ROW_COUNT_MISMATCH";
+        return false;
+    }
+    if (summaries.size() != REGION_STRATUM_SLOT_COUNT) {
+        error = "REGION_ARTIFACT_SUMMARY_SLOT_COUNT_MISMATCH";
+        return false;
+    }
+
+    std::array<int, REGION_STRATUM_SLOT_COUNT> rows_per_stratum{};
+    std::unordered_set<std::size_t> result_indices;
+    std::unordered_set<std::string> stable_keys;
+    for (const auto& row : rows) {
+        if (row.schema_version != REGION_STRATIFICATION_SCHEMA_VERSION || row.region_id < 0 ||
+            row.chromosome.empty() || row.stratum_id < 0 ||
+            row.stratum_id >= static_cast<int>(REGION_STRATUM_SLOT_COUNT)) {
+            error = "INVALID_REGION_ARTIFACT_ROW";
+            return false;
+        }
+        const auto stratum = static_cast<RegionStratum>(row.stratum_id);
+        if (row.stratum_label != region_stratum_label(stratum) ||
+            row.stratum_reason != region_stratum_reason(stratum)) {
+            error = "REGION_ARTIFACT_ENUM_MISMATCH";
+            return false;
+        }
+        if (!result_indices.insert(row.result_index).second) {
+            error = "DUPLICATE_REGION_ARTIFACT_RESULT_INDEX";
+            return false;
+        }
+        const std::string stable_key = std::to_string(row.region_id) + "\x1f" + row.chromosome +
+                                       "\x1f" + std::to_string(row.position) + "\x1f" +
+                                       row.reference + "\x1f" + row.alternate;
+        if (!stable_keys.insert(stable_key).second) {
+            error = "DUPLICATE_REGION_ARTIFACT_STABLE_KEY";
+            return false;
+        }
+        ++rows_per_stratum[static_cast<std::size_t>(row.stratum_id)];
+    }
+
+    int occupied = 0;
+    for (std::size_t index = 0; index < summaries.size(); ++index) {
+        if (summaries[index].subclone_id != static_cast<int>(index) ||
+            summaries[index].n_regions < 0 ||
+            (is_valid && summaries[index].n_regions != rows_per_stratum[index])) {
+            error = "REGION_ARTIFACT_SUMMARY_COUNT_MISMATCH";
+            return false;
+        }
+        if (rows_per_stratum[index] > 0) ++occupied;
+    }
+    if (is_valid && occupied != status.n_occupied_region_strata) {
+        error = "REGION_ARTIFACT_OCCUPIED_COUNT_MISMATCH";
+        return false;
+    }
+
+    if (!write_atomic_text(output_dir + "/region_stratification.tsv",
+                           [&](std::ostream& output, std::string&) {
+        output << "RegionID\tChr\tPos\tRef\tAlt\tRegionStratum_ID\tRegionStratum_Label\t"
+                  "RegionStratum_Reason\tRegionStratificationSchemaVersion\n";
+        if (is_valid) {
+            for (const auto& row : rows) {
+                output << row.region_id << "\t" << row.chromosome << "\t" << row.position << "\t"
+                       << row.reference << "\t" << row.alternate << "\t" << row.stratum_id << "\t"
+                       << row.stratum_label << "\t" << row.stratum_reason << "\t"
+                       << row.schema_version << "\n";
+            }
+        }
+        return true;
+    }, error)) {
+        return false;
+    }
+
+    if (!write_atomic_text(output_dir + "/region_stratification_summary.txt",
+                           [&](std::ostream& output, std::string&) {
+        output << "Cross-region ASM region stratification\n";
+        output << "Status: " << status_text << "\n";
+        output << "Reason: " << status.reason << "\n";
+        if (!is_valid) return true;
+
+        static constexpr std::array<const char*, 11> current_classes = {
+            "Strong_Bidirectional", "ClusterFirstOnly", "LOH-Structure", "MultiGroupNoLabel",
+            "LabelShift", "PermanovaLocation", "StructureNoLabel", "DispersionStructure",
+            "Noise_Uniform", "Noise_Chaotic", "Noise_Uncorrelated"};
+        static constexpr std::array<const char*, 4> legacy_classes = {
+            "Strong", "Subclone", "Weak", "Noise"};
+        for (const auto& summary : summaries) {
+            if (summary.n_regions == 0) continue;
+            const auto stratum = static_cast<RegionStratum>(summary.subclone_id);
+            output << "\nRegionStratum " << summary.subclone_id << ": "
+                   << region_stratum_label(stratum) << "\n";
+            output << "Regions: " << summary.n_regions << "\n";
+            output << "VerificationClassV2:";
+            for (std::size_t i = 0; i < current_classes.size(); ++i) {
+                output << (i == 0 ? " " : ";") << current_classes[i] << "="
+                       << summary.verification_class_v2_counts[i];
+            }
+            output << ";UnknownCurrentClass=" << summary.verification_class_v2_unknown << "\n";
+            output << "DominantVerificationClassV2: "
+                   << summary.dominant_verification_classes_v2 << "\n";
+            output << "VerificationClassLegacy:";
+            for (std::size_t i = 0; i < legacy_classes.size(); ++i) {
+                output << (i == 0 ? " " : ";") << legacy_classes[i] << "="
+                       << summary.verification_class_legacy_counts[i];
+            }
+            output << ";UnknownLegacyClass=" << summary.verification_class_legacy_unknown << "\n";
+            output << "DominantVerificationClassLegacy: "
+                   << summary.dominant_verification_classes_legacy << "\n";
+        }
+        return true;
+    }, error)) {
+        return false;
+    }
+
+    return write_atomic_text(output_dir + "/subclone_structure.txt",
+                             [&](std::ostream& output, std::string&) {
+        output << "DEPRECATED: This file does not contain cellular subclones.\n";
+        output << "Canonical report: region_stratification_summary.txt\n";
+        output << "Status: " << status_text << "\n";
+        output << "Reason: " << status.reason << "\n";
+        return true;
+    }, error);
+}
 
 // ============================================================================
 // Quality Assessment Helper Functions (Multi-Layer Validation)
@@ -184,27 +551,6 @@ std::string determine_coverage_category(double coverage_multiple) {
     } else {
         return "High_Copy";
     }
-}
-
-/**
- * @brief Determine LOH subtype based on verification class and LOH status
- */
-std::string determine_loh_subtype(bool potential_loh, const std::string& verification_class) {
-    if (!potential_loh) {
-        return "None";
-    }
-
-    if (verification_class == "Noise") {
-        return "LOH_Noise";
-    } else if (verification_class == "Weak") {
-        return "LOH_Weak";
-    } else if (verification_class == "Strong") {
-        return "LOH_Strong";
-    } else if (verification_class == "Subclone") {
-        return "LOH_Subclone";
-    }
-
-    return "None";
 }
 
 /**
@@ -573,6 +919,15 @@ int RegionProcessor::load_snvs_from_vcf(const std::string& vcf_path) {
 std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     int num_to_process = (max_snvs > 0 && max_snvs < static_cast<int>(snvs_.size())) ? max_snvs : snvs_.size();
 
+    // The status file is the commit marker. Publish a fail-closed sentinel before any work starts.
+    RegionStratificationStatusRecord lifecycle_status;
+    lifecycle_status.status = RegionStratificationStatus::Failed;
+    lifecycle_status.reason = "RUN_IN_PROGRESS";
+    std::string publication_error;
+    if (!write_region_stratification_status_atomic(output_dir_, lifecycle_status, publication_error)) {
+        throw std::runtime_error("REGION_STRATIFICATION_STATUS_WRITE_FAILED: " + publication_error);
+    }
+
     std::cout << "Processing " << num_to_process << " regions with " << num_threads_ << " threads..." << std::endl;
 
     std::vector<RegionResult> results(num_to_process);
@@ -677,7 +1032,8 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     std::stringstream final_ss;
     final_ss << "Completed " << num_to_process << " regions in " 
              << std::fixed << std::setprecision(1) << (total_elapsed / 1000.0) << "s"
-             << " (avg: " << std::setprecision(1) << (total_elapsed / num_to_process) << " ms/region)";
+             << " (avg: " << std::setprecision(1)
+             << (num_to_process > 0 ? total_elapsed / num_to_process : 0.0) << " ms/region)";
     LOG_INFO(final_ss.str());
 
     // Determine diploid coverage: user-specified or auto-estimated
@@ -709,34 +1065,161 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
         }
     }
 
-    // Phase D: Cross-region subclone analysis (when normal BAM is available)
-    if (!normal_bam_path_.empty()) {
-        SubcloneAnalyzer subclone_analyzer;
-        SubcloneResult subclone_result = subclone_analyzer.analyze(results);
-        if (subclone_result.valid) {
-            // Write back subclone assignments to results
-            // Assignments map 1:1 with valid (success + min reads/cpgs + significance) results
-            int profile_idx = 0;
-            for (auto& r : results) {
-                if (!r.success || r.num_reads < 10 || r.num_cpgs < 3 || !r.significance_computed) continue;
-                if (profile_idx < static_cast<int>(subclone_result.region_assignments.size())) {
-                    r.subclone_id = subclone_result.region_assignments[profile_idx];
-                }
-                ++profile_idx;
-            }
+    // Phase D: deterministic cross-region ASM region stratification.
+    for (auto& result : results) {
+        result.region_stratification_schema_version = REGION_STRATIFICATION_SCHEMA_VERSION;
+        result.region_stratum_id = -1;
+        result.region_stratum_label = "Unassigned";
+        result.subclone_id = -1;
+    }
 
-            // Write reports
-            SubcloneAnalyzer::write_report(subclone_result, output_dir_ + "/subclone_structure.txt");
-            LOG_INFO("Subclone analysis complete: " + std::to_string(subclone_result.n_subclones)
-                     + " groups from " + std::to_string(subclone_result.total_regions_analyzed) + " regions");
+    SubcloneResult stratification_result;
+    stratification_result.summaries.resize(REGION_STRATUM_SLOT_COUNT);
+    for (std::size_t i = 0; i < stratification_result.summaries.size(); ++i) {
+        stratification_result.summaries[i].subclone_id = static_cast<int>(i);
+    }
+
+    RegionStratificationStatusRecord terminal_status;
+    if (normal_bam_path_.empty()) {
+        terminal_status.status = RegionStratificationStatus::NotApplicableTumorOnly;
+        terminal_status.reason = "NORMAL_BAM_REQUIRED";
+        for (auto& result : results) result.region_stratum_reason = "NOT_APPLICABLE_TUMOR_ONLY";
+    } else {
+        SubcloneAnalyzer stratifier;
+        stratification_result = stratifier.analyze(results);
+        terminal_status.status = stratification_result.status;
+        terminal_status.reason = stratification_result.reason;
+        terminal_status.eligible_region_count = stratification_result.total_regions_analyzed;
+        terminal_status.warning_count = stratification_result.warning_count;
+
+        if (stratification_result.valid) {
+            const auto commit = commit_region_stratification_assignments(
+                results, stratification_result.assignments,
+                static_cast<std::size_t>(stratification_result.total_regions_analyzed));
+            if (!commit.valid) {
+                terminal_status.status = RegionStratificationStatus::Failed;
+                terminal_status.reason = "ASSIGNMENT_VALIDATION_FAILED";
+                stratification_result.valid = false;
+                stratification_result.assignments.clear();
+                stratification_result.region_assignments.clear();
+                stratification_result.total_regions_assigned = 0;
+                stratification_result.n_occupied_region_strata = 0;
+                stratification_result.n_subclones = 0;
+                for (auto& result : results) {
+                    result.region_stratum_id = -1;
+                    result.region_stratum_label = "Unassigned";
+                    result.region_stratum_reason = "FAILED";
+                    result.subclone_id = -1;
+                }
+                LOG_ERROR("Region stratification failed closed: " + commit.reason);
+            } else {
+                for (auto& result : results) {
+                    if (result.region_stratum_id < 0) result.region_stratum_reason = "INELIGIBLE_REGION";
+                }
+                terminal_status.assignment_count = stratification_result.total_regions_assigned;
+                terminal_status.n_occupied_region_strata =
+                    stratification_result.n_occupied_region_strata;
+                LOG_INFO("Region stratification complete: " +
+                         std::to_string(stratification_result.n_occupied_region_strata) +
+                         " occupied strata from " +
+                         std::to_string(stratification_result.total_regions_analyzed) + " regions");
+            }
         } else {
-            LOG_INFO("Subclone analysis skipped: insufficient valid regions ("
-                     + std::to_string(subclone_result.total_regions_analyzed) + ")");
+            const std::string row_reason =
+                terminal_status.status == RegionStratificationStatus::Failed ? "FAILED" : "INSUFFICIENT_REGIONS";
+            for (auto& result : results) result.region_stratum_reason = row_reason;
+            LOG_INFO("Region stratification not valid: " + terminal_status.reason + " (" +
+                     std::to_string(stratification_result.total_regions_analyzed) + " eligible regions)");
         }
     }
 
-    // Write significance summary and print stats
-    write_significance_summary(results);
+    std::vector<RegionStratificationArtifactRow> artifact_rows;
+    if (terminal_status.status == RegionStratificationStatus::Valid) {
+        artifact_rows.reserve(static_cast<std::size_t>(terminal_status.assignment_count));
+        for (std::size_t i = 0; i < results.size(); ++i) {
+            const auto& result = results[i];
+            if (result.region_stratum_id < 0) continue;
+            if (result.region_id < 0 || result.region_id >= static_cast<int>(snvs_.size())) {
+                terminal_status.status = RegionStratificationStatus::Failed;
+                terminal_status.reason = "STABLE_KEY_SERIALIZATION_FAILED";
+                terminal_status.assignment_count = 0;
+                terminal_status.n_occupied_region_strata = 0;
+                artifact_rows.clear();
+                for (auto& mutable_result : results) {
+                    mutable_result.region_stratum_id = -1;
+                    mutable_result.region_stratum_label = "Unassigned";
+                    mutable_result.region_stratum_reason = "FAILED";
+                    mutable_result.subclone_id = -1;
+                }
+                break;
+            }
+            const auto& snv = snvs_[static_cast<std::size_t>(result.region_id)];
+            RegionStratificationArtifactRow row;
+            row.result_index = i;
+            row.region_id = result.region_id;
+            row.chromosome = chrom_index_.get_name(snv.chr_id);
+            row.position = snv.pos;
+            row.reference = snv.ref_base;
+            row.alternate = snv.alt_base;
+            row.stratum_id = result.region_stratum_id;
+            row.stratum_label = result.region_stratum_label;
+            row.stratum_reason = result.region_stratum_reason;
+            artifact_rows.push_back(std::move(row));
+        }
+    }
+
+    publication_error.clear();
+    if (!write_region_stratification_artifacts_atomic(
+            output_dir_, artifact_rows, stratification_result.summaries, terminal_status,
+            publication_error)) {
+        const std::string primary_error = publication_error;
+        RegionStratificationStatusRecord failed_status = terminal_status;
+        failed_status.status = RegionStratificationStatus::Failed;
+        failed_status.reason = "ARTIFACT_WRITE_FAILED";
+        failed_status.assignment_count = 0;
+        failed_status.n_occupied_region_strata = 0;
+
+        // A validation failure can happen before the canonical artifacts are touched.  Explicitly
+        // overwrite every owned artifact with a FAILED/empty representation so a prior valid run
+        // cannot remain visible beside the new FAILED commit marker.
+        std::vector<SubcloneSummary> failed_summaries(REGION_STRATUM_SLOT_COUNT);
+        for (std::size_t i = 0; i < failed_summaries.size(); ++i) {
+            failed_summaries[i].subclone_id = static_cast<int>(i);
+        }
+        std::string cleanup_error;
+        const bool artifacts_failed_closed = write_region_stratification_artifacts_atomic(
+            output_dir_, {}, failed_summaries, failed_status, cleanup_error);
+        std::string status_error;
+        const bool status_failed_closed =
+            write_region_stratification_status_atomic(output_dir_, failed_status, status_error);
+
+        std::string failure = "REGION_STRATIFICATION_ARTIFACT_WRITE_FAILED: " + primary_error;
+        if (!artifacts_failed_closed) failure += "; FAILED_ARTIFACT_OVERWRITE_FAILED: " + cleanup_error;
+        if (!status_failed_closed) failure += "; FAILED_STATUS_WRITE_FAILED: " + status_error;
+        throw std::runtime_error(failure);
+    }
+
+    publication_error.clear();
+    if (!write_significance_summary(results, publication_error)) {
+        RegionStratificationStatusRecord failed_status = terminal_status;
+        failed_status.status = RegionStratificationStatus::Failed;
+        failed_status.reason = "SIGNIFICANCE_CSV_WRITE_FAILED";
+        failed_status.assignment_count = 0;
+        failed_status.n_occupied_region_strata = 0;
+        std::string ignored_error;
+        write_region_stratification_artifacts_atomic(
+            output_dir_, {}, stratification_result.summaries, failed_status, ignored_error);
+        write_region_stratification_status_atomic(output_dir_, failed_status, ignored_error);
+        throw std::runtime_error("SIGNIFICANCE_CSV_WRITE_FAILED: " + publication_error);
+    }
+
+    // Terminal status is published last, after every canonical artifact and CSV is durable.
+    publication_error.clear();
+    if (!write_region_stratification_status_atomic(output_dir_, terminal_status, publication_error)) {
+        throw std::runtime_error("REGION_STRATIFICATION_TERMINAL_STATUS_WRITE_FAILED: " +
+                                 publication_error);
+    }
+
     print_summary(results);
 
     return results;
@@ -1316,19 +1799,15 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             bam_destroy1(r);
         }
 
-        // [Stage④ 新 VerificationClass] override with evidence-based reclassification (user philosophy:
-        // retain if ANY structure). Computed HERE because Δβ/HP-AUC/Epipoly are only final after the HP +
-        // Per-CpG blocks (the legacy 2x2 in SignificanceAnalyzer ran earlier, before Δβ). Original kept in
-        // verification_class_legacy. within-HP multigroup + SEQC2-LOH deferred to Stage②③.
+        // Stage 4: apply the pure, ordered Verification schema-v2 decision tree only after all evidence
+        // axes are final. The legacy four-state class remains the provenance source for evidence-path flags.
         {
-            result.verification_class_legacy = result.verification_class;
+            result.verification_class_legacy = resolve_verification_legacy_input(
+                result.verification_class, result.verification_class_legacy);
             const bool dbeta_sig = result.germline_asm_dbeta_sig || result.subclone_dbeta_hp1_sig ||
                                    result.subclone_dbeta_hp2_sig || result.somatic_residual_dbeta_sig ||
                                    result.alt_subclone_hp1_sig || result.alt_subclone_hp2_sig;
             const bool hp_auc_struct = result.hp_auc_all >= 0.7;
-            const std::string& lvc = result.verification_class_legacy;
-            const bool cluster_match = (lvc == "Strong" || lvc == "Subclone");  // GlobalTest matched a label
-            const bool loh_struct = result.potential_loh && (hp_auc_struct || dbeta_sig);
             const bool within_hp = result.within_hp_clean_multigroup;  // Stage② within-HP clean substructure
 
             // [D1] label-PERMANOVA significance split by PERMDISP (D2) into clean location-shift vs
@@ -1341,33 +1820,34 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             const bool dispersion_structure = (hp_perm_sig && result.label_hp_dispersion_warning) ||
                                               (al_perm_sig && result.label_allele_dispersion_warning);
 
-            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct || within_hp || clean_location_permanova) {
-                if (cluster_match) {
-                    result.verification_class = "Strong";
-                } else if (loh_struct) {
-                    result.verification_class = "LOH-Structure";
-                } else if (within_hp) {
-                    result.verification_class = "MultiGroupNoLabel";  // S4/S6 within-HP clean multigroup
-                } else if (dbeta_sig) {
-                    result.verification_class = "LabelShift";  // Δβ mean-shift signal (dominant rescue)
-                } else if (clean_location_permanova) {
-                    result.verification_class = "PermanovaLocation";  // [D1] clean (PERMDISP-passed) PERMANOVA
-                } else {
-                    result.verification_class = "StructureNoLabel";  // HP-AUC structure, no label match
-                }
-            } else if (dispersion_structure) {
-                result.verification_class = "DispersionStructure";  // [D1] dispersion-type structure (ambiguous)
-            } else {
-                const double ep = result.per_cpg_epipoly_hp1;
-                const double pw = result.pairwise_mean_distance;
-                if ((pw < 0.15) || (!std::isnan(ep) && ep < 0.2)) {
-                    result.verification_class = "Noise_Uniform";  // 甲基均勻, 無可分
-                } else if ((!std::isnan(ep) && ep > 0.5) || (pw > 0.35)) {
-                    result.verification_class = "Noise_Chaotic";  // 高熵混亂無乾淨群
-                } else {
-                    result.verification_class = "Noise_Uncorrelated";
-                }
-            }
+            VerificationV2Input input;
+            input.legacy_class = result.verification_class_legacy;
+            input.dbeta_sig = dbeta_sig;
+            input.hp_auc_struct = hp_auc_struct;
+            input.potential_loh = result.potential_loh;
+            input.within_hp = within_hp;
+            input.clean_location_permanova = clean_location_permanova;
+            input.dispersion_structure = dispersion_structure;
+            input.dispersion_warning =
+                result.label_hp_dispersion_warning || result.label_allele_dispersion_warning;
+            input.per_cpg_epipoly_hp1 = result.per_cpg_epipoly_hp1;
+            input.pairwise_mean_distance = result.pairwise_mean_distance;
+            const auto decision = classify_verification_v2(input);
+
+            result.verification_schema_version = decision.schema_version;
+            result.verification_class = decision.verification_class;
+            result.verification_class_v1_deprecated = decision.verification_class_v1_deprecated;
+            result.verification_label_first_support = decision.label_first_support;
+            result.verification_cluster_first_support = decision.cluster_first_support;
+            result.verification_within_hp_support = decision.within_hp_support;
+            result.verification_dispersion_warning = decision.dispersion_warning;
+            result.verification_evidence_path = decision.evidence_path;
+            result.verification_evidence_derivation = decision.evidence_derivation;
+            result.verification_significant = decision.significant;
+
+            result.loh_subtype_legacy_vc = determine_loh_subtype_legacy_vc(
+                result.potential_loh, result.verification_class_legacy);
+            result.loh_subtype = result.loh_subtype_legacy_vc;
         }
 
         result.success = true;
@@ -1382,15 +1862,19 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     return result;
 }
 
-void RegionProcessor::write_significance_summary(const std::vector<RegionResult>& results) const {
-    if (results.empty()) return;
+bool RegionProcessor::write_significance_summary(const std::vector<RegionResult>& results,
+                                                 std::string& error) const {
 
     // 1. Write CSV Summary
     std::string csv_path = output_dir_ + "/significance_summary.csv";
-    std::ofstream csv_file(csv_path);
+    if (!ensure_output_parent(csv_path, error)) return false;
+    const std::string csv_temp_path = atomic_temp_path(csv_path);
+    TempFileGuard csv_temp_guard(csv_temp_path);
+    std::ofstream csv_file(csv_temp_path, std::ios::out | std::ios::trunc);
     if (!csv_file.is_open()) {
-        LOG_ERROR("Failed to open significance summary CSV for writing: " + csv_path);
-        return;
+        error = "OPEN_SIGNIFICANCE_CSV_TEMP_FAILED: " + csv_temp_path;
+        LOG_ERROR(error);
+        return false;
     }
 
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
@@ -1447,7 +1931,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "ComboDbeta_NTested,ComboDbeta_NSig,ComboDbeta_SigPairs,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
-                // Phase D: Subclone Assignment
+                // Phase D: deprecated region-stratum alias retained for one migration release
                 "Subclone_ID,"
                 // Phase E: Per-CpG ASM + Epiallele Metrics
                 "PerCpgASM_Valid,"
@@ -1461,7 +1945,12 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // tumor-only structure axis (clustering + PERMANOVA on TUMOR reads only) + StrengthScore components
                 "TumorOnlyClusterK,TumorOnlySilhouette,TumorOnlyPermanovaF,TumorOnlyPermanovaP,"
                 "TumorOnlyPermanovaValid,TumorOnlyDispersionWarn,TumorIntrinsic,"
-                "StrengthStruct,StrengthTumor,StrengthSomatic,StrengthAssoc,StrengthGermline\n";
+                "StrengthStruct,StrengthTumor,StrengthSomatic,StrengthAssoc,StrengthGermline,"
+                // Verification schema-v2 and honest region-stratification columns are tail-only additions.
+                "VerificationSchemaVersion,VerificationClass_V1_Deprecated,LabelFirstSupport,"
+                "ClusterFirstSupport,WithinHPSupport,DispersionWarning,EvidencePath,EvidenceDerivation,"
+                "LOH_Subtype_LegacyVC,RegionStratificationSchemaVersion,RegionStratum_ID,"
+                "RegionStratum_Label,RegionStratum_Reason\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -1475,6 +1964,45 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     for (const auto& r : results) {
         if (!r.success || !r.significance_computed) continue;
 
+        if (r.region_id < 0 || r.region_id >= static_cast<int>(snvs_.size())) {
+            error = "SIGNIFICANCE_ROW_REGION_ID_FAILED";
+            return false;
+        }
+        if (r.verification_schema_version != VERIFICATION_SCHEMA_VERSION) {
+            error = "VERIFICATION_SCHEMA_VERSION_FAILED";
+            return false;
+        }
+        if (r.loh_subtype != r.loh_subtype_legacy_vc) {
+            error = "LOH_SUBTYPE_ALIAS_FAILED";
+            return false;
+        }
+        if (r.region_stratification_schema_version != REGION_STRATIFICATION_SCHEMA_VERSION ||
+            r.subclone_id != r.region_stratum_id) {
+            error = "REGION_STRATIFICATION_ALIAS_FAILED";
+            return false;
+        }
+        if (r.region_stratum_id >= 0) {
+            if (r.region_stratum_id >= static_cast<int>(REGION_STRATUM_SLOT_COUNT) ||
+                r.region_stratum_label !=
+                    region_stratum_label(static_cast<RegionStratum>(r.region_stratum_id)) ||
+                r.region_stratum_reason !=
+                    region_stratum_reason(static_cast<RegionStratum>(r.region_stratum_id))) {
+                error = "REGION_STRATIFICATION_ENUM_FAILED";
+                return false;
+            }
+        } else {
+            const bool valid_unassigned_reason =
+                r.region_stratum_reason == "INELIGIBLE_REGION" ||
+                r.region_stratum_reason == "INSUFFICIENT_REGIONS" ||
+                r.region_stratum_reason == "NOT_APPLICABLE_TUMOR_ONLY" ||
+                r.region_stratum_reason == "FAILED";
+            if (r.region_stratum_id != -1 || r.region_stratum_label != "Unassigned" ||
+                !valid_unassigned_reason) {
+                error = "REGION_STRATIFICATION_SENTINEL_FAILED";
+                return false;
+            }
+        }
+
         total_analyzed++;
         const auto& snv = snvs_[r.region_id];
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
@@ -1485,9 +2013,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         // methylation F1-filter direction is concluded DEAD, so there is one unified verdict and Significant
         // is its boolean projection. DispersionStructure (dispersion-type, ambiguous) and Noise_* are NOT
         // location-significant. Per-axis raw numbers (PERMANOVA/dispersion/Δβ/CramersV/HP-AUC/Strength) stay.
-        const std::string& vc = r.verification_class;
-        bool is_significant = (vc == "Strong" || vc == "LOH-Structure" || vc == "MultiGroupNoLabel" ||
-                               vc == "LabelShift" || vc == "PermanovaLocation" || vc == "StructureNoLabel");
+        const bool is_significant = r.verification_significant;
         
         // Suggest filtering sites with LabelDelta > 0.3 (F1 optimization)
         bool suggest_filter = (r.label_delta > 0.3);
@@ -1630,7 +2156,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
                  << "\"" << r.loh_bed_annotation << "\","
-                 // Phase D: Subclone Assignment
+                 // Phase D: deprecated exact alias of RegionStratum_ID
                  << r.subclone_id << ","
                  // Phase E: Per-CpG ASM + Epiallele Metrics
                  << (r.per_cpg_asm_valid ? "true" : "false") << ","
@@ -1660,17 +2186,43 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (r.tumor_only_dispersion_warn ? "true" : "false") << ","
                  << (r.tumor_intrinsic ? "true" : "false") << "," << std::fixed << std::setprecision(4)
                  << r.strength_struct << "," << r.strength_tumor << "," << r.strength_somatic << ","
-                 << r.strength_assoc << "," << r.strength_germline << "\n";
+                 << r.strength_assoc << "," << r.strength_germline << ","
+                 << r.verification_schema_version << "," << r.verification_class_v1_deprecated << ","
+                 << (r.verification_label_first_support ? "true" : "false") << ","
+                 << (r.verification_cluster_first_support ? "true" : "false") << ","
+                 << (r.verification_within_hp_support ? "true" : "false") << ","
+                 << (r.verification_dispersion_warning ? "true" : "false") << ","
+                 << r.verification_evidence_path << "," << r.verification_evidence_derivation << ","
+                 << r.loh_subtype_legacy_vc << "," << r.region_stratification_schema_version << ","
+                 << r.region_stratum_id << "," << r.region_stratum_label << ","
+                 << r.region_stratum_reason << "\n";
+    }
+    csv_file.flush();
+    if (!csv_file) {
+        error = "FLUSH_SIGNIFICANCE_CSV_TEMP_FAILED: " + csv_temp_path;
+        return false;
     }
     csv_file.close();
+    if (!csv_file) {
+        error = "CLOSE_SIGNIFICANCE_CSV_TEMP_FAILED: " + csv_temp_path;
+        return false;
+    }
+    if (std::rename(csv_temp_path.c_str(), csv_path.c_str()) != 0) {
+        error = "ATOMIC_RENAME_SIGNIFICANCE_CSV_FAILED: " + csv_temp_path + " -> " + csv_path;
+        return false;
+    }
+    csv_temp_guard.mark_published();
     LOG_INFO("Significance summary written to: " + csv_path);
 
     // 2. Write Statistics Report
     std::string stats_path = output_dir_ + "/significance_statistics.txt";
-    std::ofstream stats_file(stats_path);
+    const std::string stats_temp_path = atomic_temp_path(stats_path);
+    TempFileGuard stats_temp_guard(stats_temp_path);
+    std::ofstream stats_file(stats_temp_path, std::ios::out | std::ios::trunc);
     if (!stats_file.is_open()) {
-        LOG_ERROR("Failed to open significance statistics file: " + stats_path);
-        return;
+        error = "OPEN_SIGNIFICANCE_STATS_TEMP_FAILED: " + stats_temp_path;
+        LOG_ERROR(error);
+        return false;
     }
 
     stats_file << "=== Significance Analysis Statistics ===\n\n";
@@ -1680,7 +2232,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     double sig_rate = total_analyzed > 0 ? (100.0 * total_significant / total_analyzed) : 0.0;
     stats_file << "Total Significant: " << total_significant << " (" << std::fixed << std::setprecision(2) << sig_rate
                << "%)\n";
-    stats_file << "Significance Threshold: Passed Gating AND Global P-value <= 0.05\n\n";
+    stats_file << "Significance Definition: Verification schema-v2 clean evidence-path projection\n\n";
 
     stats_file << "--- Per-Chromosome Breakdown ---\n";
     stats_file << std::left << std::setw(10) << "Chr" << std::setw(10) << "Total" << std::setw(15) << "Significant"
@@ -1691,8 +2243,23 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         stats_file << std::left << std::setw(10) << chr << std::setw(10) << stats.total << std::setw(15)
                    << stats.significant << std::setw(10) << std::fixed << std::setprecision(2) << chr_rate << "%\n";
     }
+    stats_file.flush();
+    if (!stats_file) {
+        error = "FLUSH_SIGNIFICANCE_STATS_TEMP_FAILED: " + stats_temp_path;
+        return false;
+    }
     stats_file.close();
+    if (!stats_file) {
+        error = "CLOSE_SIGNIFICANCE_STATS_TEMP_FAILED: " + stats_temp_path;
+        return false;
+    }
+    if (std::rename(stats_temp_path.c_str(), stats_path.c_str()) != 0) {
+        error = "ATOMIC_RENAME_SIGNIFICANCE_STATS_FAILED: " + stats_temp_path + " -> " + stats_path;
+        return false;
+    }
+    stats_temp_guard.mark_published();
     LOG_INFO("Significance statistics summary written to: " + stats_path);
+    return true;
 }
 
 void RegionProcessor::print_summary(const std::vector<RegionResult>& results) const {
@@ -2856,7 +3423,9 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.coverage_multiple = compute_coverage_multiple(result.num_reads);
         result.diploid_coverage_used = 75.0;  // Pass 1 default; overwritten by Pass 2
         result.coverage_category = determine_coverage_category(result.coverage_multiple);
-        result.loh_subtype = determine_loh_subtype(result.potential_loh, result.verification_class);
+        result.loh_subtype_legacy_vc =
+            determine_loh_subtype_legacy_vc(result.potential_loh, result.verification_class);
+        result.loh_subtype = result.loh_subtype_legacy_vc;
         auto qs_weights = normal_bam_path_.empty() ? get_tumor_only_weights() : get_paired_weights();
         result.quality_score = compute_quality_score(
             result.num_reads, result.num_cpgs, result.coverage_multiple,

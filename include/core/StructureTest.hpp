@@ -18,6 +18,24 @@
 
 namespace InterSubMod {
 
+enum class PermutationMode {
+    kUnrestricted,
+    kWithinStrata,
+};
+
+/**
+ * @brief Exchangeability contract for permutation-based structure tests
+ *
+ * For kWithinStrata, labels are shuffled only among samples sharing the same
+ * integer stratum. If no stratum contains at least two different labels, the
+ * test is returned as NOT_EVALUABLE instead of silently falling back to an
+ * unrestricted permutation.
+ */
+struct PermutationOptions {
+    PermutationMode mode = PermutationMode::kUnrestricted;
+    std::vector<int> strata;
+};
+
 /**
  * @brief Configuration for structure tests
  */
@@ -70,6 +88,17 @@ public:
     PermanovaResult run_permanova(const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels);
 
     /**
+     * @brief Run PERMANOVA with an explicit exchangeability contract
+     *
+     * @param dist_matrix N x N complete distance matrix
+     * @param group_labels Group assignment for each sample
+     * @param permutation_options Unrestricted or within-stratum permutation
+     * @return PermanovaResult including R-squared and realized permutation audit
+     */
+    PermanovaResult run_permanova(const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels,
+                                  const PermutationOptions& permutation_options);
+
+    /**
      * @brief Check dispersion homogeneity
      *
      * Computes mean distance to centroid for each group.
@@ -80,6 +109,15 @@ public:
      * @return DispersionResult
      */
     DispersionResult check_dispersion(const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels);
+
+    /**
+     * @brief Run permutation-based PERMDISP with an exchangeability contract
+     *
+     * Unlike the legacy analytic overload, distances to the permuted group
+     * centroids are recomputed for every permutation.
+     */
+    DispersionResult check_dispersion(const Eigen::MatrixXd& dist_matrix, const std::vector<int>& group_labels,
+                                      const PermutationOptions& permutation_options);
 
     /**
      * @brief Set random seed
@@ -120,9 +158,23 @@ private:
                                                            const std::vector<int>& group_labels);
 
     /**
+     * @brief Compute one distance-to-centroid value for every sample
+     */
+    std::vector<double> compute_distances_to_centroid_per_sample(const Eigen::MatrixXd& dist_matrix,
+                                                                 const std::vector<int>& group_labels);
+
+    /**
      * @brief Perform one-way ANOVA F-test on dispersions
      */
     double anova_f_test(const std::vector<double>& values, const std::vector<int>& group_labels);
+
+    /**
+     * @brief Validate and apply the requested permutation restriction
+     */
+    bool validate_permutation_options(int n, const std::vector<int>& group_labels,
+                                      const PermutationOptions& permutation_options, std::string& invalid_reason);
+    void permute_labels(std::vector<int>& labels, const PermutationOptions& permutation_options);
+    static const char* permutation_mode_name(PermutationMode mode);
 };
 
 }  // namespace InterSubMod
