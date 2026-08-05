@@ -7,6 +7,7 @@ import argparse
 import csv
 import gzip
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
@@ -18,6 +19,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_CLASSES_V2,
+    LEGACY_CLASSES,
+    SchemaContractError,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 DEFAULT_CHECKLIST = Path(
@@ -146,6 +159,8 @@ SUMMARY_COLUMNS = [
     "Quality_Score",
     "Quality_Tier",
     "VerificationClass",
+    "VerificationSchemaVersion",
+    "VerificationClass_Legacy",
     "DominantLabel",
     "Potential_LOH",
     "Coverage_Category",
@@ -164,7 +179,10 @@ PARAMETER_NOTES = [
     ("HP_Ratio", "collapsed haplotype imbalance 摘要；是 annotation，不是正式 LOH。"),
     ("PairwiseMedianDist", "region 內 methylation pairwise distance 的中位數；方向具有 dataset dependence。"),
     ("Quality_Score", "甲基訊號整體品質分數；較適合 soft support annotation，不宜直接 hard keep。"),
-    ("VerificationClass", "Strong/Subclone/Weak/Noise；描述 label-first 與 cluster-first 的一致性，不直接等於 TP/FP。"),
+    (
+        "VerificationClass",
+        "此工作區必須明選 current C2 或 historical legacy L4 view；兩者都只作結構註記，不直接等於 TP/FP。",
+    ),
 ]
 
 
@@ -210,12 +228,54 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT), help="Root for generated workspaces")
     parser.add_argument("--output-dir", default=None, help="Optional explicit output directory")
     parser.add_argument(
+        "--verification-view",
+        required=True,
+        choices=("current", "legacy"),
+        help=(
+            "Required schema view: current validates VerificationSchemaVersion=2 and uses the 11-class "
+            "VerificationClass taxonomy; legacy requires VerificationClass_Legacy."
+        ),
+    )
+    parser.add_argument(
         "--max-points-per-group",
         type=int,
         default=2500,
         help="Maximum sampled points per plot group for heavy plots",
     )
     return parser.parse_args()
+
+
+def verification_class_order(requested_view: str) -> List[str]:
+    """Return the exact ordered categories for the explicitly selected panel."""
+    if requested_view == "current":
+        return list(CURRENT_CLASSES_V2) + ["UnknownCurrentClass"]
+    if requested_view == "legacy":
+        return list(LEGACY_CLASSES)
+    raise ValueError(f"Unsupported verification view: {requested_view}")
+
+
+def apply_verification_view(df: pd.DataFrame, requested_view: str) -> tuple[pd.DataFrame, Dict[str, object]]:
+    """Validate and attach one explicit VerificationClass view without taxonomy folding."""
+    if requested_view == "current":
+        view = select_current_view(df)
+    elif requested_view == "legacy":
+        view = select_legacy_view(df)
+    else:
+        raise ValueError(f"Unsupported verification view: {requested_view}")
+
+    selected = df.copy()
+    selected["VerificationClass_SourceValue"] = selected[view.field]
+    selected["VerificationClass"] = pd.Categorical(
+        view.values,
+        categories=view.categories,
+        ordered=True,
+    )
+    selected["VerificationView"] = requested_view
+    selected["VerificationSourceField"] = view.field
+    selected["VerificationSchemaStatus"] = view.schema_status
+    metadata = view.metadata()
+    metadata["requested_view"] = requested_view
+    return selected, metadata
 
 
 def ensure_dir(path: Path) -> Path:
@@ -391,9 +451,24 @@ def load_workflow_coverage(checklist_path: Path) -> pd.DataFrame:
     return df.sort_values(["sample_order", "mode_order"]).reset_index(drop=True)
 
 
-def load_summary_rows(summary_path: Path, vcf_path: Path, meta: RunMeta, truth_label: str) -> pd.DataFrame:
+def load_summary_rows(
+    summary_path: Path,
+    vcf_path: Path,
+    meta: RunMeta,
+    truth_label: str,
+    verification_view: str,
+) -> pd.DataFrame:
     usecols = lambda c: c in SUMMARY_COLUMNS
     summary_df = pd.read_csv(summary_path, usecols=usecols, low_memory=False)
+    try:
+        summary_df, verification_metadata = apply_verification_view(summary_df, verification_view)
+    except SchemaContractError as exc:
+        raise SchemaContractError(f"{summary_path}: {exc}") from exc
+    if verification_metadata["unknown_counts"]:
+        print(
+            f"[verification-schema] {summary_path}: "
+            f"unknown={verification_metadata['unknown_counts']}"
+        )
     feature_df = parse_vcf_features(vcf_path)
     merged = summary_df.merge(feature_df, on=["Chr", "Pos", "Ref", "Alt"], how="left")
     merged["sample"] = meta.sample
@@ -492,12 +567,21 @@ def build_feature_summary(df: pd.DataFrame, group_cols: List[str]) -> pd.DataFra
     return pd.DataFrame(rows)
 
 
-def build_verification_summary(df: pd.DataFrame) -> pd.DataFrame:
+def build_verification_summary(df: pd.DataFrame, class_order: List[str]) -> pd.DataFrame:
     counts = (
-        df.groupby(["sample", "mode", "run_label", "truth_label", "VerificationClass"])
+        df.groupby(
+            ["sample", "mode", "run_label", "truth_label", "VerificationClass"],
+            observed=False,
+        )
         .size()
         .reset_index(name="count")
     )
+    counts["VerificationClass"] = pd.Categorical(
+        counts["VerificationClass"], categories=class_order, ordered=True
+    )
+    counts = counts.sort_values(
+        ["sample", "mode", "run_label", "truth_label", "VerificationClass"]
+    ).reset_index(drop=True)
     total = counts.groupby(["sample", "mode", "run_label", "truth_label"])["count"].transform("sum")
     counts["fraction"] = counts["count"] / total
     return counts
@@ -712,7 +796,7 @@ def plot_run_violin(feature_df: pd.DataFrame, out_png: Path, max_points_per_grou
     plt.close(fig)
 
 
-def plot_verification_stack(feature_df: pd.DataFrame, out_png: Path) -> None:
+def plot_verification_stack(feature_df: pd.DataFrame, out_png: Path, class_order: List[str]) -> None:
     counts = (
         feature_df.groupby(["run_label", "truth_label", "VerificationClass"]).size().reset_index(name="count")
     )
@@ -722,11 +806,24 @@ def plot_verification_stack(feature_df: pd.DataFrame, out_png: Path) -> None:
         "Subclone": "#7570b3",
         "Weak": "#d95f02",
         "Noise": "#666666",
+        "Strong_Bidirectional": "#1b9e77",
+        "ClusterFirstOnly": "#7570b3",
+        "LOH-Structure": "#e7298a",
+        "MultiGroupNoLabel": "#66a61e",
+        "LabelShift": "#e6ab02",
+        "PermanovaLocation": "#a6761d",
+        "StructureNoLabel": "#1f78b4",
+        "DispersionStructure": "#6a3d9a",
+        "Noise_Uniform": "#bdbdbd",
+        "Noise_Chaotic": "#737373",
+        "Noise_Uncorrelated": "#252525",
+        "UnknownCurrentClass": "#ff00ff",
     }
     for ax, truth_label in zip(axes, ["TP", "FP"]):
         sub = counts[counts["truth_label"] == truth_label]
         pivot = sub.pivot(index="run_label", columns="VerificationClass", values="count").fillna(0)
-        cols = [c for c in ["Strong", "Subclone", "Weak", "Noise"] if c in pivot.columns]
+        pivot = pivot.reindex(columns=class_order, fill_value=0)
+        cols = list(class_order)
         pivot[cols].plot(
             kind="bar",
             stacked=True,
@@ -1108,7 +1205,15 @@ def main() -> None:
         raise SystemExit(f"No completed expected runs found in {checklist_path}")
     workflow_df = load_workflow_coverage(checklist_path)
 
-    output_dir = Path(args.output_dir).resolve() if args.output_dir else Path(args.output_root).resolve() / DEFAULT_OUTPUT_NAME
+    default_output_name = (
+        DEFAULT_OUTPUT_NAME if args.verification_view == "legacy"
+        else f"{DEFAULT_OUTPUT_NAME}_current_v2"
+    )
+    output_dir = (
+        Path(args.output_dir).resolve()
+        if args.output_dir
+        else Path(args.output_root).resolve() / default_output_name
+    )
     data_dir = ensure_dir(output_dir / "data")
     plots_global = ensure_dir(output_dir / "plots" / "global")
     plots_sample = ensure_dir(output_dir / "plots" / "by_sample")
@@ -1116,9 +1221,26 @@ def main() -> None:
     layer_df = build_layer_metrics_df(runs)
     feature_parts: List[pd.DataFrame] = []
     for meta in runs:
-        feature_parts.append(load_summary_rows(meta.tp_summary_path, meta.tp_vcf_path, meta, "TP"))
-        feature_parts.append(load_summary_rows(meta.fp_summary_path, meta.fp_vcf_path, meta, "FP"))
+        feature_parts.append(
+            load_summary_rows(
+                meta.tp_summary_path,
+                meta.tp_vcf_path,
+                meta,
+                "TP",
+                args.verification_view,
+            )
+        )
+        feature_parts.append(
+            load_summary_rows(
+                meta.fp_summary_path,
+                meta.fp_vcf_path,
+                meta,
+                "FP",
+                args.verification_view,
+            )
+        )
     feature_df = pd.concat(feature_parts, ignore_index=True)
+    class_order = verification_class_order(args.verification_view)
 
     sample_meta_df = pd.DataFrame(
         [
@@ -1145,7 +1267,7 @@ def main() -> None:
         ignore_index=True,
         sort=False,
     )
-    verification_df = build_verification_summary(feature_df)
+    verification_df = build_verification_summary(feature_df, class_order)
     transition_df = build_run_transition_df(layer_df)
     feature_delta_run_df = build_feature_delta_df(feature_df, ["sample", "mode", "run_label"])
     feature_delta_sample_df = build_feature_delta_df(feature_df, ["sample"])
@@ -1160,7 +1282,11 @@ def main() -> None:
     plot_tp_fp_counts(feature_df, plots_global / "03_tp_fp_region_counts.png")
     plot_mode_box(feature_df, plots_global / "04_feature_box_by_mode_truth.png", args.max_points_per_group)
     plot_run_violin(feature_df, plots_global / "05_feature_violin_by_run_truth.png", args.max_points_per_group)
-    plot_verification_stack(feature_df, plots_global / "06_verification_class_stack.png")
+    plot_verification_stack(
+        feature_df,
+        plots_global / "06_verification_class_stack.png",
+        class_order,
+    )
     plot_hcc1395_family(layer_df, plots_global / "07_hcc1395_family_layer_f1.png")
     plot_feature_delta_heatmap(feature_delta_run_df, plots_global / "08_feature_delta_heatmap.png")
 
@@ -1191,6 +1317,17 @@ def main() -> None:
         "region_rows": int(feature_df.shape[0]),
         "samples": sorted(feature_df["sample"].unique().tolist()),
         "modes": sorted(feature_df["mode"].unique().tolist()),
+        "verification_view": args.verification_view,
+        "verification_source_field": str(feature_df["VerificationSourceField"].iloc[0]),
+        "verification_schema_status": str(feature_df["VerificationSchemaStatus"].iloc[0]),
+        "verification_class_order": class_order,
+        "verification_unknown_counts": {
+            str(key): int(value)
+            for key, value in feature_df.loc[
+                feature_df["VerificationClass"].astype("object") == "UnknownCurrentClass",
+                "VerificationClass_SourceValue",
+            ].value_counts(dropna=False).items()
+        },
     }
     (data_dir / "workspace_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 

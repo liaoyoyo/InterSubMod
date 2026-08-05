@@ -21,6 +21,8 @@ Output:
   - 20260401_SNV甲基化關聯性定量分析報告_01.md
 """
 
+import argparse
+import json
 import sys
 import os
 import warnings
@@ -37,6 +39,21 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -84,11 +101,141 @@ METHYL_BINARIZE_THRESHOLD = 0.5
 MAX_REGIONS_PER_SAMPLE = 500  # subsample for speed; set 0 for unlimited
 N_WORKERS = max(1, cpu_count() - 2)  # use all but 2 cores
 
+PROVENANCE_METADATA_FIELDS = (
+    "VerificationProvenanceStatus",
+    "VerificationProvenanceSourceField",
+    "VerificationProvenanceWarnings",
+)
+
+M1_MASTER_FIELDS = [
+    "RegionID", "Chr", "Pos", "NumReads", "NumCpGs",
+    "HPMergedDelta", "HPMergedP", "HPMergedSig",
+    "AlleleDelta", "AlleleP", "AlleleSig",
+    "HPFineSig", "HPFineP", "GlobalP",
+    "ClusterPermanovaP", "LabelAllelePermanovaP",
+    "Significant", "PassedGating",
+    "sample", "mode", "truth_label",
+    "Potential_LOH",
+]
+
 np.random.seed(42)
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--master-dataset", default=str(MASTER_DATASET_PATH))
+    parser.add_argument("--output-dir", default=str(OUTPUT_DIR))
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize historical H1 input without VerificationSchemaVersion.",
+    )
+    return parser.parse_args()
+
+
+def load_master_with_provenance(path: Path, allow_unversioned_v1: bool = False):
+    available = pd.read_csv(path, sep="\t", compression="infer", nrows=0).columns.tolist()
+    missing_science = [field for field in M1_MASTER_FIELDS if field not in available]
+    if missing_science:
+        raise SchemaContractError(
+            "SNV association: master table missing required analysis fields: "
+            + ", ".join(missing_science)
+        )
+    provenance_available = [
+        field for field in VERIFICATION_PROVENANCE_COLUMNS if field in available
+    ]
+    upstream_metadata_available = [
+        field
+        for field in PROVENANCE_METADATA_FIELDS
+        if field in available and field not in provenance_available
+    ]
+    selected = pd.read_csv(
+        path,
+        sep="\t",
+        compression="infer",
+        usecols=M1_MASTER_FIELDS + provenance_available + upstream_metadata_available,
+        low_memory=False,
+    )
+    input_status = None
+    if "VerificationProvenanceStatus" in selected.columns:
+        statuses = sorted(
+            {
+                value
+                for value in selected["VerificationProvenanceStatus"].dropna().astype(str)
+                if value.strip()
+            }
+        )
+        if len(statuses) != 1:
+            raise SchemaContractError(
+                f"SNV association provenance: expected one upstream status, observed {statuses}"
+            )
+        input_status = statuses[0]
+    if input_status not in {None, "V2", "UNVERSIONED_V1"}:
+        raise SchemaContractError(
+            f"SNV association provenance: unsupported upstream status {input_status!r}"
+        )
+    h1_input = input_status == "UNVERSIONED_V1" or (
+        input_status is None and "VerificationSchemaVersion" not in selected.columns
+    )
+    if not h1_input:
+        current = select_current_view(selected)
+        select_legacy_view(selected)
+        read_evidence(selected)
+        select_loh_legacy(selected)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in selected.columns]
+        if missing:
+            raise SchemaContractError(
+                "SNV association provenance: missing required fields: " + ", ".join(missing)
+            )
+        known = current.values != UNKNOWN_CURRENT_CLASS
+        if known.any():
+            extract_provenance_frame(selected.loc[known])
+        status = "V2"
+        source = current.field
+        warning_payload = {"unknown_current_counts": current.unknown_counts}
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "SNV association provenance: VerificationSchemaVersion missing; explicit "
+                "--allow-unversioned-v1 authorization is required for historical H1 input"
+            )
+        if "VerificationSchemaVersion" in selected.columns:
+            nonblank_versions = {
+                value
+                for value in selected["VerificationSchemaVersion"].dropna().astype(str)
+                if value.strip()
+            }
+            if nonblank_versions:
+                raise SchemaContractError(
+                    "SNV association provenance: UNVERSIONED_V1 input cannot carry a schema version"
+                )
+        missing_h1 = [field for field in ("VerificationClass", "LOH_Subtype") if field not in selected.columns]
+        if missing_h1:
+            raise SchemaContractError(
+                "SNV association provenance: H1 input missing required raw fields: "
+                + ", ".join(missing_h1)
+            )
+        historical = selected[["VerificationClass", "LOH_Subtype"]].copy()
+        provenance = extract_provenance_frame(historical, allow_unversioned_v1=True)
+        status = "UNVERSIONED_V1"
+        source = str(provenance.attrs.get("selection_field", "VerificationClass"))
+        warning_payload = {
+            "authorization": "--allow-unversioned-v1",
+            "messages": list(provenance.attrs.get("warnings", [])),
+        }
+        for field in VERIFICATION_PROVENANCE_COLUMNS:
+            if field not in selected.columns:
+                selected[field] = ""
+    selected["VerificationProvenanceStatus"] = status
+    selected["VerificationProvenanceSourceField"] = source
+    selected["VerificationProvenanceWarnings"] = json.dumps(
+        warning_payload, ensure_ascii=False, sort_keys=True
+    )
+    return selected
 
 
 def load_region_data(region_dir: Path):
@@ -342,30 +489,70 @@ def _worker_analyze(args):
 # ---------------------------------------------------------------------------
 
 
-def run_multi_method_analysis():
+def run_multi_method_analysis(
+    master_dataset: Path = MASTER_DATASET_PATH,
+    output_dir: Path = OUTPUT_DIR,
+    allow_unversioned_v1: bool = False,
+):
     """Run the full multi-method ASM analysis."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Phase 1: ISM data from master dataset ---
     print("=" * 60)
     print("Phase 1: Loading ISM master dataset for M1 statistics")
     print("=" * 60)
 
-    master = pd.read_csv(
-        MASTER_DATASET_PATH, sep="\t", compression="gzip",
-        usecols=[
-            "RegionID", "Chr", "Pos", "NumReads", "NumCpGs",
-            "HPMergedDelta", "HPMergedP", "HPMergedSig",
-            "AlleleDelta", "AlleleP", "AlleleSig",
-            "HPFineSig", "HPFineP", "GlobalP",
-            "ClusterPermanovaP", "LabelAllelePermanovaP",
-            "Significant", "PassedGating",
-            "sample", "mode", "truth_label",
-            "Potential_LOH", "VerificationClass",
-        ],
-        low_memory=False,
+    master = load_master_with_provenance(
+        master_dataset,
+        allow_unversioned_v1=allow_unversioned_v1,
     )
     print(f"  Master: {len(master):,} rows")
+    provenance_statuses = sorted(
+        master["VerificationProvenanceStatus"].dropna().astype(str).unique().tolist()
+    )
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(
+            f"SNV association provenance: mixed schema statuses: {provenance_statuses}"
+        )
+    schema_versions = sorted(
+        {
+            value
+            for value in master["VerificationSchemaVersion"].dropna().astype(str)
+            if value.strip()
+        }
+    )
+    receipt = {
+        "input": str(master_dataset),
+        "schema_status": provenance_statuses[0],
+        "schema_versions": schema_versions,
+        "selection_field": sorted(
+            master["VerificationProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        ),
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "provenance_fields": list(VERIFICATION_PROVENANCE_COLUMNS),
+        "scientific_parameters": {
+            "n_bootstrap": N_BOOTSTRAP,
+            "alpha": ALPHA,
+            "min_reads_per_allele": MIN_READS_PER_ALLELE,
+            "methyl_binarize_threshold": METHYL_BINARIZE_THRESHOLD,
+            "max_regions_per_sample": MAX_REGIONS_PER_SAMPLE,
+        },
+    }
+    (output_dir / "verification_schema_contract.json").write_text(
+        json.dumps(receipt, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    provenance_fields = [
+        "RegionID", "Chr", "Pos", "sample", "mode", "truth_label",
+        *VERIFICATION_PROVENANCE_COLUMNS,
+        *PROVENANCE_METADATA_FIELDS,
+    ]
+    master[provenance_fields].to_csv(
+        output_dir / "m1_ism_region_provenance.tsv.gz",
+        sep="\t",
+        index=False,
+        compression="gzip",
+    )
 
     # M1 proportion table
     m1_results = []
@@ -382,6 +569,8 @@ def run_multi_method_analysis():
             row = {
                 "mode": mode,
                 "truth_label": label,
+                "VerificationProvenanceStatus": provenance_statuses[0],
+                "VerificationSchemaVersion": schema_versions[0] if schema_versions else "",
                 "n_total": n,
                 "HPMergedSig_rate": sub["HPMergedSig"].mean(),
                 "AlleleSig_rate": sub["AlleleSig"].mean(),
@@ -396,7 +585,7 @@ def run_multi_method_analysis():
             m1_results.append(row)
 
     m1_df = pd.DataFrame(m1_results)
-    m1_df.to_csv(OUTPUT_DIR / "m1_ism_proportion_summary.tsv", sep="\t", index=False)
+    m1_df.to_csv(output_dir / "m1_ism_proportion_summary.tsv", sep="\t", index=False)
     print("\n  M1 ISM proportions saved.")
     print(m1_df.to_string(index=False))
 
@@ -416,6 +605,8 @@ def run_multi_method_analysis():
                     "sample": sample,
                     "mode": mode,
                     "truth_label": label,
+                    "VerificationProvenanceStatus": provenance_statuses[0],
+                    "VerificationSchemaVersion": schema_versions[0] if schema_versions else "",
                     "n": len(sub),
                     "HPMergedSig_rate": sub["HPMergedSig"].mean(),
                     "AlleleSig_rate": sub["AlleleSig"].mean(),
@@ -424,7 +615,7 @@ def run_multi_method_analysis():
                     "median_AlleleDelta": sub["AlleleDelta"].median(),
                 })
     m1_sample_df = pd.DataFrame(m1_per_sample)
-    m1_sample_df.to_csv(OUTPUT_DIR / "m1_per_sample.tsv", sep="\t", index=False)
+    m1_sample_df.to_csv(output_dir / "m1_per_sample.tsv", sep="\t", index=False)
 
     # --- Phase 2: Independent methods (M2-M5) on read-level data ---
     print("\n" + "=" * 60)
@@ -459,7 +650,7 @@ def run_multi_method_analysis():
     print(f"    -> Final: {len(all_results)} valid results from {len(all_tasks)} tasks")
 
     results_df = pd.DataFrame(all_results)
-    results_df.to_csv(OUTPUT_DIR / "per_region_multi_method.tsv", sep="\t", index=False)
+    results_df.to_csv(output_dir / "per_region_multi_method.tsv", sep="\t", index=False)
     print(f"\n  Total regions analyzed: {len(results_df):,}")
 
     # --- Phase 3: Concordance analysis ---
@@ -492,7 +683,7 @@ def run_multi_method_analysis():
             proportion_rows.append(row)
 
     prop_df = pd.DataFrame(proportion_rows)
-    prop_df.to_csv(OUTPUT_DIR / "proportion_summary_independent.tsv", sep="\t", index=False)
+    prop_df.to_csv(output_dir / "proportion_summary_independent.tsv", sep="\t", index=False)
     print("\n  Independent method proportions:")
     print(prop_df.to_string(index=False))
 
@@ -514,7 +705,7 @@ def run_multi_method_analysis():
             per_sample_indep.append(row)
     if per_sample_indep:
         ps_df = pd.DataFrame(per_sample_indep)
-        ps_df.to_csv(OUTPUT_DIR / "per_sample_independent_proportions.tsv", sep="\t", index=False)
+        ps_df.to_csv(output_dir / "per_sample_independent_proportions.tsv", sep="\t", index=False)
         print("\n  Per-sample independent proportions:")
         print(ps_df.to_string(index=False))
 
@@ -556,9 +747,9 @@ def run_multi_method_analysis():
     print("Phase 5: Generating figures")
     print("=" * 60)
 
-    generate_figures(results_df, m1_df, m1_sample_df, OUTPUT_DIR)
+    generate_figures(results_df, m1_df, m1_sample_df, output_dir)
 
-    print("\n  Done! All outputs in:", OUTPUT_DIR)
+    print("\n  Done! All outputs in:", output_dir)
 
 
 # ---------------------------------------------------------------------------
@@ -828,4 +1019,9 @@ def generate_figures(results_df, m1_df, m1_sample_df, out_dir):
 
 
 if __name__ == "__main__":
-    run_multi_method_analysis()
+    cli_args = parse_args()
+    run_multi_method_analysis(
+        master_dataset=Path(cli_args.master_dataset).resolve(),
+        output_dir=Path(cli_args.output_dir).resolve(),
+        allow_unversioned_v1=cli_args.allow_unversioned_v1,
+    )

@@ -11,7 +11,9 @@ LOH 内 HPFineP / AlleleDelta TP-FP 区分力验证
 
 Output: output/clairsto_correction_analysis/feature_study/LOH_validation/
 """
+import argparse
 import os, sys, json, warnings
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -21,7 +23,14 @@ from matplotlib.gridspec import GridSpec
 from scipy import stats
 from sklearn.metrics import roc_auc_score
 
-warnings.filterwarnings("ignore")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 plt.rcParams.update({"font.size": 9, "figure.dpi": 150})
 
 # === Paths ===
@@ -37,19 +46,50 @@ VERSIONS = {
     },
 }
 OUTDIR = "/big7_disk/liaoyoyo2001/InterSubMod/output/clairsto_correction_analysis/feature_study/LOH_validation"
-os.makedirs(OUTDIR, exist_ok=True)
 
 LOH_SUBTYPES = ["LOH_Strong", "LOH_Weak", "LOH_Noise"]
 CHROMOSOMES = [f"chr{i}" for i in range(1, 23)]
 
 
-def load_version(ver):
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
+def load_version(ver, allow_unversioned_v1: bool = False):
     """Load and merge TP/FP for a version."""
     tp = pd.read_csv(VERSIONS[ver]["tp"])
     fp = pd.read_csv(VERSIONS[ver]["fp"])
     tp["label"] = "TP"
     fp["label"] = "FP"
-    df = pd.concat([tp, fp], ignore_index=True)
+    df = attach_loh_legacy_view(
+        pd.concat([tp, fp], ignore_index=True),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
     # Parse chromosome
     df["chromosome"] = df["Chr"].astype(str)
     return df
@@ -111,7 +151,7 @@ def compute_feature_stats(df_loh, feature, boolean=False):
 
     # Per subtype
     for st in LOH_SUBTYPES:
-        sub = df_loh[df_loh["LOH_Subtype"] == st]
+        sub = df_loh[df_loh["_loh_subtype_legacy"] == st]
         tp_v = sub.loc[sub["label"] == "TP", feature].dropna()
         fp_v = sub.loc[sub["label"] == "FP", feature].dropna()
         y_s = np.array([1]*len(tp_v) + [0]*len(fp_v))
@@ -169,7 +209,10 @@ def per_chromosome_subtype_auc(df_loh, feature, boolean=False):
     rows = []
     for chrom in CHROMOSOMES:
         for st in LOH_SUBTYPES:
-            sub = df_loh[(df_loh["chromosome"] == chrom) & (df_loh["LOH_Subtype"] == st)]
+            sub = df_loh[
+                (df_loh["chromosome"] == chrom)
+                & (df_loh["_loh_subtype_legacy"] == st)
+            ]
             tp_v = sub.loc[sub["label"] == "TP", feature].dropna()
             fp_v = sub.loc[sub["label"] == "FP", feature].dropna()
             if len(tp_v) < 3 or len(fp_v) < 3:
@@ -199,7 +242,11 @@ def plot_fig1(data_dict):
         subtypes = ["All_LOH"] + LOH_SUBTYPES
         tp_rates, fp_rates, ns_tp, ns_fp = [], [], [], []
         for st in subtypes:
-            sub = df_loh if st == "All_LOH" else df_loh[df_loh["LOH_Subtype"] == st]
+            sub = (
+                df_loh
+                if st == "All_LOH"
+                else df_loh[df_loh["_loh_subtype_legacy"] == st]
+            )
             tp = sub[sub["label"] == "TP"]["HPFineSig"]
             fp = sub[sub["label"] == "FP"]["HPFineSig"]
             tp_rates.append(tp.mean() if len(tp) > 0 else 0)
@@ -246,7 +293,7 @@ def plot_fig2(data_dict):
     for row_idx, (ver, df_loh) in enumerate(data_dict.items()):
         for col_idx, st in enumerate(LOH_SUBTYPES):
             ax = axes[row_idx, col_idx]
-            sub = df_loh[df_loh["LOH_Subtype"] == st]
+            sub = df_loh[df_loh["_loh_subtype_legacy"] == st]
             tp_p = sub.loc[sub["label"] == "TP", "HPFineP"].dropna()
             fp_p = sub.loc[sub["label"] == "FP", "HPFineP"].dropna()
 
@@ -312,7 +359,7 @@ def plot_fig3(data_dict):
     for row_idx, (ver, df_loh) in enumerate(data_dict.items()):
         for col_idx, st in enumerate(LOH_SUBTYPES):
             ax = axes[row_idx, col_idx]
-            sub = df_loh[df_loh["LOH_Subtype"] == st]
+            sub = df_loh[df_loh["_loh_subtype_legacy"] == st]
             tp_d = sub.loc[sub["label"] == "TP", "AlleleDelta"].dropna()
             fp_d = sub.loc[sub["label"] == "FP", "AlleleDelta"].dropna()
 
@@ -665,6 +712,8 @@ def plot_fig8(all_stats):
 # Main
 # ============================================================
 def main():
+    args = parse_args()
+    os.makedirs(OUTDIR, exist_ok=True)
     print("=" * 60)
     print("LOH Feature Validation: HPFineP + AlleleDelta")
     print("=" * 60)
@@ -674,18 +723,26 @@ def main():
     all_stats = {}
     chr_auc = {}
     chr_sub_auc = {}
+    loh_schema_contract = {}
 
     for ver in ["v2b", "baseline"]:
         print(f"\n--- Loading {ver} ---")
-        df = load_version(ver)
+        df = load_version(ver, allow_unversioned_v1=args.allow_unversioned_v1)
+        loh_schema_contract[ver] = dict(df.attrs["loh_schema_contract"])
         print(f"  Total: {len(df)} ({(df['label']=='TP').sum()} TP, {(df['label']=='FP').sum()} FP)")
 
-        df_loh = df[df["LOH_Subtype"].isin(LOH_SUBTYPES)].copy()
+        df_loh = df[df["_loh_subtype_legacy"].isin(LOH_SUBTYPES)].copy()
         print(f"  LOH: {len(df_loh)} ({(df_loh['label']=='TP').sum()} TP, {(df_loh['label']=='FP').sum()} FP)")
         for st in LOH_SUBTYPES:
-            n = (df_loh["LOH_Subtype"] == st).sum()
-            nt = ((df_loh["LOH_Subtype"] == st) & (df_loh["label"] == "TP")).sum()
-            nf = ((df_loh["LOH_Subtype"] == st) & (df_loh["label"] == "FP")).sum()
+            n = (df_loh["_loh_subtype_legacy"] == st).sum()
+            nt = (
+                (df_loh["_loh_subtype_legacy"] == st)
+                & (df_loh["label"] == "TP")
+            ).sum()
+            nf = (
+                (df_loh["_loh_subtype_legacy"] == st)
+                & (df_loh["label"] == "FP")
+            ).sum()
             print(f"    {st}: {n} (TP={nt}, FP={nf})")
 
         data_loh[ver] = df_loh
@@ -735,6 +792,7 @@ def main():
         "sample": "HCC1395 (100% purity)",
         "versions": ["v2b (PON-only)", "baseline (longphase-to)"],
         "features_tested": ["HPFineSig/HPFineP", "AlleleDelta"],
+        "loh_schema_contract": loh_schema_contract,
         "key_findings": {},
         "single_sample_limitation": True,
         "cross_sample_validated": False,

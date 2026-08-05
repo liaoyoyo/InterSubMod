@@ -17,13 +17,26 @@ Output:
   - docs/methodology/20260323_VerificationClass決策樹跨樣本量化_01.md
 """
 
-import csv
+import argparse
 import json
 import math
 import os
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_CLASSES_V2,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 # ── Data Paths ──────────────────────────────────────────────────────────────
 
@@ -49,6 +62,12 @@ EXTRA_PATHS = {
 
 OUTPUT_DOC = "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/20260323_VerificationClass決策樹跨樣本量化_01.md"
 
+CURRENT_NOISE_CLASSES = (
+    "Noise_Uniform",
+    "Noise_Chaotic",
+    "Noise_Uncorrelated",
+)
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -64,15 +83,43 @@ def safe_bool(v):
     return str(v).strip().lower() in ("true", "1", "yes")
 
 
+def apply_verification_contract(frame):
+    """Validate C2 + typed evidence; this audit forbids unknown current classes."""
+    current = select_current_view(frame)
+    if current.unknown_counts:
+        raise SchemaContractError(
+            f"decision-tree audit: unknown VerificationClass values: {current.unknown_counts}"
+        )
+    evidence = read_evidence(frame)
+    selected = frame.copy()
+    selected["_VerificationClass_C2"] = current.values
+    selected["_LabelFirstSupport_E"] = evidence["LabelFirstSupport"]
+    selected["_ClusterFirstSupport_E"] = evidence["ClusterFirstSupport"]
+    selected["_EvidencePath_E"] = evidence["EvidencePath"]
+    selected["_VerificationSourceField"] = current.field
+    selected["_VerificationSchemaStatus"] = current.schema_status
+    return selected, {
+        "verification": current.metadata(),
+        "evidence_fields": [
+            "LabelFirstSupport",
+            "ClusterFirstSupport",
+            "WithinHPSupport",
+            "DispersionWarning",
+            "EvidencePath",
+            "EvidenceDerivation",
+        ],
+    }
+
+
 def load_csv(path):
     if not path or not os.path.exists(path):
         return []
-    rows = []
-    with open(path, "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            rows.append(row)
-    return rows
+    frame = pd.read_csv(path, low_memory=False)
+    try:
+        selected, _ = apply_verification_contract(frame)
+    except SchemaContractError as exc:
+        raise SchemaContractError(f"{path}: {exc}") from exc
+    return [enrich_row(row) for row in selected.to_dict("records")]
 
 
 def auroc(scores_tp, scores_fp):
@@ -120,9 +167,11 @@ def enrich_row(row):
     row["_LOH_HP_Signal"] = hp_imbalance * ad if loh else ad
 
     row["_passed_gate"] = safe_bool(row.get("PassedGating", False))
-    row["_label_sig"] = safe_bool(row.get("HPMergedSig", False)) or safe_bool(row.get("AlleleSig", False))
-    vc = row.get("VerificationClass", "Noise")
-    row["_cluster_sig"] = vc in ("Strong", "Subclone")
+    if "_VerificationClass_C2" not in row:
+        raise SchemaContractError("decision-tree audit: row lacks validated C2 class")
+    vc = row["_VerificationClass_C2"]
+    row["_label_sig"] = bool(row["_LabelFirstSupport_E"])
+    row["_cluster_sig"] = bool(row["_ClusterFirstSupport_E"])
     row["_vc"] = vc
     row["_significant"] = safe_bool(row.get("Significant", False))
     row["_loh"] = loh
@@ -158,11 +207,23 @@ def decision_tree_flow(tp_rows, fp_rows):
     result["passed_gate_true"]  = {"tp": len(tp_pg), "fp": len(fp_pg)}
     result["passed_gate_false"] = {"tp": len(tp_ng), "fp": len(fp_ng)}
 
-    # VerificationClass branches
-    for vc in ("Strong", "Subclone", "Weak", "Noise"):
+    # Canonical VerificationClass v2 branches
+    result["verification_classes"] = {}
+    for vc in CURRENT_CLASSES_V2:
         tp_vc = [r for r in tp_rows if r["_vc"] == vc]
         fp_vc = [r for r in fp_rows if r["_vc"] == vc]
-        result[f"vc_{vc.lower()}"] = {"tp": len(tp_vc), "fp": len(fp_vc)}
+        result["verification_classes"][vc] = {"tp": len(tp_vc), "fp": len(fp_vc)}
+
+    # Evidence support comes from typed E fields, never from class names.
+    for key, predicate in (
+        ("cluster_first_support_true", lambda r: r["_cluster_sig"]),
+        ("label_first_support_true", lambda r: r["_label_sig"]),
+        ("bidirectional_support_true", lambda r: r["_cluster_sig"] and r["_label_sig"]),
+    ):
+        result[key] = {
+            "tp": sum(1 for r in tp_rows if predicate(r)),
+            "fp": sum(1 for r in fp_rows if predicate(r)),
+        }
 
     # Significant field
     tp_sig = [r for r in tp_rows if r["_significant"]]
@@ -170,9 +231,9 @@ def decision_tree_flow(tp_rows, fp_rows):
     result["significant_true"]  = {"tp": len(tp_sig), "fp": len(fp_sig)}
     result["significant_false"] = {"tp": n_tp - len(tp_sig), "fp": n_fp - len(fp_sig)}
 
-    # Not-noise (VC != Noise)
-    tp_nn = [r for r in tp_rows if r["_vc"] != "Noise"]
-    fp_nn = [r for r in fp_rows if r["_vc"] != "Noise"]
+    # C2 non-noise classes (explicit exact enum set; no fallback/default-to-Noise).
+    tp_nn = [r for r in tp_rows if r["_vc"] not in CURRENT_NOISE_CLASSES]
+    fp_nn = [r for r in fp_rows if r["_vc"] not in CURRENT_NOISE_CLASSES]
     result["vc_not_noise"] = {"tp": len(tp_nn), "fp": len(fp_nn)}
 
     return result
@@ -228,21 +289,24 @@ def quality_audit(tp_rows, fp_rows):
     result["fp_loh_true"]  = bucket(fp_rows, lambda r: r["_loh"], "FP LOH=True")
     result["fp_loh_false"] = bucket(fp_rows, lambda r: not r["_loh"], "FP LOH=False")
 
-    # TP in Noise class by quality tier
-    tp_noise = [r for r in tp_rows if r["_vc"] == "Noise"]
+    # TP in canonical C2 noise classes by quality tier
+    tp_noise = [r for r in tp_rows if r["_vc"] in CURRENT_NOISE_CLASSES]
     for tier in ("High", "Medium", "Low", "VeryLow", ""):
         key = f"tp_noise_tier_{tier or 'unknown'}"
         subset = [r for r in tp_noise if r["_quality_tier"] == tier]
         result[key] = len(subset)
 
-    # LOH rate by VC class
-    for vc in ("Strong", "Subclone", "Weak", "Noise"):
+    # LOH rate by canonical C2 VerificationClass.
+    result["loh_rate_by_verification_class"] = {}
+    for vc in CURRENT_CLASSES_V2:
         tp_vc = [r for r in tp_rows if r["_vc"] == vc]
         fp_vc = [r for r in fp_rows if r["_vc"] == vc]
         tp_loh = sum(1 for r in tp_vc if r["_loh"])
         fp_loh = sum(1 for r in fp_vc if r["_loh"])
-        result[f"tp_{vc.lower()}_loh_rate"] = tp_loh / len(tp_vc) if tp_vc else float("nan")
-        result[f"fp_{vc.lower()}_loh_rate"] = fp_loh / len(fp_vc) if fp_vc else float("nan")
+        result["loh_rate_by_verification_class"][vc] = {
+            "tp": tp_loh / len(tp_vc) if tp_vc else float("nan"),
+            "fp": fp_loh / len(fp_vc) if fp_vc else float("nan"),
+        }
 
     return result
 
@@ -290,13 +354,13 @@ def load_sample(sample, tp_path, fp_path):
     if not tp_raw:
         print(f"  [WARN] {sample}: no TP data at {tp_path}")
         return None, None
-    tp_rows = [enrich_row(r) for r in tp_raw]
-    fp_rows = [enrich_row(r) for r in fp_raw]
+    tp_rows = tp_raw
+    fp_rows = fp_raw
     print(f"  {sample}: TP={len(tp_rows)}, FP={len(fp_rows)}")
     return tp_rows, fp_rows
 
 
-def collect_samples():
+def collect_samples(include_extra=True):
     samples = {}
     print("\n=== Loading sample data ===")
     for sample, run_id in SAMPLE_PATHS.items():
@@ -306,10 +370,11 @@ def collect_samples():
         if tp is not None:
             samples[sample] = {"tp": tp, "fp": fp}
 
-    for name, paths in EXTRA_PATHS.items():
-        tp, fp = load_sample(name, paths["tp"], paths["fp"])
-        if tp is not None:
-            samples[name] = {"tp": tp, "fp": fp}
+    if include_extra:
+        for name, paths in EXTRA_PATHS.items():
+            tp, fp = load_sample(name, paths["tp"], paths["fp"])
+            if tp is not None:
+                samples[name] = {"tp": tp, "fp": fp}
 
     return samples
 
@@ -326,20 +391,28 @@ def print_decision_tree(sample, flow, n_tp_total, n_fp_total):
     print(f"  PassedGating=False: TP={ng['tp']} ({fmt_pct(ng['tp'],total['tp'])}) "
           f"FP={ng['fp']} ({fmt_pct(ng['fp'],total['fp'])})")
 
-    print(f"  VerificationClass breakdown:")
-    for vc in ("Strong", "Subclone", "Weak", "Noise"):
-        b = flow[f"vc_{vc.lower()}"]
+    print(f"  VerificationClass v2 breakdown:")
+    for vc in CURRENT_CLASSES_V2:
+        b = flow["verification_classes"][vc]
         prec = precision(b["tp"], b["fp"])
-        print(f"    {vc:9s}: TP={b['tp']:5d} ({fmt_pct(b['tp'],total['tp'])}) "
+        print(f"    {vc:24s}: TP={b['tp']:5d} ({fmt_pct(b['tp'],total['tp'])}) "
               f"FP={b['fp']:5d} ({fmt_pct(b['fp'],total['fp'])}) "
               f"Prec={prec:.1%}")
+
+    print("  Typed evidence support:")
+    for key in ("cluster_first_support_true", "label_first_support_true", "bidirectional_support_true"):
+        branch = flow[key]
+        print(
+            f"    {key:30s}: TP={branch['tp']:5d} FP={branch['fp']:5d} "
+            f"Prec={precision(branch['tp'], branch['fp']):.1%}"
+        )
 
     sig = flow["significant_true"]
     nn  = flow["vc_not_noise"]
     print(f"  Significant=True:   TP={sig['tp']:5d} ({fmt_pct(sig['tp'],total['tp'])}) "
           f"FP={sig['fp']:5d} ({fmt_pct(sig['fp'],total['fp'])}) "
           f"Prec={precision(sig['tp'],sig['fp']):.1%}")
-    print(f"  VC != Noise:        TP={nn['tp']:5d} ({fmt_pct(nn['tp'],total['tp'])}) "
+    print(f"  C2 non-noise:       TP={nn['tp']:5d} ({fmt_pct(nn['tp'],total['tp'])}) "
           f"FP={nn['fp']:5d} ({fmt_pct(nn['fp'],total['fp'])}) "
           f"Prec={precision(nn['tp'],nn['fp']):.1%}")
 
@@ -361,16 +434,20 @@ def print_quality_audit(sample, qa):
             print(f"  {key}: n={d['n']} mean={d['mean']:.1f} median={d['median']:.0f} "
                   f"p25={d['p25']:.0f} p75={d['p75']:.0f}")
 
-    print(f"  TP in Noise by Quality_Tier:")
+    print(f"  TP in C2 noise classes by Quality_Tier:")
     for tier in ("High", "Medium", "Low", "VeryLow", "unknown"):
         key = f"tp_noise_tier_{tier}"
         print(f"    {tier}: {qa.get(key, 0)}")
 
-    print(f"  LOH rate per VC class:")
-    for vc in ("strong", "subclone", "weak", "noise"):
-        tr = qa.get(f"tp_{vc}_loh_rate", float("nan"))
-        fr = qa.get(f"fp_{vc}_loh_rate", float("nan"))
-        print(f"    {vc:9s}: TP_LOH%={tr:.1%}  FP_LOH%={fr:.1%}" if not (math.isnan(tr) or math.isnan(fr)) else f"    {vc}: N/A")
+    print(f"  LOH rate per C2 class:")
+    for vc in CURRENT_CLASSES_V2:
+        rates = qa["loh_rate_by_verification_class"][vc]
+        tr, fr = rates["tp"], rates["fp"]
+        print(
+            f"    {vc:24s}: TP_LOH%={tr:.1%}  FP_LOH%={fr:.1%}"
+            if not (math.isnan(tr) or math.isnan(fr))
+            else f"    {vc}: N/A"
+        )
 
 
 def print_permanova_audit(sample, pa):
@@ -405,17 +482,13 @@ def build_markdown(all_results):
         "",
         "## 1. 定義",
         "",
-        "### VerificationClass 決策邏輯",
+        "### VerificationClass v2 與 evidence 契約",
         "```",
-        "cluster_significant = passed_gate AND (GlobalAltP ≤ 0.05 OR GlobalHPP ≤ 0.05)",
-        "label_significant   = HPMergedSig OR AlleleSig",
-        "",
-        "Strong   = label_sig=True  AND cluster_sig=True",
-        "Subclone = label_sig=False AND cluster_sig=True",
-        "Weak     = label_sig=True  AND cluster_sig=False",
-        "Noise    = label_sig=False AND cluster_sig=False",
-        "",
-        "passed_gate = (GlobalP ≤ 0.1) AND (CramersV ≥ 0.1)",
+        "current_class = VerificationClass (VerificationSchemaVersion == 2)",
+        "label_support = typed LabelFirstSupport",
+        "cluster_support = typed ClusterFirstSupport",
+        "non_noise = current_class not in {Noise_Uniform, Noise_Chaotic, Noise_Uncorrelated}",
+        "# evidence is never reconstructed from a class name",
         "```",
         "",
         "### 欄位來源（significance_summary.csv）",
@@ -424,9 +497,11 @@ def build_markdown(all_results):
         "| PassedGating | passed_gate 結果 |",
         "| CramersV | Cramér's V 效應量 |",
         "| GlobalP | 全局 p-value（AlleleDelta chi-sq） |",
-        "| HPMergedSig | HP 合并顯著性 |",
-        "| AlleleSig | Allele 顯著性 |",
-        "| VerificationClass | Strong/Weak/Subclone/Noise |",
+        "| VerificationSchemaVersion | 必須逐列為 2 |",
+        "| VerificationClass | canonical 11-class C2 taxonomy |",
+        "| LabelFirstSupport | typed label-first evidence |",
+        "| ClusterFirstSupport | typed cluster-first evidence |",
+        "| EvidencePath | canonical evidence path enum |",
         "| Significant | Python 層判斷（候選去除） |",
         "| Potential_LOH | LOH 旗標 |",
         "| Quality_Score | QualityScore (0-100) |",
@@ -449,10 +524,9 @@ def build_markdown(all_results):
 
         pg  = flow["passed_gate_true"]
         ng  = flow["passed_gate_false"]
-        s   = flow["vc_strong"]
-        sc  = flow["vc_subclone"]
-        w   = flow["vc_weak"]
-        n   = flow["vc_noise"]
+        cfs = flow["cluster_first_support_true"]
+        lfs = flow["label_first_support_true"]
+        bidir = flow["bidirectional_support_true"]
         sig = flow["significant_true"]
         nn  = flow["vc_not_noise"]
 
@@ -462,26 +536,29 @@ def build_markdown(all_results):
             f"```mermaid",
             f"flowchart TD",
             f'  ALL["全量<br>TP={total["tp"]:,} FP={total["fp"]:,}"]',
-            f'  ALL --> PG["PassedGating=True<br>TP={pg["tp"]:,} ({fmt_pct(pg["tp"],total["tp"])})<br>FP={pg["fp"]:,} ({fmt_pct(pg["fp"],total["fp"])})<br>Prec={precision(pg["tp"],pg["fp"]):.0%}"]',
-            f'  ALL --> NPG["PassedGating=False<br>TP={ng["tp"]:,} FP={ng["fp"]:,}"]',
-            f'  PG --> STR["Strong (cluster+label=True)<br>TP={s["tp"]:,} FP={s["fp"]:,}<br>Prec={precision(s["tp"],s["fp"]):.0%}"]',
-            f'  PG --> SUB["Subclone (cluster=True,label=False)<br>TP={sc["tp"]:,} FP={sc["fp"]:,}<br>Prec={precision(sc["tp"],sc["fp"]):.0%}"]',
-            f'  NPG --> WK["Weak (label=True,cluster=False)<br>TP={w["tp"]:,} FP={w["fp"]:,}"]',
-            f'  NPG --> NSE["Noise (both=False)<br>TP={n["tp"]:,} FP={n["fp"]:,}"]',
+            f'  ALL --> CFS["ClusterFirstSupport=True<br>TP={cfs["tp"]:,} FP={cfs["fp"]:,}<br>Prec={precision(cfs["tp"],cfs["fp"]):.0%}"]',
+            f'  ALL --> LFS["LabelFirstSupport=True<br>TP={lfs["tp"]:,} FP={lfs["fp"]:,}<br>Prec={precision(lfs["tp"],lfs["fp"]):.0%}"]',
+            f'  ALL --> BI["Both evidence arms=True<br>TP={bidir["tp"]:,} FP={bidir["fp"]:,}<br>Prec={precision(bidir["tp"],bidir["fp"]):.0%}"]',
             f"```",
             f"",
             f"| 判斷標準 | TP | FP | TP% | FP% | Precision |",
             f"|---------|----|----|-----|-----|-----------|",
             f"| 全量 | {total['tp']:,} | {total['fp']:,} | 100% | 100% | {precision(total['tp'],total['fp']):.1%} |",
             f"| PassedGating=True | {pg['tp']:,} | {pg['fp']:,} | {fmt_pct(pg['tp'],total['tp'])} | {fmt_pct(pg['fp'],total['fp'])} | {precision(pg['tp'],pg['fp']):.1%} |",
-            f"| Strong | {s['tp']:,} | {s['fp']:,} | {fmt_pct(s['tp'],total['tp'])} | {fmt_pct(s['fp'],total['fp'])} | {precision(s['tp'],s['fp']):.1%} |",
-            f"| Subclone | {sc['tp']:,} | {sc['fp']:,} | {fmt_pct(sc['tp'],total['tp'])} | {fmt_pct(sc['fp'],total['fp'])} | {precision(sc['tp'],sc['fp']):.1%} |",
-            f"| Weak | {w['tp']:,} | {w['fp']:,} | {fmt_pct(w['tp'],total['tp'])} | {fmt_pct(w['fp'],total['fp'])} | {precision(w['tp'],w['fp']):.1%} |",
-            f"| Noise | {n['tp']:,} | {n['fp']:,} | {fmt_pct(n['tp'],total['tp'])} | {fmt_pct(n['fp'],total['fp'])} | {precision(n['tp'],n['fp']):.1%} |",
+            f"| ClusterFirstSupport=True | {cfs['tp']:,} | {cfs['fp']:,} | {fmt_pct(cfs['tp'],total['tp'])} | {fmt_pct(cfs['fp'],total['fp'])} | {precision(cfs['tp'],cfs['fp']):.1%} |",
+            f"| LabelFirstSupport=True | {lfs['tp']:,} | {lfs['fp']:,} | {fmt_pct(lfs['tp'],total['tp'])} | {fmt_pct(lfs['fp'],total['fp'])} | {precision(lfs['tp'],lfs['fp']):.1%} |",
+            f"| Both evidence arms=True | {bidir['tp']:,} | {bidir['fp']:,} | {fmt_pct(bidir['tp'],total['tp'])} | {fmt_pct(bidir['fp'],total['fp'])} | {precision(bidir['tp'],bidir['fp']):.1%} |",
             f"| Significant=True | {sig['tp']:,} | {sig['fp']:,} | {fmt_pct(sig['tp'],total['tp'])} | {fmt_pct(sig['fp'],total['fp'])} | {precision(sig['tp'],sig['fp']):.1%} |",
-            f"| VC != Noise | {nn['tp']:,} | {nn['fp']:,} | {fmt_pct(nn['tp'],total['tp'])} | {fmt_pct(nn['fp'],total['fp'])} | {precision(nn['tp'],nn['fp']):.1%} |",
-            f"",
+            f"| C2 non-noise | {nn['tp']:,} | {nn['fp']:,} | {fmt_pct(nn['tp'],total['tp'])} | {fmt_pct(nn['fp'],total['fp'])} | {precision(nn['tp'],nn['fp']):.1%} |",
         ]
+        for vc in CURRENT_CLASSES_V2:
+            branch = flow["verification_classes"][vc]
+            lines.append(
+                f"| C2 `{vc}` | {branch['tp']:,} | {branch['fp']:,} | "
+                f"{fmt_pct(branch['tp'],total['tp'])} | {fmt_pct(branch['fp'],total['fp'])} | "
+                f"{precision(branch['tp'],branch['fp']):.1%} |"
+            )
+        lines.append("")
 
     # AUROC summary table
     lines += [
@@ -509,13 +586,13 @@ def build_markdown(all_results):
         lines.append(f"| {feat} | " + " | ".join(vals) + " |")
     lines.append("")
 
-    # Step 4: Significant vs VC!=Noise
+    # Step 4: Significant vs canonical C2 non-noise
     lines += [
         "## 4. Significant 欄位評估",
         "",
-        "比較 Significant=True 與 VC!=Noise 作為分類準則的差異：",
+        "比較 Significant=True 與 C2 non-noise 作為分類準則的差異：",
         "",
-        "| 樣本 | Sig=True TP% | Sig=True FP% | Sig=True Prec | VC!=Noise TP% | VC!=Noise FP% | VC!=Noise Prec |",
+        "| 樣本 | Sig=True TP% | Sig=True FP% | Sig=True Prec | C2 non-noise TP% | C2 non-noise FP% | C2 non-noise Prec |",
         "|------|-------------|-------------|--------------|--------------|--------------|---------------|",
     ]
     for sample, data in all_results.items():
@@ -556,11 +633,11 @@ def build_markdown(all_results):
         )
     lines.append("")
 
-    # Step 6: LOH rate by VC
+    # Step 6: LOH rate by selected C2 classes
     lines += [
-        "### LOH 比率（各 VC class）",
+        "### LOH 比率（selected C2 classes）",
         "",
-        "| 樣本 | Strong TP/FP LOH% | Subclone TP/FP LOH% | Noise TP LOH% |",
+        "| 樣本 | Strong_Bidirectional TP/FP LOH% | ClusterFirstOnly TP/FP LOH% | C2 noise TP LOH% |",
         "|------|------------------|---------------------|--------------|",
     ]
     for sample, data in all_results.items():
@@ -568,11 +645,18 @@ def build_markdown(all_results):
         total = data["flow"]["total"]
         if total["fp"] == 0:
             continue
+        rates = qa["loh_rate_by_verification_class"]
+        strong = rates["Strong_Bidirectional"]
+        cluster = rates["ClusterFirstOnly"]
+        tp_rows = data["flow"]["total"]["tp"]
+        noise_tp_count = sum(
+            data["flow"]["verification_classes"][vc]["tp"] for vc in CURRENT_NOISE_CLASSES
+        )
         lines.append(
             f"| {sample} | "
-            f"TP={qa.get('tp_strong_loh_rate',float('nan')):.0%} / FP={qa.get('fp_strong_loh_rate',float('nan')):.0%} | "
-            f"TP={qa.get('tp_subclone_loh_rate',float('nan')):.0%} / FP={qa.get('fp_subclone_loh_rate',float('nan')):.0%} | "
-            f"TP={qa.get('tp_noise_loh_rate',float('nan')):.0%} |"
+            f"TP={strong['tp']:.0%} / FP={strong['fp']:.0%} | "
+            f"TP={cluster['tp']:.0%} / FP={cluster['fp']:.0%} | "
+            f"{fmt_pct(noise_tp_count, tp_rows)} |"
         )
     lines.append("")
 
@@ -604,7 +688,7 @@ def build_markdown(all_results):
         "- **Pending**: 需結合 3+ 樣本數據確認 passed_gate 雙重閾值合理性",
         "",
         "### Step 4: Significant 欄位",
-        "- **Pending**: 對比 Significant=True vs VC!=Noise 的 Precision 差異確認是否需要移除",
+        "- **Pending**: 對比 Significant=True vs C2 non-noise 的 Precision 差異確認是否需要移除",
         "",
         "### Step 5: QualityScore LOH 懲罰",
         "- **Pending**: 確認 LOH TP 的 QualityScore 是否顯著低於非 LOH TP",
@@ -621,7 +705,22 @@ def build_markdown(all_results):
 
 
 def main():
-    samples = collect_samples()
+    global BASE, OUTPUT_DOC
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base", default=BASE, help="Canonical sample root")
+    parser.add_argument("--output-doc", default=OUTPUT_DOC)
+    parser.add_argument(
+        "--skip-extra",
+        action="store_true",
+        help="Explicitly exclude the optional /tmp n=99 reference inputs.",
+    )
+    args = parser.parse_args()
+    BASE = args.base
+    OUTPUT_DOC = args.output_doc
+    try:
+        samples = collect_samples(include_extra=not args.skip_extra)
+    except SchemaContractError as exc:
+        raise SystemExit(f"[decision-tree][schema-contract] {exc}") from exc
     if not samples:
         print("ERROR: No sample data loaded")
         sys.exit(1)
@@ -657,24 +756,27 @@ def main():
     print("\n" + "=" * 70)
     print("CROSS-SAMPLE SUMMARY: VerificationClass Precision")
     print("=" * 70)
-    print(f"{'Sample':25s} {'Strong Prec':12s} {'Sub Prec':10s} {'Weak Prec':10s} {'Noise TP%':10s} {'SigTrue Prec':12s} {'VC!=N Prec':10s}")
+    print(
+        f"{'Sample':25s} {'StrongBi Prec':13s} {'ClusterOnly':12s} "
+        f"{'CFS Prec':10s} {'Noise TP%':10s} {'SigTrue Prec':12s} {'C2!=N Prec':10s}"
+    )
     for sample, data in all_results.items():
         flow = data["flow"]
         total = flow["total"]
         if total["fp"] == 0:
             print(f"  {sample}: FP=0, skipping precision")
             continue
-        s   = flow["vc_strong"]
-        sc  = flow["vc_subclone"]
-        w   = flow["vc_weak"]
-        n   = flow["vc_noise"]
+        s = flow["verification_classes"]["Strong_Bidirectional"]
+        sc = flow["verification_classes"]["ClusterFirstOnly"]
+        cfs = flow["cluster_first_support_true"]
         sig = flow["significant_true"]
         nn  = flow["vc_not_noise"]
-        noise_tp_rate = n["tp"] / total["tp"] if total["tp"] > 0 else 0
+        noise_tp = sum(flow["verification_classes"][vc]["tp"] for vc in CURRENT_NOISE_CLASSES)
+        noise_tp_rate = noise_tp / total["tp"] if total["tp"] > 0 else 0
         print(f"  {sample:25s} "
-              f"{precision(s['tp'],s['fp']):10.1%}  "
-              f"{precision(sc['tp'],sc['fp']):8.1%}  "
-              f"{precision(w['tp'],w['fp']):8.1%}  "
+              f"{precision(s['tp'],s['fp']):11.1%}  "
+              f"{precision(sc['tp'],sc['fp']):10.1%}  "
+              f"{precision(cfs['tp'],cfs['fp']):8.1%}  "
               f"{noise_tp_rate:8.1%}  "
               f"{precision(sig['tp'],sig['fp']):10.1%}  "
               f"{precision(nn['tp'],nn['fp']):8.1%}")

@@ -25,6 +25,7 @@ Output:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -33,6 +34,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
+
+LOCAL_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(LOCAL_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(LOCAL_REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
 
 # Reuse obs common helpers if available
 sys.path.insert(
@@ -67,7 +74,6 @@ FIG_DIR = Path(
     "/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/04/"
     "figures/20260423_B3_paired_obs18"
 )
-FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 CANON_ROOT = Path("/big7_disk/liaoyoyo2001/InterSubMod/output/canonical")
 
@@ -83,6 +89,11 @@ SAMPLES_PAIRED: dict[str, str] = {
 }
 
 BUCKET_COLS = ["HPFineN_HP1", "HPFineN_HP1S", "HPFineN_HP2", "HPFineN_HP2S"]
+LOH_SCHEMA_COLUMNS = [
+    "VerificationSchemaVersion",
+    "LOH_Subtype_LegacyVC",
+    "LOH_Subtype",
+]
 
 COMBOS_ORDER = [
     "same_HP1 (HP1 + HP1-1)",
@@ -102,6 +113,35 @@ TO_OBS18_TSV = (
 # ---------------------------------------------------------------------------
 # 1. Load + categorize
 # ---------------------------------------------------------------------------
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
 def categorize_combo(has_hp1: int, has_hp1s: int, has_hp2: int, has_hp2s: int) -> str:
     if has_hp1 and has_hp1s and not has_hp2 and not has_hp2s:
         return "same_HP1 (HP1 + HP1-1)"
@@ -114,7 +154,11 @@ def categorize_combo(has_hp1: int, has_hp1s: int, has_hp2: int, has_hp2s: int) -
     return "other"
 
 
-def load_sample(name: str, run_id: str) -> pd.DataFrame:
+def load_sample(
+    name: str,
+    run_id: str,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
     base = CANON_ROOT / name / "paired_full" / run_id
     paths = {
         "tp": base / "intersubmod_tp" / "significance_summary.csv",
@@ -126,15 +170,18 @@ def load_sample(name: str, run_id: str) -> pd.DataFrame:
         if not p.exists():
             print(f"  [!] missing {p}")
             return pd.DataFrame()
-        df = pd.read_csv(
-            p,
-            low_memory=False,
-            usecols=["RegionID", "AlleleDelta", "HPFineNGroups", "Potential_LOH", "LOH_Subtype"] + BUCKET_COLS,
-        )
+        available = set(pd.read_csv(p, nrows=0).columns)
+        usecols = ["RegionID", "AlleleDelta", "HPFineNGroups", "Potential_LOH"]
+        usecols += BUCKET_COLS
+        usecols += [column for column in LOH_SCHEMA_COLUMNS if column in available]
+        df = pd.read_csv(p, low_memory=False, usecols=usecols)
         df["tp_label"] = col
         df["sample"] = name
         frames.append(df)
-    return pd.concat(frames, ignore_index=True)
+    return attach_loh_legacy_view(
+        pd.concat(frames, ignore_index=True),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
 
 
 def analyze_sample(df: pd.DataFrame) -> pd.DataFrame:
@@ -438,6 +485,8 @@ def plot_proportion_stacked(all_results: pd.DataFrame) -> Path:
 # 3. Main
 # ---------------------------------------------------------------------------
 def main() -> None:
+    args = parse_args()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
     apply_style()
 
     # TO reference
@@ -445,11 +494,17 @@ def main() -> None:
 
     # Load paired samples
     all_results = []
+    loh_schema_contract_by_sample = {}
     for name, run_id in SAMPLES_PAIRED.items():
         print(f"[B3] loading paired {name} ({run_id})")
-        df = load_sample(name, run_id)
+        df = load_sample(
+            name,
+            run_id,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
         if df.empty:
             continue
+        loh_schema_contract_by_sample[name] = dict(df.attrs["loh_schema_contract"])
         res = analyze_sample(df)
         if not res.empty:
             all_results.append(res)
@@ -482,6 +537,7 @@ def main() -> None:
     merged_gap.to_csv(gap_tsv, sep="\t", index=False)
     print(f"[B3] wrote {gap_tsv}")
 
+    wil["loh_schema_contract_by_sample"] = loh_schema_contract_by_sample
     wil_json = DATA_DIR / "B3_wilcoxon_gap_stats.json"
     wil_json.write_text(json.dumps(wil, indent=2, default=str))
     print(f"[B3] wrote {wil_json}")

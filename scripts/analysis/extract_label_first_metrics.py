@@ -4,6 +4,20 @@
 import argparse
 import csv
 import os
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 
 OUTPUT_COLUMNS = [
@@ -43,6 +57,15 @@ OUTPUT_COLUMNS = [
     "VerificationClass",
     "Significant",
     "SuggestFilter",
+    "VerificationSchemaVersion",
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
 ]
 
 
@@ -57,6 +80,32 @@ def parse_args():
     return parser.parse_args()
 
 
+def validate_label_first_schema(rows):
+    """Require schema-v2 evidence; label-first support is never inferred from class names."""
+    df = pd.DataFrame(rows)
+    current = select_current_view(df)
+    evidence = read_evidence(df)
+    required = [
+        "Chr",
+        "Pos",
+        "Ref",
+        "Alt",
+        "VerificationClass_V1_Deprecated",
+        "VerificationClass_Legacy",
+    ]
+    missing = [field for field in required if field not in df.columns]
+    if missing:
+        raise SchemaContractError(
+            "label-first metrics: missing required input fields: " + ", ".join(missing)
+        )
+    df["VerificationClass"] = current.values
+    # ``read_evidence`` is a validator here.  Preserve the serialized source
+    # values verbatim so the derived TSV remains a true pass-through artifact
+    # (not a pandas-specific re-serialization of nullable booleans).
+    del evidence
+    return df.to_dict(orient="records"), current.metadata()
+
+
 def main():
     args = parse_args()
     output_tsv = args.output_tsv
@@ -66,6 +115,11 @@ def main():
     with open(args.summary_csv, "r", newline="") as handle:
         reader = csv.DictReader(handle)
         rows = list(reader)
+
+    try:
+        rows, _verification_metadata = validate_label_first_schema(rows)
+    except SchemaContractError as exc:
+        raise SystemExit(f"[extract_label_first_metrics][schema-contract] {exc}") from exc
 
     os.makedirs(os.path.dirname(output_tsv) or ".", exist_ok=True)
     with open(output_tsv, "w", newline="") as handle:
@@ -112,6 +166,15 @@ def main():
                     "VerificationClass": row.get("VerificationClass", ""),
                     "Significant": row.get("Significant", ""),
                     "SuggestFilter": row.get("SuggestFilter", ""),
+                    "VerificationSchemaVersion": row.get("VerificationSchemaVersion", ""),
+                    "VerificationClass_V1_Deprecated": row.get("VerificationClass_V1_Deprecated", ""),
+                    "VerificationClass_Legacy": row.get("VerificationClass_Legacy", ""),
+                    "LabelFirstSupport": row.get("LabelFirstSupport", ""),
+                    "ClusterFirstSupport": row.get("ClusterFirstSupport", ""),
+                    "WithinHPSupport": row.get("WithinHPSupport", ""),
+                    "DispersionWarning": row.get("DispersionWarning", ""),
+                    "EvidencePath": row.get("EvidencePath", ""),
+                    "EvidenceDerivation": row.get("EvidenceDerivation", ""),
                 }
             )
 

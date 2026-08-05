@@ -5,8 +5,22 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    SchemaContractError,
+    V1_CURRENT_CLASSES,
+    read_evidence,
+    select_current_view,
+)
 
 
 def as_bool(value: str) -> bool:
@@ -37,6 +51,47 @@ def load_tsv_rows(path: Path) -> List[Dict[str, str]]:
 def load_csv_rows(path: Path) -> List[Dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def prepare_verification_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Validate v2 identity and expose evidence plus the frozen v1 reference."""
+    current_view = select_current_view(frame)
+    evidence = read_evidence(frame)
+    v1_field = "VerificationClass_V1_Deprecated"
+    if v1_field not in frame.columns:
+        raise SchemaContractError(
+            f"verification scheme comparison: missing required historical reference {v1_field}"
+        )
+    v1_values = frame[v1_field].astype("string")
+    invalid_mask = v1_values.isna() | ~v1_values.isin(V1_CURRENT_CLASSES)
+    if invalid_mask.any():
+        invalid = (
+            v1_values[invalid_mask]
+            .fillna("<MISSING>")
+            .value_counts(dropna=False)
+            .to_dict()
+        )
+        raise SchemaContractError(
+            f"verification scheme comparison: invalid {v1_field} values: {invalid}"
+        )
+
+    prepared = frame.copy()
+    prepared["_verification_class_v2"] = current_view.values
+    prepared["_verification_class_v1_deprecated"] = v1_values
+    prepared["_label_first_support"] = evidence["LabelFirstSupport"]
+    prepared["_cluster_first_support"] = evidence["ClusterFirstSupport"]
+    prepared["_within_hp_support"] = evidence["WithinHPSupport"]
+    prepared["_dispersion_warning"] = evidence["DispersionWarning"]
+    prepared["_evidence_path"] = evidence["EvidencePath"]
+    prepared["_evidence_derivation"] = evidence["EvidenceDerivation"]
+    prepared["_verification_selection_field"] = v1_field
+    prepared["_verification_schema_status"] = current_view.schema_status
+    return prepared
+
+
+def load_validated_summary_rows(path: Path) -> List[Dict[str, object]]:
+    frame = pd.read_csv(path, dtype=str, keep_default_na=False)
+    return prepare_verification_frame(frame).to_dict(orient="records")
 
 
 def write_tsv(path: Path, fieldnames: Iterable[str], rows: List[Dict[str, str]]) -> None:
@@ -114,7 +169,7 @@ def main() -> None:
         rule_hits[rule_id] = (tp_hit, fp_hit)
 
     for summary_csv in args.summary_csv:
-        for row in load_csv_rows(Path(summary_csv)):
+        for row in load_validated_summary_rows(Path(summary_csv)):
             region_key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
             feature = feature_rows.get(region_key)
             if feature is None:
@@ -142,7 +197,8 @@ def main() -> None:
                 permanova_cluster_support or to_float(row.get("LocalBestP", "1")) <= 0.05
             )
 
-            current_class = row.get("VerificationClass", "Noise") or "Noise"
+            reference_class_v1 = row["_verification_class_v1_deprecated"]
+            cluster_first_support = bool(row["_cluster_first_support"])
             scheme_label_tiered = classify_scheme(global_cluster_support, hp_sig, allele_sig)
             scheme_local_hybrid = classify_scheme(local_cluster_support, hp_sig, allele_sig)
             scheme_permanova_strict = classify_scheme(permanova_cluster_support, hp_sig, allele_sig)
@@ -152,7 +208,22 @@ def main() -> None:
             out_row = {
                 "region_key": region_key,
                 "source_scope": truth_scope,
-                "current_class": current_class,
+                "reference_class_v1_deprecated": reference_class_v1,
+                "verification_class_v2": row["_verification_class_v2"],
+                "verification_selection_field": row["_verification_selection_field"],
+                "verification_schema_status": row["_verification_schema_status"],
+                "label_first_support": str(bool(row["_label_first_support"])).lower(),
+                "cluster_first_support": str(cluster_first_support).lower(),
+                "within_hp_support": (
+                    "NA" if pd.isna(row["_within_hp_support"])
+                    else str(bool(row["_within_hp_support"])).lower()
+                ),
+                "dispersion_warning": (
+                    "NA" if pd.isna(row["_dispersion_warning"])
+                    else str(bool(row["_dispersion_warning"])).lower()
+                ),
+                "evidence_path": row["_evidence_path"],
+                "evidence_derivation": row["_evidence_derivation"],
                 "label_tier": current_label_tier,
                 "scheme_label_tiered": scheme_label_tiered,
                 "scheme_local_hybrid": scheme_local_hybrid,
@@ -175,7 +246,7 @@ def main() -> None:
             per_region_rows.append(out_row)
 
             for scheme_name, cls in (
-                ("current", current_class),
+                ("v1_deprecated_reference", reference_class_v1),
                 ("label_tiered", scheme_label_tiered),
                 ("local_hybrid", scheme_local_hybrid),
                 ("permanova_strict", scheme_permanova_strict),
@@ -185,7 +256,10 @@ def main() -> None:
 
             low_vaf_high_ad = feature["low_vaf_high_ad"] == "True"
             low_vaf_high_ad_cv = feature["low_vaf_high_ad_cv"] == "True"
-            current_strong_allele_only = current_class == "Strong" and (not hp_sig) and allele_sig
+            # Historical rule id is retained for output compatibility, but the
+            # trigger now reads explicit cluster-first evidence rather than
+            # reverse-engineering support from a class name.
+            current_strong_allele_only = cluster_first_support and (not hp_sig) and allele_sig
             current_strong_allele_only_low = current_strong_allele_only and low_vaf_high_ad
             current_strong_allele_only_low_cv = current_strong_allele_only and low_vaf_high_ad_cv
             tiered_weak_low = scheme_label_tiered == "Weak" and low_vaf_high_ad
@@ -208,7 +282,16 @@ def main() -> None:
         [
             "region_key",
             "source_scope",
-            "current_class",
+            "reference_class_v1_deprecated",
+            "verification_class_v2",
+            "verification_selection_field",
+            "verification_schema_status",
+            "label_first_support",
+            "cluster_first_support",
+            "within_hp_support",
+            "dispersion_warning",
+            "evidence_path",
+            "evidence_derivation",
             "label_tier",
             "scheme_label_tiered",
             "scheme_local_hybrid",
@@ -278,7 +361,8 @@ def main() -> None:
         "",
         "## Key Points",
         "",
-        "- `current_strong_allele_only` 表示現行 core 已標成 `Strong`，但實際上只有 allele signal、沒有 HP signal。",
+        "- `current_strong_allele_only` 為保留歷史比較而維持的 rule id；實際條件已改讀明確的 `ClusterFirstSupport=true`，且只有 allele signal、沒有 HP signal。",
+        "- class A/B 的參考欄固定為 `VerificationClass_V1_Deprecated`；canonical v2 class 與 evidence provenance 逐列輸出，不做 v2→v1 折疊。",
         "- `label_tiered` 將 `Strong` 僅留給 `hp_sig + allele_sig`；只有 allele signal 的情況降為 `Weak`。",
         "- `hybrid` 在 `label_tiered` 基礎上，另外要求 cluster support 至少通過 `GlobalP + LocalBestP/ClusterPermanova` 的混合條件。",
         "",

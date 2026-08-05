@@ -51,6 +51,41 @@ AF_BINS = [(0, 0.2), (0.2, 0.5), (0.5, 0.8), (0.8, 1.01)]
 AF_LABELS = ["0-0.2", "0.2-0.5", "0.5-0.8", "0.8-1.0"]
 
 
+def require_explicit_truth_labels(df: pd.DataFrame) -> pd.DataFrame:
+    """Require real binary truth; VerificationClass is annotation only."""
+    if "truth_label" not in df.columns:
+        raise ValueError(
+            "Feature direction analysis requires an explicit truth_label column with TP/FP values; "
+            "VerificationClass cannot be used to manufacture truth."
+        )
+    truth = df["truth_label"].astype("string")
+    invalid_mask = truth.isna() | ~truth.isin(["TP", "FP"])
+    if invalid_mask.any():
+        invalid = truth[invalid_mask].fillna("<MISSING>").value_counts().to_dict()
+        raise ValueError(f"truth_label contains missing or non-binary values: {invalid}")
+    validated = df.copy()
+    validated["truth_label"] = truth
+    validated["truth_selection_field"] = "truth_label"
+    validated["truth_schema_status"] = "EXPLICIT_BINARY_TRUTH"
+    return validated
+
+
+def write_truth_schema_provenance(df: pd.DataFrame) -> None:
+    counts = df["truth_label"].value_counts()
+    pd.DataFrame(
+        [
+            {
+                "truth_selection_field": "truth_label",
+                "truth_schema_status": "EXPLICIT_BINARY_TRUTH",
+                "verification_class_role": "annotation_only",
+                "row_count": len(df),
+                "tp_count": int(counts.get("TP", 0)),
+                "fp_count": int(counts.get("FP", 0)),
+            }
+        ]
+    ).to_csv(OUT_DIR / "truth_schema_provenance.tsv", sep="\t", index=False)
+
+
 def classify_loh(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["is_loh"] = df["Potential_LOH"].astype(str).str.lower().isin(["true", "1", "yes"])
@@ -481,14 +516,13 @@ def main():
     print("Wave 3 M3: Feature Direction Map + Correctability Assessment")
     print("=" * 70)
 
-    df = load_master_dataset()
+    df = require_explicit_truth_labels(load_master_dataset())
     df = classify_loh(df)
+    write_truth_schema_provenance(df)
 
     if "mode" not in df.columns:
         df["mode"] = df["sample_mode"] if "sample_mode" in df.columns else "unknown"
-    if "truth_label" not in df.columns and "VerificationClass" in df.columns:
-        df["truth_label"] = df["VerificationClass"].map(
-            {"Strong": "TP", "Weak": "TP", "Noise": "FP"})
+    print("Truth source: truth_label (EXPLICIT_BINARY_TRUTH)")
 
     # E1
     auc_df = e1_four_way_auc(df)

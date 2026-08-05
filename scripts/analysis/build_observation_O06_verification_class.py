@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """O6: VerificationClass Structure Analysis — Systematic Observation.
 
-Analyses the four ISM VerificationClass categories (Strong, Subclone, Weak, Noise)
-across samples, modes (paired/TO), truth labels, LOH subtypes, and feature boundaries.
+Analyses an explicitly selected canonical current-v2 or historical legacy-four
+VerificationClass view across samples, modes, truth labels, LOH subtypes, and features.
 
 Generates 6 figures, 5 data tables, and round_context.json.
 
 Usage:
-    python build_observation_O06_verification_class.py
+    python build_observation_O06_verification_class.py --verification-view {current,legacy}
 """
 
 from __future__ import annotations
 
+import argparse
 import sys
 import warnings
 
@@ -31,6 +32,19 @@ import seaborn as sns
 from scipy import stats as sp_stats
 from sklearn.metrics import cohen_kappa_score
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_CLASSES_V2,
+    LEGACY_CLASSES,
+    SchemaContractError,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -40,12 +54,24 @@ OBS_TITLE = "VerificationClass Structure Analysis"
 OUT_DIR = OUTPUT_ROOT / "20260401_O06_verification_class"
 DATA_DIR = OUT_DIR / "data"
 
-VC_ORDER = ["Strong", "Subclone", "Weak", "Noise"]
+VC_ORDER = list(LEGACY_CLASSES)
 VC_COLORS = {
     "Strong": "#1565C0",   # deep blue
     "Subclone": "#2E7D32", # green
     "Weak": "#F9A825",     # yellow
     "Noise": "#9E9E9E",    # grey
+    "Strong_Bidirectional": "#1565C0",
+    "ClusterFirstOnly": "#2E7D32",
+    "LOH-Structure": "#C62828",
+    "MultiGroupNoLabel": "#6A1B9A",
+    "LabelShift": "#EF6C00",
+    "PermanovaLocation": "#00838F",
+    "StructureNoLabel": "#3949AB",
+    "DispersionStructure": "#8E24AA",
+    "Noise_Uniform": "#BDBDBD",
+    "Noise_Chaotic": "#757575",
+    "Noise_Uncorrelated": "#424242",
+    "UnknownCurrentClass": "#FF00FF",
 }
 VC_PALETTE = [VC_COLORS[c] for c in VC_ORDER]
 
@@ -59,8 +85,9 @@ BOUNDARY_FEATURES = ["PairwiseMedianDist", "CramersV", "AlleleDelta", "HPMergedD
 
 # Columns to load
 USECOLS = [
-    "VerificationClass", "DominantLabel", "Stability", "verification_class",
-    "LOH_Subtype", "Quality_Tier", "Quality_Score",
+    "VerificationClass", "VerificationSchemaVersion", "VerificationClass_Legacy",
+    "DominantLabel", "Stability", "verification_class",
+    "LOH_Subtype_LegacyVC", "LOH_Subtype", "Quality_Tier", "Quality_Score",
     "truth_label", "variant_key", "sample", "mode", "dataset_id", "dataset_label",
     "PairwiseMedianDist", "CramersV", "AlleleDelta", "HPMergedDelta",
     "HPMergedSig", "AlleleSig", "HPMergedP", "AlleleP",
@@ -75,16 +102,92 @@ CAPTION = f"Source: all_region_rows.tsv.gz (748,391 rows) | {OBS_ID} | InterSubM
 # Data loading
 # ---------------------------------------------------------------------------
 
-def load_data() -> pd.DataFrame:
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--verification-view",
+        required=True,
+        choices=("legacy", "current"),
+        help=(
+            "Required panel: legacy uses VerificationClass_Legacy; current validates "
+            "VerificationSchemaVersion=2 and uses the 11-class taxonomy."
+        ),
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Optional output override; current defaults to a separate *_current_v2 workspace.",
+    )
+    return parser.parse_args()
+
+
+def apply_verification_contract(
+    df: pd.DataFrame,
+    requested_view: str,
+) -> tuple[pd.DataFrame, Dict[str, object]]:
+    """Attach the requested verification view and canonical legacy-derived LOH view."""
+    if requested_view == "legacy":
+        verification = select_legacy_view(df)
+    elif requested_view == "current":
+        verification = select_current_view(df)
+    else:
+        raise ValueError(f"Unsupported verification view: {requested_view}")
+    loh = select_loh_legacy(df)
+
+    selected = df.copy()
+    selected["VerificationClass_SourceValue"] = selected[verification.field]
+    selected["VerificationClass"] = pd.Categorical(
+        verification.values,
+        categories=verification.categories,
+        ordered=True,
+    )
+    selected["LOH_Subtype"] = pd.Categorical(
+        loh.values,
+        categories=loh.categories,
+        ordered=True,
+    )
+    selected["VerificationView"] = requested_view
+    selected["VerificationSourceField"] = verification.field
+    selected["VerificationSchemaStatus"] = verification.schema_status
+    selected["LOHSourceField"] = loh.field
+    metadata = verification.metadata()
+    metadata.update(
+        {
+            "requested_view": requested_view,
+            "loh_selection_field": loh.field,
+            "loh_schema_status": loh.schema_status,
+            "loh_unknown_counts": loh.unknown_counts,
+        }
+    )
+    return selected, metadata
+
+
+def configure_verification_panel(requested_view: str, output_override: Path | None = None) -> None:
+    """Configure plot order/output path once, before any figure is built."""
+    global VC_ORDER, VC_PALETTE, OUT_DIR, DATA_DIR
+    VC_ORDER = (
+        list(LEGACY_CLASSES)
+        if requested_view == "legacy"
+        else list(CURRENT_CLASSES_V2) + ["UnknownCurrentClass"]
+    )
+    VC_PALETTE = [VC_COLORS[c] for c in VC_ORDER]
+    if output_override is not None:
+        OUT_DIR = output_override.resolve()
+    elif requested_view == "current":
+        OUT_DIR = OUTPUT_ROOT / "20260401_O06_verification_class_current_v2"
+    else:
+        OUT_DIR = OUTPUT_ROOT / "20260401_O06_verification_class"
+    DATA_DIR = OUT_DIR / "data"
+
+
+def load_data(requested_view: str) -> tuple[pd.DataFrame, Dict[str, object]]:
     """Load master dataset with required columns."""
-    df = load_master_dataset(usecols=USECOLS)
-
-    # Ensure VerificationClass is categorical with correct order
-    df["VerificationClass"] = pd.Categorical(df["VerificationClass"], categories=VC_ORDER, ordered=True)
-
-    # Ensure LOH_Subtype has consistent values
-    df["LOH_Subtype"] = df["LOH_Subtype"].fillna("None").replace("", "None")
-    df["LOH_Subtype"] = pd.Categorical(df["LOH_Subtype"], categories=LOH_ORDER, ordered=True)
+    try:
+        df = load_master_dataset(usecols=USECOLS)
+        df, schema_metadata = apply_verification_contract(df, requested_view)
+    except (ValueError, SchemaContractError) as exc:
+        raise SystemExit(f"[O06][schema-contract] {exc}") from exc
 
     # Ensure DominantLabel
     df["DominantLabel"] = df["DominantLabel"].fillna("none")
@@ -94,7 +197,8 @@ def load_data() -> pd.DataFrame:
     print(df["VerificationClass"].value_counts().to_string())
     print(f"[O06] truth_label distribution:")
     print(df["truth_label"].value_counts().to_string())
-    return df
+    print(f"[O06] Verification schema: {schema_metadata}")
+    return df, schema_metadata
 
 
 # ---------------------------------------------------------------------------
@@ -410,7 +514,7 @@ def fig06_class_boundary_features(df: pd.DataFrame) -> Dict:
         ax.set_xlabel("")
         ax.tick_params(axis="x", labelsize=8)
 
-    fig.suptitle(f"[{OBS_ID}] Feature Distributions by VerificationClass (Strong vs Weak boundary)",
+    fig.suptitle(f"[{OBS_ID}] Feature Distributions by Explicit Verification View",
                  fontsize=12, y=1.01)
     add_caption(fig, CAPTION)
     fig.tight_layout()
@@ -449,7 +553,7 @@ def write_verification_class_by_sample_mode(df: pd.DataFrame) -> None:
     ct = pd.crosstab(
         [df["sample"], df["mode"]],
         df["VerificationClass"],
-    ).reset_index()
+    ).reindex(columns=VC_ORDER, fill_value=0).reset_index()
     ct.columns.name = None
     out_path = DATA_DIR / "verification_class_by_sample_mode.tsv"
     ct.to_csv(out_path, sep="\t", index=False)
@@ -484,8 +588,10 @@ def write_class_transition_matrix(trans: pd.DataFrame, trans_norm: pd.DataFrame,
 # ---------------------------------------------------------------------------
 
 def main():
+    args = parse_args()
+    configure_verification_panel(args.verification_view, args.output_dir)
     print(f"{'=' * 70}")
-    print(f"  O6: {OBS_TITLE}")
+    print(f"  O6: {OBS_TITLE} [{args.verification_view}]")
     print(f"  Output: {OUT_DIR}")
     print(f"{'=' * 70}")
 
@@ -494,7 +600,7 @@ def main():
     ensure_dir(DATA_DIR)
 
     # Load data
-    df = load_data()
+    df, schema_metadata = load_data(args.verification_view)
 
     # ----- Data outputs -----
     write_source_summary(df)
@@ -542,8 +648,8 @@ def main():
         observation_id=OBS_ID,
         title=OBS_TITLE,
         description=(
-            "Systematic analysis of the four ISM VerificationClass categories "
-            "(Strong, Subclone, Weak, Noise) across samples, modes, truth labels, "
+            f"Systematic analysis of the explicit {args.verification_view} VerificationClass view "
+            "across samples, modes, truth labels, "
             "LOH subtypes, and feature boundaries. Includes paired-TO transition "
             "analysis and class boundary feature distributions."
         ),
@@ -556,6 +662,8 @@ def main():
         row_count=len(df),
         col_count=len(df.columns),
         extra={
+            "verification_contract": schema_metadata,
+            "verification_class_order": VC_ORDER,
             "figures": [
                 "fig01_verification_class_composition.png",
                 "fig02_verification_class_tp_fp_rate.png",

@@ -13,6 +13,7 @@ Outputs 8 figures + feature_statistics.tsv + round_context.json
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import warnings
@@ -38,6 +39,16 @@ from observation_common import (
     ensure_dir, safe_div, write_round_context, write_feature_statistics,
     markdown_table, OUTPUT_ROOT,
     COLOR_TP, COLOR_FP, COLOR_PAIRED, COLOR_TO,
+)
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    LEGACY_CLASSES,
+    SchemaContractError,
+    select_legacy_view,
 )
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -72,15 +83,71 @@ SAMPLE_ORDER = [
 
 
 # ===== Data Loading =====
-def load_read_training_table() -> pd.DataFrame:
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--read-table", type=Path, default=READ_TABLE_PATH)
+    parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize an historical unversioned VerificationClass column; "
+            "unknown values are excluded from the legacy four-state figure and counted."
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_legacy_verification_view(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, Dict[str, object]]:
+    """Require L4 provenance for the historical read-level panel."""
+    view = select_legacy_view(
+        df,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="exclude",
+    )
+    selected = df.copy()
+    selected["VerificationClass_SourceValue"] = selected[view.field]
+    selected["VerificationClass"] = pd.Categorical(
+        view.values,
+        categories=LEGACY_CLASSES,
+        ordered=True,
+    )
+    selected["VerificationSourceField"] = view.field
+    selected["VerificationSchemaStatus"] = view.schema_status
+    metadata = view.metadata()
+    metadata.update(
+        {
+            "requested_view": "legacy",
+            "input_rows": int(len(selected)),
+            "excluded_unknown_rows": int(selected["VerificationClass"].isna().sum()),
+        }
+    )
+    return selected, metadata
+
+
+def load_read_training_table(
+    path: Path = READ_TABLE_PATH,
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, Dict[str, object]]:
     """Load the Phase 1A read training table."""
-    print(f"[O10] Loading read training table from {READ_TABLE_PATH} ...")
-    df = pd.read_csv(READ_TABLE_PATH, sep="\t", low_memory=False)
+    print(f"[O10] Loading read training table from {path} ...")
+    df = pd.read_csv(path, sep="\t", low_memory=False)
+    try:
+        df, verification_metadata = attach_legacy_verification_view(
+            df,
+            allow_unversioned_v1=allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        raise SystemExit(f"[O10][schema-contract] {path}: {exc}") from exc
     print(f"[O10]   -> {len(df):,} reads x {len(df.columns)} cols")
     print(f"[O10]   Samples: {df['sample'].nunique()}, Regions: {df['region_key'].nunique()}")
     print(f"[O10]   TP reads: {(df['truth_status']=='TP').sum():,}, FP reads: {(df['truth_status']=='FP').sum():,}")
     print(f"[O10]   ALT reads: {(df['alt_support']=='ALT').sum():,}, REF reads: {(df['alt_support']=='REF').sum():,}")
-    return df
+    print(f"[O10]   Verification contract: {verification_metadata}")
+    return df, verification_metadata
 
 
 # ===== Derived Columns =====
@@ -331,7 +398,7 @@ def fig05_methyl_by_truth_label(df: pd.DataFrame) -> Path:
 # ===== Figure 6: Methylation by VerificationClass =====
 def fig06_methyl_by_verification_class(df: pd.DataFrame) -> Path:
     """Read methylation across four VerificationClass categories."""
-    vc_order = ["Strong", "Weak", "Subclone", "Noise"]
+    vc_order = list(LEGACY_CLASSES)
     vc_colors = {"Strong": "#1B5E20", "Weak": "#FFC107", "Subclone": "#FF9800", "Noise": "#D32F2F"}
 
     fig, axes = plt.subplots(2, 3, figsize=(16, 10))
@@ -526,6 +593,10 @@ def compute_comprehensive_stats(df: pd.DataFrame) -> pd.DataFrame:
 
 # ===== Main =====
 def main():
+    global READ_TABLE_PATH, OUT_DIR
+    args = parse_args()
+    READ_TABLE_PATH = args.read_table.resolve()
+    OUT_DIR = args.output_dir.resolve()
     print("=" * 70)
     print(f"O10: Read-Level Methylation Feature Observation")
     print(f"Run date: {RUN_DATE}")
@@ -535,7 +606,10 @@ def main():
     ensure_dir(OUT_DIR)
 
     # Load data
-    df = load_read_training_table()
+    df, verification_metadata = load_read_training_table(
+        READ_TABLE_PATH,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
     df = add_derived_columns(df)
 
     # Feature statistics
@@ -565,6 +639,7 @@ def main():
         row_count=len(df),
         col_count=len(df.columns),
         extra={
+            "verification_contract": verification_metadata,
             "samples": list(df["sample"].unique()),
             "modes": list(df["mode"].unique()),
             "n_alt": int((df["alt_support"] == "ALT").sum()),

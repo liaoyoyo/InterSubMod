@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """B7 analysis: LOH_Noise + Extreme AF unexpected signal (TP 88-96%).
 
-Investigates whether LOH_Noise (low-confidence LOH by VerificationClass=="Noise"
+Investigates whether LOH_Noise (legacy-derived low-confidence LOH class
 but still Potential_LOH=True per HP_Ratio) behaves like LOH_Strong under
 Extreme AF; if so, LOH.bed Noise tier may be overly conservative.
 
@@ -16,12 +16,20 @@ Outputs:
 """
 from __future__ import annotations
 
+import argparse
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
 
 plt.rcParams["font.family"] = "DejaVu Sans"
 
@@ -36,7 +44,6 @@ OUT_FIG_DIR = Path(
 OUT_DATA_DIR = Path(
     "/big7_disk/liaoyoyo2001/InterSubMod/research/ng_kde_rescaling/data"
 )
-OUT_FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Coverage_Category -> CN tier lumping
 CN_TIER_MAP = {
@@ -61,6 +68,35 @@ PAIRED_SAMPLES = [
 ]
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
 def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     if n == 0:
         return (float("nan"), float("nan"))
@@ -71,9 +107,12 @@ def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     return (center - half, center + half)
 
 
-def load_main() -> pd.DataFrame:
+def load_main(allow_unversioned_v1: bool = False) -> pd.DataFrame:
     print(f"[B7] Loading {DATA_TSV}")
-    df = pd.read_csv(DATA_TSV, sep="\t", low_memory=False)
+    df = attach_loh_legacy_view(
+        pd.read_csv(DATA_TSV, sep="\t", low_memory=False),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
     df["CN_tier"] = df["Coverage_Category"].map(CN_TIER_MAP).fillna("other")
     return df
 
@@ -89,13 +128,13 @@ def tp_rate(sub: pd.DataFrame) -> dict:
 def stratified_table(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for (sample, mode, subtype, af_class, cn_tier), sub in df.groupby(
-        ["sample", "mode", "LOH_Subtype", "AF_class", "CN_tier"], dropna=False
+        ["sample", "mode", "_loh_subtype_legacy", "AF_class", "CN_tier"], dropna=False
     ):
         r = tp_rate(sub)
         r.update(
             sample=sample,
             mode=mode,
-            LOH_Subtype=subtype,
+            LOH_Subtype_LegacyVC=subtype,
             AF_class=af_class,
             CN_tier=cn_tier,
         )
@@ -107,10 +146,10 @@ def hcc1395_to_extreme_af_table(df: pd.DataFrame) -> pd.DataFrame:
     sub = df[(df["sample"] == "HCC1395") & (df["mode"] == "to_pileup")]
     rows = []
     for (subtype, af_class, cn_tier), g in sub.groupby(
-        ["LOH_Subtype", "AF_class", "CN_tier"], dropna=False
+        ["_loh_subtype_legacy", "AF_class", "CN_tier"], dropna=False
     ):
         r = tp_rate(g)
-        r.update(LOH_Subtype=subtype, AF_class=af_class, CN_tier=cn_tier)
+        r.update(LOH_Subtype_LegacyVC=subtype, AF_class=af_class, CN_tier=cn_tier)
         rows.append(r)
     return pd.DataFrame(rows)
 
@@ -119,10 +158,15 @@ def per_sample_subtype_af_tp(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for (sample, mode), g in df.groupby(["sample", "mode"], dropna=False):
         for (subtype, af_class), sub in g.groupby(
-            ["LOH_Subtype", "AF_class"], dropna=False
+            ["_loh_subtype_legacy", "AF_class"], dropna=False
         ):
             r = tp_rate(sub)
-            r.update(sample=sample, mode=mode, LOH_Subtype=subtype, AF_class=af_class)
+            r.update(
+                sample=sample,
+                mode=mode,
+                LOH_Subtype_LegacyVC=subtype,
+                AF_class=af_class,
+            )
             rows.append(r)
     return pd.DataFrame(rows)
 
@@ -130,13 +174,13 @@ def per_sample_subtype_af_tp(df: pd.DataFrame) -> pd.DataFrame:
 def heatmap_hcc1395_to(tab: pd.DataFrame) -> None:
     """Heatmap: LOH_Subtype (rows) x (CN_tier x AF_class) (cols); cell = TP rate."""
     pivot_tp = tab.pivot_table(
-        index="LOH_Subtype",
+        index="LOH_Subtype_LegacyVC",
         columns=["CN_tier", "AF_class"],
         values="tp_rate",
         aggfunc="first",
     )
     pivot_n = tab.pivot_table(
-        index="LOH_Subtype",
+        index="LOH_Subtype_LegacyVC",
         columns=["CN_tier", "AF_class"],
         values="n",
         aggfunc="first",
@@ -195,7 +239,7 @@ def panel_cross_sample_extreme(per_sample: pd.DataFrame) -> None:
     across all 7 paired_full samples, plus HCC1395 TO for reference."""
     tgt = per_sample[
         (per_sample["AF_class"] == "Extreme")
-        & (per_sample["LOH_Subtype"].isin(["LOH_Noise", "LOH_Strong"]))
+        & (per_sample["LOH_Subtype_LegacyVC"].isin(["LOH_Noise", "LOH_Strong"]))
     ].copy()
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.2), sharey=True)
@@ -208,8 +252,8 @@ def panel_cross_sample_extreme(per_sample: pd.DataFrame) -> None:
         noise_vals, strong_vals, noise_n, strong_n = [], [], [], []
         noise_lo, noise_hi, strong_lo, strong_hi = [], [], [], []
         for s in samples_here:
-            row_n = sub[(sub["sample"] == s) & (sub["LOH_Subtype"] == "LOH_Noise")]
-            row_s = sub[(sub["sample"] == s) & (sub["LOH_Subtype"] == "LOH_Strong")]
+            row_n = sub[(sub["sample"] == s) & (sub["LOH_Subtype_LegacyVC"] == "LOH_Noise")]
+            row_s = sub[(sub["sample"] == s) & (sub["LOH_Subtype_LegacyVC"] == "LOH_Strong")]
             if len(row_n) == 1:
                 noise_vals.append(float(row_n["tp_rate"].iloc[0]))
                 noise_n.append(int(row_n["n"].iloc[0]))
@@ -282,7 +326,7 @@ def build_summary(
     # 1. HCC1395 TO headline: LOH_Noise vs LOH_Strong at Extreme AF (all CN)
     tgt = hcc1395_to_tab[hcc1395_to_tab["AF_class"] == "Extreme"]
     agg = (
-        tgt.groupby("LOH_Subtype")[["n", "k"]]
+        tgt.groupby("LOH_Subtype_LegacyVC")[["n", "k"]]
         .sum()
         .reset_index()
     )
@@ -293,22 +337,22 @@ def build_summary(
     # 2. HCC1395 TO LOH_Noise stratified by CN at Extreme AF
     strat = hcc1395_to_tab[
         (hcc1395_to_tab["AF_class"] == "Extreme")
-        & (hcc1395_to_tab["LOH_Subtype"] == "LOH_Noise")
+        & (hcc1395_to_tab["LOH_Subtype_LegacyVC"] == "LOH_Noise")
     ]
     summary["hcc1395_to_LOH_Noise_extreme_by_CN"] = strat.to_dict(orient="records")
 
     # 3. cross-sample Noise vs Strong @ Extreme AF
     cross = per_sample[
         (per_sample["AF_class"] == "Extreme")
-        & (per_sample["LOH_Subtype"].isin(["LOH_Noise", "LOH_Strong"]))
+        & (per_sample["LOH_Subtype_LegacyVC"].isin(["LOH_Noise", "LOH_Strong"]))
     ]
     summary["cross_sample_extreme_af"] = cross.to_dict(orient="records")
 
     # 4. Cohen's h between Noise and Strong TP rate per sample×mode
     cohen_rows = []
     for (sample, mode), g in cross.groupby(["sample", "mode"]):
-        rn = g[g["LOH_Subtype"] == "LOH_Noise"]
-        rs = g[g["LOH_Subtype"] == "LOH_Strong"]
+        rn = g[g["LOH_Subtype_LegacyVC"] == "LOH_Noise"]
+        rs = g[g["LOH_Subtype_LegacyVC"] == "LOH_Strong"]
         if len(rn) != 1 or len(rs) != 1:
             continue
         pn, ps = float(rn["tp_rate"].iloc[0]), float(rs["tp_rate"].iloc[0])
@@ -333,7 +377,10 @@ def build_summary(
 
 
 def main() -> int:
-    df = load_main()
+    args = parse_args()
+    OUT_FIG_DIR.mkdir(parents=True, exist_ok=True)
+    df = load_main(allow_unversioned_v1=args.allow_unversioned_v1)
+    loh_schema_contract = dict(df.attrs["loh_schema_contract"])
 
     # full stratified table across 7 samples
     full_tab = stratified_table(df)
@@ -358,6 +405,7 @@ def main() -> int:
     panel_cross_sample_extreme(per_sample)
 
     summary = build_summary(hcc_to_tab, per_sample)
+    summary["loh_schema_contract"] = loh_schema_contract
     summary_out = OUT_DATA_DIR / "b7_loh_noise_summary.json"
     with open(summary_out, "w") as fh:
         json.dump(summary, fh, indent=2, default=float)
@@ -367,7 +415,7 @@ def main() -> int:
     print("\n=== HEADLINE (HCC1395 TO @ Extreme AF, pooled CN) ===")
     for r in summary["hcc1395_to_extreme_af_pooled_cn"]:
         print(
-            f"  {r['LOH_Subtype']:15s}  n={int(r['n']):6d}  "
+            f"  {r['LOH_Subtype_LegacyVC']:15s}  n={int(r['n']):6d}  "
             f"TP rate={r['tp_rate']:.3f}  CI=[{r['ci_lo']:.3f}, {r['ci_hi']:.3f}]"
         )
     print("\n=== CROSS-SAMPLE Noise vs Strong TP rate @ Extreme AF ===")

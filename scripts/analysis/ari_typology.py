@@ -13,10 +13,19 @@ ARI_Cluster_Allele, WithinHP_CleanMultigroup, VerificationClass) and derives:
 Pure offline read-back — every number is a deterministic count.
 Usage: python3 ari_typology.py significance_summary.csv [out.json]
 """
-import csv
+import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_current_view
 
 TAU_HIGH = 0.5   # ARI >= this -> aligned (substantial agreement)
 TAU_LOW = 0.2    # ARI < this (but computed) -> no-align / structure-not-label
@@ -61,13 +70,27 @@ def dist(vals):
     }
 
 
+def attach_current_verification_view(frame: pd.DataFrame) -> pd.DataFrame:
+    """Attach a guarded C2 view while retaining unknown classes as a bucket."""
+    view = select_current_view(frame)
+    prepared = frame.copy()
+    prepared["_verification_class_current"] = view.values
+    prepared.attrs["verification_view"] = view
+    return prepared
+
+
 def main():
-    if len(sys.argv) < 2:
-        sys.exit("usage: ari_typology.py significance_summary.csv [out.json]")
-    path = sys.argv[1]
-    out = sys.argv[2] if len(sys.argv) > 2 else None
-    with open(path, newline="") as fh:
-        rows = list(csv.DictReader(fh))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("significance_summary", help="Versioned significance_summary.csv")
+    parser.add_argument("out_json", nargs="?", help="Optional JSON output path")
+    args = parser.parse_args()
+    path = args.significance_summary
+    out = args.out_json
+    frame = attach_current_verification_view(
+        pd.read_csv(path, dtype=str, keep_default_na=False)
+    )
+    verification_view = frame.attrs["verification_view"]
+    rows = frame.to_dict(orient="records")
     n = len(rows)
 
     hp = [ffloat(r.get("ARI_Cluster_HP", "")) for r in rows]
@@ -94,7 +117,7 @@ def main():
             else:
                 t = "noalign_lt_0.2_computed"
         typ[t] += 1
-        vc = r.get("VerificationClass", "").strip() or "(blank)"
+        vc = str(r["_verification_class_current"])
         typ_by_vc.setdefault(t, {})
         typ_by_vc[t][vc] = typ_by_vc[t].get(vc, 0) + 1
         w = str(r.get("WithinHP_CleanMultigroup", "")).strip().lower() in ("true", "1")
@@ -105,6 +128,12 @@ def main():
     result = {
         "source_csv": path,
         "n": n,
+        "verification_schema": {
+            "selection_field": verification_view.field,
+            "schema_status": verification_view.schema_status,
+            "unknown_current_class_count": sum(verification_view.unknown_counts.values()),
+            "unknown_current_class_values": verification_view.unknown_counts,
+        },
         "ari_hp": dist(hp),
         "ari_allele": dist(al),
         "typology_by_ARImax": {k: {"n": v, "frac": round(v / n, 4) if n else None} for k, v in typ.items()},

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, List, Sequence
@@ -12,6 +13,17 @@ from typing import Callable, Dict, List, Sequence
 import pandas as pd
 
 from research_common import compute_metrics, ensure_dir, markdown_table, write_tsv_rows
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 @dataclass
@@ -35,6 +47,7 @@ DATASET_FIELDS = [
     "platform",
     "caller",
     "mode",
+    "verification_support_mode",
     "total_rows",
     "candidate_rows",
     "candidate_tp",
@@ -159,7 +172,7 @@ NUMERIC_FEATURES = [
 ]
 
 CATEGORICAL_FEATURES = [
-    "VerificationClass",
+    "VerificationSupportState",
     "agreement_type",
     "cluster_class",
     "label_class",
@@ -176,6 +189,12 @@ def parse_args() -> argparse.Namespace:
         help="Format: dataset_id|label|joined_tsv|baseline_tp|baseline_fp|truth_total",
     )
     parser.add_argument("--output-dir", required=True, help="Output directory")
+    parser.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        required=True,
+        help="Explicit source for historical Strong/Subclone support semantics",
+    )
     return parser.parse_args()
 
 
@@ -198,7 +217,48 @@ def as_bool_series(series: pd.Series) -> pd.Series:
     return series.fillna(False).map(lambda value: str(value).strip().lower() in {"1", "true", "yes", "y"})
 
 
-def prepare_frame(path: Path) -> pd.DataFrame:
+def attach_verification_support(df: pd.DataFrame, support_mode: str, analyzed_mask: pd.Series) -> pd.DataFrame:
+    if support_mode not in {"evidence-v2", "legacy"}:
+        raise ValueError(f"Unsupported verification support mode: {support_mode}")
+    result = df.copy()
+    analyzed = result.loc[analyzed_mask].copy()
+    if not analyzed.empty:
+        if support_mode == "evidence-v2":
+            current = select_current_view(analyzed)
+            if current.unknown_counts:
+                raise SchemaContractError(f"feature-space input: unknown current classes: {current.unknown_counts}")
+            evidence = read_evidence(analyzed)
+            label_values = evidence["LabelFirstSupport"]
+            cluster_values = evidence["ClusterFirstSupport"]
+            source = "LabelFirstSupport+ClusterFirstSupport"
+            status = "V2_EVIDENCE"
+        elif support_mode == "legacy":
+            legacy = select_legacy_view(analyzed, allow_unversioned_v1=False)
+            label_values = legacy.values.isin(["Strong", "Weak"])
+            cluster_values = legacy.values.isin(["Strong", "Subclone"])
+            source = legacy.field
+            status = legacy.schema_status
+        result["label_first_support"] = label_values.reindex(result.index).astype("boolean")
+        result["cluster_first_support"] = cluster_values.reindex(result.index).astype("boolean")
+    else:
+        result["label_first_support"] = pd.Series(pd.NA, index=result.index, dtype="boolean")
+        result["cluster_first_support"] = pd.Series(pd.NA, index=result.index, dtype="boolean")
+        source = "LabelFirstSupport+ClusterFirstSupport" if support_mode == "evidence-v2" else "VerificationClass_Legacy"
+        status = "NO_ANALYZED_ROWS"
+    result["VerificationSupportState"] = pd.Series(pd.NA, index=result.index, dtype="string")
+    label = result["label_first_support"]
+    cluster = result["cluster_first_support"]
+    result.loc[analyzed_mask & label.fillna(False) & cluster.fillna(False), "VerificationSupportState"] = "Strong"
+    result.loc[analyzed_mask & ~label.fillna(False) & cluster.fillna(False), "VerificationSupportState"] = "Subclone"
+    result.loc[analyzed_mask & label.fillna(False) & ~cluster.fillna(False), "VerificationSupportState"] = "Weak"
+    result.loc[analyzed_mask & ~label.fillna(False) & ~cluster.fillna(False), "VerificationSupportState"] = "Noise"
+    result["verification_support_mode"] = support_mode
+    result["verification_support_source"] = source
+    result["verification_support_schema_status"] = status
+    return result
+
+
+def prepare_frame(path: Path, support_mode: str) -> pd.DataFrame:
     df = pd.read_csv(path, sep="\t")
     numeric_columns = [
         "qual",
@@ -242,7 +302,6 @@ def prepare_frame(path: Path) -> pd.DataFrame:
             df[column] = False
 
     text_fill = {
-        "VerificationClass": "NA",
         "agreement_type": "NA",
         "cluster_class": "NA",
         "label_class": "NA",
@@ -261,8 +320,8 @@ def prepare_frame(path: Path) -> pd.DataFrame:
     df["candidate_eligible"] = df["candidate_eligible"].fillna(False)
     analyzed_mask = df["source_scope"].isin({"tp", "fp"})
     df["analysis_available"] = analyzed_mask
+    df = attach_verification_support(df, support_mode, analyzed_mask)
     df["agreement_positive"] = df["agreement_type"].isin({"label_upgrade", "consistent_strong", "consistent_subclone"})
-    df["strong_subclone"] = df["VerificationClass"].isin({"Strong", "Subclone"})
     return df
 
 
@@ -275,6 +334,7 @@ def dataset_metadata(df: pd.DataFrame) -> Dict[str, str]:
         "platform": str(row.get("platform", "unknown")),
         "caller": str(row.get("caller", "unknown")),
         "mode": str(row.get("mode", "unknown")),
+        "verification_support_mode": str(row.get("verification_support_mode", "unknown")),
     }
 
 
@@ -446,10 +506,10 @@ def predicate_definitions() -> List[Dict[str, object]]:
         },
         {
             "feature_type": "label_cluster",
-            "family": "verification_class",
-            "rule_id": "strong_subclone",
-            "notes": "VerificationClass in Strong/Subclone",
-            "func": lambda df: analyzed(df) & df["strong_subclone"],
+            "family": "verification_evidence",
+            "rule_id": "cluster_first_support",
+            "notes": "ClusterFirstSupport == true",
+            "func": lambda df: analyzed(df) & df["cluster_first_support"].fillna(False),
         },
         {
             "feature_type": "label_cluster",
@@ -490,7 +550,7 @@ def top_predicates_for_combinations() -> Sequence[str]:
         "quality_ge_60",
         "quality_ge_75",
         "hp_assign_ge_099",
-        "strong_subclone",
+        "cluster_first_support",
         "agreement_positive",
         "label_upgrade",
         "allele_delta_ge_005",
@@ -518,6 +578,7 @@ def summarize_dataset(config: DatasetConfig, df: pd.DataFrame, meta: Dict[str, s
         "platform": meta["platform"],
         "caller": meta["caller"],
         "mode": meta["mode"],
+        "verification_support_mode": meta["verification_support_mode"],
         "total_rows": len(df),
         "candidate_rows": len(candidate),
         "candidate_tp": int((candidate["truth_status"] == "TP").sum()),
@@ -880,7 +941,7 @@ def build_summary_markdown(
 
 def main() -> None:
     args = parse_args()
-    output_dir = ensure_dir(Path(args.output_dir).resolve())
+    output_dir = Path(args.output_dir).resolve()
 
     configs = [parse_dataset(item) for item in args.dataset]
     dataset_rows: List[Dict[str, object]] = []
@@ -892,7 +953,7 @@ def main() -> None:
     top_rows: List[Dict[str, object]] = []
 
     for config in configs:
-        df = prepare_frame(config.input_tsv)
+        df = prepare_frame(config.input_tsv, args.verification_support_mode)
         meta = dataset_metadata(df)
         dataset_rows.append(summarize_dataset(config, df, meta))
         numeric_rows.extend(numeric_distributions(config, df, meta))
@@ -903,6 +964,7 @@ def main() -> None:
         combo_rows.extend(combo_part)
         top_rows.extend(top_part)
 
+    ensure_dir(output_dir)
     write_tsv_rows(output_dir / "dataset_summary.tsv", DATASET_FIELDS, dataset_rows)
     write_tsv_rows(output_dir / "numeric_feature_distribution.tsv", NUMERIC_FIELDS, numeric_rows)
     write_tsv_rows(output_dir / "categorical_feature_distribution.tsv", CATEGORICAL_FIELDS, categorical_rows)

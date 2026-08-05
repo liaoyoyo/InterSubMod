@@ -6,12 +6,38 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import json
 import math
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List
 
+import pandas as pd
+
 from research_common import compute_metrics, read_json, to_float, to_int, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
+
+PROVENANCE_METADATA_FIELDS = (
+    "VerificationProvenanceStatus",
+    "VerificationProvenanceSourceField",
+    "VerificationProvenanceWarnings",
+)
+PROVENANCE_EXPORT_FIELDS = VERIFICATION_PROVENANCE_COLUMNS + PROVENANCE_METADATA_FIELDS
 
 
 PER_REGION_FIELDS = [
@@ -24,6 +50,7 @@ PER_REGION_FIELDS = [
     "cluster_class",
     "label_class",
     "verification_class",
+    *PROVENANCE_EXPORT_FIELDS,
     "reads",
     "num_cpgs",
     "passed_gating",
@@ -90,6 +117,7 @@ TOP_FIELDS = [
     "class_shift",
     "cluster_class",
     "label_class",
+    *PROVENANCE_EXPORT_FIELDS,
     "vaf",
     "qual",
     "gq",
@@ -139,6 +167,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--legacy-vaf-threshold", type=float, default=0.24, help="Legacy rule VAF threshold")
     parser.add_argument("--legacy-qual-threshold", type=float, default=0.75, help="Legacy rule QUAL threshold")
     parser.add_argument("--top-n", type=int, default=100, help="Top suspicious TP/FP rows to export")
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize historical H1 summaries without VerificationSchemaVersion.",
+    )
     return parser.parse_args()
 
 
@@ -146,13 +179,64 @@ def open_text(path: Path):
     return gzip.open(path, "rt", encoding="utf-8") if path.suffix == ".gz" else path.open("r", encoding="utf-8")
 
 
-def load_summary_rows(path: Path, scope: str) -> Dict[str, Dict[str, object]]:
+def validate_summary_provenance(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    selected = df.copy()
+    if "VerificationSchemaVersion" in selected.columns:
+        current = select_current_view(selected)
+        select_legacy_view(selected)
+        read_evidence(selected)
+        select_loh_legacy(selected)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in selected.columns]
+        if missing:
+            raise SchemaContractError(
+                "TO feature provenance: missing required fields: " + ", ".join(missing)
+            )
+        known = current.values != UNKNOWN_CURRENT_CLASS
+        if known.any():
+            extract_provenance_frame(selected.loc[known])
+        status = "V2"
+        source = current.field
+        warning_payload = {"unknown_current_counts": current.unknown_counts}
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "TO feature provenance: VerificationSchemaVersion missing; explicit "
+                "--allow-unversioned-v1 authorization is required for historical H1 input"
+            )
+        provenance = extract_provenance_frame(selected, allow_unversioned_v1=True)
+        status = "UNVERSIONED_V1"
+        source = str(provenance.attrs.get("selection_field", "VerificationClass"))
+        warning_payload = {
+            "authorization": "--allow-unversioned-v1",
+            "messages": list(provenance.attrs.get("warnings", [])),
+        }
+        for field in VERIFICATION_PROVENANCE_COLUMNS:
+            if field not in selected.columns:
+                selected[field] = ""
+    selected["VerificationProvenanceStatus"] = status
+    selected["VerificationProvenanceSourceField"] = source
+    selected["VerificationProvenanceWarnings"] = json.dumps(
+        warning_payload, ensure_ascii=False, sort_keys=True
+    )
+    return selected
+
+
+def load_summary_rows(
+    path: Path,
+    scope: str,
+    allow_unversioned_v1: bool = False,
+) -> Dict[str, Dict[str, object]]:
     rows: Dict[str, Dict[str, object]] = {}
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            region_key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
-            rows[region_key] = {
+    frame = validate_summary_provenance(
+        pd.read_csv(path, keep_default_na=False, low_memory=False),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    for _, row in frame.iterrows():
+        region_key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
+        rows[region_key] = {
                 "source_scope": scope,
                 "verification_class": row.get("VerificationClass", ""),
                 "reads": to_int(row.get("NumReads")),
@@ -164,7 +248,8 @@ def load_summary_rows(path: Path, scope: str) -> Dict[str, Dict[str, object]]:
                 "pairwise_mean_dist": to_float(row.get("PairwiseMeanDist")),
                 "global_p": to_float(row.get("GlobalP")),
                 "quality_score": to_float(row.get("Quality_Score")),
-            }
+                **{field: row.get(field, "") for field in PROVENANCE_EXPORT_FIELDS},
+        }
     return rows
 
 
@@ -267,9 +352,21 @@ def main() -> None:
     baseline_fp = int(filtered.get("fp", 0))
     baseline_f1 = float(filtered.get("f1", 0.0))
 
-    tp_summary = load_summary_rows(sample_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv", "tp")
-    fp_summary = load_summary_rows(sample_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv", "fp")
+    tp_summary_path = sample_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv"
+    fp_summary_path = sample_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv"
+    tp_summary = load_summary_rows(tp_summary_path, "tp", args.allow_unversioned_v1)
+    fp_summary = load_summary_rows(fp_summary_path, "fp", args.allow_unversioned_v1)
     summary_index = {**tp_summary, **fp_summary}
+    provenance_statuses = sorted(
+        {
+            str(row["VerificationProvenanceStatus"])
+            for row in summary_index.values()
+        }
+    )
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(
+            f"TO feature provenance: mixed schema statuses across TP/FP: {provenance_statuses}"
+        )
     vcf_index = {
         **load_vcf_features(sample_dir / "step04_benchmark_longphase_to" / "filtered_snv_tp.vcf.gz", "tp"),
         **load_vcf_features(sample_dir / "step04_benchmark_longphase_to" / "filtered_snv_fp.vcf.gz", "fp"),
@@ -336,6 +433,7 @@ def main() -> None:
                 "cluster_class": row.get("cluster_class", ""),
                 "label_class": row.get("label_class", ""),
                 "verification_class": summary.get("verification_class", ""),
+                **{field: summary.get(field, "") for field in PROVENANCE_EXPORT_FIELDS},
                 "reads": summary.get("reads", 0),
                 "num_cpgs": summary.get("num_cpgs", 0),
                 "passed_gating": summary.get("passed_gating", ""),
@@ -518,6 +616,26 @@ def main() -> None:
     )
     write_tsv_rows(output_dir / "to_feature_top_fp_candidates.tsv", TOP_FIELDS, [row_to_output(row) for row in top_fp])
     write_tsv_rows(output_dir / "to_feature_top_tp_controls.tsv", TOP_FIELDS, [row_to_output(row) for row in top_tp])
+    (output_dir / "verification_schema_contract.json").write_text(
+        json.dumps(
+            {
+                "inputs": [str(tp_summary_path), str(fp_summary_path)],
+                "schema_status": provenance_statuses[0],
+                "allow_unversioned_v1": args.allow_unversioned_v1,
+                "provenance_fields": list(PROVENANCE_EXPORT_FIELDS),
+                "warnings": sorted(
+                    {
+                        str(row["VerificationProvenanceWarnings"])
+                        for row in summary_index.values()
+                    }
+                ),
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     selected = {row["focus_group"]: row for row in matrix_rows}
     md_lines = [

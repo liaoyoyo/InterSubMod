@@ -32,6 +32,12 @@ import seaborn as sns
 from scipy import stats as sp_stats
 from datetime import datetime
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_current_view
+
 OUT_DIR = ensure_dir(OUTPUT_ROOT / "20260406_loh_concordance")
 
 QUAD_PALETTE = {
@@ -47,6 +53,35 @@ QUAD_LABELS = {
     "Q3_bed_only": "Q3: LOH.bed-only",
     "Q4_neither": "Q4: Neither",
 }
+
+
+def attach_current_verification_view(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate C2 schema identity and retain unknown values in a named bucket."""
+    view = select_current_view(df)
+    prepared = df.copy()
+    prepared["_verification_class_current"] = view.values
+    prepared.attrs["verification_schema_metadata"] = {
+        **view.metadata(),
+        "unknown_current_class_count": sum(view.unknown_counts.values()),
+    }
+    return prepared
+
+
+def write_verification_schema_provenance(df: pd.DataFrame) -> None:
+    metadata = df.attrs["verification_schema_metadata"]
+    pd.DataFrame(
+        [
+            {
+                "selection_field": metadata["selection_field"],
+                "schema_status": metadata["schema_status"],
+                "unknown_current_class_count": metadata["unknown_current_class_count"],
+                "unknown_current_class_values": "; ".join(
+                    f"{key}:{value}"
+                    for key, value in sorted(metadata["unknown_counts"].items())
+                ),
+            }
+        ]
+    ).to_csv(OUT_DIR / "verification_schema_provenance.tsv", sep="\t", index=False)
 
 
 def assign_quadrants(df):
@@ -177,11 +212,11 @@ def fig11_verification_class(df_to):
     fig, ax = plt.subplots(figsize=(12, 6))
 
     quads = ["Q1_both", "Q2_ism_only", "Q4_neither"]
-    vc_order = sorted(df_to["VerificationClass"].dropna().unique())
+    vc_order = sorted(df_to["_verification_class_current"].dropna().unique())
 
     counts = {}
     for q in quads:
-        vc = df_to[df_to["loh_quadrant"] == q]["VerificationClass"].value_counts()
+        vc = df_to[df_to["loh_quadrant"] == q]["_verification_class_current"].value_counts()
         total = vc.sum()
         counts[q] = {v: vc.get(v, 0) / total * 100 for v in vc_order}
 
@@ -310,7 +345,8 @@ def main():
     print("Step 1.3: Q2 差異區域解釋")
     print("=" * 70)
 
-    df = load_master_dataset()
+    df = attach_current_verification_view(load_master_dataset())
+    write_verification_schema_provenance(df)
     df_to = df[df["mode"] == "to"].copy()
     df_to = assign_quadrants(df_to)
     print(f"\nTO mode: {len(df_to):,} rows")

@@ -9,13 +9,29 @@ Output: TSV tables + diagnostic report data.
 
 from __future__ import annotations
 
+import argparse
+import csv
 import gzip
 import sys
+import warnings
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    V1_CURRENT_CLASSES,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 # ── Config ──────────────────────────────────────────────────────────────
 
@@ -51,18 +67,109 @@ KEY_FEATURES = [
 ]
 
 
-def load_master_dataset() -> Tuple[List[str], List[Dict[str, str]]]:
-    """Load master TSV and return (headers, rows)."""
+PROVENANCE_FIELDS = [
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
+]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--master-tsv", default=str(MASTER_TSV))
+    parser.add_argument("--output-dir", default=str(OUTPUT_DIR))
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize the historical unversioned v1 current taxonomy.",
+    )
+    return parser.parse_args()
+
+
+def _validate_current_taxonomy(
+    rows: List[Dict[str, str]],
+    headers: List[str],
+    allow_unversioned_v1: bool,
+) -> Dict[str, object]:
+    """Fail closed on schema identity and normalize only unknown class values."""
+    required = ["VerificationClass"]
+    if "VerificationSchemaVersion" in headers:
+        required += PROVENANCE_FIELDS + ["VerificationSchemaVersion"]
+        missing = [field for field in required if field not in headers]
+        if missing:
+            raise SchemaContractError(
+                "PON master dataset: missing v2 provenance fields: " + ", ".join(missing)
+            )
+        schema_frame = pd.DataFrame(
+            ({field: row.get(field, "") for field in required} for row in rows),
+            columns=required,
+        )
+        current = select_current_view(schema_frame)
+        read_evidence(schema_frame)
+        for row, value in zip(rows, current.values.tolist()):
+            row["VerificationClass"] = value
+        metadata = current.metadata()
+        metadata["evidence_fields"] = list(PROVENANCE_FIELDS)
+        return metadata
+
+    if "VerificationClass" not in headers:
+        raise SchemaContractError("PON master dataset: VerificationClass is missing")
+    if not allow_unversioned_v1:
+        raise SchemaContractError(
+            "PON master dataset is unversioned; --allow-unversioned-v1 is required"
+        )
+    unknown_counts: Counter[str] = Counter()
+    allowed = set(V1_CURRENT_CLASSES)
+    for row in rows:
+        value = row.get("VerificationClass", "")
+        if value not in allowed:
+            unknown_counts[value or "<MISSING>"] += 1
+            row["VerificationClass"] = UNKNOWN_CURRENT_CLASS
+    message = (
+        "UNVERSIONED: PON master current taxonomy accepted under explicit "
+        "--allow-unversioned-v1; v2 evidence provenance is unavailable"
+    )
+    warnings.warn(message, UserWarning, stacklevel=2)
+    return {
+        "selection_field": "VerificationClass",
+        "schema_status": "UNVERSIONED_V1",
+        "categories": list(V1_CURRENT_CLASSES) + [UNKNOWN_CURRENT_CLASS],
+        "unknown_counts": dict(sorted(unknown_counts.items())),
+        "warnings": [message],
+        "evidence_fields": [],
+    }
+
+
+def load_master_dataset(
+    path: Path = MASTER_TSV,
+    allow_unversioned_v1: bool = False,
+) -> Tuple[List[str], List[Dict[str, str]], Dict[str, object]]:
+    """Load and schema-check the master TSV before returning any analytical rows."""
     print("Loading master dataset...", file=sys.stderr)
     rows = []
-    with gzip.open(MASTER_TSV, "rt") as f:
-        headers = f.readline().strip().split("\t")
-        for line in f:
-            fields = line.strip().split("\t")
-            row = dict(zip(headers, fields))
-            rows.append(row)
+    path = Path(path)
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        headers = list(reader.fieldnames or [])
+        rows.extend(reader)
     print(f"  Loaded {len(rows):,} rows, {len(headers)} columns", file=sys.stderr)
-    return headers, rows
+    metadata = _validate_current_taxonomy(rows, headers, allow_unversioned_v1)
+    return headers, rows, metadata
+
+
+def _taxonomy_header(metadata: Dict[str, object]) -> List[str]:
+    return [
+        f"Verification taxonomy status: {metadata['schema_status']}",
+        f"Verification selection field: {metadata['selection_field']}",
+        f"Unknown current classes bucketed: {metadata.get('unknown_counts', {})}",
+        "",
+    ]
 
 
 def safe_float(v: str) -> float:
@@ -74,13 +181,15 @@ def safe_float(v: str) -> float:
 
 # ── Task 2: PON Cross-Sample Analysis ──────────────────────────────────
 
-def run_pon_analysis(rows: List[Dict[str, str]]) -> str:
+def run_pon_analysis(rows: List[Dict[str, str]], metadata: Dict[str, object] | None = None) -> str:
     """Compute PON removal rates and cross-sample comparison."""
     output_lines = []
     output_lines.append("=" * 80)
     output_lines.append("Task 2: PON Cross-Sample FP Removal Rate Analysis")
     output_lines.append("=" * 80)
     output_lines.append("")
+    if metadata is not None:
+        output_lines.extend(_taxonomy_header(metadata))
 
     # Part A: Raw VCF-level PON removal
     output_lines.append("## Part A: Raw VCF-Level PON Removal Rate")
@@ -164,13 +273,15 @@ def run_pon_analysis(rows: List[Dict[str, str]]) -> str:
 
 # ── Task 3: H2009 Root Cause Diagnosis ─────────────────────────────────
 
-def run_h2009_diagnosis(rows: List[Dict[str, str]]) -> str:
+def run_h2009_diagnosis(rows: List[Dict[str, str]], metadata: Dict[str, object] | None = None) -> str:
     """Diagnose H2009 negative root cause."""
     output_lines = []
     output_lines.append("=" * 80)
     output_lines.append("Task 3: H2009 Negative Root Cause Diagnosis")
     output_lines.append("=" * 80)
     output_lines.append("")
+    if metadata is not None:
+        output_lines.extend(_taxonomy_header(metadata))
 
     # Separate by sample and mode
     sample_data = defaultdict(lambda: {"TP": [], "FP": []})
@@ -319,7 +430,7 @@ def run_h2009_diagnosis(rows: List[Dict[str, str]]) -> str:
     for sample in sorted(sample_data.keys()):
         for truth in ["TP", "FP"]:
             for row in sample_data[sample][truth]:
-                vc = row.get("VerificationClass", row.get("verification_class", "Unknown"))
+                vc = row["VerificationClass"]
                 vc_dist[sample][vc][truth] += 1
 
     for sample in ["H2009", "HCC1395", "COLO829"]:
@@ -366,14 +477,22 @@ def run_h2009_diagnosis(rows: List[Dict[str, str]]) -> str:
 # ── Main ────────────────────────────────────────────────────────────────
 
 def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    args = parse_args()
+    output_dir = Path(args.output_dir).resolve()
 
-    headers, rows = load_master_dataset()
+    try:
+        headers, rows, verification_metadata = load_master_dataset(
+            Path(args.master_tsv).resolve(),
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        raise SystemExit(f"[pon-diagnosis][schema-contract] {exc}") from exc
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Task 2
     print("\n--- Running Task 2: PON Cross-Sample Analysis ---\n", file=sys.stderr)
-    pon_report = run_pon_analysis(rows)
-    pon_path = OUTPUT_DIR / "pon_cross_sample_analysis.txt"
+    pon_report = run_pon_analysis(rows, verification_metadata)
+    pon_path = output_dir / "pon_cross_sample_analysis.txt"
     pon_path.write_text(pon_report)
     print(pon_report)
 
@@ -381,23 +500,28 @@ def main():
 
     # Task 3
     print("--- Running Task 3: H2009 Diagnosis ---\n", file=sys.stderr)
-    h2009_report = run_h2009_diagnosis(rows)
-    h2009_path = OUTPUT_DIR / "h2009_root_cause_diagnosis.txt"
+    h2009_report = run_h2009_diagnosis(rows, verification_metadata)
+    h2009_path = output_dir / "h2009_root_cause_diagnosis.txt"
     h2009_path.write_text(h2009_report)
     print(h2009_report)
 
     # Save TSV summary for PON rates
-    tsv_path = OUTPUT_DIR / "pon_removal_rates.tsv"
+    tsv_path = output_dir / "pon_removal_rates.tsv"
     with open(tsv_path, "w") as f:
-        f.write("sample\ttotal_raw\tnonsomatic\tpass\tlowqual_only\tpon_rate_pct\ttruth_total\tpass_to_total_pct\n")
+        f.write(
+            "sample\ttotal_raw\tnonsomatic\tpass\tlowqual_only\tpon_rate_pct\ttruth_total\t"
+            "pass_to_total_pct\tVerificationSchemaStatus\tVerificationSchemaVersion\n"
+        )
         for sample in ["HCC1395", "HCC1395_DORADO", "COLO829", "H1437", "H2009", "HCC1937", "HCC1954"]:
             s = RAW_VCF_STATS[sample]
             pon_rate = s["nonsomatic"] / s["total"] * 100
             pass_rate = s["pass"] / s["total"] * 100
             f.write(f"{sample}\t{s['total']}\t{s['nonsomatic']}\t{s['pass']}\t"
-                    f"{s['lowqual_only']}\t{pon_rate:.4f}\t{TRUTH_TOTALS[sample]}\t{pass_rate:.4f}\n")
+                    f"{s['lowqual_only']}\t{pon_rate:.4f}\t{TRUTH_TOTALS[sample]}\t{pass_rate:.4f}\t"
+                    f"{verification_metadata['schema_status']}\t"
+                    f"{2 if verification_metadata['schema_status'] == 'V2' else ''}\n")
 
-    print(f"\nOutputs saved to {OUTPUT_DIR}/", file=sys.stderr)
+    print(f"\nOutputs saved to {output_dir}/", file=sys.stderr)
     print(f"  - pon_cross_sample_analysis.txt", file=sys.stderr)
     print(f"  - h2009_root_cause_diagnosis.txt", file=sys.stderr)
     print(f"  - pon_removal_rates.tsv", file=sys.stderr)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compare TP/FP enrichment patterns and evaluate subclone-validation heuristics.
+Compare TP/FP enrichment patterns using explicit legacy verification support.
 
 Outputs:
 1) Metrics table (TSV)
@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
 from pathlib import Path
@@ -21,9 +22,20 @@ import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    select_legacy_view,
+)
+
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compare TP/FP enrichment and subclone validation signals.")
+    parser = argparse.ArgumentParser(
+        description="Compare TP/FP enrichment using the explicit legacy four-state verification field."
+    )
     parser.add_argument(
         "--advanced-samples",
         default="/big8_disk/liaoyoyo2001/InterSubMod_runs/output/advanced_analysis_20260119/advanced_samples.csv",
@@ -59,10 +71,20 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--out-prefix",
-        default="/big8_disk/liaoyoyo2001/InterSubMod_runs/output/tmp_meth_annot_test/subclone_validation_comparison_20260301",
-        help="Output prefix for generated TSV files",
+        required=True,
+        help="Output prefix for generated TSV files (required; no historical output default)",
     )
     return parser.parse_args()
+
+
+def derive_legacy_support_columns(df: pd.DataFrame):
+    """Attach the two locked historical support definitions from the legacy field."""
+    view = select_legacy_view(df, allow_unversioned_v1=False)
+    result = df.copy()
+    result["VerificationClass_Legacy_Selected"] = view.values
+    result["LegacyVerificationSupport"] = view.values.isin(["Strong", "Subclone"])
+    result["LegacyClusterFirstOnly"] = view.values.eq("Subclone")
+    return result, view
 
 
 def query_vcf_af_h(vcf_path: str) -> pd.DataFrame:
@@ -148,9 +170,14 @@ def f1_stats(y_true: Iterable[bool], y_pred: Iterable[bool]) -> Dict[str, float]
 def main() -> None:
     args = parse_args()
     out_prefix = Path(args.out_prefix)
-    out_prefix.parent.mkdir(parents=True, exist_ok=True)
 
     advanced_df = pd.read_csv(args.advanced_samples)
+    try:
+        advanced_df, legacy_view = derive_legacy_support_columns(advanced_df)
+    except SchemaContractError as exc:
+        print(f"ERROR: legacy verification schema contract failed: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
+
     advanced_df["IsTP"] = advanced_df["Category"].astype(str).str.startswith("TP")
 
     tp_df = query_vcf_af_h(args.tp_vcf)
@@ -188,10 +215,6 @@ def main() -> None:
     advanced_df["LowAF"] = advanced_df["AF"] < args.low_af_threshold
     advanced_df["HighCluster"] = advanced_df["ClusterCount50kb"] > args.high_cluster_threshold
     advanced_df["LOH_like"] = advanced_df["Potential_LOH"].fillna(False) | (advanced_df["HFlag"] == 1)
-    advanced_df["MethylSupport_SubcloneLike"] = advanced_df["VerificationClass"].isin(["Subclone", "Strong"]) | (
-        advanced_df["HPMergedDelta"] <= 0.10
-    )
-    advanced_df["SubcloneClass"] = advanced_df["VerificationClass"].eq("Subclone")
 
     lowaf_df = advanced_df[advanced_df["LowAF"]].copy()
 
@@ -202,35 +225,47 @@ def main() -> None:
     metrics_rows.append({"group": "meta", "metric": "sample_size_fp", "value": int((~advanced_df["IsTP"]).sum())})
     metrics_rows.append({"group": "meta", "metric": "sample_size_lowAF", "value": int(len(lowaf_df))})
     metrics_rows.append({"group": "meta", "metric": "missing_af_h_lookup", "value": int(missing)})
+    metrics_rows.append(
+        {"group": "meta", "metric": "verification_selection_field", "value": legacy_view.field}
+    )
+    metrics_rows.append(
+        {"group": "meta", "metric": "verification_schema_status", "value": legacy_view.schema_status}
+    )
 
     for feat in ["LOH_like", "HighCluster", "LowAF"]:
         stats = fisher_stats(advanced_df, feat)
         for key, value in stats.items():
             metrics_rows.append({"group": feat, "metric": key, "value": value})
 
-    lowaf_support_stats = fisher_stats(lowaf_df, "MethylSupport_SubcloneLike")
+    lowaf_support_stats = fisher_stats(lowaf_df, "LegacyVerificationSupport")
     for key, value in lowaf_support_stats.items():
-        metrics_rows.append({"group": "lowAF_MethylSupport", "metric": key, "value": value})
+        metrics_rows.append({"group": "lowAF_LegacyVerificationSupport", "metric": key, "value": value})
 
-    lowaf_subclone_stats = fisher_stats(lowaf_df, "SubcloneClass")
-    for key, value in lowaf_subclone_stats.items():
-        metrics_rows.append({"group": "lowAF_SubcloneClass", "metric": key, "value": value})
+    lowaf_cluster_first_stats = fisher_stats(lowaf_df, "LegacyClusterFirstOnly")
+    for key, value in lowaf_cluster_first_stats.items():
+        metrics_rows.append({"group": "lowAF_LegacyClusterFirstOnly", "metric": key, "value": value})
 
     lowaf_baseline_tp_rate = float(lowaf_df["IsTP"].mean()) if len(lowaf_df) > 0 else float("nan")
     lowaf_support_tp_rate = (
-        float(lowaf_df.loc[lowaf_df["MethylSupport_SubcloneLike"], "IsTP"].mean())
-        if int(lowaf_df["MethylSupport_SubcloneLike"].sum()) > 0
+        float(lowaf_df.loc[lowaf_df["LegacyVerificationSupport"], "IsTP"].mean())
+        if int(lowaf_df["LegacyVerificationSupport"].sum()) > 0
         else float("nan")
     )
     lowaf_nonsupport_tp_rate = (
-        float(lowaf_df.loc[~lowaf_df["MethylSupport_SubcloneLike"], "IsTP"].mean())
-        if int((~lowaf_df["MethylSupport_SubcloneLike"]).sum()) > 0
+        float(lowaf_df.loc[~lowaf_df["LegacyVerificationSupport"], "IsTP"].mean())
+        if int((~lowaf_df["LegacyVerificationSupport"]).sum()) > 0
         else float("nan")
     )
     metrics_rows.append({"group": "lowAF_rates", "metric": "baseline_tp_rate", "value": lowaf_baseline_tp_rate})
-    metrics_rows.append({"group": "lowAF_rates", "metric": "methylsupport_tp_rate", "value": lowaf_support_tp_rate})
     metrics_rows.append(
-        {"group": "lowAF_rates", "metric": "non_methylsupport_tp_rate", "value": lowaf_nonsupport_tp_rate}
+        {"group": "lowAF_rates", "metric": "legacy_verification_support_tp_rate", "value": lowaf_support_tp_rate}
+    )
+    metrics_rows.append(
+        {
+            "group": "lowAF_rates",
+            "metric": "non_legacy_verification_support_tp_rate",
+            "value": lowaf_nonsupport_tp_rate,
+        }
     )
 
     metrics_df = pd.DataFrame(metrics_rows)
@@ -239,15 +274,15 @@ def main() -> None:
     y = advanced_df["IsTP"].astype(bool)
 
     rule_1 = advanced_df["AF"] >= args.low_af_threshold
-    rule_2 = (advanced_df["AF"] >= args.low_af_threshold) | advanced_df["VerificationClass"].eq("Subclone")
+    rule_2 = (advanced_df["AF"] >= args.low_af_threshold) | advanced_df["LegacyClusterFirstOnly"]
     rule_3 = advanced_df["Significant"].fillna(False).astype(bool)
-    rule_4 = (advanced_df["AF"] >= args.low_af_threshold) | advanced_df["MethylSupport_SubcloneLike"].astype(bool)
+    rule_4 = (advanced_df["AF"] >= args.low_af_threshold) | advanced_df["LegacyVerificationSupport"]
 
     for name, pred in [
         (f"AF>={args.low_af_threshold}", rule_1),
-        (f"AF>={args.low_af_threshold}_OR_SubcloneClass", rule_2),
+        (f"AF>={args.low_af_threshold}_OR_LegacyClusterFirstOnly", rule_2),
         ("SignificantOnly", rule_3),
-        (f"AF>={args.low_af_threshold}_OR_MethylSupport", rule_4),
+        (f"AF>={args.low_af_threshold}_OR_LegacyVerificationSupport", rule_4),
     ]:
         stats = f1_stats(y, pred)
         stats["rule"] = name
@@ -261,6 +296,7 @@ def main() -> None:
     rules_out = out_prefix.parent / f"{out_prefix.name}_rules.tsv"
     samples_out = out_prefix.parent / f"{out_prefix.name}_samples.tsv"
 
+    out_prefix.parent.mkdir(parents=True, exist_ok=True)
     metrics_df.to_csv(metrics_out, sep="\t", index=False)
     rules_df.to_csv(rules_out, sep="\t", index=False)
     advanced_df.to_csv(samples_out, sep="\t", index=False)

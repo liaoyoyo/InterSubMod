@@ -14,6 +14,7 @@
   - ism_gradient_summary.tsv         （跨樣本 AF bin 比較表）
   - ism_passgating_enrichment.tsv    （PassedGating 富集比例）
 """
+import argparse
 import os
 import sys
 import subprocess
@@ -21,6 +22,12 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import stats
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import SchemaContractError, select_legacy_view
 
 SYNTH_ROOT = Path("/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds")
 OUT_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/research/fp_provenance/20260322_cross_sample_to_loh_analysis")
@@ -42,6 +49,20 @@ AF_BINS    = [0, 0.2, 0.4, 0.6, 0.9, 1.01]
 AF_LABELS  = ["<0.2", "0.2-0.4", "0.4-0.6", "0.6-0.9", ">=0.9"]
 FEATURES   = ["Quality_Score", "PairwiseMedianDist", "CramersV", "GlobalP"]
 
+
+def attach_historical_legacy_view(df, allow_unversioned_v1=False):
+    """Select the historical four-state metric without folding v2 classes."""
+    view = select_legacy_view(
+        df,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="fail",
+    )
+    selected = df.copy()
+    selected["_verification_legacy_class"] = view.values
+    selected["_verification_selection_field"] = view.field
+    selected["_verification_schema_status"] = view.schema_status
+    return selected
+
 def af_from_vcf(vcf_path):
     """提取 chr:pos:ref:alt → AF 映射，使用 FORMAT/AF 欄位"""
     result = subprocess.run(
@@ -61,7 +82,7 @@ def af_from_vcf(vcf_path):
             pass
     return af_map
 
-def load_significance_summary(csv_path, truth_status):
+def load_significance_summary(csv_path, truth_status, allow_unversioned_v1=False):
     """讀 significance_summary.csv 並加上 truth_status 和 variant_key"""
     df = pd.read_csv(csv_path)
     df["truth_status"] = truth_status
@@ -69,11 +90,9 @@ def load_significance_summary(csv_path, truth_status):
     # 標準化 PassedGating
     if "PassedGating" in df.columns:
         df["PassedGating"] = df["PassedGating"].map(lambda x: str(x).lower() in ["true","1","yes"])
-    if "VerificationClass" not in df.columns:
-        df["VerificationClass"] = "Unknown"
-    return df
+    return attach_historical_legacy_view(df, allow_unversioned_v1)
 
-def analyze_sample_full(sample_name, run_dir):
+def analyze_sample_full(sample_name, run_dir, allow_unversioned_v1=False):
     """從 significance_summary + VCF 的 AF 做完整 AF 梯度分析"""
     step04 = SYNTH_ROOT / run_dir / "step04_benchmark_longphase_to"
     step05 = SYNTH_ROOT / run_dir / "step05_intersubmod"
@@ -90,8 +109,8 @@ def analyze_sample_full(sample_name, run_dir):
     print(f"  Loading {sample_name}...")
 
     # 讀 ISM 特徵
-    tp_df = load_significance_summary(tp_csv, "TP")
-    fp_df = load_significance_summary(fp_csv, "FP")
+    tp_df = load_significance_summary(tp_csv, "TP", allow_unversioned_v1)
+    fp_df = load_significance_summary(fp_csv, "FP", allow_unversioned_v1)
     df = pd.concat([tp_df, fp_df], ignore_index=True)
     print(f"    ISM: TP={len(tp_df)}, FP={len(fp_df)}")
 
@@ -109,7 +128,7 @@ def analyze_sample_full(sample_name, run_dir):
 
     return df
 
-def analyze_hcc1395_5khz():
+def analyze_hcc1395_5khz(allow_unversioned_v1=False):
     """HCC1395 5kHz 使用已有的 rescue_joined_features.tsv"""
     if not HCC1395_5KHZ_RJF.exists():
         return None
@@ -119,11 +138,31 @@ def analyze_hcc1395_5khz():
         "caller_removed_fp": "FP",
     })
     df = df.dropna(subset=["truth_status", "af"])
+    df = attach_historical_legacy_view(df, allow_unversioned_v1)
     print(f"  HCC1395_5kHz: TP={len(df[df.truth_status=='TP'])}, FP={len(df[df.truth_status=='FP'])} (rescue candidate pool)")
     return df
 
 def compute_af_gradient(df, sample_name):
     """計算 AF bins 的 TP/FP 甲基化特徵比較"""
+    required = {
+        "_verification_legacy_class",
+        "_verification_selection_field",
+        "_verification_schema_status",
+    }
+    missing = sorted(required.difference(df.columns))
+    if missing:
+        raise SchemaContractError(
+            "AF gradient requires an explicit historical legacy view; missing "
+            + ", ".join(missing)
+        )
+    selection_fields = df["_verification_selection_field"].dropna().unique().tolist()
+    schema_statuses = df["_verification_schema_status"].dropna().unique().tolist()
+    if len(selection_fields) != 1 or len(schema_statuses) != 1:
+        raise SchemaContractError(
+            "AF gradient cannot combine different verification selections: "
+            f"fields={selection_fields}, statuses={schema_statuses}"
+        )
+
     rows = []
     for i, label in enumerate(AF_LABELS):
         mask = (df["af"] >= AF_BINS[i]) & (df["af"] < AF_BINS[i+1])
@@ -135,6 +174,9 @@ def compute_af_gradient(df, sample_name):
             "af_bin": label,
             "tp_n": len(tp_g),
             "fp_n": len(fp_g),
+            "verification_view": "legacy4_historical",
+            "verification_selection_field": selection_fields[0],
+            "verification_schema_status": schema_statuses[0],
         }
 
         # 特徵統計
@@ -173,16 +215,17 @@ def compute_af_gradient(df, sample_name):
             else:
                 row["gate_enrichment"] = None
 
-        # VerificationClass Noise%
-        if "VerificationClass" in df.columns:
-            tp_noise = (tp_g["VerificationClass"] == "Noise").sum() / len(tp_g) * 100 if len(tp_g) > 0 else 0
-            fp_noise = (fp_g["VerificationClass"] == "Noise").sum() / len(fp_g) * 100 if len(fp_g) > 0 else 0
-            tp_strong = (tp_g["VerificationClass"] == "Strong").sum() / len(tp_g) * 100 if len(tp_g) > 0 else 0
-            fp_strong = (fp_g["VerificationClass"] == "Strong").sum() / len(fp_g) * 100 if len(fp_g) > 0 else 0
-            row["tp_noise_pct"] = round(tp_noise, 1)
-            row["fp_noise_pct"] = round(fp_noise, 1)
-            row["tp_strong_pct"] = round(tp_strong, 1)
-            row["fp_strong_pct"] = round(fp_strong, 1)
+        # Historical four-state VerificationClass metrics. Empty cohorts are N/A,
+        # never silently reported as zero percent.
+        legacy_field = "_verification_legacy_class"
+        tp_noise = (tp_g[legacy_field] == "Noise").mean() * 100 if len(tp_g) > 0 else None
+        fp_noise = (fp_g[legacy_field] == "Noise").mean() * 100 if len(fp_g) > 0 else None
+        tp_strong = (tp_g[legacy_field] == "Strong").mean() * 100 if len(tp_g) > 0 else None
+        fp_strong = (fp_g[legacy_field] == "Strong").mean() * 100 if len(fp_g) > 0 else None
+        row["tp_noise_pct"] = round(tp_noise, 1) if tp_noise is not None else None
+        row["fp_noise_pct"] = round(fp_noise, 1) if fp_noise is not None else None
+        row["tp_strong_pct"] = round(tp_strong, 1) if tp_strong is not None else None
+        row["fp_strong_pct"] = round(fp_strong, 1) if fp_strong is not None else None
 
         rows.append(row)
     return pd.DataFrame(rows)
@@ -228,12 +271,26 @@ def print_gradient_table(results):
         print()
     print("="*100)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical raw VerificationClass as the legacy-four-state field; "
+            "canonical v2 input does not need this flag"
+        ),
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     print("=== 跨樣本 ISM 甲基化特徵 AF 梯度分析 ===\n")
     results = {}
 
     # HCC1395_5kHz 特殊處理
-    df_5khz = analyze_hcc1395_5khz()
+    df_5khz = analyze_hcc1395_5khz(args.allow_unversioned_v1)
     if df_5khz is not None:
         grad = compute_af_gradient(df_5khz, "HCC1395_5kHz")
         grad.to_csv(OUT_DIR / "ism_gradient_HCC1395_5kHz.tsv", sep="\t", index=False)
@@ -241,7 +298,7 @@ def main():
 
     # 其他樣本
     for sample_name, run_dir in SAMPLES.items():
-        df = analyze_sample_full(sample_name, run_dir)
+        df = analyze_sample_full(sample_name, run_dir, args.allow_unversioned_v1)
         if df is None:
             continue
         grad = compute_af_gradient(df, sample_name)

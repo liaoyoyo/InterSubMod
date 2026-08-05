@@ -12,6 +12,7 @@ Q5: AlleleDelta LOH inner/outer discrimination
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import json
 import warnings
@@ -33,6 +34,12 @@ from observation_common import (
     mannwhitney_test, chi2_test, ensure_dir,
     COLOR_TP, COLOR_FP, format_p, format_ci,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_current_view, select_loh_legacy
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -81,10 +88,48 @@ STRATA = ["All", "LOH", "Non-LOH", "LOH_Strong", "LOH_Weak"]
 def _p(msg): print(msg, flush=True)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned current-class raw display and "
+            "deprecated LOH_Subtype fallback"
+        ),
+    )
+    return parser.parse_args()
+
+
 # ---------------------------------------------------------------------------
 # Data Loading
 # ---------------------------------------------------------------------------
-def load_version(version: str) -> pd.DataFrame:
+def attach_schema_views(
+    df: pd.DataFrame,
+    version: str,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach guarded current-class and legacy-derived LOH views."""
+    current = select_current_view(df, allow_unversioned_raw=allow_unversioned_v1)
+    loh = select_loh_legacy(df, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = df.copy()
+    prepared["_verification_class_current"] = current.values
+    prepared["_loh_subtype_legacy"] = loh.values
+    prepared.attrs["schema_metadata"] = {
+        "version": version,
+        "verification_selection_field": current.field,
+        "verification_schema_status": current.schema_status,
+        "unknown_current_class_count": sum(current.unknown_counts.values()),
+        "unknown_current_class_values": "; ".join(
+            f"{key}:{value}" for key, value in sorted(current.unknown_counts.items())
+        ),
+        "loh_selection_field": loh.field,
+        "loh_schema_status": loh.schema_status,
+    }
+    return prepared
+
+
+def load_version(version: str, allow_unversioned_v1: bool = False) -> pd.DataFrame:
     """Load TP + FP for one haplotagging version, add truth_label."""
     paths = DATA_PATHS[version]
     tp = pd.read_csv(paths["tp"], low_memory=False)
@@ -94,6 +139,7 @@ def load_version(version: str) -> pd.DataFrame:
     tp["version"] = version
     fp["version"] = version
     df = pd.concat([tp, fp], ignore_index=True)
+    df = attach_schema_views(df, version, allow_unversioned_v1)
     # Convert booleans
     for col in BOOLEAN_FEATURES + ["Potential_LOH"]:
         if col in df.columns:
@@ -115,9 +161,9 @@ def stratify(df: pd.DataFrame, stratum: str) -> pd.DataFrame:
     elif stratum == "Non-LOH":
         return df[df["Potential_LOH"] == 0]
     elif stratum == "LOH_Strong":
-        return df[df["LOH_Subtype"] == "LOH_Strong"]
+        return df[df["_loh_subtype_legacy"] == "LOH_Strong"]
     elif stratum == "LOH_Weak":
-        return df[df["LOH_Subtype"] == "LOH_Weak"]
+        return df[df["_loh_subtype_legacy"] == "LOH_Weak"]
     return df
 
 
@@ -658,7 +704,7 @@ def run_q4(dfs: dict[str, pd.DataFrame]):
 
         # 4. Per LOH_Subtype HPFineSig delta
         for sub in ["LOH_Strong", "LOH_Weak", "LOH_Subclone", "LOH_Noise"]:
-            sdf = df[df["LOH_Subtype"] == sub]
+            sdf = df[df["_loh_subtype_legacy"] == sub]
             if len(sdf) < 20:
                 continue
             tp_r = sdf[sdf.y_true == 1]["HPFineSig"].mean()
@@ -867,6 +913,7 @@ def run_q5(dfs: dict[str, pd.DataFrame]):
 # Main
 # ===========================================================================
 def main():
+    args = parse_args()
     _p("="*70)
     _p("TO ClairS-TO Feature Discrimination Deep Study — Q1-Q5")
     _p("="*70)
@@ -886,12 +933,18 @@ def main():
 
     # Load data
     dfs = {}
+    schema_rows = []
     for ver in available:
         _p(f"\nLoading {ver}...")
-        df = load_version(ver)
+        df = load_version(ver, allow_unversioned_v1=args.allow_unversioned_v1)
+        schema_rows.append(df.attrs["schema_metadata"])
         _p(f"  {ver}: {len(df):,} rows (TP={sum(df.y_true==1):,}, FP={sum(df.y_true==0):,})")
         _p(f"  LOH: {sum(df.Potential_LOH==1):,}, Non-LOH: {sum(df.Potential_LOH==0):,}")
         dfs[ver] = df
+
+    pd.DataFrame(schema_rows).to_csv(
+        DATA_OUT / "schema_provenance.tsv", sep="\t", index=False
+    )
 
     # Phase 1: Quick comparison
     _p("\n" + "="*60)

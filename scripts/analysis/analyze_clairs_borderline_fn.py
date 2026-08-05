@@ -17,13 +17,26 @@ Outputs:
 from __future__ import annotations
 
 import argparse
-import csv
 import gzip
 import math
+import sys
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence
+from typing import Callable, Dict, List, Sequence
+
+import pandas as pd
 
 from research_common import compute_metrics, infer_platform, to_float, to_int, write_tsv_rows
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 RuleFunc = Callable[[Dict[str, object]], bool]
@@ -71,6 +84,10 @@ JOINED_FIELDS = [
     "filter",
     "filter_tags",
     "VerificationClass",
+    "LabelFirstSupport_Selected",
+    "ClusterFirstSupport_Selected",
+    "VerificationSupportSource",
+    "VerificationSupportSchemaStatus",
     "AlleleDelta",
     "CramersV",
     "PairwiseMedianDist",
@@ -99,6 +116,11 @@ def parse_args() -> argparse.Namespace:
                    help="Truth total SNV count (for recall / F1)")
     p.add_argument("--sample", default="HCC1395", help="Sample name")
     p.add_argument("--output-dir", required=True, help="Output directory")
+    p.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        help="Required with significance CSVs; explicit source for historical Strong/Subclone support",
+    )
     return p.parse_args()
 
 
@@ -159,15 +181,38 @@ def parse_vcf(path: Path) -> List[Dict[str, object]]:
     return rows
 
 
-def load_significance(path: Path) -> Dict[str, Dict[str, object]]:
-    """Load significance_summary.csv; key = Chr:Pos:Ref:Alt."""
+def load_significance(path: Path, support_mode: str) -> tuple[Dict[str, Dict[str, object]], Dict[str, str]]:
+    """Load and fail-closed validate the requested verification support source."""
+    df = pd.read_csv(path)
+    if support_mode == "evidence-v2":
+        current = select_current_view(df)
+        if current.unknown_counts:
+            raise SchemaContractError(f"ClairS significance input: unknown current classes: {current.unknown_counts}")
+        evidence = read_evidence(df)
+        label_values = evidence["LabelFirstSupport"]
+        cluster_values = evidence["ClusterFirstSupport"]
+        source = "LabelFirstSupport+ClusterFirstSupport"
+        status = "V2_EVIDENCE"
+    elif support_mode == "legacy":
+        legacy = select_legacy_view(df, allow_unversioned_v1=False)
+        label_values = legacy.values.isin(["Strong", "Weak"])
+        cluster_values = legacy.values.isin(["Strong", "Subclone"])
+        source = legacy.field
+        status = legacy.schema_status
+    else:
+        raise ValueError(f"Unsupported verification support mode: {support_mode}")
+
+    df["LabelFirstSupport_Selected"] = label_values.astype(bool)
+    df["ClusterFirstSupport_Selected"] = cluster_values.astype(bool)
+    df["VerificationSupportSource"] = source
+    df["VerificationSupportSchemaStatus"] = status
     result: Dict[str, Dict[str, object]] = {}
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
-            result[key] = row
-    return result
+    for row in df.to_dict(orient="records"):
+        key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
+        if key in result:
+            raise SchemaContractError(f"ClairS significance input: duplicate region key {key}")
+        result[key] = row
+    return result, {"support_mode": support_mode, "support_source": source, "schema_status": status}
 
 
 def _median(values: Sequence[float]) -> str:
@@ -244,9 +289,8 @@ def _build_caller_rules() -> Dict[str, tuple[str, RuleFunc]]:
 def _build_combined_rules() -> Dict[str, tuple[str, RuleFunc]]:
     """Combined caller + methylation rescue rules.
 
-    Variants without methylation data get VerificationClass='NA'.
+    Variants without methylation data have missing evidence and never trigger evidence rules.
     """
-    METHYL_CLASSES_STRONG = {"Strong", "Subclone"}
 
     def _af(v):
         return float(v["af"]) if not math.isnan(float(v["af"])) else 0.0
@@ -257,8 +301,15 @@ def _build_combined_rules() -> Dict[str, tuple[str, RuleFunc]]:
     def _ad(v):
         return float(v.get("AlleleDelta") or 0.0)
 
-    def _cls(v):
-        return v.get("VerificationClass", "NA")
+    def _support(v, field):
+        value = v.get(field, pd.NA)
+        return bool(value) if pd.notna(value) else False
+
+    def _cluster_support(v):
+        return _support(v, "ClusterFirstSupport_Selected")
+
+    def _any_support(v):
+        return _support(v, "LabelFirstSupport_Selected") or _cluster_support(v)
 
     def _hp_sig(v):
         return str(v.get("HPMergedSig", "")).strip().lower() in {"true", "1", "yes"}
@@ -271,22 +322,22 @@ def _build_combined_rules() -> Dict[str, tuple[str, RuleFunc]]:
             lambda v: v["filter_tags"] == frozenset({"LowQual"}) and v["gq"] >= 15,
         ),
         # Methyl-only
-        "class_strong_or_subclone": (
-            "VerificationClass in {Strong, Subclone}",
-            lambda v: _cls(v) in METHYL_CLASSES_STRONG,
+        "cluster_first_support": (
+            "ClusterFirstSupport = true",
+            _cluster_support,
         ),
         "pairwise_ge_020": (
             "PairwiseMedianDist >= 0.20",
             lambda v: _pd(v) >= 0.20,
         ),
         # Combined
-        "gq15_and_not_noise": (
-            "GQ >= 15 AND VerificationClass != Noise",
-            lambda v: v["gq"] >= 15 and _cls(v) not in {"Noise", "NA"},
+        "gq15_and_any_verification_support": (
+            "GQ >= 15 AND (LabelFirstSupport OR ClusterFirstSupport)",
+            lambda v: v["gq"] >= 15 and _any_support(v),
         ),
-        "gq15_and_strong_or_subclone": (
-            "GQ >= 15 AND VerificationClass in {Strong, Subclone}",
-            lambda v: v["gq"] >= 15 and _cls(v) in METHYL_CLASSES_STRONG,
+        "gq15_and_cluster_first_support": (
+            "GQ >= 15 AND ClusterFirstSupport = true",
+            lambda v: v["gq"] >= 15 and _cluster_support(v),
         ),
         "gq15_and_allele_delta_low": (
             "GQ >= 15 AND AlleleDelta < 0.15 (low AD = not artifact-like)",
@@ -360,6 +411,10 @@ def join_methylation(
             "filter": v["filter"],
             "filter_tags": ";".join(sorted(v["filter_tags"])),
             "VerificationClass": sig.get("VerificationClass", ""),
+            "LabelFirstSupport_Selected": sig.get("LabelFirstSupport_Selected", ""),
+            "ClusterFirstSupport_Selected": sig.get("ClusterFirstSupport_Selected", ""),
+            "VerificationSupportSource": sig.get("VerificationSupportSource", ""),
+            "VerificationSupportSchemaStatus": sig.get("VerificationSupportSchemaStatus", ""),
             "AlleleDelta": sig.get("AlleleDelta", ""),
             "CramersV": sig.get("CramersV", ""),
             "PairwiseMedianDist": sig.get("PairwiseMedianDist", ""),
@@ -373,7 +428,11 @@ def join_methylation(
 def main() -> None:
     args = parse_args()
     output_dir = Path(args.output_dir).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if (args.significance_csv or args.significance_csv_non_fn) and not args.verification_support_mode:
+        raise SystemExit(
+            "--verification-support-mode is required when a significance CSV is provided"
+        )
 
     pool_b_fn = parse_vcf(Path(args.pool_b_fn_vcf))
     pool_b_non_fn = parse_vcf(Path(args.pool_b_non_fn_vcf))
@@ -384,20 +443,33 @@ def main() -> None:
     # Load methylation data if provided
     sig_map: Dict[str, Dict] = {}       # for Pool B FN (TP side)
     sig_map_non_fn: Dict[str, Dict] = {}  # for Pool B non-FN (FP side)
+    verification_metadata = {
+        "support_mode": "none",
+        "support_source": "none",
+        "schema_status": "NO_SIGNIFICANCE_INPUT",
+    }
     if args.significance_csv:
         sig_path = Path(args.significance_csv)
-        if sig_path.exists():
-            sig_map = load_significance(sig_path)
-            print(f"[analyze_clairs_borderline_fn] Loaded {len(sig_map)} regions from significance CSV (FN)")
-        else:
-            print(f"[analyze_clairs_borderline_fn] WARNING: significance CSV not found: {sig_path}")
+        if not sig_path.exists():
+            raise FileNotFoundError(f"significance CSV not found: {sig_path}")
+        sig_map, verification_metadata = load_significance(
+            sig_path,
+            args.verification_support_mode,
+        )
+        print(f"[analyze_clairs_borderline_fn] Loaded {len(sig_map)} regions from significance CSV (FN)")
     if args.significance_csv_non_fn:
         sig_path_nfn = Path(args.significance_csv_non_fn)
-        if sig_path_nfn.exists():
-            sig_map_non_fn = load_significance(sig_path_nfn)
-            print(f"[analyze_clairs_borderline_fn] Loaded {len(sig_map_non_fn)} regions from significance CSV (non-FN)")
-        else:
-            print(f"[analyze_clairs_borderline_fn] WARNING: non-FN significance CSV not found: {sig_path_nfn}")
+        if not sig_path_nfn.exists():
+            raise FileNotFoundError(f"non-FN significance CSV not found: {sig_path_nfn}")
+        sig_map_non_fn, non_fn_metadata = load_significance(
+            sig_path_nfn,
+            args.verification_support_mode,
+        )
+        if non_fn_metadata != verification_metadata:
+            raise SchemaContractError("FN and non-FN significance inputs use different support schemas")
+        print(f"[analyze_clairs_borderline_fn] Loaded {len(sig_map_non_fn)} regions from significance CSV (non-FN)")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     fn_keys = {v["region_key"] for v in pool_b_fn}
     fn_with_methyl = [v for v in pool_b_fn if v["region_key"] in sig_map]
@@ -423,6 +495,9 @@ def main() -> None:
         {"key": "baseline_precision", "value": f"{baseline_metrics['precision']:.6f}"},
         {"key": "baseline_recall", "value": f"{baseline_metrics['recall']:.6f}"},
         {"key": "baseline_f1", "value": f"{baseline_f1:.6f}"},
+        {"key": "verification_support_mode", "value": verification_metadata["support_mode"]},
+        {"key": "verification_support_source", "value": verification_metadata["support_source"]},
+        {"key": "verification_support_schema_status", "value": verification_metadata["schema_status"]},
         {"key": "go_nogo_threshold_fn", "value": "30"},
         {"key": "go_nogo_result", "value": "GO" if len(pool_b_fn) >= 30 else "NO-GO (Pool B FN < 30)"},
         {"key": "methyl_coverage_threshold", "value": "0.40"},
@@ -465,6 +540,8 @@ def main() -> None:
                 enriched.append({
                     **v,
                     "VerificationClass": sig.get("VerificationClass", "NA"),
+                    "LabelFirstSupport_Selected": sig.get("LabelFirstSupport_Selected", pd.NA),
+                    "ClusterFirstSupport_Selected": sig.get("ClusterFirstSupport_Selected", pd.NA),
                     "AlleleDelta": to_float(sig.get("AlleleDelta"), 0.0),
                     "CramersV": to_float(sig.get("CramersV"), 0.0),
                     "PairwiseMedianDist": to_float(sig.get("PairwiseMedianDist"), 0.0),
@@ -497,6 +574,7 @@ def main() -> None:
         f"- Sample: `{args.sample}` / Platform: `{infer_platform(args.sample)}`",
         f"- Truth total: `{args.truth_total}`",
         f"- Baseline (ClairS-TO PASS): TP=`{args.baseline_tp}`, FP=`{args.baseline_fp}`, F1=`{baseline_f1:.6f}`",
+        f"- Verification support: `{verification_metadata['support_mode']}` / `{verification_metadata['support_source']}` / `{verification_metadata['schema_status']}`",
         "",
         "## Pool B FN 數量（Go/No-Go）",
         "",

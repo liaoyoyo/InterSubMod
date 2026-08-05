@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -20,6 +21,15 @@ from build_phase1_training_manifest import (
 )
 from research_common import ensure_dir, write_json, write_tsv_rows
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    VERIFICATION_PROVENANCE_COLUMNS,
+    extract_provenance_frame,
+)
+
 
 OUTPUT_ROOT_DEFAULT = Path(
     "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/"
@@ -27,20 +37,26 @@ OUTPUT_ROOT_DEFAULT = Path(
 )
 
 
-SHARD_MANIFEST_FIELDS = [
+SHARD_MANIFEST_FIELDS = list(dict.fromkeys([
     "dataset_id",
     "dataset_label",
     "region_key",
     "truth_status",
     "source_scope",
     "Quality_Score",
-    "VerificationClass",
+    *VERIFICATION_PROVENANCE_COLUMNS,
     "region_resolve_status",
     "region_dir",
     "summary_num_reads",
     "summary_num_cpgs",
     "read_rows_exported",
-]
+]))
+
+
+READ_OUTPUT_FIELDS = list(dict.fromkeys([
+    *READ_LEVEL_FIELDS,
+    *VERIFICATION_PROVENANCE_COLUMNS,
+]))
 
 
 SHARD_SUMMARY_FIELDS = [
@@ -76,6 +92,24 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output-dir", default=str(OUTPUT_ROOT_DEFAULT), help="Output directory.")
     return parser.parse_args()
+
+
+def attach_verification_provenance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Validate complete v2 provenance and retain it for every downstream row."""
+    provenance = extract_provenance_frame(frame)
+    prepared = frame.copy()
+    for column in VERIFICATION_PROVENANCE_COLUMNS:
+        prepared[column] = provenance[column]
+    prepared.attrs["verification_provenance"] = {
+        "schema_status": provenance.attrs["schema_status"],
+        "columns": list(VERIFICATION_PROVENANCE_COLUMNS),
+        "row_count": len(prepared),
+    }
+    return prepared
+
+
+def provenance_payload(row: pd.Series) -> Dict[str, object]:
+    return {column: row.get(column, "") for column in VERIFICATION_PROVENANCE_COLUMNS}
 
 
 def select_manifest_rows(
@@ -145,7 +179,7 @@ def export_shard_rows(selected_df: pd.DataFrame) -> tuple[List[Dict[str, object]
                     "truth_status": manifest_row["truth_status"],
                     "source_scope": scope,
                     "Quality_Score": manifest_row["Quality_Score"],
-                    "VerificationClass": manifest_row["VerificationClass"],
+                    **provenance_payload(manifest_row),
                     "region_resolve_status": "missing",
                     "region_dir": "",
                     "summary_num_reads": manifest_row["summary_num_reads"],
@@ -160,7 +194,7 @@ def export_shard_rows(selected_df: pd.DataFrame) -> tuple[List[Dict[str, object]
         merged = reads.merge(methyl, on="read_id", how="left", copy=False)
 
         for _, read_row in merged.iterrows():
-            payload = {field: manifest_row.get(field, "") for field in READ_LEVEL_FIELDS if field not in {
+            payload = {field: manifest_row.get(field, "") for field in READ_OUTPUT_FIELDS if field not in {
                 "region_dir",
                 "read_id",
                 "read_name",
@@ -189,6 +223,7 @@ def export_shard_rows(selected_df: pd.DataFrame) -> tuple[List[Dict[str, object]
                 "methyl_low_fraction",
             }}
             payload["region_dir"] = str(region_dir)
+            payload.update(provenance_payload(manifest_row))
             payload.update(
                 {
                     "read_id": str(read_row.get("read_id", "")),
@@ -222,7 +257,7 @@ def export_shard_rows(selected_df: pd.DataFrame) -> tuple[List[Dict[str, object]
                 "truth_status": manifest_row["truth_status"],
                 "source_scope": scope,
                 "Quality_Score": manifest_row["Quality_Score"],
-                "VerificationClass": manifest_row["VerificationClass"],
+                **provenance_payload(manifest_row),
                 "region_resolve_status": "resolved",
                 "region_dir": str(region_dir),
                 "summary_num_reads": manifest_row["summary_num_reads"],
@@ -258,7 +293,10 @@ def build_summary_rows(shard_manifest_rows: List[Dict[str, object]]) -> List[Dic
 def main() -> None:
     args = parse_args()
     output_dir = ensure_dir(Path(args.output_dir).resolve())
-    manifest_df = pd.read_csv(args.manifest_tsv, sep="\t", low_memory=False)
+    manifest_df = attach_verification_provenance(
+        pd.read_csv(args.manifest_tsv, sep="\t", low_memory=False)
+    )
+    verification_provenance = dict(manifest_df.attrs["verification_provenance"])
 
     dataset_ids = args.dataset or manifest_df["dataset_id"].drop_duplicates().tolist()
     scopes = args.source_scope or ["tp", "fp"]
@@ -273,7 +311,7 @@ def main() -> None:
 
     write_tsv_rows(output_dir / "phase1_shard_manifest.tsv", SHARD_MANIFEST_FIELDS, shard_manifest_rows)
     write_tsv_rows(output_dir / "phase1_shard_summary.tsv", SHARD_SUMMARY_FIELDS, shard_summary_rows)
-    write_tsv_rows(output_dir / "phase1_shard_read_training_table.tsv", READ_LEVEL_FIELDS, read_rows)
+    write_tsv_rows(output_dir / "phase1_shard_read_training_table.tsv", READ_OUTPUT_FIELDS, read_rows)
     write_json(
         output_dir / "run_context.json",
         {
@@ -283,6 +321,7 @@ def main() -> None:
             "scopes": scopes,
             "max_regions_per_dataset_scope": args.max_regions_per_dataset_scope,
             "output_dir": str(output_dir),
+            "verification_provenance": verification_provenance,
         },
     )
 

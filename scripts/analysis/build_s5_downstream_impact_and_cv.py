@@ -12,9 +12,12 @@ CV-2: 7-sample direction consistency
 CV-5: Self-phasing LOH disappearance per sample
 """
 
+import argparse
+import json
 import os
 import sys
 import warnings
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -23,12 +26,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import chi2_contingency, mannwhitneyu, spearmanr
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_CLASSES_V2,
+    UNKNOWN_CURRENT_CLASS,
+    SchemaContractError,
+    select_current_view,
+)
+
+C2_ORDER = list(CURRENT_CLASSES_V2) + [UNKNOWN_CURRENT_CLASS]
+
 warnings.filterwarnings('ignore')
 
 # ── paths ──────────────────────────────────────────────────────────────────
 MASTER = '/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz'
 OUTDIR = '/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260402_phasing_causal_chain/'
-os.makedirs(OUTDIR, exist_ok=True)
 
 # ── helpers ────────────────────────────────────────────────────────────────
 def compute_auc(tp_vals, fp_vals):
@@ -53,17 +68,85 @@ def cramers_v(ct):
     return np.sqrt(chi2 / (n * k)) if k > 0 else 0.0
 
 
+def attach_current_verification_view(df):
+    """Validate C2 once and retain future/unknown values in the named unknown bucket."""
+    view = select_current_view(df)
+    selected = df.copy()
+    selected['_VerificationClass_C2'] = view.values
+    selected['_VerificationClass_SourceValue'] = selected[view.field]
+    selected['_VerificationSchemaStatus'] = view.schema_status
+    return selected, view.metadata()
+
+
+def validate_paired_to_schema(paired_df, to_df):
+    """Fail if either side cannot independently prove the same canonical v2 schema."""
+    if paired_df.empty or to_df.empty:
+        raise SchemaContractError('S5 paired/to comparison requires non-empty paired and to rows')
+    paired_view = select_current_view(paired_df)
+    to_view = select_current_view(to_df)
+    if paired_view.schema_status != to_view.schema_status:
+        raise SchemaContractError(
+            'S5 paired/to comparison has different verification schema status: '
+            f'{paired_view.schema_status} vs {to_view.schema_status}'
+        )
+    return {
+        'paired': paired_view.metadata(),
+        'to': to_view.metadata(),
+    }
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--master', default=MASTER, help='Input all_region_rows TSV/TSV.GZ')
+    parser.add_argument('--output-dir', default=OUTDIR)
+    parser.add_argument(
+        '--schema-check-only',
+        default=None,
+        metavar='TSV',
+        help='Validate a small TSV fixture with paired/to rows, print diagnostics, and exit.',
+    )
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    _ARGS = parse_args()
+    MASTER = _ARGS.master
+    OUTDIR = _ARGS.output_dir
+    if _ARGS.schema_check_only:
+        _fixture = pd.read_csv(_ARGS.schema_check_only, sep='\t', low_memory=False)
+        try:
+            _fixture, _fixture_metadata = attach_current_verification_view(_fixture)
+            _paired_fixture = _fixture[_fixture['mode'] == 'paired']
+            _to_fixture = _fixture[_fixture['mode'] == 'to']
+            _pair_metadata = validate_paired_to_schema(_paired_fixture, _to_fixture)
+        except (KeyError, SchemaContractError) as exc:
+            raise SystemExit(f'[S5][schema-contract] {_ARGS.schema_check_only}: {exc}') from exc
+        print(json.dumps({
+            'input': _ARGS.schema_check_only,
+            'verification_contract': _fixture_metadata,
+            'paired_to_contract': _pair_metadata,
+        }, indent=2, sort_keys=True))
+        raise SystemExit(0)
+
+os.makedirs(OUTDIR, exist_ok=True)
+
+
 # ── load master dataset ──────────────────────────────────────────────────
 print('[INFO] Loading master dataset …')
 df = pd.read_csv(MASTER, sep='\t', low_memory=False)
+try:
+    df, verification_metadata = attach_current_verification_view(df)
+except SchemaContractError as exc:
+    raise SystemExit(f'[S5][schema-contract] {MASTER}: {exc}') from exc
 print(f'  rows = {len(df):,}   cols = {df.shape[1]}')
+print(f'  verification contract: {verification_metadata}')
 
 # Normalise column access (lowercase aliases already exist in dataset)
 # Use lowercase versions: verification_class, quality_score, core_loh_like, etc.
 # The dataset has both CamelCase originals and lowercase duplicates.
 # We'll use whichever is available.
 
-vc_col = 'verification_class' if 'verification_class' in df.columns else 'VerificationClass'
+vc_col = '_VerificationClass_C2'
 qs_col = 'quality_score'      if 'quality_score'      in df.columns else 'Quality_Score'
 loh_col = 'core_loh_like'
 mode_col = 'mode'
@@ -94,6 +177,22 @@ print('\n[INFO] Building same-locus pairs …')
 
 paired_df = df[df[mode_col] == 'paired'].copy()
 to_df     = df[df[mode_col] == 'to'].copy()
+try:
+    paired_to_schema_metadata = validate_paired_to_schema(paired_df, to_df)
+except SchemaContractError as exc:
+    raise SystemExit(f'[S5][schema-contract] paired/to: {exc}') from exc
+print(f'  paired/to verification contract: {paired_to_schema_metadata}')
+with open(os.path.join(OUTDIR, 's5_verification_schema_contract.json'), 'w') as _schema_handle:
+    json.dump(
+        {
+            'master': MASTER,
+            'verification_contract': verification_metadata,
+            'paired_to_contract': paired_to_schema_metadata,
+        },
+        _schema_handle,
+        indent=2,
+        sort_keys=True,
+    )
 
 common_vk = set(paired_df[vk_col].unique()) & set(to_df[vk_col].unique())
 print(f'  variant_keys: paired={paired_df[vk_col].nunique():,}  to={to_df[vk_col].nunique():,}  common={len(common_vk):,}')
@@ -140,8 +239,9 @@ vc_p = f'{vc_col}_P'
 vc_t = f'{vc_col}_T'
 
 # Overall cross-tab
-ct_all = pd.crosstab(pairs[vc_p], pairs[vc_t])
-cv_all = cramers_v(ct_all)
+ct_all_observed = pd.crosstab(pairs[vc_p], pairs[vc_t])
+cv_all = cramers_v(ct_all_observed)
+ct_all = ct_all_observed.reindex(index=C2_ORDER, columns=C2_ORDER, fill_value=0)
 print(f'\n[Overall] Cramér\'s V = {cv_all:.4f}   n = {len(pairs):,}')
 print(ct_all.to_string())
 
@@ -151,8 +251,9 @@ for cat in ['neither_LOH', 'TO_only_LOH', 'both_LOH', 'paired_only_LOH']:
     sub = pairs[pairs['loh_cat'] == cat]
     if len(sub) < 10:
         continue
-    ct = pd.crosstab(sub[vc_p], sub[vc_t])
-    cv = cramers_v(ct)
+    ct_observed = pd.crosstab(sub[vc_p], sub[vc_t])
+    cv = cramers_v(ct_observed)
+    ct = ct_observed.reindex(index=C2_ORDER, columns=C2_ORDER, fill_value=0)
     # Concordance rate = fraction where VC matches
     concordance = (sub[vc_p] == sub[vc_t]).mean()
     s51_rows.append({

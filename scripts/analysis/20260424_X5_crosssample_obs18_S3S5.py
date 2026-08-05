@@ -11,6 +11,7 @@ Output: research/tpfp_loh_af_kde_discrimination/data/X5_crosssample_v2.{tsv,json
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -20,14 +21,37 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    SchemaContractError,
+    select_loh_legacy,
+)
+
 X1_BATCH = Path("/big7_disk/liaoyoyo2001/big7_disk_output/kde_smoke_test/x1_archive_to_rerun")
 OUT_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/research/tpfp_loh_af_kde_discrimination/data")
 
 SAMPLES = ["HCC1395", "HCC1395_DORADO", "H1437", "H2009", "HCC1937", "HCC1954"]
 BUCKET_COLS = ["HPFineN_HP1", "HPFineN_HP1S", "HPFineN_HP2", "HPFineN_HP2S"]
 NEEDED = ["RegionID", "Chr", "Pos", "AlleleDelta", "HPFineNGroups",
-          "Potential_LOH", "LOH_Subtype", "Coverage_Multiple", "Diploid_Coverage_Used",
+          "Potential_LOH", "LOH_Subtype_LegacyVC", "LOH_Subtype",
+          "VerificationSchemaVersion", "Coverage_Multiple", "Diploid_Coverage_Used",
           "Coverage_Category", "NumReads"] + BUCKET_COLS
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical inputs that only have deprecated LOH_Subtype. "
+            "Versioned inputs must carry LOH_Subtype_LegacyVC and an exact LOH_Subtype alias."
+        ),
+    )
+    return parser.parse_args()
 
 
 def categorize_combo(r1, r1s, r2, r2s) -> str:
@@ -46,26 +70,40 @@ def af_class(af):
     return "Intermediate"
 
 
-def load_sample(sample: str):
+def load_sample(sample: str, allow_unversioned_v1: bool = False):
     tp_csv = X1_BATCH / f"{sample}_TO_tp" / "significance_summary.csv"
     fp_csv = X1_BATCH / f"{sample}_TO_fp" / "significance_summary.csv"
     if not tp_csv.exists() or not fp_csv.exists():
         print(f"  [!] {sample}: missing {tp_csv.name if not tp_csv.exists() else fp_csv.name}")
         return None
     dfs = []
+    loh_contracts = []
     for path, lbl in [(tp_csv, 1), (fp_csv, 0)]:
         try:
             # use intersect of wanted cols (some may miss if older run)
             header = pd.read_csv(path, nrows=0).columns
             cols = [c for c in NEEDED if c in header]
             df = pd.read_csv(path, low_memory=False, usecols=cols)
+            loh_view = select_loh_legacy(
+                df,
+                allow_unversioned_v1=allow_unversioned_v1,
+            )
+            df["LOH_Subtype_LegacyVC"] = loh_view.values
+            loh_contracts.append({
+                "input_path": str(path),
+                "canonical_analysis_field": "LOH_Subtype_LegacyVC",
+                "allow_unversioned_v1": allow_unversioned_v1,
+                **loh_view.metadata(),
+            })
             df["tp_label"] = lbl
             df["sample"] = sample
             dfs.append(df)
+        except SchemaContractError:
+            raise
         except Exception as e:
             print(f"  [!] {sample}/{path.name}: {e}")
             return None
-    return pd.concat(dfs, ignore_index=True)
+    return pd.concat(dfs, ignore_index=True), loh_contracts
 
 
 def obs18_split(df: pd.DataFrame) -> pd.DataFrame:
@@ -122,13 +160,19 @@ def thread_b_s3_s5(df: pd.DataFrame) -> Dict:
 
 
 def main():
+    args = parse_args()
     all_obs18 = []
     per_sample_summary = {}
+    loh_schema_contract = {}
 
     for sample in SAMPLES:
         print(f"=== {sample} ===")
-        df = load_sample(sample)
-        if df is None: continue
+        loaded = load_sample(sample, allow_unversioned_v1=args.allow_unversioned_v1)
+        if loaded is None: continue
+        df, sample_loh_contracts = loaded
+        loh_schema_contract[sample] = sample_loh_contracts
+        statuses = sorted({str(item["schema_status"]) for item in sample_loh_contracts})
+        print(f"  LOH schema status={','.join(statuses)}")
         dc = df["Diploid_Coverage_Used"].iloc[0] if "Diploid_Coverage_Used" in df.columns else "NA"
         print(f"  rows={len(df):,}  Diploid_Coverage_Used={dc}")
 
@@ -181,6 +225,7 @@ def main():
             "analysis": "X5_crosssample_obs18_S3S5",
             "date": "2026-04-24",
             "source_batch": str(X1_BATCH),
+            "loh_schema_contract": loh_schema_contract,
             "per_sample": per_sample_summary,
             "obs18_pivot": pivot_gap if 'pivot_gap' in locals() else [],
             "wilcoxon_replicate_B1": wilcoxon_result if 'wilcoxon_result' in locals() else None,

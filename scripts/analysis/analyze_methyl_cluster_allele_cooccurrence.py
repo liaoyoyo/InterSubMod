@@ -3,12 +3,14 @@
 Observation Document 1: Methylation Cluster <-> HP/Allele Co-occurrence Analysis
 Sample: HCC1395 5kHz paired_full (20260314)
 Goal:   Test if methylation clusters are non-randomly associated with HP1/HP2
-        haplotype labels and ALT/REF allele support in Strong vs Noise loci.
+        haplotype labels and ALT/REF allele support in legacy Strong vs Noise loci.
 
 Output: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/
         20260324_methylation_cluster_allele_cooccurrence_HCC1395/
 """
 
+import argparse
+import json
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
@@ -21,20 +23,29 @@ import warnings
 import sys
 from datetime import datetime
 
-warnings.filterwarnings('ignore')
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    select_legacy_view,
+)
+
+# Keep known plotting deprecation noise quiet without hiding schema warnings.
+warnings.filterwarnings("ignore", category=FutureWarning, module="seaborn")
 
 # ===== Config =====
 ISM_TP_DIR = Path(
     "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full"
     "/20260314_HCC1395_paired_full_full_complete_matrix/intersubmod_tp"
 )
-SIG_SUMMARY = ISM_TP_DIR / "significance_summary.csv"
 OUTPUT_DIR = Path(
     "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces"
     "/20260324_methylation_cluster_allele_cooccurrence_HCC1395"
 )
 
-SAMPLE_N_PER_CLASS = 300   # loci to sample per VerificationClass
+SAMPLE_N_PER_CLASS = 300   # loci to sample per legacy verification class
 MIN_READS = 12             # min reads after NA filter
 MIN_CPGS_PER_READ = 5      # min non-NA CpGs per read
 METHYL_HIGH_THR = 0.6      # threshold: mean methylation >= this => High
@@ -42,6 +53,56 @@ METHYL_LOW_THR = 0.4       # threshold: mean methylation <= this => Low (else Mi
 RANDOM_SEED = 42
 
 TARGET_CLASSES = ["Strong", "Noise"]
+LEGACY_SELECTION_COLUMN = "_VerificationClass_Legacy_Selected"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Replicate the historical legacy Strong-vs-Noise co-occurrence analysis."
+    )
+    parser.add_argument(
+        "--significance-summary",
+        type=Path,
+        default=None,
+        help="Input significance_summary.csv (default: <ism-tp-dir>/significance_summary.csv)",
+    )
+    parser.add_argument("--ism-tp-dir", type=Path, default=ISM_TP_DIR)
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned VerificationClass as the legacy four-state field; "
+            "unknown values are excluded and counted"
+        ),
+    )
+    return parser.parse_args()
+
+
+def select_replication_cohorts(sig_df: pd.DataFrame, allow_unversioned_v1: bool = False):
+    """Select legacy Strong/Noise without folding any v2 current classes."""
+    view = select_legacy_view(
+        sig_df,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="exclude",
+    )
+    selected = sig_df.copy()
+    selected[LEGACY_SELECTION_COLUMN] = view.values
+    selected["_SelectionField"] = view.field
+    counts = selected[LEGACY_SELECTION_COLUMN].value_counts()
+    target_mask = selected[LEGACY_SELECTION_COLUMN].isin(TARGET_CLASSES)
+    metadata = view.metadata()
+    metadata.update(
+        {
+            "selection_values": list(TARGET_CLASSES),
+            "input_row_count": int(len(selected)),
+            "selected_row_count": int(target_mask.sum()),
+            "selected_counts": {name: int(counts.get(name, 0)) for name in TARGET_CLASSES},
+            "excluded_non_target_count": int((selected[LEGACY_SELECTION_COLUMN].notna() & ~target_mask).sum()),
+            "excluded_unknown_count": int(selected[LEGACY_SELECTION_COLUMN].isna().sum()),
+        }
+    )
+    return selected[target_mask].copy(), metadata
 
 # ===== Path helpers =====
 
@@ -171,7 +232,8 @@ def analyze_locus(row: pd.Series):
         "region_id": row["RegionID"],
         "chr": row["Chr"],
         "pos": row["Pos"],
-        "verification_class": row["VerificationClass"],
+        "selection_field": row["_SelectionField"],
+        "selection_value": row[LEGACY_SELECTION_COLUMN],
         "dominant_label": row.get("DominantLabel", ""),
         "hp_merged_delta": row.get("HPMergedDelta", np.nan),
         "allele_delta": row.get("AlleleDelta", np.nan),
@@ -222,7 +284,7 @@ def analyze_locus(row: pd.Series):
 def run_analysis(sig_df: pd.DataFrame) -> pd.DataFrame:
     all_results = []
     for cls in TARGET_CLASSES:
-        subset = sig_df[sig_df["VerificationClass"] == cls]
+        subset = sig_df[sig_df[LEGACY_SELECTION_COLUMN] == cls]
         if len(subset) > SAMPLE_N_PER_CLASS:
             subset = subset.sample(SAMPLE_N_PER_CLASS, random_state=RANDOM_SEED)
         print(f"\n[{cls}] Analyzing {len(subset)} loci...")
@@ -245,7 +307,7 @@ def run_analysis(sig_df: pd.DataFrame) -> pd.DataFrame:
 def summary_stats(results: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for cls in TARGET_CLASSES:
-        sub = results[results["verification_class"] == cls]
+        sub = results[results["selection_value"] == cls]
         if sub.empty:
             continue
 
@@ -277,7 +339,7 @@ def summary_stats(results: pd.DataFrame) -> pd.DataFrame:
 
 def make_plots(results: pd.DataFrame):
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-    fig.suptitle("Methylation Cluster ↔ HP/Allele Association\nHCC1395 5kHz (Strong vs Noise)",
+    fig.suptitle("Methylation Cluster ↔ HP/Allele Association\nHCC1395 5kHz (Legacy Strong vs Noise)",
                  fontsize=13, fontweight="bold")
 
     palette = {"Strong": "#e74c3c", "Noise": "#3498db"}
@@ -286,7 +348,7 @@ def make_plots(results: pd.DataFrame):
     # 1. HP Cramér's V distribution
     ax = axes[0, 0]
     for cls in classes:
-        sub = results[(results["verification_class"] == cls) & results["hp_cramers_v"].notna()]
+        sub = results[(results["selection_value"] == cls) & results["hp_cramers_v"].notna()]
         ax.hist(sub["hp_cramers_v"], bins=30, alpha=0.6, label=cls,
                 color=palette[cls], density=True)
     ax.set_xlabel("HP Cramér's V")
@@ -297,7 +359,7 @@ def make_plots(results: pd.DataFrame):
     # 2. Allele Cramér's V distribution
     ax = axes[0, 1]
     for cls in classes:
-        sub = results[(results["verification_class"] == cls) & results["allele_cramers_v"].notna()]
+        sub = results[(results["selection_value"] == cls) & results["allele_cramers_v"].notna()]
         ax.hist(sub["allele_cramers_v"], bins=30, alpha=0.6, label=cls,
                 color=palette[cls], density=True)
     ax.set_xlabel("Allele Cramér's V")
@@ -308,7 +370,7 @@ def make_plots(results: pd.DataFrame):
     ax = axes[0, 2]
     plot_data = []
     for cls in classes:
-        sub = results[(results["verification_class"] == cls) & results["hp_p"].notna()]
+        sub = results[(results["selection_value"] == cls) & results["hp_p"].notna()]
         log_p = -np.log10(sub["hp_p"].clip(lower=1e-15))
         for v in log_p:
             plot_data.append({"class": cls, "-log10(p)": v})
@@ -323,7 +385,7 @@ def make_plots(results: pd.DataFrame):
     # 4. HP methylation delta (HP1 vs HP2 fraction high)
     ax = axes[1, 0]
     for cls in classes:
-        sub = results[results["verification_class"] == cls].copy()
+        sub = results[results["selection_value"] == cls].copy()
         delta = (sub["hp1_frac_high"] - sub["hp2_frac_high"]).abs().dropna()
         ax.hist(delta, bins=30, alpha=0.6, label=cls, color=palette[cls], density=True)
     ax.set_xlabel("|HP1_HighFrac - HP2_HighFrac|")
@@ -333,7 +395,7 @@ def make_plots(results: pd.DataFrame):
     # 5. Allele methylation delta (ALT vs REF fraction high)
     ax = axes[1, 1]
     for cls in classes:
-        sub = results[results["verification_class"] == cls].copy()
+        sub = results[results["selection_value"] == cls].copy()
         delta = (sub["alt_frac_high"] - sub["ref_frac_high"]).abs().dropna()
         ax.hist(delta, bins=30, alpha=0.6, label=cls, color=palette[cls], density=True)
     ax.set_xlabel("|ALT_HighFrac - REF_HighFrac|")
@@ -343,7 +405,7 @@ def make_plots(results: pd.DataFrame):
     # 6. Scatter: HP Cramér's V vs Allele Cramér's V
     ax = axes[1, 2]
     for cls in classes:
-        sub = results[results["verification_class"] == cls].dropna(subset=["hp_cramers_v", "allele_cramers_v"])
+        sub = results[results["selection_value"] == cls].dropna(subset=["hp_cramers_v", "allele_cramers_v"])
         ax.scatter(sub["hp_cramers_v"], sub["allele_cramers_v"],
                    alpha=0.3, s=15, label=cls, color=palette[cls])
     ax.set_xlabel("HP Cramér's V")
@@ -360,34 +422,37 @@ def make_plots(results: pd.DataFrame):
 
 # ===== Observation document =====
 
-def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame):
+def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame, metadata):
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    n_strong = len(results[results["verification_class"] == "Strong"])
-    n_noise = len(results[results["verification_class"] == "Noise"])
+    n_strong = len(results[results["selection_value"] == "Strong"])
+    n_noise = len(results[results["selection_value"] == "Noise"])
 
     strong = summary[summary["class"] == "Strong"].iloc[0] if n_strong > 0 else {}
     noise = summary[summary["class"] == "Noise"].iloc[0] if n_noise > 0 else {}
 
     doc = f"""<!--
 建立時間: {now}
-目標: 觀察 ISM Strong/Noise loci 中甲基 cluster 與 HP/Allele 標籤的共存關係
+目標: 觀察 legacy Strong/Noise loci 中甲基 cluster 與 HP/Allele 標籤的共存關係
 處理範圍: HCC1395 5kHz paired_full (20260314)
 關聯檔案:
   - scripts/analysis/analyze_methyl_cluster_allele_cooccurrence.py
-  - /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix
+  - {ISM_TP_DIR}
 -->
 
 # 觀察文件 1：甲基 Cluster ↔ HP/Allele 共存分析
 
 **樣本**：HCC1395 5kHz paired_full
 **分析時間**：{now}
-**分析 loci**：Strong={n_strong}，Noise={n_noise}（各最多 {SAMPLE_N_PER_CLASS} 個，random seed={RANDOM_SEED}）
+**歷史 cohort 欄位**：`{metadata['selection_field']}`（schema status=`{metadata['schema_status']}`）
+**歷史 cohort 值**：`Strong`、`Noise`
+**未知值計數**：`{metadata['unknown_counts']}`（不納入 cohort）
+**分析 loci**：legacy Strong={n_strong}，legacy Noise={n_noise}（各最多 {SAMPLE_N_PER_CLASS} 個，random seed={RANDOM_SEED}）
 
 ---
 
 ## 方法
 
-1. 讀取 `significance_summary.csv`，按 VerificationClass 分組抽樣
+1. 讀取 `significance_summary.csv`，按明確的 legacy four-state 欄位分組抽樣；不折疊 current v2 classes
 2. 每個 locus 合併 `reads.tsv`（hp, alt_support）與 `methylation.csv`（per-CpG 機率）
 3. 每個 read 計算 mean methylation（忽略 NA，需 ≥{MIN_CPGS_PER_READ} 個 CpG）
 4. Binary 分類：mean ≥ 0.5 → High，< 0.5 → Low
@@ -398,7 +463,7 @@ def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame):
 
 ## 結果總覽
 
-| 指標 | Strong ({n_strong} loci) | Noise ({n_noise} loci) |
+| 指標 | Legacy Strong ({n_strong} loci) | Legacy Noise ({n_noise} loci) |
 |------|------|------|
 | **HP 顯著比例**（p<0.05） | {strong.get('hp_sig_pct', float('nan')):.1f}% | {noise.get('hp_sig_pct', float('nan')):.1f}% |
 | **HP Cramér's V 中位數** | {strong.get('hp_cramers_v_median', float('nan')):.3f} | {noise.get('hp_cramers_v_median', float('nan')):.3f} |
@@ -414,7 +479,7 @@ def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame):
 ### HP 關聯（Haplotype-specific methylation）
 - **高 Cramér's V**（>0.3）+ **p < 0.05** → HP1/HP2 有不同甲基模式
 - 可能原因：(a) germline ASM（HP 決定的正常甲基差異），(b) tumor-specific clonal methylation change
-- Strong > Noise 代表 ISM 的 Strong classification 確實捕捉到了有生物意義的甲基-allele 共存
+- Legacy Strong > legacy Noise 代表歷史 four-state cohort 捕捉到較強的甲基-allele 共存；不得解讀為 current v2 class 比較
 
 ### Allele 關聯（Somatic allele-specific methylation）
 - **高 Cramér's V** + **p < 0.05** → ALT/REF 等位基因有不同甲基模式
@@ -443,7 +508,8 @@ def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame):
 
 - `methylation_cluster_association_summary.png`：6 panel 綜合圖
 - `results_per_locus.csv`：每個 locus 的完整統計
-- `summary_stats.csv`：Strong vs Noise 匯總
+- `summary_stats.csv`：legacy Strong vs Noise 匯總
+- `analysis_metadata.json`：selection field/value、schema status、warning 與 unknown counts
 
 """
     doc_path = OUTPUT_DIR / "20260324_methylation_cluster_allele_cooccurrence_obs_01.md"
@@ -454,16 +520,43 @@ def write_observation_doc(results: pd.DataFrame, summary: pd.DataFrame):
 # ===== Entry point =====
 
 def main():
+    global ISM_TP_DIR, OUTPUT_DIR
+    args = parse_args()
+    ISM_TP_DIR = args.ism_tp_dir
+    OUTPUT_DIR = args.output_dir
+    significance_summary = args.significance_summary or (ISM_TP_DIR / "significance_summary.csv")
+
     print("=" * 60)
     print("Methylation Cluster <-> HP/Allele Co-occurrence Analysis")
     print("HCC1395 5kHz paired_full")
     print("=" * 60)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    sig_df = pd.read_csv(SIG_SUMMARY)
+    sig_df = pd.read_csv(significance_summary)
     print(f"\nLoaded significance_summary: {len(sig_df)} loci")
-    print(sig_df["VerificationClass"].value_counts().to_string())
+    try:
+        sig_df, metadata = select_replication_cohorts(
+            sig_df,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        print(f"ERROR: legacy verification schema contract failed: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    print(
+        "Selection: "
+        f"field={metadata['selection_field']} values={metadata['selection_values']} "
+        f"schema_status={metadata['schema_status']} counts={metadata['selected_counts']}"
+    )
+    for message in metadata["warnings"]:
+        print(f"WARNING: {message}", file=sys.stderr)
+    if metadata["unknown_counts"]:
+        print(
+            f"WARNING: excluded unknown legacy values: {metadata['unknown_counts']}",
+            file=sys.stderr,
+        )
+
+    # Do not create partial analysis artifacts until the cohort schema is valid.
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     results = run_analysis(sig_df)
     print(f"\nTotal analyzed loci: {len(results)}")
@@ -479,7 +572,24 @@ def main():
     print(summary.to_string(index=False))
 
     make_plots(results)
-    write_observation_doc(results, summary)
+    write_observation_doc(results, summary, metadata)
+
+    metadata.update(
+        {
+            "generated_at": datetime.now().isoformat(timespec="seconds"),
+            "significance_summary": str(significance_summary.resolve()),
+            "ism_tp_dir": str(ISM_TP_DIR.resolve()),
+            "output_dir": str(OUTPUT_DIR.resolve()),
+            "sample_n_per_class": SAMPLE_N_PER_CLASS,
+            "random_seed": RANDOM_SEED,
+            "analyzed_counts": {
+                name: int((results["selection_value"] == name).sum()) for name in TARGET_CLASSES
+            },
+        }
+    )
+    metadata_path = OUTPUT_DIR / "analysis_metadata.json"
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Analysis metadata: {metadata_path}")
 
     print("\nDone.")
 

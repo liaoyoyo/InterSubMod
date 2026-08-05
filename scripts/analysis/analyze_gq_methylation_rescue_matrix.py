@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import itertools
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Sequence
@@ -13,6 +14,17 @@ from typing import Callable, Dict, Iterable, List, Sequence
 import pandas as pd
 
 from research_common import compute_metrics, ensure_dir, write_tsv_rows
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 @dataclass
@@ -65,6 +77,7 @@ DATASET_OVERVIEW_FIELDS = [
     "platform",
     "caller",
     "mode",
+    "verification_support_mode",
     "baseline_tp",
     "baseline_fp",
     "baseline_fn",
@@ -242,6 +255,12 @@ def parse_args() -> argparse.Namespace:
         help="Format: dataset_id|label|raw_candidate_pool_tsv|joined_tsv|baseline_tp|baseline_fp|truth_total",
     )
     parser.add_argument("--output-dir", required=True, help="Output directory")
+    parser.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        required=True,
+        help="Explicit source for historical Strong/Subclone support semantics",
+    )
     return parser.parse_args()
 
 
@@ -294,7 +313,36 @@ def load_raw_pool(path: Path) -> pd.DataFrame:
     return df
 
 
-def load_joined(path: Path) -> pd.DataFrame:
+def attach_verification_support(df: pd.DataFrame, support_mode: str, analyzed_mask: pd.Series) -> pd.DataFrame:
+    if support_mode not in {"evidence-v2", "legacy"}:
+        raise ValueError(f"Unsupported verification support mode: {support_mode}")
+    result = df.copy()
+    analyzed = result.loc[analyzed_mask].copy()
+    if not analyzed.empty:
+        if support_mode == "evidence-v2":
+            current = select_current_view(analyzed)
+            if current.unknown_counts:
+                raise SchemaContractError(f"GQ matrix input: unknown current classes: {current.unknown_counts}")
+            cluster_values = read_evidence(analyzed)["ClusterFirstSupport"]
+            source = "ClusterFirstSupport"
+            status = "V2_EVIDENCE"
+        elif support_mode == "legacy":
+            legacy = select_legacy_view(analyzed, allow_unversioned_v1=False)
+            cluster_values = legacy.values.isin(["Strong", "Subclone"])
+            source = legacy.field
+            status = legacy.schema_status
+        result["cluster_first_support"] = cluster_values.reindex(result.index).astype("boolean")
+    else:
+        result["cluster_first_support"] = pd.Series(pd.NA, index=result.index, dtype="boolean")
+        source = "ClusterFirstSupport" if support_mode == "evidence-v2" else "VerificationClass_Legacy"
+        status = "NO_ANALYZED_ROWS"
+    result["verification_support_mode"] = support_mode
+    result["verification_support_source"] = source
+    result["verification_support_schema_status"] = status
+    return result
+
+
+def load_joined(path: Path, support_mode: str) -> pd.DataFrame:
     df = pd.read_csv(path, sep="\t")
     numeric_columns = [
         "qual",
@@ -326,7 +374,6 @@ def load_joined(path: Path) -> pd.DataFrame:
         "PassedGating",
     ]
     text_columns = {
-        "VerificationClass": "NA",
         "agreement_type": "NA",
         "cluster_class": "NA",
         "label_class": "NA",
@@ -352,7 +399,7 @@ def load_joined(path: Path) -> pd.DataFrame:
             df[column] = default
 
     df["analysis_available"] = df["source_scope"].isin({"tp", "fp"})
-    df["strong_subclone"] = df["VerificationClass"].isin({"Strong", "Subclone"})
+    df = attach_verification_support(df, support_mode, df["analysis_available"])
     df["agreement_positive"] = df["agreement_type"].isin({"label_upgrade", "consistent_strong", "consistent_subclone"})
     return df
 
@@ -438,7 +485,7 @@ def support_rule_defs() -> List[Dict[str, object]]:
         {"family": "quality_score", "rule_id": "quality_ge_70", "notes": "Quality_Score >= 70", "func": lambda df: df["Quality_Score"] >= 70},
         {"family": "quality_score", "rule_id": "quality_ge_80", "notes": "Quality_Score >= 80", "func": lambda df: df["Quality_Score"] >= 80},
         {"family": "agreement", "rule_id": "agreement_positive", "notes": "agreement_type in label_upgrade/consistent_strong/consistent_subclone", "func": lambda df: df["agreement_positive"]},
-        {"family": "verification", "rule_id": "strong_subclone", "notes": "VerificationClass in Strong/Subclone", "func": lambda df: df["strong_subclone"]},
+        {"family": "verification", "rule_id": "cluster_first_support", "notes": "ClusterFirstSupport == true", "func": lambda df: df["cluster_first_support"].fillna(False)},
         {"family": "agreement", "rule_id": "label_upgrade", "notes": "agreement_type == label_upgrade", "func": lambda df: df["agreement_type"] == "label_upgrade"},
         {"family": "agreement", "rule_id": "consistent_strong", "notes": "agreement_type == consistent_strong", "func": lambda df: df["agreement_type"] == "consistent_strong"},
         {"family": "phase", "rule_id": "hp_assign_ge_090", "notes": "hp_assign_rate >= 0.90", "func": lambda df: df["hp_assign_rate"] >= 0.90},
@@ -507,7 +554,7 @@ def selected_combo_rule_ids() -> Sequence[str]:
         "quality_ge_60",
         "quality_ge_70",
         "agreement_positive",
-        "strong_subclone",
+        "cluster_first_support",
         "hp_assign_ge_099",
         "globalp_le_050",
     ]
@@ -587,7 +634,12 @@ def add_exclusion_reason_rows(config: DatasetConfig, raw_df: pd.DataFrame) -> Li
     return rows
 
 
-def dataset_overview_row(config: DatasetConfig, raw_df: pd.DataFrame, eval_df: pd.DataFrame) -> Dict[str, object]:
+def dataset_overview_row(
+    config: DatasetConfig,
+    raw_df: pd.DataFrame,
+    eval_df: pd.DataFrame,
+    support_mode: str,
+) -> Dict[str, object]:
     baseline = compute_metrics(config.baseline_tp, config.baseline_fp, config.truth_total)
     meta = raw_df.iloc[0].to_dict() if not raw_df.empty else {}
     raw_lost = raw_status_counts(raw_df, "caller_lost_tp")
@@ -604,6 +656,7 @@ def dataset_overview_row(config: DatasetConfig, raw_df: pd.DataFrame, eval_df: p
         "platform": meta.get("platform", "unknown"),
         "caller": meta.get("caller", "unknown"),
         "mode": meta.get("mode", "unknown"),
+        "verification_support_mode": support_mode,
         "baseline_tp": config.baseline_tp,
         "baseline_fp": config.baseline_fp,
         "baseline_fn": baseline["fn"],
@@ -891,7 +944,7 @@ def orthogonal_feature_masks(df: pd.DataFrame) -> Dict[str, pd.Series]:
         "pairwise_le_020": df["PairwiseMedianDist"] <= 0.20,
         "quality_ge_60": df["Quality_Score"] >= 60,
         "agreement_positive": df["agreement_positive"],
-        "strong_subclone": df["strong_subclone"],
+        "cluster_first_support": df["cluster_first_support"].fillna(False),
         "hp_assign_ge_099": df["hp_assign_rate"] >= 0.99,
         "globalp_le_050": df["GlobalP"] <= 0.50,
         "lowvaf_highadelta_lowcv": artifact_low_vaf_high_adelta_low_cv(df),
@@ -1069,7 +1122,7 @@ def write_summary_markdown(
 def main() -> None:
     args = parse_args()
     configs = [parse_dataset(value) for value in args.dataset]
-    output_dir = ensure_dir(Path(args.output_dir).resolve())
+    output_dir = Path(args.output_dir).resolve()
 
     pool_rows: List[Dict[str, object]] = []
     exclusion_rows: List[Dict[str, object]] = []
@@ -1084,12 +1137,14 @@ def main() -> None:
 
     for config in configs:
         raw_df = load_raw_pool(config.raw_pool_tsv)
-        joined_df = load_joined(config.joined_tsv)
+        joined_df = load_joined(config.joined_tsv, args.verification_support_mode)
         eval_df = candidate_eval_frame(joined_df)
 
         pool_rows.extend(add_pool_eligibility_rows(config, raw_df))
         exclusion_rows.extend(add_exclusion_reason_rows(config, raw_df))
-        overview_rows.append(dataset_overview_row(config, raw_df, eval_df))
+        overview_rows.append(
+            dataset_overview_row(config, raw_df, eval_df, args.verification_support_mode)
+        )
         gq_rows.extend(add_gq_sweep_rows(config, eval_df))
         methyl_rows.extend(add_methyl_only_rows(config, eval_df))
         combo_rows.extend(add_combo_rows(config, eval_df))
@@ -1100,6 +1155,7 @@ def main() -> None:
 
     summary_rows = summarize_best_rows(gq_rows, methyl_rows, combo_rows)
 
+    ensure_dir(output_dir)
     write_tsv_rows(output_dir / "pool_eligibility_summary.tsv", POOL_ELIGIBILITY_FIELDS, pool_rows)
     write_tsv_rows(output_dir / "exclusion_reason_summary.tsv", EXCLUSION_REASON_FIELDS, exclusion_rows)
     write_tsv_rows(output_dir / "dataset_overview.tsv", DATASET_OVERVIEW_FIELDS, overview_rows)

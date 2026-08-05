@@ -14,13 +14,23 @@ TO TP 全量特徵畫像 + FP Germline/LOH/Artifact 分類分析
 4. 高 AF TP 的 LOH 特徵探索
 """
 
+import argparse
 import gzip
 import csv
 import os
 import sys
 import math
 from collections import defaultdict, Counter
+from pathlib import Path
+
+import pandas as pd
 from scipy.stats import mannwhitneyu
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_legacy_view
 
 # ──────────────────────────────────────────────────────────────────
 # 路徑設定
@@ -45,6 +55,28 @@ BASELINE_TP = 28505
 BASELINE_FP = 11598
 BASELINE_FN = 10942
 BASELINE_F1 = 2 * BASELINE_TP / (2 * BASELINE_TP + BASELINE_FP + BASELINE_FN)
+
+
+def attach_historical_legacy_records(rows, columns=None, allow_unversioned_v1=False):
+    """Attach an explicit legacy-four-state view to historical rescue rows."""
+    frame = pd.DataFrame(rows, columns=columns)
+    view = select_legacy_view(
+        frame,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="fail",
+    )
+    selected_rows = []
+    for row, selected_class in zip(rows, view.values.tolist()):
+        selected = dict(row)
+        selected["VerificationClass_Legacy_Selected"] = selected_class
+        selected["verification_selection_field"] = view.field
+        selected["verification_schema_status"] = view.schema_status
+        selected_rows.append(selected)
+    return selected_rows, {
+        "verification_view": "legacy4_historical",
+        "verification_selection_field": view.field,
+        "verification_schema_status": view.schema_status,
+    }
 
 # ──────────────────────────────────────────────────────────────────
 # 分類函數
@@ -305,7 +337,7 @@ def analyze_fp(fp_records):
 # Step 4: ISM 候選池 FP 甲基化特徵差異
 # ──────────────────────────────────────────────────────────────────
 
-def analyze_ism_fp_methylation(fp_records, tp_records):
+def analyze_ism_fp_methylation(fp_records, tp_records, allow_unversioned_v1=False):
     """合併 rescue_joined_features.tsv 與 provenance naf，比較甲基化特徵"""
     print("[Step 4] 分析 ISM 候選池 FP 甲基化特徵 ...", flush=True)
 
@@ -329,7 +361,14 @@ def analyze_ism_fp_methylation(fp_records, tp_records):
 
     with open(RESCUE_FEATURES, 'r') as f:
         reader = csv.DictReader(f, delimiter='\t')
-        for row in reader:
+        source_rows = list(reader)
+        source_columns = reader.fieldnames
+        source_rows, verification_metadata = attach_historical_legacy_records(
+            source_rows,
+            source_columns,
+            allow_unversioned_v1,
+        )
+        for row in source_rows:
             region_key = row.get('region_key', '')
             # region_key 格式: chrom:pos:ref:alt 或 chr:pos:ref>alt
             # variant_key 格式可能略有不同，需嘗試匹配
@@ -369,7 +408,9 @@ def analyze_ism_fp_methylation(fp_records, tp_records):
                 'AD': safe_float(row.get('AlleleDelta', '')),
                 'hp_assign': safe_float(row.get('hp_assign_rate', '')),
                 'allele_assign': safe_float(row.get('allele_assign_rate', '')),
-                'VerificationClass': row.get('VerificationClass', ''),
+                'VerificationClass_Legacy_Selected': row['VerificationClass_Legacy_Selected'],
+                'verification_selection_field': row['verification_selection_field'],
+                'verification_schema_status': row['verification_schema_status'],
                 'af': safe_float(row.get('af', '')),
                 'gq': safe_float(row.get('gq', '')),
                 'naf': None,
@@ -434,8 +475,12 @@ def analyze_ism_fp_methylation(fp_records, tp_records):
                 result[f'median_{feat}'] = None
                 result[f'q1_{feat}'] = None
                 result[f'q3_{feat}'] = None
-        # VerificationClass 分佈
-        vc_counts = Counter(r['VerificationClass'] for r in records if r.get('VerificationClass'))
+        # Explicit historical legacy-four-state distribution.
+        vc_counts = Counter(
+            r['VerificationClass_Legacy_Selected']
+            for r in records
+            if r.get('VerificationClass_Legacy_Selected')
+        )
         total_vc = sum(vc_counts.values())
         result['noise_pct'] = vc_counts.get('Noise', 0) / total_vc * 100 if total_vc else None
         result['strong_pct'] = vc_counts.get('Strong', 0) / total_vc * 100 if total_vc else None
@@ -493,6 +538,7 @@ def analyze_ism_fp_methylation(fp_records, tp_records):
         'fp_groups': dict(fp_groups),
         'tp_summary': tp_summary,
         'fp_summaries': fp_summaries,
+        'verification_metadata': verification_metadata,
     }
 
 
@@ -541,8 +587,12 @@ def analyze_highaf_tp(tp_analysis, ism_data):
         highaf_ism = [r for r in ism_tp if r.get('af') is not None and r['af'] >= 0.6]
         print(f"  高 AF TP 在 ISM 候選池中: N={len(highaf_ism)}", flush=True)
         if highaf_ism:
-            vc_counts = Counter(r['VerificationClass'] for r in highaf_ism if r.get('VerificationClass'))
-            print(f"  ISM VerificationClass 分佈: {dict(vc_counts)}", flush=True)
+            vc_counts = Counter(
+                r['VerificationClass_Legacy_Selected']
+                for r in highaf_ism
+                if r.get('VerificationClass_Legacy_Selected')
+            )
+            print(f"  ISM legacy VerificationClass 分佈: {dict(vc_counts)}", flush=True)
             cv_vals = sorted([r['CV'] for r in highaf_ism if r.get('CV') is not None])
             if cv_vals:
                 print(f"  CramersV: median={cv_vals[len(cv_vals)//2]:.3f}, "
@@ -636,13 +686,17 @@ def write_outputs(tp_analysis, fp_classified, fp_group_stats, ism_data, highaf_a
     # ── ism_fp_methylation_comparison.tsv ──
     if ism_data:
         ism_path = os.path.join(OUTPUT_DIR, "ism_fp_methylation_comparison.tsv")
+        verification_metadata = ism_data['verification_metadata']
         with open(ism_path, 'w') as f:
-            f.write("group\tcount\tmedian_QS\tq1_QS\tq3_QS\tmedian_PMD\tmedian_CV\t"
+            f.write("group\tverification_view\tverification_selection_field\tverification_schema_status\t"
+                    "count\tmedian_QS\tq1_QS\tq3_QS\tmedian_PMD\tmedian_CV\t"
                     "median_hp_assign\tnoise_pct\tstrong_pct\tsubclone_pct\n")
             # TP first
             ts = ism_data['tp_summary']
             f.write(
-                f"TP\t{ts['n']}\t"
+                f"TP\t{verification_metadata['verification_view']}\t"
+                f"{verification_metadata['verification_selection_field']}\t"
+                f"{verification_metadata['verification_schema_status']}\t{ts['n']}\t"
                 f"{ts['median_QS']:.1f}\t{ts['q1_QS']:.1f}\t{ts['q3_QS']:.1f}\t"
                 f"{ts['median_PMD']:.3f}\t{ts['median_CV']:.3f}\t"
                 f"{ts['median_hp_assign']:.3f}\t"
@@ -652,7 +706,9 @@ def write_outputs(tp_analysis, fp_classified, fp_group_stats, ism_data, highaf_a
                 def fmt(v, fmt_str=".3f"):
                     return f"{v:{fmt_str}}" if v is not None else "NA"
                 f.write(
-                    f"{group_name}\t{fs['n']}\t"
+                    f"{group_name}\t{verification_metadata['verification_view']}\t"
+                    f"{verification_metadata['verification_selection_field']}\t"
+                    f"{verification_metadata['verification_schema_status']}\t{fs['n']}\t"
                     f"{fmt(fs['median_QS'], '.1f')}\t{fmt(fs['q1_QS'], '.1f')}\t{fmt(fs['q3_QS'], '.1f')}\t"
                     f"{fmt(fs['median_PMD'])}\t{fmt(fs['median_CV'])}\t"
                     f"{fmt(fs['median_hp_assign'])}\t"
@@ -683,7 +739,21 @@ def write_outputs(tp_analysis, fp_classified, fp_group_stats, ism_data, highaf_a
 # 主程式
 # ──────────────────────────────────────────────────────────────────
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize the fixed historical rescue table's raw VerificationClass "
+            "as a legacy-four-state input"
+        ),
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     print("=" * 70, flush=True)
     print("TO TP 全量特徵畫像 + FP Germline/LOH/Artifact 分類分析", flush=True)
     print("=" * 70, flush=True)
@@ -702,7 +772,11 @@ def main():
     print()
 
     # Step 4: ISM 甲基化特徵比較
-    ism_data = analyze_ism_fp_methylation(fp_records, tp_records)
+    ism_data = analyze_ism_fp_methylation(
+        fp_records,
+        tp_records,
+        args.allow_unversioned_v1,
+    )
     print()
 
     # Step 5: 高 AF TP LOH 分析

@@ -10,6 +10,7 @@ Tier 3 (stratum-defining): HP_Ratio, HP1FamilyN, HP2FamilyN
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import json
 import warnings
@@ -29,7 +30,14 @@ from observation_common import (
     COLOR_TP, COLOR_FP,
 )
 
-warnings.filterwarnings("ignore")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -46,8 +54,8 @@ DATA_PATHS = {
     },
 }
 
-OUT_ROOT = ensure_dir(Path("/big7_disk/liaoyoyo2001/InterSubMod/output/clairsto_correction_analysis/feature_study"))
-Q6_DIR = ensure_dir(OUT_ROOT / "Q6")
+OUT_ROOT = Path("/big7_disk/liaoyoyo2001/InterSubMod/output/clairsto_correction_analysis/feature_study")
+Q6_DIR = OUT_ROOT / "Q6"
 
 BOOLEAN_FEATURES = ["PassedGating", "HPMergedSig", "HPFineSig", "AlleleSig",
                      "ClusterPermanovaValid", "Potential_LOH"]
@@ -67,7 +75,39 @@ STRATA = ["All", "LOH", "Non-LOH", "LOH_Strong", "LOH_Weak"]
 def _p(msg): print(msg, flush=True)
 
 
-def load_version(version: str) -> pd.DataFrame:
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
+def load_version(
+    version: str,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
     paths = DATA_PATHS[version]
     tp = pd.read_csv(paths["tp"], low_memory=False)
     fp = pd.read_csv(paths["fp"], low_memory=False)
@@ -75,7 +115,10 @@ def load_version(version: str) -> pd.DataFrame:
     fp["truth_label"] = "FP"
     tp["version"] = version
     fp["version"] = version
-    df = pd.concat([tp, fp], ignore_index=True)
+    df = attach_loh_legacy_view(
+        pd.concat([tp, fp], ignore_index=True),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
     for col in BOOLEAN_FEATURES + ["Potential_LOH"]:
         if col in df.columns:
             df[col] = df[col].astype(str).str.lower().isin(["true", "1", "yes"]).astype(int)
@@ -93,8 +136,8 @@ def stratify(df, stratum):
     if stratum == "All": return df
     elif stratum == "LOH": return df[df["Potential_LOH"] == 1]
     elif stratum == "Non-LOH": return df[df["Potential_LOH"] == 0]
-    elif stratum == "LOH_Strong": return df[df["LOH_Subtype"] == "LOH_Strong"]
-    elif stratum == "LOH_Weak": return df[df["LOH_Subtype"] == "LOH_Weak"]
+    elif stratum == "LOH_Strong": return df[df["_loh_subtype_legacy"] == "LOH_Strong"]
+    elif stratum == "LOH_Weak": return df[df["_loh_subtype_legacy"] == "LOH_Weak"]
     return df
 
 
@@ -183,7 +226,10 @@ def run_q6(dfs: dict[str, pd.DataFrame]):
         _p(f"\n{'='*40}")
         _p(f"Version: {ver}")
         _p(f"{'='*40}")
-        res = {"version": ver}
+        res = {
+            "version": ver,
+            "loh_schema_contract": dict(df.attrs["loh_schema_contract"]),
+        }
 
         # 1. Feature correlation matrix (for fig)
         all_feats = TIER1 + TIER2 + TIER3
@@ -491,7 +537,9 @@ def run_q6(dfs: dict[str, pd.DataFrame]):
     return results
 
 
-if __name__ == "__main__":
+def main() -> None:
+    args = parse_args()
+    Q6_DIR.mkdir(parents=True, exist_ok=True)
     # Load data
     available = {}
     for ver, paths in DATA_PATHS.items():
@@ -504,9 +552,13 @@ if __name__ == "__main__":
     dfs = {}
     for ver in available:
         _p(f"\nLoading {ver}...")
-        df = load_version(ver)
+        df = load_version(ver, allow_unversioned_v1=args.allow_unversioned_v1)
         _p(f"  {len(df):,} rows")
         dfs[ver] = df
 
     import seaborn as sns
     run_q6(dfs)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,12 +1,8 @@
 #!/bin/bash
-# ISM regression check — 結果不變機制（雙守護，2026-06-14 預設改 SKIP 後）
-# 固定 canonical 配置(chr1 ±5000 BERNOULLI paired) → 比 golden → PASS/FAIL
-#   SKIP(預設)     比 golden_chr1_w5000_bernoulli_skip.tsv   ← 主研究基準
-#   MAX_DIST(對照) 比 golden_chr1_w5000_bernoulli.tsv        ← 確認改預設沒動 MAX_DIST 路徑(歷史名)
-# 用法:
-#   regression_check.sh --update-golden   # 重建兩個 golden
-#   regression_check.sh                    # 雙路徑比對(每次 C++ 改動後跑)
-set -uo pipefail
+# ISM frozen regression check: schema-v2 provenance + numeric output must match reviewed goldens.
+# Golden artifacts are intentionally immutable here; updates require a separate reviewed procedure.
+set -euo pipefail
+
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 BIN="$ROOT/build/bin/inter_sub_mod"
@@ -16,47 +12,164 @@ REF=/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa
 VCF=/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp_chr1.vcf.gz
 GOLDEN_SKIP="$HERE/golden_chr1_w5000_bernoulli_skip.tsv"
 GOLDEN_MAXDIST="$HERE/golden_chr1_w5000_bernoulli.tsv"
-export TMPDIR=/big7_disk/liaoyoyo2001/tmp; mkdir -p "$TMPDIR"
 
-run_extract() {  # $1=nan_strategy  $2=outdir
-  rm -rf "$2"; mkdir -p "$2"
-  "$BIN" -t "$TUMOR" -n "$NORMAL" -r "$REF" -v "$VCF" -w 5000 -j 16 \
-    --distance-metric BERNOULLI --nan-distance-strategy "$1" --no-output-distance-matrix -o "$2" > "$2/run.log" 2>&1
-  python3 -c "
-import pandas as pd
-d=pd.read_csv('$2/significance_summary.csv')
-cols=['RegionID','NumReads','NumCpGs','GlobalP','CramersV','PassedGating','ClusterPermanovaValid','Significant','VerificationClass']
-d[cols].sort_values('RegionID').to_csv('$2/current.tsv',sep='\t',index=False,float_format='%.6g')
-"
-}
-
-OUT_SKIP="$ROOT/output/_tmp_regression_skip"
-OUT_MAXD="$ROOT/output/_tmp_regression_maxdist"
+COLUMNS=(
+  RegionID NumReads NumCpGs GlobalP CramersV PassedGating ClusterPermanovaValid Significant
+  VerificationSchemaVersion VerificationClass VerificationClass_V1_Deprecated VerificationClass_Legacy
+  LabelFirstSupport ClusterFirstSupport WithinHPSupport DispersionWarning EvidencePath EvidenceDerivation
+)
+EXPECTED_HEADER="$(IFS=$'\t'; echo "${COLUMNS[*]}")"
 
 if [ "${1:-}" = "--update-golden" ]; then
-  run_extract SKIP "$OUT_SKIP";       cp "$OUT_SKIP/current.tsv" "$GOLDEN_SKIP"
-  run_extract MAX_DIST "$OUT_MAXD";   cp "$OUT_MAXD/current.tsv" "$GOLDEN_MAXDIST"
-  echo "[regression] golden 已建/更新: SKIP=$(($(wc -l < "$GOLDEN_SKIP")-1)) + MAX_DIST=$(($(wc -l < "$GOLDEN_MAXDIST")-1)) 位點 @ commit $(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null)"
-  rm -rf "$OUT_SKIP" "$OUT_MAXD"; exit 0
+  echo "[regression] REFUSED: golden artifacts are frozen and cannot be rebuilt by regression_check.sh." >&2
+  echo "[regression] Use a separate, code-reviewed golden migration with recorded provenance." >&2
+  exit 2
+fi
+if [ "$#" -ne 0 ]; then
+  echo "Usage: $0" >&2
+  exit 2
 fi
 
+export TMPDIR=/big7_disk/liaoyoyo2001/tmp
+mkdir -p "$TMPDIR"
+
+validate_contract_file() {  # $1=file $2=label
+  local file="$1"
+  local label="$2"
+  if [ ! -f "$file" ]; then
+    echo "[regression] $label missing: $file" >&2
+    exit 2
+  fi
+  local observed_header
+  observed_header="$(head -n 1 "$file")"
+  if [ "$observed_header" != "$EXPECTED_HEADER" ]; then
+    echo "[regression] $label has a stale/non-v2 header; frozen golden migration is required." >&2
+    echo "[regression] expected: $EXPECTED_HEADER" >&2
+    echo "[regression] observed: $observed_header" >&2
+    exit 2
+  fi
+
+  python3 - "$file" "$ROOT" <<'PY'
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+path = Path(sys.argv[1])
+sys.path.insert(0, sys.argv[2])
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_TO_EVIDENCE_PATH,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
+
+try:
+    frame = pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
+    current = select_current_view(frame)
+    legacy = select_legacy_view(frame)
+    evidence = read_evidence(frame)
+    if current.unknown_counts:
+        raise SchemaContractError(f"unknown canonical classes: {current.unknown_counts}")
+
+    expected_v1 = current.values.map(
+        lambda value: "Strong" if value in {"Strong_Bidirectional", "ClusterFirstOnly"} else value
+    )
+    mismatch = frame["VerificationClass_V1_Deprecated"].astype(str) != expected_v1.astype(str)
+    if mismatch.any():
+        raise SchemaContractError("VerificationClass_V1_Deprecated is not the exact frozen alias")
+
+    expected_path = current.values.map(CURRENT_TO_EVIDENCE_PATH)
+    if (evidence["EvidencePath"].astype(str) != expected_path.astype(str)).any():
+        raise SchemaContractError("EvidencePath conflicts with canonical VerificationClass")
+    expected_label = legacy.values.isin({"Strong", "Weak"})
+    expected_cluster = legacy.values.isin({"Strong", "Subclone"})
+    if (evidence["LabelFirstSupport"].astype(bool) != expected_label).any():
+        raise SchemaContractError("LabelFirstSupport conflicts with VerificationClass_Legacy")
+    if (evidence["ClusterFirstSupport"].astype(bool) != expected_cluster).any():
+        raise SchemaContractError("ClusterFirstSupport conflicts with VerificationClass_Legacy")
+    legacy_derived = evidence["EvidenceDerivation"] == "LEGACY_CLASS"
+    if evidence.loc[legacy_derived, "WithinHPSupport"].notna().any():
+        raise SchemaContractError("LEGACY_CLASS requires WithinHPSupport=NA")
+    if evidence.loc[legacy_derived, "DispersionWarning"].notna().any():
+        raise SchemaContractError("LEGACY_CLASS requires DispersionWarning=NA")
+except (SchemaContractError, ValueError) as exc:
+    raise SystemExit(f"[regression][schema-contract] {path}: {exc}") from exc
+PY
+}
+
+# Validate both frozen goldens before launching the expensive C++ process.
+validate_contract_file "$GOLDEN_SKIP" "SKIP golden"
+validate_contract_file "$GOLDEN_MAXDIST" "MAX_DIST golden"
+
+run_extract() {  # $1=nan_strategy $2=outdir
+  local strategy="$1"
+  local outdir="$2"
+  if [ -e "$outdir" ]; then
+    echo "[regression] refusing stale output directory: $outdir" >&2
+    exit 2
+  fi
+  mkdir -p "$outdir"
+  "$BIN" -t "$TUMOR" -n "$NORMAL" -r "$REF" -v "$VCF" -w 5000 -j 16 \
+    --distance-metric BERNOULLI --nan-distance-strategy "$strategy" \
+    --no-output-distance-matrix -o "$outdir" > "$outdir/run.log" 2>&1
+  python3 - "$outdir/significance_summary.csv" "$outdir/current.tsv" <<'PY'
+import sys
+import pandas as pd
+
+columns = [
+    "RegionID", "NumReads", "NumCpGs", "GlobalP", "CramersV", "PassedGating",
+    "ClusterPermanovaValid", "Significant", "VerificationSchemaVersion", "VerificationClass",
+    "VerificationClass_V1_Deprecated", "VerificationClass_Legacy", "LabelFirstSupport",
+    "ClusterFirstSupport", "WithinHPSupport", "DispersionWarning", "EvidencePath",
+    "EvidenceDerivation",
+]
+frame = pd.read_csv(sys.argv[1], keep_default_na=False)
+serialized = pd.read_csv(sys.argv[1], dtype=str, keep_default_na=False)
+missing = [column for column in columns if column not in frame.columns]
+if missing:
+    raise SystemExit("[regression][schema-contract] generated summary missing: " + ", ".join(missing))
+# Retain the C++ writer's canonical lowercase true/false/NA evidence values.
+# Other historical regression columns keep their established pandas formatting.
+for column in (
+    "LabelFirstSupport", "ClusterFirstSupport", "WithinHPSupport",
+    "DispersionWarning", "EvidencePath", "EvidenceDerivation",
+):
+    frame[column] = serialized[column]
+frame[columns].sort_values("RegionID").to_csv(
+    sys.argv[2], sep="\t", index=False, float_format="%.6g"
+)
+PY
+  validate_contract_file "$outdir/current.tsv" "$strategy current output"
+}
+
+OUT_SKIP="$ROOT/output/_tmp_regression_skip.$$"
+OUT_MAXD="$ROOT/output/_tmp_regression_maxdist.$$"
 FAIL=0
+
 check_one() {  # $1=label $2=strategy $3=golden $4=outdir
-  [ ! -f "$3" ] && { echo "[regression] $1 無 golden ($3) — 先跑 --update-golden"; exit 2; }
-  run_extract "$2" "$4"
-  if diff -q "$3" "$4/current.tsv" >/dev/null; then
-    echo "[regression] ✅ $1 PASS — 與 golden 一致 ($(($(wc -l < "$3")-1)) 位點)"; rm -rf "$4"
+  local label="$1"
+  local strategy="$2"
+  local golden="$3"
+  local outdir="$4"
+  run_extract "$strategy" "$outdir"
+  if diff -q "$golden" "$outdir/current.tsv" >/dev/null; then
+    echo "[regression] ✅ $label PASS — schema/provenance and values match frozen golden ($(($(wc -l < "$golden")-1)) rows)"
   else
-    echo "[regression] 🔴 $1 FAIL — 結果改變！差異(golden<→current>):"; diff "$3" "$4/current.tsv" | head -15
-    echo "(完整輸出留 $4)"; FAIL=1
+    echo "[regression] 🔴 $label FAIL — frozen result changed; first differences:"
+    diff -u "$golden" "$outdir/current.tsv" | head -15 || true
+    echo "[regression] full current output retained at $outdir"
+    FAIL=1
   fi
 }
 
-check_one "SKIP(預設/主基準)" SKIP "$GOLDEN_SKIP" "$OUT_SKIP"
-check_one "MAX_DIST(對照)" MAX_DIST "$GOLDEN_MAXDIST" "$OUT_MAXD"
+check_one "SKIP(default/main)" SKIP "$GOLDEN_SKIP" "$OUT_SKIP"
+check_one "MAX_DIST(control)" MAX_DIST "$GOLDEN_MAXDIST" "$OUT_MAXD"
 
 if [ "$FAIL" -eq 0 ]; then
-  echo "[regression] ✅ 雙守護 PASS (SKIP 預設 + MAX_DIST 對照)"; exit 0
-else
-  echo "[regression] 🔴 雙守護 FAIL"; exit 1
+  echo "[regression] ✅ dual frozen guard PASS (outputs retained: $OUT_SKIP, $OUT_MAXD)"
+  exit 0
 fi
+echo "[regression] 🔴 dual frozen guard FAIL"
+exit 1

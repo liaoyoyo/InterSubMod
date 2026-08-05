@@ -4,12 +4,24 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Callable, Dict, List
 
 import pandas as pd
 
 from research_common import compute_metrics, infer_platform, write_tsv_rows
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 RuleFunc = Callable[[pd.Series], bool]
@@ -47,6 +59,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline-fp", type=int, required=True, help="Baseline kept FP count")
     parser.add_argument("--truth-total", type=int, required=True, help="Truth total count")
     parser.add_argument("--output-dir", required=True, help="Output directory")
+    parser.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        required=True,
+        help="Explicit source for historical Strong/Subclone support semantics",
+    )
     return parser.parse_args()
 
 
@@ -119,9 +137,9 @@ def build_rules(mode: str) -> List[Dict[str, object]]:
     # Caller + methylation support.
     add(
         "caller_plus_methylation_support",
-        "caller_candidate_gq_ge_10__support_strong_or_subclone",
-        "candidate_eligible;gq>=10;VerificationClass in Strong/Subclone",
-        lambda row: row["candidate_eligible"] and row["gq"] >= 10 and support_strong_or_subclone(row),
+        "caller_candidate_gq_ge_10__support_cluster_first",
+        "candidate_eligible;gq>=10;ClusterFirstSupport=true",
+        lambda row: row["candidate_eligible"] and row["gq"] >= 10 and support_cluster_first(row),
     )
     add(
         "caller_plus_methylation_support",
@@ -131,11 +149,11 @@ def build_rules(mode: str) -> List[Dict[str, object]]:
     )
     add(
         "caller_plus_methylation_support",
-        "caller_candidate_gq_ge_10__support_strong_pairwise_ge_020",
-        "candidate_eligible;gq>=10;Strong/Subclone;PairwiseMedianDist>=0.20",
+        "caller_candidate_gq_ge_10__support_cluster_first_pairwise_ge_020",
+        "candidate_eligible;gq>=10;ClusterFirstSupport=true;PairwiseMedianDist>=0.20",
         lambda row: row["candidate_eligible"]
         and row["gq"] >= 10
-        and support_strong_or_subclone(row)
+        and support_cluster_first(row)
         and row["PairwiseMedianDist"] >= 0.20,
     )
     add(
@@ -175,12 +193,34 @@ def artifact_combined(row: pd.Series) -> bool:
     return False
 
 
-def support_strong_or_subclone(row: pd.Series) -> bool:
-    return row["VerificationClass"] in {"Strong", "Subclone"}
+def support_cluster_first(row: pd.Series) -> bool:
+    value = row["cluster_first_support"]
+    return bool(value) if pd.notna(value) else False
 
 
 def support_agreement(row: pd.Series) -> bool:
     return row["agreement_type"] in {"label_upgrade", "consistent_strong", "consistent_subclone"}
+
+
+def attach_summary_support(df: pd.DataFrame, support_mode: str) -> pd.DataFrame:
+    result = df.copy()
+    if support_mode == "evidence-v2":
+        current = select_current_view(result)
+        if current.unknown_counts:
+            raise SchemaContractError(f"rescue summary: unknown current classes: {current.unknown_counts}")
+        evidence = read_evidence(result)
+        result["cluster_first_support"] = evidence["ClusterFirstSupport"]
+        result["verification_support_source"] = "ClusterFirstSupport"
+        result["verification_support_schema_status"] = "V2_EVIDENCE"
+    elif support_mode == "legacy":
+        legacy = select_legacy_view(result, allow_unversioned_v1=False)
+        result["cluster_first_support"] = legacy.values.isin(["Strong", "Subclone"])
+        result["verification_support_source"] = legacy.field
+        result["verification_support_schema_status"] = legacy.schema_status
+    else:
+        raise ValueError(f"Unsupported verification support mode: {support_mode}")
+    result["verification_support_mode"] = support_mode
+    return result
 
 
 def load_joined(args: argparse.Namespace) -> pd.DataFrame:
@@ -190,6 +230,11 @@ def load_joined(args: argparse.Namespace) -> pd.DataFrame:
     ].copy()
     tp_summary = pd.read_csv(args.tp_summary_csv)
     fp_summary = pd.read_csv(args.fp_summary_csv)
+    tp_summary = attach_summary_support(tp_summary, args.verification_support_mode)
+    fp_summary = attach_summary_support(fp_summary, args.verification_support_mode)
+    for summary in (tp_summary, fp_summary):
+        if "VerificationClass" not in summary.columns:
+            summary["VerificationClass"] = pd.NA
 
     for df, scope in ((tp_summary, "tp"), (fp_summary, "fp")):
         df["region_key"] = (
@@ -206,6 +251,10 @@ def load_joined(args: argparse.Namespace) -> pd.DataFrame:
         "AlleleDelta",
         "CramersV",
         "VerificationClass",
+        "cluster_first_support",
+        "verification_support_mode",
+        "verification_support_source",
+        "verification_support_schema_status",
         "DominantLabel",
         "PassedGating",
         "GlobalP",
@@ -303,9 +352,8 @@ def load_joined(args: argparse.Namespace) -> pd.DataFrame:
 def main() -> None:
     args = parse_args()
     output_dir = Path(args.output_dir).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     joined = load_joined(args)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     sample = str(joined["sample"].iloc[0]) if not joined.empty else "unknown"
     platform = str(joined["platform"].iloc[0]) if not joined.empty else infer_platform(sample)
@@ -315,7 +363,7 @@ def main() -> None:
     tp = joined[joined["downstream_status"] == "caller_lost_tp"].copy()
     fp = joined[joined["downstream_status"] == "caller_removed_fp"].copy()
 
-    export_mask = joined["candidate_eligible"] | (joined["VerificationClass"] != "NA") | (joined["PairwiseMedianDist"] > 0)
+    export_mask = joined["candidate_eligible"] | joined["cluster_first_support"].notna() | (joined["PairwiseMedianDist"] > 0)
     joined.loc[export_mask].to_csv(output_dir / "rescue_joined_features.tsv", sep="\t", index=False)
 
     baseline_metrics = compute_metrics(args.baseline_tp, args.baseline_fp, args.truth_total)
@@ -370,6 +418,7 @@ def main() -> None:
         f"- Baseline F1: `{baseline_metrics['f1']:.6f}`",
         f"- Downstream lost TP rows: `{len(tp)}`",
         f"- Downstream removed FP rows: `{len(fp)}`",
+        f"- Verification support mode: `{args.verification_support_mode}`",
         "",
     ]
     if best_safe:

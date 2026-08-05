@@ -10,6 +10,8 @@ Usage:
     python scripts/analysis/seqc2_cnv_cross_sample_and_rootcause.py
 """
 
+import argparse
+import json
 import os
 import sys
 import warnings
@@ -25,10 +27,19 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 from sklearn.metrics import roc_auc_score
 
-warnings.filterwarnings('ignore')
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    V1_CURRENT_CLASSES,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = PROJECT_ROOT / "research" / "seqc2_cnv_stratification"
 FIG_DIR = OUTPUT_DIR / "figures"
 DATA_DIR = OUTPUT_DIR / "data"
@@ -79,17 +90,83 @@ plt.rcParams.update({
     'savefig.dpi': 150,
 })
 
+PROVENANCE_FIELDS = [
+    'VerificationClass_V1_Deprecated', 'VerificationClass_Legacy',
+    'LabelFirstSupport', 'ClusterFirstSupport', 'WithinHPSupport',
+    'DispersionWarning', 'EvidencePath', 'EvidenceDerivation',
+]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--canonical-base', default=str(CANONICAL_BASE))
+    parser.add_argument('--output-dir', default=str(OUTPUT_DIR))
+    parser.add_argument(
+        '--allow-unversioned-v1', action='store_true',
+        help='Explicitly authorize historical unversioned v1 current taxonomy inputs.',
+    )
+    return parser.parse_args()
+
+
+def normalize_current_taxonomy(df, allow_unversioned_v1=False, context='SEQC2 input'):
+    """Return a current-class frame with explicit schema identity and direct evidence checks."""
+    result = df.copy()
+    if 'VerificationSchemaVersion' in result.columns:
+        missing = [field for field in PROVENANCE_FIELDS if field not in result.columns]
+        if missing:
+            raise SchemaContractError(f"{context}: missing v2 provenance fields: {', '.join(missing)}")
+        view = select_current_view(result)
+        read_evidence(result)
+        result['VerificationClass'] = view.values
+        metadata = view.metadata()
+        metadata['evidence_fields'] = list(PROVENANCE_FIELDS)
+        return result, metadata
+
+    if 'VerificationClass' not in result.columns:
+        raise SchemaContractError(f'{context}: VerificationClass is missing')
+    if not allow_unversioned_v1:
+        raise SchemaContractError(f'{context}: unversioned current taxonomy requires --allow-unversioned-v1')
+
+    raw = result['VerificationClass'].astype('string')
+    valid = raw.isin(V1_CURRENT_CLASSES)
+    unknown_counts = {
+        str(key): int(value)
+        for key, value in raw[~valid].fillna('<MISSING>').value_counts().sort_index().items()
+    }
+    result['VerificationClass'] = raw.where(valid, UNKNOWN_CURRENT_CLASS)
+    message = (
+        f'UNVERSIONED: {context} accepted as historical v1 current taxonomy under explicit '
+        '--allow-unversioned-v1; v2 evidence provenance is unavailable'
+    )
+    warnings.warn(message, UserWarning, stacklevel=2)
+    return result, {
+        'selection_field': 'VerificationClass',
+        'schema_status': 'UNVERSIONED_V1',
+        'categories': list(V1_CURRENT_CLASSES) + [UNKNOWN_CURRENT_CLASS],
+        'unknown_counts': unknown_counts,
+        'warnings': [message],
+        'evidence_fields': [],
+    }
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Part A: Cross-Sample CNV Stratification
 # ══════════════════════════════════════════════════════════════════════════════
 
-def load_all_samples():
+def load_all_samples(canonical_base=CANONICAL_BASE, allow_unversioned_v1=False):
     """Load significance_summary.csv for all samples."""
     all_data = []
+    source_metadata = []
+    canonical_base = Path(canonical_base)
     for sample_name, subdir in SAMPLES.items():
-        tp_path = CANONICAL_BASE / sample_name / "paired_pileup" / subdir / "intersubmod_tp" / "significance_summary.csv"
-        fp_path = CANONICAL_BASE / sample_name / "paired_pileup" / subdir / "intersubmod_fp" / "significance_summary.csv"
+        tp_path = (
+            canonical_base / sample_name / "paired_pileup" / subdir
+            / "intersubmod_tp" / "significance_summary.csv"
+        )
+        fp_path = (
+            canonical_base / sample_name / "paired_pileup" / subdir
+            / "intersubmod_fp" / "significance_summary.csv"
+        )
 
         if not tp_path.exists():
             print(f"  SKIP {sample_name}: TP file not found")
@@ -106,6 +183,15 @@ def load_all_samples():
             df = pd.concat([tp, fp], ignore_index=True)
         else:
             df = tp
+
+        df, taxonomy = normalize_current_taxonomy(
+            df,
+            allow_unversioned_v1=allow_unversioned_v1,
+            context=f'{sample_name} significance summaries',
+        )
+        taxonomy['sample'] = sample_name
+        taxonomy['source_files'] = [str(tp_path)] + ([str(fp_path)] if fp_path.exists() else [])
+        source_metadata.append(taxonomy)
 
         # Assign CN zone based on Coverage_Multiple
         if 'Coverage_Multiple' in df.columns:
@@ -131,7 +217,18 @@ def load_all_samples():
         n_fp = sum(df.Label == 'FP')
         print(f"  {sample_name}: {n_tp} TP + {n_fp} FP = {len(df)} total")
 
+    if not all_data:
+        raise SchemaContractError(f'SEQC2 inputs: no readable significance summaries below {canonical_base}')
+    statuses = sorted({item['schema_status'] for item in source_metadata})
+    if len(statuses) != 1:
+        raise SchemaContractError(f'SEQC2 inputs mix taxonomy schema statuses: {statuses}')
     combined = pd.concat(all_data, ignore_index=True)
+    combined.attrs['verification_taxonomy'] = {
+        'schema_status': statuses[0],
+        'selection_field': 'VerificationClass',
+        'source_count': len(source_metadata),
+        'sources': source_metadata,
+    }
     print(f"\n  Total: {len(combined)} regions across {combined.Sample.nunique()} samples")
     return combined
 
@@ -399,11 +496,24 @@ def cross_sample_loh_interaction(df):
 # Part B: Gain+LOH Root Cause Investigation (HCC1395)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def load_hcc1395_annotated():
+def load_hcc1395_annotated(allow_unversioned_v1=False, expected_schema_status=None):
     """Load the SEQC2-annotated HCC1395 data from Step 1."""
     path = DATA_DIR / 'annotated_hcc1395_cnv.tsv'
     if path.exists():
-        return pd.read_csv(path, sep='\t')
+        df = pd.read_csv(path, sep='\t', low_memory=False)
+        if 'VerificationClass' in df.columns or 'VerificationSchemaVersion' in df.columns:
+            df, taxonomy = normalize_current_taxonomy(
+                df,
+                allow_unversioned_v1=allow_unversioned_v1,
+                context='HCC1395 SEQC2 annotated table',
+            )
+            if expected_schema_status is not None and taxonomy['schema_status'] != expected_schema_status:
+                raise SchemaContractError(
+                    'SEQC2 inputs mix taxonomy schema statuses: '
+                    f"canonical={expected_schema_status}, annotated={taxonomy['schema_status']}"
+                )
+            df.attrs['verification_taxonomy'] = taxonomy
+        return df
     return None
 
 
@@ -619,7 +729,7 @@ def gain_loh_vs_others_comparison(hcc_df):
 # Part C: Feasibility of Coverage_Multiple-based CNV Zone for FP discrimination
 # ══════════════════════════════════════════════════════════════════════════════
 
-def feasibility_analysis(df):
+def feasibility_analysis(df, verification_metadata=None):
     """Fig 15: Can Coverage_Multiple-based zones improve FP discrimination?"""
 
     fig, axes = plt.subplots(2, 3, figsize=(18, 10))
@@ -821,6 +931,9 @@ def feasibility_analysis(df):
     plt.close()
     print("  Saved: 15_feasibility_analysis.png")
 
+    if verification_metadata is not None:
+        strat_df['VerificationSchemaStatus'] = verification_metadata['schema_status']
+        strat_df['VerificationSelectionField'] = verification_metadata['selection_field']
     strat_df.to_csv(DATA_DIR / 'zone_exclusion_tradeoff.tsv', sep='\t', index=False)
     return strat_df
 
@@ -830,8 +943,12 @@ def feasibility_analysis(df):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def main():
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    global OUTPUT_DIR, FIG_DIR, DATA_DIR, CANONICAL_BASE
+    args = parse_args()
+    OUTPUT_DIR = Path(args.output_dir).resolve()
+    FIG_DIR = OUTPUT_DIR / 'figures'
+    DATA_DIR = OUTPUT_DIR / 'data'
+    CANONICAL_BASE = Path(args.canonical_base).resolve()
 
     print("=" * 70)
     print("SEQC2 CNV Cross-Sample Analysis + Root Cause Investigation")
@@ -841,7 +958,23 @@ def main():
     # Part A: Cross-Sample Analysis
     # ══════════════════════════════════════════════════════════════════════════
     print("\n[Part A] Loading all samples...")
-    all_df = load_all_samples()
+    try:
+        all_df = load_all_samples(
+            CANONICAL_BASE,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+        verification_metadata = all_df.attrs['verification_taxonomy']
+        hcc_df = load_hcc1395_annotated(
+            allow_unversioned_v1=args.allow_unversioned_v1,
+            expected_schema_status=verification_metadata['schema_status'],
+        )
+    except SchemaContractError as exc:
+        raise SystemExit(f'[seqc2-cnv][schema-contract] {exc}') from exc
+
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(DATA_DIR / 'verification_taxonomy.json', 'w') as handle:
+        json.dump(verification_metadata, handle, indent=2)
 
     print("\n[Part A] CN Zone × Sample FP rate analysis...")
     fp_matrix, count_matrix = cross_sample_cn_zone_analysis(all_df)
@@ -866,8 +999,6 @@ def main():
     # Part B: Gain+LOH Root Cause
     # ══════════════════════════════════════════════════════════════════════════
     print("\n[Part B] Loading HCC1395 SEQC2-annotated data...")
-    hcc_df = load_hcc1395_annotated()
-
     if hcc_df is not None:
         print("\n[Part B] Gain+LOH root cause analysis...")
         cn_fp_rates = gain_loh_rootcause(hcc_df)
@@ -883,7 +1014,7 @@ def main():
     # Part C: Feasibility Analysis
     # ══════════════════════════════════════════════════════════════════════════
     print("\n[Part C] Feasibility of Coverage_Multiple-based zone discrimination...")
-    strat_df = feasibility_analysis(all_df)
+    strat_df = feasibility_analysis(all_df, verification_metadata)
 
     print("\n  Zone exclusion trade-off:")
     print(strat_df.to_string(index=False))

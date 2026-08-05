@@ -9,6 +9,7 @@ import itertools
 import math
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence
@@ -16,6 +17,17 @@ from typing import Dict, Iterable, List, Sequence
 import pandas as pd
 
 from research_common import compute_metrics, ensure_dir, markdown_table, parse_variant_counts, write_tsv_rows
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 REPO_ROOT = Path("/big8_disk/liaoyoyo2001/InterSubMod")
@@ -163,6 +175,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", default=str(OUTPUT_ROOT_DEFAULT), help="Output directory")
     parser.add_argument("--skip-benchmark", action="store_true", help="Skip rerunning paired raw benchmarks")
+    parser.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        required=True,
+        help="Explicit source for the historical Strong/Subclone support cohort",
+    )
     return parser.parse_args()
 
 
@@ -178,7 +196,48 @@ def format_float(value: float) -> str:
     return f"{value:.6f}"
 
 
-def load_joined(path: Path) -> pd.DataFrame:
+def attach_verification_support(
+    df: pd.DataFrame,
+    support_mode: str,
+    analysis_mask: pd.Series,
+) -> pd.DataFrame:
+    """Attach nullable evidence booleans without inferring them from current class names."""
+    if support_mode not in {"evidence-v2", "legacy"}:
+        raise ValueError(f"Unsupported verification support mode: {support_mode}")
+    result = df.copy()
+    analyzed = result.loc[analysis_mask].copy()
+    if not analyzed.empty:
+        if support_mode == "evidence-v2":
+            current = select_current_view(analyzed)
+            if current.unknown_counts:
+                raise SchemaContractError(
+                    f"phase2 verification support: unknown current classes: {current.unknown_counts}"
+                )
+            evidence = read_evidence(analyzed)
+            label_values = evidence["LabelFirstSupport"]
+            cluster_values = evidence["ClusterFirstSupport"]
+            source_field = "LabelFirstSupport+ClusterFirstSupport"
+            schema_status = "V2_EVIDENCE"
+        else:
+            legacy = select_legacy_view(analyzed, allow_unversioned_v1=False)
+            label_values = legacy.values.isin(["Strong", "Weak"])
+            cluster_values = legacy.values.isin(["Strong", "Subclone"])
+            source_field = legacy.field
+            schema_status = legacy.schema_status
+        result["label_first_support"] = label_values.reindex(result.index).astype("boolean")
+        result["cluster_first_support"] = cluster_values.reindex(result.index).astype("boolean")
+    else:
+        result["label_first_support"] = pd.Series(pd.NA, index=result.index, dtype="boolean")
+        result["cluster_first_support"] = pd.Series(pd.NA, index=result.index, dtype="boolean")
+        source_field = "LabelFirstSupport+ClusterFirstSupport" if support_mode == "evidence-v2" else "VerificationClass_Legacy"
+        schema_status = "NO_ANALYZED_ROWS"
+    result["verification_support_mode"] = support_mode
+    result["verification_support_source"] = source_field
+    result["verification_support_schema_status"] = schema_status
+    return result
+
+
+def load_joined(path: Path, support_mode: str) -> pd.DataFrame:
     df = pd.read_csv(path, sep="\t")
     numeric_columns = [
         "qual",
@@ -216,7 +275,7 @@ def load_joined(path: Path) -> pd.DataFrame:
         df["candidate_eligible"] = False
 
     df["analysis_available"] = df["source_scope"].isin({"tp", "fp"})
-    df["strong_subclone"] = df["VerificationClass"].isin({"Strong", "Subclone"})
+    df = attach_verification_support(df, support_mode, df["analysis_available"])
     df["agreement_positive"] = df["agreement_type"].isin({"label_upgrade", "consistent_strong", "consistent_subclone"})
     return df
 
@@ -423,7 +482,7 @@ def fine_threshold_defs() -> List[Dict[str, object]]:
     defs.extend(
         [
             {"feature": "agreement_positive", "rule_id": "agreement_positive", "notes": "agreement_type in label_upgrade/consistent_strong/consistent_subclone", "func": lambda df: df["agreement_positive"]},
-            {"feature": "VerificationClass", "rule_id": "strong_subclone", "notes": "VerificationClass in Strong/Subclone", "func": lambda df: df["strong_subclone"]},
+            {"feature": "ClusterFirstSupport", "rule_id": "cluster_first_support", "notes": "ClusterFirstSupport == true", "func": lambda df: df["cluster_first_support"].fillna(False)},
         ]
     )
     return defs
@@ -471,7 +530,7 @@ def orthogonal_masks(df: pd.DataFrame) -> Dict[str, pd.Series]:
         "hp_assign_ge_095": df["hp_assign_rate"] >= 0.95,
         "hp_assign_ge_099": df["hp_assign_rate"] >= 0.99,
         "agreement_positive": df["agreement_positive"],
-        "strong_subclone": df["strong_subclone"],
+        "cluster_first_support": df["cluster_first_support"].fillna(False),
         "lowvaf_highadelta_lowcv": artifact_low_vaf_high_adelta_low_cv(df),
     }
 
@@ -486,7 +545,7 @@ def is_complementary_threshold_pair(name_a: str, name_b: str) -> bool:
     return False
 
 
-def build_feature_outputs(output_dir: Path) -> Dict[str, pd.DataFrame]:
+def build_feature_outputs(output_dir: Path, support_mode: str) -> Dict[str, pd.DataFrame]:
     threshold_rows: List[Dict[str, object]] = []
     interval_rows: List[Dict[str, object]] = []
     top_bin_rows: List[Dict[str, object]] = []
@@ -494,7 +553,7 @@ def build_feature_outputs(output_dir: Path) -> Dict[str, pd.DataFrame]:
     top_orth_rows: List[Dict[str, object]] = []
 
     for dataset in RESCUE_DATASETS:
-        joined_df = load_joined(dataset.joined_tsv)
+        joined_df = load_joined(dataset.joined_tsv, support_mode)
         eval_df = candidate_eval_frame(joined_df)
         analyzed_df = eval_df[eval_df["analysis_available"]].copy()
 
@@ -713,10 +772,10 @@ def write_phase2_markdown(
 def main() -> None:
     args = parse_args()
     output_dir = Path(args.output_dir).resolve()
-    ensure_dir(output_dir)
 
+    feature_outputs = build_feature_outputs(output_dir, args.verification_support_mode)
+    ensure_dir(output_dir)
     paired_df = build_paired_raw_benchmark(output_dir, skip_benchmark=args.skip_benchmark)
-    feature_outputs = build_feature_outputs(output_dir)
 
     write_tsv_rows(
         output_dir / "paired_raw_model_benchmark.tsv",

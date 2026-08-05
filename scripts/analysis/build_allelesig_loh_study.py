@@ -16,6 +16,7 @@ Analysis:
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import json
 import warnings
@@ -36,7 +37,14 @@ from observation_common import (
     COLOR_TP, COLOR_FP, format_p, format_ci,
 )
 
-warnings.filterwarnings("ignore")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 BASE_DIR = Path("/big7_disk/liaoyoyo2001/longphase-to-mod/output")
 DATA_PATHS = {
@@ -50,7 +58,7 @@ DATA_PATHS = {
     },
 }
 
-OUT_DIR = ensure_dir(Path("/big7_disk/liaoyoyo2001/InterSubMod/output/clairsto_correction_analysis/feature_study/AlleleSig_LOH"))
+OUT_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/output/clairsto_correction_analysis/feature_study/AlleleSig_LOH")
 
 BOOL_COLS = ["PassedGating", "HPMergedSig", "HPFineSig", "AlleleSig",
              "ClusterPermanovaValid", "Potential_LOH"]
@@ -58,13 +66,45 @@ BOOL_COLS = ["PassedGating", "HPMergedSig", "HPFineSig", "AlleleSig",
 def _p(msg): print(msg, flush=True)
 
 
-def load_version(version):
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
+def load_version(version, allow_unversioned_v1: bool = False):
     paths = DATA_PATHS[version]
     tp = pd.read_csv(paths["tp"], low_memory=False)
     fp = pd.read_csv(paths["fp"], low_memory=False)
     tp["truth_label"] = "TP"; fp["truth_label"] = "FP"
     tp["version"] = version; fp["version"] = version
-    df = pd.concat([tp, fp], ignore_index=True)
+    df = attach_loh_legacy_view(
+        pd.concat([tp, fp], ignore_index=True),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
     for col in BOOL_COLS:
         if col in df.columns:
             df[col] = df[col].astype(str).str.lower().isin(["true", "1", "yes"]).astype(int)
@@ -99,6 +139,8 @@ def bootstrap_auc(y_true, y_score, n_boot=500, seed=42):
 
 
 def main():
+    args = parse_args()
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     _p("=" * 70)
     _p("AlleleSig LOH Discrimination Study")
     _p("=" * 70)
@@ -110,9 +152,13 @@ def main():
         _p(f"\n{'=' * 50}")
         _p(f"Version: {ver}")
         _p(f"{'=' * 50}")
-        df = load_version(ver)
+        df = load_version(ver, allow_unversioned_v1=args.allow_unversioned_v1)
         loh = df[df["Potential_LOH"] == 1].copy()
-        res = {"version": ver, "loh_n": len(loh)}
+        res = {
+            "version": ver,
+            "loh_n": len(loh),
+            "loh_schema_contract": dict(df.attrs["loh_schema_contract"]),
+        }
         n_tp = (loh.y_true == 1).sum()
         n_fp = (loh.y_true == 0).sum()
         _p(f"  LOH: {len(loh):,} (TP={n_tp:,}, FP={n_fp:,})")
@@ -135,7 +181,7 @@ def main():
 
         # Per-subtype
         for sub in ["LOH_Strong", "LOH_Weak", "LOH_Subclone", "LOH_Noise"]:
-            sdf = loh[loh["LOH_Subtype"] == sub]
+            sdf = loh[loh["_loh_subtype_legacy"] == sub]
             if len(sdf) < 50: continue
             tp_r = sdf[sdf.y_true == 1]["AlleleSig"].mean()
             fp_r = sdf[sdf.y_true == 0]["AlleleSig"].mean()
@@ -461,7 +507,7 @@ def main():
 
         # LOH subtype distribution
         for sub in ["LOH_Strong", "LOH_Weak", "LOH_Subclone", "LOH_Noise"]:
-            sdf = loh[loh["LOH_Subtype"] == sub]
+            sdf = loh[loh["_loh_subtype_legacy"] == sub]
             pct = len(sdf) / len(loh) * 100
             tp_pct = (sdf.y_true == 1).sum() / max(n_tp, 1) * 100
             fp_pct = (sdf.y_true == 0).sum() / max(n_fp, 1) * 100

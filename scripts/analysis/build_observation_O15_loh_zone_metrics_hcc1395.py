@@ -10,11 +10,11 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import sys
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
@@ -43,6 +43,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_legacy_view, select_loh_legacy
 
 # ── Output Paths ──────────────────────────────────────────────────────────
 BASE_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/research/loh_investigation")
@@ -73,7 +79,7 @@ GROUP_B = ["AlleleDelta", "PairwiseMedianDist", "CramersV", "GlobalP",
 GROUP_C = ["ClusterPermanovaF", "ClusterPermanovaP",
            "LabelHPPermanovaF", "LabelHPPermanovaP",
            "LabelAllelePermanovaF", "LabelAllelePermanovaP"]
-GROUP_D_CAT = ["VerificationClass", "PassedGating", "Potential_LOH", "LOH_Subtype"]
+GROUP_D_CAT = ["VerificationClass_Legacy", "PassedGating", "Potential_LOH", "LOH_Subtype_LegacyVC"]
 GROUP_D_NUM = ["Quality_Score"]
 GROUP_E = ["caller_af", "caller_dp", "caller_gq", "caller_filter",
            "caller_ad_ref", "caller_ad_alt"]
@@ -91,10 +97,53 @@ ALL_NUMERIC_METRICS = (
 LOAD_COLS = (
     ["RegionID", "Chr", "Pos", "sample", "mode", "truth_label"] +
     GROUP_A + GROUP_B + GROUP_C +
-    ["VerificationClass", "Quality_Score", "PassedGating", "Potential_LOH", "LOH_Subtype"] +
+    ["VerificationClass_Legacy", "Quality_Score", "PassedGating", "Potential_LOH", "LOH_Subtype_LegacyVC"] +
     GROUP_E + GROUP_F + GROUP_G +
     ["NumReads"]
 )
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical raw VerificationClass/LOH_Subtype fields; "
+            "versioned input reads canonical legacy columns"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_historical_schema_views(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach explicit historical L4 and canonical legacy LOH views."""
+    verification = select_legacy_view(
+        df,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="fail",
+    )
+    loh = select_loh_legacy(df, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = df.copy()
+    prepared["_verification_class_legacy"] = verification.values
+    prepared["_loh_subtype_legacy"] = loh.values
+    prepared.attrs["schema_metadata"] = {
+        "verification_view": "legacy4_historical",
+        "verification_selection_field": verification.field,
+        "verification_schema_status": verification.schema_status,
+        "loh_selection_field": loh.field,
+        "loh_schema_status": loh.schema_status,
+    }
+    return prepared
+
+
+def write_schema_provenance(df: pd.DataFrame) -> None:
+    pd.DataFrame([df.attrs["schema_metadata"]]).to_csv(
+        DATA_DIR / "o15_schema_provenance.tsv", sep="\t", index=False
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -357,9 +406,9 @@ def fig04_auc_heatmap(df: pd.DataFrame) -> Path:
 
 
 def fig05_verification_class(df: pd.DataFrame) -> Path:
-    """Fig05: VerificationClass by zone x truth (Stacked bar, TO only)."""
-    print("[O15] Fig05: VerificationClass stacked bar (TO)...")
-    sub = df[(df["mode"] == "to")].dropna(subset=["VerificationClass"])
+    """Fig05: legacy VerificationClass by zone x truth (Stacked bar, TO only)."""
+    print("[O15] Fig05: legacy VerificationClass stacked bar (TO)...")
+    sub = df[(df["mode"] == "to")].dropna(subset=["_verification_class_legacy"])
     if len(sub) < 10:
         print("  [SKIP] Not enough TO data")
         return None
@@ -384,7 +433,7 @@ def fig05_verification_class(df: pd.DataFrame) -> Path:
             for ti, tl in enumerate(["TP", "FP"]):
                 tsub = zsub[zsub["truth_label"] == tl]
                 total = len(tsub)
-                count = (tsub["VerificationClass"] == vc).sum()
+                count = (tsub["_verification_class_legacy"] == vc).sum()
                 pct = count / total * 100 if total > 0 else 0
                 bottom = bottom_tp if ti == 0 else bottom_fp
                 bar = ax.bar(x_positions[ti], pct, width=width, bottom=bottom,
@@ -407,8 +456,8 @@ def fig05_verification_class(df: pd.DataFrame) -> Path:
 
     # Legend
     handles = [mpatches.Patch(color=vc_colors[vc], label=vc) for vc in vc_order]
-    fig.legend(handles=handles, loc="upper right", title="VerificationClass", fontsize=9)
-    fig.suptitle("Fig05: VerificationClass by LOH Zone × Truth (TO Only)", fontsize=13, y=1.02)
+    fig.legend(handles=handles, loc="upper right", title="Legacy VerificationClass", fontsize=9)
+    fig.suptitle("Fig05: Legacy VerificationClass by LOH Zone × Truth (TO Only)", fontsize=13, y=1.02)
     add_caption(fig, CAPTION_SRC)
     fig.tight_layout()
     return save_figure(fig, FIG_DIR / "o15_p1_fig05_verification_class.png")
@@ -570,14 +619,14 @@ def fig09_passed_gating(df: pd.DataFrame) -> Path:
 
 
 def fig10_loh_subtype_heatmap(df: pd.DataFrame) -> Path:
-    """Fig10: LOH_Subtype x SEQC2 zone cross-tabulation (Heatmap, TO)."""
-    print("[O15] Fig10: LOH_Subtype x Zone heatmap (TO)...")
-    sub = df[(df["mode"] == "to")].dropna(subset=["LOH_Subtype"])
+    """Fig10: legacy-derived LOH subtype x SEQC2 zone cross-tabulation."""
+    print("[O15] Fig10: legacy-derived LOH subtype x Zone heatmap (TO)...")
+    sub = df[(df["mode"] == "to")].dropna(subset=["_loh_subtype_legacy"])
     if len(sub) < 10:
         print("  [SKIP] Not enough data")
         return None
 
-    ct = pd.crosstab(sub["LOH_Subtype"], sub["loh_zone"])
+    ct = pd.crosstab(sub["_loh_subtype_legacy"], sub["loh_zone"])
     ct = ct.reindex(columns=ZONE_ORDER, fill_value=0)
     # Compute proportions per column
     ct_pct = ct.div(ct.sum(axis=0), axis=1) * 100
@@ -591,8 +640,8 @@ def fig10_loh_subtype_heatmap(df: pd.DataFrame) -> Path:
     fig, ax = plt.subplots(figsize=(10, max(6, len(ct) * 0.5)))
     sns.heatmap(ct, annot=annot, fmt="", cmap="YlOrRd", ax=ax, linewidths=0.5,
                 cbar_kws={"label": "Count"})
-    ax.set_title("Fig10: LOH_Subtype × SEQC2 Zone Cross-Tabulation (TO)")
-    ax.set_ylabel("LOH_Subtype")
+    ax.set_title("Fig10: Legacy-derived LOH Subtype × SEQC2 Zone (TO)")
+    ax.set_ylabel("LOH_Subtype_LegacyVC")
     ax.set_xlabel("SEQC2 LOH Zone")
     fig.tight_layout()
     return save_figure(fig, FIG_DIR / "o15_p1_fig10_loh_subtype_heatmap.png")
@@ -1093,12 +1142,12 @@ def write_report(df: pd.DataFrame, fig_paths: List[Optional[Path]],
         "Extreme HP_Ratio Rate by Zone × Mode × Truth",
         "ISM Methylation Metrics by Zone × Mode",
         "AUC Heatmap — TP/FP Discrimination",
-        "VerificationClass by Zone × Truth (TO Only)",
+        "Legacy VerificationClass by Zone × Truth (TO Only)",
         "Quality_Score by Zone × Mode × Truth",
         "AlleleDelta vs caller_af (LOH-inside vs outside, TO)",
         "Forest Plot — Cohen's d per Metric (TO)",
         "PassedGating PASS Rate by Zone × Mode × Truth",
-        "LOH_Subtype × SEQC2 Zone Cross-Tabulation (TO)",
+        "Legacy-derived LOH Subtype × SEQC2 Zone Cross-Tabulation (TO)",
         "PERMANOVA F-stats by Zone × Mode",
         "Methylation Significance by Zone × Mode",
         "CpG/Stability/HeuristicScore by Zone × Mode × Truth",
@@ -1130,7 +1179,7 @@ def write_report(df: pd.DataFrame, fig_paths: List[Optional[Path]],
     lines.append("1. LOH zones (SEQC2 TP/FP/FN/TN) create distinct metric distributions across all ISM features.")
     lines.append("2. The AUC heatmap reveals which metrics retain discriminative power inside vs outside LOH regions.")
     lines.append("3. Cohen's d forest plot shows effect size differences are generally attenuated inside LOH zones.")
-    lines.append("4. VerificationClass distributions shift toward Noise/Weak inside LOH-TP zones for TO mode.")
+    lines.append("4. Legacy VerificationClass distributions shift toward Noise/Weak inside LOH-TP zones for TO mode.")
     lines.append("5. Quality_Score is systematically lower inside LOH zones due to LOH penalty in the scoring formula.")
     lines.append("")
 
@@ -1145,6 +1194,7 @@ def write_report(df: pd.DataFrame, fig_paths: List[Optional[Path]],
 # ══════════════════════════════════════════════════════════════════════════
 
 def main():
+    args = parse_args()
     t0 = datetime.now()
     print("=" * 72)
     print("O15 Phase 1: HCC1395 LOH Zone Metrics Complete Analysis")
@@ -1155,7 +1205,11 @@ def main():
     # ── 1. Load data ──────────────────────────────────────────────────
     # Only load columns we need (for speed)
     available_load = None  # Load all to check what exists, then filter
-    df = load_master_dataset()
+    df = attach_historical_schema_views(
+        load_master_dataset(),
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    write_schema_provenance(df)
 
     # Filter to HCC1395 samples
     df = df[df["sample"].isin(HCC1395_SAMPLES)].copy()

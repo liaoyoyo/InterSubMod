@@ -293,7 +293,7 @@ def fig5_impact_matrix():
          ["Quality_Score → AUC 0.497",
           "GlobalP → HP component noisy",
           "CramersV → HP component noisy",
-          "VerificationClass → label_sig contaminated"]),
+          "Historical legacy VerificationClass (v1) → label_sig contaminated"]),
         ("🟢 No impact (conclusions solid)", "#C8E6C9", "#1B5E20", 3,
          ["PairwiseMean / MedianDist",
           "AlleleDelta / AlleleP",

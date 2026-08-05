@@ -29,6 +29,12 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import SchemaContractError, select_current_view
+
 warnings.filterwarnings("ignore")
 
 # ============================================================
@@ -87,13 +93,44 @@ def write_tsv(df, path, description=""):
     print(f"  {path.name} ({len(df)} rows, {os.path.getsize(path):,} bytes) — {description}")
 
 
+def attach_current_verification_view(frame: pd.DataFrame) -> pd.DataFrame:
+    """Validate the versioned C2 view and any derived lowercase exact alias."""
+    view = select_current_view(frame)
+    if "verification_class" in frame.columns:
+        canonical = frame["VerificationClass"].astype("string")
+        derived = frame["verification_class"].astype("string")
+        mismatch = canonical.fillna("<MISSING>") != derived.fillna("<MISSING>")
+        if mismatch.any():
+            raise SchemaContractError(
+                "post-HP-fix master: verification_class is not an exact alias of "
+                f"VerificationClass at {int(mismatch.sum())} rows"
+            )
+    prepared = frame.copy()
+    prepared["_verification_class_current"] = view.values
+    prepared.attrs["verification_schema_metadata"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "unknown_current_class_count": sum(view.unknown_counts.values()),
+        "unknown_current_class_values": "; ".join(
+            f"{key}:{value}" for key, value in sorted(view.unknown_counts.items())
+        ),
+    }
+    return prepared
+
+
 # ============================================================
 # Data Loading
 # ============================================================
 print(f"[1/7] Loading master dataset from {ROUND1_WS / 'all_region_rows.tsv.gz'} ...")
-df = pd.read_csv(ROUND1_WS / "all_region_rows.tsv.gz", sep="\t", low_memory=False)
+df = attach_current_verification_view(
+    pd.read_csv(ROUND1_WS / "all_region_rows.tsv.gz", sep="\t", low_memory=False)
+)
+verification_schema_metadata = dict(df.attrs["verification_schema_metadata"])
 df["tier"] = df["effective_hp_reads"].apply(assign_tier)
 print(f"  Loaded {len(df):,} rows ({df['mode'].value_counts().to_dict()})")
+pd.DataFrame([verification_schema_metadata]).to_csv(
+    OUT_DIR / "verification_schema_provenance.tsv", sep="\t", index=False
+)
 
 # Load old master for comparison
 print(f"[1b/7] Loading old (pre-fix) master for comparison ...")
@@ -248,9 +285,9 @@ print("\n[3/7] Q2 — TO LOH as TP rescue candidate ...")
 print("  [3a] LOH-like fraction by VerificationClass (TO)")
 to_df = df[df["mode"] == "to"]
 rows_q2a = []
-for vc in to_df["verification_class"].dropna().unique():
+for vc in to_df["_verification_class_current"].dropna().unique():
     for truth in ["TP", "FP"]:
-        sub = to_df[(to_df["verification_class"] == vc) & (to_df["truth_label"] == truth)]
+        sub = to_df[(to_df["_verification_class_current"] == vc) & (to_df["truth_label"] == truth)]
         if len(sub) == 0:
             continue
         loh_n = sub["core_loh_like"].sum()
@@ -671,6 +708,7 @@ context = {
     "questions_investigated": ["Q1: opposite enrichment directions", "Q2: TP rescue", "Q3: tier structure"],
     "figures_generated": 10,
     "tsv_generated": len(list(OUT_DIR.glob("*.tsv"))),
+    "verification_schema": verification_schema_metadata,
 }
 (OUT_DIR / "investigation_context.json").write_text(json.dumps(context, indent=2, ensure_ascii=False) + "\n")
 

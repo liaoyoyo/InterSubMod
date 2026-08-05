@@ -8,13 +8,25 @@ import csv
 import gzip
 import itertools
 import math
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Tuple
 
+import pandas as pd
 import pysam
 
 from research_common import compute_metrics, ensure_dir, infer_platform, load_tsv_rows, read_json, to_float, to_int, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 
 DEFAULT_SAMPLES = ["HCC1395", "HCC1395_DORADO"]
@@ -162,6 +174,10 @@ FEATURE_GROUP_FIELDS = [
     "median_hp_assign_rate",
     "median_allele_assign_rate",
     "top_verification_class",
+    "verification_class_field",
+    "verification_schema_status",
+    "verification_rule_source",
+    "verification_rule_selection_field",
     "top_agreement_type",
     "top_class_shift",
 ]
@@ -169,6 +185,7 @@ FEATURE_GROUP_FIELDS = [
 RULE_SWEEP_FIELDS = [
     "sample",
     "phase",
+    "verification_rule_source",
     "rule_rank",
     "rule_id",
     "rule_label",
@@ -189,6 +206,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample", action="append", default=None, help="Sample name, repeatable")
     parser.add_argument("--output-dir", required=True, help="Workspace output directory")
+    parser.add_argument(
+        "--verification-rule-source",
+        required=True,
+        choices=("current-bidirectional", "cluster-first-evidence"),
+        help=(
+            "Explicit meaning of the historical Strong-based candidate rule: "
+            "canonical Strong_Bidirectional class or ClusterFirstSupport evidence"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -359,26 +385,62 @@ def parse_feature_vcf_records(path: Path, paired: bool = False) -> dict[str, dic
     return records
 
 
-def load_significance_map(path: Path) -> dict[str, dict[str, str]]:
+def attach_verification_rule_view(
+    frame: pd.DataFrame,
+    verification_rule_source: str,
+) -> pd.DataFrame:
+    """Attach the explicitly selected v2 class/evidence rule input."""
+    current_view = select_current_view(frame)
+    if current_view.unknown_counts:
+        raise SchemaContractError(
+            "TO FP provenance rule selection: unknown current VerificationClass values: "
+            f"{current_view.unknown_counts}"
+        )
+
+    prepared = frame.copy()
+    prepared["_verification_class_v2"] = current_view.values
+    if verification_rule_source == "current-bidirectional":
+        prepared["_verification_rule_match"] = current_view.values.eq("Strong_Bidirectional")
+        selection_field = "VerificationClass"
+    elif verification_rule_source == "cluster-first-evidence":
+        evidence = read_evidence(frame)
+        prepared["_verification_rule_match"] = evidence["ClusterFirstSupport"]
+        prepared["_verification_evidence_path"] = evidence["EvidencePath"]
+        selection_field = "ClusterFirstSupport"
+    else:
+        raise SchemaContractError(
+            f"unsupported verification rule source: {verification_rule_source!r}"
+        )
+
+    prepared["_verification_rule_source"] = verification_rule_source
+    prepared["_verification_rule_selection_field"] = selection_field
+    prepared["_verification_schema_status"] = current_view.schema_status
+    return prepared
+
+
+def load_significance_map(
+    path: Path,
+    verification_rule_source: str,
+) -> dict[str, dict[str, object]]:
     if not path.exists():
         return {}
-    rows: dict[str, dict[str, str]] = {}
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            if row.get("RegionKey"):
-                key = row["RegionKey"]
-            elif row.get("region_key"):
-                key = row["region_key"]
-            else:
-                chrom = row.get("Chr") or row.get("chrom")
-                pos = row.get("Pos") or row.get("pos")
-                ref = row.get("Ref") or row.get("ref")
-                alt = row.get("Alt") or row.get("alt")
-                if not all([chrom, pos, ref, alt]):
-                    continue
-                key = region_key(chrom, int(pos), ref, alt)
-            rows[key] = row
+    frame = pd.read_csv(path, dtype=str, keep_default_na=False)
+    prepared = attach_verification_rule_view(frame, verification_rule_source)
+    rows: dict[str, dict[str, object]] = {}
+    for row in prepared.to_dict(orient="records"):
+        if row.get("RegionKey"):
+            key = str(row["RegionKey"])
+        elif row.get("region_key"):
+            key = str(row["region_key"])
+        else:
+            chrom = row.get("Chr") or row.get("chrom")
+            pos = row.get("Pos") or row.get("pos")
+            ref = row.get("Ref") or row.get("ref")
+            alt = row.get("Alt") or row.get("alt")
+            if not all([chrom, pos, ref, alt]):
+                continue
+            key = region_key(str(chrom), int(str(pos)), str(ref), str(alt))
+        rows[key] = row
     return rows
 
 
@@ -400,7 +462,7 @@ def load_label_agreement_map(path: Path, source_scope: str) -> dict[str, dict[st
 
 def build_feature_map(
     vcf_records: dict[str, dict[str, object]],
-    summary_map: dict[str, dict[str, str]],
+    summary_map: dict[str, dict[str, object]],
     label_map: dict[str, dict[str, str]],
 ) -> dict[str, dict[str, object]]:
     rows: dict[str, dict[str, object]] = {}
@@ -419,7 +481,14 @@ def build_feature_map(
             "cramers_v": to_float(summary.get("CramersV")),
             "quality_score": to_float(summary.get("Quality_Score")),
             "allele_delta": to_float(summary.get("AlleleDelta") or summary.get("AlleleDelta_abs")),
-            "verification_class": summary.get("VerificationClass", ""),
+            "verification_class": summary.get("_verification_class_v2", ""),
+            "verification_class_field": "VerificationClass" if summary else "",
+            "verification_rule_match": summary.get("_verification_rule_match"),
+            "verification_rule_source": summary.get("_verification_rule_source", ""),
+            "verification_rule_selection_field": summary.get(
+                "_verification_rule_selection_field", ""
+            ),
+            "verification_schema_status": summary.get("_verification_schema_status", ""),
             "quality_tier": summary.get("Quality_Tier", ""),
             "potential_loh": summary.get("Potential_LOH", ""),
             "coverage_category": summary.get("Coverage_Category", ""),
@@ -436,32 +505,43 @@ def build_feature_map(
     return rows
 
 
-def load_stage_feature_maps(base_dir: Path, tp_scope: str, fp_scope: str) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
+def load_stage_feature_maps(
+    base_dir: Path,
+    tp_scope: str,
+    fp_scope: str,
+    verification_rule_source: str,
+) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
     label_path = base_dir / "label_cluster_agreement.tsv"
     tp_vcf = parse_feature_vcf_records(base_dir / tp_scope / "tp.vcf" if (base_dir / tp_scope / "tp.vcf").exists() else base_dir / tp_scope / "filtered_snv_tp.vcf.gz")
     fp_vcf = parse_feature_vcf_records(base_dir / fp_scope / "fp.vcf" if (base_dir / fp_scope / "fp.vcf").exists() else base_dir / fp_scope / "filtered_snv_fp.vcf.gz")
-    tp_summary = load_significance_map(base_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv") if (base_dir / "step05_intersubmod").exists() else load_significance_map(base_dir / "intersubmod_tp" / "significance_summary.csv")
-    fp_summary = load_significance_map(base_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv") if (base_dir / "step05_intersubmod").exists() else load_significance_map(base_dir / "intersubmod_fp" / "significance_summary.csv")
+    tp_summary = load_significance_map(base_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv", verification_rule_source) if (base_dir / "step05_intersubmod").exists() else load_significance_map(base_dir / "intersubmod_tp" / "significance_summary.csv", verification_rule_source)
+    fp_summary = load_significance_map(base_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv", verification_rule_source) if (base_dir / "step05_intersubmod").exists() else load_significance_map(base_dir / "intersubmod_fp" / "significance_summary.csv", verification_rule_source)
     tp_label = load_label_agreement_map(label_path, "tp")
     fp_label = load_label_agreement_map(label_path, "fp")
     return build_feature_map(tp_vcf, tp_summary, tp_label), build_feature_map(fp_vcf, fp_summary, fp_label)
 
 
-def load_to_feature_maps(to_round_dir: Path) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
+def load_to_feature_maps(
+    to_round_dir: Path,
+    verification_rule_source: str,
+) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
     tp_vcf = parse_feature_vcf_records(to_round_dir / "step04_benchmark_longphase_to" / "tp.vcf")
     fp_vcf = parse_feature_vcf_records(to_round_dir / "step04_benchmark_longphase_to" / "fp.vcf")
-    tp_summary = load_significance_map(to_round_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv")
-    fp_summary = load_significance_map(to_round_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv")
+    tp_summary = load_significance_map(to_round_dir / "step05_intersubmod" / "intersubmod_tp" / "significance_summary.csv", verification_rule_source)
+    fp_summary = load_significance_map(to_round_dir / "step05_intersubmod" / "intersubmod_fp" / "significance_summary.csv", verification_rule_source)
     tp_label = load_label_agreement_map(to_round_dir / "label_cluster_agreement.tsv", "tp")
     fp_label = load_label_agreement_map(to_round_dir / "label_cluster_agreement.tsv", "fp")
     return build_feature_map(tp_vcf, tp_summary, tp_label), build_feature_map(fp_vcf, fp_summary, fp_label)
 
 
-def load_paired_feature_maps(paired_dir: Path) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
+def load_paired_feature_maps(
+    paired_dir: Path,
+    verification_rule_source: str,
+) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
     tp_vcf = parse_feature_vcf_records(paired_dir / "longphase_s" / "tp.vcf", paired=True)
     fp_vcf = parse_feature_vcf_records(paired_dir / "longphase_s" / "fp.vcf", paired=True)
-    tp_summary = load_significance_map(paired_dir / "intersubmod_tp" / "significance_summary.csv")
-    fp_summary = load_significance_map(paired_dir / "intersubmod_fp" / "significance_summary.csv")
+    tp_summary = load_significance_map(paired_dir / "intersubmod_tp" / "significance_summary.csv", verification_rule_source)
+    fp_summary = load_significance_map(paired_dir / "intersubmod_fp" / "significance_summary.csv", verification_rule_source)
     tp_label = load_label_agreement_map(paired_dir / "label_cluster_agreement.tsv", "tp")
     fp_label = load_label_agreement_map(paired_dir / "label_cluster_agreement.tsv", "fp")
     return build_feature_map(tp_vcf, tp_summary, tp_label), build_feature_map(fp_vcf, fp_summary, fp_label)
@@ -541,6 +621,14 @@ def classify_paired_resolution(
 
 
 def build_feature_group_summary(sample: str, group_name: str, rows: Sequence[dict[str, object]]) -> dict[str, object]:
+    def unique_metadata(field: str) -> str:
+        values = sorted({str(row.get(field)) for row in rows if str(row.get(field, "")).strip()})
+        if len(values) > 1:
+            raise SchemaContractError(
+                f"feature group {group_name}: mixed {field} values: {values}"
+            )
+        return values[0] if values else ""
+
     return {
         "sample": sample,
         "group_name": group_name,
@@ -553,6 +641,12 @@ def build_feature_group_summary(sample: str, group_name: str, rows: Sequence[dic
         "median_hp_assign_rate": median_or_blank(to_float(row.get("hp_assign_rate")) for row in rows),
         "median_allele_assign_rate": median_or_blank(to_float(row.get("allele_assign_rate")) for row in rows),
         "top_verification_class": top_or_blank(row.get("verification_class", "") for row in rows),
+        "verification_class_field": unique_metadata("verification_class_field"),
+        "verification_schema_status": unique_metadata("verification_schema_status"),
+        "verification_rule_source": unique_metadata("verification_rule_source"),
+        "verification_rule_selection_field": unique_metadata(
+            "verification_rule_selection_field"
+        ),
         "top_agreement_type": top_or_blank(row.get("agreement_type", "") for row in rows),
         "top_class_shift": top_or_blank(row.get("class_shift", "") for row in rows),
     }
@@ -567,7 +661,20 @@ def make_numeric_rule(rule_id: str, label: str, predicate):
     return {"rule_id": rule_id, "rule_label": label, "predicate": predicate}
 
 
-def build_candidate_rules(sample: str) -> list[dict[str, object]]:
+def require_verification_rule_match(row: dict[str, object]) -> bool:
+    value = row.get("verification_rule_match")
+    if not isinstance(value, bool):
+        raise SchemaContractError(
+            "candidate rule requires a matched, validated significance-summary row; "
+            f"variant={row.get('variant_key', '<UNKNOWN>')} value={value!r}"
+        )
+    return value
+
+
+def build_candidate_rules(
+    sample: str,
+    verification_rule_source: str,
+) -> list[dict[str, object]]:
     rules: list[dict[str, object]] = []
     for af_max, ad_min in itertools.product([0.03, 0.05, 0.08, 0.10, 0.12], [0.15, 0.20, 0.25, 0.30]):
         rules.append(
@@ -593,13 +700,30 @@ def build_candidate_rules(sample: str) -> list[dict[str, object]]:
                 lambda row, af_max=af_max, ad_min=ad_min, pairwise_max=pairwise_max: to_float(row.get("af")) <= af_max and to_float(row.get("allele_delta")) >= ad_min and to_float(row.get("pairwise_median_dist")) <= pairwise_max,
             )
         )
+    if verification_rule_source == "current-bidirectional":
+        verification_rule = make_numeric_rule(
+            "strong_bidirectional_lowaf_highad",
+            "VerificationClass(v2)=Strong_Bidirectional and AF<=0.10 and AlleleDelta>=0.15",
+            lambda row: require_verification_rule_match(row)
+            and to_float(row.get("af")) <= 0.10
+            and to_float(row.get("allele_delta")) >= 0.15,
+        )
+    elif verification_rule_source == "cluster-first-evidence":
+        verification_rule = make_numeric_rule(
+            "cluster_first_support_lowaf_highad",
+            "ClusterFirstSupport=true and AF<=0.10 and AlleleDelta>=0.15",
+            lambda row: require_verification_rule_match(row)
+            and to_float(row.get("af")) <= 0.10
+            and to_float(row.get("allele_delta")) >= 0.15,
+        )
+    else:
+        raise SchemaContractError(
+            f"unsupported verification rule source: {verification_rule_source!r}"
+        )
+
     rules.extend(
         [
-            make_numeric_rule(
-                "strong_lowaf_highad",
-                "VerificationClass=Strong and AF<=0.10 and AlleleDelta>=0.15",
-                lambda row: row.get("verification_class") == "Strong" and to_float(row.get("af")) <= 0.10 and to_float(row.get("allele_delta")) >= 0.15,
-            ),
+            verification_rule,
             make_numeric_rule(
                 "cluster_plus_weak_lowaf_highad",
                 "agreement=cluster_plus_weak_label and AF<=0.10 and AlleleDelta>=0.15",
@@ -627,6 +751,7 @@ def run_rule_sweep(
     final_metrics: dict[str, object],
     candidate_rules: Sequence[dict[str, object]],
     phase: str,
+    verification_rule_source: str,
     rule_limit: Optional[int] = None,
 ) -> list[dict[str, object]]:
     total_tp = int(final_metrics["filtered"]["tp"])
@@ -642,6 +767,7 @@ def run_rule_sweep(
             {
                 "sample": sample,
                 "phase": phase,
+                "verification_rule_source": verification_rule_source,
                 "rule_rank": idx,
                 "rule_id": rule["rule_id"],
                 "rule_label": rule["rule_label"],
@@ -675,6 +801,7 @@ def write_gzip_tsv(path: Path, fieldnames: Sequence[str], rows: Iterable[dict[st
 def analyze_sample(config: dict[str, object], output_dir: Path) -> dict[str, object]:
     sample = config["sample"]
     platform = config["platform"]
+    verification_rule_source = str(config["verification_rule_source"])
     truth_keys = load_truth_keys(config["truth_vcf"])
     bed_intervals = load_bed_intervals(config["truth_bed"])
 
@@ -686,8 +813,12 @@ def analyze_sample(config: dict[str, object], output_dir: Path) -> dict[str, obj
     paired_longphase_tp_keys = parse_vcf_keys(config["paired_dir"] / "longphase_s" / "tp.vcf")
     paired_longphase_fp_keys = parse_vcf_keys(config["paired_dir"] / "longphase_s" / "fp.vcf")
 
-    to_tp_feature_map, to_fp_feature_map = load_to_feature_maps(config["to_round_dir"])
-    paired_tp_feature_map, paired_fp_feature_map = load_paired_feature_maps(config["paired_dir"])
+    to_tp_feature_map, to_fp_feature_map = load_to_feature_maps(
+        config["to_round_dir"], verification_rule_source
+    )
+    paired_tp_feature_map, paired_fp_feature_map = load_paired_feature_maps(
+        config["paired_dir"], verification_rule_source
+    )
 
     to_rule = config["metrics_to"]["rule"]
     paired_rule = config["metrics_paired"]["rule"]
@@ -871,8 +1002,16 @@ def analyze_sample(config: dict[str, object], output_dir: Path) -> dict[str, obj
         build_feature_group_summary(sample, "to_residual_fp_paired_persistent", residual_fp_paired_persistent),
     ]
 
-    discovery_rules = build_candidate_rules(sample)
-    sweep_rows = run_rule_sweep(sample, final_tp_rows, final_fp_rows, config["metrics_to"], discovery_rules, phase="discovery")
+    discovery_rules = build_candidate_rules(sample, verification_rule_source)
+    sweep_rows = run_rule_sweep(
+        sample,
+        final_tp_rows,
+        final_fp_rows,
+        config["metrics_to"],
+        discovery_rules,
+        phase="discovery",
+        verification_rule_source=verification_rule_source,
+    )
 
     summary_row = {
         "sample": sample,
@@ -980,10 +1119,12 @@ def main() -> None:
     per_sample_results = {}
     for sample in samples:
         config = load_configs(sample)
+        config["verification_rule_source"] = args.verification_rule_source
         sample_manifest_rows.append(
             {
                 "sample": sample,
                 "platform": config["platform"],
+                "verification_rule_source": args.verification_rule_source,
                 "truth_total": config["truth_total"],
                 "to_round_dir": str(config["to_round_dir"]),
                 "paired_dir": str(config["paired_dir"]),
@@ -1005,7 +1146,10 @@ def main() -> None:
     # discovery -> validation: take top 10 HCC1395 rules and apply to DORADO current final set
     hcc1395_top = [row for row in per_sample_results["HCC1395"]["sweep_rows"] if float(row["delta_f1_vs_final"]) > -1.0][:10]
     validation_rules = []
-    lookup = {row["rule_id"]: row for row in build_candidate_rules("HCC1395")}
+    lookup = {
+        row["rule_id"]: row
+        for row in build_candidate_rules("HCC1395", args.verification_rule_source)
+    }
     dorado_result = per_sample_results.get("HCC1395_DORADO")
     if dorado_result:
         selected_rules = [lookup[row["rule_id"]] for row in hcc1395_top if row["rule_id"] in lookup]
@@ -1016,13 +1160,14 @@ def main() -> None:
             load_configs("HCC1395_DORADO")["metrics_to"],
             selected_rules,
             phase="validation",
+            verification_rule_source=args.verification_rule_source,
         )
         for rank, row in enumerate(validation_rules, start=1):
             row["rule_rank"] = rank
         rule_sweep_rows.extend(validation_rules)
 
     write_tsv_rows(output_dir / "sample_manifest.tsv", [
-        "sample", "platform", "truth_total", "to_round_dir", "paired_dir", "to_raw_vcf", "paired_raw_vcf", "truth_vcf", "truth_bed"
+        "sample", "platform", "verification_rule_source", "truth_total", "to_round_dir", "paired_dir", "to_raw_vcf", "paired_raw_vcf", "truth_vcf", "truth_bed"
     ], sample_manifest_rows)
     write_tsv_rows(output_dir / "sample_level_summary.tsv", SAMPLE_SUMMARY_FIELDS, sample_summary_rows)
     write_tsv_rows(output_dir / "fp_primary_class_summary.tsv", CLASS_SUMMARY_FIELDS, class_summary_rows)

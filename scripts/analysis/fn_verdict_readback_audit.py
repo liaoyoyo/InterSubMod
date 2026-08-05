@@ -7,7 +7,7 @@ T1 + T2 of the ISM structure<->label false-negative audit (workflow wf_fe623383-
 Pure OFFLINE read-back over an existing significance_summary.csv — NO C++ rerun,
 NO fabrication. Quantifies, per region:
   Stage-1 (per-gate attrition): how many regions each gate/floor drops, flag big ones.
-  Stage-2 (verdict-ignored FN): among VerificationClass in {Noise, Weak}, how many
+  Stage-2 (verdict-ignored FN): among legacy L4 class in {Noise, Weak}, how many
            already carry a VALID, significant PERMANOVA (cluster / label-HP / label-allele)
            that the discrete 2x2 verdict ignored (FN1), broken down by axis, plus the
            subset significant ONLY on an axis the global gate cannot open (FN10:
@@ -16,13 +16,26 @@ NO fabrication. Quantifies, per region:
 
 Usage:
   python3 fn_verdict_readback_audit.py OUT.json LABEL1=CSV1 [LABEL2=CSV2 ...]
+      [--allow-unversioned-v1]
 
 Every number written is a deterministic count over the CSV — grep-able back to source.
 """
-import csv
+import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    select_legacy_view,
+)
 
 
 def fbool(s):
@@ -45,10 +58,16 @@ def sig(p_field, valid_field, row, alpha=0.05):
     return (not math.isnan(p)) and p <= alpha
 
 
-def audit_csv(path):
-    with open(path, newline="") as fh:
-        rdr = csv.DictReader(fh)
-        rows = list(rdr)
+def audit_csv(path, allow_unversioned_v1=False):
+    frame = pd.read_csv(path, low_memory=False)
+    view = select_legacy_view(
+        frame,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="exclude",
+    )
+    frame = frame.copy()
+    frame["_VerificationClass_L4"] = view.values
+    rows = frame.to_dict("records")
     n = len(rows)
 
     # ---- Stage 1: per-gate attrition ----
@@ -68,8 +87,10 @@ def audit_csv(path):
         "potential_loh_true": 0,
     }
     for r in rows:
-        vc = r.get("VerificationClass", "").strip() or "(blank)"
-        vclass[vc] = vclass.get(vc, 0) + 1
+        vc = r.get("_VerificationClass_L4")
+        if not pd.isna(vc):
+            vc = str(vc)
+            vclass[vc] = vclass.get(vc, 0) + 1
         if not fbool(r.get("PassedGating", "")):
             cnt["passed_gating_false"] += 1
         if not fbool(r.get("ClusterPermanovaValid", "")):
@@ -119,7 +140,11 @@ def audit_csv(path):
 
     stage2 = {}
     for target in ("Noise", "Weak"):
-        sub = [r for r in rows if r.get("VerificationClass", "").strip() == target]
+        sub = [
+            r for r in rows
+            if not pd.isna(r.get("_VerificationClass_L4"))
+            and r.get("_VerificationClass_L4") == target
+        ]
         m = len(sub)
         any_perm = sum(
             1 for r in sub
@@ -162,6 +187,8 @@ def audit_csv(path):
 
     return {
         "n_rows": n,
+        "verification_contract": view.metadata(),
+        "verification_unknown_excluded_rows": int(sum(view.unknown_counts.values())),
         "stage1_per_gate_attrition": cnt,
         "verification_class_counts": dict(sorted(vclass.items(), key=lambda kv: -kv[1])),
         "stage2_verdict_ignored_permanova_FN1_FN10": stage2,
@@ -170,18 +197,36 @@ def audit_csv(path):
 
 
 def main():
-    if len(sys.argv) < 3:
-        sys.exit("usage: fn_verdict_readback_audit.py OUT.json LABEL=CSV [LABEL=CSV ...]")
-    out_path = sys.argv[1]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("out_json")
+    parser.add_argument("inputs", nargs="+", metavar="LABEL=CSV")
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned VerificationClass input; "
+            "unknown values are excluded from Noise/Weak cohorts and counted."
+        ),
+    )
+    args = parser.parse_args()
+    out_path = args.out_json
     result = {}
-    for spec in sys.argv[2:]:
+    for spec in args.inputs:
         label, _, path = spec.partition("=")
-        result[label] = {"source_csv": path, **audit_csv(path)}
+        if not label or not path:
+            parser.error(f"input must be LABEL=CSV, observed {spec!r}")
+        try:
+            audit = audit_csv(path, allow_unversioned_v1=args.allow_unversioned_v1)
+        except SchemaContractError as exc:
+            raise SystemExit(f"[fn-verdict-audit][schema-contract] {path}: {exc}") from exc
+        result[label] = {"source_csv": path, **audit}
     with open(out_path, "w") as fh:
         json.dump(result, fh, indent=2)
     # human-readable echo to stdout
     for label, d in result.items():
         print(f"\n===== {label}  ({d['n_rows']} rows)  {d['source_csv']} =====")
+        print("  Verification contract:", d["verification_contract"])
+        print("  Unknown rows excluded:", d["verification_unknown_excluded_rows"])
         print("  VerificationClass:", d["verification_class_counts"])
         print("  Stage1 attrition :", d["stage1_per_gate_attrition"])
         for cls, s in d["stage2_verdict_ignored_permanova_FN1_FN10"].items():

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence
@@ -20,6 +21,15 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from research_common import ensure_dir, write_json, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    VERIFICATION_PROVENANCE_COLUMNS,
+    extract_provenance_frame,
+)
 
 
 DEFAULT_INPUT = Path(
@@ -146,10 +156,12 @@ SUMMARY_FIELDS = [
     "discovery_regions",
     "validation_regions",
     "models_evaluated",
+    "verification_schema_status",
+    "verification_provenance_columns",
 ]
 
 
-PREDICTION_FIELDS = [
+PREDICTION_FIELDS = list(dict.fromkeys([
     "model_name",
     "evaluation_split",
     "dataset_id",
@@ -162,9 +174,9 @@ PREDICTION_FIELDS = [
     "predicted_label",
     "is_error",
     "truth_status",
-    "VerificationClass",
+    *VERIFICATION_PROVENANCE_COLUMNS,
     "PassedGating",
-]
+]))
 
 
 @dataclass(frozen=True)
@@ -182,9 +194,27 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def attach_verification_provenance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Validate v2 provenance before filtering, splitting, or model fitting."""
+    provenance = extract_provenance_frame(frame)
+    prepared = frame.copy()
+    for column in VERIFICATION_PROVENANCE_COLUMNS:
+        prepared[column] = provenance[column]
+    prepared.attrs["verification_provenance"] = {
+        "schema_status": provenance.attrs["schema_status"],
+        "columns": list(VERIFICATION_PROVENANCE_COLUMNS),
+        "row_count": len(prepared),
+    }
+    return prepared
+
+
 def load_benchmark_rows(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="\t", low_memory=False)
+    df = attach_verification_provenance(
+        pd.read_csv(path, sep="\t", low_memory=False)
+    )
+    verification_provenance = dict(df.attrs["verification_provenance"])
     df = df[df["phase1a_read_label"].isin(["ALT", "REF"])].copy()
+    df.attrs["verification_provenance"] = verification_provenance
     df["label"] = (df["phase1a_read_label"] == "ALT").astype(int)
 
     numeric_columns = sorted(set(NUMERIC_FEATURES_CONTEXT))
@@ -305,8 +335,7 @@ def build_prediction_rows(
     for (_, row), pred in zip(test_df.iterrows(), predictions):
         predicted_label = label_map[int(pred)]
         truth_label = str(row["phase1a_read_label"])
-        rows.append(
-            {
+        payload = {
                 "model_name": model_name,
                 "evaluation_split": evaluation_split,
                 "dataset_id": row["dataset_id"],
@@ -319,10 +348,12 @@ def build_prediction_rows(
                 "predicted_label": predicted_label,
                 "is_error": predicted_label != truth_label,
                 "truth_status": row["truth_status"],
-                "VerificationClass": row["VerificationClass"],
                 "PassedGating": row["PassedGating"],
             }
+        payload.update(
+            {column: row[column] for column in VERIFICATION_PROVENANCE_COLUMNS}
         )
+        rows.append(payload)
     return rows
 
 
@@ -424,6 +455,7 @@ def main() -> None:
     output_dir = ensure_dir(Path(args.output_dir).resolve())
 
     df = load_benchmark_rows(input_path)
+    verification_provenance = dict(df.attrs["verification_provenance"])
     discovery_df = df[df["dataset_role"] == "discovery"].copy()
     validation_df = df[df["dataset_role"] == "validation"].copy()
     discovery_train_df, discovery_holdout_df = pick_discovery_holdout(discovery_df, args.test_size, args.random_state)
@@ -524,6 +556,10 @@ def main() -> None:
             "discovery_regions": int(discovery_df["region_key"].nunique()),
             "validation_regions": int(validation_df["region_key"].nunique()),
             "models_evaluated": 5,
+            "verification_schema_status": verification_provenance["schema_status"],
+            "verification_provenance_columns": ";".join(
+                verification_provenance["columns"]
+            ),
         }
     ]
 
@@ -541,6 +577,7 @@ def main() -> None:
             "test_size": args.test_size,
             "random_state": args.random_state,
             "output_dir": str(output_dir),
+            "verification_provenance": verification_provenance,
         },
     )
 

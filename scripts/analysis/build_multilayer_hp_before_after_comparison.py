@@ -5,6 +5,8 @@ Compare old (before multi-layer HP) vs new (after) benchmark output.
 Generates figures and summary data for visual inspection.
 """
 
+import argparse
+import json
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -14,13 +16,22 @@ import matplotlib.gridspec as gridspec
 from pathlib import Path
 import sys
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    SchemaContractError,
+    select_current_view,
+    select_legacy_view,
+)
+
 # ============================================================================
 # Configuration
 # ============================================================================
 
 BASE = Path("/big7_disk/liaoyoyo2001/InterSubMod/output/multilayer_hp_benchmark")
 OUT_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/output/multilayer_hp_benchmark/comparison_figures")
-OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 BEFORE_TP = BASE / "before_paired_tp" / "significance_summary.csv"
 BEFORE_FP = BASE / "before_paired_fp" / "significance_summary.csv"
@@ -31,10 +42,87 @@ AFTER_FP  = BASE / "paired_fp" / "significance_summary.csv"
 # Load and merge data
 # ============================================================================
 
-def load_and_merge(before_path, after_path, label):
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--verification-view",
+        required=True,
+        choices=("current-v2", "legacy"),
+        help=(
+            "Select one semantic class view for both matrix axes. current-v2 rejects "
+            "v1 input; legacy reads VerificationClass_Legacy or an explicitly allowed H1 field."
+        ),
+    )
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Authorize unversioned VerificationClass only when --verification-view=legacy",
+    )
+    return parser.parse_args()
+
+
+def attach_verification_view(
+    frame: pd.DataFrame,
+    verification_view: str,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach one explicitly selected semantic view; never mix v1 raw with v2 current."""
+    if verification_view == "current-v2":
+        if allow_unversioned_v1:
+            raise SchemaContractError(
+                "--allow-unversioned-v1 is only valid with --verification-view=legacy"
+            )
+        view = select_current_view(frame)
+        label = "Current VerificationClass v2"
+    elif verification_view == "legacy":
+        view = select_legacy_view(
+            frame,
+            allow_unversioned_v1=allow_unversioned_v1,
+            unversioned_unknown_policy="fail",
+        )
+        label = "Legacy VerificationClass"
+    else:
+        raise SchemaContractError(f"unknown verification view: {verification_view!r}")
+
+    prepared = frame.copy()
+    prepared["_verification_class_selected"] = view.values
+    prepared.attrs["verification_schema_contract"] = {
+        "requested_view": verification_view,
+        "view_label": label,
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "categories": list(view.categories),
+        "unknown_counts": dict(view.unknown_counts),
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
+def load_and_merge(
+    before_path,
+    after_path,
+    label,
+    verification_view,
+    allow_unversioned_v1=False,
+):
     """Load before/after CSVs and merge on variant key."""
-    df_before = pd.read_csv(before_path)
-    df_after  = pd.read_csv(after_path)
+    df_before = attach_verification_view(
+        pd.read_csv(before_path),
+        verification_view,
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    df_after = attach_verification_view(
+        pd.read_csv(after_path),
+        verification_view,
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    before_contract = dict(df_before.attrs["verification_schema_contract"])
+    after_contract = dict(df_after.attrs["verification_schema_contract"])
+    if before_contract["categories"] != after_contract["categories"]:
+        raise SchemaContractError(
+            "before/after verification views expose different category contracts"
+        )
 
     # Create unique key
     for df in [df_before, df_after]:
@@ -42,7 +130,16 @@ def load_and_merge(before_path, after_path, label):
 
     merged = pd.merge(df_before, df_after, on='key', suffixes=('_before', '_after'))
     print(f"[{label}] Before: {len(df_before)}, After: {len(df_after)}, Merged: {len(merged)}")
-    return merged, df_before, df_after
+    contract = {
+        "label": label,
+        "before_path": str(before_path),
+        "after_path": str(after_path),
+        "before": before_contract,
+        "after": after_contract,
+        "comparison_semantics": before_contract["view_label"],
+        "direct_v1_v2_current_mix": False,
+    }
+    return merged, df_before, df_after, contract
 
 
 # ============================================================================
@@ -88,25 +185,30 @@ def fig1_gating_transition(merged_tp, merged_fp):
 # Figure 2: VerificationClass transition (Sankey-style table)
 # ============================================================================
 
-def fig2_verification_class_transition(merged_tp, merged_fp):
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    classes = ['Noise', 'Weak', 'Subclone', 'Strong']
+def fig2_verification_class_transition(merged_tp, merged_fp, classes, view_label):
+    width = 18 if len(classes) > 6 else 14
+    fig, axes = plt.subplots(1, 2, figsize=(width, 7))
 
     for ax, (df, label) in zip(axes, [(merged_tp, 'TP'), (merged_fp, 'FP')]):
-        mat = np.zeros((4, 4), dtype=int)
+        mat = np.zeros((len(classes), len(classes)), dtype=int)
         for i, bv in enumerate(classes):
             for j, av in enumerate(classes):
-                mat[i, j] = ((df['VerificationClass_before'] == bv) & (df['VerificationClass_after'] == av)).sum()
+                mat[i, j] = (
+                    (df['_verification_class_selected_before'] == bv)
+                    & (df['_verification_class_selected_after'] == av)
+                ).sum()
 
         im = ax.imshow(mat, cmap='YlOrRd', aspect='auto')
-        ax.set_xticks(range(4)); ax.set_xticklabels(classes, rotation=45, ha='right')
-        ax.set_yticks(range(4)); ax.set_yticklabels(classes)
+        ax.set_xticks(range(len(classes)))
+        ax.set_xticklabels(classes, rotation=45, ha='right')
+        ax.set_yticks(range(len(classes)))
+        ax.set_yticklabels(classes)
         ax.set_xlabel('After (New)')
         ax.set_ylabel('Before (Old)')
-        ax.set_title(f'VerificationClass Transition — {label}')
+        ax.set_title(f'{view_label} Transition — {label}')
 
-        for i in range(4):
-            for j in range(4):
+        for i in range(len(classes)):
+            for j in range(len(classes)):
                 if mat[i, j] > 0:
                     pct = mat[i, j] / len(df) * 100
                     txt = f"{mat[i, j]}\n({pct:.1f}%)"
@@ -115,7 +217,11 @@ def fig2_verification_class_transition(merged_tp, merged_fp):
 
         plt.colorbar(im, ax=ax, shrink=0.8)
 
-    fig.suptitle('Figure 2: VerificationClass Transition (Before → After)', fontsize=14, fontweight='bold')
+    fig.suptitle(
+        f'Figure 2: {view_label} Transition (Before → After)',
+        fontsize=14,
+        fontweight='bold',
+    )
     fig.tight_layout()
     fig.savefig(OUT_DIR / 'fig2_verification_class_transition.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -372,10 +478,18 @@ def fig7_sanity_check(merged_tp):
 # Summary statistics
 # ============================================================================
 
-def compute_summary(merged_tp, merged_fp, df_after_tp, df_after_fp):
+def compute_summary(
+    merged_tp,
+    merged_fp,
+    df_after_tp,
+    df_after_fp,
+    classes,
+    view_label,
+):
     """Compute and return summary statistics as text."""
     lines = []
     lines.append("# Multilayer HP Before/After Comparison Summary\n")
+    lines.append(f"- Verification comparison semantics: {view_label}\n")
 
     for df, label in [(merged_tp, 'TP'), (merged_fp, 'FP')]:
         lines.append(f"\n## {label} (n={len(df)} matched regions)\n")
@@ -392,12 +506,11 @@ def compute_summary(merged_tp, merged_fp, df_after_tp, df_after_fp):
         lines.append(f"- New passes (False→True): {n_new_pass}")
         lines.append(f"- Lost passes (True→False): {n_lost}")
 
-        # VerificationClass
-        lines.append(f"\n### VerificationClass")
-        classes = ['Strong', 'Subclone', 'Weak', 'Noise']
+        # Explicitly selected verification view
+        lines.append(f"\n### {view_label}")
         for cls in classes:
-            nb = (df['VerificationClass_before'] == cls).sum()
-            na = (df['VerificationClass_after'] == cls).sum()
+            nb = (df['_verification_class_selected_before'] == cls).sum()
+            na = (df['_verification_class_selected_after'] == cls).sum()
             lines.append(f"- {cls}: {nb} → {na} (delta: {na-nb:+d})")
 
         # Transitions (non-diagonal)
@@ -406,7 +519,10 @@ def compute_summary(merged_tp, merged_fp, df_after_tp, df_after_fp):
             for dst in classes:
                 if src == dst:
                     continue
-                n = ((df['VerificationClass_before'] == src) & (df['VerificationClass_after'] == dst)).sum()
+                n = (
+                    (df['_verification_class_selected_before'] == src)
+                    & (df['_verification_class_selected_after'] == dst)
+                ).sum()
                 if n > 0:
                     lines.append(f"- {src} → {dst}: {n}")
 
@@ -471,6 +587,8 @@ def compute_summary(merged_tp, merged_fp, df_after_tp, df_after_fp):
 # ============================================================================
 
 def main():
+    args = parse_args()
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     # Check if before data exists
     if not BEFORE_TP.exists() or not BEFORE_FP.exists():
         print(f"ERROR: Before data not found at {BEFORE_TP} or {BEFORE_FP}")
@@ -478,12 +596,40 @@ def main():
         sys.exit(1)
 
     print("Loading data...")
-    merged_tp, _, df_after_tp = load_and_merge(BEFORE_TP, AFTER_TP, 'TP')
-    merged_fp, _, df_after_fp = load_and_merge(BEFORE_FP, AFTER_FP, 'FP')
+    merged_tp, _, df_after_tp, tp_contract = load_and_merge(
+        BEFORE_TP,
+        AFTER_TP,
+        'TP',
+        args.verification_view,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    merged_fp, _, df_after_fp, fp_contract = load_and_merge(
+        BEFORE_FP,
+        AFTER_FP,
+        'FP',
+        args.verification_view,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    classes = tp_contract["before"]["categories"]
+    if classes != fp_contract["before"]["categories"]:
+        raise SchemaContractError("TP and FP comparisons use different category contracts")
+    view_label = tp_contract["comparison_semantics"]
+    if view_label != fp_contract["comparison_semantics"]:
+        raise SchemaContractError("TP and FP comparisons use different semantic views")
+
+    provenance = {
+        "requested_view": args.verification_view,
+        "allow_unversioned_v1": args.allow_unversioned_v1,
+        "categories": classes,
+        "TP": tp_contract,
+        "FP": fp_contract,
+    }
+    with open(OUT_DIR / 'verification_schema_provenance.json', 'w') as f:
+        json.dump(provenance, f, indent=2)
 
     print("\nGenerating figures...")
     fig1_gating_transition(merged_tp, merged_fp)
-    fig2_verification_class_transition(merged_tp, merged_fp)
+    fig2_verification_class_transition(merged_tp, merged_fp, classes, view_label)
     fig3_globalp_comparison(merged_tp, merged_fp)
     fig4_heuristic_score(merged_tp, merged_fp)
     fig5_quality(merged_tp, merged_fp)
@@ -493,7 +639,14 @@ def main():
     print("\nSanity check results:")
     print(df_sanity.to_string(index=False))
 
-    summary = compute_summary(merged_tp, merged_fp, df_after_tp, df_after_fp)
+    summary = compute_summary(
+        merged_tp,
+        merged_fp,
+        df_after_tp,
+        df_after_fp,
+        classes,
+        view_label,
+    )
     summary_path = OUT_DIR / 'summary_stats.txt'
     with open(summary_path, 'w') as f:
         f.write(summary)

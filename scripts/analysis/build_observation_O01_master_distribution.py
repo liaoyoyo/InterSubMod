@@ -11,11 +11,13 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
+import json
 import sys
 import warnings
+from pathlib import Path
 
 warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
 
 sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
 from observation_common import *
@@ -26,6 +28,29 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
+
+PROVENANCE_METADATA_FIELDS = (
+    "VerificationProvenanceStatus",
+    "VerificationProvenanceSourceField",
+    "VerificationProvenanceWarnings",
+    "VerificationUnknownCurrentCounts",
+    "LOHProvenanceSourceField",
+)
 
 # ── Column lists ──────────────────────────────────────────────────────────
 NUMERIC_COLS_20 = [
@@ -46,6 +71,107 @@ CAPTION_SRC = (
     "Source: all_region_rows.tsv.gz "
     "(20260327_loh_round1_cross_sample_audit) | "
 )
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--master-dataset", default=str(MASTER_DATASET_PATH))
+    parser.add_argument(
+        "--output-dir",
+        default=str(OUTPUT_ROOT / "20260401_O01_master_distribution"),
+    )
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize a historical H1 master table without schema metadata.",
+    )
+    return parser.parse_args()
+
+
+def attach_master_provenance(df, allow_unversioned_v1=False):
+    """Validate current/legacy/evidence/LOH identity and create explicit plot views."""
+    selected = df.copy()
+    input_status = None
+    if "VerificationProvenanceStatus" in selected.columns:
+        statuses = sorted(
+            {
+                value
+                for value in selected["VerificationProvenanceStatus"].dropna().astype(str)
+                if value.strip()
+            }
+        )
+        if len(statuses) != 1:
+            raise SchemaContractError(f"O01 provenance: expected one upstream status, observed {statuses}")
+        input_status = statuses[0]
+    if input_status not in {None, "V2", "UNVERSIONED_V1"}:
+        raise SchemaContractError(f"O01 provenance: unsupported upstream status {input_status!r}")
+
+    h1_input = input_status == "UNVERSIONED_V1" or (
+        input_status is None and "VerificationSchemaVersion" not in selected.columns
+    )
+    if not h1_input:
+        current = select_current_view(selected)
+        select_legacy_view(selected)
+        read_evidence(selected)
+        loh = select_loh_legacy(selected)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in selected.columns]
+        if missing:
+            raise SchemaContractError(
+                "O01 provenance: missing required fields: " + ", ".join(missing)
+            )
+        known = current.values != UNKNOWN_CURRENT_CLASS
+        if known.any():
+            extract_provenance_frame(selected.loc[known])
+        status = "V2"
+        warning_payload = {"unknown_current_counts": current.unknown_counts}
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "O01 provenance: VerificationSchemaVersion missing; explicit "
+                "--allow-unversioned-v1 authorization is required for historical H1 input"
+            )
+        if "VerificationSchemaVersion" in selected.columns:
+            nonblank_versions = {
+                value
+                for value in selected["VerificationSchemaVersion"].dropna().astype(str)
+                if value.strip()
+            }
+            if nonblank_versions:
+                raise SchemaContractError(
+                    "O01 provenance: UNVERSIONED_V1 input cannot carry a schema version"
+                )
+        missing_h1 = [field for field in ("VerificationClass", "LOH_Subtype") if field not in selected.columns]
+        if missing_h1:
+            raise SchemaContractError(
+                "O01 provenance: H1 input missing required raw fields: " + ", ".join(missing_h1)
+            )
+        historical = selected[["VerificationClass", "LOH_Subtype"]].copy()
+        current = select_legacy_view(historical, allow_unversioned_v1=True)
+        loh = select_loh_legacy(historical, allow_unversioned_v1=True)
+        provenance = extract_provenance_frame(historical, allow_unversioned_v1=True)
+        status = "UNVERSIONED_V1"
+        warning_payload = {
+            "authorization": "--allow-unversioned-v1",
+            "messages": list(provenance.attrs.get("warnings", [])),
+        }
+        for field in VERIFICATION_PROVENANCE_COLUMNS:
+            if field not in selected.columns:
+                selected[field] = ""
+
+    selected["VerificationClass_SourceRaw"] = selected["VerificationClass"]
+    selected["LOH_Subtype_DeprecatedSourceRaw"] = selected["LOH_Subtype"]
+    selected["VerificationClass"] = current.values
+    selected["LOH_Subtype"] = loh.values
+    selected["VerificationProvenanceStatus"] = status
+    selected["VerificationProvenanceSourceField"] = current.field
+    selected["LOHProvenanceSourceField"] = loh.field
+    selected["VerificationUnknownCurrentCounts"] = json.dumps(
+        current.unknown_counts, ensure_ascii=False, sort_keys=True
+    )
+    selected["VerificationProvenanceWarnings"] = json.dumps(
+        warning_payload, ensure_ascii=False, sort_keys=True
+    )
+    return selected
 
 
 # ── Helper: AUC via scipy (fallback-safe) ─────────────────────────────────
@@ -433,8 +559,9 @@ def fig12_dataset_summary_heatmap(df, out):
 # ══════════════════════════════════════════════════════════════════════════
 
 def main():
+    args = parse_args()
     setup_plot_style()
-    OUT = OUTPUT_ROOT / "20260401_O01_master_distribution"
+    OUT = Path(args.output_dir).resolve()
     ensure_dir(OUT / "figures")
     ensure_dir(OUT / "data")
 
@@ -443,7 +570,42 @@ def main():
     print("=" * 70)
 
     # ── Load data ─────────────────────────────────────────────────────
-    df = load_master_dataset()
+    master_path = Path(args.master_dataset).resolve()
+    df = attach_master_provenance(
+        load_master_dataset(master_path),
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    provenance_statuses = sorted(
+        df["VerificationProvenanceStatus"].dropna().astype(str).unique().tolist()
+    )
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(f"O01 provenance: mixed schema statuses: {provenance_statuses}")
+    verification_receipt = {
+        "input": str(master_path),
+        "schema_status": provenance_statuses[0],
+        "schema_versions": sorted(
+            {
+                value
+                for value in df["VerificationSchemaVersion"].dropna().astype(str)
+                if value.strip()
+            }
+        ),
+        "current_selection_field": sorted(
+            df["VerificationProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        ),
+        "loh_selection_field": sorted(
+            df["LOHProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        ),
+        "unknown_current_counts": sorted(
+            df["VerificationUnknownCurrentCounts"].dropna().astype(str).unique().tolist()
+        ),
+        "allow_unversioned_v1": args.allow_unversioned_v1,
+        "provenance_fields": list(VERIFICATION_PROVENANCE_COLUMNS),
+    }
+    (OUT / "verification_schema_contract.json").write_text(
+        json.dumps(verification_receipt, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     n_rows, n_cols = df.shape
     print(f"Dataset shape: {n_rows:,} rows × {n_cols} columns\n")
 
@@ -507,6 +669,12 @@ def main():
         if c not in src_summary.columns:
             src_summary[c] = 0
     src_summary["total"] = src_summary.sum(axis=1)
+    src_summary["VerificationProvenanceStatus"] = provenance_statuses[0]
+    src_summary["VerificationSchemaVersion"] = (
+        verification_receipt["schema_versions"][0]
+        if verification_receipt["schema_versions"]
+        else ""
+    )
     src_summary.to_csv(OUT / "data" / "source_summary.tsv", sep="\t")
     print(f"  -> source_summary.tsv ({len(src_summary)} datasets)")
 
@@ -516,6 +684,24 @@ def main():
     # feature_auc_by_mode.tsv
     auc_df.to_csv(OUT / "data" / "feature_auc_by_mode.tsv", sep="\t", index=False)
     print(f"  -> feature_auc_by_mode.tsv ({len(auc_df)} rows)")
+
+    provenance_export = df[list(VERIFICATION_PROVENANCE_COLUMNS)].copy()
+    provenance_export["VerificationClass"] = df["VerificationClass_SourceRaw"]
+    provenance_export["LOH_Subtype"] = df["LOH_Subtype_DeprecatedSourceRaw"]
+    provenance_summary = (
+        provenance_export.groupby(list(VERIFICATION_PROVENANCE_COLUMNS), dropna=False)
+        .size()
+        .rename("row_count")
+        .reset_index()
+    )
+    for field in PROVENANCE_METADATA_FIELDS:
+        provenance_summary[field] = df[field].iloc[0]
+    provenance_summary.to_csv(
+        OUT / "data" / "verification_provenance_summary.tsv",
+        sep="\t",
+        index=False,
+    )
+    print(f"  -> verification_provenance_summary.tsv ({len(provenance_summary)} rows)")
 
     # round_context.json
     write_round_context(
@@ -530,13 +716,17 @@ def main():
         script_path="scripts/analysis/build_observation_O01_master_distribution.py",
         data_sources=[{
             "name": "all_region_rows.tsv.gz",
-            "path": str(MASTER_DATASET_PATH),
+            "path": str(master_path),
             "rows": n_rows,
             "cols": n_cols,
         }],
         row_count=n_rows,
         col_count=n_cols,
-        extra={"figures_count": 12, "data_files_count": 4},
+        extra={
+            "figures_count": 12,
+            "data_files_count": 5,
+            "verification_contract": verification_receipt,
+        },
     )
     print(f"  -> round_context.json")
 

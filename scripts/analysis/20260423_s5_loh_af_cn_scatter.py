@@ -4,11 +4,21 @@ S5 圖：各樣本 × (LOH Inner / Outer) × TP/FP 散點圖
 X: Coverage_Multiple (CN proxy)   Y: AF (caller)
 AF 三分類背景 + 虛線分隔
 """
+import argparse
+import json
 import os
+import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
 
 SRC = "/big7_disk/liaoyoyo2001/InterSubMod/research/ng_kde_rescaling/data/merged_7samples_paired_full_plus_hcc1395_to.tsv.gz"
 # HCC1395 的 phase1_new run LOH annotation 不完整，改用 stale master 的 archive 資料
@@ -17,7 +27,6 @@ SRC_HCC1395_ARCHIVE = "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observ
 HCC1395_KDE_BASELINE = 54.0  # SEQC2 neutral median
 
 OUTDIR = "/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/04/figures/20260423_s5_loh_af_cn_scatter"
-os.makedirs(OUTDIR, exist_ok=True)
 
 plt.rcParams.update({
     "font.family": "DejaVu Sans",
@@ -48,12 +57,45 @@ SAMPLE_KDE_BX = {
 }
 
 
-def load_all_from_archive():
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
+
+def load_all_from_archive(allow_unversioned_v1: bool = False):
     """All 6 TO samples from stale master archive, unified schema.
     用 caller_af 作 Y (而非 merged 檔的 AF — 後者非真正 VAF)；
     用 NumReads / per-sample KDE bx 作 X (KDE-equivalent CovM)。
     """
-    arch = pd.read_csv(SRC_HCC1395_ARCHIVE, sep="\t", low_memory=False)
+    arch = attach_loh_legacy_view(
+        pd.read_csv(SRC_HCC1395_ARCHIVE, sep="\t", low_memory=False),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    loh_schema_contract = dict(arch.attrs["loh_schema_contract"])
     # 只取 TO
     arch_to = arch[arch["mode"] == "to"].copy()
     # 只留我們要的 6 樣本
@@ -69,13 +111,21 @@ def load_all_from_archive():
     arch_to["tp_label"] = (arch_to["truth_label"] == "TP").astype(int)
     arch_to["mode"] = "to_pileup"
     arch_to["kde_status"] = "archive_unified_kde_equiv"
-    return arch_to[["sample", "mode", "AF", "Coverage_Multiple", "loh_side", "tp_label",
-                    "Diploid_Coverage_Used", "kde_status", "LOH_Subtype"]]
+    arch_to["LOH_Subtype_LegacyVC"] = arch_to["_loh_subtype_legacy"]
+    result = arch_to[[
+        "sample", "mode", "AF", "Coverage_Multiple", "loh_side", "tp_label",
+        "Diploid_Coverage_Used", "kde_status", "LOH_Subtype_LegacyVC",
+    ]].copy()
+    result.attrs["loh_schema_contract"] = loh_schema_contract
+    return result
 
 
 def main():
+    args = parse_args()
+    os.makedirs(OUTDIR, exist_ok=True)
     # 6 個 TO 樣本全部從 stale master archive 讀，統一使用 caller_af 與 per-sample KDE bx
-    df = load_all_from_archive()
+    df = load_all_from_archive(allow_unversioned_v1=args.allow_unversioned_v1)
+    loh_schema_contract = dict(df.attrs["loh_schema_contract"])
 
     df = df.dropna(subset=["AF", "Coverage_Multiple", "loh_side", "tp_label"])
     df["tpfp"] = df["tp_label"].apply(
@@ -191,6 +241,8 @@ def main():
     out = os.path.join(OUTDIR, "fig_s5_loh_inner_outer_af_cn_per_sample.png")
     plt.savefig(out, bbox_inches="tight", dpi=130)
     plt.close()
+    with open(os.path.join(OUTDIR, "schema_provenance.json"), "w") as handle:
+        json.dump(loh_schema_contract, handle, indent=2)
     print(f"[OK] {out}")
     print(f"     size: {os.path.getsize(out)/1024:.1f} KB")
 

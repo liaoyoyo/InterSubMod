@@ -10,17 +10,17 @@ Key difference from Phase 1:
   - Each sample uses its OWN LongPhase-TO LOH.bed file
 
 Usage:
-    python3 build_observation_O15b_loh_zone_metrics_cross_sample.py
+    python3 build_observation_O15b_loh_zone_metrics_cross_sample.py [--allow-unversioned-v1]
 """
 
 from __future__ import annotations
 
+import argparse
 import sys
 import time
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
@@ -30,6 +30,7 @@ from observation_common import (
     encode_truth_binary, ensure_dir, safe_div,
     SAMPLE_ORDER, MODE_ORDER,
     COLOR_TP, COLOR_FP, TRUTH_PALETTE,
+    MASTER_DATASET_PATH,
 )
 
 import json
@@ -47,6 +48,18 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    LEGACY_CLASSES,
+    UNKNOWN_LEGACY_CLASS,
+    SchemaContractError,
+    select_legacy_view,
+    select_loh_legacy,
+)
 
 # ── Output Paths ──────────────────────────────────────────────────────────
 BASE_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/research/loh_investigation")
@@ -115,7 +128,9 @@ LOAD_COLS = [
     "LabelHPPermanovaF", "LabelHPPermanovaP",
     "LabelAllelePermanovaF", "LabelAllelePermanovaP",
     # Group D
-    "VerificationClass", "Quality_Score", "PassedGating", "Potential_LOH", "LOH_Subtype",
+    "VerificationSchemaVersion", "VerificationClass", "VerificationClass_Legacy",
+    "Quality_Score", "PassedGating", "Potential_LOH",
+    "LOH_Subtype_LegacyVC", "LOH_Subtype",
     # Group E
     "caller_af", "caller_dp", "caller_gq", "caller_filter",
     "caller_ad_ref", "caller_ad_alt",
@@ -126,6 +141,89 @@ LOAD_COLS = [
     "to_phase_filter", "phase_block_status",
     "NumReads",
 ]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize the historical unversioned VerificationClass/LOH_Subtype fields. "
+            "Versioned inputs must carry canonical legacy provenance."
+        ),
+    )
+    return parser.parse_args()
+
+
+def apply_historical_schema_contract(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, Dict[str, object]]:
+    """Attach L4 and LOH-L views without folding unknown classes into Noise."""
+    verification = select_legacy_view(
+        df,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="exclude",
+    )
+    loh = select_loh_legacy(df, allow_unversioned_v1=allow_unversioned_v1)
+    selected = df.copy()
+    selected["VerificationClass_SourceValue"] = selected[verification.field]
+    selected_values = verification.values.fillna(UNKNOWN_LEGACY_CLASS)
+    selected["VerificationClass"] = pd.Categorical(
+        selected_values,
+        categories=LEGACY_CLASSES + (UNKNOWN_LEGACY_CLASS,),
+        ordered=True,
+    )
+    selected["LOH_Subtype"] = pd.Categorical(
+        loh.values,
+        categories=loh.categories,
+        ordered=True,
+    )
+    selected["VerificationSourceField"] = verification.field
+    selected["VerificationSchemaStatus"] = verification.schema_status
+    selected["LOHSourceField"] = loh.field
+    metadata = verification.metadata()
+    metadata.update(
+        {
+            "requested_view": "legacy",
+            "unknown_bucket_count": int((selected_values == UNKNOWN_LEGACY_CLASS).sum()),
+            "loh_selection_field": loh.field,
+            "loh_schema_status": loh.schema_status,
+            "loh_unknown_counts": loh.unknown_counts,
+        }
+    )
+    return selected, metadata
+
+
+def load_contract_aware_master(allow_unversioned_v1: bool) -> pd.DataFrame:
+    """Project the large master table while allowing only an explicitly requested H1 fallback."""
+    header = pd.read_csv(
+        MASTER_DATASET_PATH,
+        sep="\t",
+        compression="gzip",
+        nrows=0,
+    ).columns
+    schema_optional = {
+        "VerificationSchemaVersion",
+        "VerificationClass",
+        "VerificationClass_Legacy",
+        "LOH_Subtype_LegacyVC",
+        "LOH_Subtype",
+    }
+    missing_non_schema = [
+        column for column in LOAD_COLS if column not in header and column not in schema_optional
+    ]
+    if missing_non_schema:
+        raise SchemaContractError(
+            "O15 master input is missing analysis columns: " + ", ".join(missing_non_schema)
+        )
+    if not allow_unversioned_v1:
+        # Keep every canonical field in usecols so a missing column is a hard pandas/schema error.
+        projected = LOAD_COLS
+    else:
+        projected = [column for column in LOAD_COLS if column in header]
+    return load_master_dataset(usecols=projected)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -516,16 +614,21 @@ def fig04_auc_heatmap(auc_df: pd.DataFrame) -> Path:
 def fig05_verification_class_bar(df: pd.DataFrame) -> Path:
     """Fig05: VerificationClass inside/outside LOH per sample (Faceted bar 7), TO mode."""
     print("[O15-P2] Fig05: VerificationClass bar charts...")
-    vc_order = ["Noise", "Weak", "Subclone", "Strong"]
-    vc_palette = {"Noise": "#F44336", "Weak": "#FF9800", "Subclone": "#4CAF50", "Strong": "#2196F3"}
+    vc_order = ["Noise", "Weak", "Subclone", "Strong", UNKNOWN_LEGACY_CLASS]
+    vc_palette = {
+        "Noise": "#F44336",
+        "Weak": "#FF9800",
+        "Subclone": "#4CAF50",
+        "Strong": "#2196F3",
+        UNKNOWN_LEGACY_CLASS: "#FF00FF",
+    }
 
     fig, axes = plt.subplots(2, 4, figsize=(20, 10))
     axes_flat = axes.flatten()
 
     for si, sample in enumerate(SAMPLE_ORDER):
         ax = axes_flat[si]
-        sub = df[(df["sample"] == sample) & (df["mode"] == "to") &
-                 df["VerificationClass"].isin(vc_order)]
+        sub = df[(df["sample"] == sample) & (df["mode"] == "to")]
 
         if len(sub) < 10:
             ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center",
@@ -1361,6 +1464,7 @@ Metrics with AUC > 0.6 across samples:
 # ══════════════════════════════════════════════════════════════════════════
 
 def main():
+    args = parse_args()
     t_start = time.time()
     print("=" * 70)
     print("O15 Phase 2: Cross-Sample LOH Zone Metrics Analysis")
@@ -1370,8 +1474,19 @@ def main():
 
     # ── Step 1: Load Data ──────────────────────────────────────────────
     t0 = time.time()
-    df = load_master_dataset(usecols=LOAD_COLS)
+    try:
+        df = load_contract_aware_master(args.allow_unversioned_v1)
+        df, schema_metadata = apply_historical_schema_contract(
+            df,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except (ValueError, SchemaContractError) as exc:
+        raise SystemExit(f"[O15-P2][schema-contract] {exc}") from exc
     print(f"  Data loaded in {time.time() - t0:.1f}s")
+    print(f"  Verification/LOH contract: {schema_metadata}")
+    schema_path = DATA_DIR / f"{PREFIX}_verification_schema_contract.json"
+    schema_path.write_text(json.dumps(schema_metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"  Verification/LOH contract written: {schema_path}")
     print(f"  Samples: {df['sample'].unique().tolist()}")
     print(f"  Modes: {df['mode'].unique().tolist()}")
 

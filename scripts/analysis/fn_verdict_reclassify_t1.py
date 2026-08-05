@@ -10,8 +10,9 @@ ISOLATE the subsets that may NOT be "the structure we want":
   - dispersion-warned label-PERMANOVA (possible betadisper artifact)
   - germline-HP-driven (labelHP) vs allele-driven (labelAllele)
 
-Derivation of the ORIGINAL booleans from VerificationClass (matches
-SignificanceAnalyzer.cpp:326-339 exactly):
+The ORIGINAL booleans are read directly from schema-v2 LabelFirstSupport and
+ClusterFirstSupport.  A historical four-state file is accepted only with the
+explicit --allow-unversioned-v1 flag, then mapped as follows:
   Strong   -> label_sig=T, cluster_sig=T
   Subclone -> label_sig=F, cluster_sig=T
   Weak     -> label_sig=T, cluster_sig=F
@@ -19,12 +20,27 @@ SignificanceAnalyzer.cpp:326-339 exactly):
 
 NO C++ rerun, NO fabrication — every number is a deterministic count over the CSV.
 
-Usage: python3 fn_verdict_reclassify_t1.py OUT.json LABEL=CSV [LABEL=CSV ...]
+Usage: python3 fn_verdict_reclassify_t1.py [--allow-unversioned-v1] OUT.json LABEL=CSV [LABEL=CSV ...]
 """
-import csv
+import argparse
 import json
 import math
 import sys
+import warnings
+from pathlib import Path
+
+import pandas as pd
+
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 def fbool(s):
@@ -57,9 +73,53 @@ def cls(label_sig, cluster_sig):
     return "Noise"
 
 
-def audit(path):
-    with open(path, newline="") as fh:
-        rows = list(csv.DictReader(fh))
+def load_original_support(path, allow_unversioned_v1=False):
+    df = pd.read_csv(path)
+    if "VerificationSchemaVersion" in df.columns:
+        current = select_current_view(df)
+        if current.unknown_counts:
+            raise SchemaContractError(f"FN verdict input: unknown current classes: {current.unknown_counts}")
+        evidence = read_evidence(df)
+        label_values = evidence["LabelFirstSupport"]
+        cluster_values = evidence["ClusterFirstSupport"]
+        metadata = {
+            "schema_status": "V2_EVIDENCE",
+            "selection_field": "LabelFirstSupport+ClusterFirstSupport",
+            "warnings": [],
+            "unknown_counts": {},
+        }
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "FN verdict input is unversioned; --allow-unversioned-v1 is required"
+            )
+        legacy = select_legacy_view(
+            df,
+            allow_unversioned_v1=True,
+            unversioned_unknown_policy="fail",
+        )
+        label_values = legacy.values.isin(["Strong", "Weak"])
+        cluster_values = legacy.values.isin(["Strong", "Subclone"])
+        metadata = legacy.metadata()
+        if legacy.field == "VerificationClass_Legacy":
+            message = (
+                "UNVERSIONED: using explicit VerificationClass_Legacy under "
+                "--allow-unversioned-v1 authorization"
+            )
+            warnings.warn(message, UserWarning, stacklevel=2)
+            metadata = {
+                **metadata,
+                "schema_status": "UNVERSIONED_V1_EXPLICIT_LEGACY",
+                "warnings": [message],
+            }
+    result = df.copy()
+    result["_OriginalLabelFirstSupport"] = label_values.astype(bool)
+    result["_OriginalClusterFirstSupport"] = cluster_values.astype(bool)
+    return result.to_dict(orient="records"), metadata
+
+
+def audit(path, allow_unversioned_v1=False):
+    rows, verification_metadata = load_original_support(path, allow_unversioned_v1)
     n = len(rows)
 
     # transition matrices
@@ -81,9 +141,9 @@ def audit(path):
     weak_upgraded_full = 0           # Weak -> Strong via cluster PERMANOVA
 
     for r in rows:
-        vc = r.get("VerificationClass", "").strip()
-        orig_label = vc in ("Strong", "Weak")
-        orig_cluster = vc in ("Strong", "Subclone")
+        orig_label = bool(r["_OriginalLabelFirstSupport"])
+        orig_cluster = bool(r["_OriginalClusterFirstSupport"])
+        vc = cls(orig_label, orig_cluster)
 
         plhp = sigperm("LabelHPPermanovaP", "LabelHPPermanovaValid", r)
         plal = sigperm("LabelAllelePermanovaP", "LabelAllelePermanovaValid", r)
@@ -129,6 +189,7 @@ def audit(path):
 
     return {
         "n_rows": n,
+        "verification_provenance": verification_metadata,
         "T1i_label_rescue": {
             "transitions": dict(sorted(trans_label.items(), key=lambda kv: -kv[1])),
             "orig_Strong_demoted": orig_strong_demoted_label,
@@ -151,14 +212,26 @@ def audit(path):
     }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--allow-unversioned-v1", action="store_true")
+    parser.add_argument("out_json")
+    parser.add_argument("inputs", nargs="+", metavar="LABEL=CSV")
+    return parser.parse_args()
+
+
 def main():
-    if len(sys.argv) < 3:
-        sys.exit("usage: fn_verdict_reclassify_t1.py OUT.json LABEL=CSV [...]")
-    out = sys.argv[1]
+    args = parse_args()
+    out = args.out_json
     res = {}
-    for spec in sys.argv[2:]:
+    for spec in args.inputs:
         label, _, path = spec.partition("=")
-        res[label] = {"source_csv": path, **audit(path)}
+        if not label or not path:
+            raise SystemExit(f"invalid input specification: {spec!r}; expected LABEL=CSV")
+        res[label] = {
+            "source_csv": path,
+            **audit(path, allow_unversioned_v1=args.allow_unversioned_v1),
+        }
     with open(out, "w") as fh:
         json.dump(res, fh, indent=2)
     for label, d in res.items():

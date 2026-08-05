@@ -11,6 +11,7 @@ Q5: Methylation features in LOH-like subgroups (TP vs FP, Tier A vs A+)
 Input: all_region_rows.tsv.gz (post-HP-fix master dataset)
 """
 
+import argparse
 import os
 import sys
 import warnings
@@ -27,7 +28,29 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats
 
-warnings.filterwarnings("ignore")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_legacy_view
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize raw VerificationClass as the historical legacy-four-state field"
+        ),
+    )
+    return parser.parse_args()
+
+
+ARGS = parse_args()
 
 # ============================================================
 # Configuration
@@ -74,6 +97,22 @@ def write_tsv(df, path, desc=""):
     print(f"  {path.name} ({len(df)} rows) — {desc}")
 
 
+def attach_historical_verification_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach the explicit historical four-state view."""
+    view = select_legacy_view(
+        frame,
+        allow_unversioned_v1=allow_unversioned_v1,
+        unversioned_unknown_policy="fail",
+    )
+    prepared = frame.copy()
+    prepared["_verification_class_legacy"] = view.values
+    prepared.attrs["verification_view"] = view
+    return prepared
+
+
 def enrichment(df_sub, loh_col="core_loh_like", truth_col="truth_label"):
     """FP/TP enrichment: (FP_loh/FP_total) / (TP_loh/TP_total).
     >1 = FP enriched, <1 = TP enriched."""
@@ -92,7 +131,11 @@ def enrichment(df_sub, loh_col="core_loh_like", truth_col="truth_label"):
 # Data Loading
 # ============================================================
 print(f"[0/5] Loading master dataset ...")
-df = pd.read_csv(ROUND1_WS / "all_region_rows.tsv.gz", sep="\t", low_memory=False)
+df = attach_historical_verification_view(
+    pd.read_csv(ROUND1_WS / "all_region_rows.tsv.gz", sep="\t", low_memory=False),
+    allow_unversioned_v1=ARGS.allow_unversioned_v1,
+)
+verification_view = df.attrs["verification_view"]
 df["tier"] = df["effective_hp_reads"].apply(assign_tier)
 df["tier"] = pd.Categorical(df["tier"], categories=TIER_ORDER, ordered=True)
 # Ensure boolean
@@ -101,6 +144,16 @@ df["HPMergedSig"] = df["HPMergedSig"].map({"True": True, "False": False, True: T
 print(f"  Loaded {len(df):,} rows (TO: {(df['mode']=='to').sum():,}, paired: {(df['mode']=='paired').sum():,})")
 print(f"  TP: {(df['truth_label']=='TP').sum():,}, FP: {(df['truth_label']=='FP').sum():,}")
 print(f"  LOH-like: {df['core_loh_like'].sum():,}, non-LOH: {(~df['core_loh_like']).sum():,}")
+pd.DataFrame(
+    [
+        {
+            "verification_view": "legacy4_historical",
+            "verification_selection_field": verification_view.field,
+            "verification_schema_status": verification_view.schema_status,
+            "unknown_legacy_class_count": sum(verification_view.unknown_counts.values()),
+        }
+    ]
+).to_csv(OUT_DIR / "verification_schema_provenance.tsv", sep="\t", index=False)
 
 
 # ============================================================
@@ -503,9 +556,9 @@ print("  fig06_to_dimensions_loh_rate.png")
 
 
 # ============================================================
-# Q4: VerificationClass × LOH × Tier 3D cross
+# Q4: Legacy VerificationClass × LOH × Tier 3D cross
 # ============================================================
-print(f"\n[4/5] Q4 — VerificationClass × LOH × Tier ...")
+print(f"\n[4/5] Q4 — Legacy VerificationClass × LOH × Tier ...")
 
 # --- Q4a: Full 3D cross ---
 rows_q4a = []
@@ -513,7 +566,7 @@ for mode in ["paired", "to"]:
     dm = df[df["mode"] == mode]
     for vc in VC_ORDER:
         for tier in TIER_ORDER:
-            dt = dm[(dm["verification_class"] == vc) & (dm["tier"] == tier)]
+            dt = dm[(dm["_verification_class_legacy"] == vc) & (dm["tier"] == tier)]
             for truth in ["TP", "FP"]:
                 sub = dt[dt["truth_label"] == truth]
                 n = len(sub)
@@ -538,8 +591,8 @@ for i, mode in enumerate(["paired", "to"]):
                 cmap="YlOrRd", vmin=0, vmax=0.8,
                 linewidths=0.5, cbar_kws={"label": "FP LOH-like fraction"})
     ax.set_title(f"{mode.upper()} — FP LOH-like Rate", fontsize=12, fontweight="bold")
-    ax.set_ylabel("VerificationClass" if i == 0 else "")
-fig.suptitle("Q4: FP LOH-like Rate — VerificationClass × Tier", fontsize=14, fontweight="bold")
+    ax.set_ylabel("Legacy VerificationClass" if i == 0 else "")
+fig.suptitle("Q4: FP LOH-like Rate — Legacy VerificationClass × Tier", fontsize=14, fontweight="bold")
 plt.tight_layout()
 fig.savefig(FIG_DIR / "fig07_vc_tier_fp_loh_rate_heatmap.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -556,8 +609,8 @@ for i, mode in enumerate(["paired", "to"]):
                 cmap="YlGn", vmin=0, vmax=0.8,
                 linewidths=0.5, cbar_kws={"label": "TP LOH-like fraction"})
     ax.set_title(f"{mode.upper()} — TP LOH-like Rate", fontsize=12, fontweight="bold")
-    ax.set_ylabel("VerificationClass" if i == 0 else "")
-fig.suptitle("Q4: TP LOH-like Rate — VerificationClass × Tier", fontsize=14, fontweight="bold")
+    ax.set_ylabel("Legacy VerificationClass" if i == 0 else "")
+fig.suptitle("Q4: TP LOH-like Rate — Legacy VerificationClass × Tier", fontsize=14, fontweight="bold")
 plt.tight_layout()
 fig.savefig(FIG_DIR / "fig08_vc_tier_tp_loh_rate_heatmap.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -578,8 +631,8 @@ for i, mode in enumerate(["paired", "to"]):
                 cmap="RdBu", center=0, vmin=-0.3, vmax=0.3,
                 linewidths=0.5, cbar_kws={"label": "TP - FP LOH-like rate (>0 = TP enriched)"})
     ax.set_title(f"{mode.upper()} — Delta (TP - FP) LOH-like Rate", fontsize=12, fontweight="bold")
-    ax.set_ylabel("VerificationClass" if i == 0 else "")
-fig.suptitle("Q4: TP vs FP LOH-like Rate Delta — VerificationClass × Tier", fontsize=14, fontweight="bold")
+    ax.set_ylabel("Legacy VerificationClass" if i == 0 else "")
+fig.suptitle("Q4: TP vs FP LOH-like Rate Delta — Legacy VerificationClass × Tier", fontsize=14, fontweight="bold")
 plt.tight_layout()
 fig.savefig(FIG_DIR / "fig09_vc_tier_delta_loh_rate_heatmap.png", dpi=150, bbox_inches="tight")
 plt.close()

@@ -4,12 +4,26 @@
 from __future__ import annotations
 
 import argparse
+import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
 
 from research_common import ensure_dir, write_json, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    V1_CURRENT_CLASSES,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
 
 
 DEFAULT_INPUT = Path(
@@ -35,6 +49,16 @@ PAIR_KEYS = [
     "truth_status",
     "VerificationClass",
     "PassedGating",
+    "VerificationSchemaStatus",
+    "VerificationSchemaVersion",
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
 ]
 
 
@@ -46,6 +70,16 @@ BUCKET_FIELDS = [
     "truth_status",
     "VerificationClass",
     "PassedGating",
+    "VerificationSchemaStatus",
+    "VerificationSchemaVersion",
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
     "rows_total",
     "model_a",
     "model_a_error_count",
@@ -65,6 +99,8 @@ DATASET_FIELDS = [
     "dataset_id",
     "dataset_label",
     "harmonization_group",
+    "VerificationSchemaStatus",
+    "VerificationSchemaVersion",
     "rows_total",
     "model_a",
     "model_a_error_count",
@@ -86,7 +122,77 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-a", default="logistic_context_only", help="Baseline model name.")
     parser.add_argument("--model-b", default="logistic_methyl_context", help="Comparison model name.")
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT), help="Output directory.")
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize a historical unversioned v1 current taxonomy; evidence remains unavailable.",
+    )
     return parser.parse_args()
+
+
+PROVENANCE_FIELDS = [
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
+]
+
+
+def attach_current_taxonomy(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, Dict[str, object]]:
+    """Validate current taxonomy identity and preserve v2 evidence provenance."""
+    result = df.copy()
+    if "VerificationSchemaVersion" in result.columns:
+        view = select_current_view(result)
+        missing = [field for field in PROVENANCE_FIELDS if field not in result.columns]
+        if missing:
+            raise SchemaContractError(
+                "Phase 1A predictions: missing v2 provenance fields: " + ", ".join(missing)
+            )
+        read_evidence(result)
+        result["VerificationClass"] = view.values
+        result["VerificationSchemaStatus"] = view.schema_status
+        metadata = view.metadata()
+        metadata["evidence_fields"] = list(PROVENANCE_FIELDS)
+        return result, metadata
+
+    if not allow_unversioned_v1:
+        raise SchemaContractError(
+            "Phase 1A predictions are unversioned; --allow-unversioned-v1 is required"
+        )
+    if "VerificationClass" not in result.columns:
+        raise SchemaContractError("Phase 1A predictions: VerificationClass is missing")
+
+    raw = result["VerificationClass"].astype("string")
+    valid = raw.isin(V1_CURRENT_CLASSES)
+    unknown_counts = {
+        str(key): int(value)
+        for key, value in raw[~valid].fillna("<MISSING>").value_counts().sort_index().items()
+    }
+    result["VerificationClass"] = raw.where(valid, UNKNOWN_CURRENT_CLASS)
+    result["VerificationSchemaVersion"] = ""
+    result["VerificationSchemaStatus"] = "UNVERSIONED_V1"
+    for field in PROVENANCE_FIELDS:
+        result[field] = ""
+    message = (
+        "UNVERSIONED: Phase 1A current taxonomy accepted only under "
+        "--allow-unversioned-v1; v2 evidence provenance is unavailable"
+    )
+    warnings.warn(message, UserWarning, stacklevel=2)
+    return result, {
+        "selection_field": "VerificationClass",
+        "schema_status": "UNVERSIONED_V1",
+        "categories": list(V1_CURRENT_CLASSES) + [UNKNOWN_CURRENT_CLASS],
+        "unknown_counts": unknown_counts,
+        "warnings": [message],
+        "evidence_fields": [],
+    }
 
 
 def build_pairwise_table(df: pd.DataFrame, model_a: str, model_b: str) -> pd.DataFrame:
@@ -135,9 +241,16 @@ def summarize_group(
 
 def main() -> None:
     args = parse_args()
-    output_dir = ensure_dir(Path(args.output_dir).resolve())
-    df = pd.read_csv(args.predictions_tsv, sep="\t", low_memory=False)
+    df = pd.read_csv(args.predictions_tsv, sep="\t", low_memory=False, keep_default_na=False)
+    try:
+        df, verification_metadata = attach_current_taxonomy(
+            df,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        raise SystemExit(f"[phase1a-compare][schema-contract] {exc}") from exc
     df = df[df["evaluation_split"] == args.evaluation_split].copy()
+    output_dir = ensure_dir(Path(args.output_dir).resolve())
 
     pairwise = build_pairwise_table(df, args.model_a, args.model_b)
 
@@ -152,6 +265,16 @@ def main() -> None:
                 "truth_status",
                 "VerificationClass",
                 "PassedGating",
+                "VerificationSchemaStatus",
+                "VerificationSchemaVersion",
+                "VerificationClass_V1_Deprecated",
+                "VerificationClass_Legacy",
+                "LabelFirstSupport",
+                "ClusterFirstSupport",
+                "WithinHPSupport",
+                "DispersionWarning",
+                "EvidencePath",
+                "EvidenceDerivation",
             ],
             sort=True,
             dropna=False,
@@ -166,6 +289,16 @@ def main() -> None:
                     "truth_status",
                     "VerificationClass",
                     "PassedGating",
+                    "VerificationSchemaStatus",
+                    "VerificationSchemaVersion",
+                    "VerificationClass_V1_Deprecated",
+                    "VerificationClass_Legacy",
+                    "LabelFirstSupport",
+                    "ClusterFirstSupport",
+                    "WithinHPSupport",
+                    "DispersionWarning",
+                    "EvidencePath",
+                    "EvidenceDerivation",
                 ],
                 keys,
             )}
@@ -175,13 +308,27 @@ def main() -> None:
     dataset_rows: List[Dict[str, object]] = []
     if not pairwise.empty:
         grouped = pairwise.groupby(
-            ["evaluation_split", "dataset_id", "dataset_label", "harmonization_group"],
+            [
+                "evaluation_split",
+                "dataset_id",
+                "dataset_label",
+                "harmonization_group",
+                "VerificationSchemaStatus",
+                "VerificationSchemaVersion",
+            ],
             sort=True,
             dropna=False,
         )
         for keys, sub in grouped:
             row = {field: value for field, value in zip(
-                ["evaluation_split", "dataset_id", "dataset_label", "harmonization_group"],
+                [
+                    "evaluation_split",
+                    "dataset_id",
+                    "dataset_label",
+                    "harmonization_group",
+                    "VerificationSchemaStatus",
+                    "VerificationSchemaVersion",
+                ],
                 keys,
             )}
             row.update(summarize_group(sub, args.model_a, args.model_b))
@@ -197,6 +344,7 @@ def main() -> None:
             "evaluation_split": args.evaluation_split,
             "model_a": args.model_a,
             "model_b": args.model_b,
+            "verification_taxonomy": verification_metadata,
             "output_dir": str(output_dir),
         },
     )

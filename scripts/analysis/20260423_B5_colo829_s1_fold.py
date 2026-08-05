@@ -17,12 +17,18 @@ Output:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+if str(Path(__file__).resolve().parents[2]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
 
 ROOT = Path("/big7_disk/liaoyoyo2001/InterSubMod")
 MERGED = ROOT / "research/ng_kde_rescaling/data/merged_7samples_paired_full_plus_hcc1395_to.tsv.gz"
@@ -32,6 +38,35 @@ OUT_DIST_TSV = ROOT / "research/ng_kde_rescaling/data/B5_colo829_vs_cohort_distr
 # S1 definition: LOH_Strong ∩ Extreme AF
 # Samples for comparison (exclude HCC1954 which is post-hoc flagged by user)
 SAMPLES = ["COLO829", "H1437", "H2009", "HCC1395", "HCC1395_DORADO", "HCC1937"]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical unversioned LOH_Subtype input; "
+            "versioned input requires LOH_Subtype_LegacyVC and an exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
 
 
 def tp_rate(df_sub: pd.DataFrame) -> tuple[float, int, int]:
@@ -76,7 +111,7 @@ def s1_analysis(df: pd.DataFrame) -> pd.DataFrame:
         base_fp = base_n - base_tp
         base_ratio = (base_tp / base_fp) if base_fp > 0 else float("nan")
 
-        s1_mask = (sub["LOH_Subtype"] == "LOH_Strong") & (sub["AF_class"] == "Extreme")
+        s1_mask = (sub["_loh_subtype_legacy"] == "LOH_Strong") & (sub["AF_class"] == "Extreme")
         s1_cells = sub[s1_mask]
         s1_tp_rate, s1_tp, s1_n = tp_rate(s1_cells)
         s1_fp = s1_n - s1_tp
@@ -123,7 +158,7 @@ def s1_analysis(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def distribution_analysis(df: pd.DataFrame) -> pd.DataFrame:
-    """Per sample distributions of LOH_Subtype, AF_class, Coverage_Category."""
+    """Per-sample legacy-derived LOH, AF, and coverage distributions."""
     rows = []
     for sample in SAMPLES:
         sub = df[(df["sample"] == sample) & (df["mode"] == "paired_full")]
@@ -131,11 +166,11 @@ def distribution_analysis(df: pd.DataFrame) -> pd.DataFrame:
             continue
         n = len(sub)
 
-        # LOH_Subtype
-        loh = sub["LOH_Subtype"].fillna("None").value_counts()
+        # Canonical legacy-derived LOH subtype; missing/unknown already failed closed.
+        loh = sub["_loh_subtype_legacy"].value_counts()
         for subtype, count in loh.items():
             rows.append({
-                "sample": sample, "dimension": "LOH_Subtype",
+                "sample": sample, "dimension": "LOH_Subtype_LegacyVC",
                 "value": str(subtype), "count": int(count),
                 "frac": count / n, "total_n": n,
             })
@@ -159,8 +194,13 @@ def distribution_analysis(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> int:
+    args = parse_args()
     print(f"[B5] Reading {MERGED}", file=sys.stderr)
-    df = pd.read_csv(MERGED, sep="\t", low_memory=False)
+    df = attach_loh_legacy_view(
+        pd.read_csv(MERGED, sep="\t", low_memory=False),
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    loh_schema_contract = dict(df.attrs["loh_schema_contract"])
     print(f"[B5] Total rows: {len(df):,}", file=sys.stderr)
 
     # S1 core table
@@ -176,6 +216,7 @@ def main() -> int:
 
     # Summary JSON (for report embedding)
     summary = {
+        "loh_schema_contract": loh_schema_contract,
         "s1_fold_by_sample": {
             row["sample"]: {
                 "fold_precision_thread_b": row["fold_precision_thread_b"],

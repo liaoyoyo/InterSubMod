@@ -4,7 +4,7 @@
 4-way comparison on the existing paired-multibio sample637 shard:
   1. context_only       — baseline (no methyl, no LOH)
   2. methyl+context     — Round 2 best (methyl features added)
-  3. loh+context        — LOH features added (Potential_LOH, LOH_Subtype)
+  3. loh+context        — LOH features added (Potential_LOH, LOH_Subtype_LegacyVC)
   4. methyl+loh+context — full feature set
 
 Key hypothesis: LOH features will specifically rescue H2009's negative
@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 
@@ -25,6 +26,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from research_common import ensure_dir, write_json, write_tsv_rows
 from run_phase1a_read_classifier_benchmark import (
@@ -36,6 +41,7 @@ from run_phase1a_read_classifier_benchmark import (
     load_benchmark_rows,
     pick_discovery_holdout,
 )
+from scripts.lib.verification_schema_contract import SchemaContractError, select_loh_legacy
 
 
 DEFAULT_INPUT = Path(
@@ -49,8 +55,8 @@ DEFAULT_OUTPUT = Path(
     "20260328_phase1a_round3_loh_feature_v1"
 )
 
-# LOH categorical features already present in shard
-LOH_CATEGORICAL_FEATURES = ["Potential_LOH", "LOH_Subtype"]
+# LOH categorical features.  The subtype is explicitly legacy-VC-derived.
+LOH_CATEGORICAL_FEATURES = ["Potential_LOH", "LOH_Subtype_LegacyVC"]
 
 # 4 model definitions: (name, numeric_features, categorical_features)
 MODEL_CONFIGS: List[Tuple[str, List[str], List[str]]] = [
@@ -107,17 +113,64 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--random-state", type=int, default=42)
     parser.add_argument("--bootstrap-reps", type=int, default=500)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical input that only has deprecated LOH_Subtype. "
+            "Versioned input must carry LOH_Subtype_LegacyVC and an exact LOH_Subtype alias."
+        ),
+    )
     return parser.parse_args()
 
 
-def prepare_loh_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Ensure LOH categorical features are string-encoded for OneHotEncoder."""
-    df = df.copy()
-    # Potential_LOH: convert to string "True"/"False" for consistent encoding
-    df["Potential_LOH"] = df["Potential_LOH"].astype(str)
-    # LOH_Subtype: fill NaN, ensure string
-    df["LOH_Subtype"] = df["LOH_Subtype"].fillna("None").astype(str)
-    return df
+def prepare_loh_features(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> Tuple[pd.DataFrame, Dict[str, object]]:
+    """Validate LOH provenance and encode categorical features without imputing unknown as None."""
+    if "Potential_LOH" not in df.columns:
+        raise SchemaContractError("round3 LOH features: Potential_LOH is missing")
+
+    prepared = df.copy()
+    potential_raw = prepared["Potential_LOH"].astype("string").str.strip().str.lower()
+    potential_map = {
+        "true": "True",
+        "false": "False",
+        "1": "True",
+        "0": "False",
+    }
+    potential = potential_raw.map(potential_map)
+    if potential.isna().any():
+        invalid = prepared.loc[potential.isna(), "Potential_LOH"].astype("string")
+        counts = invalid.fillna("<MISSING>").value_counts(dropna=False).to_dict()
+        raise SchemaContractError(
+            f"round3 LOH features: Potential_LOH has invalid or missing values: {counts}"
+        )
+
+    loh_view = select_loh_legacy(prepared, allow_unversioned_v1=allow_unversioned_v1)
+    loh = loh_view.values.astype("string")
+    inconsistent = ((potential == "False") & (loh != "None")) | (
+        (potential == "True") & (loh == "None")
+    )
+    if inconsistent.any():
+        rows = [str(index) for index in prepared.index[inconsistent][:10].tolist()]
+        raise SchemaContractError(
+            "round3 LOH features: Potential_LOH and legacy-derived subtype disagree at rows "
+            + ", ".join(rows)
+        )
+
+    prepared["Potential_LOH"] = potential
+    prepared["LOH_Subtype_LegacyVC"] = loh
+    metadata: Dict[str, object] = {
+        "selection_field": loh_view.field,
+        "canonical_feature_field": "LOH_Subtype_LegacyVC",
+        "schema_status": loh_view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(loh_view.warning_messages),
+        "unknown_count": 0,
+    }
+    return prepared, metadata
 
 
 def bootstrap_delta(
@@ -484,7 +537,10 @@ def main() -> None:
 
     print(f"[round3] loading {input_path}")
     df = load_benchmark_rows(input_path)
-    df = prepare_loh_features(df)
+    df, loh_schema_contract = prepare_loh_features(
+        df,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
 
     discovery_df = df[df["dataset_role"] == "discovery"].copy()
     validation_df = df[df["dataset_role"] == "validation"].copy()
@@ -531,6 +587,7 @@ def main() -> None:
         "bootstrap_reps": args.bootstrap_reps,
         "models": [m for m, _, _ in MODEL_CONFIGS],
         "loh_features": LOH_CATEGORICAL_FEATURES,
+        "loh_schema_contract": loh_schema_contract,
     })
 
     # Figures

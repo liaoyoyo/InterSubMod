@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""B4 | HCC1395 TO S4 (LOH=None + Extreme AF) secondary-discrimination pilot.
+"""B4 | HCC1395 TO S4 (legacy-derived LOH=None + Extreme AF) pilot.
 
 Hypothesis: The S4 bucket (LOH_Subtype=None + AF<0.1 or AF>0.9) has no
 first-level discriminative power (TP rate = baseline ~71%). We test whether
@@ -21,6 +21,7 @@ Outputs:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -32,6 +33,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
 
 # ---------- Paths ----------
 PHASE1_DIR = Path("/tmp/ism_hp_fix_phase1")
@@ -47,23 +54,57 @@ FIG_DIR = Path(
 )
 DATA_DIR = MASTER_TSV.parent
 
-FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize historical input that only carries deprecated "
+            "LOH_Subtype; versioned input must carry LOH_Subtype_LegacyVC and its "
+            "exact deprecated alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach fail-closed legacy-derived LOH subtype without imputing None."""
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
 
 
 # ---------- Load & filter ----------
-def load_s4_data() -> pd.DataFrame:
+def load_s4_data(
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load HCC1395 TO, merge AF from master_extended, restrict to S4."""
     tp = pd.read_csv(TP_CSV)
     tp["tp_label"] = 1
     fp = pd.read_csv(FP_CSV)
     fp["tp_label"] = 0
-    sig = pd.concat([tp, fp], axis=0, ignore_index=True)
+    sig = attach_loh_legacy_view(
+        pd.concat([tp, fp], axis=0, ignore_index=True),
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    loh_schema_contract = dict(sig.attrs["loh_schema_contract"])
 
     master = pd.read_csv(MASTER_TSV, sep="\t", low_memory=False)
     master_sub = master[(master["sample"] == "HCC1395") & (master["mode"] == "to_pileup")].copy()
 
-    # Merge AF and LOH_Subtype on (Chr, Pos). sig has LOH_Subtype already,
-    # but use master's AF field (sig has AlleleDelta not caller AF).
+    # Merge caller AF on (Chr, Pos); retain the validated LOH provenance from sig.
     key_cols = ["Chr", "Pos"]
     merged = sig.merge(
         master_sub[key_cols + ["AF", "AF_class"]],
@@ -71,10 +112,14 @@ def load_s4_data() -> pd.DataFrame:
         how="inner",
     )
 
-    # S4 filter: LOH_Subtype=None (string "None") + AF extreme
+    merged.attrs["loh_schema_contract"] = loh_schema_contract
+
+    # S4 filter: canonical legacy-derived subtype=None + AF extreme.
     s4 = merged[
-        (merged["LOH_Subtype"] == "None") & ((merged["AF"] < 0.1) | (merged["AF"] > 0.9))
+        (merged["_loh_subtype_legacy"] == "None")
+        & ((merged["AF"] < 0.1) | (merged["AF"] > 0.9))
     ].copy()
+    s4.attrs["loh_schema_contract"] = loh_schema_contract
     return merged, s4
 
 
@@ -276,8 +321,11 @@ def plot_samehap_stack(df: pd.DataFrame, out_path: Path) -> None:
 
 # ---------- Main ----------
 def main() -> int:
+    args = parse_args()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
     print("[B4] Loading HCC1395 TO significance_summary + master_extended...")
-    full, s4 = load_s4_data()
+    full, s4 = load_s4_data(allow_unversioned_v1=args.allow_unversioned_v1)
+    loh_schema_contract = dict(full.attrs["loh_schema_contract"])
     print(f"  Full HCC1395 TO: n={len(full)} TP rate={full['tp_label'].mean():.4f}")
     print(
         f"  S4 (LOH=None & AF extreme): n={len(s4)}, "
@@ -322,6 +370,7 @@ def main() -> int:
     lr_json["s4_tp"] = int(s4["tp_label"].sum())
     lr_json["s4_fp"] = int((s4["tp_label"] == 0).sum())
     lr_json["s4_tp_rate"] = float(s4["tp_label"].mean())
+    lr_json["loh_schema_contract"] = loh_schema_contract
     with (DATA_DIR / "B4_S4_lr_cv.json").open("w") as fh:
         json.dump(lr_json, fh, indent=2)
 

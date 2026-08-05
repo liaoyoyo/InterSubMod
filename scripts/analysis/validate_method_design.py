@@ -6,10 +6,24 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import pandas as pd
+
 from research_common import as_bool, to_float, to_int, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+)
 
 
 DESIGN_FIELDS = [
@@ -27,6 +41,9 @@ DESIGN_FIELDS = [
     "interpretability_grade",
     "consistency_grade",
     "cluster_class",
+    "cluster_class_source",
+    "cluster_class_selection_field",
+    "verification_schema_status",
     "dominant_label",
     "notes",
 ]
@@ -39,6 +56,9 @@ AGREEMENT_FIELDS = [
     "hp_assign_rate",
     "allele_assign_rate",
     "cluster_class",
+    "cluster_class_source",
+    "cluster_class_selection_field",
+    "verification_schema_status",
     "label_class",
     "agreement_type",
     "cluster_permanova_p",
@@ -57,6 +77,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--haplotag-qc", default=None, help="Optional haplotag_qc.tsv")
     parser.add_argument("--sample", default="unknown", help="Sample name")
     parser.add_argument("--output-dir", required=True, help="Output directory")
+    parser.add_argument(
+        "--cluster-class-source",
+        required=True,
+        choices=("legacy", "evidence"),
+        help=(
+            "Explicit four-state comparison source: VerificationClass_Legacy or a "
+            "four-state view derived from typed LabelFirstSupport/ClusterFirstSupport"
+        ),
+    )
     parser.add_argument("--min-reads", type=int, default=20, help="Minimum reads required for method validation")
     parser.add_argument(
         "--min-hp-assign-rate",
@@ -70,6 +99,45 @@ def parse_args() -> argparse.Namespace:
 def load_rows(path: Path) -> List[Dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def select_cluster_class_frame(frame: pd.DataFrame, source: str) -> pd.DataFrame:
+    """Select the four-state comparison input without reading current names as legacy."""
+    current = select_current_view(frame)
+    if current.unknown_counts:
+        raise SchemaContractError(
+            "method design validation: unknown current VerificationClass values: "
+            f"{current.unknown_counts}"
+        )
+
+    prepared = frame.copy()
+    if source == "legacy":
+        legacy = select_legacy_view(frame)
+        prepared["_cluster_class_selected"] = legacy.values
+        selection_field = legacy.field
+        schema_status = f"{current.schema_status}+{legacy.schema_status}"
+    elif source == "evidence":
+        evidence = read_evidence(frame)
+        label_support = evidence["LabelFirstSupport"]
+        cluster_support = evidence["ClusterFirstSupport"]
+        prepared["_cluster_class_selected"] = "Noise"
+        prepared.loc[label_support & ~cluster_support, "_cluster_class_selected"] = "Weak"
+        prepared.loc[~label_support & cluster_support, "_cluster_class_selected"] = "Subclone"
+        prepared.loc[label_support & cluster_support, "_cluster_class_selected"] = "Strong"
+        selection_field = "LabelFirstSupport+ClusterFirstSupport"
+        schema_status = f"{current.schema_status}+TYPED_EVIDENCE"
+    else:
+        raise SchemaContractError(f"unsupported cluster class source: {source!r}")
+
+    prepared["_cluster_class_source"] = source
+    prepared["_cluster_class_selection_field"] = selection_field
+    prepared["_verification_schema_status"] = schema_status
+    return prepared
+
+
+def load_selected_summary_rows(path: Path, source: str) -> List[Dict[str, object]]:
+    frame = pd.read_csv(path, dtype=str, keep_default_na=False)
+    return select_cluster_class_frame(frame, source).to_dict(orient="records")
 
 
 def parse_metadata(path: Path) -> Optional[Dict[str, str]]:
@@ -262,7 +330,7 @@ def main() -> None:
     for summary_csv in args.summary_csv:
         summary_path = Path(summary_csv)
         scope = summary_path.parent.name.replace("intersubmod_", "")
-        for row in load_rows(summary_path):
+        for row in load_selected_summary_rows(summary_path, args.cluster_class_source):
             region_key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
             if region_key not in region_stats_cache:
                 region_stats_cache[region_key] = infer_summary_read_stats(row)
@@ -283,7 +351,14 @@ def main() -> None:
             hp_assign_rate = region_stats.get("hp_assign_rate", sample_hp_rate)
             allele_assign_rate = region_stats.get("allele_assign_rate", math.nan)
             num_reads = to_int(row.get("NumReads"))
-            cluster_class = row.get("VerificationClass", "Noise") or "Noise"
+            cluster_class = row["_cluster_class_selected"]
+            selection_metadata = {
+                "cluster_class_source": row["_cluster_class_source"],
+                "cluster_class_selection_field": row[
+                    "_cluster_class_selection_field"
+                ],
+                "verification_schema_status": row["_verification_schema_status"],
+            }
             dominant_label = row.get("DominantLabel", "none") or "none"
             cluster_count = row.get("LocalBestCluster", "")
 
@@ -332,6 +407,7 @@ def main() -> None:
                     "interpretability_grade": interpretability_grade(cluster_class, num_reads >= args.min_reads, dominant_label),
                     "consistency_grade": "self",
                     "cluster_class": cluster_class,
+                    **selection_metadata,
                     "dominant_label": dominant_label,
                     "notes": f"sample={args.sample}",
                 }
@@ -353,6 +429,7 @@ def main() -> None:
                     "interpretability_grade": interpretability_grade(hp_class, hp_applicable, dominant_label),
                     "consistency_grade": consistency_grade(cluster_class, hp_class, hp_applicable),
                     "cluster_class": cluster_class,
+                    **selection_metadata,
                     "dominant_label": dominant_label,
                     "notes": f"HPMergedSig={row.get('HPMergedSig', '')}; HPFineSig={row.get('HPFineSig', '')}",
                 }
@@ -374,6 +451,7 @@ def main() -> None:
                     "interpretability_grade": interpretability_grade(allele_class, allele_applicable, dominant_label),
                     "consistency_grade": consistency_grade(cluster_class, allele_class, allele_applicable),
                     "cluster_class": cluster_class,
+                    **selection_metadata,
                     "dominant_label": dominant_label,
                     "notes": f"AlleleSig={row.get('AlleleSig', '')}",
                 }
@@ -393,6 +471,7 @@ def main() -> None:
                     "hp_assign_rate": format_ratio(hp_assign_rate),
                     "allele_assign_rate": format_ratio(allele_assign_rate),
                     "cluster_class": cluster_class,
+                    **selection_metadata,
                     "label_class": combined_label_class,
                     "agreement_type": agreement_type(cluster_class, combined_label_class, combined_applicable),
                     "cluster_permanova_p": row.get("ClusterPermanovaP", ""),

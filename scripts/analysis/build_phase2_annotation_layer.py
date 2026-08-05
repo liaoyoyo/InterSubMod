@@ -52,7 +52,7 @@ ANNOTATION_CONFIG: Dict[str, DatasetAnnotationConfig] = {
         caller_strict_gq=15,
         support_topbin_features=("Quality_Score", "PairwiseMedianDist"),
         support_flag_features=("agreement_positive",),
-        weak_support_flag_features=("strong_subclone",),
+        weak_support_flag_features=("cluster_first_support",),
         qc_topbin_features=(),
         qc_flag_features=("hp_assign_high_095", "hp_assign_veryhigh_099"),
         observed_only_topbin_features=("hp_assign_rate",),
@@ -64,7 +64,7 @@ ANNOTATION_CONFIG: Dict[str, DatasetAnnotationConfig] = {
         caller_strict_gq=15,
         support_topbin_features=("Quality_Score", "PairwiseMedianDist"),
         support_flag_features=(),
-        weak_support_flag_features=("strong_subclone",),
+        weak_support_flag_features=("cluster_first_support",),
         qc_topbin_features=(),
         qc_flag_features=("hp_assign_high_095", "hp_assign_veryhigh_099"),
         observed_only_topbin_features=("hp_assign_rate",),
@@ -88,7 +88,7 @@ ANNOTATION_CONFIG: Dict[str, DatasetAnnotationConfig] = {
         caller_strict_gq=20,
         support_topbin_features=(),
         support_flag_features=(),
-        weak_support_flag_features=("strong_subclone",),
+        weak_support_flag_features=("cluster_first_support",),
         qc_topbin_features=("Quality_Score", "PairwiseMedianDist", "hp_assign_rate"),
         qc_flag_features=("hp_assign_high_095", "hp_assign_veryhigh_099"),
         observed_only_topbin_features=(),
@@ -99,6 +99,7 @@ ANNOTATION_CONFIG: Dict[str, DatasetAnnotationConfig] = {
 
 ANNOTATION_CONFIG_FIELDS = [
     "dataset_id",
+    "verification_support_mode",
     "caller_primary_gq",
     "caller_strict_gq",
     "support_topbin_features",
@@ -134,6 +135,11 @@ ANNOTATED_FIELDS = [
     "CramersV",
     "hp_assign_rate",
     "VerificationClass",
+    "label_first_support",
+    "cluster_first_support",
+    "verification_support_mode",
+    "verification_support_source",
+    "verification_support_schema_status",
     "agreement_type",
     "class_shift",
     "caller_primary_flag",
@@ -142,7 +148,7 @@ ANNOTATED_FIELDS = [
     "pairwise_topbin_flag",
     "hp_assign_topbin_flag",
     "agreement_positive_flag",
-    "strong_subclone_flag",
+    "cluster_first_support_flag",
     "artifact_lowvaf_highad_flag",
     "artifact_lowvaf_highad_lowcv_flag",
     "hp_assign_high_095",
@@ -216,6 +222,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase2-dir", default=str(PHASE2_OUTPUT_DIR), help="Directory containing phase 2 outputs")
     parser.add_argument("--output-dir", default=str(OUTPUT_ROOT_DEFAULT), help="Output directory")
+    parser.add_argument(
+        "--verification-support-mode",
+        choices=("evidence-v2", "legacy"),
+        required=True,
+        help="Explicit source for the historical Strong/Subclone support cohort",
+    )
     return parser.parse_args()
 
 
@@ -267,8 +279,8 @@ def annotation_mask(df: pd.DataFrame, flag_name: str) -> pd.Series:
         return df[flag_name].fillna(False).astype(bool)
     if flag_name == "agreement_positive":
         return df["agreement_positive_flag"]
-    if flag_name == "strong_subclone":
-        return df["strong_subclone_flag"]
+    if flag_name == "cluster_first_support":
+        return df["cluster_first_support_flag"]
     if flag_name == "hp_assign_high_095":
         return df["hp_assign_high_095"]
     if flag_name == "hp_assign_veryhigh_099":
@@ -303,9 +315,10 @@ def build_annotation_strings(row: pd.Series, support_names: Sequence[str], qc_na
 def annotate_dataset(
     dataset,
     top_bins: Dict[Tuple[str, str], str],
+    support_mode: str,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     config = ANNOTATION_CONFIG[dataset.dataset_id]
-    joined_df = load_joined(dataset.joined_tsv)
+    joined_df = load_joined(dataset.joined_tsv, support_mode)
     base_df = joined_df[joined_df["candidate_eligible"]].copy()
     base_df["dataset_id"] = dataset.dataset_id
     base_df["label"] = dataset.label
@@ -323,7 +336,7 @@ def annotate_dataset(
     base_df["agreement_positive_flag"] = base_df["agreement_type"].isin(
         ["label_upgrade", "consistent_strong", "consistent_subclone"]
     )
-    base_df["strong_subclone_flag"] = base_df["VerificationClass"].isin(["Strong", "Subclone"])
+    base_df["cluster_first_support_flag"] = base_df["cluster_first_support"].fillna(False)
     base_df["artifact_lowvaf_highad_flag"] = low_vaf_high_ad(base_df)
     base_df["artifact_lowvaf_highad_lowcv_flag"] = low_vaf_high_ad_low_cv(base_df)
     base_df["hp_assign_high_095"] = base_df["hp_assign_rate"] >= 0.95
@@ -420,7 +433,7 @@ def annotate_dataset(
                 "pairwise_topbin_flag",
                 "hp_assign_topbin_flag",
                 "agreement_positive_flag",
-                "strong_subclone_flag",
+                "cluster_first_support_flag",
                 "artifact_lowvaf_highad_flag",
                 "artifact_lowvaf_highad_lowcv_flag",
                 "hp_assign_high_095",
@@ -445,7 +458,7 @@ def annotate_dataset(
         ("pairwise_topbin_flag", "pairwise_topbin", "support" if "PairwiseMedianDist" in config.support_topbin_features else "annotation"),
         ("hp_assign_topbin_flag", "hp_assign_topbin", "qc" if "hp_assign_rate" in config.qc_topbin_features or "hp_assign_rate" in config.observed_only_topbin_features else "annotation"),
         ("agreement_positive_flag", "agreement_positive", "support" if "agreement_positive" in config.support_flag_features else "annotation"),
-        ("strong_subclone_flag", "strong_subclone", "support" if "strong_subclone" in config.weak_support_flag_features else "annotation"),
+        ("cluster_first_support_flag", "cluster_first_support", "support" if "cluster_first_support" in config.weak_support_flag_features else "annotation"),
         ("artifact_lowvaf_highad_flag", "artifact_lowvaf_highad", "artifact"),
         ("artifact_lowvaf_highad_lowcv_flag", "artifact_lowvaf_highad_lowcv", "artifact"),
         ("annotation_support_primary_any", "annotation_support_primary_any", "support"),
@@ -546,7 +559,7 @@ def annotate_dataset(
         "quality_topbin_flag",
         "pairwise_topbin_flag",
         "agreement_positive_flag",
-        "strong_subclone_flag",
+        "cluster_first_support_flag",
         "hp_assign_high_095",
         "artifact_lowvaf_highad_lowcv_flag",
     ]
@@ -645,7 +658,6 @@ def main() -> None:
     args = parse_args()
     phase2_dir = Path(args.phase2_dir).resolve()
     output_dir = Path(args.output_dir).resolve()
-    ensure_dir(output_dir)
 
     top_bins = load_top_bins(phase2_dir)
     config_rows = []
@@ -653,6 +665,7 @@ def main() -> None:
         config_rows.append(
             {
                 "dataset_id": config.dataset_id,
+                "verification_support_mode": args.verification_support_mode,
                 "caller_primary_gq": config.caller_primary_gq,
                 "caller_strict_gq": config.caller_strict_gq,
                 "support_topbin_features": ",".join(config.support_topbin_features) or "none",
@@ -669,12 +682,21 @@ def main() -> None:
     all_summary = []
     all_policy = []
     all_overlap = []
+    annotated_outputs = []
     for dataset in RESCUE_DATASETS:
-        annotated_df, summary_df, policy_df, overlap_df = annotate_dataset(dataset, top_bins)
-        write_dataset_annotations(output_dir, annotated_df)
+        annotated_df, summary_df, policy_df, overlap_df = annotate_dataset(
+            dataset,
+            top_bins,
+            args.verification_support_mode,
+        )
+        annotated_outputs.append(annotated_df)
         all_summary.append(summary_df)
         all_policy.append(policy_df)
         all_overlap.append(overlap_df)
+
+    ensure_dir(output_dir)
+    for annotated_df in annotated_outputs:
+        write_dataset_annotations(output_dir, annotated_df)
 
     summary_df = pd.concat(all_summary, ignore_index=True)
     policy_df = pd.concat(all_policy, ignore_index=True)

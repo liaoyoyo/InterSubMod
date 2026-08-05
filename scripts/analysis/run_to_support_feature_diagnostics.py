@@ -6,11 +6,21 @@ from __future__ import annotations
 import argparse
 import csv
 import subprocess
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 import pandas as pd
+
+LOCAL_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(LOCAL_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(LOCAL_REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    VERIFICATION_PROVENANCE_COLUMNS,
+    extract_provenance_frame,
+)
 
 
 REPO_ROOT = Path("/big8_disk/liaoyoyo2001/InterSubMod")
@@ -77,9 +87,29 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def attach_verification_provenance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Require complete, internally consistent v2 provenance before selection."""
+    provenance = extract_provenance_frame(frame)
+    prepared = frame.copy()
+    for column in VERIFICATION_PROVENANCE_COLUMNS:
+        prepared[column] = provenance[column]
+    prepared.attrs["verification_provenance"] = {
+        "schema_status": provenance.attrs["schema_status"],
+        "columns": list(VERIFICATION_PROVENANCE_COLUMNS),
+        "row_count": len(prepared),
+    }
+    return prepared
+
+
+def provenance_payload(row: pd.Series) -> Dict[str, object]:
+    return {column: row.get(column, "") for column in VERIFICATION_PROVENANCE_COLUMNS}
+
+
 def load_joined(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="\t")
+    df = attach_verification_provenance(pd.read_csv(path, sep="\t"))
+    verification_provenance = dict(df.attrs["verification_provenance"])
     df = df[df["candidate_eligible"] == True].copy()
+    df.attrs["verification_provenance"] = verification_provenance
     for col in ["Quality_Score", "PairwiseMedianDist", "hp_assign_rate", "af", "gq", "qual"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
@@ -202,7 +232,7 @@ def main() -> None:
                             "feature_rank": rank,
                             "feature_direction_note": note,
                             "feature_value": row[feature],
-                            "VerificationClass": row["VerificationClass"],
+                            **provenance_payload(row),
                             "agreement_type": row["agreement_type"],
                             "class_shift": row["class_shift"],
                             "af": row["af"],
@@ -218,7 +248,7 @@ def main() -> None:
                             "region_key": row["region_key"],
                             "downstream_status": row["downstream_status"],
                             "truth_status": row["truth_status"],
-                            "VerificationClass": row["VerificationClass"],
+                            **provenance_payload(row),
                             "agreement_type": row["agreement_type"],
                             "class_shift": row["class_shift"],
                             "Quality_Score": row["Quality_Score"],
@@ -242,7 +272,7 @@ def main() -> None:
         "feature_rank",
         "feature_direction_note",
         "feature_value",
-        "VerificationClass",
+        *VERIFICATION_PROVENANCE_COLUMNS,
         "agreement_type",
         "class_shift",
         "af",
@@ -257,7 +287,7 @@ def main() -> None:
         "region_key",
         "downstream_status",
         "truth_status",
-        "VerificationClass",
+        *VERIFICATION_PROVENANCE_COLUMNS,
         "agreement_type",
         "class_shift",
         "Quality_Score",
@@ -359,7 +389,7 @@ def main() -> None:
         "region_key",
         "downstream_status",
         "truth_status",
-        "VerificationClass",
+        *VERIFICATION_PROVENANCE_COLUMNS,
         "agreement_type",
         "class_shift",
         "Quality_Score",

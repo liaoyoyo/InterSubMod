@@ -37,6 +37,12 @@ import seaborn as sns
 from scipy import stats as sp_stats
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_current_view, select_loh_legacy
+
 # ── Constants ────────────────────────────────────────────────────────────
 OUT_DIR = ensure_dir(OUTPUT_ROOT / "20260401_O03_loh_features_post_fix")
 CAPTION_SRC = (
@@ -46,10 +52,10 @@ CAPTION_SRC = (
 
 LOH_FEATURE_COLS = [
     "HP_Ratio", "hp_ratio_core", "effective_hp_reads",
-    "core_loh_like", "Potential_LOH", "LOH_Subtype",
+    "core_loh_like", "Potential_LOH", "LOH_Subtype_LegacyVC",
     "HP1FamilyN", "HP2FamilyN", "NHP0", "NHP3",
     "hp0_ratio", "hp3_ratio", "hp_assign_rate",
-    "loh_subtype", "tool_core_loh_match", "tool_potential_loh",
+    "tool_core_loh_match", "tool_potential_loh",
     "to_loh_bed_hit", "HPMergedSig",
 ]
 
@@ -78,6 +84,39 @@ def _auc_safe(y_true, y_score):
 def _available_cols(df, cols):
     """Return list of columns that exist in df."""
     return [c for c in cols if c in df.columns]
+
+
+def attach_verification_loh_views(df: pd.DataFrame) -> pd.DataFrame:
+    """Attach guarded C2 current and canonical legacy-derived LOH views."""
+    current = select_current_view(df)
+    loh = select_loh_legacy(df)
+    prepared = df.copy()
+    prepared["_verification_class_current"] = current.values
+    prepared["_loh_subtype_legacy"] = loh.values
+    prepared.attrs["schema_metadata"] = {
+        "verification_selection_field": current.field,
+        "verification_schema_status": current.schema_status,
+        "unknown_current_class_count": sum(current.unknown_counts.values()),
+        "unknown_current_class_values": current.unknown_counts,
+        "loh_selection_field": loh.field,
+        "loh_schema_status": loh.schema_status,
+    }
+    return prepared
+
+
+def write_schema_provenance(df: pd.DataFrame, out: Path) -> None:
+    metadata = df.attrs["schema_metadata"]
+    pd.DataFrame(
+        [
+            {
+                **{key: value for key, value in metadata.items() if key != "unknown_current_class_values"},
+                "unknown_current_class_values": "; ".join(
+                    f"{key}:{value}"
+                    for key, value in sorted(metadata["unknown_current_class_values"].items())
+                ),
+            }
+        ]
+    ).to_csv(out / "schema_provenance.tsv", sep="\t", index=False)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -232,9 +271,8 @@ def fig03_core_loh_like_rate_by_tier(df, out):
 
     # Panel 3: LOH subtype breakdown by tier
     ax = axes[2]
-    sub_df = df[["Quality_Tier", "LOH_Subtype"]].copy()
-    sub_df["LOH_Subtype"] = sub_df["LOH_Subtype"].fillna("None")
-    sub_cts = sub_df.groupby(["Quality_Tier", "LOH_Subtype"]).size().unstack("LOH_Subtype", fill_value=0)
+    sub_df = df[["Quality_Tier", "_loh_subtype_legacy"]].copy()
+    sub_cts = sub_df.groupby(["Quality_Tier", "_loh_subtype_legacy"]).size().unstack("_loh_subtype_legacy", fill_value=0)
     sub_cts = sub_cts.reindex(tier_order)
     # Normalize to proportions
     sub_pcts = sub_cts.div(sub_cts.sum(axis=1), axis=0)
@@ -373,17 +411,17 @@ def fig06_to_vs_paired_loh_concordance(df, out):
     fig, axes = plt.subplots(1, 3, figsize=(20, 7))
 
     # Build matched pairs via variant_key
-    paired_df = df[df["mode"] == "paired"][["variant_key", "sample", "Potential_LOH", "truth_label", "LOH_Subtype"]].copy()
+    paired_df = df[df["mode"] == "paired"][["variant_key", "sample", "Potential_LOH", "truth_label", "_loh_subtype_legacy"]].copy()
     paired_df = paired_df.rename(columns={
         "Potential_LOH": "LOH_paired",
         "truth_label": "truth_paired",
-        "LOH_Subtype": "subtype_paired",
+        "_loh_subtype_legacy": "subtype_paired",
     })
-    to_df = df[df["mode"] == "to"][["variant_key", "sample", "Potential_LOH", "truth_label", "LOH_Subtype"]].copy()
+    to_df = df[df["mode"] == "to"][["variant_key", "sample", "Potential_LOH", "truth_label", "_loh_subtype_legacy"]].copy()
     to_df = to_df.rename(columns={
         "Potential_LOH": "LOH_to",
         "truth_label": "truth_to",
-        "LOH_Subtype": "subtype_to",
+        "_loh_subtype_legacy": "subtype_to",
     })
 
     matched = paired_df.merge(to_df, on=["variant_key", "sample"], how="inner")
@@ -622,14 +660,14 @@ def fig09_effective_hp_vs_verificationclass(df, out):
     # Define effective_hp_reads bins
     hp_bins = [0, 10, 30, 50, 80, 120, 200, 5000]
     hp_labels = ["0-10", "10-30", "30-50", "50-80", "80-120", "120-200", "200+"]
-    df_plot = df[["effective_hp_reads", "VerificationClass", "mode"]].dropna().copy()
+    df_plot = df[["effective_hp_reads", "_verification_class_current", "mode"]].dropna().copy()
     df_plot["hp_bin"] = pd.cut(df_plot["effective_hp_reads"], bins=hp_bins, labels=hp_labels, right=False)
 
-    vc_order = df_plot["VerificationClass"].value_counts().index.tolist()
+    vc_order = df_plot["_verification_class_current"].value_counts().index.tolist()
 
     # Panel 1: Heatmap (all data)
     ax = axes[0]
-    ct = pd.crosstab(df_plot["hp_bin"], df_plot["VerificationClass"])
+    ct = pd.crosstab(df_plot["hp_bin"], df_plot["_verification_class_current"])
     ct = ct.reindex(columns=[c for c in vc_order if c in ct.columns])
     sns.heatmap(ct, annot=True, fmt=",", cmap="YlGnBu", ax=ax, linewidths=0.3,
                 cbar_kws={"label": "Count"})
@@ -829,7 +867,7 @@ def compute_statistical_summary(df, out):
         results[f"chi2_loh_truth_{mode}"] = chi2_m
 
     # 5. LOH Subtype x Truth chi-squared
-    ct_sub = pd.crosstab(df["LOH_Subtype"].fillna("None"), df["truth_label"])
+    ct_sub = pd.crosstab(df["_loh_subtype_legacy"], df["truth_label"])
     chi2_sub = chi2_test(ct_sub.values)
     results["chi2_loh_subtype_truth"] = chi2_sub
 
@@ -853,7 +891,8 @@ def main():
     print("=" * 70)
 
     # Load data
-    df = load_master_dataset()
+    df = attach_verification_loh_views(load_master_dataset())
+    write_schema_provenance(df, OUT_DIR)
     print(f"\nDataset shape: {df.shape}")
     print(f"Columns: {len(df.columns)}")
 

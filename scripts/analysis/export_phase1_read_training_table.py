@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -13,6 +14,15 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 import pandas as pd
 
 from research_common import as_bool, ensure_dir, to_float, write_json, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (
+    VERIFICATION_PROVENANCE_COLUMNS,
+    extract_provenance_frame,
+)
 
 
 OUTPUT_ROOT_DEFAULT = Path(
@@ -162,6 +172,24 @@ READ_LEVEL_FIELDS = [
     "methyl_low_fraction",
 ]
 
+READ_LEVEL_FIELDS = list(dict.fromkeys([
+    *READ_LEVEL_FIELDS,
+    *VERIFICATION_PROVENANCE_COLUMNS,
+]))
+
+REGION_MANIFEST_FIELDS = list(dict.fromkeys([
+    "dataset_id",
+    "dataset_label",
+    "region_key",
+    "downstream_status",
+    "source_scope",
+    *VERIFICATION_PROVENANCE_COLUMNS,
+    "region_found",
+    "region_dir",
+    "reads_exported",
+    "num_cpg_total",
+]))
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -185,6 +213,24 @@ def parse_args() -> argparse.Namespace:
         help="Include compact methyl vector and CpG position list columns.",
     )
     return parser.parse_args()
+
+
+def attach_verification_provenance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Require one internally consistent v2 schema before any row selection."""
+    provenance = extract_provenance_frame(frame)
+    prepared = frame.copy()
+    for column in VERIFICATION_PROVENANCE_COLUMNS:
+        prepared[column] = provenance[column]
+    prepared.attrs["verification_provenance"] = {
+        "schema_status": provenance.attrs["schema_status"],
+        "columns": list(VERIFICATION_PROVENANCE_COLUMNS),
+        "row_count": len(prepared),
+    }
+    return prepared
+
+
+def provenance_payload(row: pd.Series) -> Dict[str, object]:
+    return {column: row.get(column, "") for column in VERIFICATION_PROVENANCE_COLUMNS}
 
 
 def parse_metadata(path: Path) -> Dict[str, str]:
@@ -249,7 +295,7 @@ def normalize_alt_support(value: object) -> str:
 
 
 def load_joined(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="\t")
+    df = attach_verification_provenance(pd.read_csv(path, sep="\t"))
     if "candidate_eligible" in df.columns:
         df["candidate_eligible"] = df["candidate_eligible"].map(as_bool)
     else:
@@ -359,7 +405,7 @@ def select_regions(
 
 
 def row_to_base_payload(cfg: DatasetConfig, row: pd.Series, region_dir: Path) -> Dict[str, object]:
-    return {
+    payload = {
         "dataset_id": cfg.dataset_id,
         "dataset_label": cfg.label,
         "sample": cfg.sample,
@@ -385,7 +431,6 @@ def row_to_base_payload(cfg: DatasetConfig, row: pd.Series, region_dir: Path) ->
         "af": to_float(row.get("af")),
         "ad_ref": to_float(row.get("ad_ref")),
         "ad_alt": to_float(row.get("ad_alt")),
-        "VerificationClass": row.get("VerificationClass", ""),
         "DominantLabel": row.get("DominantLabel", ""),
         "agreement_type": row.get("agreement_type", ""),
         "class_shift": row.get("class_shift", ""),
@@ -401,6 +446,8 @@ def row_to_base_payload(cfg: DatasetConfig, row: pd.Series, region_dir: Path) ->
         "hp_assign_rate": to_float(row.get("hp_assign_rate")),
         "allele_assign_rate": to_float(row.get("allele_assign_rate")),
     }
+    payload.update(provenance_payload(row))
+    return payload
 
 
 def export_dataset(
@@ -430,6 +477,7 @@ def export_dataset(
                     "region_key": region_key,
                     "downstream_status": row.get("downstream_status", ""),
                     "source_scope": source_scope or "",
+                    **provenance_payload(row),
                     "region_found": False,
                     "region_dir": "",
                     "reads_exported": 0,
@@ -477,6 +525,7 @@ def export_dataset(
                 "region_key": region_key,
                 "downstream_status": row.get("downstream_status", ""),
                 "source_scope": source_scope or "",
+                **provenance_payload(row),
                 "region_found": True,
                 "region_dir": str(region_dir),
                 "reads_exported": int(len(merged.index)),
@@ -491,6 +540,10 @@ def export_dataset(
         "regions_found": int(sum(1 for row in manifest_rows if row["region_found"])),
         "missing_regions": int(missing_regions),
         "read_rows_exported": int(len(training_rows)),
+        "verification_schema_status": joined.attrs["verification_provenance"]["schema_status"],
+        "verification_provenance_columns": ";".join(
+            joined.attrs["verification_provenance"]["columns"]
+        ),
     }
     return training_rows, manifest_rows, summary
 
@@ -524,22 +577,21 @@ def main() -> None:
     write_tsv_rows(output_dir / "phase1_read_training_table.tsv", read_fields, read_rows)
     write_tsv_rows(
         output_dir / "phase1_region_manifest.tsv",
-        [
-            "dataset_id",
-            "dataset_label",
-            "region_key",
-            "downstream_status",
-            "source_scope",
-            "region_found",
-            "region_dir",
-            "reads_exported",
-            "num_cpg_total",
-        ],
+        REGION_MANIFEST_FIELDS,
         manifest_rows,
     )
     write_tsv_rows(
         output_dir / "phase1_export_summary.tsv",
-        ["dataset_id", "dataset_label", "selected_regions", "regions_found", "missing_regions", "read_rows_exported"],
+        [
+            "dataset_id",
+            "dataset_label",
+            "selected_regions",
+            "regions_found",
+            "missing_regions",
+            "read_rows_exported",
+            "verification_schema_status",
+            "verification_provenance_columns",
+        ],
         summary_rows,
     )
 
@@ -552,6 +604,13 @@ def main() -> None:
             "max_regions_per_dataset": args.max_regions_per_dataset,
             "include_methyl_vector": args.include_methyl_vector,
             "output_dir": str(output_dir),
+            "verification_provenance_by_dataset": {
+                row["dataset_id"]: {
+                    "schema_status": row["verification_schema_status"],
+                    "columns": row["verification_provenance_columns"].split(";"),
+                }
+                for row in summary_rows
+            },
         },
     )
 

@@ -7,11 +7,20 @@ import argparse
 import csv
 import gzip
 import math
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Sequence
 
+import pandas as pd
+
 from research_common import infer_platform, read_json, to_float, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_current_view
 
 
 RuleFunc = Callable[[Dict[str, object]], bool]
@@ -48,6 +57,19 @@ SUBSET_FIELDS = [
     "median_pairwise_median_dist",
     "dominant_label_top",
     "verification_class_top",
+    "verification_selection_field",
+    "verification_schema_status",
+    "unknown_current_class_count",
+]
+
+SCHEMA_FIELDS = [
+    "run_dir",
+    "scope",
+    "selection_field",
+    "schema_status",
+    "row_count",
+    "unknown_current_class_count",
+    "unknown_current_class_values",
 ]
 
 BEST_FIELDS = [
@@ -125,21 +147,38 @@ def parse_vcf_features(path: Path, scope: str) -> Dict[str, Dict[str, object]]:
     return rows
 
 
-def parse_summary(path: Path, scope: str) -> Dict[str, Dict[str, object]]:
+def parse_summary(
+    path: Path,
+    scope: str,
+) -> tuple[Dict[str, Dict[str, object]], Dict[str, object]]:
+    frame = pd.read_csv(path, dtype=str, keep_default_na=False)
+    view = select_current_view(frame)
+    frame = frame.copy()
+    frame["_verification_class_current"] = view.values
+    frame["_verification_selection_field"] = view.field
+    frame["_verification_schema_status"] = view.schema_status
     rows: Dict[str, Dict[str, object]] = {}
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
-            rows[key] = {
-                **row,
-                "label": scope,
-                "AlleleDelta": to_float(row.get("AlleleDelta")),
-                "CramersV": to_float(row.get("CramersV")),
-                "Quality_Score": to_float(row.get("Quality_Score")),
-                "PairwiseMedianDist": to_float(row.get("PairwiseMedianDist")),
-            }
-    return rows
+    for row in frame.to_dict(orient="records"):
+        key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
+        rows[key] = {
+            **row,
+            "label": scope,
+            "AlleleDelta": to_float(row.get("AlleleDelta")),
+            "CramersV": to_float(row.get("CramersV")),
+            "Quality_Score": to_float(row.get("Quality_Score")),
+            "PairwiseMedianDist": to_float(row.get("PairwiseMedianDist")),
+        }
+    metadata = {
+        "scope": scope,
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "row_count": len(frame),
+        "unknown_current_class_count": sum(view.unknown_counts.values()),
+        "unknown_current_class_values": "; ".join(
+            f"{key}:{value}" for key, value in sorted(view.unknown_counts.items())
+        ),
+    }
+    return rows, metadata
 
 
 def resolve_longphase_vcf(run_dir: Path, scope: str) -> Path:
@@ -213,7 +252,17 @@ def summarize_subset(sample: str, platform: str, rule_id: str, subset: str, rows
     quality_score = [row["Quality_Score"] for row in rows if not math.isnan(row["Quality_Score"])]
     pairwise = [row["PairwiseMedianDist"] for row in rows if not math.isnan(row["PairwiseMedianDist"])]
     dominant = Counter(str(row.get("DominantLabel", "")) for row in rows if row.get("DominantLabel"))
-    classes = Counter(str(row.get("VerificationClass", "")) for row in rows if row.get("VerificationClass"))
+    classes = Counter(
+        str(row.get("_verification_class_current", ""))
+        for row in rows
+        if row.get("_verification_class_current")
+    )
+    selection_fields = sorted(
+        {str(row.get("_verification_selection_field")) for row in rows if row.get("_verification_selection_field")}
+    )
+    schema_statuses = sorted(
+        {str(row.get("_verification_schema_status")) for row in rows if row.get("_verification_schema_status")}
+    )
     return {
         "sample": sample,
         "platform": platform,
@@ -228,15 +277,22 @@ def summarize_subset(sample: str, platform: str, rule_id: str, subset: str, rows
         "median_pairwise_median_dist": f"{median(pairwise):.4f}" if pairwise else "",
         "dominant_label_top": "; ".join(f"{key}:{value}" for key, value in dominant.most_common(3)),
         "verification_class_top": "; ".join(f"{key}:{value}" for key, value in classes.most_common(3)),
+        "verification_selection_field": ";".join(selection_fields),
+        "verification_schema_status": ";".join(schema_statuses),
+        "unknown_current_class_count": classes.get("UnknownCurrentClass", 0),
     }
 
 
-def load_joined_rows(run_dir: Path) -> List[Dict[str, object]]:
+def load_joined_rows(
+    run_dir: Path,
+) -> tuple[List[Dict[str, object]], List[Dict[str, object]]]:
     joined: Dict[str, Dict[str, object]] = {}
+    schema_metadata: List[Dict[str, object]] = []
     for scope in ("TP", "FP"):
         summary_path = run_dir / f"intersubmod_{scope.lower()}" / "significance_summary.csv"
         vcf_path = resolve_longphase_vcf(run_dir, scope)
-        summary_rows = parse_summary(summary_path, scope)
+        summary_rows, metadata = parse_summary(summary_path, scope)
+        schema_metadata.append({"run_dir": str(run_dir), **metadata})
         vcf_rows = parse_vcf_features(vcf_path, scope)
         for key, vcf_row in vcf_rows.items():
             if key not in summary_rows:
@@ -246,7 +302,7 @@ def load_joined_rows(run_dir: Path) -> List[Dict[str, object]]:
                 **vcf_row,
                 "key": key,
             }
-    return list(joined.values())
+    return list(joined.values()), schema_metadata
 
 
 def main() -> None:
@@ -259,6 +315,7 @@ def main() -> None:
     comparison_rows: List[Dict[str, object]] = []
     subset_rows: List[Dict[str, object]] = []
     best_rows: List[Dict[str, object]] = []
+    schema_rows: List[Dict[str, object]] = []
 
     for run_dir_str in args.run_dir:
         run_dir = Path(run_dir_str).resolve()
@@ -270,7 +327,8 @@ def main() -> None:
         baseline_tp = int(baseline.get("tp", 0))
         baseline_fp = int(baseline.get("fp", 0))
         baseline_f1 = float(baseline.get("f1", 0.0))
-        rows = load_joined_rows(run_dir)
+        rows, run_schema_rows = load_joined_rows(run_dir)
+        schema_rows.extend(run_schema_rows)
 
         best_rule_id = ""
         best_f1 = baseline_f1
@@ -327,6 +385,7 @@ def main() -> None:
     write_tsv_rows(output_dir / "candidate_rule_comparison.tsv", COMPARISON_FIELDS, comparison_rows)
     write_tsv_rows(output_dir / "focus_rule_subset_summary.tsv", SUBSET_FIELDS, subset_rows)
     write_tsv_rows(output_dir / "best_rule_by_sample.tsv", BEST_FIELDS, best_rows)
+    write_tsv_rows(output_dir / "verification_schema_provenance.tsv", SCHEMA_FIELDS, schema_rows)
 
     md_lines = [
         "# Candidate Rule Summary",

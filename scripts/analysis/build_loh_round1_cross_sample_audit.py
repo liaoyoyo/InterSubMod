@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import json
 import math
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
@@ -21,6 +23,29 @@ import pandas as pd
 import pysam
 
 from research_common import ensure_dir, markdown_table, read_json, write_json, write_tsv_rows
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
+
+PROVENANCE_METADATA_FIELDS = (
+    "VerificationProvenanceStatus",
+    "VerificationProvenanceSourceField",
+    "VerificationProvenanceWarnings",
+    "VerificationUnknownCurrentCounts",
+    "LOHProvenanceSourceField",
+)
 
 
 OUTPUT_ROOT_DEFAULT = Path(
@@ -240,6 +265,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", default=str(OUTPUT_ROOT_DEFAULT), help="Observation workspace output directory")
     parser.add_argument("--sample", action="append", default=None, help="Optional sample filter")
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize historical H1 summaries without VerificationSchemaVersion.",
+    )
     return parser.parse_args()
 
 
@@ -583,7 +613,64 @@ def build_manifest_rows(configs: Sequence[DatasetConfig]) -> List[Dict]:
     return rows
 
 
-def load_dataset_rows(config: DatasetConfig) -> pd.DataFrame:
+def attach_verification_contract(
+    df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach normalized C2/LOH-L views while preserving every raw provenance field."""
+
+    selected = df.copy()
+    if "VerificationSchemaVersion" in selected.columns:
+        current = select_current_view(selected)
+        select_legacy_view(selected)
+        read_evidence(selected)
+        loh = select_loh_legacy(selected)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in selected.columns]
+        if missing:
+            raise SchemaContractError(
+                "LOH round provenance: missing required fields: " + ", ".join(missing)
+            )
+        known = current.values != UNKNOWN_CURRENT_CLASS
+        if known.any():
+            extract_provenance_frame(selected.loc[known])
+        status = "V2"
+        warning_payload = {"unknown_current_counts": current.unknown_counts}
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "LOH round provenance: VerificationSchemaVersion missing; explicit "
+                "--allow-unversioned-v1 authorization is required for historical H1 input"
+            )
+        current = select_legacy_view(selected, allow_unversioned_v1=True)
+        loh = select_loh_legacy(selected, allow_unversioned_v1=True)
+        provenance = extract_provenance_frame(selected, allow_unversioned_v1=True)
+        status = "UNVERSIONED_V1"
+        warning_payload = {
+            "authorization": "--allow-unversioned-v1",
+            "messages": list(provenance.attrs.get("warnings", [])),
+        }
+        for field in VERIFICATION_PROVENANCE_COLUMNS:
+            if field not in selected.columns:
+                selected[field] = ""
+
+    selected["verification_class"] = current.values
+    selected["loh_subtype"] = loh.values
+    selected["VerificationProvenanceStatus"] = status
+    selected["VerificationProvenanceSourceField"] = current.field
+    selected["LOHProvenanceSourceField"] = loh.field
+    selected["VerificationUnknownCurrentCounts"] = json.dumps(
+        current.unknown_counts, ensure_ascii=False, sort_keys=True
+    )
+    selected["VerificationProvenanceWarnings"] = json.dumps(
+        warning_payload, ensure_ascii=False, sort_keys=True
+    )
+    return selected
+
+
+def load_dataset_rows(
+    config: DatasetConfig,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
     vcf_maps = {
         "TP": load_split_vcf_features(config.tp_vcf),
         "FP": load_split_vcf_features(config.fp_vcf),
@@ -593,7 +680,10 @@ def load_dataset_rows(config: DatasetConfig) -> pd.DataFrame:
     context = read_json(config.context_json) if config.context_json.exists() else {}
     frames: List[pd.DataFrame] = []
     for truth_label, summary_path in [("TP", config.tp_summary), ("FP", config.fp_summary)]:
-        df = pd.read_csv(summary_path)
+        df = attach_verification_contract(
+            pd.read_csv(summary_path, keep_default_na=False, low_memory=False),
+            allow_unversioned_v1=allow_unversioned_v1,
+        )
         if df.empty:
             continue
         df = df.copy()
@@ -666,8 +756,6 @@ def load_dataset_rows(config: DatasetConfig) -> pd.DataFrame:
             hp_ratio_bin(ratio, eff)
             for ratio, eff in zip(df["hp_ratio_core"].tolist(), df["effective_hp_reads"].tolist())
         ]
-        df["verification_class"] = df["VerificationClass"].fillna("Unknown")
-        df["loh_subtype"] = df["LOH_Subtype"].fillna("None")
         df["allele_delta"] = df["AlleleDelta"]
         df["pairwise_median_dist"] = df["PairwiseMedianDist"]
         df["quality_score"] = df["Quality_Score"]
@@ -733,6 +821,11 @@ def load_dataset_rows(config: DatasetConfig) -> pd.DataFrame:
     if not frames:
         return pd.DataFrame()
     result = pd.concat(frames, ignore_index=True)
+    statuses = sorted(result["VerificationProvenanceStatus"].dropna().unique().tolist())
+    if len(statuses) != 1:
+        raise SchemaContractError(
+            f"LOH round provenance: mixed TP/FP schema statuses for {config.dataset_id}: {statuses}"
+        )
     result = result.sort_values(["sample_label", "mode", "truth_label", "Chr", "Pos"]).reset_index(drop=True)
     return result
 
@@ -926,9 +1019,26 @@ def summarize_loh_vs_features(all_df: pd.DataFrame, source_file: Path, generated
 
 
 def summarize_verification_by_loh(all_df: pd.DataFrame, source_file: Path, generated_at: str) -> pd.DataFrame:
+    provenance_group_fields = [
+        *VERIFICATION_PROVENANCE_COLUMNS,
+        "VerificationProvenanceStatus",
+        "VerificationProvenanceSourceField",
+        "VerificationProvenanceWarnings",
+        "LOHProvenanceSourceField",
+        "VerificationUnknownCurrentCounts",
+    ]
     grouped = (
         all_df.groupby(
-            ["sample", "sample_label", "mode", "mode_label", "truth_label", "verification_class", "loh_subtype"],
+            [
+                "sample",
+                "sample_label",
+                "mode",
+                "mode_label",
+                "truth_label",
+                "verification_class",
+                "loh_subtype",
+                *provenance_group_fields,
+            ],
             dropna=False,
         )
         .size()
@@ -936,14 +1046,33 @@ def summarize_verification_by_loh(all_df: pd.DataFrame, source_file: Path, gener
         .reset_index()
     )
     totals = (
-        all_df.groupby(["sample", "sample_label", "mode", "mode_label", "truth_label", "verification_class"], dropna=False)
+        all_df.groupby(
+            [
+                "sample",
+                "sample_label",
+                "mode",
+                "mode_label",
+                "truth_label",
+                "verification_class",
+                *provenance_group_fields,
+            ],
+            dropna=False,
+        )
         .size()
         .rename("class_total")
         .reset_index()
     )
     grouped = grouped.merge(
         totals,
-        on=["sample", "sample_label", "mode", "mode_label", "truth_label", "verification_class"],
+        on=[
+            "sample",
+            "sample_label",
+            "mode",
+            "mode_label",
+            "truth_label",
+            "verification_class",
+            *provenance_group_fields,
+        ],
         how="left",
     )
     grouped["fraction_within_verification_class"] = grouped["count"] / grouped["class_total"]
@@ -1054,6 +1183,8 @@ def build_same_locus_compare(all_df: pd.DataFrame) -> pd.DataFrame:
         "source_vcf_file",
         "source_tagged_bam",
         "phase_block_status",
+        *VERIFICATION_PROVENANCE_COLUMNS,
+        *PROVENANCE_METADATA_FIELDS,
     ]
     rows: List[pd.DataFrame] = []
     for sample in sorted(all_df["sample"].dropna().unique().tolist()):
@@ -2058,7 +2189,12 @@ def write_round_summary(
     (output_dir / "round_summary.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_round_context(output_dir: Path, configs: Sequence[DatasetConfig], generated_at: str) -> None:
+def write_round_context(
+    output_dir: Path,
+    configs: Sequence[DatasetConfig],
+    generated_at: str,
+    verification_receipt: Optional[Dict[str, object]] = None,
+) -> None:
     payload = {
         "generated_at": generated_at,
         "workspace_type": "observation_workspace",
@@ -2067,6 +2203,7 @@ def write_round_context(output_dir: Path, configs: Sequence[DatasetConfig], gene
         "dataset_ids": [config.dataset_id for config in configs],
         "samples": sorted({config.sample for config in configs}),
         "modes": sorted({config.mode for config in configs}),
+        "verification_contract": verification_receipt or {"status": "PENDING_INPUT_VALIDATION"},
         "notes": [
             "LOH round is observation-first, not intervention-first.",
             "core hp ratio is recomputed from HP1FamilyN and HP2FamilyN.",
@@ -2076,7 +2213,11 @@ def write_round_context(output_dir: Path, configs: Sequence[DatasetConfig], gene
     write_json(output_dir / "round_context.json", payload)
 
 
-def build_workspace(output_dir: Path, configs: Sequence[DatasetConfig]) -> None:
+def build_workspace(
+    output_dir: Path,
+    configs: Sequence[DatasetConfig],
+    allow_unversioned_v1: bool = False,
+) -> None:
     generated_at = generated_at_string()
     ensure_dir(output_dir)
     ensure_dir(output_dir / "figures")
@@ -2092,11 +2233,43 @@ def build_workspace(output_dir: Path, configs: Sequence[DatasetConfig]) -> None:
     all_frames = []
     for idx, config in enumerate(ready_configs, start=1):
         print(f"[3/9] load dataset {idx}/{len(ready_configs)}: {config.dataset_id}")
-        all_frames.append(load_dataset_rows(config))
+        all_frames.append(
+            load_dataset_rows(config, allow_unversioned_v1=allow_unversioned_v1)
+        )
     all_frames = [frame for frame in all_frames if not frame.empty]
     if not all_frames:
         raise RuntimeError("No ready datasets produced region rows.")
     all_df = pd.concat(all_frames, ignore_index=True)
+    provenance_statuses = sorted(
+        all_df["VerificationProvenanceStatus"].dropna().astype(str).unique().tolist()
+    )
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(
+            f"LOH round provenance: mixed schema statuses across datasets: {provenance_statuses}"
+        )
+    verification_receipt = {
+        "schema_status": provenance_statuses[0],
+        "schema_versions": sorted(
+            {
+                value
+                for value in all_df["VerificationSchemaVersion"].dropna().astype(str)
+                if value.strip()
+            }
+        ),
+        "current_selection_field": sorted(
+            all_df["VerificationProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        ),
+        "loh_selection_field": sorted(
+            all_df["LOHProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        ),
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "unknown_current_counts": sorted(
+            all_df["VerificationUnknownCurrentCounts"].dropna().astype(str).unique().tolist()
+        ),
+        "provenance_fields": list(VERIFICATION_PROVENANCE_COLUMNS),
+    }
+    write_json(output_dir / "verification_schema_contract.json", verification_receipt)
+    write_round_context(output_dir, configs, generated_at, verification_receipt)
     all_df = all_df.sort_values(["sample_label", "mode", "truth_label", "Chr", "Pos"]).reset_index(drop=True)
     all_region_path = output_dir / "all_region_rows.tsv.gz"
     all_df.to_csv(all_region_path, sep="\t", index=False, compression="gzip")
@@ -2175,7 +2348,11 @@ def main() -> None:
     selected_samples = set(args.sample or [])
     configs = [config for config in DATASET_CONFIGS if not selected_samples or config.sample in selected_samples or config.sample_label in selected_samples]
     output_dir = Path(args.output_dir)
-    build_workspace(output_dir, configs)
+    build_workspace(
+        output_dir,
+        configs,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
 
 
 if __name__ == "__main__":

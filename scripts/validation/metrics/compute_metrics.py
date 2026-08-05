@@ -11,11 +11,38 @@ Usage:
 """
 
 import argparse
-import csv
 import json
 import os
 import sys
+import warnings
 from collections import Counter
+from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    V1_CURRENT_CLASSES,
+    SchemaContractError,
+    read_evidence,
+    select_current_view,
+)
+
+
+PROVENANCE_FIELDS = [
+    "VerificationClass_V1_Deprecated",
+    "VerificationClass_Legacy",
+    "LabelFirstSupport",
+    "ClusterFirstSupport",
+    "WithinHPSupport",
+    "DispersionWarning",
+    "EvidencePath",
+    "EvidenceDerivation",
+]
 
 
 def find_metrics_files(root_dir):
@@ -42,7 +69,68 @@ def load_metrics_json(filepath):
         return json.load(f)
 
 
-def extract_significance_stats(csv_path):
+def _serialized_distribution(series):
+    return {
+        str(key): int(value)
+        for key, value in series.astype("string").fillna("NA").value_counts().sort_index().items()
+    }
+
+
+def _canonical_evidence_distribution(series):
+    """Serialize typed evidence booleans as the schema's true/false/NA tokens."""
+    values = series.map(
+        lambda value: "NA" if pd.isna(value) else ("true" if bool(value) else "false")
+    )
+    return _serialized_distribution(values)
+
+
+def _normalize_significance_taxonomy(frame, csv_path, allow_unversioned_v1=False):
+    """Validate a current taxonomy without deriving missing evidence from class labels."""
+    result = frame.copy()
+    if "VerificationSchemaVersion" in result.columns:
+        missing = [field for field in PROVENANCE_FIELDS if field not in result.columns]
+        if missing:
+            raise SchemaContractError(
+                f"{csv_path}: missing v2 provenance fields: {', '.join(missing)}"
+            )
+        current = select_current_view(result)
+        evidence = read_evidence(result)
+        result["VerificationClass"] = current.values
+        metadata = current.metadata()
+        metadata["evidence_available"] = True
+        metadata["evidence_fields"] = list(PROVENANCE_FIELDS)
+        return result, evidence, metadata
+
+    if "VerificationClass" not in result.columns:
+        raise SchemaContractError(f"{csv_path}: VerificationClass is missing")
+    if not allow_unversioned_v1:
+        raise SchemaContractError(
+            f"{csv_path}: unversioned current taxonomy requires --allow-unversioned-v1"
+        )
+    raw = result["VerificationClass"].astype("string")
+    valid = raw.isin(V1_CURRENT_CLASSES)
+    unknown_counts = {
+        str(key): int(value)
+        for key, value in raw[~valid].fillna("<MISSING>").value_counts().sort_index().items()
+    }
+    result["VerificationClass"] = raw.where(valid, UNKNOWN_CURRENT_CLASS)
+    message = (
+        f"UNVERSIONED: {csv_path} accepted as historical v1 current taxonomy under explicit "
+        "--allow-unversioned-v1; v2 evidence provenance is unavailable"
+    )
+    warnings.warn(message, UserWarning, stacklevel=2)
+    return result, None, {
+        "selection_field": "VerificationClass",
+        "schema_status": "UNVERSIONED_V1",
+        "categories": list(V1_CURRENT_CLASSES) + [UNKNOWN_CURRENT_CLASS],
+        "unknown_counts": unknown_counts,
+        "warnings": [message],
+        "evidence_available": False,
+        "evidence_fields": [],
+    }
+
+
+def extract_significance_stats(csv_path, allow_unversioned_v1=False):
     """Extract distribution statistics from significance_summary.csv.
 
     Returns a dict with:
@@ -52,42 +140,29 @@ def extract_significance_stats(csv_path):
       - dominant_label_dist: Counter of DominantLabel values
       - region_count: total regions in CSV
     """
-    verification_classes = Counter()
+    try:
+        frame = pd.read_csv(csv_path, keep_default_na=False, low_memory=False)
+    except (OSError, pd.errors.ParserError) as exc:
+        raise SchemaContractError(f"{csv_path}: cannot parse significance summary: {exc}") from exc
+    frame, evidence, taxonomy = _normalize_significance_taxonomy(
+        frame,
+        csv_path,
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+
+    verification_classes = Counter(frame["VerificationClass"].astype(str).tolist())
     quality_scores = []
     hpfine_ngroups = Counter()
     dominant_labels = Counter()
-    region_count = 0
+    region_count = len(frame.index)
 
-    try:
-        with open(csv_path, "r") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                region_count += 1
-
-                vc = row.get("VerificationClass", "Unknown")
-                if vc:
-                    verification_classes[vc] += 1
-
-                qs = row.get("Quality_Score", "")
-                if qs:
-                    try:
-                        quality_scores.append(float(qs))
-                    except (ValueError, TypeError):
-                        pass
-
-                hpfn = row.get("HPFineNGroups", "")
-                if hpfn:
-                    try:
-                        hpfine_ngroups[int(float(hpfn))] += 1
-                    except (ValueError, TypeError):
-                        pass
-
-                dl = row.get("DominantLabel", "")
-                if dl:
-                    dominant_labels[dl] += 1
-    except Exception as e:
-        print(f"[WARN] Failed to parse {csv_path}: {e}", file=sys.stderr)
-        return None
+    if "Quality_Score" in frame.columns:
+        quality_scores = pd.to_numeric(frame["Quality_Score"], errors="coerce").dropna().tolist()
+    if "HPFineNGroups" in frame.columns:
+        hp_values = pd.to_numeric(frame["HPFineNGroups"], errors="coerce").dropna()
+        hpfine_ngroups.update(int(value) for value in hp_values.tolist())
+    if "DominantLabel" in frame.columns:
+        dominant_labels.update(value for value in frame["DominantLabel"].astype(str) if value)
 
     # Compute quality score statistics
     qs_stats = {}
@@ -104,13 +179,35 @@ def extract_significance_stats(csv_path):
             "count": n,
         }
 
-    return {
+    result = {
         "region_count": region_count,
         "verification_class_dist": dict(verification_classes),
+        "verification_taxonomy": taxonomy,
         "quality_score_stats": qs_stats,
         "hpfine_ngroups_dist": {str(k): v for k, v in sorted(hpfine_ngroups.items())},
         "dominant_label_dist": dict(dominant_labels),
     }
+    if evidence is not None:
+        result["verification_class_v1_deprecated_dist"] = _serialized_distribution(
+            frame["VerificationClass_V1_Deprecated"]
+        )
+        result["verification_class_legacy_dist"] = _serialized_distribution(
+            frame["VerificationClass_Legacy"]
+        )
+        boolean_fields = {
+            "LabelFirstSupport", "ClusterFirstSupport", "WithinHPSupport", "DispersionWarning"
+        }
+        result["verification_evidence_dist"] = {
+            field: (
+                _canonical_evidence_distribution(evidence[field])
+                if field in boolean_fields
+                else _serialized_distribution(evidence[field])
+            )
+            for field in evidence.columns
+        }
+    else:
+        result["verification_evidence_dist"] = {"available": False}
+    return result
 
 
 def infer_sample_mode(metrics_data, filepath):
@@ -120,7 +217,7 @@ def infer_sample_mode(metrics_data, filepath):
     return sample, mode
 
 
-def build_metrics_bundle(experiment_dir):
+def build_metrics_bundle(experiment_dir, allow_unversioned_v1=False):
     """Build a complete metrics bundle from experiment output."""
     metrics_files = find_metrics_files(experiment_dir)
     sig_files = find_significance_summaries(experiment_dir)
@@ -169,10 +266,13 @@ def build_metrics_bundle(experiment_dir):
         bundle["samples"][sample][mode] = entry
 
     # Process significance_summary.csv files (match to TP/FP labels)
+    taxonomy_sources = []
     for sf in sig_files:
-        sig_stats = extract_significance_stats(sf)
-        if sig_stats is None:
-            continue
+        sig_stats = extract_significance_stats(
+            sf,
+            allow_unversioned_v1=allow_unversioned_v1,
+        )
+        taxonomy_sources.append({"source_file": sf, **sig_stats["verification_taxonomy"]})
 
         # Try to match to a sample/mode by path
         # Path pattern: .../SAMPLE/MODE/RUN_ID/intersubmod_tp/...
@@ -192,6 +292,18 @@ def build_metrics_bundle(experiment_dir):
                         bundle["samples"][sample][mode][key] = sig_stats
                         break
 
+    statuses = sorted({item["schema_status"] for item in taxonomy_sources})
+    if len(statuses) > 1:
+        raise SchemaContractError(
+            f"significance summaries mix taxonomy schema statuses: {statuses}"
+        )
+    bundle["verification_taxonomy"] = {
+        "schema_status": statuses[0] if statuses else "NO_SIGNIFICANCE_FILES",
+        "selection_field": "VerificationClass" if statuses else None,
+        "source_count": len(taxonomy_sources),
+        "sources": taxonomy_sources,
+    }
+
     return bundle
 
 
@@ -201,13 +313,25 @@ def main():
                         help="Root directory of experiment output")
     parser.add_argument("--output", default=None,
                         help="Output path for metrics bundle JSON (default: stdout)")
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize historical unversioned v1 current taxonomy summaries.",
+    )
     args = parser.parse_args()
 
     if not os.path.isdir(args.experiment_dir):
         print(f"[ERROR] Experiment directory not found: {args.experiment_dir}", file=sys.stderr)
         sys.exit(1)
 
-    bundle = build_metrics_bundle(args.experiment_dir)
+    try:
+        bundle = build_metrics_bundle(
+            args.experiment_dir,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        print(f"[ERROR][schema-contract] {exc}", file=sys.stderr)
+        sys.exit(2)
 
     # Print summary
     sample_count = len(bundle["samples"])

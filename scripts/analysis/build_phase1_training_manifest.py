@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
@@ -13,11 +15,33 @@ import pandas as pd
 
 from research_common import ensure_dir, to_float, write_json, write_tsv_rows
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
+
 
 OUTPUT_ROOT_DEFAULT = Path(
     "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/"
     "20260325_phase1_training_manifest_v1"
 )
+
+PROVENANCE_METADATA_FIELDS = [
+    "VerificationProvenanceStatus",
+    "VerificationProvenanceSourceField",
+    "VerificationProvenanceWarnings",
+]
+PROVENANCE_EXPORT_FIELDS = list(VERIFICATION_PROVENANCE_COLUMNS) + PROVENANCE_METADATA_FIELDS
 
 
 @dataclass(frozen=True)
@@ -279,10 +303,9 @@ MANIFEST_FIELDS = [
     "PairwiseMedianDist",
     "AlleleDelta",
     "DominantLabel",
-    "VerificationClass",
     "Potential_LOH",
     "Coverage_Category",
-    "LOH_Subtype",
+    *PROVENANCE_EXPORT_FIELDS,
     "Quality_Score",
     "Quality_Tier",
     "Significant",
@@ -323,10 +346,9 @@ READ_LEVEL_FIELDS = [
     "PairwiseMedianDist",
     "AlleleDelta",
     "DominantLabel",
-    "VerificationClass",
     "Potential_LOH",
     "Coverage_Category",
-    "LOH_Subtype",
+    *PROVENANCE_EXPORT_FIELDS,
     "Quality_Score",
     "Quality_Tier",
     "Significant",
@@ -365,6 +387,11 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=0,
         help="Number of regions to expand into read-level rows per dataset per scope. Default: 0.",
+    )
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize legacy H1 input without VerificationSchemaVersion.",
     )
     parser.add_argument("--output-dir", default=str(OUTPUT_ROOT_DEFAULT), help="Output directory.")
     return parser.parse_args()
@@ -411,8 +438,71 @@ def resolve_region_dir(root: Path, region_key: str) -> Optional[Path]:
     return None
 
 
-def load_summary(path: Path, scope: str) -> pd.DataFrame:
-    df = pd.read_csv(path)
+def attach_input_provenance(df: pd.DataFrame, allow_unversioned_v1: bool = False) -> pd.DataFrame:
+    """Validate one source table and attach explicit pass-through receipt columns."""
+
+    selected = df.copy()
+    if "VerificationSchemaVersion" in selected.columns:
+        current = select_current_view(selected)
+        select_legacy_view(selected)
+        read_evidence(selected)
+        select_loh_legacy(selected)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in selected.columns]
+        if missing:
+            raise SchemaContractError(
+                "phase1 manifest provenance: missing required columns: " + ", ".join(missing)
+            )
+        known_mask = current.values != UNKNOWN_CURRENT_CLASS
+        if known_mask.any():
+            extract_provenance_frame(selected.loc[known_mask])
+        schema_status = "V2"
+        source_field = current.field
+        warning_payload = {
+            "unknown_current_counts": current.unknown_counts,
+            "messages": list(current.warning_messages),
+        }
+    else:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "phase1 manifest provenance: VerificationSchemaVersion missing; "
+                "rerun with --allow-unversioned-v1 only for authorized historical H1 input"
+            )
+        select_loh_legacy(selected, allow_unversioned_v1=True)
+        provenance = extract_provenance_frame(selected, allow_unversioned_v1=True)
+        schema_status = "UNVERSIONED_V1"
+        source_field = str(provenance.attrs.get("selection_field", "VerificationClass"))
+        warning_payload = {
+            "authorization": "--allow-unversioned-v1",
+            "messages": list(provenance.attrs.get("warnings", [])),
+        }
+        for field in VERIFICATION_PROVENANCE_COLUMNS:
+            if field not in selected.columns:
+                selected[field] = ""
+
+    selected["VerificationProvenanceStatus"] = schema_status
+    selected["VerificationProvenanceSourceField"] = source_field
+    selected["VerificationProvenanceWarnings"] = json.dumps(
+        warning_payload, ensure_ascii=False, sort_keys=True
+    )
+    return selected
+
+
+def provenance_export_value(row: pd.Series, field: str) -> object:
+    """Serialize validated missing evidence without emitting the invalid literal ``nan``."""
+    value = row.get(field, "")
+    if not pd.isna(value):
+        return value
+    if (
+        row.get("VerificationProvenanceStatus") == "V2"
+        and field in {"WithinHPSupport", "DispersionWarning"}
+    ):
+        return "NA"
+    return ""
+
+
+def load_summary(path: Path, scope: str, allow_unversioned_v1: bool = False) -> pd.DataFrame:
+    df = pd.read_csv(path, keep_default_na=False, low_memory=False)
+    df = attach_input_provenance(df, allow_unversioned_v1=allow_unversioned_v1)
     df["region_key"] = df.apply(lambda row: f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}", axis=1)
     df["source_scope"] = scope
     df["truth_status"] = "TP" if scope == "tp" else "FP"
@@ -420,14 +510,22 @@ def load_summary(path: Path, scope: str) -> pd.DataFrame:
     return df
 
 
-def build_manifest_for_dataset(cfg: BaselineDatasetConfig) -> List[Dict[str, object]]:
+def build_manifest_for_dataset(
+    cfg: BaselineDatasetConfig,
+    allow_unversioned_v1: bool = False,
+) -> List[Dict[str, object]]:
     summary = pd.concat(
         [
-            load_summary(cfg.tp_summary_tsv, "tp"),
-            load_summary(cfg.fp_summary_tsv, "fp"),
+            load_summary(cfg.tp_summary_tsv, "tp", allow_unversioned_v1),
+            load_summary(cfg.fp_summary_tsv, "fp", allow_unversioned_v1),
         ],
         ignore_index=True,
     )
+    provenance_statuses = sorted(summary["VerificationProvenanceStatus"].dropna().unique().tolist())
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(
+            f"phase1 manifest provenance: mixed schema statuses within dataset: {provenance_statuses}"
+        )
     rows: List[Dict[str, object]] = []
     for _, row in summary.iterrows():
         rows.append(
@@ -456,10 +554,9 @@ def build_manifest_for_dataset(cfg: BaselineDatasetConfig) -> List[Dict[str, obj
                 "PairwiseMedianDist": to_float(row.get("PairwiseMedianDist")),
                 "AlleleDelta": to_float(row.get("AlleleDelta")),
                 "DominantLabel": row.get("DominantLabel", ""),
-                "VerificationClass": row.get("VerificationClass", ""),
                 "Potential_LOH": row.get("Potential_LOH", ""),
                 "Coverage_Category": row.get("Coverage_Category", ""),
-                "LOH_Subtype": row.get("LOH_Subtype", ""),
+                **{field: provenance_export_value(row, field) for field in PROVENANCE_EXPORT_FIELDS},
                 "Quality_Score": to_float(row.get("Quality_Score")),
                 "Quality_Tier": row.get("Quality_Tier", ""),
                 "Significant": row.get("Significant", ""),
@@ -681,9 +778,21 @@ def main() -> None:
 
     manifest_rows: List[Dict[str, object]] = []
     for dataset_id in dataset_ids:
-        manifest_rows.extend(build_manifest_for_dataset(DATASET_CONFIG[dataset_id]))
+        manifest_rows.extend(
+            build_manifest_for_dataset(
+                DATASET_CONFIG[dataset_id],
+                allow_unversioned_v1=args.allow_unversioned_v1,
+            )
+        )
 
     manifest_df = pd.DataFrame(manifest_rows)
+    provenance_statuses = sorted(
+        manifest_df["VerificationProvenanceStatus"].dropna().unique().tolist()
+    )
+    if len(provenance_statuses) != 1:
+        raise SchemaContractError(
+            f"phase1 manifest provenance: mixed schema statuses across datasets: {provenance_statuses}"
+        )
     selected_for_read_export = choose_regions_for_read_export(manifest_df, args.read_export_limit_per_scope)
 
     read_rows: List[Dict[str, object]] = []
@@ -735,6 +844,9 @@ def main() -> None:
             "read_export_limit_per_scope": args.read_export_limit_per_scope,
             "output_dir": str(output_dir),
             "strategy": "summary-first manifest + selected-region resolve",
+            "verification_provenance_status": provenance_statuses[0],
+            "allow_unversioned_v1": args.allow_unversioned_v1,
+            "verification_provenance_fields": PROVENANCE_EXPORT_FIELDS,
         },
     )
 

@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import math
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -14,6 +16,24 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    CURRENT_CLASSES_V2,
+    LEGACY_CLASSES,
+    LOH_LEGACY_CLASSES,
+    UNKNOWN_CURRENT_CLASS,
+    VERIFICATION_PROVENANCE_COLUMNS,
+    SchemaContractError,
+    extract_provenance_frame,
+    read_evidence,
+    select_current_view,
+    select_legacy_view,
+    select_loh_legacy,
+)
 
 
 RNG_SEED = 20260329
@@ -45,6 +65,18 @@ BASE_COLORS = {
     "Strong": "#2563eb",
     "Subclone": "#d97706",
     "Unknown": "#64748b",
+    "Strong_Bidirectional": "#1d4ed8",
+    "ClusterFirstOnly": "#d97706",
+    "LOH-Structure": "#7c3aed",
+    "MultiGroupNoLabel": "#0891b2",
+    "LabelShift": "#0f766e",
+    "PermanovaLocation": "#2563eb",
+    "StructureNoLabel": "#4f46e5",
+    "DispersionStructure": "#be123c",
+    "Noise_Uniform": "#6b7280",
+    "Noise_Chaotic": "#4b5563",
+    "Noise_Uncorrelated": "#9ca3af",
+    UNKNOWN_CURRENT_CLASS: "#64748b",
 }
 
 
@@ -52,6 +84,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--round1-dir", default=str(ROUND1_DIR_DEFAULT))
     parser.add_argument("--output-dir", default=str(OUTPUT_DIR_DEFAULT))
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Explicitly authorize an old Round 1 workspace without schema metadata.",
+    )
     return parser.parse_args()
 
 
@@ -73,7 +110,153 @@ def save_fig(fig: plt.Figure, path: Path) -> None:
     plt.close(fig)
 
 
-def load_round1_tables(round1_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def validate_round1_provenance(
+    verif_df: pd.DataFrame,
+    all_df: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> dict[str, object]:
+    """Validate derived grouping identity and the source-row provenance receipt."""
+
+    if "VerificationProvenanceStatus" not in all_df.columns:
+        if not allow_unversioned_v1:
+            raise SchemaContractError(
+                "LOH v2 figures: upstream schema metadata missing; explicit "
+                "--allow-unversioned-v1 is required for a historical workspace"
+            )
+        historical = all_df[["verification_class", "loh_subtype"]].rename(
+            columns={"verification_class": "VerificationClass", "loh_subtype": "LOH_Subtype"}
+        )
+        extract_provenance_frame(historical, allow_unversioned_v1=True)
+        all_df["VerificationProvenanceStatus"] = "UNVERSIONED_DERIVED"
+        verif_df["VerificationProvenanceStatus"] = "UNVERSIONED_DERIVED"
+        return {
+            "schema_status": "UNVERSIONED_DERIVED",
+            "class_order": list(LEGACY_CLASSES),
+            "authorization": "--allow-unversioned-v1",
+            "provenance_fields": [],
+        }
+
+    statuses = sorted(
+        all_df["VerificationProvenanceStatus"].dropna().astype(str).unique().tolist()
+    )
+    if len(statuses) != 1:
+        raise SchemaContractError(f"LOH v2 figures: mixed source schema statuses: {statuses}")
+    status = statuses[0]
+    summary_statuses = sorted(
+        verif_df.get("VerificationProvenanceStatus", pd.Series(dtype=str))
+        .dropna()
+        .astype(str)
+        .unique()
+        .tolist()
+    )
+    if summary_statuses != [status]:
+        raise SchemaContractError(
+            "LOH v2 figures: derived verification table status does not match source rows: "
+            f"source={statuses}, derived={summary_statuses}"
+        )
+
+    if status == "V2":
+        required_summary_metadata = [
+            "VerificationSchemaVersion",
+            "VerificationProvenanceSourceField",
+            "LOHProvenanceSourceField",
+        ]
+        missing_summary_metadata = [
+            field for field in required_summary_metadata if field not in verif_df.columns
+        ]
+        if missing_summary_metadata:
+            raise SchemaContractError(
+                "LOH v2 figures: derived verification table missing schema metadata: "
+                + ", ".join(missing_summary_metadata)
+            )
+        current = select_current_view(all_df)
+        select_legacy_view(all_df)
+        read_evidence(all_df)
+        loh = select_loh_legacy(all_df)
+        missing = [field for field in VERIFICATION_PROVENANCE_COLUMNS if field not in all_df.columns]
+        if missing:
+            raise SchemaContractError(
+                "LOH v2 figures: source rows missing provenance fields: " + ", ".join(missing)
+            )
+        known = current.values != UNKNOWN_CURRENT_CLASS
+        if known.any():
+            extract_provenance_frame(all_df.loc[known])
+        if not all_df["verification_class"].astype(str).equals(current.values.astype(str)):
+            raise SchemaContractError(
+                "LOH v2 figures: derived verification_class is not the validated current C2 view"
+            )
+        if not all_df["loh_subtype"].astype(str).equals(loh.values.astype(str)):
+            raise SchemaContractError(
+                "LOH v2 figures: derived loh_subtype is not canonical LOH_Subtype_LegacyVC"
+            )
+        current_sources = sorted(
+            all_df["VerificationProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        )
+        loh_sources = sorted(
+            all_df["LOHProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        )
+        summary_current_sources = sorted(
+            verif_df["VerificationProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        )
+        summary_loh_sources = sorted(
+            verif_df["LOHProvenanceSourceField"].dropna().astype(str).unique().tolist()
+        )
+        if current_sources != ["VerificationClass"] or summary_current_sources != current_sources:
+            raise SchemaContractError(
+                "LOH v2 figures: current-view provenance source must be VerificationClass"
+            )
+        if loh_sources != ["LOH_Subtype_LegacyVC"] or summary_loh_sources != loh_sources:
+            raise SchemaContractError(
+                "LOH v2 figures: LOH provenance source must be LOH_Subtype_LegacyVC"
+            )
+        versions = pd.to_numeric(verif_df["VerificationSchemaVersion"], errors="coerce")
+        if versions.isna().any() or sorted(versions.unique().tolist()) != [2.0]:
+            raise SchemaContractError(
+                "LOH v2 figures: derived verification table must carry VerificationSchemaVersion=2"
+            )
+        invalid_classes = sorted(
+            set(verif_df["verification_class"].dropna().astype(str))
+            - set(CURRENT_CLASSES_V2)
+            - {UNKNOWN_CURRENT_CLASS}
+        )
+        invalid_loh = sorted(
+            set(verif_df["loh_subtype"].dropna().astype(str)) - set(LOH_LEGACY_CLASSES)
+        )
+        if invalid_classes or invalid_loh:
+            raise SchemaContractError(
+                f"LOH v2 figures: invalid derived classes current={invalid_classes}, loh={invalid_loh}"
+            )
+        return {
+            "schema_status": status,
+            "class_order": list(CURRENT_CLASSES_V2) + [UNKNOWN_CURRENT_CLASS],
+            "schema_versions": [2],
+            "current_selection_field": "VerificationClass",
+            "loh_selection_field": "LOH_Subtype_LegacyVC",
+            "provenance_fields": list(VERIFICATION_PROVENANCE_COLUMNS),
+        }
+
+    if status != "UNVERSIONED_V1":
+        raise SchemaContractError(f"LOH v2 figures: unsupported schema status {status!r}")
+    if not allow_unversioned_v1:
+        raise SchemaContractError(
+            "LOH v2 figures: UNVERSIONED_V1 input requires --allow-unversioned-v1 authorization"
+        )
+    historical = all_df[["verification_class", "loh_subtype"]].rename(
+        columns={"verification_class": "VerificationClass", "loh_subtype": "LOH_Subtype"}
+    )
+    extract_provenance_frame(historical, allow_unversioned_v1=True)
+    return {
+        "schema_status": status,
+        "class_order": list(LEGACY_CLASSES),
+        "authorization": "--allow-unversioned-v1",
+        "provenance_fields": ["VerificationClass", "LOH_Subtype"],
+    }
+
+
+def load_round1_tables(
+    round1_dir: Path,
+    allow_unversioned_v1: bool = False,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     loh_df = pd.read_csv(round1_dir / "loh_enrichment_by_sample_mode.tsv", sep="\t")
     verif_df = pd.read_csv(round1_dir / "verificationclass_by_loh_subtype.tsv", sep="\t")
     usecols = [
@@ -94,7 +277,30 @@ def load_round1_tables(round1_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd
         "hp3_ratio",
         "caller_af",
     ]
-    all_df = pd.read_csv(round1_dir / "all_region_rows.tsv.gz", sep="\t", usecols=usecols, low_memory=False)
+    all_path = round1_dir / "all_region_rows.tsv.gz"
+    available = pd.read_csv(all_path, sep="\t", nrows=0).columns.tolist()
+    provenance_candidates = [
+        *VERIFICATION_PROVENANCE_COLUMNS,
+        "VerificationProvenanceStatus",
+        "VerificationProvenanceSourceField",
+        "VerificationProvenanceWarnings",
+        "VerificationUnknownCurrentCounts",
+        "LOHProvenanceSourceField",
+    ]
+    required_missing = [field for field in usecols if field not in available]
+    if required_missing:
+        raise SchemaContractError(
+            "LOH v2 figures: source table missing required columns: " + ", ".join(required_missing)
+        )
+    selected_cols = usecols + [field for field in provenance_candidates if field in available]
+    all_df = pd.read_csv(all_path, sep="\t", usecols=selected_cols, low_memory=False)
+    receipt = validate_round1_provenance(
+        verif_df,
+        all_df,
+        allow_unversioned_v1=allow_unversioned_v1,
+    )
+    all_df.attrs["verification_contract"] = receipt
+    verif_df.attrs["verification_contract"] = receipt
     numeric_cols = [
         "effective_hp_reads",
         "hp_ratio_core",
@@ -275,10 +481,13 @@ def plot_fig04(verif_df: pd.DataFrame, out_path: Path) -> None:
     order = [f"{sample}|{mode}|{truth}" for sample in SAMPLE_ORDER for mode in MODE_ORDER for truth in ["TP", "FP"]]
     order = [x for x in order if x in set(df["sample_mode_truth"])]
 
-    combo_order = []
-    for cls in ["Noise", "Weak", "Strong", "Subclone"]:
-        combo_order.append((cls, "None"))
-        combo_order.append((cls, f"LOH_{cls}" if cls != "Subclone" else "LOH_Subclone"))
+    receipt = verif_df.attrs.get("verification_contract", {})
+    class_order = receipt.get("class_order", list(LEGACY_CLASSES))
+    combo_order = [
+        (cls, subtype)
+        for cls in class_order
+        for subtype in LOH_LEGACY_CLASSES
+    ]
     combo_order = [x for x in combo_order if ((df["verification_class"] == x[0]) & (df["loh_subtype"] == x[1])).any()]
 
     pivot = pd.DataFrame(index=order)
@@ -492,7 +701,15 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    loh_df, verif_df, all_df = load_round1_tables(round1_dir)
+    loh_df, verif_df, all_df = load_round1_tables(
+        round1_dir,
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    receipt = all_df.attrs.get("verification_contract", {})
+    (output_dir / "verification_schema_contract.json").write_text(
+        json.dumps(receipt, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     plot_fig01(loh_df, output_dir / "fig01_loh_like_fraction_overview.png")
     plot_fig02(all_df, output_dir / "fig02_hp_ratio_core_distribution.png")
     plot_fig03(all_df, output_dir / "fig03_effective_hp_vs_hp_ratio_scatter.png")

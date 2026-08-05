@@ -5,16 +5,17 @@ Inputs
 ------
 research/ng_kde_rescaling/data/merged_7samples_paired_full_plus_hcc1395_to.tsv.gz
     Columns of interest:
-      sample, mode, tp_label, LOH_Subtype, AF_class, AF, Coverage_Multiple,
+      sample, mode, tp_label, LOH_Subtype_LegacyVC, AF_class, AF,
+      Coverage_Multiple,
       LOH_Bed_Overlap, HPFineNGroups, ...
 
 Schemes (Thread B definitions, week-aligned)
 -------------------------------------------
   S1: LOH_Strong AND AF_class == Extreme  (AF<0.1 or >0.9)
   S2: LOH_Subclone AND AF in (0.1,0.4] U [0.6,0.9)
-  S3: Diploid Het = (LOH_Subtype=='None') AND (AF in [0.4,0.6]) AND (CovM in [0.65,1.33])
+  S3: Diploid Het = (LOH_Subtype_LegacyVC=='None') AND (AF in [0.4,0.6]) AND (CovM in [0.65,1.33])
       (CN tier T1/T2 — near-diploid)
-  S4: (LOH_Subtype=='None') AND AF_class == Extreme          (ambiguous)
+  S4: (LOH_Subtype_LegacyVC=='None') AND AF_class == Extreme (ambiguous)
   S5: (S1 OR S2 OR S3) AND NOT S4                            (combo-clean)
   S6: S1 AND HPFineNGroups >= 3
   S7: S5 AND HPFineNGroups >= 3
@@ -31,9 +32,11 @@ docs/experiments/in_progress/2026/04/figures/20260423_phase3_synthesis/
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -43,11 +46,16 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy import stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import select_loh_legacy
+
 # ---------------------------------------------------------------------------
 ROOT = Path("/big7_disk/liaoyoyo2001/InterSubMod")
 SRC = ROOT / "research/ng_kde_rescaling/data/merged_7samples_paired_full_plus_hcc1395_to.tsv.gz"
 OUT_DIR = ROOT / "docs/experiments/in_progress/2026/04/figures/20260423_phase3_synthesis"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 B1_JSON = ROOT / "research/tpfp_loh_af_kde_discrimination/data/obs18_wilcoxon_B1.json"
 B3_JSON = ROOT / "research/tpfp_loh_af_kde_discrimination/data/B3_wilcoxon_gap_stats.json"
@@ -64,6 +72,35 @@ COVM_DIPLOID_HI = 1.33
 
 # ---------------------------------------------------------------------------
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help=(
+            "Explicitly authorize the historical unversioned LOH_Subtype field; "
+            "versioned input requires canonical LOH_Subtype_LegacyVC plus exact alias"
+        ),
+    )
+    return parser.parse_args()
+
+
+def attach_loh_legacy_view(
+    frame: pd.DataFrame,
+    allow_unversioned_v1: bool = False,
+) -> pd.DataFrame:
+    """Attach canonical legacy-derived LOH view and provenance metadata."""
+    view = select_loh_legacy(frame, allow_unversioned_v1=allow_unversioned_v1)
+    prepared = frame.copy()
+    prepared["_loh_subtype_legacy"] = view.values
+    prepared.attrs["loh_schema_contract"] = {
+        "selection_field": view.field,
+        "schema_status": view.schema_status,
+        "allow_unversioned_v1": allow_unversioned_v1,
+        "warnings": list(view.warning_messages),
+    }
+    return prepared
+
 def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     """Wilson score 95% CI for a binomial proportion."""
     if n == 0:
@@ -79,7 +116,7 @@ def classify_schemes(df: pd.DataFrame) -> pd.DataFrame:
     """Annotate boolean columns S1..S7 per row."""
     af = df["AF"].astype(float)
     af_class = df["AF_class"].astype(str)
-    loh = df["LOH_Subtype"].fillna("None").astype(str)
+    loh = df["_loh_subtype_legacy"].astype("string")
     covm = df["Coverage_Multiple"].astype(float)
     ng = df["HPFineNGroups"].astype(float)
 
@@ -266,8 +303,14 @@ def ng_gap_aggregate(b1_json: dict, b2_overlay_note: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    args = parse_args()
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[load] {SRC}")
-    df = pd.read_csv(SRC, sep="\t", low_memory=False)
+    df = attach_loh_legacy_view(
+        pd.read_csv(SRC, sep="\t", low_memory=False),
+        allow_unversioned_v1=args.allow_unversioned_v1,
+    )
+    loh_schema_contract = dict(df.attrs["loh_schema_contract"])
     print(f"[load] rows={len(df)}, samples={sorted(df['sample'].unique())}, modes={sorted(df['mode'].unique())}")
 
     df = classify_schemes(df)
@@ -316,13 +359,14 @@ def main() -> None:
         "analysis": "Phase3_Cross_Sample_S1S7_Synthesis",
         "date": "2026-04-23",
         "source_tsv": str(SRC),
+        "loh_schema_contract": loh_schema_contract,
         "to_samples": TO_SAMPLES,
         "paired_samples": PAIRED_SAMPLES,
         "scheme_definitions": {
-            "S1": "LOH_Strong AND AF_class=Extreme",
-            "S2": "LOH_Subclone AND AF in (0.1, 0.4] U [0.6, 0.9)",
-            "S3": "LOH=None AND AF in [0.4, 0.6] AND CovM in [0.65, 1.33]",
-            "S4": "LOH=None AND AF_class=Extreme (ambiguous)",
+            "S1": "LOH_Subtype_LegacyVC=LOH_Strong AND AF_class=Extreme",
+            "S2": "LOH_Subtype_LegacyVC=LOH_Subclone AND AF in (0.1, 0.4] U [0.6, 0.9)",
+            "S3": "LOH_Subtype_LegacyVC=None AND AF in [0.4, 0.6] AND CovM in [0.65, 1.33]",
+            "S4": "LOH_Subtype_LegacyVC=None AND AF_class=Extreme (ambiguous)",
             "S5": "(S1 OR S2 OR S3) AND NOT S4",
             "S6": "S1 AND HPFineNGroups>=3",
             "S7": "S5 AND HPFineNGroups>=3",
