@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4 軸結構偵測判定 — 距離/level/label/PERMANOVA 交集 + 為何判別不同</title>
+<!-- data_sources: /tmp/venn4.json (verified reproduced on ism-review-infra/output/_wg_d1_unified/significance_summary.csv) -->
+<style>
+:root{--mono:"SF Mono",ui-monospace,Menlo,monospace;--bg:#FAF7F0;--card:#fff;--ink:#3a2418;--muted:#8a7a68;--border:#E3DACC;--pass:#2F7D5B;--dead:#9A3B3B;--gold:#8a6d10}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:15px 0;box-shadow:0 1px 3px rgba(90,60,30,.05)}
+h2{font-size:1.14rem;margin:0 0 8px;display:flex;align-items:center;gap:9px}
+h2 .n{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.82rem;flex:none}
+.lead{color:#5e4a38;font-size:.92rem;margin:0 0 12px}
+.fig{margin:10px 0;padding:12px;background:#fcfaf5;border:1px solid var(--border);border-radius:9px;overflow-x:auto}
+.good{background:#eef6f0;border:1px solid #cce5d6;border-left:4px solid var(--pass);border-radius:8px;padding:12px 14px;margin:10px 0;font-size:.9rem}
+.crit{background:#fcefef;border:1px solid #e9cccc;border-left:4px solid var(--dead);border-radius:8px;padding:12px 14px;margin:10px 0;font-size:.88rem;color:#5e2424}
+.tab{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:6px}
+.tab th{background:#f3ece0;padding:8px;text-align:left;border-bottom:2px solid var(--border);font-size:.77rem;color:#5e4a38}
+.tab td{padding:8px;border-bottom:1px solid #f0e9dc;vertical-align:top}
+.tab .r{text-align:right;font-family:var(--mono)}
+.vbadge{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:10px;background:#dcefe3;color:#1f5f43}
+.note{font-size:.82rem;color:var(--muted);margin-top:8px}
+code{background:#f3ece0;border-radius:4px;padding:1px 5px;font-family:var(--mono);font-size:.82em}
+</style></head><body><div class="wrap">
+
+<h1>4 軸結構偵測判定 — 距離 / level / label / PERMANOVA</h1>
+<p class="sub">交集 + 為何判別不同 · 來源 <code>_wg_d1_unified</code>（Option-B reclassify-v2）· 全 30,490 TP · <span class="vbadge">✅ 每個數字已重算驗證</span></p>
+
+<div class="good"><b>數據驗證</b>：你提供的 4 軸 marginal（距離 23,007 / level 7,910 / label 29,615 / PERMANOVA 29,726）與完整交集表（4軸 6,090、0軸 327…）<b>對實際檔逐項重跑、100% 吻合 = 真實正確</b>。先前對不上是因為查了舊 run（無 <code>WithinHP_LevelBimodal</code> 等新欄位）。</div>
+
+<section>
+  <h2><span class="n">1</span>四軸 marginal — 飽和落差是關鍵</h2>
+  <div class="fig"><svg viewBox="0 0 960 216" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img"><text x="12" y="24" font-size="14" font-weight="800" fill="#3a2418">4 軸 marginal 觸發率（全 30,490）— 注意飽和落差</text><text x="12" y="59" font-size="12" font-weight="800" fill="#9a6fb0">PERMANOVA</text><rect x="120" y="44" width="820" height="24" fill="#f0e9dc" rx="4"/><rect x="120" y="44" width="799" height="24" fill="#9a6fb0" rx="4"/><text x="913" y="61" text-anchor="end" font-size="11" font-weight="800" fill="#fff">29,726（97.5%）</text><text x="12" y="97" font-size="12" font-weight="800" fill="#2F7D5B">label</text><rect x="120" y="82" width="820" height="24" fill="#f0e9dc" rx="4"/><rect x="120" y="82" width="796" height="24" fill="#2F7D5B" rx="4"/><text x="910" y="99" text-anchor="end" font-size="11" font-weight="800" fill="#fff">29,615（97.1%）</text><text x="12" y="135" font-size="12" font-weight="800" fill="#5B5BD6">距離</text><rect x="120" y="120" width="820" height="24" fill="#f0e9dc" rx="4"/><rect x="120" y="120" width="619" height="24" fill="#5B5BD6" rx="4"/><text x="733" y="137" text-anchor="end" font-size="11" font-weight="800" fill="#fff">23,007（75.5%）</text><text x="12" y="173" font-size="12" font-weight="800" fill="#C77B3B">level</text><rect x="120" y="158" width="820" height="24" fill="#f0e9dc" rx="4"/><rect x="120" y="158" width="213" height="24" fill="#C77B3B" rx="4"/><text x="327" y="175" text-anchor="end" font-size="11" font-weight="800" fill="#fff">7,910（25.9%）</text><text x="120" y="210" font-size="10.5" fill="#8a7a68">label/PERMANOVA ~97% 近飽和（甲基-標籤關聯無所不在，多為 germline ASM）；距離 75.5% 受覆蓋 gating；level 25.9% 最稀（HP 內 mean-β 雙峰）</text></svg></div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>為何四軸判別不同？— 它們量的是不同東西</h2>
+  <table class="tab">
+    <thead><tr><th>軸</th><th>怎麼算</th><th>偵測什麼</th><th class="r">觸發</th><th>判別性質</th></tr></thead>
+    <tbody>
+    <tr><td><b style="color:#2F7D5B">label 關聯</b></td><td>已知標籤(HP/allele) χ² + Δβ（AlleleSig/HPMergedSig/HPFineSig）</td><td>甲基與<b>已知單倍型/等位</b>相關</td><td class="r">97.1%</td><td>a-priori·<b>但近飽和</b>（多 germline ASM）</td></tr>
+    <tr><td><b style="color:#9a6fb0">PERMANOVA</b></td><td>labeled 群全-CpG centroid 是否分離（permutation）</td><td>labeled 群甲基<b>整體分布</b>分離</td><td class="r">97.5%</td><td>a-priori·<b>也近飽和</b></td></tr>
+    <tr><td><b style="color:#5B5BD6">距離 cluster</b></td><td>read×read BERNOULLI 距離 → UPGMA → cluster-PERMANOVA</td><td>reads <b>自己</b>依甲基 pattern 分群（unsupervised）</td><td class="r">75.5%</td><td>受覆蓋 gating；unsupervised</td></tr>
+    <tr><td><b style="color:#C77B3B">level</b></td><td>HP 內 mean-β 雙峰（WithinHP_LevelBimodal）</td><td>HP 內<b>整體高/低甲基子群</b>（距離漏的 level 位移）</td><td class="r">25.9%</td><td>互補·但 heuristic 無 null</td></tr>
+    </tbody>
+  </table>
+  <div class="crit"><b>🔑 為何判別不同（一句）</b>：四軸是<b>不同的「偵測」面向</b>，不是同一件事的四種測法。<br>• <b>label + PERMANOVA（~97%）</b>用<u>已知標籤</u>→ 幾乎每個位點都有「某種」甲基-標籤關聯（被 germline ASM 撐滿）→ <b>高敏感、低特異</b>；<br>• <b>距離（75.5%）</b>是<u>unsupervised read 分群</u>，要足夠覆蓋才跑得動；<br>• <b>level（25.9%）</b>抓<u>HP 內整體位移</u>，是距離漏掉的那種。<br>→ 它們交集不同，正因各自盲點不同：<b>「有結構」幾乎普遍（97%），但判別「是不是 subclone」要靠 conditioned a-priori 軸（SubcloneDbeta），不是這 4 條偵測軸。</b></div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>完整交集（UpSet）</h2>
+  <p class="lead">每個位點觸發哪幾軸的完整分佈。核心 3 軸 <code>距離∩label∩PERMANOVA</code> 16,565（54.3%）最大；4 軸全交 6,090（20%）；純 label-only 表示「有標籤關聯但 read 不分群」。</p>
+  <div class="fig"><svg viewBox="0 0 960 670" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img"><text x="12" y="24" font-size="14" font-weight="800" fill="#3a2418">UpSet：各軸組合的位點數（≥20，15 組）</text><rect x="300" y="40" width="500" height="26" fill="#3B7BC7" rx="3"/><text x="806" y="57" font-size="10.5" font-weight="800" fill="#3B7BC7">16,565（54.3%）</text><circle cx="40" cy="53.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="53.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="53.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="53.0" r="7" fill="#9a6fb0"/><rect x="300" y="74" width="184" height="26" fill="#1f7a4d" rx="3"/><text x="490" y="91" font-size="10.5" font-weight="800" fill="#1f7a4d">6,090（20.0%）</text><circle cx="40" cy="87.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="87.0" r="7" fill="#C77B3B"/><circle cx="160" cy="87.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="87.0" r="7" fill="#9a6fb0"/><rect x="300" y="108" width="151" height="26" fill="#C77B3B" rx="3"/><text x="457" y="125" font-size="10.5" font-weight="800" fill="#C77B3B">4,992（16.4%）</text><circle cx="40" cy="121.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="121.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="121.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="121.0" r="7" fill="#9a6fb0"/><rect x="300" y="142" width="49" height="26" fill="#3B7BC7" rx="3"/><text x="355" y="159" font-size="10.5" font-weight="800" fill="#3B7BC7">1,619（5.3%）</text><circle cx="40" cy="155.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="155.0" r="7" fill="#C77B3B"/><circle cx="160" cy="155.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="155.0" r="7" fill="#9a6fb0"/><rect x="300" y="176" width="10" height="26" fill="#9A3B3B" rx="3"/><text x="316" y="193" font-size="10.5" font-weight="800" fill="#9A3B3B">327（1.1%）</text><circle cx="40" cy="189.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="189.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="189.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="189.0" r="7" fill="#e0d8c8"/><rect x="300" y="210" width="7" height="26" fill="#b8862e" rx="3"/><text x="313" y="227" font-size="10.5" font-weight="800" fill="#b8862e">223（0.7%）</text><circle cx="40" cy="223.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="223.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="223.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="223.0" r="7" fill="#e0d8c8"/><rect x="300" y="244" width="6" height="26" fill="#C77B3B" rx="3"/><text x="312" y="261" font-size="10.5" font-weight="800" fill="#C77B3B">211（0.7%）</text><circle cx="40" cy="257.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="257.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="257.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="257.0" r="7" fill="#9a6fb0"/><rect x="300" y="278" width="6" height="26" fill="#b8862e" rx="3"/><text x="312" y="295" font-size="10.5" font-weight="800" fill="#b8862e">193（0.6%）</text><circle cx="40" cy="291.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="291.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="291.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="291.0" r="7" fill="#9a6fb0"/><rect x="300" y="312" width="2" height="26" fill="#b8862e" rx="3"/><text x="308" y="329" font-size="10.5" font-weight="800" fill="#b8862e">59（0.2%）</text><circle cx="40" cy="325.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="325.0" r="7" fill="#C77B3B"/><circle cx="160" cy="325.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="325.0" r="7" fill="#e0d8c8"/><rect x="300" y="346" width="1" height="26" fill="#C77B3B" rx="3"/><text x="307" y="363" font-size="10.5" font-weight="800" fill="#C77B3B">49（0.2%）</text><circle cx="40" cy="359.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="359.0" r="7" fill="#C77B3B"/><circle cx="160" cy="359.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="359.0" r="7" fill="#e0d8c8"/><rect x="300" y="380" width="1" height="26" fill="#C77B3B" rx="3"/><text x="307" y="397" font-size="10.5" font-weight="800" fill="#C77B3B">47（0.2%）</text><circle cx="40" cy="393.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="393.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="393.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="393.0" r="7" fill="#e0d8c8"/><rect x="300" y="414" width="1" height="26" fill="#3B7BC7" rx="3"/><text x="307" y="431" font-size="10.5" font-weight="800" fill="#3B7BC7">35（0.1%）</text><circle cx="40" cy="427.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="427.0" r="7" fill="#C77B3B"/><circle cx="160" cy="427.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="427.0" r="7" fill="#9a6fb0"/><rect x="300" y="448" width="1" height="26" fill="#3B7BC7" rx="3"/><text x="307" y="465" font-size="10.5" font-weight="800" fill="#3B7BC7">30（0.1%）</text><circle cx="40" cy="461.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="461.0" r="7" fill="#C77B3B"/><circle cx="160" cy="461.0" r="7" fill="#2F7D5B"/><circle cx="220" cy="461.0" r="7" fill="#e0d8c8"/><rect x="300" y="482" width="1" height="26" fill="#b8862e" rx="3"/><text x="307" y="499" font-size="10.5" font-weight="800" fill="#b8862e">22（0.1%）</text><circle cx="40" cy="495.0" r="7" fill="#5B5BD6"/><circle cx="100" cy="495.0" r="7" fill="#e0d8c8"/><circle cx="160" cy="495.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="495.0" r="7" fill="#e0d8c8"/><rect x="300" y="516" width="1" height="26" fill="#C77B3B" rx="3"/><text x="307" y="533" font-size="10.5" font-weight="800" fill="#C77B3B">21（0.1%）</text><circle cx="40" cy="529.0" r="7" fill="#e0d8c8"/><circle cx="100" cy="529.0" r="7" fill="#C77B3B"/><circle cx="160" cy="529.0" r="7" fill="#e0d8c8"/><circle cx="220" cy="529.0" r="7" fill="#9a6fb0"/><text x="40" y="568" text-anchor="middle" font-size="10" font-weight="800" fill="#5B5BD6" transform="rotate(-12 40 568)">距離</text><text x="100" y="568" text-anchor="middle" font-size="10" font-weight="800" fill="#C77B3B" transform="rotate(-12 100 568)">level</text><text x="160" y="568" text-anchor="middle" font-size="10" font-weight="800" fill="#2F7D5B" transform="rotate(-12 160 568)">label</text><text x="220" y="568" text-anchor="middle" font-size="10" font-weight="800" fill="#9a6fb0" transform="rotate(-12 220 568)">PERMANOVA</text><text x="300" y="568" font-size="10" fill="#8a7a68">點亮=該軸觸發 · 色＝軸數（綠4/藍3/橘2/黃1/紅0）</text></svg></div>
+  <table class="tab">
+    <thead><tr><th>層級</th><th>意義</th><th class="r">數量</th><th class="r">%</th></tr></thead>
+    <tbody>
+    <tr><td>4 軸全交</td><td>四種證據一致 — 最穩</td><td class="r">6,090</td><td class="r">20.0%</td></tr>
+    <tr><td>3 軸</td><td>主結構（多為 距離∩label∩PERMANOVA 16,565）</td><td class="r">18,249</td><td class="r">59.9%</td></tr>
+    <tr><td>2 軸</td><td>部分（label∩PERMANOVA 4,992 = 純標籤關聯無 read 分群 = germline-like）</td><td class="r">5,327</td><td class="r">17.5%</td></tr>
+    <tr><td>1 軸</td><td>單軸（弱）</td><td class="r">497</td><td class="r">1.6%</td></tr>
+    <tr><td>0 軸</td><td>無任何結構軸 = 純噪音</td><td class="r">327</td><td class="r">1.1%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="n">4</span>用桑基畫會如何？（軸數分流）</h2>
+  <p class="lead">4 軸成員是<b>對稱集合</b>（無天然流向），最自然是 UpSet/Venn。但若要<b>桑基</b>，合理重構＝依「幾條軸觸發」分流（4軸→0軸），把「結構強度」當流量 — 越多軸一致越可信。</p>
+  <div class="fig"><svg viewBox="0 0 1000 610" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img"><text x="500" y="26" text-anchor="middle" font-size="14" font-weight="800" fill="#3a2418">桑基：30,490 依「幾條結構軸觸發」分流（4軸→0軸）</text><path d="M 82 46 C 231.0 46 231.0 46 380 46 L 380 149.8635618235487 C 231.0 149.8635618235487 231.0 149.8635618235487 82 149.8635618235487 Z" fill="#1f7a4d" fill-opacity="0.42"/><path d="M 82 149.8635618235487 C 231.0 149.8635618235487 231.0 157.8635618235487 380 157.8635618235487 L 380 469.09609708101016 C 231.0 469.09609708101016 231.0 461.09609708101016 82 461.09609708101016 Z" fill="#3B7BC7" fill-opacity="0.42"/><path d="M 82 461.09609708101016 C 231.0 461.09609708101016 231.0 477.09609708101016 380 477.09609708101016 L 380 567.9468678255165 C 231.0 567.9468678255165 231.0 551.9468678255165 82 551.9468678255165 Z" fill="#C77B3B" fill-opacity="0.42"/><path d="M 82 551.9468678255165 C 231.0 551.9468678255165 231.0 575.9468678255165 380 575.9468678255165 L 380 584.4230895375532 C 231.0 584.4230895375532 231.0 560.4230895375532 82 560.4230895375532 Z" fill="#b8862e" fill-opacity="0.42"/><path d="M 82 560.4230895375532 C 231.0 560.4230895375532 231.0 592.4230895375532 380 592.4230895375532 L 380 597.9999999999999 C 231.0 597.9999999999999 231.0 565.9999999999999 82 565.9999999999999 Z" fill="#9A3B3B" fill-opacity="0.42"/><rect x="50" y="46" width="32" height="520" fill="#5e4a38" rx="3"/><text x="44" y="310" text-anchor="end" font-size="12" font-weight="800" fill="#3a2418">30,490</text><rect x="380" y="46.0" width="32" height="103.9" fill="#1f7a4d" rx="3"/><text x="420" y="96" font-size="11.5" font-weight="800" fill="#1f7a4d">4軸　6,090（20.0%）</text><text x="420" y="111" font-size="9.5" fill="#5e4a38">全證據一致</text><rect x="380" y="157.9" width="32" height="311.2" fill="#3B7BC7" rx="3"/><text x="420" y="311" font-size="11.5" font-weight="800" fill="#3B7BC7">3軸　18,249（59.9%）</text><text x="420" y="326" font-size="9.5" fill="#5e4a38">主結構</text><rect x="380" y="477.1" width="32" height="90.9" fill="#C77B3B" rx="3"/><text x="420" y="521" font-size="11.5" font-weight="800" fill="#C77B3B">2軸　5,327（17.5%）</text><text x="420" y="536" font-size="9.5" fill="#5e4a38">部分</text><rect x="380" y="575.9" width="32" height="8.5" fill="#b8862e" rx="3"/><text x="420" y="583" font-size="11.5" font-weight="800" fill="#b8862e">1軸　497（1.6%）</text><text x="420" y="598" font-size="9.5" fill="#5e4a38">單軸</text><rect x="380" y="592.4" width="32" height="5.6" fill="#9A3B3B" rx="3"/><text x="420" y="598" font-size="11.5" font-weight="800" fill="#9A3B3B">0軸　327（1.1%）</text><text x="420" y="613" font-size="9.5" fill="#5e4a38">無結構=噪音</text><text x="380" y="590" font-size="10.5" fill="#8a7a68">越多軸一致＝越可信「有結構」；但<b>「有結構」≠「是 subclone」</b>（label/PERMANOVA 飽和、多 germline；判別力要靠 conditioned a-priori 軸，非這 4 偵測軸）</text></svg></div>
+  <div class="note">桑基適合「軸數 → keep/remove」或「軸組合 → 信心層」的<b>有向</b>重構；純 4-set 交集本身用 UpSet/Venn 更精確。兩者我都畫了。</div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>⚠️ 引用綜整文件的一處修正（判別性循環）</h2>
+  <p class="lead">綜整文件 <code>20260616_keep_remove_classification_consolidation_01.md</code> §4.5–4.7 的 Venn / PERMDISP 邏輯<b>紮實、可參考</b>。但 §2/§4 寫「a-priori 軸在 Noise <b>0%</b> → 真判別」這句要修正：</p>
+  <div class="crit">
+    <b>0% 是循環論證</b>：實測 D1 各類 SubcloneDbeta 顯著率 — Strong 16.0% / LabelShift 34.9% / MultiGroup 15.4%，<b>但 Noise_Uniform/Uncorrelated/Chaotic 全 0%</b>。然而這 0% 是<b>定義造成的</b>：cascade 把任何 a-priori-sig 位點判進 KEEP 類（LabelShift+），所以它<u>不可能</u>落在 Noise-REMOVE 桶 → 0% 是 tautology，非「a-priori 不在噪音觸發」的證據。<br>
+    <b>真正非循環的判別率</b>（對 legacy VerificationClass Noise）= <b>7.6%</b>（上輪 4-lens 已證）。→ a-priori 與 unsupervised-clean 判別力其實打平（~2×），a-priori 優勢在<b>可解釋/合法 null</b>非偵測率。改寫成「a-priori 有合法 permutation null（免 collider）」即正確。
+  </div>
+</section>
+
+<section style="background:#f6efe2">
+  <h2><span class="n">∑</span>三個回答</h2>
+  <ul style="font-size:.94rem;line-height:1.8">
+    <li><b>數據正確？</b> ✅ 是 — 4 軸 marginal + 完整交集表對實際 <code>_wg_d1_unified</code> 逐項重跑 100% 吻合。</li>
+    <li><b>為何判別不同？</b> 四軸量不同面向：label/PERMANOVA 用已知標籤→飽和(97%，germline 撐滿)、距離 unsupervised 受覆蓋 gating(75.5%)、level 抓 HP 內位移(25.9%)。「有結構」普遍，但「是 subclone」要靠 conditioned a-priori 軸。</li>
+    <li><b>能畫桑基嗎？</b> 能 — 但 4-set 交集用 UpSet/Venn 更精確；桑基適合「軸數→keep/remove」有向重構（§4 已畫）。</li>
+  </ul>
+  <p class="note">溯源：<code>/tmp/venn4.json</code> ← <code>.claude/worktrees/ism-review-infra/output/_wg_d1_unified/significance_summary.csv</code>（venn.py 軸定義逐項重算驗證）。</p>
+</section>
+
+</div></body></html>

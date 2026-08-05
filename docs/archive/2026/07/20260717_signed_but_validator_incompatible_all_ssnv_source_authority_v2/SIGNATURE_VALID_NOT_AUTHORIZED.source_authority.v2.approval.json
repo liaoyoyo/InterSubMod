@@ -1,0 +1,57 @@
+{
+  "approval_status": "APPROVED_FOR_FULL_TASK_B_RUN",
+  "authority_id": "20260717_all_ssnv_focal_alt_task_b_release_v2",
+  "authority_manifest": {
+    "mode": "0o444",
+    "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/provenance/source_authorities/20260717_all_ssnv_focal_alt_release_source_authority.v2.json",
+    "sha256": "e661764ec6e1c6089c4855fcaee8514cbd737acf21aa63694432e4baa1ee5809",
+    "size_bytes": 9868
+  },
+  "private_key_retirement": {
+    "passphrase_lifecycle": "discarded_after_single_signature",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260717_all_ssnv_v2/ed25519_private_encrypted_unrecoverable_after_signing.pem",
+    "required_post_signature_mode": "0o0"
+  },
+  "public_key": {
+    "mode": "0o444",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260717_all_ssnv_v2/ed25519_public.pem",
+    "sha256": "8773f88579b01a97fe4e39682b42ca5ae55f74872d31b5a5f8585e8942644970",
+    "size_bytes": 113
+  },
+  "review_approvals": [
+    {
+      "findings_closed": true,
+      "model": "claude-sonnet-5",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260717_external_claude_reviewer_A_v5b_output.json",
+        "sha256": "b4a4d764726917adc856dc4ecb798ea48f6014b6757f88f84b09f61eaa38aa37",
+        "size_bytes": 1599
+      },
+      "review_scope": "Fresh bounded read-only P0 pre-run source-authorization review covering exact 23-role identity, claim-contract-v5 and test XML, v2 trust anchors and signer ordering, v1 exclusion, F1 producer binding and F2 report-release fail-closed implementation; absent post-run artifacts were correctly out of scope.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "b00a1c3605520af5fcc314d9c55b9a00ef90c651244b8c3666a30a67349a6add",
+      "reviewer_id": "26b85e42-d7ec-4a0a-ae0b-96c9c09768a9",
+      "reviewer_label": "external_claude_reviewer_A_v5b_phase_correct",
+      "verdict": "APPROVE"
+    },
+    {
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260717_external_claude_reviewer_B_v5_output.json",
+        "sha256": "e9ff04bb9f7376a11302fa6f7c9eb7e53a53894fb63d24e26ef4e1a49a326a6d",
+        "size_bytes": 1601
+      },
+      "review_scope": "Fresh independent read-only scientific-contract non-regression review of the v2 release source authority, 23-role source identity, 377-test evidence, claim-contract-v5, signer-only delta, M1/M2/G1/G2/R1/B1/C1 boundaries, ten report outputs and v1 exclusion.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "b00a1c3605520af5fcc314d9c55b9a00ef90c651244b8c3666a30a67349a6add",
+      "reviewer_id": "3c35f7fd-b116-4349-a866-74ffddbce08c",
+      "reviewer_label": "external_claude_reviewer_B_v5",
+      "verdict": "APPROVE"
+    }
+  ],
+  "schema_name": "intersubmod.release_source_authority.approval",
+  "schema_version": "1.0.0"
+}

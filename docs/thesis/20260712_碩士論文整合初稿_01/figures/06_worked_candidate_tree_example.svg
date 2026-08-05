@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">可手算的候選樹完整列舉範例</title>
+  <desc id="desc">以兩個突變、三條完整或部分覆蓋 reads，展示 Boolean subcube、最小 hidden state 搜尋與兩棵同樣最小候選樹。</desc>
+  <rect width="1400" height="850" fill="#f8f8f5"/>
+  <text x="70" y="65" font-size="34" font-weight="700" fill="#17324d">可手算範例：同一 read evidence 為何可能支持兩棵最小候選樹？</text>
+  <text x="70" y="105" font-size="18" fill="#52636b">合成示例只解釋演算法；不代表任何真實 dataset 的結果。</text>
+
+  <g>
+    <rect x="70" y="150" width="350" height="560" rx="10" fill="#ffffff" stroke="#86a7b9" stroke-width="2"/>
+    <text x="95" y="195" font-size="23" font-weight="700" fill="#17324d">① Read–mutation matrix</text>
+    <rect x="100" y="230" width="270" height="180" fill="#f4f7f8" stroke="#c8d4d9"/>
+    <line x1="100" y1="275" x2="370" y2="275" stroke="#9fb1ba"/>
+    <line x1="190" y1="230" x2="190" y2="410" stroke="#9fb1ba"/>
+    <line x1="280" y1="230" x2="280" y2="410" stroke="#9fb1ba"/>
+    <text x="215" y="260" font-size="17" font-weight="700" fill="#17324d">M1</text>
+    <text x="305" y="260" font-size="17" font-weight="700" fill="#17324d">M2</text>
+    <text x="125" y="310" font-size="17" fill="#314652">r1</text><text x="222" y="310" font-size="18" fill="#27543a">A</text><text x="313" y="310" font-size="18" fill="#6d5529">?</text>
+    <text x="125" y="355" font-size="17" fill="#314652">r2</text><text x="222" y="355" font-size="18" fill="#6d5529">?</text><text x="313" y="355" font-size="18" fill="#27543a">A</text>
+    <text x="125" y="398" font-size="17" fill="#314652">r3</text><text x="222" y="398" font-size="18" fill="#27543a">A</text><text x="313" y="398" font-size="18" fill="#27543a">A</text>
+    <text x="100" y="455" font-size="17" font-weight="700" fill="#17324d">完整觀測</text>
+    <text x="220" y="455" font-size="17" fill="#314652">F = {11}</text>
+    <text x="100" y="495" font-size="17" font-weight="700" fill="#17324d">Partial subcubes</text>
+    <text x="100" y="530" font-size="16" fill="#314652">A? → G₁ = {10, 11}</text>
+    <text x="100" y="565" font-size="16" fill="#314652">?A → G₂ = {01, 11}</text>
+    <text x="100" y="615" font-size="17" font-weight="700" fill="#17324d">Root</text>
+    <text x="220" y="615" font-size="17" fill="#314652">00</text>
+    <text x="100" y="660" font-size="15" fill="#52636b">? 不補成 0/1；以相容狀態集合傳遞。</text>
+  </g>
+
+  <path d="M430 425 H470" stroke="#2f6882" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="480" y="150" width="390" height="560" rx="10" fill="#eef4f6" stroke="#86a7b9" stroke-width="2"/>
+    <text x="505" y="195" font-size="23" font-weight="700" fill="#17324d">② 逐 hidden level 搜尋</text>
+    <text x="510" y="245" font-size="17" fill="#314652">Base = {00, 11}</text>
+    <text x="510" y="280" font-size="17" fill="#314652">去重後 extra pool = {10, 01}</text>
+
+    <rect x="510" y="320" width="330" height="105" rx="7" fill="#faeeee" stroke="#dfb5ad"/>
+    <text x="535" y="355" font-size="18" font-weight="700" fill="#873b31">e = 0　不可行</text>
+    <text x="535" y="390" font-size="16" fill="#314652">11 沒有 unit predecessor，無法連到 00。</text>
+
+    <rect x="510" y="450" width="330" height="155" rx="7" fill="#edf5ef" stroke="#b9d0bf"/>
+    <text x="535" y="487" font-size="18" font-weight="700" fill="#27543a">e = 1　第一個可行層</text>
+    <text x="535" y="525" font-size="16" fill="#314652">N₁ = {00, 10, 11}</text>
+    <text x="535" y="558" font-size="16" fill="#314652">N₂ = {00, 01, 11}</text>
+    <text x="535" y="590" font-size="16" fill="#314652">故 hₘᵢₙ = 1；兩個節點集都必須保留。</text>
+    <text x="510" y="655" font-size="15" fill="#52636b">逐層窮舉使第一個可行 e 成為 hidden-node minimum。</text>
+  </g>
+
+  <path d="M880 425 H920" stroke="#2f6882" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="930" y="150" width="400" height="560" rx="10" fill="#ffffff" stroke="#86a7b9" stroke-width="2"/>
+    <text x="955" y="195" font-size="23" font-weight="700" fill="#17324d">③ 全部最小 parent choices</text>
+
+    <text x="990" y="250" font-size="18" font-weight="700" fill="#17324d">T₁：M1 → M2</text>
+    <circle cx="1000" cy="310" r="27" fill="#eaf1f3" stroke="#2f6882" stroke-width="2"/><text x="1000" y="317" text-anchor="middle" font-size="16" fill="#17324d">00</text>
+    <line x1="1030" y1="310" x2="1090" y2="310" stroke="#2f6882" stroke-width="4" marker-end="url(#arrow)"/>
+    <circle cx="1120" cy="310" r="27" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/><text x="1120" y="317" text-anchor="middle" font-size="16" fill="#17324d">10</text>
+    <line x1="1150" y1="310" x2="1210" y2="310" stroke="#2f6882" stroke-width="4" marker-end="url(#arrow)"/>
+    <circle cx="1240" cy="310" r="27" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/><text x="1240" y="317" text-anchor="middle" font-size="16" fill="#17324d">11</text>
+
+    <text x="990" y="405" font-size="18" font-weight="700" fill="#17324d">T₂：M2 → M1</text>
+    <circle cx="1000" cy="465" r="27" fill="#eaf1f3" stroke="#2f6882" stroke-width="2"/><text x="1000" y="472" text-anchor="middle" font-size="16" fill="#17324d">00</text>
+    <line x1="1030" y1="465" x2="1090" y2="465" stroke="#2f6882" stroke-width="4" marker-end="url(#arrow)"/>
+    <circle cx="1120" cy="465" r="27" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/><text x="1120" y="472" text-anchor="middle" font-size="16" fill="#17324d">01</text>
+    <line x1="1150" y1="465" x2="1210" y2="465" stroke="#2f6882" stroke-width="4" marker-end="url(#arrow)"/>
+    <circle cx="1240" cy="465" r="27" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/><text x="1240" y="472" text-anchor="middle" font-size="16" fill="#17324d">11</text>
+
+    <rect x="975" y="550" width="310" height="110" rx="7" fill="#f3efe4" stroke="#d6c8a5"/>
+    <text x="1130" y="590" text-anchor="middle" font-size="21" font-weight="700" fill="#6d5529">Verdict：ambiguous</text>
+    <text x="1130" y="625" text-anchor="middle" font-size="16" fill="#314652">n_hidden = 1；n_trees = 2</text>
+    <text x="1130" y="650" text-anchor="middle" font-size="14" fill="#52636b">任選一棵會把 preference 偽裝成 certainty。</text>
+  </g>
+
+  <rect x="70" y="755" width="1260" height="48" rx="6" fill="#17324d"/>
+  <text x="700" y="786" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">域內完整性的意思：兩個同樣最小的 exact candidates 都保留；不是宣稱其中一棵為真實 clone genealogy。</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2f6882"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>≥2群確認 觀察儀表板</title><style>
+:root{--bg:#0f172a;--card:#1e293b;--mut:#94a3b8;--fg:#e2e8f0;--ac:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--no:#ef4444;--line:#334155}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:13.5px/1.6 system-ui,'Noto Sans CJK TC',sans-serif}
+header{padding:14px 22px;border-bottom:1px solid var(--line);background:#0b1222;position:sticky;top:0;z-index:50}
+h1{margin:0 0 3px;font-size:18px}.sub{color:var(--mut);font-size:12px}.wrap{max-width:1500px;margin:0 auto;padding:0 18px 80px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:11px 0}
+details summary{cursor:pointer;font-weight:600;font-size:14px}details{margin:6px 0}
+table{border-collapse:collapse;width:100%;font-size:12px;margin:5px 0}th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}th{background:#0b1222;color:var(--mut)}tr.hl td{background:#10241a;font-weight:600}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:54px;background:#0b1222ee;backdrop-filter:blur(4px);padding:9px 10px;border:1px solid var(--line);border-radius:9px;z-index:40}
+.ctrl label{font-size:11.5px;color:var(--mut)}select,button,input[type=range]{background:#0b1222;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px}
+.cg{display:flex;gap:4px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:11px;margin-top:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.card.j-in{border-color:var(--ok)}.card.j-ex{border-color:var(--no)}.card.j-doubt{border-color:var(--warn)}
+.hd{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer}.ttl{font-weight:700;font-size:13px}
+.badge{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:3px}
+.b-ok{background:#14532d;color:#86efac}.b-info{background:#0c2a4d;color:#60a5fa}.b-warn{background:#78350f;color:#fcd34d}.b-mut{background:#1e293b;color:#cbd5e1}.b-no{background:#450a0a;color:#fca5a5}
+.figs{display:flex;gap:2px;background:#fff;cursor:pointer}.figs img{width:50%;display:block;min-height:30px}
+.kv{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;padding:4px 10px;color:var(--mut)}.kv b{color:var(--fg);font-variant-numeric:tabular-nums}
+.jrow{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}.jrow button{flex:1;font-size:10.5px;padding:4px 2px}
+.jb.on-in{background:#14532d;color:#86efac;border-color:#22c55e}.jb.on-doubt{background:#78350f;color:#fcd34d;border-color:#f59e0b}.jb.on-ex{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.rsel{width:100%;padding:5px 8px;font-size:10.5px;border-top:1px solid var(--line);border-radius:0}
+.pager{display:flex;gap:8px;justify-content:center;align-items:center;margin:12px 0}
+.sb4{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0}.sbx{background:#0b1222;border:1px solid var(--line);border-radius:7px;padding:5px 10px}.sbx .n{font-size:17px;font-weight:800}.sbx .l{font-size:10px;color:var(--mut)}
+#modal{position:fixed;inset:0;background:#000d;display:none;z-index:100;overflow:auto;padding:20px}#modal .mc{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--ac);border-radius:11px;padding:16px}#modal img{width:49%;background:#fff;border-radius:5px}
+footer{margin-top:24px;border-top:1px solid var(--line);padding-top:10px;color:var(--mut);font-size:11.5px}
+.outwrap summary{color:var(--warn)}
+</style></head><body>
+<header><h1>≥2 群確認 — 觀察儀表板（cluster×haplotag · BERNOULLI）</h1>
+<div class="sub">chr1 sample · 24 案 · PNG via HTML · 判讀存 localStorage · ⭐2 pilot HCC1395</div></header>
+<div class="wrap">
+<div class="panel">
+<details open><summary>① 確認標準（cluster×haplotag CramérV+Fisher，已獨立重算）</summary>
+<table><tr><th>層級</th><th>數量</th><th>%</th><th>重算</th></tr>
+<tr><td>有切出群 computable</td><td>5461</td><td>17.9%</td><td>✓ 5461</td></tr>
+<tr><td>顯著 p&lt;0.05</td><td>4185</td><td>13.7%</td><td>✓</td></tr>
+<tr><td>顯著+V≥0.5</td><td>3706</td><td>12.2%</td><td>✓ 3706</td></tr>
+<tr class="hl"><td><b>可確認≥2群 V≥0.7+sig</b></td><td><b>2941</b></td><td><b>9.6%</b></td><td><b>✓ 2941</b></td></tr></table>
+<div class="mut">distance=BERNOULLI（與 clustering 同 metric）· detector 非 validator · ≥2群≠≥2subclone</div></details>
+<details><summary>② 三態決策（全 30490，重算 ✓）</summary>
+<table><tr><th>狀態</th><th>數量</th><th>%</th></tr>
+<tr><td>不能問/LOH</td><td>12038</td><td>39.5%</td></tr>
+<tr><td>確認1群（germline=carrier）</td><td>13856</td><td>45.4%</td></tr>
+<tr><td>多群候選</td><td>4596</td><td>15.1%</td></tr></table></details>
+<details><summary>③ 前提診斷（可信子集多大）</summary>
+<table><tr><th>前提</th><th>數量</th><th>%</th></tr>
+<tr><td>讀數不足 n&lt;6（棄權）</td><td>413</td><td>1.35%</td></tr>
+<tr><td>Cochran 不可靠（V歸0）/computable</td><td>4294</td><td>78.6%</td></tr>
+<tr><td>標籤失衡&lt;10%/computable</td><td>2496</td><td>45.7%</td></tr>
+<tr class="hl"><td><b>完全乾淨子集</b>（V≥.7&sig&可靠&不失衡）</td><td><b>882</b></td><td><b>2.89%</b></td></tr></table>
+<div class="mut">V≥0.7 & Fisher sig & Cochran-reliable & 無<10%失衡 — 只 ~3% 完全乾淨，結論的可信子集有界</div></details>
+</div>
+<div class="panel"><b>判讀進度</b><div class="sb4" id="prog"></div>
+ <div style="margin-top:8px"><button onclick="exportJ()">⬇ JSON</button> <button onclick="exportCSV()">⬇ CSV</button> <button onclick="clearJ()">✕ 清空</button></div></div>
+
+<div class="ctrl">
+ <div class="cg"><label>桶</label><select id="fb"><option value="all">全部</option><option value="可確認(clear)">可確認(clear)</option><option value="較可信(mid)">較可信(mid)</option><option value="不可靠(weak)">不可靠(weak)</option><option value="極弱(vweak)">極弱(vweak)</option></select></div>
+ <div class="cg"><label>顯著</label><select id="fs"><option value="all">全部</option><option value="sig">顯著</option><option value="ns">ns</option></select></div>
+ <div class="cg"><label>判讀</label><select id="fv"><option value="all">全部</option><option value="correct">✓ 正確</option><option value="incorrect">✗ 不正確</option><option value="doubt">存疑</option><option value="un">未判讀</option></select></div>
+ <div class="cg"><label>排序</label><select id="sk"><option value="V">V</option><option value="sil">silhouette</option><option value="k">群數k</option><option value="p">p值</option><option value="n">read數n</option><option value="pos">位置</option></select><select id="sd"><option value="desc">↓降</option><option value="asc">↑升</option></select></div>
+ <div class="cg"><label>V≥<span id="tvl">0.00</span></label><input type="range" id="tv" min="0" max="1" step="0.05" value="0"></div>
+ <div class="cg"><label>sil≥<span id="tsl">0.00</span></label><input type="range" id="ts" min="0" max="1" step="0.05" value="0"></div>
+ <span class="sub" id="cnt"></span>
+</div>
+<div class="grid" id="grid"></div>
+<div class="pager" id="pager"></div>
+<details class="outwrap panel"><summary>🗂 被篩除區塊（<span id="outcnt">0</span> 個不符目前篩選）</summary>
+ <div class="grid" id="outgrid"></div></details>
+<footer>distance=BERNOULLI（同 clustering）· 數字注入自 verify_results/premise/spectrum_decision.json · 圖 PNG 外部相對路徑（需與 figs 同資料夾）· 產生 2026-06-19</footer>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
+<script id="d" type="application/json">{"cases": [{"pos": "164206569", "V": 1.0, "p": 2.319522830243567e-16, "sil": 0.457, "n": 72, "bucket": "可確認(clear)", "sig": true, "id": "clear_1_164206569", "fig_meth": "obs_figs/clear_1_164206569_meth.png", "fig_dist": "obs_figs/clear_1_164206569_dist.png", "sil_render": 0.457, "k": 2, "n_render": 72}, {"pos": "237502733", "V": 1.0, "p": 1.0261879631701889e-10, "sil": 0.356, "n": 46, "bucket": "可確認(clear)", "sig": true, "id": "clear_2_237502733", "fig_meth": "obs_figs/clear_2_237502733_meth.png", "fig_dist": "obs_figs/clear_2_237502733_dist.png", "sil_render": 0.356, "k": 2, "n_render": 46}, {"pos": "110527011", "V": 0.9576719576719577, "p": 3.246214637613715e-11, "sil": 0.492, "n": 48, "bucket": "可確認(clear)", "sig": true, "id": "clear_3_110527011", "fig_meth": "obs_figs/clear_3_110527011_meth.png", "fig_dist": "obs_figs/clear_3_110527011_dist.png", "sil_render": 0.492, "k": 2, "n_render": 48}, {"pos": "224089598", "V": 0.9270489754416341, "p": 6.1911977836361065e-12, "sil": 0.311, "n": 55, "bucket": "可確認(clear)", "sig": true, "id": "clear_4_224089598", "fig_meth": "obs_figs/clear_4_224089598_meth.png", "fig_dist": "obs_figs/clear_4_224089598_dist.png", "sil_render": 0.311, "k": 2, "n_render": 55}, {"pos": "49525159", "V": 0.8392857142857142, "p": 0.00036974391791241005, "sil": 0.426, "n": 18, "bucket": "可確認(clear)", "sig": true, "id": "clear_5_49525159", "fig_meth": "obs_figs/clear_5_49525159_meth.png", "fig_dist": "obs_figs/clear_5_49525159_dist.png", "sil_render": 0.426, "k": 2, "n_render": 18}, {"pos": "157621945", "V": 0.7057788125549826, "p": 2.565724327436758e-15, "sil": 0.392, "n": 81, "bucket": "可確認(clear)", "sig": true, "id": "clear_6_157621945", "fig_meth": "obs_figs/clear_6_157621945_meth.png", "fig_dist": "obs_figs/clear_6_157621945_dist.png", "sil_render": 0.392, "k": 4, "n_render": 81}, {"pos": "119446237", "V": 0.6989019287810943, "p": 5.400545692681846e-15, "sil": 0.271, "n": 81, "bucket": "較可信(mid)", "sig": true, "id": "mid_1_119446237", "fig_meth": "obs_figs/mid_1_119446237_meth.png", "fig_dist": "obs_figs/mid_1_119446237_dist.png", "sil_render": 0.271, "k": 4, "n_render": 81}, {"pos": "111963950", "V": 0.6767899840043509, "p": 2.691932802113713e-06, "sil": 0.46, "n": 56, "bucket": "較可信(mid)", "sig": true, "id": "mid_2_111963950", "fig_meth": "obs_figs/mid_2_111963950_meth.png", "fig_dist": "obs_figs/mid_2_111963950_dist.png", "sil_render": 0.46, "k": 2, "n_render": 56}, {"pos": "119845496", "V": 0.6582805886043833, "p": 0.0001053315033416186, "sil": 0.523, "n": 27, "bucket": "較可信(mid)", "sig": true, "id": "mid_3_119845496", "fig_meth": "obs_figs/mid_3_119845496_meth.png", "fig_dist": "obs_figs/mid_3_119845496_dist.png", "sil_render": 0.523, "k": 3, "n_render": 27}, {"pos": "164450364", "V": 0.6316963164761519, "p": 6.790064466653462e-11, "sil": 0.386, "n": 67, "bucket": "較可信(mid)", "sig": true, "id": "mid_4_164450364", "fig_meth": "obs_figs/mid_4_164450364_meth.png", "fig_dist": "obs_figs/mid_4_164450364_dist.png", "sil_render": 0.386, "k": 3, "n_render": 67}, {"pos": "70683247", "V": 0.5802316082495185, "p": 0.00123533764515477, "sil": 0.492, "n": 31, "bucket": "較可信(mid)", "sig": true, "id": "mid_5_70683247", "fig_meth": "obs_figs/mid_5_70683247_meth.png", "fig_dist": "obs_figs/mid_5_70683247_dist.png", "sil_render": 0.492, "k": 2, "n_render": 31}, {"pos": "47164030", "V": 0.5222329678670935, "p": 0.021967705889435495, "sil": 0.422, "n": 28, "bucket": "較可信(mid)", "sig": true, "id": "mid_6_47164030", "fig_meth": "obs_figs/mid_6_47164030_meth.png", "fig_dist": "obs_figs/mid_6_47164030_dist.png", "sil_render": 0.422, "k": 2, "n_render": 28}, {"pos": "228067665", "V": 0.625, "p": 0.07894037170939774, "sil": 0.492, "n": 13, "bucket": "不可靠(weak)", "sig": false, "id": "weak_1_228067665", "fig_meth": "obs_figs/weak_1_228067665_meth.png", "fig_dist": "obs_figs/weak_1_228067665_dist.png", "sil_render": 0.492, "k": 2, "n_render": 13}, {"pos": "104693089", "V": 0.449740015866217, "p": 0.029023296823778712, "sil": 0.221, "n": 35, "bucket": "不可靠(weak)", "sig": true, "id": "weak_2_104693089", "fig_meth": "obs_figs/weak_2_104693089_meth.png", "fig_dist": "obs_figs/weak_2_104693089_dist.png", "sil_render": 0.221, "k": 3, "n_render": 35}, {"pos": "46939831", "V": 0.3950160804376802, "p": 0.0033948852351190087, "sil": 0.377, "n": 55, "bucket": "不可靠(weak)", "sig": true, "id": "weak_3_46939831", "fig_meth": "obs_figs/weak_3_46939831_meth.png", "fig_dist": "obs_figs/weak_3_46939831_dist.png", "sil_render": 0.377, "k": 2, "n_render": 55}, {"pos": "49323318", "V": 0.35855855855855856, "p": 0.009720895457108514, "sil": 0.223, "n": 52, "bucket": "不可靠(weak)", "sig": true, "id": "weak_4_49323318", "fig_meth": "obs_figs/weak_4_49323318_meth.png", "fig_dist": "obs_figs/weak_4_49323318_dist.png", "sil_render": 0.223, "k": 2, "n_render": 52}, {"pos": "118454941", "V": 0.32655755853173146, "p": 0.01933817718823778, "sil": 0.186, "n": 74, "bucket": "不可靠(weak)", "sig": true, "id": "weak_5_118454941", "fig_meth": "obs_figs/weak_5_118454941_meth.png", "fig_dist": "obs_figs/weak_5_118454941_dist.png", "sil_render": 0.186, "k": 2, "n_render": 74}, {"pos": "38748531", "V": 0.30650301691644405, "p": 0.09319372625643542, "sil": 0.416, "n": 30, "bucket": "不可靠(weak)", "sig": false, "id": "weak_6_38748531", "fig_meth": "obs_figs/weak_6_38748531_meth.png", "fig_dist": "obs_figs/weak_6_38748531_dist.png", "sil_render": 0.416, "k": 2, "n_render": 30}, {"pos": "69322613", "V": 0.29994521438722493, "p": 0.08029687663152889, "sil": 0.348, "n": 34, "bucket": "極弱(vweak)", "sig": false, "id": "vweak_1_69322613", "fig_meth": "obs_figs/vweak_1_69322613_meth.png", "fig_dist": "obs_figs/vweak_1_69322613_dist.png", "sil_render": 0.348, "k": 2, "n_render": 34}, {"pos": "95660269", "V": 0.23859005223385643, "p": 0.02876341268026184, "sil": 0.264, "n": 84, "bucket": "極弱(vweak)", "sig": true, "id": "vweak_2_95660269", "fig_meth": "obs_figs/vweak_2_95660269_meth.png", "fig_dist": "obs_figs/vweak_2_95660269_dist.png", "sil_render": 0.264, "k": 2, "n_render": 84}, {"pos": "167901387", "V": 0.1571820491697337, "p": 0.4370718917208686, "sil": 0.352, "n": 67, "bucket": "極弱(vweak)", "sig": false, "id": "vweak_3_167901387", "fig_meth": "obs_figs/vweak_3_167901387_meth.png", "fig_dist": "obs_figs/vweak_3_167901387_dist.png", "sil_render": 0.352, "k": 2, "n_render": 67}, {"pos": "117997038", "V": 0.10680996127368807, "p": 0.6445375723852783, "sil": 0.428, "n": 77, "bucket": "極弱(vweak)", "sig": false, "id": "vweak_4_117997038", "fig_meth": "obs_figs/vweak_4_117997038_meth.png", "fig_dist": "obs_figs/vweak_4_117997038_dist.png", "sil_render": 0.428, "k": 2, "n_render": 77}, {"pos": "169433882", "V": 0.036632985031529446, "p": 0.7642885953349648, "sil": 0.321, "n": 67, "bucket": "極弱(vweak)", "sig": false, "id": "vweak_5_169433882", "fig_meth": "obs_figs/vweak_5_169433882_meth.png", "fig_dist": "obs_figs/vweak_5_169433882_dist.png", "sil_render": 0.321, "k": 2, "n_render": 67}, {"pos": "102372472", "V": 0.0, "p": 1.0, "sil": 0.336, "n": 38, "bucket": "極弱(vweak)", "sig": false, "id": "vweak_6_102372472", "fig_meth": "obs_figs/vweak_6_102372472_meth.png", "fig_dist": "obs_figs/vweak_6_102372472_dist.png", "sil_render": 0.336, "k": 2, "n_render": 38}], "lskey": "obs_dashboard_v1"}</script>
+<script>
+const D=JSON.parse(document.getElementById('d').textContent);const CASES=D.cases;const $=id=>document.getElementById(id);
+const LSKEY=D.lskey;let J=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+function saveJ(){localStorage.setItem(LSKEY,JSON.stringify(J));}
+const VST=[{k:'in',l:'✓ 分群明確(正確)'},{k:'doubt',l:'存疑'},{k:'ex',l:'✗ 看不出(不正確)'}];
+const REAS=[{k:'',l:'—原因—'},{k:'ok',l:'標準合理'},{k:'wrong_bucket',l:'應屬其他桶'},{k:'cis',l:'像cis-ASM非subclone'},{k:'small_n',l:'小樣本假象'},{k:'other',l:'其他'}];
+function setJ(id,c){const o=J[id]||{};o.c=(o.c===c?'un':c);o.t=new Date().toISOString().slice(0,19);J[id]=o;saveJ();draw();}
+function setR(id,r){const o=J[id]||{c:'un'};o.r=r;J[id]=o;saveJ();}
+window.setJ=setJ;window.setR=setR;
+const BUCKETS=['可確認(clear)','較可信(mid)','不可靠(weak)','極弱(vweak)'];
+let page=0;const PER=18;
+
+function matches(c){
+ const b=$('fb').value; if(b!=='all'&&c.bucket!==b)return false;
+ const s=$('fs').value; if(s==='sig'&&!c.sig)return false; if(s==='ns'&&c.sig)return false;
+ const vd=$('fv').value;
+ if(vd!=='all'){const jc=(J[c.id]||{}).c||'un';
+   if(vd==='correct'&&jc!=='in')return false; if(vd==='incorrect'&&jc!=='ex')return false;
+   if(vd==='doubt'&&jc!=='doubt')return false; if(vd==='un'&&jc!=='un')return false;}
+ if(c.V < parseFloat($('tv').value))return false;
+ if(c.sil < parseFloat($('ts').value))return false;
+ return true;
+}
+function sorted(arr){const k=$('sk').value,dir=$('sd').value==='desc'?-1:1;
+ return arr.slice().sort((a,b)=>{let x=a[k],y=b[k];if(k==='pos'){x=a.pos;y=b.pos;}return (x>y?1:x<y?-1:0)*dir;});}
+function badges(c){const bk={'可確認(clear)':'b-ok','較可信(mid)':'b-info','不可靠(weak)':'b-warn','極弱(vweak)':'b-mut'}[c.bucket]||'b-mut';
+ return `<span class="badge ${bk}">${c.bucket}</span><span class="badge ${c.sig?'b-ok':'b-mut'}">${c.sig?'顯著':'ns'}</span><span class="badge b-info">V=${c.V.toFixed(2)}</span>`;}
+function card(c){const jc=(J[c.id]||{}).c;const cc=jc==='in'?' j-in':jc==='ex'?' j-ex':jc==='doubt'?' j-doubt':'';
+ const ch=c.chr?`${c.chr}:`:'chr1:';
+ return `<div class="card${cc}">
+  <div class="hd" onclick="openM('${c.id}')"><span class="ttl">${ch}${c.pos.toLocaleString()}</span> ${badges(c)}</div>
+  <div class="figs" onclick="openM('${c.id}')"><img loading="lazy" src="${c.fig_meth}"><img loading="lazy" src="${c.fig_dist}"></div>
+  <div class="kv"><span>V <b>${c.V.toFixed(3)}</b></span><span>sil <b>${(c.sil??0).toFixed(2)}</b></span><span>k <b>${c.k}</b></span><span>p <b>${c.p.toExponential(1)}</b></span><span>n <b>${c.n}</b></span></div>
+  <div class="jrow">${VST.map(s=>`<button class="jb${jc===s.k?' on-'+s.k:''}" onclick="event.stopPropagation();setJ('${c.id}','${s.k}')">${s.l}</button>`).join('')}</div>
+  <select class="rsel" onchange="setR('${c.id}',this.value)">${REAS.map(r=>`<option value="${r.k}"${((J[c.id]||{}).r||'')===r.k?' selected':''}>${r.l}</option>`).join('')}</select>
+ </div>`;}
+function draw(){
+ const shown=[],out=[];for(const c of CASES)(matches(c)?shown:out).push(c);
+ const ss=sorted(shown);const pages=Math.max(1,Math.ceil(ss.length/PER));page=Math.min(page,pages-1);
+ $('grid').innerHTML=ss.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="mut">無符合</div>';
+ $('cnt').textContent=`符合 ${shown.length} / 共 ${CASES.length}`;
+ $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;
+ // verdict progress
+ const n={in:0,doubt:0,ex:0};for(const c of CASES){const jc=(J[c.id]||{}).c;if(n[jc]!==undefined)n[jc]++;}
+ $('prog').innerHTML=`<div class="sbx"><div class="n">${n.in}</div><div class="l">✓正確</div></div><div class="sbx"><div class="n">${n.doubt}</div><div class="l">存疑</div></div><div class="sbx"><div class="n">${n.ex}</div><div class="l">✗不正確</div></div><div class="sbx"><div class="n">${CASES.length-n.in-n.doubt-n.ex}</div><div class="l">未判讀</div></div>`;
+ // filtered-out block
+ const os=sorted(out);
+ $('outcnt').textContent=os.length;
+ $('outgrid').innerHTML=os.slice(0,60).map(card).join('')+(os.length>60?`<div class="mut">…還有 ${os.length-60} 個（縮小篩選看全部）</div>`:'');
+}
+window.openM=id=>{const c=CASES.find(x=>x.id===id);const ch=c.chr?`${c.chr}:`:'chr1:';
+ $('mc').innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="margin:0">${ch}${c.pos.toLocaleString()} ${badges(c)}</h2><button onclick="closeM()">關閉 ✕</button></div>
+  <div style="display:flex;gap:8px;margin:10px 0"><img src="${c.fig_meth}"><img src="${c.fig_dist}"></div>
+  <div class="kv"><span>V <b>${c.V.toFixed(3)}</b></span><span>silhouette <b>${(c.sil??0).toFixed(3)}</b></span><span>k <b>${c.k}</b></span><span>p <b>${c.p.toExponential(2)}</b></span><span>n reads <b>${c.n}</b></span></div>
+  <div class="jrow">${VST.map(s=>`<button class="jb${(J[c.id]||{}).c===s.k?' on-'+s.k:''}" onclick="setJ('${c.id}','${s.k}')">${s.l}</button>`).join('')}</div>`;
+ $('modal').style.display='block';};
+window.closeM=()=>$('modal').style.display='none';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+window.exportJ=()=>{const rows=CASES.filter(c=>{const j=J[c.id];return j&&j.c&&j.c!=='un';}).map(c=>({id:c.id,chr:c.chr||'chr1',pos:c.pos,bucket:c.bucket,V:c.V,verdict:J[c.id].c,reason:J[c.id].r||'',ts:J[c.id].t||''}));
+ dl(LSKEY+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({generated:new Date().toISOString(),judgments:rows},null,1),'application/json');};
+window.exportCSV=()=>{const rows=CASES.filter(c=>{const j=J[c.id];return j&&j.c&&j.c!=='un';}).map(c=>[c.id,c.chr||'chr1',c.pos,c.bucket,c.V,J[c.id].c,J[c.id].r||'',J[c.id].t||'']);
+ const csv=[['id','chr','pos','bucket','V','verdict','reason','ts'].join(',')].concat(rows.map(r=>r.map(x=>JSON.stringify(x??'')).join(','))).join('\n');
+ dl(LSKEY+'_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();}
+window.clearJ=()=>{if(confirm('清空所有判讀？')){J={};saveJ();draw();}};
+['fb','fs','fv','sk','sd','tv','ts'].forEach(id=>$(id).addEventListener('input',()=>{page=0;
+ if(id==='tv')$('tvl').textContent=parseFloat($('tv').value).toFixed(2);
+ if(id==='ts')$('tsl').textContent=parseFloat($('ts').value).toFixed(2);draw();}));
+draw();
+</script>
+</body></html>

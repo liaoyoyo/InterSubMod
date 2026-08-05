@@ -19,7 +19,7 @@ data_sources: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_ve
 |---|---|:---:|---|
 | **A** | 6 sSNV：5 TP + 1「FP」(vs SEQC2) | **L2** | ✅ tumor/normal allele 兩 basecaller 重現；TP/FP 標籤承襲 SEQC2（pos3 落 HC 空隙不可 truth 驗證）|
 | **B** | read linkage 群組 | **L2** | ⚠️ 分叉乾淨（**0 違反**），但「**5 群」過報 → 實為 ~3 lineage**（pos4 G/T/DEL 是 poly-T homopolymer artifact）|
-| **C** | 甲基把兩 lineage 分開 | **L2** | ⚠️ HKU 9 個 CpG 全顯著；**DORADO 僅 proximal 子集（2.1/2.2/3.1/3.2/3.3）複製**，distal(3.4/3.5/5.x) 不顯著 |
+| **C** | 甲基把兩 lineage 分開 | **L2** | ⚠️ HKU 9 CpG 顯著；**扣 normal HP1-vs-HP2 germline-ASM 後**乾淨子集=**{2.1,2.2,3.1,3.2,5.1,5.2}**、**{3.3,3.4,3.5,4.1} 被既存 ASM confound**；clean+DORADO-FDR 最強=**{3.1,3.2}**（2026-06-15 第二 audit 取代舊「robust {…,3.3}」）|
 | **D** | LOH + normal=REF + 無 REF read | **L2/部分撤回** | ✅ LOH(HP1 1.4%)+normal=REF 乾淨；❌「**無 ancestral REF read」是覆蓋假象**（C-G-G ref read 確實存在）|
 | **E** | subclone tree 拓樸 + 順序 | **L2 骨幹 / L3 順序** | ✅ 骨幹（all-REF root→α/β 分叉, pos5 nest α）parsimony 強制；🔶 **突變順序 L3**（VAF 不可排序 siblings + 局部 VAF 被 LOH 扭曲）|
 | **F** | pos3「FP」其實是真 somatic | **L2 最強** | ✅ 30/28 分子、mapQ60、雙股、tiled starts、兩 normal 0% → 真變異，僅落 HC 空隙 |
@@ -49,8 +49,9 @@ data_sources: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_ve
 
 ### Claim C — 甲基判別（L2；**robust 複製限 proximal 子集**）
 - HKU_MOD：α vs β 在 **9 個 CpG 全顯著**（Mann-Whitney p 1e-2→1e-7；permutation 20k 對 3.1/3.2/2.2/3.4 perm-p≤1e-4）。
-- **🔴 修正**：DORADO **僅 proximal 子集複製**：2.1(p=7e-5)/2.2(p=5e-4)/3.1(p=4e-6)/3.2(p=3e-5)/3.3(p=2e-2) 顯著；**3.4(p=0.073)、3.5(p=0.26) 不顯著**，5.1/5.2 在 DORADO n=1 不可解。
-- **robust cross-basecaller 判別 CpG = {2.1, 2.2, 3.1, 3.2, 3.3}**（非「全 CpG 兩 basecaller」）。
+- **🔴 修正（2026-06-15 第二 audit ASM 控制取代舊結論）**：跑 normal HP1-vs-HP2 甲基（本 session 獨立 code path 復現，逐位吻合）發現 **3.3/3.4/3.5/4.1 在 normal 已有顯著 germline ASM**（Δ0.57–0.82，FDR≤0.03）→ 這些 CpG 的 tumor α/β 差異**被既存 ASM confound，不可當 subclone 新生甲基**。
+- **乾淨子集（normal 無 ASM）= {2.1, 2.2, 3.1, 3.2, 5.1, 5.2}**；其中 **clean + DORADO-FDR 通過 = {3.1, 3.2}（最強、最可防守的 subclone-甲基證據）**。舊「robust {…,3.3}」作廢（3.3 是 ASM-confounded）。
+- **4.1 座標校正**：原報 18096041 是 A（非 CpG），真 4.1 CpG=**18096340**；校正後 4.1 也屬 ASM-confound 組。
 - 0 甲基-lineage 矛盾 read；2 條 ref-genotype(C-G-G) read 帶**乾淨 β 甲基**（3.1 高/2.2 低）→ epigenotype 追 lineage（強化非弱化）。
 
 ### Claim D — LOH + normal=REF（L2，**「無 REF read」撤回**）
@@ -72,18 +73,20 @@ pos3 A：HKU 30 分子 / DORADO 28 分子、**全 mapQ60、0 低品質**、雙�
 ### 任何論文文字必標為「推論」(非事實) 的三點
 1. **「5 群/5 subclone」count** → 改「**≥3 distinguishable lineages**」；pos4 三分若保留須標 ONT-homopolymer-uncertain。
 2. **突變順序 / 「無 ancestral REF read」(two-hit order)** → 覆蓋太稀(≤10 reads 跨≥4點) + ancestral read 存在；root 是 parsimony 推論非觀測。
-3. **「subclonal 而非 germline ASM」** → operational 為真（單一保留 allele → live 雙親 ASM 結構上不可能 + flip 跨 HP tag + HP-free DORADO 複製）；但**「LOH 前既存 germline-ASM 被保留、再由 somatic 突變切分」無法形式排除**（沒有丟失 allele 可對照）→ 需 normal-anchored cis/ASM control。
+3. **「subclonal 而非 germline ASM」** → operational 為真（單一保留 allele → live 雙親 ASM 結構上不可能 + flip 跨 HP tag + HP-free DORADO 複製）。**🆕 ASM 控制已跑（2026-06-15 第二 audit）**：normal HP1-vs-HP2 顯示 **{3.3,3.4,3.5,4.1} 有既存 germline ASM、{2.1,2.2,3.1,3.2,5.1,5.2} 無** → 部分解 confound：乾淨 subclone-甲基訊號**收斂到無-ASM 子集（最強 3.1/3.2）**。nuance：tumor 已 LOH 丟 HP1，故 confound 機制是「這些 CpG epigenetically labile」而非「簡單繼承 germline ASM」。
 
 ### 升 tier 前置（→ L3+）
-(a) per-read 5mC partition 的 binomial/permutation test；(b) normal-anchored cis/ASM control 分離 subclone-methylation vs ASM-on-retained-LOH；(c) 第二 LOH 位點或第二樣本複製。
+(a) per-read 5mC partition 的 binomial/permutation test；(b) ~~normal-anchored cis/ASM control~~ **✅ 已完成（第二 audit；見 `independent_audit.{json,md}` + `..._independent_verdict_02.md`）**；(c) 第二 LOH 位點或第二樣本複製（仍待）。
 
 ---
 
 ## 限制
-1. 單位點 × 單樣本 × 單 pipeline；cross-basecaller 為主要 uplift（非獨立複製）→ 天花板 L2。
-2. DORADO tagged BAM 已清理，cross-check 用 raw（無 HP）；LOH/HP 僅 HKU_MOD 驗。
+1. 單位點 × 單樣本 × 單 pipeline；cross-basecaller 為主要 uplift（同細胞株技術重現，非獨立 biological replicate）→ 天花板 L2。
+2. ~~DORADO tagged BAM 已清理~~ **校正：20260420 版被刪，但 20260315 complete_matrix 版仍存在（有 HP tag）；第二 audit 已用它做 HP-aware DORADO cross-check**。
 3. tagged BAM 重複記錄 340→280 unique（dedup 後分析）。
 4. 與 user 手標不符：**CpG 2.2** 資料 α=H（手標 L），方向相反。
+
+> **🔗 2026-06-15 對齊註**：本報告（第一輪驗證）之甲基 robust set、ASM、DORADO tagged 三處，已被更嚴謹的**第二輪獨立 audit** 取代/補強，並經本 session 親驗（重跑 byte-identical + 我方 code path 復現 normal ASM 逐位吻合）。權威結論以 `InterSubMod/docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md` 為準；教學頁 04 Fig 4 已 data-bound 重生對齊。
 
 ## 資產
 - 腳本：`_assets/scripts/{extract_locus_matrix,analyze_matrix,methyl_discrimination,make_verification_figure}.py`

@@ -15,6 +15,7 @@ import sys
 import os
 import json
 import gzip
+import hashlib
 import time
 from collections import Counter, defaultdict
 from bisect import bisect_right
@@ -29,12 +30,16 @@ A = os.environ.get("SM_WORKDIR", "/big7_disk/liaoyoyo2001/InterSubMod/.claude/wo
 OUT = os.environ.get("SM_OUT", f"{A}/sm_linkage_genomewide.json")
 VCF_MODE = os.environ.get("SM_VCF_MODE", "perchrom")
 
-TIER_R = 50000      # same-read 枚舉上限 (read aligned-span p95~34kb, max~76kb → 50kb 涵蓋, 由 co-read 過濾)
-COREAD_MIN = 6      # 連鎖「confirmed」最低共讀 (記錄 >=2 的所有對, powered = coread>=6)
-MAPQ_MIN = 20
-NORM_REF_MIN = 4    # normal somatic 確認: norm_ref>=NORM_REF_MIN 且 normal VAF<NORM_VAF_MAX
-NORM_VAF_MAX = 0.05  # 容忍 normal 端低階噪聲 ALT (chr17 β1 真 somatic 但 normal 56/2=3.4%; 嚴格 ==0 會誤殺)
+TIER_R = int(os.environ.get("SM_TIER_R", "50000"))
+COREAD_MIN = int(os.environ.get("SM_COREAD_MIN", "6"))
+MAPQ_MIN = int(os.environ.get("SM_MAPQ_MIN", "20"))
+BASEQ_MIN = int(os.environ.get("SM_BASEQ_MIN", "0"))
+READ_TAG_SIDECAR = os.environ.get("SM_READ_TAG_SIDECAR", "")
+NORM_REF_MIN = int(os.environ.get("SM_NORM_REF_MIN", "4"))
+NORM_VAF_MAX = float(os.environ.get("SM_NORM_VAF_MAX", "0.05"))
 CHROMS = [f"chr{c}" for c in range(1, 23)]
+_TAG_TABIX = None
+_LAST_TAG_DIAGNOSTICS = {}
 
 
 def is_somatic(nref, nalt):
@@ -79,12 +84,57 @@ def load_union(chrom):
     return sorted((pos, v[0], v[1], v[2]) for pos, v in snvs.items())
 
 
+def _cigar_digest(alignment):
+    return hashlib.blake2b((alignment.cigarstring or "*").encode(), digest_size=8).hexdigest()
+
+
+def _alignment_key(alignment):
+    return (alignment.query_name, alignment.reference_name, int(alignment.reference_start),
+            int(alignment.reference_end or alignment.reference_start + 1), int(alignment.flag),
+            _cigar_digest(alignment))
+
+
+def _load_sidecar_tags(chrom, lo, hi):
+    """Fetch exact alignment HP/PS records overlapping a 1-based closed target span."""
+    global _TAG_TABIX
+    if not READ_TAG_SIDECAR:
+        return None, set()
+    if _TAG_TABIX is None:
+        _TAG_TABIX = pysam.TabixFile(READ_TAG_SIDECAR)
+    values = {}
+    conflicts = set()
+    try:
+        lines = _TAG_TABIX.fetch(chrom, lo - 1, hi)
+    except (ValueError, OSError):
+        return {}, set()
+    for line in lines:
+        fields = line.split("\t")
+        if len(fields) != 9:
+            continue
+        row_chrom, start, end, qname, flag, _mapq, cigar_digest, hp, ps = fields
+        key = (qname, row_chrom, int(start), int(end), int(flag), cigar_digest)
+        value = (None if hp == "." else hp, None if ps == "." else ps)
+        if key in values and values[key] != value:
+            conflicts.add(key)
+        else:
+            values[key] = value
+    return values, conflicts
+
+
+def last_tag_diagnostics():
+    return dict(_LAST_TAG_DIAGNOSTICS)
+
+
 def per_read_calls(bam, chrom, group):
-    """group=[(pos,ref,alt,src)]. 回 calls{rn:{pos:'REF'/'ALT'/'OTHER'}}, hp{rn:int}, ps{rn:int}.
+    """Return per-alignment allele calls plus HP/PS using an exact streamed sidecar when configured.
+
+    Alignment identity includes QNAME, coordinates, FLAG and a stable CIGAR digest. This prevents
+    primary/supplementary segments from being stitched into one synthetic molecule vector.
     O2(2026-07-01): group span 發『單次』region pileup,只在 sSNV 位點 tabulate — 取代原逐位點 pileup。
     長 read 橫跨多 sSNV 時只解壓一次(非 k 次)。byte-identical 已驗證(original vs 本版,同輸入):
     397 group unit + chr22 端到端 7/7(pairs/census/tally/universe/計數)+ 多片切割合併 7/7;
     加速 per-unit 1.4-1.7x、超寬 group(chr8 503kb/33-sSNV)2.98-6.19x。原逐位點版見 git 歷史。"""
+    global _LAST_TAG_DIAGNOSTICS
     calls = defaultdict(dict)
     hp = {}
     ps = {}
@@ -92,7 +142,10 @@ def per_read_calls(bam, chrom, group):
     posset = set(refalt)
     lo = min(posset)
     hi = max(posset)
-    for col in bam.pileup(chrom, lo - 1, hi, truncate=True, min_base_quality=0, stepper="samtools"):
+    sidecar, sidecar_conflicts = _load_sidecar_tags(chrom, lo, hi)
+    seen_alignments = {}
+    allele_conflict_keys = set()
+    for col in bam.pileup(chrom, lo - 1, hi, truncate=True, min_base_quality=BASEQ_MIN, stepper="samtools"):
         pos = col.reference_pos + 1  # pileup 0-based reference_pos → 1-based sSNV pos
         if pos not in posset:
             continue
@@ -103,19 +156,57 @@ def per_read_calls(bam, chrom, group):
             aln = pr.alignment
             if aln.mapping_quality < MAPQ_MIN:
                 continue
-            rn = aln.query_name
+            key = _alignment_key(aln)
             base = aln.query_sequence[pr.query_position].upper()
-            calls[rn][pos] = "REF" if base == ref else ("ALT" if base == alt else "OTHER")
-            if aln.has_tag("HP"):
-                hp[rn] = aln.get_tag("HP")
-            if aln.has_tag("PS"):
-                ps[rn] = aln.get_tag("PS")
+            call = "REF" if base == ref else ("ALT" if base == alt else "OTHER")
+            previous = calls[key].get(pos)
+            if previous is not None and previous != call:
+                allele_conflict_keys.add(key)
+            else:
+                calls[key][pos] = call
+            seen_alignments[key] = aln.flag
+            if sidecar is not None:
+                if key in sidecar_conflicts:
+                    continue
+                if key in sidecar:
+                    side_hp, side_ps = sidecar[key]
+                    if side_hp is not None:
+                        hp[key] = side_hp
+                    if side_ps is not None:
+                        ps[key] = side_ps
+            else:
+                if aln.has_tag("HP"):
+                    hp[key] = aln.get_tag("HP")
+                if aln.has_tag("PS"):
+                    ps[key] = aln.get_tag("PS")
+    for key in allele_conflict_keys:
+        calls.pop(key, None)
+        hp.pop(key, None)
+        ps.pop(key, None)
+    raw_hp = Counter(str(hp.get(key, ".")) for key in calls)
+    raw_hp_ps = Counter(str(hp.get(key, ".")) for key in calls if key in ps)
+    classes = Counter()
+    for key in calls:
+        flag = seen_alignments.get(key, key[4])
+        classes["secondary" if flag & 0x100 else ("supplementary" if flag & 0x800 else "primary")] += 1
+    _LAST_TAG_DIAGNOSTICS = {
+        "alignment_group_exposures": len(calls),
+        "raw_HP_counts": dict(raw_hp),
+        "raw_HP_with_PS_counts": dict(raw_hp_ps),
+        "alignment_class_counts": dict(classes),
+        "n_unique_phase_sets": len(set(str(value) for value in ps.values())),
+        "sidecar_configured": sidecar is not None,
+        "sidecar_exact_matches": sum(key in (sidecar or {}) and key not in sidecar_conflicts for key in calls),
+        "sidecar_missing": sum(key not in (sidecar or {}) for key in calls) if sidecar is not None else 0,
+        "sidecar_conflicts": sum(key in sidecar_conflicts for key in calls),
+        "alignment_identity_allele_conflicts": len(allele_conflict_keys),
+    }
     return calls, hp, ps
 
 
 def normal_status(nb, chrom, pos, ref, alt):
     nref = nalt = 0
-    for col in nb.pileup(chrom, pos - 1, pos, truncate=True, min_base_quality=0, stepper="samtools"):
+    for col in nb.pileup(chrom, pos - 1, pos, truncate=True, min_base_quality=BASEQ_MIN, stepper="samtools"):
         for pr in col.pileups:
             if pr.is_del or pr.is_refskip or pr.query_position is None:
                 continue
@@ -267,7 +358,10 @@ def main(chroms=None, out_path=None):
 
     tb.close(); nb.close()
     out = {
-        "params": {"TIER_R": TIER_R, "COREAD_MIN": COREAD_MIN, "MAPQ_MIN": MAPQ_MIN, "NORM_REF_MIN": NORM_REF_MIN},
+        "params": {"TIER_R": TIER_R, "COREAD_MIN": COREAD_MIN, "MAPQ_MIN": MAPQ_MIN,
+                   "BASEQ_MIN": BASEQ_MIN, "NORM_REF_MIN": NORM_REF_MIN,
+                   "NORM_VAF_MAX": NORM_VAF_MAX,
+                   "READ_TAG_SOURCE": READ_TAG_SIDECAR or "BAM_HP_PS"},
         "universe": uni,
         "n_groups_multi": n_groups_multi, "n_singletons": n_singletons,
         "n_pairs_recorded": len(pairs),

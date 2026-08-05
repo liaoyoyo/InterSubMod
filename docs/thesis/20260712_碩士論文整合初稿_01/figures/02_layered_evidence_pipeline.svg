@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">分層證據管線與資料角色</title>
+  <desc id="desc">從 ClairS 原始 VCF 經 LongPhase-S、read tags、區域候選樹到四級驗證的流程，標示每層不能跨越的語意邊界。</desc>
+  <defs>
+    <marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#315f73"/></marker>
+  </defs>
+  <rect width="1400" height="900" fill="#f8f8f5"/>
+  <text x="70" y="65" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">分層證據管線：每一層只回答一種問題</text>
+  <text x="70" y="105" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#52636b">語意邊界寫入資料契約與 QA，避免 caller label、read tag、候選樹與 biological truth 混用。</text>
+
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <rect x="70" y="155" width="230" height="120" rx="10" fill="#ffffff" stroke="#728c98" stroke-width="2"/>
+    <text x="95" y="190" font-size="18" font-weight="700" fill="#17324d">L0｜Caller universe</text>
+    <text x="95" y="222" font-size="16" fill="#314652">paired ClairS raw-all</text>
+    <text x="95" y="248" font-size="16" fill="#314652">biallelic sSNV records</text>
+
+    <line x1="305" y1="215" x2="370" y2="215" stroke="#315f73" stroke-width="4" marker-end="url(#a)"/>
+
+    <rect x="385" y="155" width="270" height="120" rx="10" fill="#eaf1f3" stroke="#568296" stroke-width="2"/>
+    <text x="410" y="190" font-size="18" font-weight="700" fill="#17324d">L1｜Recalibration contract</text>
+    <text x="410" y="222" font-size="16" fill="#314652">LongPhase-S _sc.vcf</text>
+    <text x="410" y="248" font-size="16" fill="#314652">PASS = canonical tree input</text>
+
+    <line x1="660" y1="215" x2="725" y2="215" stroke="#315f73" stroke-width="4" marker-end="url(#a)"/>
+
+    <rect x="740" y="155" width="270" height="120" rx="10" fill="#ffffff" stroke="#728c98" stroke-width="2"/>
+    <text x="765" y="190" font-size="18" font-weight="700" fill="#17324d">L2｜Read-level evidence</text>
+    <text x="765" y="222" font-size="16" fill="#314652">sSNV co-occurrence + HP</text>
+    <text x="765" y="248" font-size="16" fill="#314652">PS only for phase/QC</text>
+
+    <line x1="1015" y1="215" x2="1080" y2="215" stroke="#315f73" stroke-width="4" marker-end="url(#a)"/>
+
+    <rect x="1095" y="155" width="235" height="120" rx="10" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/>
+    <text x="1120" y="190" font-size="18" font-weight="700" fill="#27543a">L3｜Candidate trees</text>
+    <text x="1120" y="222" font-size="16" fill="#314652">region × HP family</text>
+    <text x="1120" y="248" font-size="16" fill="#314652">all minimum solutions</text>
+  </g>
+
+  <rect x="70" y="320" width="1260" height="160" rx="12" fill="#fff" stroke="#97a7ad" stroke-width="2"/>
+  <text x="100" y="360" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="21" font-weight="700" fill="#17324d">分析物件與規則</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="16" fill="#314652">
+    <text x="100" y="394"><tspan font-weight="700">Region：</tspan>相鄰 sSNV gap ≤ 50 kb 的 connected component；</text>
+    <text x="100" y="425">總 span 可以大於 50 kb。</text>
+    <text x="100" y="456"><tspan font-weight="700">HP family：</tspan>HP1/HP2 是 allelic partition；HP3/H4 auxiliary；不等同父母來源。</text>
+    <text x="720" y="394"><tspan font-weight="700">Tree：</tspan>rooted monotone mutation-state partial order；</text>
+    <text x="720" y="425">hidden state 是 graph state，不是已觀測 cell clone。</text>
+    <text x="720" y="456"><tspan font-weight="700">Refusal：</tspan>recurrence-required、capped、underdetermined、多解均明示。</text>
+  </g>
+
+  <line x1="700" y1="485" x2="700" y2="545" stroke="#315f73" stroke-width="4" marker-end="url(#a)"/>
+
+  <rect x="70" y="560" width="1260" height="135" rx="12" fill="#f3efe4" stroke="#9a7b42" stroke-width="2"/>
+  <text x="100" y="600" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="21" font-weight="700" fill="#6d5529">L4｜輔助證據只做有界解讀</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="16" fill="#314652">
+    <text x="105" y="638"><tspan font-weight="700">Read AF：</tspan>候選內探索排序</text>
+    <text x="105" y="668">不是 purity/CN-corrected CCF</text>
+    <text x="505" y="638"><tspan font-weight="700">Copy number：</tspan>recurrence/multiplicity 後驗解讀</text>
+    <text x="505" y="668">不直接生成 tree edge</text>
+    <text x="970" y="638"><tspan font-weight="700">5mC：</tspan>bounded characterization</text>
+    <text x="970" y="668">不 filter、rescue、rank 或 confirm tree</text>
+  </g>
+
+  <text x="70" y="755" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="22" font-weight="700" fill="#17324d">驗證階梯</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <rect x="70" y="785" width="280" height="70" rx="8" fill="#edf5ef" stroke="#4f8062"/>
+    <text x="90" y="814" font-size="16" font-weight="700" fill="#27543a">A｜Contract integrity</text><text x="90" y="839" font-size="14" fill="#314652">7/7 producer；record/accounting</text>
+    <rect x="380" y="785" width="280" height="70" rx="8" fill="#edf5ef" stroke="#4f8062"/>
+    <text x="400" y="814" font-size="16" font-weight="700" fill="#27543a">B｜Solver consistency</text><text x="400" y="839" font-size="14" fill="#314652">golden/full/stress；implementation</text>
+    <rect x="690" y="785" width="280" height="70" rx="8" fill="#f3efe4" stroke="#9a7b42"/>
+    <text x="710" y="814" font-size="16" font-weight="700" fill="#6d5529">C｜Technical reproducibility</text><text x="710" y="839" font-size="14" fill="#314652">same cell line, different tech source</text>
+    <rect x="1000" y="785" width="330" height="70" rx="8" fill="#faeeee" stroke="#aa5a4b"/>
+    <text x="1020" y="814" font-size="16" font-weight="700" fill="#873b31">D｜Biological confirmation</text><text x="1020" y="839" font-size="14" fill="#314652">single-cell / multi-region / lineage truth：未完成</text>
+  </g>
+</svg>

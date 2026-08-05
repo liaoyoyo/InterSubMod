@@ -70,6 +70,16 @@ EXACT_PS_BUILD = (
     / "build_exact_ps_layered_workstation.py"
 )
 
+# Optional per-sample cancer-gene / drug context overlay (annotation-stratified only).
+# Only HCC1395 has a curated COSMIC CGC + DGIdb region-hit table today; other samples
+# build without gene annotations and the workstation degrades gracefully to empty panels.
+GENE_DRUG_TSV_BY_SAMPLE = {
+    "HCC1395": REPO_ROOT
+    / "research"
+    / "20260712_hcc1395_pair_coarse_topology_gene_drug_validation"
+    / "agents"
+    / "hcc1395_pair_cancer_drug_region_hits.tsv",
+}
 
 EXPECTED_SAMPLES = {
     "COLO829",
@@ -84,7 +94,7 @@ EXPECTED_SCOPE = "7 datasets / 6 biological samples / chr1-22"
 EXPECTED_BACKBONE = "longphase_s_recalibrated_FILTER_PASS"
 EXPECTED_TREE_SOURCE = "longphase_s_recalibrated_filter_pass"
 EXPECTED_REGION_SCOPE = "chr1-22 primary; chrX/chrY out-of-scope census only"
-EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-4"
 PAGE_META_NAMES = {
     "summary_sha256": "intersubmod-current-summary-sha256",
     "region_sha256": "intersubmod-region-view-sha256",
@@ -340,7 +350,7 @@ def load_authority() -> dict[str, Any]:
     read_af_index = load_json(READ_AF_TOPOLOGY_INDEX)
     require(
         read_af_index.get("schema_name") == "intersubmod.current_v5_read_af_topology_index"
-        and read_af_index.get("schema_version") == "1.0.0",
+        and read_af_index.get("schema_version") == "1.1.0",
         "unexpected read-AF topology index schema",
     )
     require(read_af_index.get("all_checks_pass") is True, "read-AF topology index checks failed")
@@ -694,6 +704,9 @@ def collect_rows(authority: dict[str, Any], build_samples: bool) -> list[dict[st
                 SM_READ_AF_TOPOLOGY=str(sample["read_af_path"]),
                 SM_READ_AF_TOPOLOGY_SHA256=sample["read_af_sha256"],
             )
+            gene_drug_tsv = GENE_DRUG_TSV_BY_SAMPLE.get(name)
+            if gene_drug_tsv and gene_drug_tsv.is_file():
+                env["SM_GENE_DRUG_TSV"] = str(gene_drug_tsv)
             result = subprocess.run(
                 [PYTHON, str(BUILD)],
                 env=env,

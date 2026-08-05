@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM C++ 能不能解釋 chr2:18M subclone？— 能力 vs 敘述 gap 對照</title>
+<!--
+  doc_type: explain · capability_gap_analysis
+  page: 10_ism-cpp-vs-chr2-subclone-capability
+  built_utc: 2026-06-23
+  repo_head: 9098f11   branch: research/subclonal-reconstruction-202606
+  scope: PARTIAL — chr2:18M HCC1395 單位點 × 單樣本；對照「ISM C++ as-built」vs「chr2 subclone 敘述」
+  data_sources:
+    - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json (pysam 案例真值, build b761336, L2)
+    - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md
+    - output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/.../clustering/significance.json (ISM C++ 實測, 本 session 親讀)
+    - src/core/{SubcloneAnalyzer,NormalBaseline,PerCpgAsm,TreeStructure,SomaticSnv,ReadParser,LabelTest,StructureTest,GlobalTest,RegionProcessor}.cpp (file:line 親讀)
+  provenance_note: 所有 ISM 數字本 session 由 significance.json + reads.tsv + metadata.txt Read 讀回；所有案例數字引自 workstation_data.json (commit b761336)。§13.0 撰寫與分析分屬不同 batch。
+-->
+<!-- provenance-verified: ISM allele_PERMANOVA F/p (#1 15.43/.001 #2 23.65/.001 #5 12.25/.001)、reads 數、alt_support 分布、case 甲基 q/FDR/CCF/LOH 全本 session 親讀 significance.json + workstation_data.json；module file:line 親讀 src/core/*.cpp -->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.0rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.05rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.5rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-5) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.1rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424} .takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p{font-size:1.04rem;line-height:1.62}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:5px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:170px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.76rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)} .kpi.info{border-left:4px solid var(--c-info)} .kpi.warn{border-left:4px solid var(--c-warn)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code,th code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+.flow1{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);text-align:center;margin:var(--sp-3) 0;overflow-x:auto}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figcaption{font-size:.8rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.9rem}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.79rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.verdict{font-family:var(--mono);font-weight:800;white-space:nowrap}
+.v-ok{color:var(--c-pass)} .v-part{color:var(--c-warn)} .v-no{color:var(--c-dead)}
+.lcol{width:30%} .half{width:50%}
+.tag-l{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:800;padding:0 5px;border-radius:4px;border:1px solid;vertical-align:middle}
+.l1{color:var(--c-pass);border-color:var(--c-pass);background:var(--c-pass-soft)}
+.l2{color:var(--c-info);border-color:var(--c-info);background:var(--c-info-soft)}
+.l3{color:var(--c-warn);border-color:var(--c-warn);background:var(--c-warn-soft)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin:var(--sp-4) 0}
+.col{background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.col h5{margin:0 0 var(--sp-2);font-size:1rem}
+.col.pass{border-top:4px solid var(--c-pass)} .col.dead{border-top:4px solid var(--c-dead)}
+.col ul{padding-left:1.15em;margin:var(--sp-2) 0;font-size:.9rem} .col li{margin:5px 0}
+@media(max-width:760px){.split{grid-template-columns:1fr}.lcol,.half{width:auto}}
+.warnote{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-left:5px solid var(--c-warn);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.88rem;margin:var(--sp-3) 0}
+.warnote b{color:var(--c-warn)}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="08_subclone-logic-chain-chr2-18M.standalone.html">邏輯鏈</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例走查</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">案例 audit</a>
+    <a href="09_three-stats-division-of-labor.standalone.html">ISM 三統計</a>
+    <a href="06_ism-subclone-pipeline-concept.standalone.html">pipeline 構想</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋中心 · 頁 10 · 能力 vs 敘述 gap</div>
+  <h1>ISM C++ 的數據與敘述，能解釋 chr2:18M subclone 的哪些部分？</h1>
+  <p class="lede">把使用者手動觀察、再用 pysam 驗證的 <strong>chr2:18M subclone 重建敘述</strong>，逐項對照<strong>「最新 ISM C++ as-built 在同一批位點實際算出什麼」</strong>。誠實界定：<strong>哪些 ISM 撐得起（characterize 半邊）、哪些 ISM 根本沒有（reconstruct 骨幹半邊）、為什麼，以及模組命名的 over-claim 風險。</strong></p>
+</header>
+
+<!-- ============ BLUF ============ -->
+<div class="bluf">
+  <h2>L0 一眼結論</h2>
+  <p><span class="key">ISM C++ 足夠解釋 subclone 故事的「甲基刻畫」半邊，但解釋不了「重建骨幹」半邊。</span> 而且 — 關鍵事實 — chr2:18M 敘述裡的 α/β lineage、互斥 linkage、甲基 α-vs-β 那些數字，<strong>不是 ISM C++ 算的，是 pysam 自訂腳本算的</strong>。ISM C++ <strong>確實獨立在同一批 sSNV 位點跑過</strong>，但它輸出的是「單位點 allele-軸甲基結構」，不是「跨位點 lineage 重建」。</p>
+  <p class="pi">▸ <b>給 PI 一句話：</b>ISM 在 chr2 三個 sSNV 上<b>都獨立複製了「ALT vs REF 甲基結構顯著」（allele PERMANOVA p=0.001 ×3）</b>＝主軸「甲基 corroborate somatic 軸」的硬證據；但 ISM 沒有多-sSNV read linkage、沒有 clone tree、沒有 CCF —— 重建骨幹是 genetic haplotag + pysam，不是甲基、也不是 ISM 的 <code>SubcloneAnalyzer</code>（那只是 4-bucket 跨區分類器，名不副實）。</p>
+</div>
+
+<div class="ironclad">
+  <b>🔴 讀這頁的 4 條鐵則（避免把 ISM oversell）</b>
+  <ol>
+    <li>ISM 的 <code>SubcloneAnalyzer</code> <b>不是 subclone 重建器</b>——是把全基因組 ≥50 個 region 依 ASM 特徵塞進 4 個固定桶的 if/else（<code>SubcloneAnalyzer.cpp:100-128</code>）。沒有 read linkage、沒有樹、沒有 CCF、沒碰任何 SNV。</li>
+    <li>ISM 的 <code>TreeStructure</code> <b>不是腫瘤演化樹</b>——是 read×read 甲基距離的 dendrogram（葉=read，邊=甲基距離），沒有祖先-後代、沒有 CCF。</li>
+    <li>ISM 的 <code>"Subclone"</code> verification_class = 「cluster 結構顯著<b>但</b>標籤不顯著」（<code>SignificanceAnalyzer.cpp:307-340</code>）＝正是 cis-ASM／double-dip <b>候選旗標</b>，不是被確認的 subclone。</li>
+    <li>ISM 實測在 chr2 的顯著訊號全在 <b>a-priori allele 軸</b>（label-first），<b>unsupervised cluster PERMANOVA 三位點全 invalid</b>。「無監督切群＝subclone」在此<b>不成立</b>。</li>
+  </ol>
+</div>
+
+<!-- ============ 1. chr2 例子是什麼 ============ -->
+<section id="case">
+  <h3><span class="num">1</span> 先講清楚：chr2:18M subclone 例子是什麼 <span class="badge tier">案例 L2</span></h3>
+  <p class="sub">HCC1395 乳癌細胞株，<code>chr2:18,068,480–18,108,828</code>（~40 kb，2p24.2，KCNS3 intron，落在 SEQC2-confirmed LOH 區 <code>chr2:16,146,119–22,100,000</code>）。使用者手動 IGV 觀察「LOH→subclone→多群 read」，再用 <strong>pysam 逐 read 萃取</strong> 6 個 somatic SNV 的 base + HP/PS + MM/ML 甲基，對照 SEQC2 truth + DORADO 跨 basecaller 複製 + 第二輪獨立 audit。</p>
+
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">6</div><div class="k">somatic SNV（5 TP + 1 落 HC 空隙）</div></div>
+    <div class="kpi info"><div class="v">98.3% / 99.6%</div><div class="k">LOH 主單倍型占比（HKU / DORADO）</div></div>
+    <div class="kpi pass"><div class="v">0</div><div class="k">α/β 互斥 linkage 違反 read（strict）</div></div>
+    <div class="kpi warn"><div class="v">L2</div><div class="k">證據天花板（單位點×單樣本×單 pipeline）</div></div>
+  </div>
+
+  <h4 class="mini">6 個 somatic SNV 與其角色（pysam + SEQC2，<span class="tag-l l2">L2</span>）</h4>
+  <table>
+    <thead><tr><th>#</th><th>座標</th><th>變異</th><th>SEQC2</th><th>CCF</th><th>角色（lineage）</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>18,068,480</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.814</td><td>beta-left block</td></tr>
+      <tr><td>2</td><td><code>18,072,546</code></td><td>G&gt;C</td><td>TP HighConf</td><td>0.786</td><td>beta-left block</td></tr>
+      <tr><td>3</td><td><code>18,086,020</code></td><td>G&gt;A</td><td class="verdict v-part">落 HC 空隙</td><td>—</td><td>α-branch pivot（truth-unevaluable）</td></tr>
+      <tr><td>4</td><td><code>18,096,269</code></td><td>C&gt;G</td><td>TP MedConf</td><td>0.489</td><td>beta-right（後接 20bp poly-T，G/T/DEL = homopolymer jitter）</td></tr>
+      <tr><td>5</td><td><code>18,099,697</code></td><td>G&gt;C</td><td>TP</td><td>0.097</td><td>α-1 nested（subclonal-minor，低 VAF）</td></tr>
+      <tr><td>6</td><td><code>18,108,828</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.772</td><td>beta-right block</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini">敘述的 6 個 claim（已被第二輪 audit 校正，<span class="tag-l l2">L2</span>）</h4>
+  <table>
+    <thead><tr><th class="lcol">Claim</th><th>已驗證內容</th><th>裁決</th></tr></thead>
+    <tbody>
+      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor/normal allele 兩 basecaller 重現；normal 6 點全 REF</td><td class="verdict v-ok">✅ 確認</td></tr>
+      <tr><td><b>B</b> read linkage 定 α/β lineage</td><td>α(pos3=A) 與 β(pos1G/2C/6G) 互斥 0 違反；(3)A→(5)C 巢狀；「5 群」校正為 ~3 regional states</td><td class="verdict v-ok">✅ 骨幹確認</td></tr>
+      <tr><td><b>C</b> 甲基把兩 lineage 分開</td><td>10 候選 CpG，扣 normal-HP ASM 後乾淨子集 <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code>，最強 <code>{3.1,3.2}</code>（如 3.2 HKU α0.97/β0.14 q=4.1e-5、DORADO 1.00/0.006 q=2.4e-5）</td><td class="verdict v-part">⚠ 有界</td></tr>
+      <tr><td><b>D</b> LOH + normal=REF</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 全 REF</td><td class="verdict v-ok">✅ 確認</td></tr>
+      <tr><td><b>E</b> 樹拓樸 + 順序</td><td>骨幹 parsimony 強制；演化順序僅 (3)→(5) nesting 可排，其餘不可排</td><td class="verdict v-part">⚠ 骨幹 L2 / 順序 L3</td></tr>
+      <tr><td><b>F</b> pos3「FP」其實真 somatic</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩 normal 0% A，僅落 SEQC2 HC 空隙</td><td class="verdict v-ok">✅ 最強單點</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">最終可防守用語（verdict_02）：<em>"a regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence"</em> —— <b>非</b>「confirmed five-subclone evolutionary reconstruction」。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
+
+  <div class="warnote">⚠ <b>關鍵前提</b>：上述 A–F 的數字，全部來自 <code>pysam</code> 自訂腳本（<code>extract_locus_matrix.py</code> + <code>analyze_matrix.py</code> → <code>independent_audit.json</code>，build commit <code>b761336</code>），<b>不是 ISM C++ 算的</b>。下一節看 ISM C++ 在同一批位點實際算了什麼。</p></div>
+</section>
+
+<!-- ============ 2. ISM C++ 實際算了什麼 ============ -->
+<section id="ism">
+  <h3><span class="num">2</span> ISM C++ as-built 在這些位點實際算出什麼 <span class="badge b-info">本 session 親讀 significance.json</span></h3>
+  <p class="sub">好消息：ISM C++ binary <strong>確實在 chr2:18M 的 sSNV anchor 上跑過</strong>（canonical paired_full TP 批次，<code>20260314_..._complete_matrix</code>）。每個 somatic SNV ±5000bp 是一個獨立 region，輸出 <code>metadata.txt / reads.tsv / methylation.csv / distance/&lt;METRIC&gt;/matrix.csv / clustering/{tree.nwk, significance.json}</code>。以下是<strong>三個 sSNV region 的 ISM 實測統計</strong>（本 session 由 <code>significance.json</code> 讀回）。</p>
+
+  <figure>
+    <div class="figtitle">ISM C++ 對 chr2 三個 sSNV region 的實際輸出（read-back 真值，<span class="tag-l l1">L1</span>）</div>
+    <table>
+      <thead><tr>
+        <th>sSNV region</th><th>reads</th><th>optimal_k</th>
+        <th>cluster×ALT<br>Fisher p / V</th><th>cluster×HP<br>Fisher p / V</th>
+        <th>cluster PERMANOVA<br>(unsupervised)</th>
+        <th class="half">allele PERMANOVA<br>(ALT vs REF, label-first)</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><code>chr2:18,068,480</code><br><span class="muted">#1 · Region 2738 · 47 CpG</span></td>
+          <td>36<br><span class="muted">REF21/ALT15</span></td><td>2</td>
+          <td>0.144 / 0.30</td><td>0.039 / 0.66</td>
+          <td class="verdict v-no">invalid · F=0 · p=1.0</td>
+          <td class="verdict v-ok">F=15.43 · <b>p=0.001</b> · disp_p=1.0</td>
+        </tr>
+        <tr>
+          <td><code>chr2:18,072,546</code><br><span class="muted">#2 · 43 reads</span></td>
+          <td>43<br><span class="muted">REF23/ALT20</span></td><td>3</td>
+          <td>0.000 / 0.95</td><td>0.020 / 0.79</td>
+          <td class="verdict v-no">invalid · F=0 · p=1.0</td>
+          <td class="verdict v-ok">F=23.65 · <b>p=0.001</b> · disp_p=1.0</td>
+        </tr>
+        <tr>
+          <td><code>chr2:18,099,697</code><br><span class="muted">#5 · 低 VAF（CCF 0.10）</span></td>
+          <td>34<br><span class="muted">REF23/ALT11</span></td><td>4</td>
+          <td>0.000 / 0.78</td><td>1.000 / 0.00</td>
+          <td class="verdict v-no">invalid · F=0 · p=1.0</td>
+          <td class="verdict v-ok">F=12.25 · <b>p=0.001</b> · disp_p=1.0</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>
+      <b>讀法（3 件事）：</b>
+      ① <b>allele PERMANOVA 三位點全顯著 p=0.001</b>（F=12–24，dispersion_p=1.0 排除離散度假象）→ ISM 用<b>自己的 read×read 距離 + label-first 檢定</b>，獨立證實「攜帶 somatic ALT 的 read 與攜帶 REF 的 read 甲基結構顯著不同」。連低-VAF 的 #5（ALT 僅 11 條）也過。
+      ② <b>cluster PERMANOVA（unsupervised）三位點全 invalid</b> → ISM 的「無監督切群結構」檢定在此<b>無有效結論</b>；訊號完全靠 a-priori allele 標籤，不靠盲切。
+      ③ ISM 的 allele call（REF21/ALT15 等）與 pysam（#1 C22/G16）<b>幾乎吻合</b> = 兩條 pipeline 交叉驗證 per-read base calling 一致。
+      <br><b>來源：</b><code>output/canonical/HCC1395/paired_full/20260314_..._complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/.../clustering/significance.json</code>（本 session Read）。
+    </figcaption>
+  </figure>
+
+  <h4 class="mini">ISM 一個 region 內部做兩條正交軸（<code>RegionProcessor.cpp</code>）</h4>
+  <div class="flow1">
+    每 read → [甲基 read×CpG 矩陣] → read×read 距離(NHD/BERNOULLI) → UPGMA 樹 → 切 k∈[2,6] 群<br>
+    ↘ 軸A <b>cluster-first</b>：群 × {ALT/REF, HP} Fisher-FFH 列聯表（<code>GlobalTest.cpp</code>）<br>
+    ↘ 軸B <b>label-first</b>：依 a-priori {HP, ALT/REF, Tumor/Normal} 分組 → 甲基距離 PERMANOVA（<code>LabelTest.cpp</code>，<b>非循環</b>）
+  </div>
+  <p class="muted">⤷ chr2 的顯著結果全落在<b>軸 B 的 allele 維度</b>（label-first，ALT vs REF）。這也是 ISM 唯一能跟 chr2 敘述對上的單元 —— 但它是<b>單位點</b>的 allele-甲基關聯，不是跨位點 lineage。<a href="09_three-stats-division-of-labor.standalone.html">三統計分工細節 → 頁 09</a>。</p>
+</section>
+
+<!-- ============ 3. 逐 claim gap 對照 ============ -->
+<section id="gap">
+  <h3><span class="num">3</span> 逐 claim 對照：ISM 撐得起哪些、缺哪些 <span class="badge b-warn">核心</span></h3>
+  <p class="sub">把第 1 節的 6 個 claim，逐一對到第 2 節的 ISM C++ as-built 能力。<span class="verdict v-ok">✅ 合理</span>＝ISM 有對應實作且實測支持；<span class="verdict v-part">⚠ 部分／弱</span>＝有但語意降級或較弱；<span class="verdict v-no">❌ 缺少</span>＝ISM 根本沒有，靠 pysam／外部。</p>
+
+  <table>
+    <thead><tr><th class="lcol">chr2 claim</th><th>ISM C++ as-built 對應</th><th>裁決</th><th>原因（file:line）</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>A</b>　6 sSNV 逐 read REF/ALT</td>
+        <td>每 region <b>單錨點</b> ALT/REF base-calling（CIGAR-accurate）；<code>reads.tsv</code> 有 <code>alt_support</code> 欄</td>
+        <td class="verdict v-part">⚠ 部分</td>
+        <td>有逐 read allele，但 ISM 一次只看<b>一個</b> SNV anchor；reads.tsv <b>無 PS 欄</b> → 無法串多 SNV（<code>ReadParser.cpp:167-261</code>、<code>RegionWriter.cpp:151</code>）</td>
+      </tr>
+      <tr>
+        <td><b>B</b>　互斥 linkage 定 α/β lineage<br><span class="muted">（重建骨幹）</span></td>
+        <td><b>無</b>。每 somatic SNV 獨立成 region；無 cross-SNV read linkage 引擎；唯一跨位點構造 <code>SubcloneAnalyzer</code> 是特徵向量分桶，非 read 共享</td>
+        <td class="verdict v-no">❌ 缺少</td>
+        <td>骨幹（多 sSNV 在同 read 共現定 lineage）<b>不在 ISM C++</b>；由 pysam linkage 00/10/01/11 做（<code>main.cpp</code> 每 SNV 獨立、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
+      </tr>
+      <tr>
+        <td><b>C</b>　甲基把兩 lineage 分開</td>
+        <td>read×read 甲基距離 → 群 + <b>label-first allele/HP PERMANOVA</b>；<b>實測 allele PERMANOVA p=0.001 跨 3 位點複製</b></td>
+        <td class="verdict v-ok">✅ 合理<br><span class="muted">(單位點/allele 軸)</span></td>
+        <td>ISM 直接把 read 依 ALT/REF 分組測甲基距離（<code>LabelTest.cpp:307,86-133</code>、<code>StructureTest.cpp:153-201</code>）。但這是<b>單位點 allele-甲基</b>，且未在 allele 軸跑 cis-control（見下節）</td>
+      </tr>
+      <tr>
+        <td><b>D</b>　LOH context + normal=REF</td>
+        <td>外部 LOH BED overlap + <code>hp_ratio</code> 失衡 heuristic；實測同位點 HP 失衡 34:2</td>
+        <td class="verdict v-part">⚠ 合理<br><span class="muted">(註記非重建)</span></td>
+        <td>ISM 把 LOH 當<b>輸入註記</b>，不自己 call LOH、不建 CN model、不 phasing（<code>LohBedAnnotator.cpp:73,88</code>）</td>
+      </tr>
+      <tr>
+        <td><b>C′</b>　normal-anchored ASM-control<br><span class="muted">（拆 germline vs tumor-acquired）</span></td>
+        <td>delta-of-deltas（tumor HP delta − normal HP delta）+ per-CpG ASM Fisher+BH-FDR；residual-matrix 路徑<b>刻意停用</b></td>
+        <td class="verdict v-part">⚠ 合理但弱</td>
+        <td>概念有實作但軸是 <b>HP1-family vs HP2-family（germline 軸）</b>；somatic-skewed 常見情況退化為 germline-only、sig=false（<code>RegionProcessor.cpp:976,985-992,890-893</code>、<code>PerCpgAsm.cpp:228</code>）</td>
+      </tr>
+      <tr>
+        <td><b>E</b>　樹拓樸 + 演化順序 + CCF</td>
+        <td><b>無 clone tree</b>。<code>TreeStructure</code> 是 read×read 甲基距離 dendrogram；<code>SubcloneAnalyzer</code> 是 4-bucket 跨區分類；<b>grep CCF = 0 hits</b></td>
+        <td class="verdict v-no">❌ 缺少</td>
+        <td>葉=read、邊=甲基距離，無祖先-後代、無 CCF、無跨位點 lineage（<code>TreeStructure.cpp</code>、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
+      </tr>
+      <tr>
+        <td><b>F</b>　pos3 truth-gap somatic 驗證</td>
+        <td><b>無</b>。ISM 不比對 SEQC2 truth、不做 strand/mapQ artifact 統計</td>
+        <td class="verdict v-no">❌ 缺少</td>
+        <td>屬 pysam 逐 read 統計 + SEQC2 HC.bed 比對（<code>seqc2_subclone_concordance.py</code>）</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="split">
+    <div class="col pass">
+      <h5>✅ ISM C++ 撐得起 ——「characterize」半邊</h5>
+      <ul>
+        <li><b>C</b> 甲基結構分群（read×read 距離 + PERMANOVA）+ <b>實測 allele PERMANOVA p=0.001 ×3</b></li>
+        <li><b>C′</b> normal-anchored ASM-control（拆 germline vs tumor-acquired，雖弱）</li>
+        <li><b>D</b> LOH 註記（BED overlap + hp_ratio）</li>
+        <li><b>A</b>(部分) 單錨點逐 read allele call（與 pysam 吻合）</li>
+      </ul>
+      <p class="muted">＝「在已被獨立軸（allele/HP/LOH）定義好的結構上，<b>刻畫</b>甲基」。</p>
+    </div>
+    <div class="col dead">
+      <h5>❌ ISM C++ 缺少 ——「reconstruct」骨幹半邊</h5>
+      <ul>
+        <li><b>B</b> 多 sSNV read linkage 定 α/β lineage（骨幹）</li>
+        <li><b>E</b> clone tree / 演化順序 / CCF</li>
+        <li><b>F</b> SEQC2 truth-gap somatic 驗證</li>
+        <li>homopolymer / VAF-排序 / coverage 三防呆護欄</li>
+      </ul>
+      <p class="muted">＝重建骨幹由 <b>genetic haplotag + pysam linkage + SEQC2</b> 做，<b>不在</b> ISM C++、也<b>不由甲基驅動</b>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 為什麼 — oversell 警告 + cis-ASM caveat ============ -->
+<section id="why">
+  <h3><span class="num">4</span> 為什麼 ISM 缺這半邊 + 兩個 over-claim 陷阱 <span class="badge b-dead">誠實邊界</span></h3>
+  <p class="sub">不是 bug，是<b>設計分析單位</b>不同：ISM 的 unit = 「一個 somatic SNV ±window」，做 region 內甲基結構 + 標籤關聯；它從未被設計成「跨位點把 read 串成譜系」。以下三點是對外敘述<b>必須</b>誠實標記的，否則模組名字會讓人誤會。</p>
+
+  <details class="card" open><summary>陷阱 1　<code>SubcloneAnalyzer</code> 名字像「subclone 重建器」，其實是 4-bucket 規則 <span class="badge b-dead">over-claim</span></summary>
+  <div class="body">
+    <p>它接收的是<b>已算好的 per-region ASM 特徵向量</b>（hp_asm_delta、sample_asm_delta、hp_ratio…），用固定門檻 if/else 把 region 分到 4 個桶：0=非LOH低ASM／1=非LOH高HP-ASM／2=任何LOH／3=高sample-ASM（<code>SubcloneAnalyzer.cpp:100-128</code>，需 ≥50 regions）。<b>沒有 read、沒有 SNV、沒有距離、沒有樹、沒有 CCF</b>；<code>n_subclones</code> 是「看到的桶 id 最大值+1」，<b>構造上封頂 4</b>，不是估計出的 clone 數。輸出 <code>subclone_structure.txt</code> 是「≤4 種固定<b>表觀類別</b>的 region 計數」，不是腫瘤 subclone。</p>
+    <p class="muted">→ 對外請說「per-region ASM signature 分類」，<b>不要</b>說「ISM 重建了 N 個 subclone」。</p>
+  </div></details>
+
+  <details class="card"><summary>陷阱 2　<code>"Subclone"</code> verification_class 是「結構顯著但標籤不顯著」= cis-ASM 候選旗標 <span class="badge b-dead">over-claim</span></summary>
+  <div class="body">
+    <p>每 region 的 verdict（<code>SignificanceAnalyzer.cpp:307-340</code>）：cluster_significant ∧ label_significant → <b>Strong</b>；cluster_significant ∧ <b>¬</b>label_significant → <b>"Subclone"</b>；¬cluster ∧ label → Weak；else Noise。<br>注意「Subclone」是<b>用標籤關聯的「缺席」定義的</b>——意思是「甲基把 read 切成有結構的群，但這結構<b>對不上</b>任何 a-priori 標籤（HP/allele/tumor）」。這正是專案反覆警告的 <b>cis-ASM / double-dip artifact</b>：read 內甲基自相關就能切出群。所以一個 region 被標 "Subclone"＝<b>需要進一步查的候選</b>，<b>不是</b>被確認的 subclone。</p>
+    <p class="muted">補強：cluster_significant 的一半其實是 <b>Fisher-FFH</b>（固定邊際 hypergeometric null，<b>無</b> read 非獨立／over-dispersion 校正，<code>FisherExact.cpp:259-315</code>），不是 PERMANOVA p；而擋離散度假象的 <code>check_dispersion</code> 的 p 是<b>硬編查表</b>（<code>StructureTest.cpp:292</code>）非真 PERMDISP → 守門偏弱。</p>
+  </div></details>
+
+  <details class="card"><summary>陷阱 3　allele PERMANOVA p=0.001 很漂亮，但 allele 軸最易被 cis-ASM 污染 <span class="badge b-warn">baseline-dependence</span></summary>
+  <div class="body">
+    <p>第 2 節 ISM 實測的顯著訊號在 <b>ALT vs REF allele 軸</b>。對一個 LOH 區的 somatic SNV，ALT-vs-REF 甲基差<b>可能是 cis-ASM</b>（somatic 變異 cis 連帶的 allele-specific methylation），<b>不一定是 subclone marker</b>。ISM 的 <code>significance.json</code> 在 allele 軸<b>沒有</b>跑 normal-anchored cis-control（它的 ASM-control 是 HP 軸的 delta-of-deltas，且 somatic-skewed 時退化）。</p>
+    <p>這正是 pysam audit 補的關鍵一刀：跑 <b>normal HP1-vs-HP2</b> 後發現 10 個 CpG 是<b>混合的</b> —— 乾淨 tumor-acquired <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code> vs 既存 germline-ASM confounded <code>{3.3,3.4,3.5,4.1}</code>（如 3.3 normal HP1 0.814/HP2 0.046 FDR 0.007）。<b>ISM 的 region-level allele PERMANOVA 看不到這層拆解</b>，需要 per-CpG + normal-HP 控制（pysam 做的）才分得開。</p>
+    <p class="muted">→ ISM allele PERMANOVA 證明「甲基隨 somatic allele 軸<b>共分離</b>」（真），但「這是 subclone 甲基 vs cis-ASM」要靠 normal-anchored 拆解才判得了。詞義隨 baseline 變，見 baseline-discipline 詞典。</p>
+  </div></details>
+</section>
+
+<!-- ============ 5. 結論 ============ -->
+<section id="conclusion">
+  <h3><span class="num">5</span> 結論：足夠解釋哪些、不足解釋哪些 <span class="badge tier">Tier 4 paper-scope</span></h3>
+
+  <div class="takeaway pass"><span class="lab">足夠 ✅</span>
+    ISM C++ 的數據與敘述<b>足夠解釋 chr2 subclone 故事的「甲基刻畫」半邊</b>：它在同一批 sSNV 位點上<b>獨立複製了 allele-軸甲基結構顯著</b>（allele PERMANOVA p=0.001 ×3，dispersion 排除），並提供 normal-anchored ASM-control 概念 + LOH 註記。這直接支撐主軸「甲基 = corroborate somatic 軸的 lineage coherence」。
+  </div>
+
+  <div class="takeaway dead"><span class="lab">不足 ❌</span>
+    ISM C++ <b>不足以解釋「重建骨幹」半邊</b>：多 sSNV read linkage 定 α/β lineage（claim B）、clone tree／演化順序／CCF（claim E）、truth-gap somatic 驗證（claim F）—— 這些是 <b>pysam 自訂腳本 + genetic haplotag + SEQC2</b> 做的，<b>不在 ISM C++</b>。ISM 的 <code>SubcloneAnalyzer</code>／<code>TreeStructure</code>／<code>"Subclone"</code> class 名實不符，不能拿來宣稱重建。
+  </div>
+
+  <p><b>為什麼這個結論其實是好消息（與論文主軸一致）：</b>主軸定位本就是 <span class="key">骨幹 = somatic haplotagging（genetic）；甲基 = characterize／corroborate，非 driver、非 filter、非獨立重建</span>。ISM 的角色恰恰是「在已由獨立軸（allele/HP/LOH）定義好的結構上刻畫甲基」，而不是「無中生有重建 subclone」。所以 ISM「缺重建骨幹」不是缺陷 —— 是<b>正確的分工</b>。要對外講 subclone 重建，骨幹引用 haplotag + pysam linkage，甲基引用 ISM 的 allele PERMANOVA 當 corroboration，<b>兩者軸別與角色不可混講</b>。</p>
+
+  <h4 class="mini">一句話對外口徑（可直接用）</h4>
+  <div class="flow1" style="border-style:solid;border-color:var(--c-pass);text-align:left">
+    「chr2:18M 的 subclone <b>骨幹</b>由 somatic-haplotag + 多 sSNV read linkage 定義（pysam 驗證、L2）；<b>ISM C++ 在同一位點獨立證實了 ALT/REF allele 軸的甲基結構顯著</b>（allele PERMANOVA p=0.001，跨 3 個 sSNV 複製），作為 lineage 的甲基 <b>corroboration</b>。ISM 不重建譜系、不出 clone tree／CCF，甲基是刻畫不是驅動。」
+  </div>
+
+  <h4 class="mini">若要讓 ISM 真的能撐起重建半邊，缺口清單（→ 系統化 handoff）</h4>
+  <ol style="font-size:.92rem">
+    <li><b>cross-SNV read linkage 引擎</b>：reads.tsv 加 PS 欄／or 多 anchor 同 read 共現表（補 claim B 骨幹）。</li>
+    <li><b>allele 軸 cis-control</b>：在 region-level allele PERMANOVA 加 normal-HP1-vs-HP2 拆解（把 cis-ASM 與 subclone 甲基分開，現只在 pysam）。</li>
+    <li><b>模組正名</b>：<code>SubcloneAnalyzer</code>→「per-region ASM-signature stratifier」；<code>"Subclone"</code> class→「unlabeled-structure candidate」；避免 over-claim。</li>
+    <li><b>第二 LOH 位點／第二樣本（COLO829）</b>：破單位點 L2 天花板（升 ⭐4）。</li>
+  </ol>
+  <p class="muted">完整 9 步系統化構想見 <a href="06_ism-subclone-pipeline-concept.standalone.html">頁 06（pipeline 構想，非已實作）</a>。</p>
+
+  <div class="rel">
+    <a href="08_subclone-logic-chain-chr2-18M.standalone.html">為何可行（邏輯鏈）</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例走查</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">案例權威 audit</a>
+    <a href="09_three-stats-division-of-labor.standalone.html">ISM 三統計分工</a>
+    <a href="06_ism-subclone-pipeline-concept.standalone.html">pipeline 構想</a>
+  </div>
+</section>
+
+<footer class="prov"><div>
+  <h4>Provenance（所有數字可追溯）</h4>
+  <p><b>ISM C++ 實測</b>（<span class="tag-l l1">L1</span> 本 session 親讀）：<code>output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/&lt;window&gt;/clustering/significance.json</code> + <code>reads/reads.tsv</code> + <code>metadata.txt</code>。allele PERMANOVA：#1 F=15.43/p=0.001、#2 F=23.65/p=0.001、#5 F=12.25/p=0.001（disp_p=1.0）；cluster PERMANOVA 三位點 invalid。</p>
+  <p><b>chr2 案例真值</b>（<span class="tag-l l2">L2</span>）：<code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json</code>（pysam，build commit <code>b761336</code>）+ <code>..._independent_verdict_02.md</code> + <code>data/independent_audit.json</code>。</p>
+  <p><b>ISM 模組事實</b>（<span class="tag-l l1">L1</span> file:line 親讀）：<code>src/core/{SubcloneAnalyzer:100-128, NormalBaseline:84 + RegionProcessor:890-993, PerCpgAsm:228, TreeStructure, SomaticSnv:82, ReadParser:167-261, LabelTest:307, StructureTest:153-201/292, GlobalTest:259-315, RegionProcessor:740-1290}.cpp</code> + <code>src/io/RegionWriter.cpp:151</code>。</p>
+  <p><b>推論層</b>（<span class="tag-l l3">L3</span>）：「allele PERMANOVA 可能是 cis-ASM 非 subclone」「ISM 缺重建是正確分工」為解讀，依 normal-HP 控制 + 主軸定位支持，非單一實測。</p>
+  <ul>
+    <li><b>核心發現</b>：chr2 subclone 敘述的骨幹數字（A/B/E/F）= pysam，不在 ISM C++；ISM 撐 characterize 半邊（C/C′/D + 實測 allele PERMANOVA）。</li>
+    <li><b>scope</b>：PARTIAL — chr2:18M HCC1395 單位點 × 單樣本；ISM 只跑了該區 TP 集的 sSNV（#1/#2/#5 有 significance.json）。</li>
+    <li><b>對齊 memory</b>：<code>project_chr2_18m_subclone_locus_verification</code>、<code>project_decisionflow_5state_classification_wg</code>（state③ label-first 非循環）、<code>feedback_asm_allele_axis_baseline_confound</code>、<code>feedback_baseline_dependence_not_result</code>。</li>
+  </ul>
+  <p style="margin-top:var(--sp-3)">repo HEAD <code>9098f11</code> · branch <code>research/subclonal-reconstruction-202606</code> · 本頁建於 2026-06-23 · 撰寫與分析分屬不同 batch（§13.0）</p>
+</div></footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>甲基救 unphase — 這幾天的改動驗證（聚焦 skip 問題）</title>
+<!--
+  doc_type: change_verification  created: 2026-06-14  scope: A pilot (HCC1395 單樣本, chr15/19/20/22 實掃)
+  data_sources: unphase_inventory_chr15.json, unphase_inventory_chr19.json, unphase_inventory_chr20.json,
+                unphase_inventory_chr22.json, rigor_aggregate.json, assist_3targets_aggregate.json,
+                t3_reconcile_chr7.json, VERIFIED_RESULTS.md (V11/V11b/V11c/V12), DEV_LOG.md
+  provenance-verified: 所有數字皆 2026-06-14 從同層 JSON / VERIFIED_RESULTS 親讀 grep；
+                       4-chr 合計由 Python 實算（非手算）。圖 fig_rigor / fig_rigor_corrected = 同層 PNG。
+-->
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-soft:#F2E4DC;--c-text:#1c1b19;--c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5;--c-card:#FFFFFF;--c-border:#E3DACC;
+  --c-pass:#2F7D5B;--c-pass-soft:#E4F0EA;--c-warn:#B06A16;--c-warn-soft:#F6EBD8;
+  --c-info:#2F6690;--c-info-soft:#E2ECF3;--c-dead:#9A3B3B;--c-dead-soft:#F3E2E2;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.7;font-size:16px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1060px;margin:0 auto;padding:8px var(--sp-5);display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;font-size:.8rem}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:1.95rem;margin:6px 0;line-height:1.2}
+header.hero .lede{color:var(--c-text-soft);max-width:840px;font-size:1.05rem}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.5rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-4);max-width:860px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf p{margin:var(--sp-2) 0}
+.ironclad{background:var(--c-info-soft);border:1px solid var(--c-info);border-left:6px solid var(--c-info);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.93rem}
+.ironclad b{color:var(--c-info)}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.1rem;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424}.takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.84rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:190px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:800;line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)}.kpi.dead .v{color:var(--c-dead)}
+.kpi.pass{border-left:4px solid var(--c-pass)}.kpi.pass .v{color:var(--c-pass)}
+.kpi.warn{border-left:4px solid var(--c-warn)}.kpi.warn .v{color:var(--c-warn)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+.ba{font-family:var(--mono);font-size:.82rem}
+.ba .b{color:var(--c-dead)}.ba .a{color:var(--c-pass);font-weight:700}.ba .arrow{color:var(--c-accent);font-weight:800}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure img{display:block;max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:6px}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.55}
+figcaption b{color:var(--c-text)}
+.svgnote{font-size:9px;fill:#6B6B66}
+.timeline{list-style:none;padding:0;margin:var(--sp-3) 0;counter-reset:tl}
+.timeline li{position:relative;padding:10px 0 10px 132px;border-bottom:1px dashed var(--c-border)}
+.timeline li .when{position:absolute;left:0;top:10px;width:118px;font-family:var(--mono);font-size:.78rem;color:var(--c-info);font-weight:700}
+.timeline li b{color:var(--c-text)}
+.confirm{background:#fff;border:2px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-4);margin:var(--sp-4) 0}
+.confirm h4{margin:0 0 var(--sp-2);color:var(--c-accent)}
+.confirm ul{margin:var(--sp-2) 0;padding-left:1.2em}.confirm li{margin:6px 0}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-6);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
+footer.prov code{font-family:var(--mono)}
+footer.prov ul{padding-left:1.2em}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">改動驗證</span>
+  <nav>
+    <a href="#timeline">改動時間軸</a><a href="#skip">① skip 問題</a><a href="#matched">② 配對校正</a>
+    <a href="#t3">③ T3 窄翻案</a><a href="#net">淨結論</a><a href="#confirm">請你確認</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">甲基救 unphase · V11→V12 · HCC1395 單樣本 · A pilot (partial)</div>
+  <h1>這幾天的幾次改動驗證 —— 聚焦「skip 問題」</h1>
+  <p class="lede">回顧 06-09～06-11 對「甲基救 unphase / 矯正 longphase-S tag」做的<strong>四次迭代修正</strong>（V11 → V11b → V11c → V12），把每一步的<strong>前後數字差異</strong>攤出來，特別是你問的 <strong>skip 問題</strong>（絕大多數 unphase read 其實無法救、被跳過）。所有數字都標了來源 JSON。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 一眼看懂這幾次改動在修什麼</h2>
+  <p>原本的好消息是「甲基能把 unphase read 救回正確 haplotype，正確率 88.5%」。這幾天的修正把這句話<strong>收斂到誠實版本</strong>：</p>
+  <p>① <b class="key">88.5% 只在「可嘗試」的那 ~6% read 上成立</b>，其餘 <b>94% 的 unphase read 根本沒有本地參考、必須跳過（skip）</b>；② 之前 T3「亞群有獨特甲基（+0.022）」是<b>沒做同窗配對</b>的假象，<u>正確配對後 p=0.924（與噪音無異）</u>；③ 但 T3 用「位點 ALT/REF」重做，<b>存在性窄翻案 POSITIVE</b>（可用性仍 NEGATIVE）。</p>
+  <p class="muted">範圍誠實標註：全部 = HCC1395 單樣本、longphase-S 單一 pipeline、skip 清點只實掃 chr15/19/20/22（4 條）。tier 上限 ⭐3。</p>
+</div>
+
+<div class="ironclad">
+  <b>「skip 問題」到底指什麼？</b> 一條 unphase read 要能被甲基救援，必須同時滿足：<b>(a)</b> 自己有 ≥5 個 CpG 甲基訊號、<b>(b)</b> 它所在的 2kb 區段裡有足夠的 HP1 與 HP2 read（各 ≥8 條）當「本地參考」可比對。<u>不滿足 (b) 的 read 沒有可比的對象 → 無法區分 → 被跳過（<code>cannot_distinguish</code>）</u>。V12 的清點發現：滿足兩者的只有 ~6%。
+</div>
+
+<!-- ============ 改動時間軸 ============ -->
+<section id="timeline">
+  <h3><span class="num">⏱</span> 四次改動步驟（時間軸）</h3>
+  <p class="sub">每一步都是「被質疑 → 重做 → 數字變了」。驅動力是多 agent 對抗審查 + 你的質疑。</p>
+  <ul class="timeline">
+    <li><span class="when">V11<br>06-09</span><b>初版三 target</b>：T1 unphase→H1/H2 <span class="badge b-pass">0.926</span>、T2 H3→分支 <span class="badge b-warn">0.90</span>、T3 拆亞群 <span class="badge b-dead">❌</span>。<span class="muted">（assist_3targets_aggregate.json）</span></li>
+    <li><span class="when">V11b<br>06-09</span><b>4-agent 對抗審查修正</b>：T1 降為 headline 0.885（0.926 只在可分子集）；T2 <b>OVERSTATED</b>（0.90 只在有真值處，外推 H3 未證）；<b>T3 的「+0.022 excess」是未配對假象 → 正確 matched p=0.924</b>。<span class="muted">（rigor_aggregate.json + fig_rigor_corrected.png）</span></li>
+    <li><span class="when">V11c<br>06-11</span><b>T3 local-allele 窄翻案</b>：改用位點 ALT/REF 鹼基當亞群/母本標籤 → <b>存在性 POSITIVE</b>（farCpG AUC 0.85 vs 噪音 0.50），但發現先前 NEGATIVE 部分是<b>標籤污染</b>。可用性仍 NEGATIVE。<span class="muted">（t3_local_allele/t3_reconcile JSON）</span></li>
+    <li><span class="when">V12<br>06-11</span><b>⭐ unphase/HP3 量清點（skip 問題）</b>：實掃 4 染色體 → <b>94% unphase read 無本地錨點、必須跳過</b>；88.5% 只在 ~6% 可嘗試池內。HP3 更只 0.36% 可嘗試。<span class="muted">（unphase_inventory_chr*.json）</span></li>
+  </ul>
+</section>
+
+<!-- ============ ① skip 問題 ============ -->
+<section id="skip">
+  <h3><span class="num">①</span> skip 問題：到底有多少 unphase read 救不了？ <span class="badge b-info">V12 · 核心</span></h3>
+  <p class="sub">這是你最想確認的。下圖是「漏斗」：每一層篩掉一批，最後只剩可嘗試救援的少數。數字是 chr15/19/20/22 四條的<strong>實算合計</strong>（Python 加總，非手算）。</p>
+
+  <div class="kpis">
+    <div class="kpi dead"><div class="v">94.22%</div><div class="k">無法救／被跳過<br>924,927 / 981,701 read（4 chr 合計）</div></div>
+    <div class="kpi warn"><div class="v">5.78%</div><div class="k">可嘗試救援（有甲基＋本地錨點）<br>56,774 read</div></div>
+    <div class="kpi pass"><div class="v">88.5%</div><div class="k">救援正確率（V6）<br>★ 只在上面那 5.78% 池內</div></div>
+  </div>
+
+  <figure>
+    <div class="figtitle">圖 1　unphase read 可救援漏斗（chr15/19/20/22 合計，真實數字）</div>
+    <svg viewBox="0 0 900 300" role="img" aria-label="unphase 可救援漏斗">
+      <g font-family="-apple-system,sans-serif">
+        <rect x="60" y="20" width="780" height="44" rx="6" fill="#E2ECF3" stroke="#2F6690"/>
+        <text x="450" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#2F6690">① 全部 unphase read：981,701（longphase-S 標為無相位）</text>
+        <text x="450" y="56" text-anchor="middle" font-size="10.5" fill="#5C5A54">100%</text>
+        <polygon points="60,64 840,64 720,108 180,108" fill="#fff" stroke="#2F6690"/>
+        <text x="450" y="90" text-anchor="middle" font-size="12.5" fill="#1c1b19">② 有 ≥5 個 CpG 甲基訊號：864,130　<tspan fill="#5C5A54">(88.0%)</tspan></text>
+        <polygon points="180,108 720,108 540,152 360,152" fill="#fff" stroke="#B06A16"/>
+        <text x="450" y="134" text-anchor="middle" font-size="12.5" fill="#B06A16">③ 且區段有 HP1/HP2 本地錨點：71,162　<tspan fill="#5C5A54">(7.2%)</tspan></text>
+        <rect x="360" y="158" width="180" height="46" rx="6" fill="#E4F0EA" stroke="#2F7D5B"/>
+        <text x="450" y="178" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2F7D5B">④ 兩者皆備＝可嘗試</text>
+        <text x="450" y="196" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2F7D5B">56,774（5.78%）</text>
+        <!-- skip arrow -->
+        <rect x="600" y="158" width="240" height="46" rx="6" fill="#F3E2E2" stroke="#9A3B3B"/>
+        <text x="720" y="178" text-anchor="middle" font-size="12" font-weight="800" fill="#9A3B3B">cannot_distinguish（skip）</text>
+        <text x="720" y="196" text-anchor="middle" font-size="12" font-weight="800" fill="#9A3B3B">924,927（94.22%）</text>
+        <path d="M450,204 L450,224 L720,224 L720,206" fill="none" stroke="#9A3B3B" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="450" y="246" text-anchor="middle" font-size="10" fill="#9A3B3B">沒滿足②或③的 read → 無可比參考 → 跳過</text>
+      </g>
+      <text class="svgnote" x="60" y="280">來源：unphase_inventory_chr{15,19,20,22}.json（bin=2kb, min_anchor=8, min CpG=5）。漏斗階層定義見 unphase_inventory.py:8-11。</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>88% 的 unphase read 其實「有甲基」（②），卡關的是 ③ —— 它們多半落在 germline 稀疏／LOH 區，<b>區段裡湊不到足夠的 HP1/HP2 read 當本地參考</b>，所以沒有對象可比、被跳過。這正是「skip 問題」：<b>瓶頸不是甲基訊號，是缺本地參考</b>。</figcaption>
+  </figure>
+
+  <h4 class="mini">逐染色體（可嘗試比例差很大）</h4>
+  <table>
+    <thead><tr><th>染色體</th><th>unphase 總數</th><th>有≥5 CpG</th><th>有本地錨點 bin</th><th>可嘗試</th><th>可嘗試%</th><th>跳過%</th></tr></thead>
+    <tbody>
+      <tr><td>chr15</td><td>303,557</td><td>257,306</td><td>13,247</td><td>9,240</td><td>3.0%</td><td class="imp">97.0%</td></tr>
+      <tr><td>chr19</td><td>175,790</td><td>160,358</td><td>6,240</td><td>4,824</td><td>2.7%</td><td class="imp">97.3%</td></tr>
+      <tr><td>chr20</td><td>306,315</td><td>269,756</td><td>17,544</td><td>13,400</td><td>4.4%</td><td class="imp">95.6%</td></tr>
+      <tr><td>chr22</td><td>196,039</td><td>176,710</td><td>34,131</td><td>29,310</td><td>15.0%</td><td class="imp">85.0%</td></tr>
+      <tr style="background:#F6EBD8"><td class="imp">合計</td><td class="imp">981,701</td><td class="imp">864,130</td><td class="imp">71,162</td><td class="imp">56,774</td><td class="imp">5.78%</td><td class="imp">94.22%</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">chr22 可嘗試比例（15%）明顯高於其他 → 與該區 HP1/HP2 錨點密度有關，非錯誤。HP3：6,107 條中僅 22 條可嘗試（0.36%），等於全跳過。</p>
+
+  <div class="takeaway dead">
+    <span class="lab">Takeaway · skip 問題</span>
+    「甲基救 unphase 88.5%」這句話對外講時<b>必須附分母</b>：它只覆蓋全 unphase read 的 ~6%；其餘 94% 因缺本地參考被跳過。對「救回大量 unphase read」的整體期待 = <b>機制在最需要的稀疏/LOH 區失效</b>。
+  </div>
+</section>
+
+<!-- ============ ② 配對校正 ============ -->
+<section id="matched">
+  <h3><span class="num">②</span> 配對校正：T3「亞群有獨特甲基」是假象 <span class="badge b-dead">V11b · 已撤回</span></h3>
+  <p class="sub">這是另一個「skip/配對」相關的修正 —— 比較亞群 vs 噪音時，原本沒把同一個窗的數據配對起來，造成虛假的正向差異。下面兩張圖就是改動前後。</p>
+
+  <table>
+    <thead><tr><th>口徑</th><th>亞群 vs 噪音 Δβ</th><th>統計</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td><b class="ba"><span class="b">改動前</span></b> unmatched（池化噪音 0.088）</td><td>亞群 0.110 − 噪音 0.088 = <b>+0.0224</b></td><td>無配對檢定</td><td><span class="badge b-warn">看似有訊號</span></td></tr>
+      <tr><td class="imp"><b class="ba"><span class="a">改動後</span></b> matched 同窗配對（真噪音 0.0997）</td><td>同窗配對差 median <b>−0.0043</b></td><td>Wilcoxon <b>p=0.924</b>（dz=0.07）</td><td><span class="badge b-dead">與噪音無異</span></td></tr>
+      <tr><td>正控（不同 haplotype H1 vs H2）</td><td>median <b>+0.0425</b></td><td>p=<b>1.77e-49</b></td><td><span class="badge b-pass">配對法有效</span></td></tr>
+    </tbody>
+  </table>
+  <p class="ba"><span class="b">+0.0224</span> <span class="arrow">→</span> <span class="a">−0.0043（p=0.924）</span> ：差異整個消失。正控 p=2e-49 證明「不是配對法把所有訊號都殺光」，而是<b>亞群本來就沒有獨特甲基</b>。</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)">
+    <figure>
+      <div class="figtitle">圖 2a　改動前（V11，未配對）</div>
+      <img src="fig_rigor.png" alt="V11 原始：亞群 Δβ 0.110 vs 噪音 0.088 = +0.0224">
+      <figcaption>左圖把「亞群 0.110 vs 池化噪音 0.088」框成 <b>+0.0224 excess</b>。問題：池化噪音用了全體平均，沒對齊同一窗。</figcaption>
+    </figure>
+    <figure>
+      <div class="figtitle">圖 2b　改動後（V11b，matched 配對）</div>
+      <img src="fig_rigor_corrected.png" alt="V11b 校正：matched 配對 median −0.0043 p=0.924, 正控 +0.0425 p=2e-49">
+      <figcaption>左圖改 <b>同窗配對</b>：亞群−噪音 median <b>−0.0043, p=0.924</b>（橫跨 0，與噪音無異）；正控 +0.0425 p≈0。右圖是 4-agent 對 T1/T2/T3 的最終 verdict。</figcaption>
+    </figure>
+  </div>
+
+  <div class="takeaway dead">
+    <span class="lab">Takeaway · 配對</span>
+    教訓：比較兩組「差異」時，<b>噪音地板必須在同一個窗內配對抽樣</b>，不能用全體池化平均當對照 —— 否則窗與窗之間的甲基差會被誤算成「亞群訊號」。修正後 T3「亞群有獨特甲基」<b>撤回</b>。
+  </div>
+</section>
+
+<!-- ============ ③ T3 窄翻案 ============ -->
+<section id="t3">
+  <h3><span class="num">③</span> T3 local-allele 窄翻案：存在性 POSITIVE、可用性 NEGATIVE <span class="badge b-warn">V11c · 部分翻案</span></h3>
+  <p class="sub">②撤回後，你質疑「真的完全沒訊號嗎？」→ 換個標籤（用位點 ALT/REF 鹼基，而非可能被污染的 HP tag）重做，發現存在性其實成立。</p>
+
+  <table>
+    <thead><tr><th>面向</th><th>結果</th><th>數字</th><th>來源</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">存在性（亞群甲基可分？）</td><td><span class="badge b-pass">窄翻案 POSITIVE</span></td><td>farCpG held-out AUC <b>H1=0.851 / H2=0.866</b> vs 同-haplotype 噪音地板 <b>~0.50</b></td><td>VERIFIED_RESULTS V12</td></tr>
+      <tr><td>matched Δβ(ALT,REF)</td><td>over noise <b>+0.04</b></td><td>chr7 p=0.014 · chr15 p=3.6e-5 · chr22 p=3.4e-4 · chr20 p=0.053 (NS)</td><td>t3_reconcile_chr*.json</td></tr>
+      <tr><td>非 artifact 確認</td><td><span class="badge b-pass">過</span></td><td>farCpG≈全 CpG（非 somatic-CpG 假象）；nCpG/readlen ALT≈REF（無覆蓋 confound）</td><td>t3_reconcile_chr7：nCpG 64/65、readlen 21078/21438</td></tr>
+      <tr><td class="imp">可用性（能實際指派？）</td><td><span class="badge b-dead">NEGATIVE 維持</span></td><td>ambiguous read lean <b>8/8 全 &lt;0.5</b>（偏母本）、無 ground truth</td><td>VERIFIED_RESULTS V11c</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini">為什麼之前 ②會是 NEGATIVE？（標籤污染）</h4>
+  <p>HP1 read 約 20kb 長、somatic 突變稀疏 → <b>多數真亞群 read 根本沒蓋到那個突變位點</b> → 被 longphase 標成普通「1」（母本）→ 混進母本組把訊號沖淡。改用「位點 ALT/REF 鹼基」直接看誰帶突變，就避開了這個污染。<span class="muted">→ 你當初「亞群應該有差異」的直覺，在存在性層級成立。</span></p>
+
+  <div class="takeaway">
+    <span class="lab">Takeaway · T3</span>
+    亞群甲基差異<b>存在</b>（窄、單樣本、⭐3 未達 reopen 門檻），但<b>不能用來實際判別/指派</b>。存在 ≠ 可用 —— 與全專案 ASM 結論一致。
+  </div>
+</section>
+
+<!-- ============ 淨結論 ============ -->
+<section id="net">
+  <h3><span class="num">∑</span> 淨結論：這幾次改動有效嗎？</h3>
+  <table>
+    <thead><tr><th>改動</th><th>修了什麼</th><th>前 → 後</th><th>有效性</th></tr></thead>
+    <tbody>
+      <tr><td>V11b 配對校正</td><td>噪音對照未同窗配對</td><td class="ba"><span class="b">+0.0224</span> <span class="arrow">→</span> <span class="a">−0.0043 (p=0.924)</span></td><td><span class="badge b-pass">✓ 修正正確（正控 p=2e-49 背書）</span></td></tr>
+      <tr><td>V11c T3 重做</td><td>HP-tag 標籤污染</td><td class="ba"><span class="b">全 NEGATIVE</span> <span class="arrow">→</span> <span class="a">存在性 POSITIVE</span></td><td><span class="badge b-pass">✓ 翻案有據（但可用性仍 NEG）</span></td></tr>
+      <tr><td class="imp">V12 skip 清點</td><td>88.5% 缺分母</td><td class="ba"><span class="b">「能救 unphase」</span> <span class="arrow">→</span> <span class="a">能救的只 5.78%，94% skip</span></td><td><span class="badge b-pass">✓ 誠實天花板確立</span></td></tr>
+      <tr><td>T1 reframe</td><td>headline 用可分子集</td><td class="ba"><span class="b">0.926</span> <span class="arrow">→</span> <span class="a">0.885（全基因組 V6）</span></td><td><span class="badge b-pass">✓ 改用較保守 headline</span></td></tr>
+      <tr><td>T2 降級</td><td>0.90 外推 H3 未證</td><td class="ba"><span class="b">⭐3 可行</span> <span class="arrow">→</span> <span class="a">⭐2-3 OVERSTATED</span></td><td><span class="badge b-warn">⚠ 降級（2 blocking）</span></td></tr>
+    </tbody>
+  </table>
+  <div class="takeaway pass">
+    <span class="lab">總判定</span>
+    四次改動<b>都是把過度樂觀的宣稱收斂到有證據支撐的版本</b>，方向一致、互相背書（正控、held-out、matched、實算分母）。沒有發現新的錯誤或矛盾。<b>改動有效、無問題。</b>
+  </div>
+</section>
+
+<!-- ============ 請你確認 ============ -->
+<section id="confirm">
+  <h3><span class="num">✓</span> 請你確認（符合你的判斷嗎？）</h3>
+  <div class="confirm">
+    <h4>三個需要你拍板的點</h4>
+    <ul>
+      <li><b>① skip 問題的定性對嗎？</b> 我把「94% skip」歸因為<u>缺本地 HP1/HP2 錨點</u>（不是甲基訊號不夠）。這符合你對機制的理解嗎？還是你認為瓶頸在別處？</li>
+      <li><b>② skip 是「限制」還是「待解問題」？</b> 目前定調為<u>機制天花板（誠實限制）</u>。若你想把 94% 當成「待攻克」，方向會是：放寬 bin / 改非本地參考（如全基因組 centroid）/ 換低背景樣本 —— 要不要列為下一步？</li>
+      <li><b>③ 範圍夠嗎？</b> skip 清點只實掃 4 染色體（chr15/19/20/22）、單樣本。要不要補全 24 條 + 跨樣本，才寫進論文？目前是 <span class="todo">A pilot / partial</span>。</li>
+    </ul>
+    <p class="muted">回饋方式：你可以直接說「①對 ②列待解 ③要補全」之類，我據此調整這份驗證或開下一步。</p>
+  </div>
+</section>
+
+<footer class="prov"><div>
+  <h4>來源與可追溯性（所有數字 2026-06-14 grep-verified，同層檔案）</h4>
+  <ul>
+    <li><b>skip 漏斗 / 逐染色體：</b><code>unphase_inventory_chr{15,19,20,22}.json</code>（4-chr 合計由 Python 實算：total 981,701 / attemptable 56,774 / cannot 924,927）；漏斗定義 <code>unphase_inventory.py:8-11,60-71</code></li>
+    <li><b>配對校正：</b><code>rigor_aggregate.json</code>（subclone_dbeta 0.1104 / noise_floor 0.088 / 0.0224 已標 RETRACTED）+ <code>VERIFIED_RESULTS.md</code> V11b（matched median −0.0043, p=0.924；正控 +0.0425, p=1.77e-49）+ 圖 <code>fig_rigor.png</code> / <code>fig_rigor_corrected.png</code></li>
+    <li><b>T1/T2/T3 AUC：</b><code>assist_3targets_aggregate.json</code>（T1 0.9259 / T2 0.90 / T3-H1 0.6522 / T3-H2 0.6487）</li>
+    <li><b>T3 窄翻案：</b><code>t3_reconcile_chr{7,15,20,22}.json</code>（chr7：real 0.144 / noise 0.0806 / matched +0.0534, p=0.0137 / nCpG 64-65 / readlen ~21k）+ <code>VERIFIED_RESULTS.md</code> V11c/V12</li>
+    <li><b>改動敘事：</b><code>DEV_LOG.md</code>（V11/V11b/V11c+V12 段）；commit <code>df274b0</code>（V11c+V12）、<code>31eb693</code>（V11b）</li>
+  </ul>
+  <p><b>範圍誠實標註：</b>HCC1395 單樣本 · longphase-S 單一 pipeline（被矯正的 tag 本身是其產物 → self-reference）· skip 清點 4 染色體 · tier 上限 ⭐3 · <span class="todo">未跨樣本、未全 24 染色體</span>。</p>
+  <p style="margin-top:var(--sp-3)">建立 2026-06-14 · A pilot 改動驗證 · 目錄 <code>docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/</code></p>
+</div></footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">證據與主張邊界矩陣</title>
+  <desc id="desc">以四個證據層級對照可主張內容、所需驗證及禁止越界的生物學敘述。</desc>
+  <rect width="1400" height="860" fill="#f8f8f5"/>
+  <text x="70" y="68" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">證據強度不是同一把尺：主張必須停在它能到的位置</text>
+  <text x="70" y="108" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#52636b">目前有效結論是工程契約與技術再現性；solver 只保留 historical audit，biological confirmation 仍是 future gate。</text>
+
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <rect x="70" y="155" width="1260" height="70" fill="#17324d"/>
+    <text x="95" y="198" font-size="18" font-weight="700" fill="#fff">證據層</text>
+    <text x="300" y="198" font-size="18" font-weight="700" fill="#fff">本研究已有證據</text>
+    <text x="720" y="198" font-size="18" font-weight="700" fill="#fff">可安全主張</text>
+    <text x="1050" y="198" font-size="18" font-weight="700" fill="#fff">不可越界</text>
+
+    <rect x="70" y="225" width="1260" height="125" fill="#edf5ef" stroke="#c2d3c7"/>
+    <text x="95" y="262" font-size="18" font-weight="700" fill="#27543a">VA 工程契約</text>
+    <text x="300" y="260" font-size="16" fill="#314652">7/7 raw-all producer；638,259 records</text>
+    <text x="300" y="290" font-size="16" fill="#314652">32,184 rescue；17,444 removal；ledger 守恆</text>
+    <text x="720" y="260" font-size="16" fill="#314652">資料角色、record continuity、fail-closed</text>
+    <text x="720" y="290" font-size="16" fill="#314652">與可重跑 provenance 已建立</text>
+    <text x="1050" y="260" font-size="16" fill="#873b31">不能稱 caller accuracy</text>
+    <text x="1050" y="290" font-size="16" fill="#873b31">不能稱 biology validated</text>
+
+    <rect x="70" y="350" width="1260" height="125" fill="#f3efe4" stroke="#d6c8a5"/>
+    <text x="95" y="387" font-size="18" font-weight="700" fill="#6d5529">VB Solver 稽核</text>
+    <text x="300" y="385" font-size="16" fill="#314652">legacy HCC：18,103 checked；0 recorded fail</text>
+    <text x="300" y="415" font-size="16" fill="#873b31">4,000 stress 分母無效 → headline 撤回</text>
+    <text x="720" y="385" font-size="16" fill="#314652">只作 historical implementation audit</text>
+    <text x="720" y="415" font-size="16" fill="#314652">fresh 7-dataset consistency 尚未成立</text>
+    <text x="1050" y="385" font-size="16" fill="#873b31">不能稱樹是真實</text>
+    <text x="1050" y="415" font-size="16" fill="#873b31">不能由 0 mismatch 推生物正確率</text>
+
+    <rect x="70" y="475" width="1260" height="150" fill="#f3efe4" stroke="#d6c8a5"/>
+    <text x="95" y="512" font-size="18" font-weight="700" fill="#6d5529">VC 技術再現性</text>
+    <text x="300" y="510" font-size="16" fill="#314652">HCC VAF：Jaccard .9276；CCC .9339</text>
+    <text x="300" y="540" font-size="16" fill="#314652">Spearman .9093；binomial-compatible 93.07%</text>
+    <text x="300" y="570" font-size="16" fill="#314652">PyClone：κ .544；subclonal Jaccard .381</text>
+    <text x="720" y="510" font-size="16" fill="#314652">同 cell line 的主要結構訊號可再現</text>
+    <text x="720" y="540" font-size="16" fill="#314652">但 minor-clone 位點歸屬僅中度一致</text>
+    <text x="1050" y="510" font-size="16" fill="#873b31">技術資料不是 biological replicate</text>
+    <text x="1050" y="540" font-size="16" fill="#873b31">PyClone clustering 不是 tree truth</text>
+    <text x="1050" y="570" font-size="16" fill="#873b31">相同 reads 不是完全正交驗證</text>
+
+    <rect x="70" y="625" width="1260" height="125" fill="#faeeee" stroke="#dfb5ad"/>
+    <text x="95" y="662" font-size="18" font-weight="700" fill="#873b31">VD 生物確認</text>
+    <text x="300" y="660" font-size="16" fill="#314652">目前未完成：single-cell、multi-region、</text>
+    <text x="300" y="690" font-size="16" fill="#314652">time-series 或獨立 lineage truth</text>
+    <text x="720" y="660" font-size="16" fill="#314652">完成後才可檢驗 clone identity、</text>
+    <text x="720" y="690" font-size="16" fill="#314652">lineage edge 與 patient generalization</text>
+    <text x="1050" y="660" font-size="16" fill="#873b31">目前不可宣稱 confirmed clone tree</text>
+    <text x="1050" y="690" font-size="16" fill="#873b31">不可宣稱臨床／病人泛化</text>
+  </g>
+
+  <rect x="70" y="780" width="1260" height="45" rx="6" fill="#17324d"/>
+  <text x="700" y="809" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="17" font-weight="700" fill="#fff">論文主張天花板：hypothesis-generating regional mutation-state reconstruction with explicit uncertainty</text>
+</svg>

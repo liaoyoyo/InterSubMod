@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Re-sync 新方向 + 各章修正 + drift-check — ISM 碩論</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;--teal:#39c5cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.65;font-size:14.5px}
+  header{padding:22px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 4px;font-size:18px}
+  header .sub{color:var(--mut);font-size:12px}
+  nav{padding:7px 24px;border-bottom:1px solid var(--line);font-size:12.5px;position:sticky;top:60px;background:rgba(15,20,25,.92);z-index:9}
+  nav a{color:var(--b);text-decoration:none;margin-right:13px}
+  .wrap{max-width:1060px;margin:0 auto;padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 20px;margin:14px 0}
+  h2{font-size:16px;margin:3px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h2 .n{color:var(--p)}
+  .dir{background:linear-gradient(135deg,#1c2530,#161b22);border-left:4px solid var(--teal)}
+  h3{font-size:13.5px;margin:12px 0 4px;color:var(--teal)}
+  table{width:100%;border-collapse:collapse;margin:7px 0;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#1f2733;font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .teal{color:var(--teal)} .mut{color:var(--mut)}
+  .ok{color:var(--g);font-weight:700}
+  .badge{display:inline-block;padding:0 6px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid;margin-left:4px}
+  .badge.g{border-color:var(--g);color:var(--g)} .badge.y{border-color:var(--y);color:var(--y)} .badge.p{border-color:var(--p);color:var(--p)}
+  ul{margin:5px 0;padding-left:18px} li{margin:3px 0}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11px}
+  .small{font-size:12px;color:var(--mut)}
+  .ask{background:#241a1a;border:1px solid #5a3030}
+  .old{color:var(--r);text-decoration:line-through} .new{color:var(--g)}
+  .c{font-weight:700;color:var(--p)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Re-sync 新方向 ＋ 各章修正 ＋ drift-check — ISM 碩論</h1>
+  <div class="sub">2026-06-15 · 對齊 06-14 Intro 主軸定稿 v1（你逐句確認）+ 06-12 framing 凍結裁決 · 四章已 re-correct</div>
+</header>
+<nav>
+  <a href="#dir">①新方向</a><a href="#c123">②C1/C2/C3</a><a href="#flag">③兩旗艦</a><a href="#fix">④各章修正</a><a href="#drift">⑤drift-check</a><a href="#ask">⑥確認</a>
+</nav>
+<div class="wrap">
+
+  <div class="card dir" id="dir">
+    <h2><span class="n">①</span> 新方向 / 新題目（這是「要聚焦與說明」的最新主軸）</h2>
+    <p><b class="teal">ISM = 首個於 ONT 長讀 tumor/normal paired 資料、整合三件事於 read 層級的軟體</b>：① read 層次甲基結構檢定（距離→分群→PERMANOVA）+ ② matched-normal-anchored somatic cis-test（殘差+d_cis/d_drift/d_within 分解）+ ③ somatic-subclone 目標。</p>
+    <p><b>新穎性 = 三者於 tumor/normal read-level 的「整合」</b>（個別元件皆有前例：qFDRP 距離核、Do2020 de-novo ASM 亦用 matched-normal、Sgootr 距離式甲基重建）→ <b class="y">距離/read-level 甲基本身不是新穎</b>。</p>
+    <p><b>貢獻 = 量化 somatic 變異與甲基位點的「關聯強度」</b>；甲基↔突變因果機制歸<b>既有文獻背景</b>（SBS1/5mC deamination，citation 待補），<b class="r">ISM 不宣稱因果/順序</b>。</p>
+    <p><b>措辭收斂</b>（framing 凍結裁決）：用 <span class="new">「characterize methylation-associated subclonal structure conditioned on somatic haplotags」</span>，<span class="old">非「reconstruct subclones using methylation」</span>。標題仍保留。</p>
+  </div>
+
+  <div class="card" id="c123">
+    <h2><span class="n">②</span> 三件貢獻 C1/C2/C3</h2>
+    <table>
+      <tr><th class="k">貢獻</th><th>精確 claim</th><th>屬性</th></tr>
+      <tr><td class="k"><span class="c">C1</span> 甲基-變異聯合 characterization</td><td>HP+somatic 框架下量化每 somatic 位點鄰域 ASM 結構（距離→分群→PERMANOVA）</td><td>novelty=組合</td></tr>
+      <tr><td class="k"><span class="c">C2</span> normal-anchored cis/drift 分解</td><td>residual + d_cis/d_drift/d_within 判別真 cis vs copy/subclone 背景</td><td>增量獨特（非「獨家 normal-anchor」）</td></tr>
+      <tr><td class="k"><span class="c">C3</span> somatic-subclone 結構 characterization</td><td>多 somatic 變異+鄰域甲基→單 region read→subclone 結構；case-demo 推時序假說</td><td>case-demo（自動化=future）</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="flag">
+    <h2><span class="n">③</span> 兩旗艦案例（grep-verified 真值，不再佔位）</h2>
+    <h3>旗艦 A — BRCA2 promoter（C1+C2：偵測 + 分解）</h3>
+    <ul>
+      <li>HP-axis Δβ=<b>−0.122</b> + tumor-normal 差並存於 BRCA2 promoter【⭐3】</li>
+      <li>normal-anchored <b>分解</b>：主要 track somatic subclone tag、focal cis <b>marginal</b>（d_within=<b>−0.023</b>, perm p=<b>0.024</b>）【🟡 分解層】</li>
+      <li>意義：ISM <b>不只 flag，更量化</b> 此差屬 subclone vs focal cis</li>
+      <li class="y">⚠ 方向 hypo≠canonical TSG hyper → 勿寫「silencing」；共定位=候選關聯非已證 cis 因果</li>
+    </ul>
+    <h3>旗艦 B — chr2:18M（C3：甲基+突變共同標示 subclone）</h3>
+    <ul>
+      <li>系譜：Normal=G → <b>HP1 母本 19 reads 全 G</b> → <b>HP1-1 子克隆 36 reads（28 A/8 G）</b>（57×203）</li>
+      <li>18,086,020（標子克隆 het）：甲基分群 <b>PERMANOVA F=10.6</b>，分群↔HP <b>Cramér's V=0.67</b></li>
+      <li>18,096,269（somatic 等位）：甲基分群↔等位 <b>V=0.97</b>（F=40.0）</li>
+      <li>兩互補模式並存 → 甲基與突變共同標示同一子克隆事件 → Normal→HP1→HP1-1 <b>時序假說</b></li>
+      <li class="y">⚠ 18,086,020 不在 somatic VCF（含 germline-allelic）；時序=數據支撐推論非正交確認；<b>不輸出譜系樹</b>；自動化+大規模=future；⭐3</li>
+    </ul>
+  </div>
+
+  <div class="card" id="fix">
+    <h2><span class="n">④</span> 各章 re-correct（v2→v3，對齊 06-14）</h2>
+    <table>
+      <tr><th>章</th><th>主要修正</th></tr>
+      <tr><td class="k">摘要 v3</td><td>headline 從 de-confound floor → <b>ISM 首個整合 C1/C2/C3 + 兩旗艦</b>；填 BRCA2/chr2 真值；ceiling 加 association-非-causality / case-demo / 跨模型非 cohort</td></tr>
+      <tr><td class="k">Ch1 緒論 v3</td><td>= <b>06-14 定稿主軸句</b>；1.3 三貢獻 C1/C2/C3 + 首個整合 + 甲基↔突變因果歸文獻；措辭 characterize-conditioned；1.4 誠實 ceiling 四點</td></tr>
+      <tr><td class="k">Ch4 結果 v3</td><td>重構：4.1-4.4 de-confound 脈絡 → <b>4.5 旗艦 BRCA2（C1+C2 分解）</b> → <b>4.6 旗艦 chr2（C3 grep-verified 真值，不再佔位）</b> → 4.7 phasing 骨幹+跨樣本；hypo≠silencing / 時序=假說 / 不輸出樹</td></tr>
+      <tr><td class="k">Ch2 文獻 v2</td><td><b>5 桶定位</b>（novelty 組合/corroboration/白地/前例劃界/framing tensions）；距離-read-level 甲基非新穎（Sgootr/Gaiti）；ISM vs cvlr/ASMS 禁寫「平台/缺顯著性」；「無同 regime 衝突但有 framing tensions」非「0 conflict」；LongHap germline-only 佐證白地；6 cell line 非 cohort</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="drift" style="background:#16241a;border-color:#2a4a3a">
+    <h2><span class="n">⑤</span> drift-check — 對齊 06-14 框架 + framing 凍結裁決</h2>
+    <table>
+      <tr><th>裁決紅線</th><th>四章對齊</th></tr>
+      <tr><td class="k">ISM=首個整合 C1/C2/C3（novelty=組合非距離法）</td><td class="ok">✓ 摘要/Ch1 1.3/Ch2 2.4-2.5</td></tr>
+      <tr><td class="k">characterize-conditioned 非 reconstruct</td><td class="ok">✓ Ch1 1.2/Ch2 2.1/Ch4 章首</td></tr>
+      <tr><td class="k">甲基↔突變=關聯非因果（歸文獻）</td><td class="ok">✓ Ch1 1.3/Ch4 4.5/4.6</td></tr>
+      <tr><td class="k">BRCA2 hypo≠silencing；focal cis marginal</td><td class="ok">✓ Ch4 4.5 caveat</td></tr>
+      <tr><td class="k">chr2 不輸出樹；時序=假說；不在 somatic VCF</td><td class="ok">✓ Ch4 4.6 caveat</td></tr>
+      <tr><td class="k">6 cell line=跨模型 reproducibility 非 cohort</td><td class="ok">✓ 摘要/Ch1 1.4/Ch2 2.5</td></tr>
+      <tr><td class="k">「無同 regime 衝突但有 framing tensions」非 0 conflict</td><td class="ok">✓ Ch2 2.5</td></tr>
+      <tr><td class="k">normal-anchor 非獨家（Do2020 亦用）</td><td class="ok">✓ Ch2 2.3</td></tr>
+      <tr><td class="k">4 校正（same-hap 6/6 / cis 1/816 / chr17 非乾淨 / subclone undetermined）</td><td class="ok">✓ Ch4 4.3/4.7 + handoff</td></tr>
+      <tr><td class="k">單樣本/單 pipeline ⭐3</td><td class="ok">✓ 全章</td></tr>
+    </table>
+    <p class="small"><b>結論：四章已對齊你 06-14 逐句確認的框架，無偏離。</b></p>
+  </div>
+
+  <div class="card ask" id="ask">
+    <h2><span class="n">⑥</span> 要你確認</h2>
+    <ul>
+      <li><b>新方向（①②③）對不對</b>？這是否就是你要聚焦與說明的最新題目？</li>
+      <li>兩旗艦的真值與敘述（BRCA2 分解 / chr2 系譜+兩模式）符合你的理解嗎？</li>
+      <li>剩餘 `{{cite}}`（庫內多數已 verified，見 06-14 定稿 L5）+ 🔴 SBS1/deamination 待補 → 我要跑 <code>/citation-verification</code> 補上嗎？</li>
+      <li>下一步：<b>第三章 Methods 補</b>（ISM 三件方法 C1/C2/C3 + catalog 7-TAG + 9 驗證機制 + FDR）→ <b>第五章討論 + 第六章結論</b>。繼續？</li>
+    </ul>
+  </div>
+
+  <p class="small mut">.md 全文：<code>InterSubMod/docs/thesis/chapters/{00_abstract,ch1_introduction,ch2_related_works,ch4_results}.md</code>。權威框架：<code>docs/paper_focus/02_paper_framework/20260614_Intro主軸定稿_thesis_statement_01.md</code> + <code>docs/reports/research_landscape/20260612_external_validation_literature_gap_audit_01.md</code>。真值 grep-verified / 已套 4 校正 / {{cite}} 待 verify。</p>
+
+</div>
+</body>
+</html>

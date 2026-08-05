@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>HCC1395 per-SNV-locus 切割與分類整理</title>
+<style>
+:root{--ink:#1c1c1c;--mut:#6b6b6b;--line:#e4dfd4;--bg:#faf8f3;--acc:#8a5a2b;--ok:#1f7a4d;--warn:#b3541e;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Helvetica Neue","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 26px 90px}
+h1{font-size:23px;margin:0 0 4px}.sub{color:var(--mut);font-size:12.5px;margin:2px 0}
+.modestamp{background:#fdf0e4;border:1px solid var(--warn);border-left:5px solid var(--warn);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13px}
+.modestamp b{color:var(--warn)}
+nav{position:sticky;top:0;background:rgba(250,248,243,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:9px 0;margin:16px 0 22px;font-size:12.5px;z-index:20}
+nav a{color:var(--acc);text-decoration:none;margin-right:13px;white-space:nowrap}nav a:hover{text-decoration:underline}
+h2{font-size:18px;border-left:4px solid var(--acc);padding-left:10px;margin:32px 0 12px}
+h3{font-size:14px;margin:18px 0 8px;color:#4a4036}
+.head{background:linear-gradient(180deg,#fff,#fcfaf5);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:8px 0}
+.head .big{font-size:15px;font-weight:600}.head b{color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:8px 0 6px}
+th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+thead th{background:#f1ece2;color:#4a4036;font-size:11.5px}
+tbody tr:hover{background:#fcf8f0}
+tr.grphead td{background:#f6f1e8;font-weight:700;font-size:12px;color:#5a4a36}
+td.def{color:var(--mut);font-size:11px}
+.barwrap{position:relative;background:#efe9dd;border-radius:5px;height:20px;min-width:210px}
+.bar{height:100%;border-radius:5px}.barlbl{position:absolute;left:8px;top:1px;font-size:11.5px;color:#222;line-height:18px}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:11px 15px;margin:10px 0;font-size:12.5px}
+.card.warn{border-left-color:var(--warn);background:#fdf6ef}.card.ok{border-left-color:var(--ok)}
+.card b{color:var(--acc)}.card.warn b{color:var(--warn)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.note{font-size:11.5px;color:var(--mut);margin:4px 0}
+.pill{display:inline-block;background:#efe7d8;color:#6a4a22;border-radius:20px;padding:1px 9px;font-size:11px;margin-left:6px}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.kpi .k{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+.kpi .v{font-size:20px;font-weight:700;color:var(--acc)}.kpi .l{font-size:11px;color:var(--mut)}
+ul{margin:6px 0;padding-left:19px}li{margin:3px 0;font-size:12.5px}
+code{background:#f1ece2;padding:1px 5px;border-radius:4px;font-size:11px}
+footer{margin-top:38px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--mut)}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+
+<h1>HCC1395 — 以 SNV 位點為單位的切割 × 統計 × 方法學分類整理<span class="pill">N=29,740 loci</span></h1>
+<div class="sub">canonical paired_full longphase-s tagged BAM · 全基因組 TP somatic SNV · binary <code>feat/summary-nreadsvalid 2d5692f</code></div>
+<div class="sub">ISM <code>w=5000 BERNOULLI C_min=3 SKIP</code> · 數字注入自 <code>hcc1395_full_accounting.json</code>（§13-A 反捏造）· 獨立重算 6/6 ALL_MATCH</div>
+
+<div class="modestamp">
+<b>⚠ 模式：TUMOR-ONLY run（Normal BAM: None）。</b> NNormalReads = 0 於全部 29,740 位點。
+所有 <b>normal-anchored</b> 指標（SomaticResidualDbeta / GermlineAsmDbeta / SubcloneDbeta / SampleASM normal arm / <b>Subclone_ID 全 = −1</b>）為「<b>不可計算</b>」而非「陰性發現」——見 §8。本頁 subclone 判讀僅限無監督結構層，非 normal-conditioned subclone 軸。
+</div>
+
+<nav>
+<a href="#tldr">總覽</a><a href="#split">①切割</a><a href="#perm">②統計</a><a href="#verdict">③分類</a>
+<a href="#lens">④三透鏡</a><a href="#extra">⑤補軸</a><a href="#ctx">⑥CNV/LOH</a><a href="#cross">⑦交叉表</a><a href="#empty">⑧不可計算</a><a href="#caveat">口徑</a>
+</nav>
+
+<section id="tldr"><div class="head">
+<div class="big">全基因組 29,740 個 TP somatic SNV — 三個獨立判準把同一批位點切得很不一樣：</div>
+<div class="kpi">
+<div class="k"><div class="v">5,816</div><div class="l">① 無監督切得出 cansplit (19.6%)</div></div>
+<div class="k"><div class="v">8,247</div><div class="l">② 乾淨 PERMANOVA C (27.7%)</div></div>
+<div class="k"><div class="v">20,089</div><div class="l">③ verdict Significant (67.5%)</div></div>
+<div class="k"><div class="v">0.107</div><div class="l">Jaccard(①,②) 偏低</div></div>
+</div>
+<p style="margin:8px 0 0;font-size:12.5px">三者<b>部分重疊、非巢狀漏斗</b>（§4）。① cansplit 只代表「pooled reads 找到 k≥2 分群」，<b>可能是 cis-ASM / germline-HP / CN，不等於 tumor subclone</b>。</p>
+</div></section>
+
+<section id="split"><h2>① 切割維度（無監督 UPGMA + silhouette，tumor reads）</h2>
+<p class="note">每位點對 tumor reads 算 read×read 距離矩陣 → UPGMA → silhouette 選 best_k。best_k≥2 = cansplit。</p>
+<table class=''><thead><tr><th>狀態</th><th>位點數</th><th>佔比</th></tr></thead><tbody><tr><td>✅ cansplit（切得出 k≥2）</td><td><div class='barwrap'><div class='bar' style='width:19.6%;background:#1f7a4d'></div><span class='barlbl'>5,816 (19.6%)</span></div></td><td class='num'>19.6%</td></tr><tr><td>✋ cant（reads≥6 但切不出平衡 k≥2）</td><td><div class='barwrap'><div class='bar' style='width:78.1%;background:#b3541e'></div><span class='barlbl'>23,227 (78.1%)</span></div></td><td class='num'>78.1%</td></tr><tr><td>◌ insuff（tumor reads &lt;6，無法分群）</td><td><div class='barwrap'><div class='bar' style='width:2.3%;background:#999'></div><span class='barlbl'>697 (2.3%)</span></div></td><td class='num'>2.3%</td></tr></tbody></table>
+<div class="card"><b>切得出 ≈ 1/5。</b>「切不出來」78.1% 多數非失敗 = reads 相對同質。<b>切得出 ≠ subclone</b>（品質分帶與對齊軸見全樣本 master 報告）。</div>
+</section>
+
+<section id="perm"><h2>② 統計維度（PERMANOVA / GlobalTest，read×CpG 距離）</h2>
+<table class=''><thead><tr><th>軸</th><th>顯著 sig (p&amp;lt;.05)</th><th>乾淨 clean(扣離散度)</th><th>離散度 dispersion</th></tr></thead><tbody><tr><td>LabelHP (HP 標籤軸)</td><td class='num'>13,029 (43.8%)</td><td class='num'>4,298 (14.5%)</td><td class='num'>8,731</td></tr><tr><td>LabelAllele (REF/ALT 軸)</td><td class='num'>20,793 (69.9%)</td><td class='num'>6,058 (20.4%)</td><td class='num'>14,735</td></tr><tr><td>Cluster (無監督群軸)</td><td class='num'>9,892 (33.3%)</td><td class='num'>3,690 (12.4%)</td><td class='num'>6,202</td></tr></tbody></table>
+<div class="card warn"><b>「顯著」多數是離散度而非位置位移。</b> LabelAllele sig 69.9% 但乾淨僅 20.4%（14,735 個 dispersion warning）；LabelHP sig 43.8% → 乾淨 14.5%。PERMDISP 扣離散度後才是可信位置差異。<b>C = 任一 label 軸乾淨 = 8,247 (27.7%)</b>。</div>
+<h3>CramérV 關聯強度（cluster×label）</h3>
+<table class=''><thead><tr><th>帶</th><th>位點數</th><th>說明</th></tr></thead><tbody><tr><td>&lt;0.3</td><td class='num'>27,479</td><td class='def'>其中 exactly 0（Cochran-gated/無關聯）= 27,450（非連續弱關聯，是 0 處尖峰）</td></tr><tr><td>≥0.7</td><td class='num'>1,895</td><td class='def'></td></tr><tr><td>0.5-0.7</td><td class='num'>210</td><td class='def'></td></tr><tr><td>0.3-0.5</td><td class='num'>156</td><td class='def'></td></tr></tbody></table>
+<p class="note">⚠ &lt;0.3 帶的 92.3% 是 exactly 0（Cochran-gated），非平滑梯度。</p>
+</section>
+
+<section id="verdict"><h2>③ 方法學分類維度（C++ reclassify-v2 verdict）</h2>
+<h3>VerificationClass 9 態（依源碼分 3 群）</h3>
+<table class=''><thead><tr><th>VerificationClass</th><th>位點數</th><th>佔比</th><th>定義（源碼 RegionProcessor.cpp）</th></tr></thead><tbody><tr class='grphead'><td colspan=4>▌乾淨結構 (=Significant) — 20,089 (67.5%)</td></tr><tr><td>Strong</td><td class='num'>9,228</td><td class='num'>31.0%</td><td class='def'>GlobalTest 分群↔標籤對齊（cluster-label match）— 最高優先</td></tr><tr><td>LOH-Structure</td><td class='num'>1,137</td><td class='num'>3.8%</td><td class='def'>潛在 LOH 位點 + HP-AUC 結構或顯著 Δβ</td></tr><tr><td>MultiGroupNoLabel</td><td class='num'>4,737</td><td class='num'>15.9%</td><td class='def'>within-HP 乾淨多群子結構但無標籤對齊</td></tr><tr><td>PermanovaLocation</td><td class='num'>4,348</td><td class='num'>14.6%</td><td class='def'>label PERMANOVA 顯著且 PERMDISP 無離散度警告（乾淨位置位移）</td></tr><tr><td>StructureNoLabel</td><td class='num'>639</td><td class='num'>2.1%</td><td class='def'>HP-AUC≥0.7 結構但無標籤/LOH/within-HP/PERMANOVA 匹配</td></tr><tr class='grphead'><td colspan=4>▌離散度模糊 — 4,583 (15.4%)</td></tr><tr><td>DispersionStructure</td><td class='num'>4,583</td><td class='num'>15.4%</td><td class='def'>PERMANOVA 顯著但離散度警告 — 有結構但歸因模糊（不算 Significant）</td></tr><tr class='grphead'><td colspan=4>▌Noise — 5,068 (17.0%)</td></tr><tr><td>Noise_Uncorrelated</td><td class='num'>2,775</td><td class='num'>9.3%</td><td class='def'>中間帶距離/epipoly，無乾淨群（預設 Noise）</td></tr><tr><td>Noise_Uniform</td><td class='num'>2,283</td><td class='num'>7.7%</td><td class='def'>甲基均勻不可分（pairwise&lt;0.15 或 epipoly&lt;0.2）</td></tr><tr><td>Noise_Chaotic</td><td class='num'>10</td><td class='num'>0.0%</td><td class='def'>高熵混亂（epipoly&gt;0.5 或 pairwise&gt;0.35）</td></tr></tbody></table>
+<div class="card ok"><b>Significant = 6 個乾淨結構類之和 = 20,089（67.5%），與 Significant flag 完全一致✓。</b> DispersionStructure（4,583）+ Noise（5,068）不算 Significant。</div>
+<div class="card warn"><b>「Significant 67.5%」≠「67.5% 有真結構」。</b> 其中 <b>11,381（56.7%）是最弱的 E 級</b>。Significant 是寬鬆位置-結構 OR-gate，非強度 verdict。</div>
+<h3>StrengthGrade（強度分級）<span class="note"> — A≥0.50 · B≥0.35 · C≥0.22 · D≥0.12 · E<0.12（StrengthScore live cutoffs）</span></h3>
+<table class=''><thead><tr><th>級</th><th>位點數</th><th>佔比</th></tr></thead><tbody><tr><td>A</td><td><div class='barwrap'><div class='bar' style='width:0.4%;background:#8a5a2b'></div><span class='barlbl'>108 (0.4%)</span></div></td><td class='num'>0.4%</td></tr><tr><td>B</td><td><div class='barwrap'><div class='bar' style='width:2.8%;background:#8a5a2b'></div><span class='barlbl'>831 (2.8%)</span></div></td><td class='num'>2.8%</td></tr><tr><td>C</td><td><div class='barwrap'><div class='bar' style='width:7.6%;background:#b89b6a'></div><span class='barlbl'>2,256 (7.6%)</span></div></td><td class='num'>7.6%</td></tr><tr><td>D</td><td><div class='barwrap'><div class='bar' style='width:20.9%;background:#cfc4ad'></div><span class='barlbl'>6,222 (20.9%)</span></div></td><td class='num'>20.9%</td></tr><tr><td>E</td><td><div class='barwrap'><div class='bar' style='width:68.3%;background:#cfc4ad'></div><span class='barlbl'>20,323 (68.3%)</span></div></td><td class='num'>68.3%</td></tr></tbody></table>
+<p class="note">A+B 僅 939（3.2%）。E 級 68.3% 偏高部分因 tumor-only：StrengthScore 5 分量中 StrengthSomatic/StrengthGermline 為 normal-anchored，此 run 恆 0（§5）。</p>
+<h3>PassedGating / SuggestFilter</h3>
+<table class=''><thead><tr><th>欄位</th><th>true</th><th>佔比</th><th>定義</th></tr></thead><tbody><tr><td>PassedGating</td><td class='num'>9,951</td><td class='num'>33.5%</td><td class='def'>Fisher p≤0.1 且 CramérV≥0.1（alt 或 hp-family 任一）</td></tr><tr><td>SuggestFilter</td><td class='num'>99</td><td class='num'>0.3%</td><td class='def'>label_delta&gt;0.3（legacy F1 啟發式）</td></tr></tbody></table>
+</section>
+
+<section id="lens"><h2>④ 三透鏡非巢狀（同批位點，不同判準）</h2>
+<table class=''><thead><tr><th>判準</th><th>位點數</th><th>佔比</th><th>本質</th></tr></thead><tbody><tr><td>① cansplit（無監督 k≥2）</td><td class='num'>5,816</td><td class='num'>19.6%</td><td class='def'>pooled reads 找到分群（可為 cis-ASM/germline-HP/CN）</td></tr><tr><td>② C clean PERMANOVA</td><td class='num'>8,247</td><td class='num'>27.7%</td><td class='def'>label 軸乾淨位置位移</td></tr><tr><td>③ Significant verdict</td><td class='num'>20,089</td><td class='num'>67.5%</td><td class='def'>6 個乾淨結構 VC 類</td></tr></tbody></table>
+<div class="card warn"><b>三者部分重疊，不是漏斗。</b> ①∩③ = 5,131；只③不① = 14,958；只①不③ = 685；①∩② = 1,359（Jaccard(①,②)=0.107）。看到三個百分比<b>勿讀成子集鏈</b>。</div>
+</section>
+
+<section id="extra"><h2>⑤ 補充軸（read-level 訊號）</h2>
+<div class="grid">
+<div><h3>HP_AUC_Tumor（HP 可分性）</h3><table class=''><thead><tr><th>帶</th><th>位點數</th><th>佔比</th></tr></thead><tbody><tr><td>≥0.7</td><td class='num'>8,024</td><td class='num'>27.0%</td></tr><tr><td>&lt;0.5</td><td class='num'>12,120</td><td class='num'>40.8%</td></tr><tr><td>0.5-0.6</td><td class='num'>5,817</td><td class='num'>19.6%</td></tr><tr><td>0.6-0.7</td><td class='num'>3,779</td><td class='num'>12.7%</td></tr></tbody></table><p class="note">≥0.7（HP 強可分）= 8,024（27.0%）</p></div>
+<div><h3>TumorOnly 分群 K 分佈</h3><table class=''><thead><tr><th>K</th><th>位點數</th></tr></thead><tbody><tr><td>K=2</td><td class='num'>25,708</td></tr><tr><td>K=3</td><td class='num'>1,786</td></tr><tr><td>K=4</td><td class='num'>1,045</td></tr><tr><td>K=5</td><td class='num'>682</td></tr><tr><td>K=6</td><td class='num'>512</td></tr><tr><td>K=7</td><td class='num'>7</td></tr></tbody></table><p class="note">⚠ K=2 占 86% — 近 chance 二分；TumorIntrinsic/TumorOnly PERMANOVA 為 double-dip（memory 已證 tumor-only 軸 NEGATIVE），勿當陽性。</p></div>
+</div>
+<h3>StrengthScore 5 分量均值（解釋 E 級偏高）</h3>
+<table class=''><thead><tr><th>分量</th><th>StrengthScore</th><th>StrengthStruct</th><th>StrengthTumor</th><th>StrengthSomatic</th><th>StrengthAssoc</th><th>StrengthGermline</th></tr></thead><tbody><tr><td>均值</td><td class='num'>0.088</td><td class='num'>0.24</td><td class='num'>0.13</td><td class='num'>0.0</td><td class='num'>0.067</td><td class='num'>0.0</td></tr></tbody></table>
+<p class="note">StrengthSomatic / StrengthGermline = 0（normal-anchored，tumor-only 恆 0）→ 5 分量中 2 個結構性為 0，壓低總分。</p>
+<h3>per-CpG / 體細胞 haplotype 拓樸</h3>
+<table class=''><thead><tr><th>軸</th><th>非零位點</th><th>佔比</th></tr></thead><tbody><tr><td>Fisher per-CpG ASM（≥1 顯著 CpG）</td><td class='num'>12,372</td><td class='num'>41.6%</td></tr><tr><td>NHP_Somatic 1-1</td><td class='num'>18,936</td><td class='num'>63.7%</td></tr><tr><td>NHP_Somatic 2-1</td><td class='num'>18,301</td><td class='num'>61.5%</td></tr><tr><td>NHP_Somatic 3-3</td><td class='num'>4,393</td><td class='num'>14.8%</td></tr></tbody></table>
+</section>
+
+<section id="ctx"><h2>⑥ CNV / LOH / within-HP 脈絡</h2>
+<div class="grid">
+<div><h3>Coverage_Category（CNV 代理）</h3><table class=''><thead><tr><th>類</th><th>位點數</th><th>佔比</th></tr></thead><tbody><tr><td>Normal</td><td class='num'>9,446</td><td class='num'>31.8%</td></tr><tr><td>CNV_Gain</td><td class='num'>6,202</td><td class='num'>20.9%</td></tr><tr><td>Elevated</td><td class='num'>6,092</td><td class='num'>20.5%</td></tr><tr><td>Low</td><td class='num'>3,939</td><td class='num'>13.2%</td></tr><tr><td>High_Copy</td><td class='num'>3,492</td><td class='num'>11.7%</td></tr><tr><td>CNV_Loss</td><td class='num'>569</td><td class='num'>1.9%</td></tr></tbody></table></div>
+<div><h3>LOH_Subtype（legacy 類映射）</h3><table class=''><thead><tr><th>類</th><th>位點數</th><th>佔比</th></tr></thead><tbody><tr><td>None</td><td class='num'>15,643</td><td class='num'>52.6%</td></tr><tr><td>LOH_Noise</td><td class='num'>6,224</td><td class='num'>20.9%</td></tr><tr><td>LOH_Weak</td><td class='num'>3,427</td><td class='num'>11.5%</td></tr><tr><td>LOH_Strong</td><td class='num'>3,016</td><td class='num'>10.1%</td></tr><tr><td>LOH_Subclone</td><td class='num'>1,430</td><td class='num'>4.8%</td></tr></tbody></table><p class="note">Potential_LOH = 14,097（47.4%）</p></div>
+</div>
+<h3>within-HP 子結構（subclone-direction，無監督）</h3>
+<table class=''><thead><tr><th>欄位</th><th>true</th><th>佔比</th></tr></thead><tbody><tr><td>WithinHP_CleanMultigroup</td><td class='num'>7,869</td><td class='num'>26.5%</td></tr><tr><td>WithinHP_LevelBimodal</td><td class='num'>7,597</td><td class='num'>25.5%</td></tr><tr><td>WithinHP_SubcloneSig（a-priori germline-vs-carrier）</td><td class='num'>4,724</td><td class='num'>15.9%</td></tr></tbody></table>
+<div class="card warn"><b>legacy「Subclone」類（1,516）名過其實</b> = within-HP multi-group candidate（無監督），<b>非</b> normal-anchored subclone 軸；確認 ≥2 within-HP 群 ≠ subclone（可為 cis-ASM，~85% 對齊 germline-carrier）。</div>
+</section>
+
+<section id="cross"><h2>⑦ 交叉表：切割狀態 × VerificationClass</h2>
+<table class='cross'><thead><tr><th>切割狀態</th><th>小計</th><th>Strong</th><th>MultiGrp</th><th>DispStruct</th><th>PermLoc</th><th>NoiseUnc</th><th>NoiseUnif</th><th>LOH-Str</th><th>StructNoLbl</th><th>NoiseChaos</th></tr></thead><tbody><tr><td>✅ cansplit(切得出)</td><td class='num'><b>5,816</b></td><td class='num'>4,061</td><td class='num'>721</td><td class='num'>230</td><td class='num'>201</td><td class='num'>415</td><td class='num'>38</td><td class='num'>82</td><td class='num'>66</td><td class='num'>2</td></tr><tr><td>✋ cant(切不出)</td><td class='num'><b>23,227</b></td><td class='num'>4,983</td><td class='num'>4,016</td><td class='num'>4,178</td><td class='num'>4,026</td><td class='num'>2,249</td><td class='num'>2,144</td><td class='num'>1,055</td><td class='num'>568</td><td class='num'>8</td></tr><tr><td>◌ insuff(reads&lt;6)</td><td class='num'><b>697</b></td><td class='num'>184</td><td class='num'>0</td><td class='num'>175</td><td class='num'>121</td><td class='num'>111</td><td class='num'>101</td><td class='num'>0</td><td class='num'>5</td><td class='num'>0</td></tr></tbody></table>
+<div class="card"><b>切割 ⊥ verdict 顯著分歧。</b> cansplit 中 ~70% 是 Strong；但反過來 9,228 個 Strong verdict 只 ~44% 能無監督切群（其餘落 cant）→ <b>C++ Strong verdict 與無監督 cansplit 是不同判準</b>，互相不蘊含。</div>
+</section>
+
+<section id="empty"><h2>⑧ Tumor-only 模式：不可計算欄位（非陰性）</h2>
+<p class="note">以下 normal-anchored 欄位在此 tumor-only run 全為空/0/−1，是「未計算」非「無發現」。解讀 subclone 時務必排除。</p>
+<table class=''><thead><tr><th>欄位</th><th>空/0/−1 位點數</th><th>狀態</th></tr></thead><tbody><tr><td>SampleASM_NNormal</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>SomaticResidualDbeta_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>GermlineAsmDbeta_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>HP_Residual_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>SubcloneDbeta_HP1_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>SubcloneDbeta_HP2_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>SampleASM_Sig</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>PerCpgASM_Valid</td><td class='num'>14,757</td><td class='def'>部分</td></tr><tr><td>Subclone_ID</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr><tr><td>NNormalReads</td><td class='num'>29,740</td><td class='def'>全部 = 不可計算</td></tr></tbody></table>
+</section>
+
+<section id="caveat"><h2>口徑（給 PI / 審稿）</h2>
+<ul>
+<li><b>單樣本 tumor-only</b>：normal-anchored subclone 軸不可計算（§8）；tier 上限 ⭐3 proof-of-concept；無跨樣本/無 paired 確認。</li>
+<li><b>cansplit ≠ subclone</b>：無監督 k≥2 可為 cis-ASM / germline-HP / CN；確認 ≥2 within-HP 群亦 ≠ subclone。</li>
+<li><b>Significant 是寬鬆 OR-gate</b>（67.5%），57% 是 E 級；勿讀成「有真結構」。</li>
+<li><b>「顯著」多為離散度</b>：PERMDISP 扣除後乾淨位置位移大幅縮減（LabelAllele 69.9%→20.4%）。</li>
+<li><b>TumorIntrinsic / TumorOnly PERMANOVA = double-dip</b>（K=2 近 chance 占多數），memory 已證 tumor-only 軸 NEGATIVE。</li>
+<li><b>CramérV &lt;0.3 帶</b> 92.3% 是 gated-to-0 尖峰，非弱關聯梯度。</li>
+<li><b>denominator</b> = 29,740 matched（of 29,754 records；14 未匹配）。</li>
+</ul>
+</section>
+
+<footer>
+provenance：binary <code>inter_sub_mod @ feat/summary-nreadsvalid 2d5692f</code> · 數字注入自 <code>hcc1395_full_accounting.json</code>（§13-A 由構造防捏造）· 獨立重算 6/6 ALL_MATCH · C++ 語義經對抗 workflow 從 RegionProcessor.cpp 抽取 · tumor-only 單樣本 tier⭐3 · 生成 2026-06-21<br>
+報告目錄 <code>InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/</code>
+</footer>
+</div></body></html>

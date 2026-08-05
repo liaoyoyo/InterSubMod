@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>≥2 群確認標準 — 觀察工作站（cluster×haplotag CramérV/Fisher）</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--mut:#94a3b8;--fg:#e2e8f0;--ac:#38bdf8;
+--ok:#22c55e;--warn:#f59e0b;--no:#ef4444;--line:#334155;--gold:#f2c94c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.6 system-ui,-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif}
+header{padding:16px 24px;border-bottom:1px solid var(--line);background:#0b1222;position:sticky;top:0;z-index:40}
+h1{margin:0 0 3px;font-size:19px}h2{font-size:16px;margin:24px 0 8px;border-left:3px solid var(--ac);padding-left:9px}
+.sub{color:var(--mut);font-size:12px}.wrap{max-width:1320px;margin:0 auto;padding:0 20px 90px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.banner{margin-top:8px;background:#3a1d05;border:1px solid #92400e;border-radius:7px;padding:7px 12px;font-size:12px;color:#fcd34d}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+button,select,input[type=file]{background:#0b1222;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+.stat4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sb{background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.sb .n{font-size:20px;font-weight:800}.sb .l{font-size:11px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.card.j-in{border-color:var(--ok)}.card.j-ex{border-color:var(--no)}.card.j-doubt{border-color:var(--warn)}
+.card .hd{padding:8px 11px;border-bottom:1px solid var(--line);cursor:pointer}
+.card .ttl{font-weight:700;font-size:13px}.card .meta{font-size:10.5px;color:var(--mut);margin-top:3px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:1px 11px}
+.kv .k{color:var(--mut)}.kv .v{font-variant-numeric:tabular-nums}
+.figs{display:flex;gap:2px;background:#0b1222;cursor:pointer}.figs img{width:50%;display:block;background:#fff;min-height:40px}
+.figsvg{background:#11161f;padding:4px;cursor:pointer}.figsvg svg{width:100%;display:block}
+.nofig{padding:12px;color:#64748b;font-size:11px;text-align:center}
+.badge{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:3px}
+.b-ok{background:#14532d;color:#86efac}.b-warn{background:#78350f;color:#fcd34d}.b-no{background:#450a0a;color:#fca5a5}
+.b-info{background:#0c2a4d;color:#60a5fa}.b-mut{background:#1e293b;color:#cbd5e1}.b-gold{background:#3a300a;color:#f2c94c}
+.b-src{background:#0b1222;color:#7c8aa0;font-weight:500;font-size:10px;border:1px solid var(--line);cursor:help}
+.jrow{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}
+.jrow button{flex:1;font-size:10.5px;padding:4px 2px}
+.jb.on-in{background:#14532d;color:#86efac;border-color:#22c55e}.jb.on-doubt{background:#78350f;color:#fcd34d;border-color:#f59e0b}.jb.on-ex{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.rsel{width:100%;padding:5px 8px;font-size:10.5px;border-top:1px solid var(--line);border-radius:0}
+table{border-collapse:collapse;width:100%;font-size:11.5px;margin:4px 0}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}th{background:#0b1222;color:var(--mut)}
+.note{background:#1c1407;border:1px solid #78350f;border-radius:8px;padding:9px 13px;font-size:12px;color:#fcd34d;margin:10px 0}
+code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#fcd34d}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;z-index:100;overflow:auto;padding:22px}
+#modal .mc{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:18px}
+#modal img{width:100%;background:#fff;border-radius:6px}.mfigs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.statg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.st{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:6px 9px}.st .l{font-size:10px;color:var(--mut)}.st .n{font-size:14px;font-weight:700}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0}
+</style></head><body>
+<header>
+ <h1>≥2 群確認標準 — 觀察工作站（cluster×haplotag CramérV/Fisher）</h1>
+ <div class="sub">chr1 跨 V 光譜 4 案逐項肉眼確認 · 核心 2,941 已獨立重算 · ⭐2 pilot 單樣本 HCC1395</div>
+ <div class="banner">⚠ 資料狀態：⭐2 描述性 pilot · 單樣本 HCC1395 · 偵測非驗證（門檻為描述性選擇）　build <code>5c39051</code></div>
+</header>
+<div class="wrap">
+<h2>⓪b 修正過程紀錄 / changelog</h2><div class="panel"><div class="sub" style="line-height:1.9;margin-bottom:8px"><div><b style="color:var(--fg)">階段：</b>源 CSV 30490 列 + records_wg2.json contingency（worktree ism-review-infra @ 5c39051）</div></div><table><tr><th>ID</th><th>內容</th><th>狀態</th><th>影響</th><th>來源(已驗證)</th></tr><tr><td><b>V1</b></td><td>核心宣稱 V≥0.7+sig=2,941（可確認≥2群）獨立重算</td><td><span class="badge" style="background:#052e16;color:#86efac">✓ 權威</span></td><td>從 records_wg2 contingency 逐 region chi2→V 重算 = 2,941，命中 locked</td><td><code>obs_ws/verify_results.json:match.clear_v07=true</code></td></tr><tr><td><b>V2</b></td><td>computable 5,461 / sig+V≥0.5 3,706 / paired 22632/23007/29364/27367 重算</td><td><span class="badge" style="background:#052e16;color:#86efac">✓ 權威</span></td><td>全部命中 locked（section8/tumor_layers/fisher_cramersv.json）</td><td><code>obs_ws/verify_results.json:recomputed</code></td></tr><tr><td><b>V3</b></td><td>三態 cant 12,039 / confirm1 13,855 / multi_cand 4,596 重算</td><td><span class="badge" style="background:#052e16;color:#86efac">✓ 權威</span></td><td>命中 ±1（邊界 3-read tie），三者和=30,490</td><td><code>obs_ws/verify_results.json:match.tri_*</code></td></tr><tr><td><b>V4</b></td><td>gc/hp 對齊 2,500/441（85/15）獨立重現</td><td><span class="badge" style="background:#450a0a;color:#fca5a5">✗ 尚未做</span></td><td>4 種明顯規則皆不中（最近 1524/1417）；原始對齊規則未在腳本中找到 → 引用前須釐清</td><td><code>obs_ws/verify_results.json:match.align_gc_hp_REPRODUCED=false</code></td></tr></table><div class="note"><b>結論：</b>標準成立且核心數字可獨立重算（2,941 命中）；為 detector 非 validator；「≥2群≠≥2subclone」必守；gc/hp 85/15 子比例未重現需釐清。</div></div>
+<h2>① 確認標準是什麼 — 演算法早在 ISM 裡（已獨立重算驗證）</h2><div class="panel">
+<p><b>標準</b>：每個位點用 <b>甲基無監督群(cluster) × a-priori haplotag(label 1/1-1/2/2-1)</b> 列聯表算
+<code>Cramér's V</code>（效應量）+ <code>Fisher</code>（顯著性）。<b>V 高＝甲基分群對齊一條獨立的 haplotag 軸＝確認此位點有 ≥2 個甲基群</b>。
+label 來自 longphase-S somatic haplotag（<u>非</u>甲基本身）→ 不是 double-dip 循環。</p>
+<table>
+<tr><th>層級</th><th>數量</th><th>%（/30490）</th><th>獨立重算</th><th>意義</th></tr>
+<tr><td>① 有切出群（可算 computable）</td><td>5461</td><td>17.9%</td><td>✓ 命中 locked 5461</td><td>只有 17.9% 切得出群（其餘無平衡分群）</td></tr>
+<tr><td>② 顯著 p&lt;0.05</td><td>4185</td><td>13.7%</td><td>✓ 命中 4185</td><td>cluster 與 haplotag 顯著關聯</td></tr>
+<tr><td>③ 顯著 + V≥0.5（較可信）</td><td>3706</td><td>12.2%</td><td>✓ 命中 3706</td><td>中-大效應</td></tr>
+<tr class="hi"><td><b>④ 顯著 + V≥0.7（可確認 ≥2 群）</b></td><td><b>2941</b></td><td><b>9.6%</b></td><td><b>✓ 命中 2941</b></td><td><b>熱圖看到的「明顯 ≥2 群」← 本工作站逐案肉眼確認</b></td></tr>
+</table>
+<div class="note">✅ <b>裁決：標準成立、可依此確認，但是 detector 非 validator</b>。④的 2,941 已由原始資料（significance_summary.csv + records_wg2.json contingency）逐字重算命中（見 ⓪b）。
+但「確認 ≥2 群」＝<b>確認 2 個甲基群對齊獨立軸</b>，<u>不等於</u>「確認 2 個 subclone」。</div></div><h2>② 三態決策（全 30490 位點，已重算）</h2><div class="panel">
+<table>
+<tr><th>狀態</th><th>數量</th><th>%</th><th>重算</th><th>意義</th></tr>
+<tr><td>❌ 不能問（germline 或 carrier &lt;3 reads / LOH 990）</td><td>12038</td><td>39.5%</td><td>✓ ±1（locked 12039）</td><td>缺對照，不跑 subclone</td></tr>
+<tr><td>✅ 確認 1 群（germline=carrier，SubcloneDbeta 不顯著）</td><td>13856</td><td>45.4%</td><td>✓ ±1（locked 13855）</td><td>有信心的負結果</td></tr>
+<tr class="hi"><td>🔬 多群候選（germline≠carrier）</td><td>4596</td><td>15.1%</td><td>✓ 命中 4596</td><td>下一步 normal-anchored cis-control</td></tr>
+</table>
+<div class="sub">三態互斥，12038+13856+4596=30490=30490 ✓</div></div><h2>③ 三個必守 caveat（含 1 個未重現項）</h2><div class="panel">
+<table>
+<tr><th>#</th><th>caveat</th><th>狀態</th></tr>
+<tr><td>1</td><td>🔴 <b>「≥2 群」≠「≥2 subclone」</b>：對齊軸 85% 是 germline/carrier，那 2 群<b>可能是 cis-ASM</b> 不是 subclone → 需 normal-anchored cis-control 才分得開。真 within-carrier 子分群只 351（1.2%）。</td><td><span class="badge b-no">必守</span></td></tr>
+<tr><td>2</td><td>⚠ <b>selection 偏誤</b>：2,941 是「切得出群的 5461」之內；82% 切不出不在分母。「9.6%」是 /30490；真正可問的子集裡比例更高。</td><td><span class="badge b-warn">必守</span></td></tr>
+<tr><td>3</td><td>⚠ <b>gc/hp 對齊 85%/15%（2500/441）我未能獨立重現</b>：我的明顯規則（取最大 collapsed Cramér's V）得 1524/1417，非 2500/441；且與 .md「多為 HP1/HP2 germline ASM」有張力。<b>此子比例引用前需先釐清原始對齊規則。</b></td><td><span class="badge b-no">未重現</span></td></tr>
+</table>
+<div class="sub">⭐2 描述性 pilot · 單樣本 HCC1395 · 偵測非驗證。本工作站 24 案＝chr1 跨 V 光譜抽樣（chr1≈WG，KS D=0.126 p=0.52）。</div></div><h2>④ 怎麼用本工作站肉眼確認</h2><div class="panel">
+<p>每張圖左兩條色帶 = <b>cluster</b>（橘/綠/黃…甲基無監督群）與 <b>haplotag</b>（HP1 淺藍 / HP1-1 深藍 / HP2 淺紫 / HP2-1 深紫）。主圖 = read×CpG 甲基（紅=甲基化/藍=未）。</p>
+<ul>
+<li><b>V 高（可確認）</b>：cluster 色塊邊界 <b>對齊</b> haplotag 色塊邊界，且兩塊甲基模式不同 → 真 ≥2 群。</li>
+<li><b>V 低（極弱）</b>：cluster 色塊 <b>橫跨</b> 多個 haplotag → 切出的群與獨立軸無關 → 不可確認。</li>
+</ul>
+<p>逐案記 <b>✓ 分群明確/存疑/✗ 看不出</b> + 原因（可匯出 JSON/CSV 當修正反饋）。判讀存 localStorage。</p></div>
+<h2>判讀紀錄 — 匯出 / 匯入 / 進度</h2>
+<div class="panel">
+ <div class="row">
+  <button onclick="exportJ()">⬇ 匯出 JSON</button>
+  <button onclick="exportCSV()">⬇ 匯出 CSV</button>
+  <label class="row" style="gap:5px"><span class="sub">⬆ 匯入再校正</span><input type="file" accept=".json" onchange="importJ(event)"></label>
+  <button onclick="clearJ()">✕ 清空</button>
+ </div>
+ <div class="stat4" id="prog" style="margin-top:12px"></div>
+</div>
+<h2>逐項判讀（每項可記 ✓ 分群明確對齊/存疑/邊際/✗ 看不出分群 + 原因）</h2>
+<div class="panel">
+ <div class="row"><span class="sub">篩選判讀</span><select id="jf"><option value="all">全部</option><option value="in">✓ 分群明確對齊</option><option value="doubt">存疑/邊際</option><option value="ex">✗ 看不出分群</option><option value="un">未判讀</option></select><span id="gcount" class="sub"></span></div>
+ <div class="grid" id="grid"></div>
+ <div class="pager" id="pager"></div>
+</div>
+<footer><b>Provenance</b> · build <code>5c39051</code> · branch <code>feat/summary-nreadsvalid</code> · 生成 2026-06-18 · tier ⭐2 描述性 pilot（偵測非驗證） · scope PARTIAL — 單樣本 HCC1395，案例 chr1 抽樣（chr1≈WG KS p=0.52）<br>核心 2,941 + 5,461/3,706/三態 已由原始資料獨立重算命中（verify_results.json）；gc/hp 85/15 未重現（caveat 3）。案例圖自 chr1 持久化 pilot 輸出，未 re-run binary。<ul><li><code>/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/output/_wg_bdcprime_verify/significance_summary.csv (源 CSV, 30490 列)</code></li><li><code>/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot/records_wg2.json (cluster×label contingency)</code></li><li><code>obs_ws/verify_results.json (本輪獨立重算)</code></li><li><code>obs_ws/cases.json (24 案 locked metrics + 圖)</code></li><li><code>/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260618_subcluster_pilot/spectrum_decision.json (locked 分群)</code></li><li><code>InterSubMod/docs/methodology/20260618_within_label_subcluster_methodology_validation_01.md (方法學 SoT)</code></li></ul>所有 metric 由 spec 注入（§13-A req()-refuse），人工判讀存 localStorage 並可匯出。</footer>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
+<script id="wsspec" type="application/json">{"meta": {"title": "≥2 群確認標準 — 觀察工作站（cluster×haplotag CramérV/Fisher）", "subtitle": "chr1 跨 V 光譜 4 案逐項肉眼確認 · 核心 2,941 已獨立重算 · ⭐2 pilot 單樣本 HCC1395", "lskey": "subcluster_confirm_obs_ws_v1", "tier": "⭐2 描述性 pilot（偵測非驗證）", "scope": "PARTIAL — 單樣本 HCC1395，案例 chr1 抽樣（chr1≈WG KS p=0.52）", "build_commit": "5c39051", "build_branch": "feat/summary-nreadsvalid"}, "changelog": {"data_status": "⭐2 描述性 pilot · 單樣本 HCC1395 · 偵測非驗證（門檻為描述性選擇）", "phase": {"summary": "源 CSV 30490 列 + records_wg2.json contingency（worktree ism-review-infra @ 5c39051）"}, "corrections": [{"id": "V1", "what": "核心宣稱 V≥0.7+sig=2,941（可確認≥2群）獨立重算", "status": "authoritative", "effect": "從 records_wg2 contingency 逐 region chi2→V 重算 = 2,941，命中 locked", "src": "obs_ws/verify_results.json:match.clear_v07=true"}, {"id": "V2", "what": "computable 5,461 / sig+V≥0.5 3,706 / paired 22632/23007/29364/27367 重算", "status": "authoritative", "effect": "全部命中 locked（section8/tumor_layers/fisher_cramersv.json）", "src": "obs_ws/verify_results.json:recomputed"}, {"id": "V3", "what": "三態 cant 12,039 / confirm1 13,855 / multi_cand 4,596 重算", "status": "authoritative", "effect": "命中 ±1（邊界 3-read tie），三者和=30,490", "src": "obs_ws/verify_results.json:match.tri_*"}, {"id": "V4", "what": "gc/hp 對齊 2,500/441（85/15）獨立重現", "status": "not-done", "effect": "4 種明顯規則皆不中（最近 1524/1417）；原始對齊規則未在腳本中找到 → 引用前須釐清", "src": "obs_ws/verify_results.json:match.align_gc_hp_REPRODUCED=false"}], "audit_conclusion": {"summary": "標準成立且核心數字可獨立重算（2,941 命中）；為 detector 非 validator；「≥2群≠≥2subclone」必守；gc/hp 85/15 子比例未重現需釐清。", "src": "InterSubMod/docs/methodology/20260618_within_label_subcluster_methodology_validation_01.md"}}, "sections": [{"id": "standard", "title": "① 確認標準是什麼 — 演算法早在 ISM 裡（已獨立重算驗證）", "html": "\n<p><b>標準</b>：每個位點用 <b>甲基無監督群(cluster) × a-priori haplotag(label 1/1-1/2/2-1)</b> 列聯表算\n<code>Cramér's V</code>（效應量）+ <code>Fisher</code>（顯著性）。<b>V 高＝甲基分群對齊一條獨立的 haplotag 軸＝確認此位點有 ≥2 個甲基群</b>。\nlabel 來自 longphase-S somatic haplotag（<u>非</u>甲基本身）→ 不是 double-dip 循環。</p>\n<table>\n<tr><th>層級</th><th>數量</th><th>%（/30490）</th><th>獨立重算</th><th>意義</th></tr>\n<tr><td>① 有切出群（可算 computable）</td><td>5461</td><td>17.9%</td><td>✓ 命中 locked 5461</td><td>只有 17.9% 切得出群（其餘無平衡分群）</td></tr>\n<tr><td>② 顯著 p&lt;0.05</td><td>4185</td><td>13.7%</td><td>✓ 命中 4185</td><td>cluster 與 haplotag 顯著關聯</td></tr>\n<tr><td>③ 顯著 + V≥0.5（較可信）</td><td>3706</td><td>12.2%</td><td>✓ 命中 3706</td><td>中-大效應</td></tr>\n<tr class=\"hi\"><td><b>④ 顯著 + V≥0.7（可確認 ≥2 群）</b></td><td><b>2941</b></td><td><b>9.6%</b></td><td><b>✓ 命中 2941</b></td><td><b>熱圖看到的「明顯 ≥2 群」← 本工作站逐案肉眼確認</b></td></tr>\n</table>\n<div class=\"note\">✅ <b>裁決：標準成立、可依此確認，但是 detector 非 validator</b>。④的 2,941 已由原始資料（significance_summary.csv + records_wg2.json contingency）逐字重算命中（見 ⓪b）。\n但「確認 ≥2 群」＝<b>確認 2 個甲基群對齊獨立軸</b>，<u>不等於</u>「確認 2 個 subclone」。</div>"}, {"id": "tri", "title": "② 三態決策（全 30490 位點，已重算）", "html": "\n<table>\n<tr><th>狀態</th><th>數量</th><th>%</th><th>重算</th><th>意義</th></tr>\n<tr><td>❌ 不能問（germline 或 carrier &lt;3 reads / LOH 990）</td><td>12038</td><td>39.5%</td><td>✓ ±1（locked 12039）</td><td>缺對照，不跑 subclone</td></tr>\n<tr><td>✅ 確認 1 群（germline=carrier，SubcloneDbeta 不顯著）</td><td>13856</td><td>45.4%</td><td>✓ ±1（locked 13855）</td><td>有信心的負結果</td></tr>\n<tr class=\"hi\"><td>🔬 多群候選（germline≠carrier）</td><td>4596</td><td>15.1%</td><td>✓ 命中 4596</td><td>下一步 normal-anchored cis-control</td></tr>\n</table>\n<div class=\"sub\">三態互斥，12038+13856+4596=30490=30490 ✓</div>"}, {"id": "caveat", "title": "③ 三個必守 caveat（含 1 個未重現項）", "html": "\n<table>\n<tr><th>#</th><th>caveat</th><th>狀態</th></tr>\n<tr><td>1</td><td>🔴 <b>「≥2 群」≠「≥2 subclone」</b>：對齊軸 85% 是 germline/carrier，那 2 群<b>可能是 cis-ASM</b> 不是 subclone → 需 normal-anchored cis-control 才分得開。真 within-carrier 子分群只 351（1.2%）。</td><td><span class=\"badge b-no\">必守</span></td></tr>\n<tr><td>2</td><td>⚠ <b>selection 偏誤</b>：2,941 是「切得出群的 5461」之內；82% 切不出不在分母。「9.6%」是 /30490；真正可問的子集裡比例更高。</td><td><span class=\"badge b-warn\">必守</span></td></tr>\n<tr><td>3</td><td>⚠ <b>gc/hp 對齊 85%/15%（2500/441）我未能獨立重現</b>：我的明顯規則（取最大 collapsed Cramér's V）得 1524/1417，非 2500/441；且與 .md「多為 HP1/HP2 germline ASM」有張力。<b>此子比例引用前需先釐清原始對齊規則。</b></td><td><span class=\"badge b-no\">未重現</span></td></tr>\n</table>\n<div class=\"sub\">⭐2 描述性 pilot · 單樣本 HCC1395 · 偵測非驗證。本工作站 24 案＝chr1 跨 V 光譜抽樣（chr1≈WG，KS D=0.126 p=0.52）。</div>"}, {"id": "howto", "title": "④ 怎麼用本工作站肉眼確認", "html": "\n<p>每張圖左兩條色帶 = <b>cluster</b>（橘/綠/黃…甲基無監督群）與 <b>haplotag</b>（HP1 淺藍 / HP1-1 深藍 / HP2 淺紫 / HP2-1 深紫）。主圖 = read×CpG 甲基（紅=甲基化/藍=未）。</p>\n<ul>\n<li><b>V 高（可確認）</b>：cluster 色塊邊界 <b>對齊</b> haplotag 色塊邊界，且兩塊甲基模式不同 → 真 ≥2 群。</li>\n<li><b>V 低（極弱）</b>：cluster 色塊 <b>橫跨</b> 多個 haplotag → 切出的群與獨立軸無關 → 不可確認。</li>\n</ul>\n<p>逐案記 <b>✓ 分群明確/存疑/✗ 看不出</b> + 原因（可匯出 JSON/CSV 當修正反饋）。判讀存 localStorage。</p>"}], "item_config": {"verdict_states": [{"key": "in", "label": "✓ 分群明確對齊"}, {"key": "doubt", "label": "存疑/邊際"}, {"key": "ex", "label": "✗ 看不出分群"}], "reason_options": [{"key": "", "label": "— 原因（可選）—"}, {"key": "standard_ok", "label": "標準合理"}, {"key": "wrong_bucket", "label": "應屬其他桶"}, {"key": "cis_not_subclone", "label": "像 cis-ASM 非 subclone"}, {"key": "small_n", "label": "小樣本假象"}, {"key": "other", "label": "其他"}], "required_metrics": ["V", "p", "sil", "k", "n"], "per_page": 24}, "items": [{"id": "clear_1_164206569", "title": "chr1:164,206,569", "subtitle": "可確認(clear)　cluster×haplotag V=1.00", "badges": [{"label": "可確認(clear)", "kind": "ok"}, {"label": "顯著", "kind": "ok", "title": "Fisher p=2.3e-16"}, {"label": "V=1.00", "kind": "info"}], "metrics": [{"k": "V", "v": 1.0, "src": "records_wg2.json contingency→chi2"}, {"k": "p", "v": "2.3e-16", "src": "chi2_contingency"}, {"k": "sil", "v": 0.457, "src": "UPGMA best-k silhouette"}, {"k": "k", "v": 2, "src": "best-silhouette k"}, {"k": "n", "v": 72, "src": "complete tumor reads"}], "meta_metrics": ["V", "sil", "k"], "figures": {"mode": "png", "imgs": [{"path": "obs_figs/clear_1_164206569_meth.png", "caption": "甲基 read×CpG"}, {"path": "obs_figs/clear_1_164206569_dist.png", "caption": "距離 read×read (對角塊=群)"}]}, "reading_guide": "看 cluster 色帶邊界是否對齊 haplotag 色帶邊界：對齊+甲基模式不同=真≥2群；橫跨=不可確認。洋紅線=SNV(在CpG之間)。"}, {"id": "mid_1_119446237", "title": "chr1:119,446,237", "subtitle": "較可信(mid)　cluster×haplotag V=0.70", "badges": [{"label": "較可信(mid)", "kind": "info"}, {"label": "顯著", "kind": "ok", "title": "Fisher p=5.4e-15"}, {"label": "V=0.70", "kind": "info"}], "metrics": [{"k": "V", "v": 0.699, "src": "records_wg2.json contingency→chi2"}, {"k": "p", "v": "5.4e-15", "src": "chi2_contingency"}, {"k": "sil", "v": 0.271, "src": "UPGMA best-k silhouette"}, {"k": "k", "v": 4, "src": "best-silhouette k"}, {"k": "n", "v": 81, "src": "complete tumor reads"}], "meta_metrics": ["V", "sil", "k"], "figures": {"mode": "png", "imgs": [{"path": "obs_figs/mid_1_119446237_meth.png", "caption": "甲基 read×CpG"}, {"path": "obs_figs/mid_1_119446237_dist.png", "caption": "距離 read×read (對角塊=群)"}]}, "reading_guide": "看 cluster 色帶邊界是否對齊 haplotag 色帶邊界：對齊+甲基模式不同=真≥2群；橫跨=不可確認。洋紅線=SNV(在CpG之間)。"}, {"id": "weak_1_228067665", "title": "chr1:228,067,665", "subtitle": "不可靠(weak)　cluster×haplotag V=0.62", "badges": [{"label": "不可靠(weak)", "kind": "warn"}, {"label": "ns", "kind": "mut", "title": "Fisher p=0.079"}, {"label": "V=0.62", "kind": "info"}], "metrics": [{"k": "V", "v": 0.625, "src": "records_wg2.json contingency→chi2"}, {"k": "p", "v": "0.079", "src": "chi2_contingency"}, {"k": "sil", "v": 0.492, "src": "UPGMA best-k silhouette"}, {"k": "k", "v": 2, "src": "best-silhouette k"}, {"k": "n", "v": 13, "src": "complete tumor reads"}], "meta_metrics": ["V", "sil", "k"], "figures": {"mode": "png", "imgs": [{"path": "obs_figs/weak_1_228067665_meth.png", "caption": "甲基 read×CpG"}, {"path": "obs_figs/weak_1_228067665_dist.png", "caption": "距離 read×read (對角塊=群)"}]}, "reading_guide": "看 cluster 色帶邊界是否對齊 haplotag 色帶邊界：對齊+甲基模式不同=真≥2群；橫跨=不可確認。洋紅線=SNV(在CpG之間)。"}, {"id": "vweak_1_69322613", "title": "chr1:69,322,613", "subtitle": "極弱(vweak)　cluster×haplotag V=0.30", "badges": [{"label": "極弱(vweak)", "kind": "mut"}, {"label": "ns", "kind": "mut", "title": "Fisher p=0.08"}, {"label": "V=0.30", "kind": "info"}], "metrics": [{"k": "V", "v": 0.3, "src": "records_wg2.json contingency→chi2"}, {"k": "p", "v": "0.08", "src": "chi2_contingency"}, {"k": "sil", "v": 0.348, "src": "UPGMA best-k silhouette"}, {"k": "k", "v": 2, "src": "best-silhouette k"}, {"k": "n", "v": 34, "src": "complete tumor reads"}], "meta_metrics": ["V", "sil", "k"], "figures": {"mode": "png", "imgs": [{"path": "obs_figs/vweak_1_69322613_meth.png", "caption": "甲基 read×CpG"}, {"path": "obs_figs/vweak_1_69322613_dist.png", "caption": "距離 read×read (對角塊=群)"}]}, "reading_guide": "看 cluster 色帶邊界是否對齊 haplotag 色帶邊界：對齊+甲基模式不同=真≥2群；橫跨=不可確認。洋紅線=SNV(在CpG之間)。"}], "provenance": {"sources": ["/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/output/_wg_bdcprime_verify/significance_summary.csv (源 CSV, 30490 列)", "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot/records_wg2.json (cluster×label contingency)", "obs_ws/verify_results.json (本輪獨立重算)", "obs_ws/cases.json (24 案 locked metrics + 圖)", "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260618_subcluster_pilot/spectrum_decision.json (locked 分群)", "InterSubMod/docs/methodology/20260618_within_label_subcluster_methodology_validation_01.md (方法學 SoT)"], "note": "核心 2,941 + 5,461/3,706/三態 已由原始資料獨立重算命中（verify_results.json）；gc/hp 85/15 未重現（caveat 3）。案例圖自 chr1 持久化 pilot 輸出，未 re-run binary。"}}</script>
+<script>
+const SPEC=JSON.parse(document.getElementById('wsspec').textContent);
+const $=id=>document.getElementById(id);
+const ITEMS=SPEC.items, IC=SPEC.item_config||{};
+const LSKEY=SPEC.meta.lskey||'verify_ws_v1';
+let J=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+function saveJ(){localStorage.setItem(LSKEY,JSON.stringify(J));}
+const VSTATES=IC.verdict_states||[{key:'in',label:'同意'},{key:'doubt',label:'存疑'},{key:'ex',label:'否定'}];
+const REASONS=IC.reason_options||[{key:'',label:'— 原因（可選）—'},{key:'criteria',label:'標準不好'},{key:'method',label:'方法問題'},{key:'visual',label:'沒看清楚'},{key:'other',label:'其他'}];
+function setJ(id,c){const cur=J[id]||{};cur.c=(cur.c===c?'un':c);cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();draw();prog();}
+function setR(id,r){const cur=J[id]||{c:'un'};cur.r=r;cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();}
+window.setJ=setJ;window.setR=setR;
+
+function prog(){const v=Object.values(J);const n={};for(const s of VSTATES)n[s.key]=v.filter(x=>x.c===s.key).length;
+ const un=ITEMS.length-Object.values(n).reduce((a,b)=>a+b,0);
+ const cells=VSTATES.map(s=>`<div class="sb"><div class="n">${n[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')+
+  `<div class="sb"><div class="n">${un}</div><div class="l">未判讀</div></div>`;
+ $('prog').innerHTML=cells;}
+
+function badge(b){const cls={ok:'b-ok',warn:'b-warn',no:'b-no',info:'b-info',mut:'b-mut',gold:'b-gold'}[b.kind||'mut']||'b-mut';
+ return `<span class="badge ${cls}"${b.title?` title="${b.title}"`:''}>${b.label}</span>`;}
+function srcBadge(src){return src?`<span class="b-src badge" title="provenance: ${src}">⌖</span>`:'';}
+function figHTML(it,big){
+ const f=it.figures;if(!f)return '<div class="nofig">無圖</div>';
+ if(f.mode==='svg')return `<div class="figsvg" onclick="openM('${it.id}')">${f.svg}</div>`;
+ if(f.mode==='png'){const imgs=f.imgs||[];if(!imgs.length)return '<div class="nofig">無圖</div>';
+  if(big)return `<div class="mfigs">`+imgs.map(g=>`<div><div class="sub" style="text-align:center">${g.caption||''}</div><img src="${g.path}"></div>`).join('')+`</div>`;
+  return `<div class="figs" onclick="openM('${it.id}')">`+imgs.map(g=>`<img loading="lazy" src="${g.path}">`).join('')+`</div>`;}
+ return '<div class="nofig">無圖</div>';}
+function metaLine(it){return (it.meta_metrics||[]).map(k=>{const m=(it.metrics||[]).find(x=>x.k===k);return m?`${m.k}=${m.v}`:'';}).filter(Boolean).join(' ｜ ');}
+function jbtn(id,c,lab){const on=((J[id]||{}).c===c)?(' on-'+c):'';return `<button class="jb${on}" onclick="event.stopPropagation();setJ('${id}','${c}')">${lab}</button>`;}
+function card(it){const j=J[it.id]||{};const cc=j.c==='in'?' j-in':j.c==='ex'?' j-ex':j.c==='doubt'?' j-doubt':'';
+ const badges=(it.badges||[]).map(badge).join('');
+ const kv=(it.metrics||[]).filter(m=>m.show!==false).map(m=>`<div class="kv"><span class="k">${m.k} ${srcBadge(m.src)}</span><span class="v">${m.v}</span></div>`).join('');
+ const reasons=REASONS.map(r=>`<option value="${r.key}"${(j.r||'')===r.key?' selected':''}>${r.label}</option>`).join('');
+ return `<div class="card${cc}" data-id="${it.id}">
+   <div class="hd" onclick="openM('${it.id}')"><div class="ttl">${it.title} ${badges}</div>${it.subtitle?`<div class="meta">${it.subtitle}</div>`:''}${metaLine(it)?`<div class="meta">${metaLine(it)}</div>`:''}</div>
+   ${figHTML(it,false)}
+   <div style="padding:4px 0">${kv}</div>
+   <div class="jrow">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}<button class="jb${(J[it.id]||{}).c==='un'?' on-mut':''}" onclick="event.stopPropagation();setJ('${it.id}','un')">清除</button></div>
+   <select class="rsel" onchange="event.stopPropagation();setR('${it.id}',this.value)">${reasons}</select>
+ </div>`;}
+
+let page=0;const PER=IC.per_page||24;
+function items(){let a=ITEMS.slice();const jf=$('jf')?$('jf').value:'all';
+ if(jf!=='all')a=a.filter(it=>{const c=(J[it.id]||{}).c||'un';return c===jf;});
+ return a;}
+function draw(){const a=items();const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
+ $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
+ $('gcount').textContent=a.length+' 個';
+ $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
+if($('jf'))$('jf').addEventListener('input',()=>{page=0;draw();});
+
+window.openM=id=>{const it=ITEMS.find(x=>x.id===id);if(!it)return;
+ const stats=(it.modal_stats||it.metrics||[]).map(m=>`<div class="st"><div class="l">${m.k} ${srcBadge(m.src)}</div><div class="n">${m.v}</div></div>`).join('');
+ $('mc').innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="border:none;margin:0">${it.title} ${(it.badges||[]).map(badge).join('')}</h2><button onclick="closeM()">關閉 ✕</button></div>
+  ${figHTML(it,true)}<div class="statg">${stats}</div>
+  <div class="jrow" style="margin-top:10px">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}</div>
+  ${it.reading_guide?`<div class="sub" style="margin-top:8px">${it.reading_guide}</div>`:''}`;
+ $('modal').style.display='block';};
+window.closeM=()=>$('modal').style.display='none';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+function rows4export(){return ITEMS.filter(it=>{const c=(J[it.id]||{}).c;return c&&c!=='un';}).map(it=>{const j=J[it.id];
+ return {id:it.id,title:it.title,verdict:j.c,reason:j.r||'',ts:j.t||''};});}
+window.exportJ=()=>{const o={spec:SPEC.meta.title,build:SPEC.meta.build_commit,generated:new Date().toISOString(),judgments:rows4export()};
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(o,null,1),'application/json');};
+window.exportCSV=()=>{const r=rows4export(),h=['id','title','verdict','reason','ts'];
+ const csv=[h.join(',')].concat(r.map(x=>h.map(k=>JSON.stringify(x[k]??'')).join(','))).join('\n');
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();}
+window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{try{const o=JSON.parse(rd.result),arr=o.judgments||o;let n=0;
+  for(const x of arr){if(x.id&&x.verdict){J[x.id]={c:x.verdict,r:x.reason||'',t:x.ts||''};n++;}}
+  saveJ();draw();prog();alert('匯入 '+n+' 筆');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
+window.clearJ=()=>{if(confirm('清空所有判讀？')){J={};saveJ();draw();prog();}};
+prog();draw();
+</script>
+</body></html>

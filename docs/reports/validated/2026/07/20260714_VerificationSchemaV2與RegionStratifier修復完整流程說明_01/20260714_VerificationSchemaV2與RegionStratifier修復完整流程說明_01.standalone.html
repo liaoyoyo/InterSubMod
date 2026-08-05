@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="InterSubMod Verification schema v2、RegionStratifier、consumer migration 與 frozen 14-file audit 的完整流程說明。">
+  <title>Verification schema v2 與 RegionStratifier 修復完整流程說明</title>
+  <style>
+    :root {
+      --ink: #14212b;
+      --muted: #52636f;
+      --paper: #f5f7f8;
+      --panel: #ffffff;
+      --line: #d7e0e5;
+      --navy: #153a52;
+      --blue: #176c8c;
+      --cyan: #dff3f7;
+      --green: #13795b;
+      --green-bg: #e4f5ee;
+      --amber: #8a5700;
+      --amber-bg: #fff3d5;
+      --red: #a23535;
+      --red-bg: #fbe8e6;
+      --code: #0c2635;
+      --shadow: 0 10px 28px rgba(19, 48, 65, .08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      line-height: 1.68;
+    }
+    a { color: var(--blue); text-underline-offset: 3px; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #68b8d1; outline-offset: 3px; }
+    .skip-link { position: absolute; left: -9999px; top: 0; }
+    .skip-link:focus { left: 1rem; top: 1rem; z-index: 99; background: white; padding: .7rem 1rem; }
+    .layout { display: grid; grid-template-columns: 275px minmax(0, 1fr); min-height: 100vh; }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 1.4rem 1.2rem;
+      color: #eef6f8;
+      background: var(--navy);
+      border-right: 1px solid #0c2b3e;
+    }
+    .brand { font-weight: 800; letter-spacing: .03em; margin-bottom: .25rem; }
+    .doc-id { font-size: .78rem; color: #bdd2dc; margin-bottom: 1.2rem; }
+    aside nav a {
+      display: block;
+      color: #e7f2f5;
+      text-decoration: none;
+      padding: .45rem .55rem;
+      border-left: 3px solid transparent;
+      font-size: .9rem;
+    }
+    aside nav a:hover { background: rgba(255,255,255,.08); border-left-color: #7dd1e8; }
+    .side-meta { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.18); font-size: .78rem; color: #c8dce4; }
+    main { width: min(1180px, 100%); padding: 2.2rem 3rem 4rem; }
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 7px solid var(--green);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .eyebrow { color: var(--blue); font-size: .82rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.12; margin: .45rem 0 1rem; letter-spacing: -.035em; }
+    h2 { margin: 3rem 0 1rem; padding-top: .3rem; font-size: 1.75rem; line-height: 1.25; color: var(--navy); }
+    h3 { margin: 1.7rem 0 .65rem; font-size: 1.2rem; color: var(--navy); }
+    p { margin: .65rem 0; }
+    .lede { max-width: 880px; font-size: 1.08rem; color: #344b59; }
+    .badges { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1.15rem 0; }
+    .badge { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .35rem .72rem; font-size: .82rem; font-weight: 800; }
+    .pass { color: #075e45; background: var(--green-bg); border: 1px solid #8ecdb7; }
+    .info { color: #12546d; background: var(--cyan); border: 1px solid #98d0dc; }
+    .warn { color: var(--amber); background: var(--amber-bg); border: 1px solid #e5c779; }
+    .stop { color: var(--red); background: var(--red-bg); border: 1px solid #e4a5a0; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; margin: 1.4rem 0 .4rem; }
+    .metric { background: #f8fbfc; border: 1px solid var(--line); border-radius: 11px; padding: 1rem; }
+    .metric strong { display: block; font-size: 1.55rem; line-height: 1.05; color: var(--navy); font-variant-numeric: tabular-nums; }
+    .metric span { display: block; margin-top: .35rem; color: var(--muted); font-size: .82rem; }
+    .callout { margin: 1.1rem 0; border-left: 5px solid var(--blue); background: var(--panel); padding: .9rem 1.1rem; border-radius: 0 10px 10px 0; }
+    .callout.warning { border-left-color: #bd7b09; background: #fffaf0; }
+    .callout.danger { border-left-color: var(--red); background: #fff7f6; }
+    .callout.success { border-left-color: var(--green); background: #f3fbf7; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.15rem; box-shadow: 0 5px 16px rgba(19,48,65,.05); }
+    .card h3 { margin-top: 0; }
+    .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; color: #f3f8fa; background: var(--navy); font-weight: 750; }
+    th, td { padding: .66rem .72rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr:nth-child(even) { background: #f7fafb; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: .88em; background: #edf2f4; padding: .08rem .28rem; border-radius: 4px; overflow-wrap: anywhere; }
+    pre { overflow: auto; padding: 1rem; color: #e7f3f6; background: var(--code); border-radius: 11px; font-size: .82rem; line-height: 1.5; }
+    pre code { color: inherit; background: none; padding: 0; }
+    details { margin: .9rem 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: .65rem .85rem; }
+    summary { cursor: pointer; font-weight: 800; color: var(--navy); }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: .32rem 0; }
+    .flow { margin: 1.1rem 0; padding: .8rem; background: white; border: 1px solid var(--line); border-radius: var(--radius); }
+    .flow svg { display: block; width: 100%; height: auto; }
+    .legend { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .7rem; font-size: .8rem; color: var(--muted); }
+    .dot { display: inline-block; width: .75rem; height: .75rem; border-radius: 2px; vertical-align: -.05rem; margin-right: .25rem; }
+    .footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+    .mono-break { font-family: "SFMono-Regular", Consolas, monospace; overflow-wrap: anywhere; font-size: .83rem; }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: minmax(0, 1fr); }
+      aside, main { width: 100%; min-width: 0; }
+      aside { position: relative; height: auto; }
+      aside nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      main { padding: 1.4rem; }
+      .hero, .card, .flow, .table-wrap, pre { min-width: 0; max-width: 100%; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      aside nav, .grid-2, .metrics { grid-template-columns: 1fr; }
+      main { padding: .8rem; }
+      .hero { padding: 1.2rem; }
+      th, td { padding: .55rem; }
+    }
+    @media print {
+      body { background: white; }
+      .layout { display: block; }
+      aside { display: none; }
+      main { width: 100%; padding: 0; }
+      .hero, .card, .flow { box-shadow: none; break-inside: avoid; }
+      details { break-inside: avoid; }
+      details > * { display: block; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到主要內容</a>
+  <div class="layout">
+    <aside aria-label="文件導覽">
+      <div class="brand">InterSubMod Engineering Audit</div>
+      <div class="doc-id">20260714 · schema repair · frozen validation</div>
+      <nav>
+        <a href="#verdict">0. 裁決與範圍</a>
+        <a href="#flow">1. 端到端流程</a>
+        <a href="#schema">2. 11-class schema</a>
+        <a href="#stratifier">3. RegionStratifier</a>
+        <a href="#publication">4. Fail-closed 發布</a>
+        <a href="#consumers">5. 74 consumers</a>
+        <a href="#migration">6. Frozen migration</a>
+        <a href="#validation">7. 驗證證據</a>
+        <a href="#compat">8. 相容與操作</a>
+        <a href="#limits">9. 限制與風險</a>
+        <a href="#sources">10. 路徑與交接</a>
+      </nav>
+      <div class="side-meta">
+        <div>Task type：E + B</div>
+        <div>Goals：G4 / G5</div>
+        <div>Scope：14 frozen files</div>
+        <div>不包含：BAM rerun / clone truth</div>
+      </div>
+    </aside>
+
+    <main id="content">
+      <header class="hero" id="verdict">
+        <div class="eyebrow">Validated engineering report · SCQA</div>
+        <h1>Verification schema v2 與 RegionStratifier 修復完整流程說明</h1>
+        <p class="lede">P0→P1→P2 已完成：把 Stage④ 的兩條 evidence path拆開、把固定規則 Phase D 正名為 region stratification、讓 74 個 downstream consumers明確選擇 schema，並以 14 檔 328,697 列的 frozen corpus逐 byte驗證。</p>
+        <div class="badges" aria-label="裁決標籤">
+          <span class="badge pass">✓ Engineering PASS</span>
+          <span class="badge pass">✓ 14 / 14 VALID</span>
+          <span class="badge info">Verification schema v2</span>
+          <span class="badge info">Region schema v1</span>
+          <span class="badge warn">非生物學 truth</span>
+        </div>
+        <div class="metrics" aria-label="主要驗證數字">
+          <div class="metric"><strong>328,697</strong><span>input = output rows</span></div>
+          <div class="metric"><strong>59,910</strong><span>Strong_Bidirectional</span></div>
+          <div class="metric"><strong>6,931</strong><span>ClusterFirstOnly</span></div>
+          <div class="metric"><strong>0</strong><span>unmapped / conflicts</span></div>
+        </div>
+        <div class="callout success"><strong>一句裁決：</strong>在權威 frozen corpus與 repo code/test 範圍內，schema mapping、serialization、provenance、consumer contract與 fail-closed publication符合規格；這不等於 caller accuracy、clone數或演化樹被驗證。</div>
+      </header>
+
+      <section aria-labelledby="scqa-title">
+        <h2 id="scqa-title">SCQA：問題到底修了什麼？</h2>
+        <div class="grid-2">
+          <article class="card"><h3>Situation</h3><p>per-region raw metrics與 legacy four-state provenance已存在，但 final <code>Strong</code>混合 label-first + cluster-first與 cluster-first-only兩條路徑。</p></article>
+          <article class="card"><h3>Complication</h3><p>current／legacy／truth／clone語意可能被 consumer混讀；舊 artifact與 destination race也可能讓失敗看似成功。</p></article>
+          <article class="card"><h3>Question</h3><p>能否不改 raw metrics與 binary <code>Significant</code>，拆清 evidence、統一 assignment，並保證 frozen rows逐列不漂移？</p></article>
+          <article class="card"><h3>Answer</h3><p>可以。C++、Python contract、74 consumers與 offline migration已完成；formal output與獨立 validator皆使用 fail-closed判斷。</p></article>
+        </div>
+      </section>
+
+      <section id="flow" aria-labelledby="flow-title">
+        <h2 id="flow-title">1. 端到端流程與控制邊界</h2>
+        <div class="flow">
+          <svg viewBox="0 0 1120 520" role="img" aria-labelledby="svg-title svg-desc" preserveAspectRatio="xMidYMid meet">
+            <title id="svg-title">Verification schema 與 RegionStratifier 端到端流程</title>
+            <desc id="svg-desc">從 legacy metrics 經 Verification schema v2、RegionStratifier、fail-closed publication，再分流到 downstream consumers與 frozen migration validator。</desc>
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#176c8c"></path>
+              </marker>
+            </defs>
+            <rect x="30" y="40" width="240" height="95" rx="12" fill="#eef5f7" stroke="#176c8c" stroke-width="2"></rect>
+            <text x="150" y="70" text-anchor="middle" font-weight="700" fill="#153a52">Legacy inputs</text>
+            <text x="150" y="95" text-anchor="middle" font-size="14" fill="#52636f">raw metrics + four-state class</text>
+            <text x="150" y="117" text-anchor="middle" font-size="14" fill="#52636f">existing Significant token</text>
+
+            <rect x="330" y="30" width="300" height="120" rx="12" fill="#dff3f7" stroke="#176c8c" stroke-width="2"></rect>
+            <text x="480" y="62" text-anchor="middle" font-weight="700" fill="#153a52">Verification schema v2</text>
+            <text x="480" y="87" text-anchor="middle" font-size="14" fill="#52636f">11 classes · evidence path</text>
+            <text x="480" y="109" text-anchor="middle" font-size="14" fill="#52636f">legacy view · LOH provenance</text>
+            <text x="480" y="131" text-anchor="middle" font-size="14" fill="#52636f">binary retention preserved</text>
+
+            <rect x="690" y="30" width="300" height="120" rx="12" fill="#e4f5ee" stroke="#13795b" stroke-width="2"></rect>
+            <text x="840" y="62" text-anchor="middle" font-weight="700" fill="#153a52">RegionStratifier v1</text>
+            <text x="840" y="87" text-anchor="middle" font-size="14" fill="#52636f">shared eligibility · 4 slots</text>
+            <text x="840" y="109" text-anchor="middle" font-size="14" fill="#52636f">validate all → commit by index</text>
+            <text x="840" y="131" text-anchor="middle" font-size="14" fill="#52636f">status + current/legacy counters</text>
+
+            <path d="M270 88 H325" stroke="#176c8c" stroke-width="3" marker-end="url(#arrow)"></path>
+            <path d="M630 88 H685" stroke="#176c8c" stroke-width="3" marker-end="url(#arrow)"></path>
+
+            <rect x="330" y="215" width="660" height="105" rx="12" fill="#fff3d5" stroke="#bd7b09" stroke-width="2"></rect>
+            <text x="660" y="245" text-anchor="middle" font-weight="700" fill="#6f4900">Fail-closed publication boundary</text>
+            <text x="660" y="272" text-anchor="middle" font-size="14" fill="#52636f">FAILED/RUN_IN_PROGRESS first → atomic artifacts + CSV → terminal status last</text>
+            <text x="660" y="296" text-anchor="middle" font-size="14" fill="#52636f">任何 mismatch：零部分 write-back、覆寫 stale owned artifacts、清除 owned temp</text>
+            <path d="M840 150 V210" stroke="#176c8c" stroke-width="3" marker-end="url(#arrow)"></path>
+
+            <rect x="120" y="390" width="360" height="95" rx="12" fill="#eef5f7" stroke="#176c8c" stroke-width="2"></rect>
+            <text x="300" y="420" text-anchor="middle" font-weight="700" fill="#153a52">Shared contract + 74 consumers</text>
+            <text x="300" y="447" text-anchor="middle" font-size="14" fill="#52636f">C2 / L4 / E / R1 / P / LOH-L / H1</text>
+            <text x="300" y="469" text-anchor="middle" font-size="14" fill="#52636f">74 migrated · 0 unresolved</text>
+
+            <rect x="640" y="390" width="360" height="95" rx="12" fill="#e4f5ee" stroke="#13795b" stroke-width="2"></rect>
+            <text x="820" y="420" text-anchor="middle" font-weight="700" fill="#153a52">Frozen migration + validator</text>
+            <text x="820" y="447" text-anchor="middle" font-size="14" fill="#52636f">byte preserving · staging · no-replace</text>
+            <text x="820" y="469" text-anchor="middle" font-size="14" fill="#52636f">14 files · 328,697 rows · 3 invariants</text>
+
+            <path d="M560 320 C520 350 400 360 330 385" fill="none" stroke="#176c8c" stroke-width="3" marker-end="url(#arrow)"></path>
+            <path d="M760 320 C770 350 800 360 815 385" fill="none" stroke="#176c8c" stroke-width="3" marker-end="url(#arrow)"></path>
+          </svg>
+          <div class="legend">
+            <span><i class="dot" style="background:#dff3f7"></i>schema / contract</span>
+            <span><i class="dot" style="background:#e4f5ee"></i>validated transform</span>
+            <span><i class="dot" style="background:#fff3d5"></i>publication gate</span>
+          </div>
+        </div>
+        <div class="callout"><strong>操作規則：</strong>先驗 terminal status與 provenance，再讀 data artifact。檔案存在不代表 generation有效。</div>
+      </section>
+
+      <section id="schema" aria-labelledby="schema-title">
+        <h2 id="schema-title">2. Verification schema v2：11-class first-match-wins</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>序</th><th>最小條件</th><th>VerificationClass</th><th>EvidencePath</th><th>Significant</th></tr></thead>
+            <tbody>
+              <tr><td>1a</td><td>cluster match + legacy Strong</td><td><code>Strong_Bidirectional</code></td><td><code>BIDIRECTIONAL</code></td><td>true</td></tr>
+              <tr><td>1b</td><td>cluster match + legacy Subclone</td><td><code>ClusterFirstOnly</code></td><td><code>CLUSTER_FIRST_ONLY</code></td><td>true</td></tr>
+              <tr><td>2</td><td>LOH + (HP-AUC structure 或 Δβ)</td><td><code>LOH-Structure</code></td><td><code>LOH_STRUCTURE</code></td><td>true</td></tr>
+              <tr><td>3</td><td>within-HP clean multigroup</td><td><code>MultiGroupNoLabel</code></td><td><code>WITHIN_HP_MULTIGROUP</code></td><td>true</td></tr>
+              <tr><td>4</td><td>Δβ label shift</td><td><code>LabelShift</code></td><td><code>LABEL_SHIFT</code></td><td>true</td></tr>
+              <tr><td>5</td><td>clean location PERMANOVA</td><td><code>PermanovaLocation</code></td><td><code>PERMANOVA_LOCATION</code></td><td>true</td></tr>
+              <tr><td>6</td><td>HP-AUC structure</td><td><code>StructureNoLabel</code></td><td><code>HP_AUC_STRUCTURE_NO_LABEL</code></td><td>true</td></tr>
+              <tr><td>7</td><td>no clean branch + dispersion</td><td><code>DispersionStructure</code></td><td><code>DISPERSION_STRUCTURE</code></td><td>false</td></tr>
+              <tr><td>8</td><td>uniform noise threshold</td><td><code>Noise_Uniform</code></td><td><code>NOISE_UNIFORM</code></td><td>false</td></tr>
+              <tr><td>9</td><td>chaotic noise threshold</td><td><code>Noise_Chaotic</code></td><td><code>NOISE_CHAOTIC</code></td><td>false</td></tr>
+              <tr><td>10</td><td>otherwise</td><td><code>Noise_Uncorrelated</code></td><td><code>NOISE_UNCORRELATED</code></td><td>false</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-2" style="margin-top:1rem">
+          <div class="card"><h3>Live evidence</h3><p><code>LabelFirstSupport</code>、<code>ClusterFirstSupport</code>、<code>WithinHPSupport</code>、<code>DispersionWarning</code>都是 typed boolean；<code>EvidenceDerivation=LIVE</code>。</p></div>
+          <div class="card"><h3>Offline evidence</h3><p>前兩欄可由 legacy推得；後兩欄固定 <code>NA</code>，不可由 class猜；<code>EvidenceDerivation=LEGACY_CLASS</code>。</p></div>
+        </div>
+        <div class="callout danger"><strong>禁止線：</strong><code>VerificationClass</code>不是 truth；<code>ClusterFirstOnly</code>不是 cellular subclone。任何 consumer都不得用裸 class名稱補出 truth或 clone。</div>
+        <details>
+          <summary>LOH provenance 的最小判斷</summary>
+          <ol>
+            <li><code>potential_loh=false</code> 固定為 <code>None</code>。</li>
+            <li><code>potential_loh=true</code> 只依 legacy四態映射 <code>LOH_Noise/Weak/Strong/Subclone</code>。</li>
+            <li>canonical欄是 <code>LOH_Subtype_LegacyVC</code>；舊 <code>LOH_Subtype</code>只能是逐列 exact alias。</li>
+            <li>unknown/missing不得歸 <code>None</code>，也不建立語意不明的 current subtype。</li>
+          </ol>
+        </details>
+      </section>
+
+      <section id="stratifier" aria-labelledby="stratifier-title">
+        <h2 id="stratifier-title">3. RegionStratifier：它是固定分類，不是 clone inference</h2>
+        <p>唯一 eligibility predicate：<code>success &amp;&amp; num_reads &gt;= 10 &amp;&amp; num_cpgs &gt;= 3 &amp;&amp; significance_computed</code>。Analyzer、validator與 write-back共用它。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Label</th><th>Reason</th><th>Ordered predicate</th></tr></thead>
+            <tbody>
+              <tr><td>2</td><td><code>LohFlagged</code></td><td><code>LOH_FLAGGED</code></td><td>potential LOH 或 LOH BED overlap</td></tr>
+              <tr><td>3</td><td><code>HighSampleAsm</code></td><td><code>HIGH_SAMPLE_ASM</code></td><td>非 LOH 且 |sample ASM Δ| &gt; 0.10</td></tr>
+              <tr><td>1</td><td><code>HighHpAsm</code></td><td><code>HIGH_HP_ASM</code></td><td>前兩者否且 |HP merged Δ| &gt; 0.05</td></tr>
+              <tr><td>0</td><td><code>BaselineLowAsm</code></td><td><code>BASELINE_LOW_ASM</code></td><td>其他 eligible region</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="metrics">
+          <div class="metric"><strong>0</strong><span>eligible → insufficient</span></div>
+          <div class="metric"><strong>49</strong><span>eligible → insufficient</span></div>
+          <div class="metric"><strong>50</strong><span>eligible → assign all 50</span></div>
+          <div class="metric"><strong>4</strong><span>fixed storage slots</span></div>
+        </div>
+        <div class="grid-2">
+          <article class="card"><h3>Sparse ID 修復</h3><p>Storage永遠四槽；occupied另算 distinct IDs。只有 ID {3} 時 occupied=1；{0,3} 時=2，不再使用 <code>max_id+1</code>。</p></article>
+          <article class="card"><h3>完整驗證後才 mutation</h3><p>先驗 count、index range/unique、eligible、region_id與enum，再確認無漏列；全部通過才按 <code>result_index</code>寫回。</p></article>
+        </div>
+        <details>
+          <summary>未 assignment sentinel</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>情境</th><th>ID</th><th>Label</th><th>Reason</th></tr></thead>
+              <tbody>
+                <tr><td>valid phase，單列不 eligible</td><td>-1</td><td>Unassigned</td><td>INELIGIBLE_REGION</td></tr>
+                <tr><td>paired但不足</td><td>-1</td><td>Unassigned</td><td>INSUFFICIENT_REGIONS</td></tr>
+                <tr><td>tumor-only</td><td>-1</td><td>Unassigned</td><td>NOT_APPLICABLE_TUMOR_ONLY</td></tr>
+                <tr><td>phase failed</td><td>-1</td><td>Unassigned</td><td>FAILED</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+
+      <section id="publication" aria-labelledby="publication-title">
+        <h2 id="publication-title">4. Fail-closed publication 與 stale artifact</h2>
+        <div class="grid-2">
+          <article class="card"><h3>Commit marker</h3><ol><li>先原子寫 <code>FAILED/RUN_IN_PROGRESS</code>。</li><li>寫三個 owned artifacts。</li><li>寫 significance CSV/statistics。</li><li>最後才寫 terminal status。</li></ol></article>
+          <article class="card"><h3>失敗路徑</h3><ol><li>任何矛盾零部分 write-back。</li><li>三個 owned artifacts覆寫成 empty/FAILED內容。</li><li>status assignment/occupied固定0。</li><li>丟出 machine-readable error。</li></ol></article>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem">
+          <table>
+            <thead><tr><th>Artifact</th><th>VALID</th><th>非 VALID</th></tr></thead>
+            <tbody>
+              <tr><td><code>region_stratification.tsv</code></td><td>header + assignments</td><td>canonical header only</td></tr>
+              <tr><td><code>region_stratification_summary.txt</code></td><td>occupied sections</td><td>status/reason，無 sections</td></tr>
+              <tr><td><code>subclone_structure.txt</code></td><td colspan="2">固定 deprecation stub；不含 biological clone wording</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout success"><strong>Root-review hardening：</strong><code>TempFileGuard</code>只在 rename成功後解除；writer/flush/close/rename失敗會呼叫<code>std::remove()</code>清本輪 owned temp。新增 rename-collision test後 C++為251/251；destructor不回報remove自身失敗，外部權限／namespace競爭另列為hostile-race限制。</div>
+        <div class="callout warning"><strong>讀者責任：</strong>三檔不是跨檔 filesystem transaction；一致性依賴 status-first protocol。若 consumer跳過 status，就主動放棄 fail-closed保證。</div>
+      </section>
+
+      <section id="consumers" aria-labelledby="consumer-title">
+        <h2 id="consumer-title">5. 74 個 downstream consumers：逐檔遷移完成</h2>
+        <div class="metrics">
+          <div class="metric"><strong>62</strong><span>Verification paths</span></div>
+          <div class="metric"><strong>23</strong><span>LOH paths</span></div>
+          <div class="metric"><strong>74</strong><span>unique consumers</span></div>
+          <div class="metric"><strong>0</strong><span>unresolved</span></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>契約</th><th>讀取語意</th><th>Fail-closed 規則</th></tr></thead>
+            <tbody>
+              <tr><td>C2</td><td>schema v2 current 11-class</td><td>missing/mixed version與unknown不可默認</td></tr>
+              <tr><td>L4</td><td>legacy four-state</td><td>缺欄失敗，不從current猜</td></tr>
+              <tr><td>E</td><td>typed evidence booleans/path</td><td>missing不等於false；不靠string truthiness</td></tr>
+              <tr><td>R1</td><td>region status + assignments</td><td>status/count/sentinel/alias任一矛盾即拒絕</td></tr>
+              <tr><td>P</td><td>完整 provenance pass-through</td><td>version/current/legacy/evidence不得drop或混版</td></tr>
+              <tr><td>LOH-L</td><td>legacy-derived LOH canonical + alias</td><td>missing/unknown不得當None</td></tr>
+              <tr><td>H1</td><td>unversioned historical replication</td><td>只可 explicit CLI opt-in；production default禁用</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details>
+          <summary>四支規格點名 consumer</summary>
+          <ul>
+            <li><code>tools/compare_vcf_results.py</code>：顯示11 classes + unknown；legacy另選。</li>
+            <li><code>tools/find_verification_candidates.py</code>：historical report明確讀legacy，缺欄fail。</li>
+            <li><code>analyze_methyl_cluster_allele_cooccurrence.py</code>：H1只能explicit flag，輸出selection metadata。</li>
+            <li><code>compare_subclone_validation.py</code>：support讀legacy/evidence，輸出不再稱cellular clone。</li>
+          </ul>
+        </details>
+      </section>
+
+      <section id="migration" aria-labelledby="migration-title">
+        <h2 id="migration-title">6. Frozen migration：byte-preserving、staging、no-replace</h2>
+        <ol>
+          <li>Preflight 14個 input SHA-256與row count；任何不符立即停止。</li>
+          <li>以bytes解析CSV grammar，保留每個原token、quote、NA、newline與row order。</li>
+          <li>只授權替換既有 <code>VerificationClass</code>；原token exact複製到v1 deprecated欄。</li>
+          <li>逐 stable key核對唯一與順序；<code>Significant</code>比較raw token。</li>
+          <li>每檔temp fsync、讀回audit後才進staging canonical filename。</li>
+          <li>全檔與reports完成才用Linux <code>renameat2(RENAME_NOREPLACE)</code>發布整個目錄。</li>
+        </ol>
+        <div class="callout"><strong>沒有 lossy fallback：</strong>destination race的EEXIST/ENOTEMPTY拒絕；kernel/filesystem不支援no-replace也拒絕。dangling destination symlink視為已存在。</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Frozen check</th><th>Expected</th><th>Actual</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td>Files</td><td>14</td><td>14 valid / 0 failed</td><td>PASS</td></tr>
+              <tr><td>Rows</td><td>328,697</td><td>328,697 → 328,697</td><td>PASS</td></tr>
+              <tr><td>Input Strong</td><td>66,841</td><td>66,841</td><td>PASS</td></tr>
+              <tr><td>Strong_Bidirectional</td><td>59,910</td><td>59,910</td><td>PASS</td></tr>
+              <tr><td>ClusterFirstOnly</td><td>6,931</td><td>6,931</td><td>PASS</td></tr>
+              <tr><td>Unmapped</td><td>0</td><td>0</td><td>PASS</td></tr>
+              <tr><td>HCC1395</td><td>Strong 9,228 / CFO 1,516</td><td>9,228 / 1,516</td><td>PASS</td></tr>
+              <tr><td>Three invariants</td><td>PASS/PASS/PASS</td><td>PASS/PASS/PASS</td><td>PASS</td></tr>
+              <tr><td>Staging leftovers</td><td>0</td><td>0</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details>
+          <summary>Formal migration command與實際輸出</summary>
+          <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 scripts/migration/migrate_verification_schema_v2.py \
+  --manifest /big7_disk/liaoyoyo2001/external_validation/subclone_reconstruction_method_comparison_20260714/FROZEN_CORPUS_MANIFEST.tsv \
+  --input-root /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/results \
+  --output-dir output/schema_migrations/20260714_verification_v2 \
+  --require-output-dir-absent
+
+migration status=VALID valid_files=14 failed_files=0 input_rows=328697 output_rows=328697 output=output/schema_migrations/20260714_verification_v2
+exit code: 0</code></pre>
+        </details>
+      </section>
+
+      <section id="validation" aria-labelledby="validation-title">
+        <h2 id="validation-title">7. 驗證證據：baseline、post、獨立重驗</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Check</th><th>Baseline</th><th>Post-change</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td>CMake build</td><td>exit 0</td><td>exit 0</td><td>PASS</td></tr>
+              <tr><td>GoogleTest</td><td>234/234</td><td>251/251</td><td>PASS</td></tr>
+              <tr><td>CTest</td><td>234/234</td><td>251/251</td><td>PASS</td></tr>
+              <tr><td>Python contract/migration</td><td>n/a</td><td>107/107</td><td>PASS</td></tr>
+              <tr><td>Migration hardening</td><td>n/a</td><td>24/24</td><td>PASS</td></tr>
+              <tr><td>Independent validator unit</td><td>n/a</td><td>7/7</td><td>PASS</td></tr>
+              <tr><td>Formal independent byte audit</td><td>n/a</td><td id="validator-result">VALID · 14 files · 328,697 rows</td><td>PASS (exit 0)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout success"><strong>第一輪 read-back：</strong>14/14 output hashes與rows重算符合output manifest；total 328,697；14/14 file reports VALID；HCC 9,228/1,516。</div>
+        <p>第二支 validator不import migrator、只用 read-only file descriptors + mmap，重新驗 7份 provenance reports、14個input/output、stable-key set/order、Significant raw token、所有既有 raw token與9個append-only欄位。正式結果：<code>VALID files=14 rows=328697 input_strong=66841 strong_bidirectional=59910 cluster_first_only=6931 unmapped=0</code>，exit 0；任何一處不符則exit 2。</p>
+        <details>
+          <summary>完整 C++ / independent validator commands</summary>
+          <pre><code>cmake --build build -j2
+./build/bin/run_tests
+ctest --test-dir build --output-on-failure
+
+python3 scripts/validation/validate_verification_schema_v2_migration.py \
+  --manifest /big7_disk/liaoyoyo2001/external_validation/subclone_reconstruction_method_comparison_20260714/FROZEN_CORPUS_MANIFEST.tsv \
+  --input-root /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/results \
+  --output-dir output/schema_migrations/20260714_verification_v2</code></pre>
+        </details>
+      </section>
+
+      <section id="compat" aria-labelledby="compat-title">
+        <h2 id="compat-title">8. 相容性與 production 讀取說明</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Deprecated surface</th><th>Canonical source</th><th>Exactness</th></tr></thead>
+            <tbody>
+              <tr><td>VerificationClass_V1_Deprecated</td><td>v1 view</td><td>split leaf回Strong；其他同v2</td></tr>
+              <tr><td>LOH_Subtype</td><td>LOH_Subtype_LegacyVC</td><td>逐列exact equality</td></tr>
+              <tr><td>Subclone_ID</td><td>RegionStratum_ID</td><td>逐列exact equality</td></tr>
+              <tr><td>n_subclones</td><td>n_occupied_region_strata</td><td>corrected exact mirror</td></tr>
+              <tr><td>subclone_structure.txt</td><td>region_stratification_summary.txt</td><td>只保留deprecation stub</td></tr>
+              <tr><td>SubcloneAnalyzer C++ name</td><td>RegionStratifier semantics</td><td>source compatibility only</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Production 最小讀取步驟</h3>
+        <ol>
+          <li>先驗schema/status/provenance；production禁用unversioned fallback。</li>
+          <li>current taxonomy讀C2；historical four-state明確讀L4。</li>
+          <li>support path讀E，不由class字串反推boolean。</li>
+          <li>Region artifact先接受R1 terminal VALID；非VALID不讀assignment。</li>
+          <li>LOH讀canonical LegacyVC；alias存在就逐列驗equal。</li>
+          <li>Pass-through保留P的完整欄位；不完整或mixed provenance拒絕。</li>
+          <li>truth/clone/CCF/tree必須有各自明示來源。</li>
+        </ol>
+      </section>
+
+      <section id="limits" aria-labelledby="limits-title">
+        <h2 id="limits-title">9. 限制、風險與不能說的話</h2>
+        <div class="grid-2">
+          <article class="card"><h3>工程限制</h3><ul><li>跨檔一致性依賴status protocol。</li><li>P2 cleanup不是dirfd-based hostile same-UID防護。</li><li>C++ TempFileGuard的remove是destructor best-effort，不回報remove自身失敗。</li><li>repo外precompiled ABI consumer未知。</li><li>aliases尚無machine-readable removal version。</li></ul></article>
+          <article class="card"><h3>科學 claim ceiling</h3><ul><li>沒有BAM/read-matrix/statistics rerun。</li><li>沒有F1/AUC caller benchmark。</li><li>不證明upstream v1 biology。</li><li>不證明class/stratum是clone或tree。</li></ul></article>
+        </div>
+        <div class="callout danger"><strong>關鍵區分：</strong>本次 formal「全量」是 manifest中14個完整 frozen outputs，不是新的BAM pipeline run。權威規格明定此階段不需重跑BAM、distance、clustering或statistics。</div>
+      </section>
+
+      <section id="sources" aria-labelledby="sources-title">
+        <h2 id="sources-title">10. 路徑、hash與快速交接</h2>
+        <h3>Formal output</h3>
+        <p class="mono-break">/big7_disk/liaoyoyo2001/big7_disk_output/schema_migrations/20260714_verification_v2</p>
+        <h3>關鍵 SHA-256</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artifact</th><th>SHA-256</th></tr></thead>
+            <tbody>
+              <tr><td>Frozen manifest</td><td class="mono-break">9ab4428e28d137b3c15e811563678d006e6258ff6d3f86e718cc4f56ead2e0ea</td></tr>
+              <tr><td>Formal migrator</td><td class="mono-break">589c52605e96d07af6bbfa6810dfdea1ca04c3875052c21e2a7c90100524d3cd</td></tr>
+              <tr><td>migration_summary.json</td><td class="mono-break">454a259ec770cf1d8df7bc4f0194f9461e160efc2c88130e03e80a5c7d65532f</td></tr>
+              <tr><td>migration_file_report.tsv</td><td class="mono-break">c3ca00d8bd54af9e13856d625edf32040a0e07949dc6a10e2d0be19b924a3370</td></tr>
+              <tr><td>migrated_outputs_manifest.tsv</td><td class="mono-break">62433a28492b82783ed1c936a3aad9aeb1b30dbdd4a809ab2a1f3826d1d63c04</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details>
+          <summary>Source maps與 implementation record</summary>
+          <ul>
+            <li><code>InterSubMod/research/20260714_verification_region_stratifier_schema_repair/implementation-notes.md</code></li>
+            <li><code>InterSubMod/research/20260714_verification_region_stratifier_schema_repair/20260714_CPP分類與RegionStratifier流程來源對照_01.md</code></li>
+            <li><code>InterSubMod/research/20260714_verification_region_stratifier_schema_repair/20260714_PythonConsumer契約與遷移對照_01.md</code></li>
+            <li><code>InterSubMod/research/20260714_verification_region_stratifier_schema_repair/consumer_inventory.md</code></li>
+            <li><code>InterSubMod/research/20260714_verification_region_stratifier_schema_repair/consumer_migration_status.tsv</code></li>
+          </ul>
+        </details>
+        <h3>Browser QA</h3>
+        <p>Chromium 147實測 desktop 1440×1000與mobile 390×844：兩者皆無body overflow，11/11錨點、9/9 table wrappers、0 console/page errors、0 external requests、0 placeholders；desktop/mobile目視檢查PASS。完整receipt：<code>qa/browser_qa_receipt.json</code>。</p>
+        <div class="callout success"><strong>三步交接：</strong>先看migration status/summary；再跑independent validator；最後依C2/L4/E/R1/P/LOH-L/H1檢查任何新consumer。</div>
+      </section>
+
+      <footer class="footer">
+        <p><strong>Scope：</strong>Comprehensive engineering validation · frozen 14-file full scope · 非 BAM rerun · 非 biological truth · 非 clone reconstruction validation。</p>
+        <p><strong>Evidence：</strong>L1 code/test/hash為主；L2僅用於明示前提的工程推論；repo外ABI存在性為L5 open question。</p>
+        <p><strong>Status：</strong><span id="report-status">VALIDATED</span> · 產製日期 2026-07-15 · Asia/Taipei。</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

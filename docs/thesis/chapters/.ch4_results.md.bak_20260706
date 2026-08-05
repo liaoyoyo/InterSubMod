@@ -1,0 +1,66 @@
+<!--
+建立時間: 2026-06-15（v3 對齊 06-14 Intro 定稿：de-confound 脈絡 4.1-4.4 → 旗艦 BRCA2 4.5(C1+C2) → 旗艦 chr2 4.6(C3 grep-verified) → phasing+跨樣本 4.7；取代 v2 R5 佔位版）
+報告類型: 碩論正文草稿 — 第四章 結果
+狀態: draft v3；待 review
+data_sources:
+  - docs/paper_focus/00_共識證據台帳_20260612_01.md (§1 catalog/filter/copy/cross-sample/cis grep-confirmed)
+  - docs/paper_focus/02_paper_framework/20260614_Intro主軸定稿_thesis_statement_01.md (旗艦 BRCA2/chr2 數字)
+  - research/flagship_chr2_18086020_20260612/ism_out/anchor_18086020/chr2/chr2_18086020/chr2_18071020_18101020/{metadata.txt,clustering/significance.json,reads/reads.tsv} (chr2 PRIMARY ISM 輸出，2026-06-15 本 session 逐項 grep-verified)
+  - research/paired_priority_bug_audit/phaseC_genome_three_way_with_significance/V6_on_fp/filtered_snv_fp/chr2/chr2_18096269/chr2_18091269_18101269/clustering/significance.json (18096269 對照位點 PRIMARY，2026-06-15 grep-verified)
+provenance_note: 4.1-4.4/4.7 引共識台帳 §1（🟢）；4.6 chr2 兩位點 2026-06-15 本 session 皆從 PRIMARY ISM 輸出獨立驗證 — 18086020(57×203/32+25−、HP1 19 全REF、HP1-1 36=28ALT/8REF、F=10.6120/V=0.6689 p=0.027/k=2、allele V=0.2699 p=0.097 NS)、18096269(32 reads、global_alt V=0.9671 p≈0、global_hp V=0、k=5、cluster F=39.9956)，全吻合；4.5 BRCA2 Δβ=−0.122/d_within=−0.023 p=0.024 引 06-14 定稿（待 V-4 primary 重驗）。已套用 4 校正。誠實護欄：case-demo、時序=假說、hypo≠silencing、association 非 causality、⭐3。
+-->
+
+# 第四章　結果
+
+本章先建立 de-confounded 之全基因組脈絡（4.1–4.4），再以兩旗艦案例示範主軸（4.5–4.6），最後説明所依附之相位骨幹與跨樣本復現（4.7）。脈絡段顯示：體細胞 ASM 雖存在且略偏 somatic（4.1），但甲基化無法做變異真偽過濾器（4.2），且 read 層級可靠之甲基分群壓倒性跟隨 germline 而非 somatic、乾淨之 somatic cis 於可測位點中少見（4.3），此分群強度非源於拷貝數、且可藉 matched-normal 錨點分解 cis 與 copy（4.4）。**正因乾淨之 somatic 訊號如此罕見，能找到甲基與體細胞訊號真正交會之位點便格外有意義**——4.5（BRCA2）示範 ISM 如何偵測並**分解**此類差異，4.6（chr2:18M）示範甲基如何與多點突變**共同標示**同一子克隆事件。
+
+本章紅線：機制建於單樣本 HCC1395 與單一定相流程（⭐3，TP/FP 取自 tumor-only caller）；旗艦案例為**案例示範（case-demonstration）**而非已驗證之自動化重建，不輸出譜系樹，時序為數據支撐之假說；甲基與突變之關係表述為**關聯／共定位**而非因果。各數值真值來源標於各節（共識台帳 §1 grep-confirmed；旗艦數字引 06-14 定稿與 flagship 補跑）。
+
+---
+
+## 4.1 體細胞 ASM 存在且略偏 somatic，但靈敏度低
+
+TP 位點之顯著 ASM 比例（3.95%）高於 FP（1.07%），子單倍型配對後仍維持（3.77% 對 1.09%，約 3.5 倍），惟絕對靈敏度約 4%（多數 TP 無可偵測 ASM）【🟢 ledger:85】（見 fig2）。
+
+## 4.2 甲基化無法做為體細胞變異真偽之過濾器（四道）
+
+四道獨立證據一致為陰性【🟢，見 fig4】：(一) LOSO 自 +0.02236 塌至 −0.00012、五樣本平均 −0.00004（Wilcoxon p=0.125）；(二) |Δβ| 區分 TP/FP 之 AUC=0.505（落虛無）；(三) 整體靈敏度約 4%，COLO829 TP≈FP（0.0089≈0.0103）；(四) 分層後 FP 反而富集（OR 8.63／4.09／5.84，regression-to-extreme 假象）。此一決策相關之負結果界定甲基化之邊界。
+
+## 4.3 ⭐ 規則：甲基分群跟隨 germline 而非 somatic，乾淨 somatic cis 少見
+
+跨六樣本 332,705 位點之七類標籤目錄中，可靠之甲基 read 分群（TAG-C）12,868（3.87%）經 cis-test 顯示壓倒性為 germline-allelic 背景；latent（TAG-E）28,254 富集與背景相當；無訊號（TAG-G）291,518（87.6%）。乾淨之 somatic cis 於 HCC1395 之 816 可測 HP-axis 位點中僅 1（chr17/TBC1D16，約 0.12%）【🟢 catalog 6/6 驗，見 fig3 主圖】。此「稀少」與既有文獻「somatic 局部 cis 甲基稀少／數值貢獻不大」一致{{cite:Do2020 de-novo ASM / Zhang2019 待 citation-verification}}。
+
+> ⚠ **範圍與口徑**：「少見」之分母為 816 可測位點，**非** 332,705（後者未全 cis-tested，不可將未測當已驗陰性，見驗證 handoff V-1）；可靠分群計數依口徑（TAG-C 12,868／reliable TP+FP 11,689／all 12,876）須標明。
+
+## 4.4 拷貝數非分群來源；以 matched-normal 錨點分解 cis 與 copy
+
+拷貝數整數與 |Δβ| 無顯著關聯（signed ρ=−0.0829），gain 與 neutral 之分群強度無顯著差異（Mann-Whitney p=0.6183），否證 copy-dosage 驅動【🟢，見 fig6】。ISM 以 matched-normal 為錨點計算殘差（raw − normal mean）並以三角量 d_cis／d_drift／d_within 分解差異之來源（此為第三章所述之 normal-anchored cis-test，C2）。此分解使後續旗艦案例得以判別「與突變共定位之甲基差」究屬真 focal cis 抑或 copy／subclone 背景。
+
+## 4.5 ⭐ 旗艦一：BRCA2 promoter — ISM 偵測並分解甲基-變異共定位（C1+C2）
+
+**為何檢視**：BRCA2 為已知癌症基因；於 HCC1395（乳腺）之 BRCA2 promoter，可同時觀察到 read 層級之 haplotype 間甲基差與 tumor-normal 差，且共定位於一 somatic 變異——是檢驗「ISM 能否不只偵測、更分解此類差異」之理想旗艦。
+
+於 BRCA2 promoter，HP-axis（HP1 germline-tag vs HP1-1 somatic-subclone-tag）之甲基率差 Δβ=−0.122，且相對 matched-normal 基線有差（normal-baseline residual 非零），共定位於 BRCA2（TSG）promoter【實際數據，⭐3】。以 normal-anchored 分解（C2）進一步判別其來源：此甲基差**主要 track somatic subclone tag（HP1-1）**，而**直接 focal cis 效應 marginal**（d_within=−0.023，perm p=0.024，惟百分比不 robust）【🟡 分解層】。
+
+此案例之意義在於：ISM **不只標記**「BRCA2 promoter 有與突變共定位之甲基差」，**更量化**此差有多少屬 subclone 結構、多少屬直接 focal cis——這正是本研究欲提供之核心資訊（C2 之價值）。
+
+> ⚠ **誠實邊界**：BRCA2 之甲基差方向為 **hypomethylation**，與 canonical TSG promoter hyper-silencing 方向不同，故**不寫**「promoter 高甲基沉默 BRCA2」；「與突變之關係」為**共定位／候選關聯**而非已證之 cis 因果（focal cis 於分解層 marginal）；單樣本 ⭐3。
+
+## 4.6 ⭐ 旗艦二：chr2:18M — 甲基與多點突變共同標示同一子克隆事件（C3）
+
+**為何檢視**：本節示範主軸——以「多個 somatic 變異 + 鄰域甲基結構」對單一 region 之 read 做 subclone 結構 characterization，並示範甲基如何與突變共同標示同一子克隆事件。
+
+於 chr2:18,071,020–18,101,020（30 kb，HCC1395，ISM 補跑 57 reads〔32 正股／25 反股〕× 203 CpG），錨點 chr2:18,086,020（G→A）。somatic haplotagging 之系譜為：Normal=G → **HP1 母本**（19 reads 全為 REF/G，germline）→ **HP1-1 子克隆**（36 reads＝28 ALT/A／8 REF/G，somatic A 等位富集），另 HP2 為 2 reads（REF）【primary ISM 輸出 `reads.tsv`／`significance.json`／`metadata.txt`，build 069cadb，逐 read 與逐項 grep-verified】。於同一區段之兩個互補位點觀察到兩種模式：
+
+- **18,086,020（標示子克隆之 het 位點）**：非監督甲基分群顯著（cluster PERMANOVA F=10.61，p=0.01，最佳分群數 k=2，無離散假象），且分群與**單倍型／子克隆譜系**高度對應（Cramér's V=0.669，p=0.027；HP-family V=0.694，p=0.003），而與**該位點 het 等位本身**之對應較弱（V=0.270，p=0.097，不顯著）——即甲基分群跟隨的是 haplotype／子克隆譜系，而非單純的 het 等位。
+- **18,096,269（區段內 somatic 等位位點，獨立 anchor 窗 18,091,269–18,101,269，32 reads）**：甲基分群與 somatic 等位本身高度對應（Cramér's V=0.967，p≈0，cluster PERMANOVA F=39.996，k=5），而與 HP 無對應（V=0）——甲基跟隨 somatic 等位本身【primary ISM 輸出 `V6_on_fp/.../chr2_18096269/.../significance.json`，2026-06-15 本 session grep-verified】。
+
+兩種互補模式並存——其一甲基跟隨子克隆譜系、其二甲基跟隨 somatic 等位——構成「甲基與多點 somatic 變異於 read 層級共同標示同一子克隆事件」之機制基礎；據此巢狀等位結構與甲基之共變，推導 Normal→HP1→HP1-1 之**時序假說**。
+
+> ⚠ **誠實邊界**：18,086,020 **不在 somatic VCF**（為標示子克隆之 het 位點，其甲基↔HP 對應含 germline-allelic 成分）；subclone 甲基之 somatic-專一性待 within-haplotype 對照（G-B 未跑）；**時序為數據支撐之推論而非正交確認**，**不輸出譜系樹**；自動化 subclone 分析流程與大規模驗證為 ISM 延伸（後續工作，G-D/G-E）；單樣本單 pipeline ⭐3。
+
+## 4.7 相位骨幹與跨樣本復現
+
+旗艦案例所依附之子單倍型骨幹由 LOH-constrained 相位提供：NG=2 時內側 same-HP1 高於外側，方向 7/7（Wilcoxon W=28，p=0.0078125），same-haplotype 占用率（occupancy，非 TP-rate）六樣本皆 ≥93%（0.932／0.990／0.988／0.965／0.983／0.970）；AF 與分群數之關聯源於相位非甲基（HD-4，partial r=0.656）【🟢，見 fig5】。⚠ 此骨幹之正面性部分受 by-construction 循環影響（R-SELFREF 未跑，handoff V-8），單一 pipeline ⭐3。
+
+跨六樣本，相對虛無模型之超出量皆為正（6/6，+0.101 至 +0.241，平均 0.168），跨三癌別復現現象層訊號；惟同一位點之 somatic ASM 為樣本私有（0/38，E[overlap]=0.16，underpowered）。此「現象復現、位點私有」之模式説明旗艦案例為樣本特異，其跨樣本系統性須以標準化判準確立（handoff V-2/V-5）。

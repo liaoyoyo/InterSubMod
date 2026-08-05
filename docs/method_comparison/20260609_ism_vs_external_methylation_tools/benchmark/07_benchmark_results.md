@@ -62,8 +62,8 @@ provenance_note: modkit 數字皆自 runs/dmr_*.tsv 實跑讀回(非記憶); ISM
 
 ### ③ modkit 缺 cis/copy 控制（ISM 獨有能力的實證）
 - modkit effect_size −0.159 = **raw 率差，混入 copy**（無 normal-anchor、無 copy-partition）。
-- ISM 在同位點：HP-axis Δβ=−0.122（~80% copy）→ normal-anchored cis-test 隔出 **d_within=−0.023（邊際真 cis）**。
-- **modkit 無對應功能** → 若只看 modkit，會把 BRCA2 的 −0.159 當「強 ASM」；ISM 的 cis-control 才揭露大部分是 copy。**這正是 05 KEEP #2「normal-anchored cis-control 唯一」的實機證據。**
+- ISM 在同位點：HP-axis Δβ=−0.122（**subclone/copy 主導**；HP1-1=somatic subclone tag 非 copy、非 CN-dosage）→ normal-anchored cis-test 隔出 **d_within=−0.023（邊際 focal cis，% 不 robust）**。
+- **modkit 無對應功能** → 若只看 modkit，會把 BRCA2 的 −0.159 當「強 ASM」；ISM 的 cis-control 才揭露**大部分是 subclone/copy 背景差（非焦點 cis、非 copy-number）**。**這正是 05 KEEP #2「normal-anchored cis-control 唯一」的實機證據。**
 
 ### ④ 分層分解 — modkit 只到第 1 層，ISM 再往下三層（BRCA2 實證）
 
@@ -71,7 +71,7 @@ provenance_note: modkit 數字皆自 runs/dmr_*.tsv 實跑讀回(非記憶); ISM
 |----|------|--------|-----|---------|
 | **L1 率差** | HP1-1 vs HP1 甲基率差多少 | ✓ effect_size | ✓ dbeta | modkit −0.159 ≈ ISM −0.121（**收斂**）|
 | **L2 normal-anchor cis vs drift** | 這率差是 cis-driven 還是 germline drift | ✗ | ✓ d_cis vs d_drift | d_cis −0.142 > d_drift −0.021 |
-| **L3 copy-partition** | 扣掉 copy 後還剩多少真 cis | ✗ | ✓ d_within | **−0.023（~20% 真 cis，~80% copy）** |
+| **L3 subclone/copy-partition** | 扣掉 subclone/copy 背景後還剩多少真 focal cis | ✗ | ✓ d_within | **−0.023（邊際 focal cis；subclone/copy 主導，HP1-1=subclone tag 非 copy；% split 不 robust）** |
 | **結構** | reads 是否分成結構分離亞群 | ✗ | ✓ silhouette/ARI/PERMANOVA | HP1-1 silhouette 0.313；ari_blind 0.79 |
 
 > 🔑 **一句話**：modkit 與 ISM 在 **L1 率差層收斂**（互相驗證 BRCA2 finding 為真），但 modkit **止步於此**；ISM 的 L2/L3/結構層揭露「−0.122 的率差其實 ~80% 是 copy、只 ~20% 真 cis」—— 這是「ISM 的組合是否帶來對手沒有的真資訊」的**正面實證**（synth gap 對這 2 個 concordant 位點的回答 = YES，ISM 多給了 cis/copy 分解；discordant case 仍待 panel 擴充）。

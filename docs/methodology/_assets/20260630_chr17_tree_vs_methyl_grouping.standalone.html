@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<title>chr17 遺傳樹 vs 甲基群分布</title><style>
+body{font-family:-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;max-width:1000px;margin:0 auto;padding:24px;color:#212529;line-height:1.7;background:#f8f9fa}
+h1{font-size:21px}h2{font-size:16px;border-bottom:2px solid #dee2e6;padding-bottom:4px;margin-top:26px}
+.card{background:#fff;border:1px solid #dee2e6;border-radius:10px;padding:16px;margin:12px 0}
+table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #dee2e6;padding:6px 12px;text-align:center}
+td.g{font-weight:700;background:#f8f9fa}
+.note{color:#868e96;font-size:13px}.k{background:#fff3bf;border:1px solid #ffe066;border-radius:6px;padding:8px 12px;margin:8px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style></head><body>
+<h1>chr17:48360161 worked — 遺傳樹 vs 甲基「哪些標籤靠近」</h1>
+<div class="note">HCC1395 ⭐3。節點顏色=群平均甲基β（藍=低/紅=高）。數據從 chr17_subclone_data.json 計算注入。</div>
+
+<div class="card"><h2>① 甲基取樣範圍與機制</h2>
+<b>範圍</b>：67 個 CpG，跨 <b>9.7kb</b>（48360450–48370157）；sSNV 在 48362515–48365161，CpG 窗向上下游延伸。每 read 只覆蓋其 aligned span 內的 CpG（中位 <b>61/67</b>）。<br>
+<b>機制</b>：每 CpG 每 read 的 β = <b>ML/255</b>（Dorado 5mCG modified_bases，只取 5mC）；群=genotype 共現分類；群甲基=群內 read β 平均。</div>
+
+<div class="grid">
+<div class="card"><h2>② 遺傳樹（sSNV 共現）</h2>
+<svg viewBox="0 0 320 215" width="100%" height="215"><circle cx="120" cy="40" r="26" fill="rgb(68,80,186)" stroke="#333"/><text x="120" y="39" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">RRR</text><text x="120" y="52" text-anchor="middle" fill="#fff" font-size="9">β=0.27</text><text x="158" y="44" font-size="11">germline (n=8)</text><circle cx="120" cy="110" r="26" fill="rgb(140,80,114)" stroke="#333"/><text x="120" y="109" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">RAR</text><text x="120" y="122" text-anchor="middle" fill="#fff" font-size="9">β=0.55</text><text x="158" y="114" font-size="11">S2(α) (n=13)</text><circle cx="120" cy="180" r="26" fill="rgb(141,80,113)" stroke="#333"/><text x="120" y="179" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">AAA</text><text x="120" y="192" text-anchor="middle" fill="#fff" font-size="9">β=0.56</text><text x="158" y="184" font-size="11">S1,S2,S3 (n=13)</text><line x1="120" y1="66" x2="120" y2="84" stroke="#1565c0" stroke-width="2.5"/><text x="128" y="80" font-size="10" fill="#2b8a3e">+S2(α)</text><line x1="120" y1="136" x2="120" y2="154" stroke="#1565c0" stroke-width="2.5"/><text x="128" y="150" font-size="10" fill="#2b8a3e">+S1,S3</text></svg>
+<div class="note">germline RRR → +S2(α) → RAR → +S1,S3 → AAA。線性累積。</div></div>
+
+<div class="card"><h2>③ 甲基群×群距離（|Δβ|）= 甲基認為誰靠近</h2>
+<table><tr><th></th><th>RRR</th><th>RAR</th><th>AAA</th></tr><tr><td class="g">RRR</td><td style="background:#f1f3f5">—</td><td style="background:rgba(208,36,80,0.5)"><b>0.327</b></td><td style="background:rgba(238,13,80,0.5)"><b>0.374</b></td></tr><tr><td class="g">RAR</td><td style="background:rgba(208,36,80,0.5)"><b>0.327</b></td><td style="background:#f1f3f5">—</td><td style="background:rgba(117,107,80,0.5)"><b>0.185</b></td></tr><tr><td class="g">AAA</td><td style="background:rgba(238,13,80,0.5)"><b>0.374</b></td><td style="background:rgba(117,107,80,0.5)"><b>0.185</b></td><td style="background:#f1f3f5">—</td></tr></table>
+<div class="note">綠=近(甲基相似)、紅=遠。</div></div>
+</div>
+
+<div class="card k"><h2>④ 關鍵判讀</h2>
+<b>遺傳樹</b>：RRR→RAR→<b>AAA 是 RAR 的後代</b>（多 S1,S3 兩個突變）。<br>
+<b>甲基卻認為</b>：RAR↔AAA <b>近（0.185）</b>，兩者都遠離 RRR（0.327/0.374）。<br><br>
+🔴 <b>甲基分的是「有沒有 α(S2) 突變」（germline vs 突變），不是遺傳譜系步驟</b>——RAR 和 AAA 都帶 α → 甲基高 → 視為同一群；甲基<b>看不出 AAA 是 RAR 的後代</b>（那一步被抹平）。<br>
+→ 這是 <b>cis-ASM</b>：甲基對齊突變的局部效應（α 軸 26 個顯著 CpG），<b>非獨立 lineage</b>。所以甲基<b>能分「突變了沒」、不能排「誰是誰的後代」</b>=bounded-auxiliary 的視覺證據。</div>
+
+<div class="note">證據級 L2（單樣本 chr17）。甲基群×群距離對齊 α 突變軸而非樹深度 → 確認甲基為 cis-ASM 偵測器、非 lineage 排序器。</div>
+</body></html>

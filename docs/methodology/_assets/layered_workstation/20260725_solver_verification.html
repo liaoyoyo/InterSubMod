@@ -1,0 +1,229 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABSTAIN 重跑驗證 · 10,717 個中 99.92% 可救回</title>
+<style>
+:root{--bg:#fff;--fg:#0f172a;--mut:#64748b;--line:#e2e8f0;--card:#f8fafc;
+--ok:#0d9488;--bad:#dc2626;--warn:#b45309;--acc:#2563eb;--rad:11px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);line-height:1.72;font-size:15.5px;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:30px 20px 78px}
+.eyebrow{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);font-weight:700}
+h1{font-size:26px;margin:5px 0 7px;line-height:1.32;letter-spacing:-.01em}
+.sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+h2{font-size:19px;margin:0 0 5px;line-height:1.42}
+.sec{margin:36px 0 0;padding-top:22px;border-top:2px solid var(--line)}
+.sec>p.lead{color:var(--mut);font-size:13.5px;margin:3px 0 12px}
+.mut{color:var(--mut);font-size:12px}
+
+.verdict{border:1px solid #99f6e4;border-left:6px solid var(--ok);
+background:linear-gradient(180deg,#f0fdfa,#fafffe);border-radius:var(--rad);padding:17px 21px;margin:14px 0 6px}
+.verdict .big{font-size:17.5px;font-weight:700;line-height:1.58}
+.verdict .dn{margin-top:9px;font-size:12.5px;color:var(--mut);padding-top:9px;border-top:1px dashed #99f6e4}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 4px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+.kpi .v{font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.25;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:13px;font-weight:600;color:var(--mut)}
+.kpi .l{font-size:11.5px;color:var(--mut);margin-top:3px}
+.kpi.ok .v{color:var(--ok)} .kpi.bad .v{color:var(--bad)} .kpi.acc .v{color:var(--acc)}
+
+.mk{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:3px;
+margin-right:7px;vertical-align:1.5px;border:1px solid}
+.mk.crit{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+.mk.key{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.mk.bgm{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+.st{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.st.pass{background:#f0fdfa;color:#0f766e;border-color:#5eead4}
+.st.warn{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.st.todo{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+.st.stop{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+
+ul.logic{list-style:none;padding:0;margin:12px 0}
+ul.logic li{padding:9px 0;border-bottom:1px dashed var(--line)}
+ul.logic li:last-child{border-bottom:0}
+
+figure{margin:16px 0;padding:12px;background:#fff;border:1px solid var(--line);border-radius:var(--rad)}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:12.5px;color:var(--mut);margin-top:9px;padding-top:8px;border-top:1px dashed var(--line)}
+
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+th{background:#f1f5f9;text-align:left;padding:8px 11px;border-bottom:2px solid #cbd5e1;font-weight:700;white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:hover{background:#fafcff}
+code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+.ok{color:var(--ok);font-weight:700} .bad{color:var(--bad);font-weight:700}
+
+details.card{border:1px solid var(--line);border-radius:var(--rad);margin:9px 0;background:#fff;overflow:hidden}
+details.card>summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:14.5px;
+background:var(--card);list-style:none;display:flex;align-items:center;gap:9px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"+";font-family:ui-monospace,Menlo,monospace;font-weight:700;
+color:var(--acc);font-size:17px;width:14px;flex:0 0 14px;text-align:center}
+details.card[open]>summary::before{content:"−"}
+details.card>summary:hover{background:#eef2f7}
+details.card .ct{margin-left:auto;font-size:11px;font-weight:700;color:var(--mut);
+background:#fff;border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+details.card .cb{padding:4px 16px 16px}
+
+.box{border:1px solid var(--line);border-radius:9px;padding:12px 16px;margin:11px 0;background:var(--card);font-size:14px}
+.box.dang{background:#fef2f2;border-color:#fecaca}
+.box.warn{background:#fffbeb;border-color:#fcd34d}
+.box.good{background:#f0fdfa;border-color:#99f6e4}
+.box b.hd{display:block;margin-bottom:4px}
+footer{margin-top:42px;padding-top:16px;border-top:2px solid var(--line);font-size:12.5px;color:var(--mut)}
+@media(prefers-color-scheme:dark){
+:root{--bg:#0b1120;--fg:#e2e8f0;--mut:#94a3b8;--line:#1e293b;--card:#0f172a}
+figure{background:#0f172a} figure svg{filter:invert(.92) hue-rotate(180deg)}
+th{background:#1e293b;border-bottom-color:#334155} tbody tr:hover{background:#111c33}
+code{background:#111c33} details.card{background:#0b1120} details.card>summary:hover{background:#16233c}
+details.card .ct{background:#0f172a}
+.verdict{background:#0d2926;border-color:#115e59}
+.box.dang{background:#2a1414;border-color:#7f1d1d} .box.warn{background:#2a2410;border-color:#78350f}
+.box.good{background:#0d2926;border-color:#115e59}
+.mk.crit{background:#2a1414} .mk.key{background:#2a2410} .mk.bgm{background:#1e293b}
+}
+@media(max-width:640px){h1{font-size:21.5px} .wrap{padding:22px 14px 60px}}
+</style>
+<div class="wrap">
+
+<div class="eyebrow">Method-layer verification · 2026-07-25</div>
+<h1>workstation 上那 10,717 個 ABSTAIN，<br>99.92% 不是「定不出來」，是被過緊的搜尋預算擋掉</h1>
+<div class="sub">C++ solver：LongLineage src/solver（obligation_bnb + terminal_subset_dp + small_q_oracle）　·　所有數字由 <code>20260725_solver_verification.data.json</code> 注入</div>
+
+<!-- ═══ L0 一眼結論 ═══ -->
+<div class="verdict">
+<div class="big">全 98,955 個 exact-PS topology unit 重跑：原本 10,717 個
+resource-guard ABSTAIN，<b class="ok">10,708 個（99.92%）現在可 certify h*</b>，
+只剩 <b class="ok">9 個</b>；同時 88,238 個原已 certified 的區
+<b class="ok">0 個不一致</b>。全部跑完 <b>12.3 分鐘</b>。</div>
+<div class="dn"><b>兩條資料線都跑了，分母不同不可混算：</b>
+A · exact-PS 線（98,955 unit / 7 datasets）＝ workstation 子頁面顯示的那批；
+B · layered 線（18,931 unit / 僅 HCC1395，engineering baseline）＝ 方法開發與 bug 發現用。</div>
+</div>
+
+<div class="grid">
+<div class="kpi ok"><div class="v">99.92<small>%</small></div><div class="l">ABSTAIN 救回率</div></div>
+<div class="kpi ok"><div class="v">10,708<small>/10,717</small></div><div class="l">可 certify h*</div></div>
+<div class="kpi bad"><div class="v">9</div><div class="l">仍無法（實務邊界）</div></div>
+<div class="kpi ok"><div class="v">0</div><div class="l">回歸不一致（88,238 區）</div></div>
+<div class="kpi acc"><div class="v">12.3<small> 分</small></div><div class="l">98,955 區全部跑完</div></div>
+<div class="kpi"><div class="v">0.006<small> ms</small></div><div class="l">單區中位數</div></div>
+</div>
+
+<!-- ═══ 閱讀指引 ═══ -->
+<div class="sec">
+<div class="eyebrow">閱讀指引</div>
+<h2>先對齊四件事：分母、色彩、數字寫法、名詞</h2>
+<p class="lead">本頁刻意<b>不使用 emoji</b>（本機無 emoji 字型會顯示為方框）；重要性與狀態一律用文字徽章，
+且<b>色彩絕不單獨編碼</b> — 每個狀態都附文字標籤，色盲讀者可完整判讀。</p>
+
+<details class="card"><summary>① 資料範圍與分母（最重要，先看這個）<span class="ct">denominators</span></summary><div class="cb"><div class="tw"><table style="min-width:520px"><thead><tr><th>項目</th><th>數量</th><th>說明</th></tr></thead><tbody><tr><td>exact-PS unit 數</td><td class="num"><b>98,955</b></td><td class="mut">7 datasets / 6 生物樣本 / chr1–22</td></tr><tr><td>　其中 ABSTAIN</td><td class="num"><b>10,717</b></td><td class="mut">佔 10.83%</td></tr><tr><td>　其中已 certified</td><td class="num"><b>88,238</b></td><td class="mut">佔 89.17%</td></tr><tr><td>layered unit 數</td><td class="num"><b>18,931</b></td><td class="mut">僅 HCC1395；engineering baseline</td></tr><tr><td>　其中 capped</td><td class="num"><b>828</b></td><td class="mut">佔 4.37%</td></tr><tr><td>active loci 範圍</td><td class="num"><b>1 – 12</b></td><td class="mut">硬上限 12（編譯期常數，超過 fail-closed）</td></tr><tr><td>h* 觀察範圍</td><td class="num"><b>0 – 11</b></td><td class="mut">本輪實測；理論上界受 active loci 限制</td></tr></tbody></table></div><div class="box warn"><b class="hd">兩條線不可並列或相除</b>exact-PS 是<b>主線</b>（workstation 顯示的那批）；layered 是<b>方法開發輔助線</b>（engineering baseline，比例數字不可作正式 Results）。本頁所有比例都已標明各自分母。</div></div></details>
+
+<details class="card"><summary>② 色彩語意<span class="ct">colorblind-safe</span></summary><div class="cb"><div class="tw"><table style="min-width:400px"><thead><tr><th>色彩</th><th>代表意義</th></tr></thead><tbody><tr><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#0d9488;vertical-align:-2px;margin-right:8px"></span><code>ok</code></td><td>已救回、通過、改良後的值</td></tr><tr><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#dc2626;vertical-align:-2px;margin-right:8px"></span><code>bad</code></td><td>仍無法處理、錯誤值、改良前的問題</td></tr><tr><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#b45309;vertical-align:-2px;margin-right:8px"></span><code>warn</code></td><td>部分達成、需注意、尚有剩餘</td></tr><tr><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#2563eb;vertical-align:-2px;margin-right:8px"></span><code>acc</code></td><td>方法步驟／中性強調（非好壞）</td></tr><tr><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#64748b;vertical-align:-2px;margin-right:8px"></span><code>mut</code></td><td>背景說明、分母註記</td></tr></tbody></table></div><p class="mut">色彩僅作輔助；所有判定都另有文字標籤，不依賴色覺。</p></div></details>
+
+<details class="card"><summary>③ 標記與狀態徽章<span class="ct">text + shape</span></summary><div class="cb"><div class="tw"><table style="min-width:420px"><thead><tr><th>徽章</th><th>意義</th></tr></thead><tbody><tr><td><span class="mk crit">決定性</span></td><td>卡結論或需要決策的事實</td></tr><tr><td><span class="mk key">重要</span></td><td>有價值、影響判讀但不卡結論</td></tr><tr><td><span class="mk bgm">背景</span></td><td>已穩定的脈絡，掃過即可</td></tr><tr><td><span class="st pass">達成／全部救回</span></td><td>目標已滿足，有實測證據</td></tr><tr><td><span class="st warn">部分達成／剩 N 個</span></td><td>有進展但未清空</td></tr><tr><td><span class="st todo">未做</span></td><td>本輪刻意界定在範圍外</td></tr><tr><td><span class="st stop">UNSUPPORTED…</span></td><td>超出核心保證，立即 fail-closed</td></tr></tbody></table></div></div></details>
+
+<details class="card"><summary>④ 數字顯示規範<span class="ct">formatting</span></summary><div class="cb"><div class="tw"><table style="min-width:480px"><thead><tr><th>項目</th><th>規範</th></tr></thead><tbody><tr><td><b>千分位</b></td><td>所有 ≥1,000 的計數一律加逗號（如 <code>10,717</code>）</td></tr><tr><td><b>表格對齊</b></td><td>數字欄右對齊並用等寬數字（tabular-nums），方便直向比對位數</td></tr><tr><td><b>百分比</b></td><td>一律附分母，不單獨出現（如 <code>10,708/10,717（99.92%）</code>）</td></tr><tr><td><b>時間</b></td><td>&lt;1 秒用 ms（3 位小數）；≥1 秒用秒；≥60 秒用分鐘</td></tr><tr><td><b>樹數</b></td><td>整數，不縮寫。可能極大（如 <code>40,320</code> = 8!），刻意不四捨五入</td></tr><tr><td><b>h*</b></td><td>整數，代表最小隱藏節點數；<code>—</code> 表示未能 certify</td></tr></tbody></table></div></div></details>
+
+<details class="card"><summary>⑤ 名詞定義<span class="ct">glossary</span></summary><div class="cb"><div class="tw"><table style="min-width:560px"><thead><tr><th>名詞</th><th>定義</th></tr></thead><tbody><tr><td><code>topology unit</code></td><td>一個 exact-PS × HP bounded block；本頁的<b>主要計數單位</b>（分母）</td></tr><tr><td><code>h*（objective_h）</code></td><td>最小隱藏節點數 = 為了讓所有觀測在單調樹上連通，<b>最少</b>需要幾個未觀測祖先</td></tr><tr><td><code>certify</code></td><td><b>證明</b>某個 h* 是最小值（已窮盡所有更小的可能），而非只給一個可行解</td></tr><tr><td><code>resource-guard ABSTAIN</code></td><td>solver 因資源上限（節點數／狀態數）主動放棄並<b>不給答案</b>；<b>不等於</b>「該區無解」或「unresolved=negative」</td></tr><tr><td><code>active loci</code></td><td>該區中<b>真正有變異</b>的位點數；計算成本由它決定，<b>不是</b>區域 sSNV 總數</td></tr><tr><td><code>terminal group</code></td><td>一條 partial read 誘導出的<b>子立方體</b>；樹只需碰到其中任一頂點即算解釋</td></tr><tr><td><code>支配消除</code></td><td>若群 A ⊆ 群 B，滿足 A 必滿足 B → B 冗餘可移除</td></tr><tr><td><code>鏈式閉合式</code></td><td>單一終端且群皆含之時，h*=m−1、樹數=m!，<b>O(1) 直接得解</b>不需搜尋</td></tr><tr><td><code>terminal-subset DP</code></td><td>有向群終端子集動態規劃；只證 h*，不產候選樹家族</td></tr><tr><td><code>obligation B&amp;B</code></td><td>分枝定界；可產完整家族但成本高，且受 search-node guard 限制</td></tr><tr><td><code>capped（layered 線用語）</code></td><td>等同 exact-PS 線的 ABSTAIN；因術語源自不同 pipeline 故並存</td></tr></tbody></table></div></div></details>
+</div>
+
+<!-- ═══ L1 重點邏輯 ═══ -->
+<div class="sec">
+<div class="eyebrow">L1 · 重點邏輯</div>
+<h2>瓶頸不是問題太難，是預算設太緊、又把「突變數多」誤判成「結構複雜」</h2>
+<ul class="logic">
+<li><span class="mk crit">決定性</span><b>ABSTAIN 的成因單一且明確。</b>
+全部 10,717 個的 reason 都是 <code>SEARCH_NODE_LIMIT_REACHED</code>，
+卡在 <code>maximum_search_nodes=1000</code>。但實測 B&amp;B 常需要數千至數百萬節點才收斂 ——
+<b>1,000 這個預算太緊</b>，而 DP 路徑根本不受它限制。</li>
+<li><span class="mk crit">決定性</span><b>調高上限行不通，必須改結構。</b>
+鏈長 m=8 用暴力枚舉需 C(254,7)≈1.2×10¹³ 個候選（估 ~85 天），但真值只是閉合式 <code>m!</code>，O(1) 可得。</li>
+<li><span class="mk key">重要</span><b>「鏈填充」不是結構複雜度。</b>
+popcount-m 的終端<b>必然</b>需要 m−1 個祖先，那只是突變距離、零推論內容，卻把 cap 額度佔滿。</li>
+<li><span class="mk key">重要</span><b>求 h* 該用 DP 而非 B&amp;B。</b>
+10,295 個 unit（96.1%）由 DP certify，實測比 B&amp;B 快 20–1000×。</li>
+<li><span class="mk bgm">背景</span><b>k 上限不能移除，但可重新定義。</b>
+硬上限綁在 <b>active loci</b>（真正有變異的位點）而非區域 sSNV 數；稀疏區 k=64 仍是 0.05 ms。</li>
+</ul>
+</div>
+
+<div class="sec">
+<div class="eyebrow">L1 · 主結果</div>
+<h2>七個樣本全部大幅回收，四個樣本 100% 清空</h2>
+<figure><svg viewBox="0 0 940 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="逐樣本 ABSTAIN 救回長條圖"><rect width="940" height="372" fill="white"/><text x="132" y="26" font-size="12.5" font-weight="700" fill="#0f172a">每個樣本原本的 resource-guard ABSTAIN，改良後幾乎全部可 certify</text><rect x="132" y="36" width="13" height="11" rx="2" fill="#0d9488"/><text x="151" y="46" font-size="11" fill="#475569">已救回</text><rect x="212" y="36" width="13" height="11" rx="2" fill="#dc2626"/><text x="231" y="46" font-size="11" fill="#475569">仍無法（顯示為最小可見寬度）</text><text x="122" y="71" font-size="11.5" text-anchor="end" fill="#334155">COLO829</text><rect x="132" y="59" width="10.7" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="59" width="10.7" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="151.70355918174295" y="72" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">146 / 146</text><text x="926" y="72" font-size="11" text-anchor="end" font-weight="700" fill="#0d9488">100.0%　剩 0</text><text x="122" y="105" font-size="11.5" text-anchor="end" fill="#334155">H1437</text><rect x="132" y="93" width="116.3" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="93" width="115.9" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="257.27291001537185" y="106" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">1,581 / 1,586</text><text x="926" y="106" font-size="11" text-anchor="end" font-weight="700" fill="#b45309">99.7%　剩 5</text><text x="122" y="139" font-size="11.5" text-anchor="end" fill="#334155">H2009</text><rect x="132" y="127" width="620.0" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="127" width="620.0" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="761.0" y="140" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">8,457 / 8,457</text><text x="926" y="140" font-size="11" text-anchor="end" font-weight="700" fill="#0d9488">100.0%　剩 0</text><text x="122" y="173" font-size="11.5" text-anchor="end" fill="#334155">HCC1395</text><rect x="132" y="161" width="19.6" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="161" width="19.4" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="160.57431713373538" y="174" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">264 / 267</text><text x="926" y="174" font-size="11" text-anchor="end" font-weight="700" fill="#b45309">98.9%　剩 3</text><text x="122" y="207" font-size="11.5" text-anchor="end" fill="#334155">HCC1395_DORADO</text><rect x="132" y="195" width="5.4" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="195" width="5.4" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="146.35177959087147" y="208" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">73 / 73</text><text x="926" y="208" font-size="11" text-anchor="end" font-weight="700" fill="#0d9488">100.0%　剩 0</text><text x="122" y="241" font-size="11.5" text-anchor="end" fill="#334155">HCC1937</text><rect x="132" y="229" width="7.7" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="229" width="7.6" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="148.6977651649521" y="242" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">104 / 105</text><text x="926" y="242" font-size="11" text-anchor="end" font-weight="700" fill="#b45309">99.0%　剩 1</text><text x="122" y="275" font-size="11.5" text-anchor="end" fill="#334155">HCC1954</text><rect x="132" y="263" width="6.1" height="17" rx="3" fill="#fee2e2"/><rect x="132" y="263" width="6.1" height="17" rx="3" fill="#0d9488" opacity=".9"/><text x="147.08490008277167" y="276" font-size="11" fill="#334155" font-family="ui-monospace,Menlo,monospace">83 / 83</text><text x="926" y="276" font-size="11" text-anchor="end" font-weight="700" fill="#0d9488">100.0%　剩 0</text><line x1="132" y1="310" x2="926" y2="310" stroke="#e2e8f0"/><text x="122" y="332" font-size="12" text-anchor="end" font-weight="700" fill="#0f172a">合計</text><text x="132" y="332" font-size="12.5" fill="#0f172a"><tspan font-weight="700" fill="#0d9488">10,708</tspan> / 10,717 可 certify （<tspan font-weight="700" fill="#0d9488">99.92%</tspan>），仍無法 <tspan font-weight="700" fill="#b45309">9</tspan> 個</text><text x="132" y="354" font-size="11" fill="#64748b">分母：exact-PS × HP cohort，98,955 個 topology unit（與 workstation 子頁面同一批）</text></svg>
+<figcaption>H2009 原本最嚴重（8,457 個，佔全 cohort 的
+79%），改良後 <b>100% 全部救回</b>。
+仍無法處理的 9 個集中在 H1437（5）、HCC1395（3）、HCC1937（1）。</figcaption></figure>
+</div>
+
+<div class="sec">
+<div class="eyebrow">L1 · 方法</div>
+<h2>三項改進各自解決不同瓶頸，缺一則仍有區算不出來</h2>
+<figure><svg viewBox="0 0 940 284" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="問題到結果的三項改進流程"><rect width="940" height="284" fill="white"/><rect x="14" y="58" width="196" height="166" rx="11" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/><text x="112" y="84" font-size="12.5" font-weight="700" text-anchor="middle" fill="#b91c1c">問題（改良前）</text><text x="32" y="114" font-size="11.5" font-weight="700" fill="#0f172a">10,717 個 unit</text><text x="32" y="129" font-size="10" fill="#7f1d1d">被 guard 擋住、不給答案</text><text x="32" y="152" font-size="11.5" font-weight="700" fill="#0f172a">guard 只有 1,000</text><text x="32" y="167" font-size="10" fill="#7f1d1d">但 B&amp;B 常需數千至數百萬節點</text><text x="32" y="190" font-size="11.5" font-weight="700" fill="#0f172a">鏈長 m=8</text><text x="32" y="205" font-size="10" fill="#7f1d1d">暴力法估 ~85 天</text><rect x="256" y="44" width="300" height="52" rx="9" fill="#f0f9ff" stroke="#2563eb" stroke-width="1.6"/><text x="274" y="66" font-size="12.5" font-weight="700" fill="#1e40af">① 群去重 + 支配消除</text><text x="274" y="84" font-size="10.5" fill="#475569">群數中位 3→1（最大 43→15）</text><rect x="256" y="106" width="300" height="52" rx="9" fill="#f0f9ff" stroke="#2563eb" stroke-width="1.6"/><text x="274" y="128" font-size="12.5" font-weight="700" fill="#1e40af">② 鏈式閉合式</text><text x="274" y="146" font-size="10.5" fill="#475569">單一終端 → h*=m−1、樹數=m!，O(1)</text><rect x="256" y="168" width="300" height="52" rx="9" fill="#f0f9ff" stroke="#2563eb" stroke-width="1.6"/><text x="274" y="190" font-size="12.5" font-weight="700" fill="#1e40af">③ terminal-subset DP</text><text x="274" y="208" font-size="10.5" fill="#475569">10,295 個 unit 由此 certify</text><rect x="612" y="58" width="314" height="166" rx="11" fill="#f0fdfa" stroke="#0d9488" stroke-width="2.2"/><text x="769" y="84" font-size="12.5" font-weight="700" text-anchor="middle" fill="#0f766e">結果（全量實測）</text><text x="634" y="120" font-size="17" font-weight="700" fill="#0d9488">99.92%</text><text x="726" y="120" font-size="11" fill="#334155">ABSTAIN 救回（剩 9 個）</text><text x="634" y="156" font-size="17" font-weight="700" fill="#0d9488">0</text><text x="726" y="156" font-size="11" fill="#334155">88,238 個回歸區不一致數</text><text x="634" y="192" font-size="17" font-weight="700" fill="#0d9488">12.3 分</text><text x="726" y="192" font-size="11" fill="#334155">98,955 個 unit 全部跑完</text><path d="M220 141 L250 141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/><path d="M570 141 L600 141" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94a3b8"/></marker></defs><text x="470.0" y="266" font-size="11" text-anchor="middle" fill="#64748b">三項改進互補：①壓縮搜尋空間　②把鏈段從「搜尋」改成「計算」　③把求 h* 從 B&amp;B 換成 DP</text></svg>
+<figcaption>三者針對不同瓶頸，<b>不可互相取代</b>：只做①仍會被鏈長拖垮；只做②仍會被多群拖垮；
+只做③則池子太大讓 DP 的 state 空間爆炸。實測 10,295 個 unit 走 DP、
+413 個走鏈式閉合式。</figcaption></figure>
+</div>
+
+<div class="sec">
+<div class="eyebrow">L1 · 目標對照</div>
+<h2>七項目標：四項達成、一項部分達成、兩項明確未做</h2>
+<p class="lead">「未做」是本輪刻意界定的範圍邊界，誠實標示以免被誤讀為已完成。</p>
+<div class="tw"><table style="min-width:620px"><thead><tr><th>目標</th><th>實測證據</th><th>狀態</th></tr></thead><tbody><tr><td>讓被 guard 擋住的區能算出來</td><td>exact-PS：10,708/10,717（99.92%）；layered：828/828（100%）</td><td><span class="st pass">達成</span></td></tr><tr><td>不能破壞既有正確結果</td><td>exact-PS 88,238/88,238 ＋ layered 18,103/18,103，合計 0 不一致</td><td><span class="st pass">達成</span></td></tr><tr><td>大幅降低計算量</td><td>98,955 區 12.3 分鐘（中位 0.006 ms）；鏈長 m=8 從估 ~85 天 → 7.5 秒</td><td><span class="st pass">達成</span></td></tr><tr><td>處理 subcube（partial group）情境</td><td>群數中位 3→1；10,295 個 unit 由 DP certify</td><td><span class="st pass">達成</span></td></tr><tr><td>k 上限是否可移除</td><td>不可移除，但可重新定義為 active loci ≤ 12；稀疏區 k=64 仍 0.05 ms</td><td><span class="st warn">部分達成</span></td></tr><tr><td>完整候選樹家族枚舉</td><td>本輪只驗證 h*（最小隱藏節點數）；家族枚舉本質指數、仍需 cap</td><td><span class="st todo">未做</span></td></tr><tr><td>正式取代 workstation 既有數字</td><td>未做：需重跑 canonical pipeline 並重新簽章；本輪僅提供可回收性證據</td><td><span class="st todo">未做</span></td></tr></tbody></table></div>
+</div>
+
+<div class="sec">
+<div class="eyebrow">L1 · 分母</div>
+<h2>兩條資料線都跑了全量，但不可並列或相除</h2>
+<div class="tw"><table style="min-width:640px"><thead><tr><th>資料線</th><th>unit 數</th><th>樣本範圍</th><th>結果</th><th>耗時</th></tr></thead><tbody><tr style="background:#f0fdfa"><td><span class="st pass">主要</span> <b>A · exact-PS 線</b><br><span class="mut">workstation index 與 7 個子頁面顯示的就是這批</span></td><td class="num">98,955</td><td>7 datasets<br><span class="mut">6 生物樣本</span></td><td>ABSTAIN 10,717 → <b class="ok">9</b>（救回 99.92%）</td><td class="num">12.3 分</td></tr><tr><td><span class="st todo">輔助</span> <b>B · layered 線</b><br><span class="mut">方法開發用；engineering baseline，比例不可作正式 Results</span></td><td class="num">18,931</td><td>僅 HCC1395</td><td>capped 828 → <b class="ok">0</b>；另發現 off-by-one bug 115 區</td><td class="num">46.4 秒</td></tr></tbody></table></div>
+</div>
+
+<!-- ═══ L2 證據卡 ═══ -->
+<div class="sec">
+<div class="eyebrow">L2 · 證據卡</div>
+<h2>逐項證據（預設收合，要驗證或引用時再展開）</h2>
+
+<details class="card"><summary>證據 1 · 逐樣本救回明細<span class="ct">7 datasets</span></summary><div class="cb"><div class="tw"><table style="min-width:720px"><thead><tr><th>樣本</th><th>units</th><th>ABSTAIN 前</th><th>救回</th><th>剩餘</th><th>救回率</th><th>回歸一致</th><th>判定</th></tr></thead><tbody><tr><td><code>COLO829</code></td><td class="num">13,919</td><td class="num">146</td><td class="num ok">146</td><td class="num">0</td><td class="num">100.0%</td><td class="num">13,773/13,773</td><td><span class="st pass">全部救回</span></td></tr><tr><td><code>H1437</code></td><td class="num">17,598</td><td class="num">1,586</td><td class="num ok">1,581</td><td class="num">5</td><td class="num">99.7%</td><td class="num">16,012/16,012</td><td><span class="st warn">剩 5 個</span></td></tr><tr><td><code>H2009</code></td><td class="num">36,042</td><td class="num">8,457</td><td class="num ok">8,457</td><td class="num">0</td><td class="num">100.0%</td><td class="num">27,585/27,585</td><td><span class="st pass">全部救回</span></td></tr><tr><td><code>HCC1395</code></td><td class="num">11,590</td><td class="num">267</td><td class="num ok">264</td><td class="num">3</td><td class="num">98.9%</td><td class="num">11,323/11,323</td><td><span class="st warn">剩 3 個</span></td></tr><tr><td><code>HCC1395_DORADO</code></td><td class="num">6,865</td><td class="num">73</td><td class="num ok">73</td><td class="num">0</td><td class="num">100.0%</td><td class="num">6,792/6,792</td><td><span class="st pass">全部救回</span></td></tr><tr><td><code>HCC1937</code></td><td class="num">5,195</td><td class="num">105</td><td class="num ok">104</td><td class="num">1</td><td class="num">99.0%</td><td class="num">5,090/5,090</td><td><span class="st warn">剩 1 個</span></td></tr><tr><td><code>HCC1954</code></td><td class="num">7,746</td><td class="num">83</td><td class="num ok">83</td><td class="num">0</td><td class="num">100.0%</td><td class="num">7,663/7,663</td><td><span class="st pass">全部救回</span></td></tr><tr style="font-weight:700;background:#f8fafc"><td>合計</td><td class="num">98,955</td><td class="num">10,717</td><td class="num ok">10,708</td><td class="num">9</td><td class="num">99.92%</td><td class="num">88,238/88,238</td><td><span class="st pass">99.92%</span></td></tr></tbody></table></div></div></details>
+
+<details class="card"><summary>證據 2 · 根因：所有 ABSTAIN 都卡在同一個 guard<span class="ct">single root cause</span></summary><div class="cb"><div class="box dang"><b class="hd">單一成因</b>10,717 個 ABSTAIN 的 reason <b>全部</b>是 <code>SEARCH_NODE_LIMIT_REACHED</code>，且 <code>search_nodes</code> 全部剛好等於上限值。HCC1395 的 267 個 ABSTAIN 全部卡在 search_nodes=1000。</div><div class="box"><b class="hd">對照實測</b>B&amp;B 收斂所需節點數：簡單案例 4,000 上下，最壞（10 個位點全 active）需 <b>620 萬</b>。相對之下 <code>maximum_search_nodes=1000</code> 極緊。</div><div class="tw"><table style="min-width:460px"><thead><tr><th>救回路徑</th><th>unit 數</th><th>佔 ABSTAIN</th></tr></thead><tbody><tr><td><code>dp</code></td><td class="num">10,295</td><td class="num">96.06%</td></tr><tr><td><code>chain_closed_form</code></td><td class="num">413</td><td class="num">3.85%</td></tr><tr><td><code>dp_abstain</code></td><td class="num">9</td><td class="num">0.08%</td></tr></tbody></table></div></div></details>
+
+<details class="card"><summary>證據 3 · 回歸驗證：兩條線合計 0 個不一致<span class="ct">0 mismatch</span></summary><div class="cb"><p><b>exact-PS 線：</b>88,238/88,238 個原已 certified 的區，新算 h* 與原值<b class="ok">完全相同</b>。</p><p><b>layered 線：</b>18,103/18,103 個非 capped 區，新舊 h* <b class="ok">完全相同</b>。</p><div class="box good">合計 106,341 個回歸區、<b>0 個不一致</b> — 這是「沒有用新 bug 換舊限制」的直接證據。</div></div></details>
+
+<details class="card"><summary>證據 4 · 剩下 9 個是真正的實務邊界<span class="ct">practical limit</span></summary><div class="cb"><p>全部集中在 <b>active loci 11–12</b> 且<b>有效群數 15–20</b>。</p><div class="box"><b class="hd">為什麼停在這裡</b>DP state cells = 2^g x 2^k 超過 64M 上限;放寬到 4e9 實測 >10 分鐘跑不完,故 64M guard 校準合理</div><div class="box good">「定不出來即是答案」現在適用於 <b>9 個</b>，而不是原本的 10,717 個 — 這讓原則性拒絕真正對齊複雜度邊界，而不是對齊參數選擇。</div></div></details>
+
+<details class="card"><summary>證據 5 · layered 線順帶抓到 Python solver 一個 off-by-one（115 區）<span class="ct">layered 線</span></summary><div class="cb"><div class="box dang"><b class="hd">症狀（數學上不可能）</b>115 個區的 Python <code>n_hidden</code> <b>小於</b>新算的最小值 h* —— 但 greedy 是可行解，其隱藏節點數必 ≥ 最小值。</div><div class="box"><b class="hd">根因</b><code>n_hidden = len(N) - len(full) - 1</code>。當 full 觀測含<b>全-REF 基因型</b>（如 <code>RRRRRRRR</code>，其 altset 就是 ROOT）時，<code>base = {ROOT} | full</code> 不會多出一個元素，公式卻多扣了 1。</div><div class="box"><b class="hd">證據（對照組設計）</b>異常組 <b class="bad">115/115（100.0%）</b>含全-REF；對照組僅 <b>8/713（1.1%）</b>。</div><div class="tw"><table style="min-width:560px"><thead><tr><th>案例</th><th>Python n_hidden</th><th>新 h*</th><th>full 觀測</th></tr></thead><tbody><tr><td><code>chr6:867869-868030/1</code></td><td class="num bad">6</td><td class="num ok">7</td><td><code>AAAAAAAA, RRRRRRRR</code></td></tr><tr><td><code>chr6:867869-868030/2</code></td><td class="num bad">6</td><td class="num ok">7</td><td><code>AAAAAAAA, RRRRRRRR</code></td></tr><tr><td><code>chr6:867869-868030/none</code></td><td class="num bad">6</td><td class="num ok">7</td><td><code>AAAAAAAA, RRRRRRRR</code></td></tr></tbody></table></div><p>DP 與 B&amp;B 兩條<b>獨立</b>解法交叉確認：</p><div class="tw"><table style="min-width:560px"><thead><tr><th>案例</th><th>DP h*</th><th>B&amp;B h*</th><th>Python</th><th>判定</th></tr></thead><tbody><tr><td><code>chr6:867869-868030/1</code></td><td class="num ok">7</td><td class="num ok">7</td><td class="num bad">6</td><td><span class="st pass">兩獨立解法一致</span></td></tr><tr><td><code>chr6:3143829-3144920</code></td><td class="num ok">7</td><td class="num ok">7</td><td class="num bad">6</td><td><span class="st pass">兩獨立解法一致</span></td></tr><tr><td><code>chr6:2685736-2686644</code></td><td class="num ok">6</td><td class="num ok">6</td><td class="num bad">5</td><td><span class="st pass">兩獨立解法一致</span></td></tr></tbody></table></div><p class="mut">影響範圍：僅 greedy fallback 路徑的 <code>n_hidden</code> 欄位；正常路徑用 <code>n_hidden = e</code> 不受影響。</p></div></details>
+
+<details class="card"><summary>證據 6 · 樹數曾被低報 29,394 倍（layered 線 23 區）<span class="ct">under-report</span></summary><div class="cb"><p>舊系統把 capped 區一律記成「1 棵」；這 23 個鏈式區合計記 <b class="bad">23 棵</b>，真值 <b class="ok">676,080 棵</b>。</p><div class="tw"><table style="min-width:360px"><thead><tr><th>區數</th><th>各區真實樹數</th></tr></thead><tbody><tr><td>1 區</td><td class="num">720 棵</td></tr><tr><td>6 區</td><td class="num">5,040 棵</td></tr><tr><td>16 區</td><td class="num">40,320 棵</td></tr></tbody></table></div><div class="box warn"><b class="hd">修正後 mean n_trees 會上升</b>這不是結果變差，而是修正<b>系統性低報</b>。論文／口試須主動說明，否則會被誤讀成「新方法讓不確定性變高」。</div></div></details>
+
+<details class="card"><summary>證據 7 · 速度：Python 失敗處的加速幅度<span class="ct">10⁶× on m=8</span></summary><div class="cb"><div class="tw"><table style="min-width:520px"><thead><tr><th>鏈長 m</th><th>改良前</th><th>改良後</th></tr></thead><tbody><tr><td>m=6</td><td>capped→誤報 1 棵；放寬預算後 40 秒</td><td class="num ok"><b>7.9 ms</b></td></tr><tr><td>m=7</td><td>暴力法估 ~7 小時</td><td class="num ok"><b>157.0 ms</b></td></tr><tr><td>m=8</td><td>暴力法估 ~85 天</td><td class="num ok"><b>7,461.7 ms</b></td></tr></tbody></table></div></div></details>
+
+<details class="card"><summary>證據 8 · k 上限綁在 active loci，不是區域 sSNV 數<span class="ct">redefine, not remove</span></summary><div class="cb"><div class="tw"><table style="min-width:520px"><thead><tr><th>情況</th><th>時間</th><th>狀態</th></tr></thead><tbody><tr><td>k=64，active loci=3（稀疏區）</td><td class="num">0.05 ms</td><td><span class="st pass">CERTIFIED</span></td></tr><tr><td>active loci=10 全 A（最壞鏈）</td><td class="num">55,776.00 ms</td><td><span class="st pass">CERTIFIED</span></td></tr><tr><td>active loci=13（超出核心保證）</td><td class="num">0.00 ms</td><td><span class="st stop">UNSUPPORTED_BIT_COUNT</span></td></tr></tbody></table></div><p>硬上限 <code>kMaximumExactHypercubeBits = 12</code>（編譯期常數，超過立即 fail-closed，不假裝能算）。<b>但實務上限更低</b>：10 個位點全 active 就要 56 秒，所以上限仍然必要 — 只是應從「k ≤ 8」改成「<b>active loci ≤ 12 且有資源上限</b>」。</p></div></details>
+</div>
+
+<!-- ═══ L3 邊界與溯源 ═══ -->
+<div class="sec">
+<div class="eyebrow">L3 · 適用邊界</div>
+<h2>四項限制：越界引用會變成 overclaim</h2>
+<div class="box warn"><b class="hd">1 · 本頁未變更 workstation 既有數字</b>
+子頁面的 funnel／比例仍是原 guard1000 產出。本輪是<b>可回收性證據</b>；
+正式取代需重跑 canonical pipeline 並重新簽章（該線目前為 scientific release NO-GO）。</div>
+<div class="box warn"><b class="hd">2 · 只驗證 h*，不是完整候選樹家族</b>
+h* = 最小隱藏節點數。家族枚舉本質指數，仍需 cap。</div>
+<div class="box warn"><b class="hd">3 · 兩條資料線分母不同</b>
+exact-PS（98,955 unit / 7 datasets）與 layered（18,931 unit / 僅 HCC1395、
+engineering baseline）不可並列或相除。layered 線的比例數字不可作正式 Results。</div>
+<div class="box warn"><b class="hd">4 · VAF 不能用來處理算不出來的案例</b>
+依 pre-registration H9，read-AF ordering 只可作探索性排序；用它補救 edge case 會踩到自訂紅線。</div>
+
+<details class="card"><summary>L3 · 可重算指令與資料溯源</summary><div class="cb"><ul><li><b>exact-PS 輸入</b>：<code>20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1</code> 的 <code>*.exact_ps_mlhp.json</code>（觀測 pattern）+ <code>*.topology.jsonl</code>（ABSTAIN 狀態）</li><li><b>layered 輸入</b>：<code>docs/methodology/_assets/20260618_subcluster_pilot/mlhp_part_*.json</code></li><li><b>求解</b>：<code>ll_real.cpp</code> harness → <code>LongLineage src/solver（obligation_bnb + terminal_subset_dp + small_q_oracle）</code></li><li><b>既有測試</b>：LongLineage <code>test_runtime_solver</code> PASS（small-q oracle / exact B&amp;B / subset DP / parent mapping / router differential）</li><li><b>反捏造</b>：本頁所有數字由 <code>20260725_solver_verification.data.json</code> 注入；builder 缺 required key 直接 refuse（§13-A）</li><li><b>workstation 注入</b>：<code>20260725_exactps_recovery.data.json</code> → <code>build_exact_ps_layered_workstation.py</code> 的 <code>recovery_note()</code> / <code>solver_verification_band()</code>，index 與 7 個子頁面同步</li></ul></div></details>
+</div>
+
+<footer>
+<p>生成 2026-07-25　·　資訊分層：L0 一眼結論 → L1 重點邏輯／主結果／方法／目標對照／分母 →
+L2 證據卡（收合）→ L3 邊界與溯源。　·　無 emoji（本機無 emoji 字型），重要性以 CSS 徽章標示，
+狀態一律附文字標籤（不單靠色彩編碼）。</p>
+</footer>
+</div>

@@ -11,6 +11,10 @@ provenance: 凍結資料 @ branch feat/summary-nreadsvalid@5308d9e;本 session c
 
 > 框架：Diátaxis(reference)。本檔為整個研究的單一索引；每數字 grep-able。HCC1395 ⭐3 單樣本。
 
+> 🔴 **2026-07-10 v2 current-contract banner**：本檔保留 6/28 歷史帳本與三桶；current canonical semantics 已改為：primary lineage = mutation-bearing HP1/HP2、root-only = reference control、HP3 = `H3?` unresolved auxiliary、無 CN = unavailable、verification = non-capped eligible full V1-V7、region = adjacent-gap connected component（總 span 非 ≤50kb）、read AF ≠ CCF。最新數字與 7-dataset evidence 請以 `InterSubMod/research/20260710_layered_reconstruction_v2/` 及完成後的 v2 validation report 為準。
+>
+> 🔴 **2026-07-11 upstream scope override**：canonical tree input 是 LongPhase-S `_sc.vcf` PASS；歷史 tagged BAM 只有 1/7 genome-wide，6/7 受 truth BED 限制。舊 7/7 layered outputs 與本檔所有 downstream 比例暫降為 engineering baseline，clean no-truth U0–U7 gates 完成前不可進正式 Results。方法定義與 claim boundaries 可保留。
+
 ## §1 全 sSNV 宇宙帳本（無遺漏，整體各情況比例）
 
 **35,332 = ClairS 候選 sSNV calls（SEQC2-HC 區內）= TP 30,490 + FP 4,842**（SEQC2 標；TP/FP 只觀察、不進前處理）。

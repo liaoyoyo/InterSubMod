@@ -60,7 +60,7 @@ TOPOLOGY_KEYS = (
     "incomplete",
 )
 
-RENDERER_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
+RENDERER_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-4"
 GRCH38_SOURCE_URL = "https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh38"
 GRCH38_AUTOSOME_LENGTHS = {
     "chr1": 248_956_422,
@@ -560,12 +560,106 @@ def validate_recomputed(sample_record, indices):
         fail(f"{sample_record['sample']}: reconstructed W_primary mismatch")
 
 
+def validate_full_edge_census(sample, region_id, family, unit):
+    """Fail closed on the exhaustive edge-census contract used by the renderer."""
+    census = unit.get("full_edge_census")
+    label = f"{sample} {region_id} HP{family} full-edge census"
+    if not isinstance(census, dict):
+        fail(f"{label} is missing")
+    expected_keys = {
+        "complete",
+        "candidate_total",
+        "top_candidate_total",
+        "node_total",
+        "edge_total",
+        "edge_rows",
+    }
+    if set(census) != expected_keys:
+        fail(f"{label} fields do not match schema 1.1.0")
+    if census.get("complete") is not True:
+        fail(f"{label} is not explicitly complete")
+
+    numeric_keys = (
+        "candidate_total",
+        "top_candidate_total",
+        "node_total",
+        "edge_total",
+    )
+    for key in numeric_keys:
+        value = census.get(key)
+        if type(value) is not int or value < 0:
+            fail(f"{label} {key} is not a non-negative integer")
+
+    candidate_total = census["candidate_total"]
+    top_candidate_total = census["top_candidate_total"]
+    expected_candidates = int(unit.get("n_trees_expected") or 0)
+    if candidate_total != expected_candidates:
+        fail(
+            f"{label} candidate_total={candidate_total} does not match "
+            f"n_trees_expected={expected_candidates}"
+        )
+    if top_candidate_total > candidate_total:
+        fail(f"{label} top_candidate_total exceeds candidate_total")
+    if unit.get("status") == "ranked":
+        if top_candidate_total != int(unit.get("n_top_exact") or 0):
+            fail(f"{label} top_candidate_total does not match n_top_exact")
+    elif top_candidate_total != 0:
+        fail(f"{label} has top candidates without a ranked selection")
+
+    edge_rows = census.get("edge_rows")
+    if not isinstance(edge_rows, list) or len(edge_rows) != census["edge_total"]:
+        fail(f"{label} edge_rows do not match edge_total")
+    seen_edges = set()
+    nodes = set()
+    selected_edge_count = 0
+    normalized_edge_keys = []
+    by_edge = {}
+    for index, edge in enumerate(edge_rows):
+        if not isinstance(edge, list) or len(edge) != 4:
+            fail(f"{label} edge_rows[{index}] is not [parent, child, count, top_count]")
+        parent, child, candidate_count, top_candidate_count = edge
+        if not isinstance(parent, str) or not parent or not isinstance(child, str) or not child:
+            fail(f"{label} edge_rows[{index}] has an invalid endpoint")
+        if parent == child or (parent, child) in seen_edges:
+            fail(f"{label} edge_rows[{index}] is a self-edge or duplicate")
+        if type(candidate_count) is not int or not 0 < candidate_count <= candidate_total:
+            fail(f"{label} edge_rows[{index}] has an invalid candidate_count")
+        if (
+            type(top_candidate_count) is not int
+            or not 0 <= top_candidate_count <= top_candidate_total
+            or top_candidate_count > candidate_count
+        ):
+            fail(f"{label} edge_rows[{index}] has an invalid top_candidate_count")
+        seen_edges.add((parent, child))
+        normalized_edge_keys.append((parent, child))
+        by_edge[(parent, child)] = (candidate_count, top_candidate_count)
+        nodes.update((parent, child))
+        selected_edge_count += int(top_candidate_count > 0)
+
+    if normalized_edge_keys != sorted(normalized_edge_keys):
+        fail(f"{label} edge_rows are not sorted by parent and child")
+    if len(nodes) != census["node_total"]:
+        fail(f"{label} edge endpoints do not match node_total")
+    if candidate_total > 0 and not edge_rows:
+        fail(f"{label} exhaustive candidate set has no edges")
+    if top_candidate_total > 0 and selected_edge_count == 0:
+        fail(f"{label} top candidate set has no selected edge")
+    for representative in unit.get("top_shape_representatives") or []:
+        for edge in representative.get("edges") or []:
+            if not isinstance(edge, list) or len(edge) != 2:
+                fail(f"{label} selected representative has an invalid edge")
+            key = (str(edge[0]), str(edge[1]))
+            if key not in by_edge or by_edge[key][1] <= 0:
+                fail(f"{label} selected edge is absent or has zero top membership: {key}")
+    return census
+
+
 def validate_read_af_topology_sidecar(
     payload, path, sample, sample_record, summary_path, summary_sha, rv_path, rv_sha
 ):
     if payload.get("schema_name") != "intersubmod.current_v5_read_af_topology_sample":
         fail(f"{sample}: unexpected read-AF topology schema")
-    if payload.get("schema_version") != "1.0.0" or payload.get("sample") != sample:
+    if payload.get("schema_version") != "1.1.0" or payload.get("sample") != sample:
         fail(f"{sample}: read-AF topology identity mismatch")
     if payload.get("scope") != "GRCh38 chr1-22 current canonical v5":
         fail(f"{sample}: read-AF topology scope mismatch")
@@ -607,8 +701,111 @@ def validate_read_af_topology_sidecar(
         region_id = row.get("region")
         if not region_id or region_id in by_region:
             fail(f"{sample}: duplicate/missing read-AF topology region key")
+        for family, unit in (row.get("units") or {}).items():
+            if not isinstance(unit, dict):
+                fail(f"{sample} {region_id} HP{family}: ranking payload is not an object")
+            if unit.get("status") == "incomplete":
+                if "full_edge_census" in unit:
+                    fail(f"{sample} {region_id} HP{family}: incomplete unit claims full-edge census")
+            elif "full_edge_census" in unit:
+                validate_full_edge_census(sample, region_id, family, unit)
+            else:
+                fail(f"{sample} {region_id} HP{family}: complete unit lacks full-edge census")
         by_region[region_id] = row
     return by_region
+
+
+def load_gene_drug(tsv_path: Path, sample: str):
+    """Optional cancer-gene / drug context overlay for one sample.
+
+    Source: COSMIC Cancer Gene Census (CGC) v104 + DGIdb interactions +
+    GENCODE v46 gene coordinates. Annotation-stratified biological-plausibility
+    context ONLY; never topology truth, candidate ranking input, or clinical
+    actionability (see gene_drug_inventory claim ceiling).
+
+    NOTE: the region keys in this TSV come from an older layered-v2 backbone and
+    do NOT match current-v5 region-view keys. We therefore keep only the
+    GENCODE gene intervals (backbone-independent) and join to current-v5 regions
+    by coordinate overlap. Returns {chrom: [gene_record sorted by gene_start]}.
+    """
+    lines = tsv_path.read_text(encoding="utf-8").splitlines()
+    if not lines:
+        return {}
+    col = {name: i for i, name in enumerate(lines[0].split("\t"))}
+
+    def cell(row, name):
+        idx = col.get(name)
+        return row[idx] if idx is not None and idx < len(row) else ""
+
+    seen: dict = {}
+    for line in lines[1:]:
+        if not line:
+            continue
+        row = line.split("\t")
+        if cell(row, "sample") != sample:
+            continue
+        chrom = cell(row, "chrom")
+        symbol = cell(row, "gene_symbol")
+        gene_start = _safe_int(cell(row, "gene_start"))
+        gene_end = _safe_int(cell(row, "gene_end"))
+        if not chrom or not symbol or gene_end <= 0:
+            continue
+        key = (chrom, gene_start, gene_end, symbol)
+        if key in seen:
+            continue
+        drugs = [d for d in (cell(row, "approved_antineoplastic_drug_claim_names") or "").split("|") if d]
+        seen[key] = {
+            "chrom": chrom,
+            "gene_start": gene_start,
+            "gene_end": gene_end,
+            "symbol": symbol,
+            "gene_type": cell(row, "gene_type"),
+            "cgc": cell(row, "cgc") == "1",
+            "cgc_role": cell(row, "cgc_role"),
+            "cgc_tier": cell(row, "cgc_tier"),
+            "cgc_tumour": cell(row, "cgc_tumour"),
+            "dgidb": cell(row, "dgidb") == "1",
+            "n_drugs": _safe_int(cell(row, "dgidb_unique_drugs")),
+            "n_antineo": _safe_int(cell(row, "approved_antineoplastic_drug_count")),
+            "antineo_drugs": drugs,
+        }
+    by_chrom: dict = {}
+    for gene in seen.values():
+        by_chrom.setdefault(gene["chrom"], []).append(gene)
+    for chrom in by_chrom:
+        by_chrom[chrom].sort(key=lambda g: g["gene_start"])
+    return by_chrom
+
+
+def _parse_region_span(region_key: str):
+    """chrN:start-end -> (start, end) ints; (0, 0) on failure."""
+    try:
+        span = region_key.split(":", 1)[1]
+        start_str, end_str = span.split("-", 1)
+        return int(start_str), int(end_str)
+    except (IndexError, ValueError):
+        return 0, 0
+
+
+def genes_overlapping(genes_by_chrom: dict, chrom: str, start: int, end: int):
+    """Genes whose GENCODE interval overlaps [start, end] on chrom (body overlap)."""
+    out = []
+    for gene in genes_by_chrom.get(chrom, []):
+        if gene["gene_start"] > end:
+            break
+        if gene["gene_end"] >= start:
+            record = dict(gene)
+            record["body"] = True
+            record["promoter"] = False
+            out.append(record)
+    return out
+
+
+def _safe_int(value: str) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def main() -> None:
@@ -740,6 +937,26 @@ def main() -> None:
     if l3.get("status") != "not_evaluated" or l3.get("role") != "bounded_auxiliary":
         fail(f"{sample}: L3 contract mismatch")
 
+    # Optional cancer-gene / drug context overlay (annotation-stratified only).
+    # Joined to current-v5 regions by GENCODE gene-coordinate overlap, because the
+    # TSV region keys come from an older backbone and do not match v5 region keys.
+    gene_drug_by_chrom: "dict[str, list]" = {}
+    gene_drug_meta = None
+    gene_drug_value = os.environ.get("SM_GENE_DRUG_TSV")
+    if gene_drug_value:
+        gene_drug_path = Path(gene_drug_value).resolve()
+        if not gene_drug_path.is_file():
+            fail(f"SM_GENE_DRUG_TSV is set but missing: {gene_drug_path}")
+        gene_drug_by_chrom = load_gene_drug(gene_drug_path, sample)
+        gene_drug_meta = {
+            "path": str(gene_drug_path),
+            "sha256": file_sha256(gene_drug_path),
+            "source": "COSMIC CGC v104 + DGIdb + GENCODE v46 gene coordinates",
+            "join": "current-v5 region ∩ GENCODE gene interval (coordinate overlap); TSV region keys are older-backbone and not used for the join",
+            "unique_genes": sum(len(v) for v in gene_drug_by_chrom.values()),
+            "claim_ceiling": "annotation-stratified biological-plausibility context; NOT topology truth, candidate ranking, or clinical actionability",
+        }
+
     regions = region_view.get("regions") or []
     by_chrom = defaultdict(list)
     indices = []
@@ -756,6 +973,11 @@ def main() -> None:
         detail = dict(region)
         detail["_ui"] = profile
         detail["_read_af"] = read_af_region
+        if gene_drug_by_chrom:
+            r_start, r_end = _parse_region_span(region["region"])
+            detail["gene_drug"] = genes_overlapping(gene_drug_by_chrom, chrom, r_start, r_end)
+        else:
+            detail["gene_drug"] = []
         for lineage in detail.get("lineages", []):
             if lineage.get("is_primary_lineage") is True:
                 lineage["read_af_ranking"] = (read_af_region.get("units") or {}).get(
@@ -765,6 +987,15 @@ def main() -> None:
         by_chrom[chrom].append(detail)
         indices.append(compact_index(region, chunk_index, profile, read_af_region))
     validate_recomputed(sample_record, indices)
+    if gene_drug_by_chrom:
+        for region, idx in zip(regions, indices):
+            r_start, r_end = _parse_region_span(region["region"])
+            genes = genes_overlapping(gene_drug_by_chrom, region.get("chrom"), r_start, r_end)
+            cgc_syms = sorted({g["symbol"] for g in genes if g.get("cgc") and g["symbol"]})
+            idx["cancer_genes"] = cgc_syms
+            idx["has_cgc"] = bool(cgc_syms)
+            idx["n_genes"] = len({g["symbol"] for g in genes if g["symbol"]})
+            idx["n_antineo_drugs"] = sum(g.get("n_antineo", 0) for g in genes)
     sample_overview = build_sample_overview(
         sample_record, regions, indices, read_af_payload["summary"]
     )
@@ -815,6 +1046,7 @@ def main() -> None:
         },
         "analysis_contract": region_view.get("analysis_contract"),
         "copy_number_contract": region_view.get("copy_number_contract"),
+        "gene_drug_meta": gene_drug_meta,
         "l3": l3,
         "read_tag_census": census.get("read_tag_census"),
         "census": census,
@@ -1018,6 +1250,47 @@ h3{margin:0;font-size:17px;line-height:1.3}
 .badge.exact{border-color:#9acbb9;background:#eef8f4;color:#0d6246}.badge.shape{border-color:#95bce0;background:#edf5fc;color:#0a548f}
 .badge.multiple{border-color:#d5a3c2;background:#fbf0f7;color:#842057}.badge.incomplete{border-style:dashed;border-color:#8995a0;background:#f3f5f7;color:#44515d}
 .badge.none{border-color:#c6cdd4;background:#f3f5f6;color:#56616b}.badge.warn{border-color:#e1b77c;background:#fff7eb;color:#764000}
+.badge.cgc{border-color:#d98a8a;background:#fdecec;color:#8a1f1f;font-weight:700}
+.gene-drug{min-width:0;max-width:100%;overflow:hidden;margin-top:16px;border:1px solid #e0b9b9;border-left:4px solid #c0392b;background:#fdf3f3}
+.gene-drug>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 14px;font-size:13px}
+.gene-drug>summary::-webkit-details-marker{display:none}
+.gene-drug>summary::before{content:"▸";color:#c0392b;font-size:11px;transition:transform .15s}
+.gene-drug[open]>summary::before{transform:rotate(90deg)}
+.gd-head{font-weight:800;color:#8a1f1f}
+.gd-syms{color:#16222b;font-size:13px}
+.gd-flag{display:inline-flex;align-items:center;min-height:20px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.gd-flag.cgc{background:#c0392b;color:#fff}.gd-flag.drug{background:#0a548f;color:#fff}.gd-flag.none{background:#eceff1;color:#5b6b78;font-weight:600}
+.gd-body{min-width:0;max-width:100%;padding:0 14px 13px}
+.gd-ceiling{margin:4px 0 10px;padding:8px 10px;border-left:3px solid #c0392b;background:#fff;color:#5b3030;font-size:11px;line-height:1.5}
+.gd-table{min-width:640px;font-size:11.5px}.gd-table .is-cgc td{background:#fdf3f3}
+.gd-sym{font-weight:700;white-space:nowrap}.gd-drug{color:#0a548f;font-weight:600}
+.subsection.aux h4{font-size:13px;color:#5b6b78}.subsection.aux .subsection-note{font-size:10.5px}
+details.lane{margin-top:12px;border:1px solid var(--line);background:#fff}
+details.lane.family-2{border-top:2px solid var(--magenta)}
+details.lane>summary.lane-head{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;padding:11px 13px;background:#f6f9fb}
+details.lane>summary::-webkit-details-marker{display:none}
+details.lane>summary::before{content:"▸";margin-right:4px;color:var(--blue);font-size:11px;transition:transform .15s}
+details.lane[open]>summary::before{transform:rotate(90deg)}
+.lane-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sub-drawer{min-width:0;max-width:100%;overflow:hidden;margin-top:10px;border:1px solid #e2e8ee;border-left:3px solid #9db8cc;background:#fbfcfe}
+.sub-drawer>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px}
+.sub-drawer>summary::-webkit-details-marker{display:none}
+.sub-drawer>summary::before{content:"▸";color:#5b7994;font-size:10px;transition:transform .15s}
+.sub-drawer[open]>summary::before{transform:rotate(90deg)}
+.sub-k{font-weight:800;font-size:13px;color:#274b63}.sub-note{color:var(--muted);font-size:10.5px}
+.sub-body{min-width:0;max-width:100%;padding:2px 12px 12px}
+.locus-table{min-width:520px;font-size:11px}
+.locus-table td.loc-cell{text-align:center;font-weight:800;font-family:var(--mono);padding:5px 6px}
+.loc-cell.alt{background:#e7f4ec;color:#0d6246}.loc-cell.ref{background:#f4f6f8;color:#4f5f6d}.loc-cell.nc{background:#fff;color:#536476}
+.loc-state{font-weight:700;white-space:nowrap}.loc-a{color:#0d6246}.loc-r{color:#54626f}
+.filter-checks{display:flex;flex-direction:column;gap:4px;justify-content:center;padding:2px 6px;border-left:2px solid #eadada}
+.check-title{color:#8a1f1f;font:750 9px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#3a3030;cursor:pointer}
+.chk input{width:15px;height:15px;accent-color:#c0392b;cursor:pointer}
+.result-row .row-cgc{display:inline-block;margin-left:6px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;font-size:9px;font-weight:800;vertical-align:middle}
+.ideogram-cgc{fill:#c0392b;stroke:#fff;stroke-width:.6}
+.cgc-legend{display:inline-flex;align-items:center;gap:5px;color:#8a1f1f;font-size:11px;font-weight:700}
+.cgc-legend::before{content:"";width:9px;height:9px;border-radius:50%;background:#c0392b;border:1px solid #fff;box-shadow:0 0 0 1px #c0392b}
 .load-more{display:block;width:calc(100% - 20px);margin:10px;min-height:44px}
 [hidden]{display:none!important}
 .detail{min-width:0;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
@@ -1061,7 +1334,12 @@ th,td{padding:7px 8px;border:1px solid var(--line);vertical-align:top}th{backgro
 .network-scroll{width:100%;max-width:100%;overflow-x:auto;padding:10px;overscroll-behavior-inline:contain}
 .network-scroll svg{display:block;max-width:none;height:auto;margin:0 auto}
 .network-legend{display:flex;flex-wrap:wrap;gap:8px;padding:8px 10px;border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:10.5px}
-.line-swatch{display:inline-block;width:24px;margin-right:4px;border-top:2px solid #536476;vertical-align:middle}.line-swatch.variable{border-top-style:dashed;border-color:var(--amber)}.line-swatch.unevaluated{border-top-style:dotted;border-color:#8b97a2}
+.line-swatch{display:inline-block;width:24px;margin-right:4px;border-top:2px solid #536476;vertical-align:middle}.line-swatch.variable{border-top-style:dashed;border-color:var(--amber)}.line-swatch.unevaluated{border-top-style:dotted;border-color:#8b97a2}.line-swatch.selected{border-top:5px solid rgba(7,94,168,.38)}
+.full-edge-network{border-left:4px solid var(--blue);background:#f5f9fd}.full-edge-network .network-head{background:#edf5fc}
+.network-edge-selected-overlay{pointer-events:none;stroke:#075ea8;stroke-width:8;stroke-linecap:round;opacity:.24}
+.edge-census{margin-top:8px;border:1px solid var(--line);background:#fff}.edge-census>summary{cursor:pointer;padding:10px 12px;color:#274b63;font-size:11.5px;font-weight:800}.edge-census[open]>summary{border-bottom:1px solid var(--line)}
+.edge-census-body{padding:10px}.edge-census-boundary{margin:0 0 8px;color:var(--muted);font-size:10.5px}.edge-census-table{min-width:720px}.edge-census-table tr.edge-selected td{background:#edf5fc}.edge-census-table .edge-path{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.stored-preview-scope{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin-top:10px;padding:10px 11px;border:1px dashed #8995a0;background:#f8fafb;color:#455464;font-size:11px}.stored-preview-scope b{color:#274b63}.stored-preview-scope span{min-width:0}
 .shape-tabs,.tree-tabs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .shape-tab,.tree-tab{min-height:38px;padding:6px 9px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
 .shape-tab[aria-pressed="true"],.tree-tab[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}
@@ -1072,7 +1350,7 @@ th,td{padding:7px 8px;border:1px solid var(--line);vertical-align:top}th{backgro
 details.drawer{margin-top:10px;border:1px solid var(--line);background:#fff}
 details.drawer>summary{cursor:pointer;padding:11px 12px;font-weight:730}
 details.drawer[open]>summary{border-bottom:1px solid var(--line)}
-.drawer-body{padding:11px 12px}.drawer-body p{margin:5px 0;color:var(--muted);font-size:11.5px}
+.drawer-body{padding:11px 12px}.drawer-body p{margin:5px 0;color:var(--muted);font-size:11.5px}.drawer-body p.mono{overflow-wrap:anywhere;word-break:break-word}
 .trace{padding:8px 10px;background:#f3f6f8;color:#4f5f6d;font:10.5px/1.5 var(--mono);overflow-wrap:anywhere}
 .raw-links{display:grid;gap:8px}.raw-link{padding:9px 10px;border:1px solid var(--line);overflow-wrap:anywhere}.raw-link small{display:block;color:var(--muted)}
 .footer{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px}
@@ -1240,7 +1518,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
      <div class="ideogram-scroll-inner"><div class="ideogram-mobile-rail" id="ideogram-mobile-rail" aria-hidden="true"></div><svg id="ideogram-svg" viewBox="0 0 1120 626" role="img" aria-labelledby="ideogram-svg-title ideogram-svg-desc"><title id="ideogram-svg-title">__SAMPLE__ 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可用上方按鈕切換著色，並用每列透明按鈕下鑽染色體。</desc></svg></div>
     </div>
    </div>
-   <div class="chrom-structure-key" id="chrom-structure-key"><strong>下方 mini-bar 固定顯示 structural determinacy</strong><span><i class="seg-exact"></i>Exact 唯一</span><span><i class="seg-shape"></i>Shape 唯一</span><span><i class="seg-multiple"></i>Multi-shape</span><span><i class="seg-incomplete"></i>Incomplete</span></div>
+   <div class="chrom-structure-key" id="chrom-structure-key"><strong>下方 mini-bar 固定顯示 structural determinacy</strong><span><i class="seg-exact"></i>Exact 唯一</span><span><i class="seg-shape"></i>Shape 唯一</span><span><i class="seg-multiple"></i>Multi-shape</span><span><i class="seg-incomplete"></i>Incomplete</span><span class="cgc-legend">紅點＝交集 COSMIC CGC 癌基因</span></div>
    <div class="chrom-grid" id="chrom-grid" aria-label="22 條常染色體導覽；mini-bar 固定顯示 structural determinacy" aria-describedby="chrom-structure-key"></div>
   </div>
  </section>
@@ -1258,6 +1536,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
    <label class="filter" for="fevidence"><span>Read-state 約束</span><select id="fevidence"><option value="">全部</option><option value="full_and_partial">full + partial</option><option value="partial_only">partial-only</option><option value="full_only">full-only</option></select></label>
    <label class="filter" for="fsignal"><span>獨立 facet</span><select id="fsignal"><option value="">全部</option><option value="recurrence">有 recurrence</option><option value="hidden">有 hidden state</option><option value="multi_hp">HP1 + HP2</option></select></label>
    <label class="filter search" for="fq"><span>基因體位置／區間 overlap</span><input id="fq" type="search" placeholder="chr8:34220481 或 chr8:34200000-34300000"></label>
+   <div class="filter-checks" aria-label="癌基因狀況勾選"><span class="check-title">勾選狀況</span><label class="chk" for="fcgc"><input id="fcgc" type="checkbox"><span>🧬 只看癌基因命中（CGC）</span></label><label class="chk" for="fdrug"><input id="fdrug" type="checkbox"><span>💊 只看有抗腫瘤藥</span></label></div>
    <div class="count" id="result-count" role="status" aria-live="polite">0 regions</div>
   </div>
   <p class="filter-boundary"><b>PS QC boundary：</b>此 dataset 有 __MIXED_PS__ 個 mixed-PS regions，但 canonical region payload 沒有逐 region PS membership；因此本頁刻意不提供 PS filter，且不產生任何 PS-derived edge。</p>
@@ -1565,7 +1844,7 @@ function renderIdeogram(){
    if(row.chrom!==chrom)return;
    const x=trackX+(Number(row.midpoint)/length)*width;
    const category=ideogramCategory(row,ideogramMode);
-   out+='<line class="ideogram-mark tone-'+category.tone+'" data-row-index="'+index+'" data-region="'+esc(row.region)+'" data-chrom="'+chrom+'" data-start="'+row.start+'" data-end="'+row.end+'" data-midpoint="'+row.midpoint+'" data-mode-value="'+category.key+'" x1="'+x.toFixed(4)+'" x2="'+x.toFixed(4)+'" y1="'+(y-7)+'" y2="'+(y+7)+'"></line>';
+   out+='<line class="ideogram-mark tone-'+category.tone+'" data-row-index="'+index+'" data-region="'+esc(row.region)+'" data-chrom="'+chrom+'" data-start="'+row.start+'" data-end="'+row.end+'" data-midpoint="'+row.midpoint+'" data-mode-value="'+category.key+'" x1="'+x.toFixed(4)+'" x2="'+x.toFixed(4)+'" y1="'+(y-7)+'" y2="'+(y+7)+'"></line>'+(row.has_cgc?'<circle class="ideogram-cgc" data-region="'+esc(row.region)+'" cx="'+x.toFixed(4)+'" cy="'+(y-10.5)+'" r="2.4"><title>癌基因 '+esc((row.cancer_genes||[]).join(", "))+'</title></circle>':'');
   });
   out+='<text class="ideogram-length" x="1098" y="'+(y+4)+'">'+(length/1000000).toFixed(1)+' Mb</text><rect class="ideogram-chrom-hit" data-chrom="'+chrom+'" role="button" tabindex="0" aria-pressed="false" aria-label="開啟 '+chrom+'，'+fmt(CHROM_SUMMARIES[chrom].W_tree)+' 個 W tree regions" x="2" y="'+(y-10)+'" width="1106" height="20"></rect></g>';
  }
@@ -1713,6 +1992,8 @@ function applyFilters(){
  const evidence=document.getElementById("fevidence").value;
  const signal=document.getElementById("fsignal").value;
  const query=document.getElementById("fq").value;
+ const cgcOnly=(document.getElementById("fcgc")||{}).checked===true;
+ const drugOnly=(document.getElementById("fdrug")||{}).checked===true;
  state.filtered=INDEX.filter(row=>
   (!chrom||row.chrom===chrom)&&
   (!topology||row.topology_class===topology)&&
@@ -1720,6 +2001,8 @@ function applyFilters(){
   (!morphology||row.morphology_class===morphology)&&
   (!evidence||row.evidence_mode===evidence)&&
   independentSignal(row,signal)&&
+  (!cgcOnly||row.has_cgc===true)&&
+  (!drugOnly||(row.n_antineo_drugs||0)>0)&&
   matchesCoordinateQuery(row,query)
  ).sort((a,b)=>(chromRank(a.chrom)-chromRank(b.chrom))||(a.start-b.start)||(a.end-b.end));
  state.limit=80;
@@ -1820,6 +2103,36 @@ function limitationText(region,indexRow){
  return limits.join("；");
 }
 
+function cancerGenesOf(region){
+ return [...new Set((region.gene_drug||[]).filter(g=>g.cgc).map(g=>g.symbol).filter(Boolean))];
+}
+
+function geneDrugPanel(region){
+ const genes=region.gene_drug||[];
+ if(!genes.length)return '';
+ const cgc=genes.filter(g=>g.cgc);
+ const cgcSyms=cancerGenesOf(region);
+ const drugSet=[...new Set(genes.flatMap(g=>g.antineo_drugs||[]))].sort();
+ const summary=cgc.length
+  ? '<span class="gd-flag cgc">癌基因命中 '+cgcSyms.length+'</span><b class="gd-syms">'+esc(cgcSyms.slice(0,6).join(' · '))+(cgcSyms.length>6?' …':'')+'</b>'
+  : '<span class="gd-flag none">交集 '+genes.length+' 基因·無 COSMIC 癌基因</span>';
+ const drugSummary=drugSet.length?'<span class="gd-flag drug">抗腫瘤藥 '+drugSet.length+'</span>':'';
+ const rows=genes.map(g=>{
+  const role=g.cgc?('CGC'+(g.cgc_tier?(' T'+esc(g.cgc_tier)):'')+(g.cgc_role?(' · '+esc(g.cgc_role)):'')):'';
+  const drugs=g.antineo_drugs||[];
+  return '<tr'+(g.cgc?' class="is-cgc"':'')+'><td class="gd-sym">'+esc(g.symbol||'—')+'<br><span class="muted mono">'+esc(g.gene_type||'')+'</span></td>'+
+   '<td>'+(g.body?'gene body':(g.promoter?'promoter ±2kb':'overlap'))+'</td>'+
+   '<td>'+(role?('<span class="gd-flag cgc">'+role+'</span>'):'<span class="muted">non-CGC</span>')+'</td>'+
+   '<td>'+(drugs.length?('<span class="gd-drug">'+drugs.map(esc).join('、')+'</span>'):(g.dgidb?('<span class="muted">DGIdb '+g.n_drugs+' drugs·非 approved-antineoplastic</span>'):'<span class="muted">—</span>'))+'</td></tr>';
+ }).join('');
+ return '<details class="gene-drug"'+(cgc.length?' open':'')+'>'+
+  '<summary><span class="gd-head">🧬 癌基因／用藥脈絡</span>'+summary+drugSummary+'</summary>'+
+  '<div class="gd-body">'+
+  '<p class="gd-ceiling">脈絡註記（COSMIC CGC v104 · DGIdb · GENCODE v46 gene body）：只描述本 region 座標與基因的交集及其關聯藥物；<b>不代表此拓撲為真、不是候選排序依據、也不是臨床可用性</b>。HCC1395 兩列為同一 biological sample 的技術處理。</p>'+
+  '<div class="scroll-region" role="region" tabindex="0" aria-label="癌基因與藥物交集表"><table class="gd-table"><thead><tr><th scope="col">基因</th><th scope="col">交集</th><th scope="col">癌基因(CGC)</th><th scope="col">approved antineoplastic 藥物</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '</div></details>';
+}
+
 function siteEvidence(region){
  const positions=region.positions||[];
  if(!positions.length)return '<p class="muted">此 region-view 沒有可展示的位點座標。</p>';
@@ -1892,32 +2205,38 @@ function edgeAcquisition(parent,child){
  return changes.length?"+"+changes.join(","):"";
 }
 
-function networkSvg(edges,edgeStates,title,recurrenceIndices){
+function networkSvg(edges,edgeStates,title,recurrenceIndices,edgeMetrics){
  const layout=layoutNetwork(edges);
  const markerBase="network-arrow-"+(++networkCounter);
  const descriptionId=markerBase+"-description";
  const exactCandidate=Array.isArray(recurrenceIndices);
  const recurrenceSites=new Set((recurrenceIndices||[]).map(index=>"S"+(Number(index)+1)));
+ const metrics=edgeMetrics||{};
  const accessibleEdges=(edges||[]).map(edge=>{
-  const key=edge[0]+">"+edge[1];const status=edgeStates[key]||"unevaluated";const acquisition=edgeAcquisition(edge[0],edge[1]);
+  const key=edge[0]+">"+edge[1];const status=edgeStates[key]||"unevaluated";const acquisition=edgeAcquisition(edge[0],edge[1]);const metric=metrics[key];
   const repeated=[...recurrenceSites].filter(site=>acquisition.split(/[^A-Za-z0-9]+/).includes(site));
-  return stateLabel(edge[0])+" → "+stateLabel(edge[1])+"；"+status+(acquisition?"；"+acquisition:"")+(repeated.length?"；repeated-acquisition "+repeated.join(","):"");
+  const membership=metric?"；candidate membership "+metric.candidateCount+" / "+metric.candidateTotal+"；co-top membership "+metric.topCount+" / "+metric.topTotal+"；membership counts are not probability":"";
+  return stateLabel(edge[0])+" → "+stateLabel(edge[1])+"；"+status+membership+(acquisition?"；"+acquisition:"")+(repeated.length?"；repeated-acquisition "+repeated.join(","):"");
  });
  let accessibleSummary=accessibleEdges.length
   ? "Directed mutation-state edges: "+accessibleEdges.join("。")+"。"
   : "No stored candidate edge; ROOT-only state.";
+ if(Object.keys(metrics).length)accessibleSummary+=" This is the union across an exact candidate set, not one candidate tree; n/N and top m/M are membership counts, not probabilities.";
  if(recurrenceSites.size)accessibleSummary+=" Candidate recurrence sites: "+[...recurrenceSites].join(", ")+".";
  let svg='<svg role="img" aria-label="'+esc(title)+'" aria-describedby="'+descriptionId+'" width="'+layout.width+'" height="'+layout.height+'" viewBox="0 0 '+layout.width+' '+layout.height+'">';
  svg+='<title>'+esc(title)+'</title>';
  svg+='<defs><marker id="'+markerBase+'-forced" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536476"/></marker><marker id="'+markerBase+'-variable" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9a5200"/></marker><marker id="'+markerBase+'-unevaluated" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8b97a2"/></marker><marker id="'+markerBase+'-ranked" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#075ea8"/></marker></defs>';
  (edges||[]).forEach(edge=>{
   const p=layout.position[edge[0]],c=layout.position[edge[1]];if(!p||!c)return;
-  const key=edge[0]+">"+edge[1];const status=edgeStates[key]||"unevaluated";
+  const key=edge[0]+">"+edge[1];const status=edgeStates[key]||"unevaluated";const metric=metrics[key];const selected=Boolean(metric&&Number(metric.topCount)>0);
   const stroke=status==="forced"?"#536476":status==="variable"?"#9a5200":status==="ranked"?"#075ea8":"#8b97a2";
   const dash=status==="variable"?' stroke-dasharray="8 5"':status==="unevaluated"?' stroke-dasharray="2 6"':"";
   const dx=c.x-p.x,dy=c.y-p.y,length=Math.max(1,Math.hypot(dx,dy));
   const x1=p.x+dx/length*12,y1=p.y+dy/length*12,x2=c.x-dx/length*15,y2=c.y-dy/length*15;
-  svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+stroke+'" stroke-width="2" marker-end="url(#'+markerBase+'-'+status+')"'+dash+'><title>'+esc(status)+" directed edge "+esc(key)+'</title></line>';
+  const countAttrs=metric?' data-candidate-count="'+metric.candidateCount+'" data-candidate-total="'+metric.candidateTotal+'" data-top-count="'+metric.topCount+'" data-top-total="'+metric.topTotal+'"':"";
+  const edgeTitle=status+" directed edge "+key+(metric?"; candidate membership "+metric.candidateCount+"/"+metric.candidateTotal+"; co-top membership "+metric.topCount+"/"+metric.topTotal+"; not probability; union is not one tree":"");
+  if(selected)svg+='<line class="network-edge-selected-overlay" data-edge-key="'+esc(key)+'"'+countAttrs+' x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"><title>Selected-set overlay; '+esc(edgeTitle)+'</title></line>';
+  svg+='<line class="network-edge edge-'+status+(selected?' edge-selected':'')+'" data-edge-key="'+esc(key)+'" data-edge-status="'+status+'"'+countAttrs+' x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+stroke+'" stroke-width="2" marker-end="url(#'+markerBase+'-'+status+')"'+dash+'><title>'+esc(edgeTitle)+'</title></line>';
   const label=edgeAcquisition(edge[0],edge[1]);const repeated=[...recurrenceSites].filter(site=>label.split(/[^A-Za-z0-9]+/).includes(site));
   if(label&&exactCandidate){
    const diagonal=Math.abs(dx)>12;
@@ -1990,14 +2309,46 @@ function readAfRankingPanel(line){
  return '<section class="read-af-card"><div class="read-af-head"><div><b>'+esc(header)+'</b><p>family-specific read ALT fraction · 描述性排序</p></div><span class="badge '+badge+'">'+(ranking?.status||((complete&&Number(line.n_trees)===1)?"fixed exact":"not applicable"))+'</span></div><div class="read-af-body">'+body+familyReadAfStrip(line)+'</div></section>';
 }
 
+function exhaustiveEdgeCensus(line){
+ const raw=line.read_af_ranking?.full_edge_census;
+ if(!raw||raw.complete!==true)return null;
+ const candidateTotal=Number(raw.candidate_total),topTotal=Number(raw.top_candidate_total);
+ const nodeTotal=Number(raw.node_total),edgeTotal=Number(raw.edge_total);
+ if(!Number.isInteger(candidateTotal)||candidateTotal<1||candidateTotal!==Number(line.n_trees))throw new Error("Full edge census candidate total mismatch for "+line.fam_label);
+ if(!Number.isInteger(topTotal)||topTotal<0||topTotal>candidateTotal)throw new Error("Full edge census top total mismatch for "+line.fam_label);
+ if(!Array.isArray(raw.edge_rows)||raw.edge_rows.length!==edgeTotal)throw new Error("Full edge census row count mismatch for "+line.fam_label);
+ const rows=[];const edges=[];const metrics={};const nodes=new Set();
+ raw.edge_rows.forEach((row,index)=>{
+  if(!Array.isArray(row)||row.length!==4)throw new Error("Invalid full edge census row "+index+" for "+line.fam_label);
+  const parent=String(row[0]),child=String(row[1]),candidateCount=Number(row[2]),topCount=Number(row[3]);
+  const key=parent+">"+child;
+  if(!parent||!child||parent===child||metrics[key])throw new Error("Invalid or duplicate full edge census edge "+key+" for "+line.fam_label);
+  if(!Number.isInteger(candidateCount)||candidateCount<1||candidateCount>candidateTotal)throw new Error("Invalid full edge candidate count for "+key);
+  if(!Number.isInteger(topCount)||topCount<0||topCount>topTotal||topCount>candidateCount)throw new Error("Invalid full edge top count for "+key);
+  const status=candidateCount===candidateTotal?"forced":"variable";
+  const metric={parent:parent,child:child,key:key,candidateCount:candidateCount,candidateTotal:candidateTotal,topCount:topCount,topTotal:topTotal,status:status};
+  rows.push(metric);edges.push([parent,child]);metrics[key]=metric;nodes.add(parent);nodes.add(child);
+ });
+ if(nodes.size!==nodeTotal)throw new Error("Full edge census node count mismatch for "+line.fam_label);
+ return {candidateTotal:candidateTotal,topTotal:topTotal,nodeTotal:nodeTotal,edgeTotal:edgeTotal,rows:rows,edges:edges,metrics:metrics};
+}
+
+function edgeCensusTable(census,line){
+ const rows=census.rows.map(item=>'<tr class="'+(item.topCount>0?'edge-selected':'')+'" data-edge-key="'+esc(item.key)+'" data-candidate-count="'+item.candidateCount+'" data-candidate-total="'+item.candidateTotal+'" data-top-count="'+item.topCount+'" data-top-total="'+item.topTotal+'"><td class="edge-path">'+esc(stateLabel(item.parent))+' → '+esc(stateLabel(item.child))+'</td><td>'+(item.status==="forced"?'Forced':'Variable')+(item.topCount>0?' · selected set':'')+'</td><td class="num">'+fmt(item.candidateCount)+' / '+fmt(item.candidateTotal)+'</td><td class="num">'+fmt(item.topCount)+' / '+fmt(item.topTotal)+'</td></tr>').join("");
+ return '<details class="edge-census" data-edge-scope="complete" data-candidate-total="'+census.candidateTotal+'" data-top-total="'+census.topTotal+'"><summary>完整 edge census · '+fmt(census.edgeTotal)+' edges · '+fmt(census.nodeTotal)+' nodes · '+fmt(census.candidateTotal)+' / '+fmt(census.candidateTotal)+' candidates</summary><div class="edge-census-body"><p class="edge-census-boundary">這是完整 exact candidate set 的逐邊 membership，不是一棵合併樹。n/N 與 top m/M 是候選包含計數，<b>不是 posterior、機率或 read support weight</b>；藍色表示該邊出現在 current read-AF co-top candidate set。</p><div class="scroll-region" role="region" tabindex="0" aria-label="'+esc(line.fam_label)+' 完整 exact candidate edge census，可水平捲動"><table class="edge-census-table" data-candidate-total="'+census.candidateTotal+'" data-top-total="'+census.topTotal+'"><caption>'+esc(line.fam_label)+' exhaustive edge membership；union 不是單棵樹</caption><thead><tr><th scope="col">Directed state edge</th><th scope="col">Across exact set</th><th scope="col" class="num">Candidate n / N</th><th scope="col" class="num">Co-top m / M</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></details>';
+}
+
 function candidateExplorer(line,laneId){
  const trees=line.trees||[];
- if(!trees.length)return '<div class="scope-warning">此 unit 沒有可畫的 stored candidate edges；這是資料狀態，不是空白錯誤。</div>';
  const analysisComplete=line.analysis_candidate_set_complete===true;
  const fullDisplay=analysisComplete&&line.display_trees_complete===true&&Number(line.n_trees_stored)===Number(line.n_trees);
- const edgeCounts={};trees.forEach(tree=>(tree.edges||[]).forEach(edge=>{const key=edge[0]+">"+edge[1];edgeCounts[key]=(edgeCounts[key]||0)+1}));
- const unionEdges=Object.keys(edgeCounts).map(key=>key.split(">"));
- const edgeStates={};Object.keys(edgeCounts).forEach(key=>edgeStates[key]=fullDisplay?(edgeCounts[key]===trees.length?"forced":"variable"):"unevaluated");
+ const census=analysisComplete?exhaustiveEdgeCensus(line):null;
+ if(!trees.length&&!census)return '<div class="scope-warning">此 unit 沒有可畫的 stored candidate edges；這是資料狀態，不是空白錯誤。</div>';
+ const storedEdgeCounts={};trees.forEach(tree=>(tree.edges||[]).forEach(edge=>{const key=edge[0]+">"+edge[1];storedEdgeCounts[key]=(storedEdgeCounts[key]||0)+1}));
+ const unionEdges=census?census.edges:Object.keys(storedEdgeCounts).map(key=>key.split(">"));
+ const edgeStates={};
+ if(census)census.rows.forEach(item=>edgeStates[item.key]=item.status);
+ else Object.keys(storedEdgeCounts).forEach(key=>edgeStates[key]=fullDisplay?(storedEdgeCounts[key]===trees.length?"forced":"variable"):"unevaluated");
  const groups={};trees.forEach((tree,index)=>{const signature=shapeSignature(tree.edges||[]);(groups[signature]=groups[signature]||[]).push(index)});
  const signatures=Object.keys(groups);
  const storedShapeCount=signatures.length;const declaredStoredShapes=Number(line.n_distinct_shapes_stored);
@@ -2007,7 +2358,7 @@ function candidateExplorer(line,laneId){
  if(fullDisplay&&storedShapeCount!==exactShapeCount)throw new Error("Exact topology shape count mismatch for "+line.fam_label);
  const allExactShapesStored=analysisComplete&&Number.isFinite(exactShapeCount)&&storedShapeCount===exactShapeCount;
  const exactShapeText=line.n_distinct_shapes_exact==null?"unavailable":fmt(line.n_distinct_shapes_exact);
- const shapePrefix=allExactShapesStored?"Shape":analysisComplete?"Stored shape":"Prefix shape";
+ const shapePrefix=fullDisplay?"Shape":analysisComplete?"Stored shape preview":"Prefix shape preview";
  const shapeScope=fullDisplay
   ? "Shape controls cover the complete exact set ("+storedShapeCount+" / "+exactShapeText+")."
   : analysisComplete
@@ -2017,15 +2368,27 @@ function candidateExplorer(line,laneId){
    : "Shape controls cover "+storedShapeCount+" groups in the enumerated prefix; the exact universe total is unknown.";
  const recurrenceCounts={};trees.forEach(tree=>(tree.recurrence||[]).forEach(index=>{const site="S"+(Number(index)+1);recurrenceCounts[site]=(recurrenceCounts[site]||0)+1}));
  const recurrenceSummary=Object.entries(recurrenceCounts).map(([site,count])=>site+" in "+count+" / "+trees.length+" stored candidates").join("；");
- const candidatePrefix=fullDisplay?"Exact":analysisComplete?"Stored exact":"Prefix";
- CANDIDATE_CACHE[laneId]={trees:trees,groups:signatures.map(signature=>groups[signature]),fullDisplay:fullDisplay,edgeStates:edgeStates,shapePrefix:shapePrefix,candidatePrefix:candidatePrefix,famLabel:line.fam_label};
- const networkTitle="Candidate-space network for "+line.fam_label+"; "+(fullDisplay?"forced and variable edges evaluated across the complete displayed exact set":"edge stability not evaluated because displayed candidates are incomplete");
- let out='<div class="network-card"><div class="network-head"><div><b>候選空間 network</b><p>'+esc(fullDisplay?"完整 exact set 的聯集；實線為全候選共有，虛線為候選間變動。":"只顯示 stored candidates 的聯集；所有邊以點線標為 not evaluated，不宣稱 forced。")+'</p></div><span class="badge '+(fullDisplay?"exact":"incomplete")+'">'+(fullDisplay?"edge scope complete":"edge scope incomplete")+'</span></div>';
- out+='<div class="network-scroll" role="region" tabindex="0" aria-label="'+esc(line.fam_label)+' 候選空間 network，可水平捲動">'+networkSvg(unionEdges,edgeStates,networkTitle)+'</div>';
- out+='<div class="network-legend"><span>箭頭＝mutation-state transition 方向</span><span><span class="line-swatch"></span>forced across complete exact set</span><span><span class="line-swatch variable"></span>varies between candidates</span><span><span class="line-swatch unevaluated"></span>not evaluated</span><span>實心節點 observed</span><span>空心虛線 H inferred</span><span>聯集圖省略 +S_i label；逐邊 acquisition 見下方 single candidate</span></div></div>';
+ const candidatePrefix=fullDisplay?"Exact":analysisComplete?"Stored preview":"Prefix preview";
+ const candidateTotal=Number(line.n_trees||0);
+ CANDIDATE_CACHE[laneId]={trees:trees,groups:signatures.map(signature=>groups[signature]),fullDisplay:fullDisplay,edgeStates:edgeStates,shapePrefix:shapePrefix,candidatePrefix:candidatePrefix,famLabel:line.fam_label,candidateTotal:candidateTotal};
+ const edgeScopeComplete=Boolean(census)||fullDisplay;
+ const networkTitle=census
+  ? "Exhaustive exact candidate edge union for "+line.fam_label+"; "+census.candidateTotal+" of "+census.candidateTotal+" candidates; union is not one tree; membership counts are not probability"
+  : "Candidate-space network for "+line.fam_label+"; "+(fullDisplay?"forced and variable edges evaluated across the complete displayed exact set":"edge stability not evaluated because displayed candidates are incomplete");
+ const networkClass=census?" full-edge-network":" stored-edge-network";
+ const networkAttrs=census?' data-edge-scope="complete" data-candidate-total="'+census.candidateTotal+'" data-top-total="'+census.topTotal+'"':' data-edge-scope="'+(fullDisplay?'complete':'stored-preview')+'"';
+ const networkHeading=census?"完整 exact candidate edge union":"候選空間 network";
+ const networkNote=census
+  ? fmt(census.candidateTotal)+" / "+fmt(census.candidateTotal)+" exact candidates 的完整逐邊聯集；union 不是單棵樹，n/N 與 top m/M 不是機率。"
+  : fullDisplay?"完整 exact set 的聯集；實線為全候選共有，虛線為候選間變動。":"只顯示 stored candidates 的聯集；所有邊以點線標為 not evaluated，不宣稱 forced。";
+ let out='<div class="network-card'+networkClass+'"'+networkAttrs+'><div class="network-head"><div><b>'+networkHeading+'</b><p>'+esc(networkNote)+'</p></div><span class="badge '+(edgeScopeComplete?"exact":"incomplete")+'">'+(edgeScopeComplete?"edge scope complete":"edge scope incomplete")+'</span></div>';
+ out+='<div class="network-scroll" role="region" tabindex="0" aria-label="'+esc(line.fam_label+' '+networkHeading+'，可水平捲動；union 不是單棵樹')+'">'+networkSvg(unionEdges,edgeStates,networkTitle,undefined,census?.metrics)+'</div>';
+ out+='<div class="network-legend"><span>箭頭＝mutation-state transition 方向</span><span><span class="line-swatch"></span>forced across complete exact set</span><span><span class="line-swatch variable"></span>varies between candidates</span>'+(census&&census.topTotal>0?'<span><span class="line-swatch selected"></span>appears in co-top selected set</span>':'')+'<span><span class="line-swatch unevaluated"></span>not evaluated</span><span>實心節點 observed</span><span>空心虛線 H inferred</span><span>聯集圖省略 +S_i label；逐邊 acquisition 見下方 single candidate</span></div></div>';
+ if(census)out+=edgeCensusTable(census,line);
  out+='<div class="shape-scope"><b>Shape display scope</b><span>'+esc(shapeScope)+'</span></div>';
  if(recurrenceSummary)out+='<div class="recurrence-note"><b>Stored candidate recurrence annotation</b><span>'+esc(recurrenceSummary)+'。這是 candidate-level repeated acquisition；是否構成 recurrence facet 仍依 primary L1 class。</span></div>';
- out+='<div class="shape-tabs" role="group" aria-label="'+esc(line.fam_label+' '+shapePrefix+' topology groups')+'">'+signatures.map((signature,index)=>'<button class="shape-tab" type="button" aria-label="'+esc(line.fam_label+' '+shapePrefix+' '+(index+1)+', '+groups[signature].length+' stored exact candidates')+'" aria-pressed="'+(index===0?"true":"false")+'" data-lane="'+laneId+'" data-shape="'+index+'">'+shapePrefix+' '+(index+1)+' · '+groups[signature].length+' stored exact</button>').join("")+'</div>';
+ if(!fullDisplay)out+='<div class="stored-preview-scope" data-stored-count="'+trees.length+'" data-candidate-total="'+candidateTotal+'"><b>Stored candidate preview · '+fmt(trees.length)+' / '+fmt(candidateTotal)+'</b><span>下列 shape／candidate tabs 只巡覽 stored preview，不是完整 candidate universe；上方完整 edge union（若可用）與 read-AF 原 candidate index 才是跨全部 exact candidates 的範圍。</span></div>';
+ out+='<div class="shape-tabs" role="group" aria-label="'+esc(line.fam_label+' '+shapePrefix+' topology groups')+'">'+signatures.map((signature,index)=>'<button class="shape-tab" type="button" aria-label="'+esc(line.fam_label+' '+shapePrefix+' '+(index+1)+', '+groups[signature].length+' stored preview candidates')+'" aria-pressed="'+(index===0?"true":"false")+'" data-lane="'+laneId+'" data-shape="'+index+'">'+shapePrefix+' '+(index+1)+' · '+groups[signature].length+' stored preview</button>').join("")+'</div>';
  out+='<div class="candidate-view" id="'+laneId+'-candidate"></div>';
  return out;
 }
@@ -2039,9 +2402,9 @@ function renderCandidateShape(laneId,shapeIndex,treeIndex,restoreTreeFocus){
  const localStates={};(tree.edges||[]).forEach(edge=>localStates[edge[0]+">"+edge[1]]=payload.fullDisplay?payload.edgeStates[edge[0]+">"+edge[1]]:"unevaluated");
  const host=document.getElementById(laneId+"-candidate");
  host.innerHTML='<div class="tree-tabs" role="group" aria-label="'+esc(payload.famLabel+' '+payload.candidatePrefix+' candidates in '+payload.shapePrefix+' '+(shapeIndex+1))+'">'+candidateIndices.map((index,position)=>'<button class="tree-tab" type="button" aria-label="'+esc(payload.famLabel+' '+payload.shapePrefix+' '+(shapeIndex+1)+' '+payload.candidatePrefix+' candidate '+(index+1))+'" aria-pressed="'+(index===activeIndex?"true":"false")+'" data-lane="'+laneId+'" data-shape="'+shapeIndex+'" data-tree="'+position+'">'+payload.candidatePrefix+' #'+(index+1)+'</button>').join("")+'</div>'+recurrenceNote+
-  '<div class="network-card"><div class="network-head"><div><b>'+payload.candidatePrefix+' candidate #'+(activeIndex+1)+'</b><p>這裡保留 structural stored order；current read-AF 第一順位與原 candidate index 已在上方獨立標示。</p></div></div>'+
+  '<div class="network-card '+(payload.fullDisplay?'exact-candidate-view':'stored-preview-candidate')+'" data-stored-count="'+payload.trees.length+'" data-candidate-total="'+payload.candidateTotal+'"><div class="network-head"><div><b>'+payload.candidatePrefix+' candidate #'+(activeIndex+1)+'</b><p>這裡保留 structural stored order；current read-AF 第一順位與原 candidate index 已在上方獨立標示。'+(payload.fullDisplay?'':' 此卡屬 stored preview '+payload.trees.length+' / '+payload.candidateTotal+'。')+'</p></div></div>'+
   '<div class="network-scroll" role="region" tabindex="0" aria-label="'+esc(payload.famLabel+' '+payload.shapePrefix+' '+(shapeIndex+1)+' '+payload.candidatePrefix+' candidate '+(activeIndex+1)+' mutation-state network，可水平捲動')+'">'+networkSvg(tree.edges||[],localStates,payload.famLabel+" "+payload.shapePrefix+" "+(shapeIndex+1)+" "+payload.candidatePrefix+" mutation-state candidate "+(activeIndex+1),tree.recurrence||[])+'</div>'+
-  '<div class="tree-caption">'+payload.shapePrefix+' '+(shapeIndex+1)+' · '+payload.candidatePrefix.toLowerCase()+' candidate '+(activeIndex+1)+' / stored '+payload.trees.length+(payload.fullDisplay?" · complete display":" · display subset")+'</div></div>';
+  '<div class="tree-caption">'+payload.shapePrefix+' '+(shapeIndex+1)+' · '+payload.candidatePrefix.toLowerCase()+' candidate '+(activeIndex+1)+(payload.fullDisplay?' / '+payload.candidateTotal+' · complete display':' · stored preview '+payload.trees.length+' / exact '+payload.candidateTotal)+'</div></div>';
  host.querySelectorAll(".tree-tab").forEach(button=>button.addEventListener("click",()=>renderCandidateShape(button.dataset.lane,Number(button.dataset.shape),Number(button.dataset.tree),true)));
  document.querySelectorAll('.shape-tab[data-lane="'+laneId+'"]').forEach((button,index)=>button.setAttribute("aria-pressed",index===shapeIndex?"true":"false"));
  centerNetworkScrolls(host);
@@ -2057,8 +2420,29 @@ function readGroups(line){
  return '<p class="scroll-cue">可水平捲動；X 表示該 read 未覆蓋該位點。</p><div class="scroll-region" role="region" tabindex="0" aria-label="'+esc(line.fam_label)+' raw read-state groups"><table class="read-table"><caption>'+esc(line.fam_label)+' raw read-state groups</caption><thead><tr><th scope="col">State</th><th scope="col">Evidence mode</th><th scope="col" class="num">Reads</th></tr></thead><tbody>'+rows.map(row=>'<tr><td class="mono">'+esc(row[0])+'</td><td>'+row[1]+'</td><td class="num">'+fmt(row[2])+'</td></tr>').join("")+'</tbody></table></div>';
 }
 
+function locusArrangement(line,region){
+ const positions=(region&&region.positions)||[];
+ const full=line.obs_populations||{};const partial=line.obs_subreads||{};
+ const states=[];
+ Object.entries(full).sort((a,b)=>b[1]-a[1]).forEach(e=>states.push([e[0],e[1],"full"]));
+ Object.entries(partial).sort((a,b)=>b[1]-a[1]).forEach(e=>states.push([e[0],e[1],"partial"]));
+ if(!states.length||!positions.length)return '<p class="muted">此 unit 無可展示的 read-state 位點排列。</p>';
+ const headers=positions.map((p,i)=>'<th scope="col">S'+(i+1)+'<br><span class="mono">'+esc(String(p))+'</span></th>').join("");
+ const rows=states.map(st=>{
+  const seq=String(st[0]);
+  const cells=positions.map((p,i)=>{
+   const ch=(seq[i]||'X').toUpperCase();
+   const cls=ch==='A'?'alt':ch==='R'?'ref':'nc';
+   return '<td class="loc-cell '+cls+'">'+(ch==='A'?'A':ch==='R'?'R':'·')+'</td>';
+  }).join("");
+  return '<tr><td class="mono loc-state">'+esc(seq)+'</td>'+cells+'<td class="num">'+fmt(st[1])+'</td><td>'+(st[2]==='full'?'全跨':'partial')+'</td></tr>';
+ }).join("");
+ return '<p class="scroll-cue">每列一個觀測 read-state；<b class="loc-a">A</b>=ALT、<b class="loc-r">R</b>=REF、·=該 read 未覆蓋此位點。這是 read 直接觀測的位點排列，<b>非 phasing 推斷、非 CCF</b>。</p>'+
+  '<div class="scroll-region" role="region" tabindex="0" aria-label="'+esc(line.fam_label)+' locus 突變排列"><table class="locus-table"><thead><tr><th scope="col">read-state</th>'+headers+'<th scope="col" class="num">reads</th><th scope="col">mode</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
 let laneCounter=0;
-function laneHtml(line,isAuxiliary){
+function laneHtml(line,isAuxiliary,region){
  const laneId="lane-"+(++laneCounter);
  const family=String(line.family||"none");const familyClass=family==="2"?"family-2":"";
  const role=isAuxiliary?"auxiliary":family==="1"?"primary HP1":"primary HP2";
@@ -2068,13 +2452,15 @@ function laneHtml(line,isAuxiliary){
  const shapeLabel=complete?"Exact topology shapes":"Stored prefix shapes";
  const shapeValue=complete?line.n_distinct_shapes_exact:line.n_distinct_shapes_stored;
  const storageLabel=complete?"Stored / exact total":"Stored / enumerated prefix";
- let out='<section class="lane '+familyClass+(isAuxiliary?" auxiliary":"")+'" id="'+laneId+'"><div class="lane-head"><div class="lane-title"><b>'+esc(line.fam_label)+'</b><span class="badge">'+esc(role)+'</span><span class="badge '+(complete?"exact":"incomplete")+'">'+(complete?"candidate complete":"candidate incomplete")+'</span></div><span class="badge">'+esc(line.verification_status)+'</span></div><div class="lane-body">';
+ let out='<details class="lane '+familyClass+(isAuxiliary?" auxiliary":"")+'"'+(isAuxiliary?"":" open")+' id="'+laneId+'"><summary class="lane-head"><span class="lane-title"><b>'+esc(line.fam_label)+'</b><span class="badge">'+esc(role)+'</span><span class="badge '+(complete?"exact":"incomplete")+'">'+(complete?"candidate complete":"candidate incomplete")+'</span></span><span class="badge">'+esc(line.verification_status)+'</span></summary><div class="lane-body">';
  out+='<div class="candidate-summary"><div class="candidate-stat"><span>'+candidateLabel+'</span><strong>'+fmt(line.n_trees)+'</strong></div><div class="candidate-stat"><span>'+shapeLabel+'</span><strong>'+(shapeValue==null?"—":fmt(shapeValue))+'</strong></div><div class="candidate-stat"><span>'+storageLabel+'</span><strong>'+fmt(line.n_trees_stored)+' / '+fmt(line.n_trees)+'</strong></div><div class="candidate-stat"><span>Read states</span><strong>'+fmt(line.n_full_pops)+' full · '+fmt(line.n_partial)+' partial</strong></div></div>';
  if(!complete||!displayComplete)out+='<div class="scope-warning"><b>候選／展示範圍未完整。</b> '+(complete?"Exact universe 已知，但本頁只存展示子集。":"Exact universe total unknown；x / x 只表示 stored rows 與 enumerated prefix 相等，不代表候選已收齊。")+' 這個 unit 不宣稱 forced edge；network 中全部 edge stability 標為 not evaluated。</div>';
- if(!isAuxiliary)out+=readAfRankingPanel(line)+candidateExplorer(line,laneId);
+ if(!isAuxiliary)out+='<details class="sub-drawer" open><summary><span class="sub-k">🎯 唯一第一順位</span><span class="sub-note">read-AF exact top ranking</span></summary><div class="sub-body">'+readAfRankingPanel(line)+'</div></details>'+
+  '<details class="sub-drawer"><summary><span class="sub-k">🕸 候選空間 network</span><span class="sub-note">candidate-space edges / shapes</span></summary><div class="sub-body">'+candidateExplorer(line,laneId)+'</div></details>'+
+  '<details class="sub-drawer"><summary><span class="sub-k">🧬 locus 突變排列</span><span class="sub-note">read-state × 位點 A／R／X</span></summary><div class="sub-body">'+locusArrangement(line,region)+'</div></details>';
  else out+='<p class="muted">Auxiliary unit 不納入 W_primary、C 或 Topo；不畫入 primary candidate network。</p>';
  out+='<details class="drawer"><summary>Raw read-state groups 與 L0–L3 trace</summary><div class="drawer-body">'+readGroups(line)+'<div class="trace">'+(line.trace||[]).map(item=>'<div>'+esc(item)+'</div>').join("")+'</div><p class="mono">analysis digest: '+esc(line.analysis_tree_digest_sha256||"not available")+'</p></div></details>';
- return out+"</div></section>";
+ return out+"</div></details>";
 }
 
 function sidecars(region,indexRow){
@@ -2112,19 +2498,22 @@ function renderDetail(region,indexRow){
  const info=classInfo[indexRow.topology_class]||classInfo.no_primary_lineage;
  const selection=readAfSelectionInfo(indexRow),morphology=morphologyInfo(indexRow);
  const primary=primaryOf(region),auxiliary=auxiliaryOf(region);
+ const cgcGenes=cancerGenesOf(region);
+ const cgcBadge=cgcGenes.length?'<span class="badge cgc" title="COSMIC CGC 癌基因命中">🧬 '+esc(cgcGenes.slice(0,3).join("/"))+(cgcGenes.length>3?(" +"+(cgcGenes.length-3)):"")+'</span>':'';
  const currentIndex=state.filtered.findIndex(row=>row.region===indexRow.region);
  const prev=currentIndex>0?state.filtered[currentIndex-1]:null;
  const next=currentIndex>=0&&currentIndex<state.filtered.length-1?state.filtered[currentIndex+1]:null;
  const cValue=indexRow.C==null?"—":fmt(indexRow.C);const topoValue=indexRow.Topo==null?"—":fmt(indexRow.Topo);
  let out='<div class="detail-toolbar"><div class="routes"><button class="button" type="button" id="back-results">返回結果</button><button class="button" type="button" id="prev-region" '+(prev?"":"disabled")+'>上一區</button><button class="button" type="button" id="next-region" '+(next?"":"disabled")+'>下一區</button></div><span class="mono">'+esc(indexRow.chrom)+'</span></div><div class="detail-body">';
- out+='<div class="verdict '+(indexRow.topology_class==="incomplete"?"incomplete":"")+'"><div><p class="kicker">Region verdict</p><h3 id="detail-title" class="mono">'+esc(region.region)+'</h3><p>'+verdictText(indexRow)+' '+esc(selection.note)+'</p><div class="facet-row">'+topologyClassBadge(indexRow.topology_class)+evidenceBadge(indexRow.evidence_mode)+'<span class="badge '+esc(selection.badge)+'">'+esc(selection.value)+'</span><span class="badge '+esc(morphology.badge)+'">'+esc(morphology.value)+'</span><span class="badge">Primary HP '+indexRow.n_primary+'</span><span class="badge">Auxiliary '+indexRow.n_auxiliary+'</span>'+(indexRow.has_recurrence?'<span class="badge warn">recurrence facet</span>':'')+'<span class="badge">CN '+esc(region.cn||"unavailable")+'</span></div></div><div class="ct-readout"><div class="ct-box"><span>C exact</span><strong>'+cValue+'</strong></div><div class="ct-box"><span>Topo shapes</span><strong>'+topoValue+'</strong></div></div></div>';
+ out+='<div class="verdict '+(indexRow.topology_class==="incomplete"?"incomplete":"")+'"><div><p class="kicker">Region verdict</p><h3 id="detail-title" class="mono">'+esc(region.region)+'</h3><p>'+verdictText(indexRow)+' '+esc(selection.note)+'</p><div class="facet-row">'+topologyClassBadge(indexRow.topology_class)+evidenceBadge(indexRow.evidence_mode)+'<span class="badge '+esc(selection.badge)+'">'+esc(selection.value)+'</span><span class="badge '+esc(morphology.badge)+'">'+esc(morphology.value)+'</span><span class="badge">Primary HP '+indexRow.n_primary+'</span><span class="badge">Auxiliary '+indexRow.n_auxiliary+'</span>'+(indexRow.has_recurrence?'<span class="badge warn">recurrence facet</span>':'')+cgcBadge+'<span class="badge">CN '+esc(region.cn||"unavailable")+'</span></div></div><div class="ct-readout"><div class="ct-box"><span>C exact</span><strong>'+cValue+'</strong></div><div class="ct-box"><span>Topo shapes</span><strong>'+topoValue+'</strong></div></div></div>';
  out+=regionDimensionCards(indexRow);
  out+='<div class="assertion-grid"><article class="assertion"><b>Observed</b><p>'+fmt(region.n_sSNV)+' retained sSNV；'+fmt(region.n_full_cov_reads)+' reads 橫跨整個 region 位點集合。</p></article><article class="assertion"><b>Inferred</b><p>'+fmt(primary.reduce((sum,line)=>sum+Number(line.n_hidden||0),0))+' hidden states across primary units；只代表 solver 所需中間 mutation states。</p></article><article class="assertion"><b>Limit</b><p>'+esc(limitationText(region,indexRow))+'。</p></article></div>';
+ out+=geneDrugPanel(region);
  out+='<section class="subsection" aria-labelledby="evidence-title"><div class="subsection-head"><h4 id="evidence-title">Observed site evidence</h4><span class="subsection-note">read ALT fraction is descriptive, not CCF</span></div>'+siteEvidence(region)+'</section>';
  out+='<section class="subsection" aria-labelledby="candidate-title"><div class="subsection-head"><h4 id="candidate-title">Primary HP candidate networks</h4><span class="subsection-note">HP1 / HP2 independently reconstructed</span></div>';
- out+=primary.length?primary.map(line=>laneHtml(line,false)).join(""):'<div class="scope-warning">此區沒有 primary mutation-bearing HP1／HP2；不計入 W_primary，也不計 C／Topo。</div>';
+ out+=primary.length?primary.map(line=>laneHtml(line,false,region)).join(""):'<div class="scope-warning">此區沒有 primary mutation-bearing HP1／HP2；不計入 W_primary，也不計 C／Topo。</div>';
  out+='</section>';
- if(auxiliary.length)out+='<details class="drawer"><summary>Auxiliary／control units（'+auxiliary.length+'）</summary><div class="drawer-body">'+auxiliary.map(line=>laneHtml(line,true)).join("")+'</div></details>';
+ if(auxiliary.length)out+='<details class="drawer"><summary>Auxiliary／control units（'+auxiliary.length+'）</summary><div class="drawer-body">'+auxiliary.map(line=>laneHtml(line,true,region)).join("")+'</div></details>';
  out+='<section class="subsection" aria-labelledby="sidecar-title"><div class="subsection-head"><h4 id="sidecar-title">Independent sidecars</h4><span class="subsection-note">never topology edges; never candidate ranking</span></div>'+sidecars(region,indexRow)+'</section>';
  out+='</div>';
  detail.innerHTML=out;
@@ -2174,6 +2563,7 @@ function setupControls(){
   applyFilters();syncHash("push");
  }));
  document.getElementById("fq").addEventListener("input",()=>{applyFilters();syncHash("replace")});
+ ["fcgc","fdrug"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("change",()=>{applyFilters();syncHash("push")})});
  document.getElementById("load-more").addEventListener("click",()=>{state.limit+=80;renderResultList()});
  document.getElementById("copy-link").addEventListener("click",async event=>{
   const button=event.currentTarget;let ok=false;

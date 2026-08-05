@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>可用 26,121 集合分析 — HCC1395 ISM 甲基結構</title>
+<!-- data_sources: /tmp/set_final.json (from /tmp/perlocus_flags.csv ← reclassify-v2 on /tmp/dbeta_wg_abc/significance_summary.csv, 30490 loci) -->
+<style>
+:root{--mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;--bg:#FAF7F0;--card:#fff;--ink:#3a2418;--muted:#8a7a68;--border:#E3DACC;--pass:#2F7D5B;--dead:#9A3B3B;--gold:#8a6d10;--A:#2F7D5B;--B:#5B5BD6;--tum:#2F7D5B;--nor:#C77B3B}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:1.62rem;margin:0 0 4px;letter-spacing:.3px}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 20px}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(90,60,30,.05)}
+h2{font-size:1.16rem;margin:0 0 6px;display:flex;align-items:center;gap:9px}
+h2 .n{background:var(--ink);color:#fff;width:27px;height:27px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.85rem;flex:none}
+.lead{color:#5e4a38;font-size:.92rem;margin:2px 0 14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.kpi{border:1px solid var(--border);border-radius:9px;padding:11px 13px;background:#fffdf9}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:800;line-height:1}
+.kpi .k{font-size:.78rem;color:var(--muted);margin-top:5px}
+.kpi.a{border-left:4px solid var(--A)} .kpi.b{border-left:4px solid var(--B)}
+.kpi.t{border-left:4px solid var(--tum)} .kpi.n{border-left:4px solid var(--nor)}
+.kpi.r{border-left:4px solid var(--dead)}
+.bluf{background:linear-gradient(180deg,#fffdf8,#fbf6ec);border:1px solid var(--border);border-left:5px solid var(--gold)}
+.headline{font-size:1.2rem;font-weight:800;line-height:1.5;margin:0 0 6px}
+.key{color:var(--pass)} .keyr{color:var(--dead)}
+.scope{font-size:.86rem;background:#f6efe2;border:1px dashed var(--border);border-radius:8px;padding:10px 13px;color:#5e4a38;margin:10px 0}
+.ct{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:6px}
+.ct th{background:#f3ece0;color:#5e4a38;font-size:.76rem;padding:7px 8px;text-align:right;border-bottom:2px solid var(--border);font-weight:700;vertical-align:bottom}
+.ct th:first-child{text-align:left}
+.ct td{padding:7px 8px;border-bottom:1px solid #f0e9dc}
+.ct tbody tr:hover{background:#fbf7ef}
+.deftab{width:100%;border-collapse:collapse;font-size:.85rem}
+.deftab th{background:#f3ece0;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.78rem;color:#5e4a38}
+.deftab td{padding:8px 10px;border-bottom:1px solid #f0e9dc;vertical-align:top}
+.deftab code{background:#f3ece0;border-radius:4px;padding:1px 5px;font-family:var(--mono);font-size:.82em}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:10px}
+.pA{background:#e3f0ea;color:#1f5f43} .pB{background:#e7e7fb;color:#3a3aa8}
+.fig{margin:10px 0;padding:10px;background:#fcfaf5;border:1px solid var(--border);border-radius:9px}
+.figt{font-size:.82rem;color:var(--muted);font-weight:700;margin-bottom:4px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+.note{font-size:.82rem;color:var(--muted);margin-top:8px}
+.flag{background:#fcefef;border:1px solid #e9cccc;border-left:4px solid var(--dead);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:.9rem;color:#5e2424}
+b.g{color:var(--gold)}
+</style></head><body><div class="wrap">
+
+<h1>可用 26,121 位點 — 集合分析</h1>
+<p class="sub">HCC1395_HKU_MOD paired · 全基因組 TP somatic SNV 26,121 可用子集 · 維度交集／差集／聯集 · 數字全部由 <code style="font-family:var(--mono)">set_final.json</code> 注入</p>
+
+<div style="background:#fff8ec;border:1px solid #e6c98a;border-left:5px solid #d9a82e;border-radius:10px;padding:12px 15px;margin:0 0 14px;font-size:.88rem;color:#5e4a38">
+  <b style="color:#9a5a1a">⚠️ 校正說明（2026-06-17 a-priori 模型對齊）</b>：本頁的 <code style="font-family:var(--mono)">within_clean</code>「標籤內多子結構」<b>非</b>可驗證 subclone — 它與 a-priori <code style="font-family:var(--mono)">SubcloneDbeta</code> 的 Jaccard 僅 <b>0.123</b>，其中 <b>55.1%（2,382）無 anchor = epiallele</b>，僅 25.5% 帶 a-priori subclone 標記。真正論文相關的 subclone 訊號＝a-priori SubcloneDbeta（4,596）。完整修正見 <code>paper_core_definition.standalone.html</code> 與 <code>classification_flow_corrected.standalone.html</code>。
+</div>
+<section class="bluf">
+  <p class="headline">26,121 個可用位點：<span class="key">88.4% 兩法都穩定</span>、<span class="key">52% tumor 單獨可判</span>，但 <span class="keyr">HP 差異 89% 是 germline ASM、非 somatic</span>。</p>
+  <div class="scope"><b>怎麼比較（先確認邏輯）</b>：在「可用 26,121」內，用 <span class="pill pA">標籤形 A</span>（甲基對應 HP 標籤：HP-AUC／Δβ）與 <span class="pill pB">結構形 B</span>（read×read 分群：PERMANOVA／within-clean）兩條獨立證據交叉；再疊一層 <b>tumor 單獨 vs 需 normal</b>，最後拆 <b>germline ASM vs somatic</b>。</div>
+  <div class="kpis">
+    <div class="kpi a"><div class="v">88.4%</div><div class="k">🟢 兩法都穩定（23,079）</div></div>
+    <div class="kpi t"><div class="v">52.1%</div><div class="k">🟢 tumor 就可用（13,602）</div></div>
+    <div class="kpi n"><div class="v">47.9%</div><div class="k">🟠 加 normal 才有效（12,519）</div></div>
+    <div class="kpi b"><div class="v">16.5%</div><div class="k">🟣 within_clean 多群（4,323）<span style="color:#9A3B3B">·55% epiallele</span></div></div>
+    <div class="kpi r"><div class="v">80.1%</div><div class="k">⚪ germline ASM（20,932）</div></div>
+    <div class="kpi r"><div class="v">11.6%</div><div class="k">🔴 somatic 特異（3,030）</div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">0</span>比較邏輯 — 每個維度怎麼定義（先確認）</h2>
+  <p class="lead">所有定義皆為 per-locus 布林旗標，從 <code>significance_summary.csv</code> 欄位 + 重算 within-HP 甲基分群得出。可用＝6 個有結構依據細類（排除 4,369 noise）。</p>
+  <table class="deftab">
+    <thead><tr><th>維度</th><th>定義（旗標）</th><th>方法</th><th>數量</th></tr></thead>
+    <tbody>
+    <tr><td><b>結構穩定</b></td><td><code>ClusterPermanova顯著</code> OR <code>within-clean</code></td><td><span class="pill pB">結構形 B</span></td><td><b>23,567</b>（90.2%）</td></tr>
+    <tr><td><b>標籤穩定</b></td><td><code>HP-AUC≥0.7</code> OR <code>Δβ顯著</code> OR <code>cluster=label(Strong)</code></td><td><span class="pill pA">標籤形 A</span></td><td><b>25,630</b>（98.1%）</td></tr>
+    <tr><td>　└ Δβ 有效</td><td><code>6 個 Δβ_Sig 任一</code></td><td><span class="pill pA">A</span></td><td>12,636（48.4%）</td></tr>
+    <tr><td>　└ HP 差異</td><td><code>HP_AUC_All≥0.7</code></td><td><span class="pill pA">A</span></td><td>7,345（28.1%）</td></tr>
+    <tr><td>　└ 標籤內多子結構</td><td><code>within-clean</code>（單一 HP 內 2-means 乾淨分群）</td><td><span class="pill pB">B</span></td><td>4,323（16.5%）</td></tr>
+    <tr><td><b>tumor 就可用</b></td><td><code>HP-AUC_tumor≥0.7</code> OR <code>tumor內Δβ</code> OR <code>within-clean</code>（皆不需 normal）</td><td>tumor-only</td><td><b>13,602</b>（52.1%）</td></tr>
+    <tr><td><b>加 normal 才有效</b></td><td>可用 ∖ tumor就可用</td><td>需 normal</td><td><b>12,519</b>（47.9%）</td></tr>
+    <tr><td><b>加 normal 才有結構</b></td><td><code>HP-AUC_all≥0.7</code> 但 <code>HP-AUC_tumor&lt;0.7</code> 且 ¬within-clean</td><td>需 normal</td><td>4,631（17.7%）</td></tr>
+    <tr><td><b>germline ASM</b></td><td><code>HP-AUC_normal≥0.7</code>（normal 自己 HP 可分）</td><td>對照</td><td>20,932（80.1%）</td></tr>
+    </tbody>
+  </table>
+  <p class="note">⚠ <b>cluster_sig（PERMANOVA）87% ≈ orig_match（Strong）85%</b> 都接近全集 → 兩條「穩定」基線很高（因「可用」本就用證據定義）；真正有鑑別力、差異落在窄邊。下面逐維拆。</p>
+</section>
+
+<section>
+  <h2><span class="n">1</span>兩方法交集 — 標籤穩定 ∩ 結構穩定</h2>
+  <p class="lead">交集／差集／聯集：<b>都穩定 23,079</b> · 僅標籤 2,551 · 僅結構 488 · 聯集 26,118（殘 3）。</p>
+  <div class="fig"><div class="figt">圖 1 · 標籤穩定 vs 結構穩定（Venn）</div><svg viewBox="0 0 760 360" width="100%" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="標籤穩定與結構穩定 Venn">
+  <text x="380" y="26" text-anchor="middle" font-size="15" font-weight="800" fill="#3a2418">兩驗證方法的可用位點交集（n=26,121）</text>
+  <circle cx="300" cy="200" r="155" fill="#2F7D5B" fill-opacity="0.16" stroke="#2F7D5B" stroke-width="2.5"/>
+  <circle cx="470" cy="200" r="138" fill="#5B5BD6" fill-opacity="0.16" stroke="#5B5BD6" stroke-width="2.5"/>
+  <text x="205" y="150" text-anchor="middle" font-size="13" font-weight="800" fill="#1f5f43">標籤穩定 A</text>
+  <text x="205" y="168" text-anchor="middle" font-size="10.5" fill="#2F7D5B">25,630（98.1%）</text>
+  <text x="560" y="150" text-anchor="middle" font-size="13" font-weight="800" fill="#3a3aa8">結構穩定 B</text>
+  <text x="560" y="168" text-anchor="middle" font-size="10.5" fill="#5B5BD6">23,567（90.2%）</text>
+  <!-- label-only crescent -->
+  <text x="190" y="208" text-anchor="middle" font-size="20" font-weight="800" fill="#1f5f43">2,551</text>
+  <text x="190" y="228" text-anchor="middle" font-size="10" fill="#5e4a38">僅標籤（9.8%）</text>
+  <text x="190" y="242" text-anchor="middle" font-size="9" fill="#8a7a68">Δβ位移·無分群</text>
+  <!-- both -->
+  <text x="385" y="200" text-anchor="middle" font-size="26" font-weight="800" fill="#3a2418">23,079</text>
+  <text x="385" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#5e4a38">都穩定（88.4%）</text>
+  <!-- struct-only crescent -->
+  <text x="558" y="208" text-anchor="middle" font-size="18" font-weight="800" fill="#3a3aa8">488</text>
+  <text x="558" y="228" text-anchor="middle" font-size="10" fill="#5e4a38">僅結構（1.9%）</text>
+  <text x="380" y="345" text-anchor="middle" font-size="10.5" fill="#8a7a68">兩法高度一致（88.4% 交集）— 因「可用」本就用證據定義；分歧落在兩條窄邊（僅標籤 2,551 / 僅結構 488）</text>
+</svg></div>
+  <div class="cols">
+    <div class="flag" style="background:#e9f3ee;border-color:#bcdccb;border-left-color:var(--A);color:#1f5f43">
+      <b>僅標籤 2,551（9.8%）</b><br>有 Δβ 位移或 HP-AUC，但 read×read 分群跑不出來 → <b>LabelShift 型</b>。標籤形「看整體位移」的獨特貢獻（B 漏的）。
+    </div>
+    <div class="flag" style="background:#ecebfb;border-color:#cfcdf0;border-left-color:var(--B);color:#3a3aa8">
+      <b>僅結構 488（1.9%）</b><br>read 分群顯著但對不上 HP 標籤 → <b>StructureNoLabel 型</b>。結構形「看交錯/位置特異分群」的獨特貢獻（A 漏的）。
+    </div>
+  </div>
+  <p class="note">→ 兩法 88.4% 一致；分歧的兩條窄邊正是「為何需要兩種」的實證：各補對方盲點。</p>
+</section>
+
+<section>
+  <h2><span class="n">2</span>標籤形拆解（Δβ vs HP 差異）＋ 結構形拆解（within-multi）</h2>
+  <div class="cols">
+    <div class="fig"><div class="figt">圖 2a · 標籤形：HP-AUC vs Δβ</div><svg viewBox="0 0 380 300" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="190" y="22" text-anchor="middle" font-size="13" font-weight="800" fill="#1f5f43">標籤形組件：HP-AUC vs Δβ</text>
+  <circle cx="150" cy="160" r="105" fill="#2F7D5B" fill-opacity="0.15" stroke="#2F7D5B" stroke-width="2"/>
+  <circle cx="245" cy="160" r="118" fill="#C77B3B" fill-opacity="0.15" stroke="#C77B3B" stroke-width="2"/>
+  <text x="90" y="120" text-anchor="middle" font-size="11" font-weight="800" fill="#1f5f43">HP 差異</text>
+  <text x="90" y="135" text-anchor="middle" font-size="9.5" fill="#2F7D5B">AUC≥0.7 · 7,345</text>
+  <text x="300" y="115" text-anchor="middle" font-size="11" font-weight="800" fill="#9a5a1a">Δβ 有效</text>
+  <text x="300" y="130" text-anchor="middle" font-size="9.5" fill="#C77B3B">12,636</text>
+  <text x="92" y="172" text-anchor="middle" font-size="16" font-weight="800" fill="#1f5f43">4,217</text>
+  <text x="92" y="188" text-anchor="middle" font-size="8.5" fill="#5e4a38">僅 HP</text>
+  <text x="178" y="166" text-anchor="middle" font-size="15" font-weight="800" fill="#3a2418">3,128</text>
+  <text x="178" y="181" text-anchor="middle" font-size="8" fill="#5e4a38">兩者</text>
+  <text x="285" y="172" text-anchor="middle" font-size="16" font-weight="800" fill="#9a5a1a">9,508</text>
+  <text x="285" y="188" text-anchor="middle" font-size="8.5" fill="#5e4a38">僅 Δβ</text>
+  <text x="190" y="285" text-anchor="middle" font-size="9.5" fill="#8a7a68">Δβ 抓位移（48.4%）比 HP-AUC（28.1%）廣；within-multi 另計</text>
+</svg></div>
+    <div>
+      <div class="kpis" style="grid-template-columns:1fr">
+        <div class="kpi a"><div class="v">12,636</div><div class="k">Δβ 有效（48.4%）— 平均甲基位移顯著</div></div>
+        <div class="kpi a"><div class="v">7,345</div><div class="k">HP 差異 AUC≥0.7（28.1%）— HP1 vs HP2 距離可分</div></div>
+        <div class="kpi b"><div class="v">4,323</div><div class="k">within_clean 多群（16.5%）— 單一 HP 內裂 ≥2 甲基群；<span style="color:#9A3B3B">⚠ 非 a-priori，55% epiallele、僅 25.5% 對得上 SubcloneDbeta</span></div></div>
+      </div>
+      <p class="note">Δβ（48.4%）比 HP-AUC（28.1%）廣 — 因 Δβ 抓「整體位移」即使分不開個別 read。三者中 within-multi 是 unsupervised 分群；<b>真正可驗證的 subclone 訊號是 a-priori SubcloneDbeta（4,596），與 within_clean 幾乎不重疊（Jaccard 0.123）</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>Tumor 單獨 vs 需 Normal</h2>
+  <p class="lead">可用 26,121 對半分：<b style="color:var(--A)">tumor 就可用 13,602（52.1%）</b> · <b style="color:var(--nor)">加 normal 才有效 12,519（47.9%）</b>。</p>
+  <div class="fig"><div class="figt">圖 3 · tumor-only vs needs-normal ＋ tumor 證據來源</div><svg viewBox="0 0 780 250" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="10" y="22" font-size="13" font-weight="800" fill="#3a2418">可用 26,121 → tumor 能否單獨判定？</text>
+  <rect x="10.0" y="36" width="395.8" height="52" fill="#2F7D5B"/><text x="207.9" y="60.0" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">13,602</text><text x="207.9" y="75.0" text-anchor="middle" fill="#fff" font-size="12">tumor 就可用</text><rect x="405.8" y="36" width="364.2" height="52" fill="#C77B3B"/><text x="587.9" y="60.0" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">12,519</text><text x="587.9" y="75.0" text-anchor="middle" fill="#fff" font-size="12">加 normal 才有效</text>
+  <text x="10" y="118" font-size="11.5" font-weight="800" fill="#1f5f43">tumor 就可用 13,602（52.1%）的貢獻證據（可重疊，純 tumor reads）</text>
+  <rect x="10.0" y="128" width="198.4" height="24" fill="#2F7D5B"/><text x="109.2" y="138.0" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">7,576</text><text x="109.2" y="153.0" text-anchor="middle" fill="#fff" font-size="8">HP-AUC_tumor≥0.7</text>
+  <text x="216" y="145" font-size="10" fill="#1f5f43">HP-AUC_tumor≥0.7 · 7,576</text>
+  <rect x="10.0" y="158" width="143.3" height="24" fill="#3B9C72"/><text x="81.7" y="168.0" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">5,473</text><text x="81.7" y="183.0" text-anchor="middle" fill="#fff" font-size="8">tumor內Δβ</text>
+  <text x="161" y="175" font-size="10" fill="#1f5f43">tumor 內 Δβ（Subclone/AltSubclone）· 5,473</text>
+  <rect x="10.0" y="188" width="113.2" height="24" fill="#62B58F"/><text x="66.6" y="198.0" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">4,323</text><text x="66.6" y="213.0" text-anchor="middle" fill="#fff" font-size="8">within-clean</text>
+  <text x="131" y="205" font-size="10" fill="#1f5f43">標籤內多子結構（within-clean）· 4,323</text>
+  <text x="10" y="235" font-size="10" fill="#8a7a68">「加 normal 才有效」12,519：其中 HP-AUC_all 3,872 · germline ASM Δβ 3,927 · somatic-residual Δβ 893（皆需 normal baseline）</text>
+</svg></div>
+  <p class="note">「tumor 就可用」嚴格界定為<b>不需 normal sample 的證據</b>（HP-AUC_tumor 走純 tumor reads、within-clean 也是純 tumor、Subclone/AltSubclone Δβ 是 tumor 內 germline-vs-carrier）。CN-Sub／MultiGroup（純 within-clean 類）100% tumor-only；LOH-Structure 多需 normal（HP-AUC_all 主導）。</p>
+</section>
+
+<section>
+  <h2><span class="n">4</span>🔴 最關鍵：HP 差異是 germline 還是 somatic？</h2>
+  <p class="lead">「HP 甲基差異」乍看像 somatic 訊號，但拆開後 — <b style="color:var(--dead)">89.4% 在 normal 也有（germline ASM）</b>，只有 430 個是 tumor 特異。</p>
+  <div class="fig"><div class="figt">圖 4 · HP 差異的 germline/somatic 分解 ＋ 全可用 ASM 來源</div><svg viewBox="0 0 780 300" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="10" y="22" font-size="13.5" font-weight="800" fill="#9A3B3B">HP 甲基差異 7,345 → 是 germline 還是 somatic？</text>
+  <rect x="10.0" y="36" width="679.3" height="56" fill="#9a9088"/><text x="349.6" y="62.0" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">6,565</text><text x="349.6" y="77.0" text-anchor="middle" fill="#fff" font-size="10">normal 也有 = germline ASM</text><rect x="689.3" y="36" width="80.7" height="56" fill="#9A3B3B"/><text x="729.6" y="62.0" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">780</text><text x="729.6" y="77.0" text-anchor="middle" fill="#fff" font-size="10">其餘</text>
+  <text x="10" y="118" font-size="11" fill="#3a2418"><tspan font-weight="800" fill="#5e4a38">89.4%</tspan> 的 HP 差異在 <tspan font-weight="700">normal 也看得到</tspan> → 是 germline allele-specific methylation（非 somatic）。</text>
+  <text x="10" y="138" font-size="11" fill="#3a2418">只有 <tspan font-weight="800" fill="#9A3B3B">430</tspan> 個（5.9%）通過 somatic-residual 檢定（tumor 減 normal 後仍顯著）= tumor 特異。</text>
+  <line x1="10" y1="158" x2="770" y2="158" stroke="#E3DACC"/>
+  <text x="10" y="182" font-size="12.5" font-weight="800" fill="#3a2418">全可用 26,121 的 ASM 來源分解</text>
+  <rect x="10" y="194" width="609.0" height="40" fill="#9a9088"/>
+  <rect x="619.0" y="194" width="151.0" height="40" fill="#E3DACC"/>
+  <text x="314.5" y="219" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="800">germline ASM 20,932（80.1%）</text>
+  <text x="694.5" y="219" text-anchor="middle" fill="#7a6a58" font-size="11" font-weight="700">5,189</text>
+  <text x="10" y="258" font-size="11" fill="#3a2418">其中 somatic-residual 顯著 = <tspan font-weight="800" fill="#9A3B3B">3,030（11.6%）</tspan> · germline∩somatic 2,434 · 皆無 4,593</text>
+  <text x="10" y="284" font-size="10.5" fill="#8a7a68" font-style="italic">→ 對齊既有結論：ASM 真實但屬 <b>germline-haplotype 層級</b>，非 somatic/subclone 驅動（[[project_zar1l_brca2_asm]] · filter-DEAD）。</text>
+</svg></div>
+  <div class="flag">
+    <b>結論</b>：可用位點的甲基-HP 關聯<b>絕大多數來自 germline allele-specific methylation</b>（normal 也看得到，80.1% 全可用、89.4% 的 HP 差異），<b>非 somatic / subclone 驅動</b>。只有 11.6%（3,030）通過 somatic-residual 檢定。<br>→ 完全對齊既有定論：<b>ASM 真實但屬 germline-haplotype 層級，不能當 somatic 變異 filter（filter-DEAD）</b>。這也是為何「可用」≠「能判別 TP/FP」。
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>逐細類交叉表（tumor／normal × 各維度）</h2>
+  <p class="lead">6 個可用細類 × 26,121 位點，每類拆 tumor-only／needs-normal（綠/橙條）＋ 各維度計數。</p>
+  <table class="ct">
+    <thead><tr><th>細類（n=26,121）</th><th>位點</th><th>tumor就可用／加normal（綠/橙）</th><th>標籤內<br>多子結構</th><th>Δβ<br>有效</th><th>HP<br>差異</th><th>germline<br>ASM</th><th>somatic<br>residual</th></tr></thead>
+    <tbody><tr>
+        <td style="font-weight:700;color:#3a2418">Strong（cluster=label）</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">22,311</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="100.8" height="16" fill="#2F7D5B"/><rect x="100.8" y="0" width="99.2" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">11,242</span>/<span style="font-size:.78rem;color:#9a5a1a">11,069</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">3,373</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">9,884</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">6,457</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">18,490</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">2,156</td>
+      </tr><tr>
+        <td style="font-weight:700;color:#3a2418">LabelShift（Δβ位移）</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">2,131</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="109.0" height="16" fill="#2F7D5B"/><rect x="109.0" y="0" width="91.0" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">1,161</span>/<span style="font-size:.78rem;color:#9a5a1a">970</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">0</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">2,131</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">83</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">1,278</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">730</td>
+      </tr><tr>
+        <td style="font-weight:700;color:#3a2418">CN-Sub（gain+within）</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">627</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="200.0" height="16" fill="#2F7D5B"/><rect x="200.0" y="0" width="0.0" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">627</span>/<span style="font-size:.78rem;color:#9a5a1a">0</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">627</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">298</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">19</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">399</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">123</td>
+      </tr><tr>
+        <td style="font-weight:700;color:#3a2418">MultiGroup（within）</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">323</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="200.0" height="16" fill="#2F7D5B"/><rect x="200.0" y="0" width="0.0" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">323</span>/<span style="font-size:.78rem;color:#9a5a1a">0</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">323</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">109</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">57</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">183</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">10</td>
+      </tr><tr>
+        <td style="font-weight:700;color:#3a2418">LOH-Structure</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">609</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="62.4" height="16" fill="#2F7D5B"/><rect x="62.4" y="0" width="137.6" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">190</span>/<span style="font-size:.78rem;color:#9a5a1a">419</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">0</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">216</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">609</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">499</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">11</td>
+      </tr><tr>
+        <td style="font-weight:700;color:#3a2418">StructNoLabel</td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:800">120</td>
+        <td><svg viewBox="0 0 200 16" width="120" height="16" style="vertical-align:middle"><rect x="0" y="0" width="98.3" height="16" fill="#2F7D5B"/><rect x="98.3" y="0" width="101.7" height="16" fill="#C77B3B"/></svg> <span style="font-size:.78rem;color:#1f5f43">59</span>/<span style="font-size:.78rem;color:#9a5a1a">61</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:#5B5BD6;font-weight:700">0</td>
+        <td style="text-align:right;font-family:var(--mono);color:#C77B3B">0</td>
+        <td style="text-align:right;font-family:var(--mono);color:#2F7D5B">120</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9a9088;font-weight:700">84</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9A3B3B;font-weight:700">0</td>
+      </tr></tbody></table>
+  <p class="note">讀法：<b>CN-Sub／MultiGroup</b> 100% tumor-only 且 100% within-multi（純 tumor 結構，但<b>多為 epiallele 非 subclone</b>）；<b>LabelShift</b> within-multi=0（定義上是純 Δβ 位移無分群）；<b>LOH/StructNoLabel</b> 100% HP 差異；<b>Strong</b> germline ASM 18,490 ≫ somatic 2,156（再證 germline 主導）。</p>
+</section>
+
+<section style="background:#f6efe2">
+  <h2><span class="n">∑</span>一句話總結（給教授）</h2>
+  <ul style="margin:6px 0 0;padding-left:20px;font-size:.95rem;line-height:1.85">
+    <li>可用 26,121 中 <b>88.4% 兩條獨立證據都穩定</b>，分歧只落兩條窄邊（標籤形/結構形各補盲點）。</li>
+    <li><b>約半數（52.1%）tumor 單獨即可判定</b>，另一半需 normal baseline。</li>
+    <li>🔴 <b>HP 甲基差異 89.4% 是 germline ASM（normal 也有）</b>，僅 3,030 個 somatic 特異 → 甲基結構真實但<b>germline 層級、非 subclone 驅動</b>，不能當變異 filter。</li>
+    <li><b>校正</b>：unsupervised「within_clean 多群」16.5%（4,323）<b>非 subclone</b>（55% epiallele）；真正可驗證 subclone＝a-priori SubcloneDbeta 4,596（見 paper_core_definition 頁）。</li>
+  </ul>
+  <p class="note">資料溯源：<code>set_final.json</code> ← <code>perlocus_flags.csv</code>（reclassify-v2 重跑 30,490 區 methylation）← <code>dbeta_wg_abc/significance_summary.csv</code>。所有數字 grep 可溯。</p>
+</section>
+
+</div></body></html>

@@ -73,9 +73,10 @@ def _covers(N, full, partial_subcubes):
     return True
 
 def _is_compatible(N):
-    """四配子相容性(perfect-phylogeny 判準):對 N 節點向量的每對字元,若同時出現 (1,1)(1,0)(0,1)(root 供(0,0))→ 衝突。
+    """Rooted three-gamete 相容性：每對字元若同時出現 (1,1)(1,0)(0,1) 即衝突。
+    N 恆含 all-zero ROOT，故這與在 N∪{ROOT} 上做 four-gamete test 完全等價。
     定理:N 相容 ⟺ 存在無-recurrence 生成樹(唯一 perfect phylogeny);不相容 ⟺ 每棵生成樹皆 recurrence。
-    🔴 不可用「節點是否有≥2 pred」代替(反例:全≤1pred 仍可四配子衝突→唯一樹含 recurrence)。"""
+    🔴 不可用「節點是否有≥2 pred」代替(反例:全≤1pred 仍可 rooted-three-gamete 衝突→唯一樹含 recurrence)。"""
     chars = sorted(set().union(*N)) if N else []
     for i, j in combinations(chars, 2):
         pats = set()
@@ -102,7 +103,8 @@ def enumerate_min_trees(full_genos, partial_strs, k, extra_cap=4, per_level_budg
     回 dict:
       n_hidden      : 最小 extra(hidden/partial-supported)節點數
       trees         : [{edges:[(labP,labC)], recurrence:[bit...], n_hidden:int}]  全部同分最小樹
-      n_trees       : len(trees)
+      n_trees       : exact analytical candidate count
+      trees_complete: whether trees contains every candidate (tree_cap <= 0 means unlimited)
       capped        : bool(超 budget → fallback 單樹)
       cap_reason    : str|None
       universe      : sorted bit indices
@@ -164,7 +166,9 @@ def enumerate_min_trees(full_genos, partial_strs, k, extra_cap=4, per_level_budg
 
     # 分析式計數(2026-07-06,效能:取代生成所有樹)。定理:單一 feasible N 內
     #   節點 x 的 unit-pred 數 npred(x) → 該 N 的樹數 = Π npred(x);且
-    #   節點有 npred≥2 ⟺ 該 N 四配子不相容 ⟺ 其所有樹皆 recurrence;npred 全=1 → 相容 → 唯一無-rec 樹。
+    #   節點有 npred≥2 ⟺ 該 N rooted-three-gamete 不相容
+    #   (等價於明示 ROOT 後的 four-gamete 不相容) ⟺ 其所有樹皆 recurrence;
+    #   npred 全=1 → 相容 → 唯一無-rec 樹。
     #   跨 feasible N 求和(不同節點集→不同樹,不重疊)。has_recfree=∃相容N(有乾淨 perfect-phylogeny 解)。
     n_trees, n_recfree_N, n_recurrent_N = 0, 0, 0
     for N in feasible_N:
@@ -173,26 +177,31 @@ def enumerate_min_trees(full_genos, partial_strs, k, extra_cap=4, per_level_budg
             if x:
                 prod *= sum(1 for j in x if (x - {j}) in N)  # unit-pred 數 ≥1(feasible=closed 保證)
         n_trees += prod
-        # recurrence = N 四配子不相容(⟺ 所有生成樹皆含 recurrence);相容 → 唯一無-rec 樹(prod=1)
+        # recurrence = N rooted-three-gamete 不相容(=root-augmented four-gamete 不相容;
+        # ⟺ 所有生成樹皆含 recurrence);相容 → 唯一無-rec 樹(prod=1)
         if _is_compatible(N):
             n_recfree_N += 1
         else:
             n_recurrent_N += 1
     has_recfree = n_recfree_N > 0        # ∃ 無-recurrence 的最小解
     has_recurrence = n_recurrent_N > 0   # ∃ 需 recurrence 的最小解
-    # 生成 ≤tree_cap 範例樹(顯示用,含 recurrence 標註;不再生成全部)
+    # Generate candidates for downstream analysis. A non-positive cap means all
+    # candidates; a positive cap is display-only and must never be treated as a
+    # complete analytical set.
+    store_limit = None if tree_cap is None or tree_cap <= 0 else int(tree_cap)
     trees = []
     for N in feasible_N:
         for edges in _parent_choice_trees(N):
             lab_edges = [(label(p, full, k), label(c, full, k)) for (p, c) in edges]
             trees.append({"edges": lab_edges, "recurrence": sorted(recurrence_bits(edges)),
-                          "n_hidden": len(N) - len(full) - 1})
-            if len(trees) >= tree_cap:
+                          "n_hidden": len(set(N) - ({ROOT} | full))})
+            if store_limit is not None and len(trees) >= store_limit:
                 break
-        if len(trees) >= tree_cap:
+        if store_limit is not None and len(trees) >= store_limit:
             break
 
     return {"n_hidden": n_hidden, "trees": trees, "n_trees": n_trees, "n_trees_stored": len(trees),
+            "trees_complete": (len(trees) == n_trees), "tree_cap": tree_cap,
             "has_recfree": has_recfree, "has_recurrence": has_recurrence,
             "n_feasible_N": len(feasible_N), "n_recfree_N": n_recfree_N, "n_recurrent_N": n_recurrent_N,
             "capped": capped, "cap_reason": cap_reason,
@@ -432,9 +441,10 @@ def _run_golden():
         ("two_siblings {10,01}", ["AR", "RA"], [], 2, "determined", 1, 0),
         # 2. 單一雙突變,缺中間群 → 順序未定 2 樹
         ("single_double {11}", ["AA"], [], 2, "ambiguous", 2, 1),
-        # 3. 四配子衝突 {10,01,11} → recurrence,11 掛 10 或 01 = 2 樹
+        # 3. rooted three-gamete 衝突 {10,01,11};ROOT 補 00 後為 four-gamete。
+        #    legacy case 名保留，避免既有 log/snapshot 名稱漂移。
         ("four_gamete {10,01,11}", ["AR", "RA", "AA"], [], 2, "recurrence_required", 2, 0),
-        # 4. k=3 四配子(bit0,bit1){100,010,110}
+        # 4. k=3 同一 rooted three-gamete 條件(bit0,bit1){100,010,110};legacy 名保留
         ("four_gamete_k3 {100,010,110}", ["ARR", "RAR", "AAR"], [], 3, "recurrence_required", 2, 0),
         # 5. 乾淨 nested {100,110} → 唯一 linear
         ("nested {100,110}", ["ARR", "AAR"], [], 3, "determined", 1, 0),

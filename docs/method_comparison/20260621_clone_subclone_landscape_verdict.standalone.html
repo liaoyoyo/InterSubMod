@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--
+  20260621_clone_subclone_landscape_verdict.standalone.html
+  資料源 (verified): InterSubMod/docs/method_comparison/20260621_clone_subclone_reconstruction_landscape_and_ism_feasibility_01.md
+  內部數字 SoT: 20260617_structure_label_situation_inventory_01.md + memories
+  外部 = L3 (agent WebFetch, 帶 PMID, 投稿前過 /citation-verification)
+  稽核: workflow ww3nitd8n evaluator = PASS (0 fabrication / 0 overclaim / 0 redline)
+  此 HTML 僅呈現已驗證結論 (conclusions HTML，非 data-injection)；逐項確認狀態存 localStorage。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clone/Subclone 重建全景 + ISM 可行性裁決 — 逐項確認</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222c; --ink:#e8eaf0; --mut:#9aa3b2;
+    --line:#2a2f3a; --acc:#5b9dff; --ok:#3fbf7f; --no:#ff6b6b; --warn:#f4b740;
+    --ism:#b48cff; --gene:#6fb3ff; --sc:#5fd0c8; --lr:#f59e6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","PingFang TC",Roboto,sans-serif;
+    line-height:1.6;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
+  h1{font-size:24px;margin:0 0 4px} h2{font-size:19px;margin:34px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:16px;margin:18px 0 8px;color:var(--acc)}
+  .sub{color:var(--mut);font-size:13px}
+  .banner{background:linear-gradient(90deg,#1b2330,#171a21);border:1px solid var(--line);
+    border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13px;color:var(--mut)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;vertical-align:middle}
+  .pill.ok{background:rgba(63,191,127,.16);color:var(--ok);border:1px solid var(--ok)}
+  .pill.no{background:rgba(255,107,107,.14);color:var(--no);border:1px solid var(--no)}
+  .pill.warn{background:rgba(244,183,64,.14);color:var(--warn);border:1px solid var(--warn)}
+  .pill.l3{background:rgba(180,140,255,.14);color:var(--ism);border:1px solid var(--ism)}
+  .verdict{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+  .verdict .hl{font-size:16px;font-weight:600}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+  @media(max-width:780px){.twocol{grid-template-columns:1fr}}
+  .col{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+  .col.ok{border-top:3px solid var(--ok)} .col.no{border-top:3px solid var(--no)}
+  .col h3{margin-top:0} .col ul{margin:6px 0 0;padding-left:18px} .col li{margin:5px 0;font-size:13.5px}
+  .gates{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .gate{background:var(--panel2);border:1px solid var(--warn);border-radius:6px;padding:6px 10px;font-size:12px}
+  .gate b{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--acc);position:sticky;top:0}
+  td.c{text-align:center} .yes{color:var(--ok);font-weight:700} .non{color:var(--no);font-weight:700} .par{color:var(--warn);font-weight:700}
+  .ismrow{background:rgba(180,140,255,.08)} .ismrow td:first-child{color:var(--ism);font-weight:700}
+  /* landscape grid */
+  .grp{margin:14px 0}
+  .grplab{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .sch{border-radius:8px;padding:11px 12px;border:1px solid var(--line);background:var(--panel2)}
+  .sch.gene{border-left:4px solid var(--gene)} .sch.sc{border-left:4px solid var(--sc)} .sch.lr{border-left:4px solid var(--lr)}
+  .sch h4{margin:0 0 4px;font-size:14px} .sch .m{color:var(--mut);font-size:12px;margin:3px 0}
+  .sch .can{color:var(--ok);font-size:12px} .sch .cant{color:var(--no);font-size:12px}
+  .ismbox{border:2px solid var(--ism);background:rgba(180,140,255,.07);border-radius:10px;padding:14px 16px;margin:14px 0}
+  .ismbox h3{color:var(--ism);margin-top:0}
+  .axis3{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .axis3 span{background:rgba(180,140,255,.14);border:1px solid var(--ism);border-radius:6px;padding:4px 9px;font-size:12px}
+  .note{color:var(--mut);font-size:12px}
+  /* confirm widget */
+  .item{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);
+    border-radius:7px;padding:9px 11px;margin:7px 0}
+  .item .body{flex:1} .item .body .t{font-size:13.5px} .item .body .d{color:var(--mut);font-size:12px;margin-top:2px}
+  .stbtns{display:flex;gap:4px;flex-shrink:0}
+  .stbtns button{border:1px solid var(--line);background:#222732;color:var(--mut);border-radius:5px;
+    padding:3px 7px;font-size:11px;cursor:pointer}
+  .stbtns button.on.y{background:var(--ok);color:#062;border-color:var(--ok)}
+  .stbtns button.on.q{background:var(--warn);color:#321;border-color:var(--warn)}
+  .stbtns button.on.n{background:var(--mut);color:#111;border-color:var(--mut)}
+  .toolbar{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.94);backdrop-filter:blur(4px);
+    border-bottom:1px solid var(--line);padding:8px 0;margin-bottom:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .toolbar button{background:var(--acc);color:#04132e;border:0;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:13px}
+  .toolbar .stat{color:var(--mut);font-size:12px}
+  .red{color:var(--no)} .star{color:var(--warn)}
+  code{background:#222732;padding:1px 5px;border-radius:4px;font-size:12px}
+  details{margin:6px 0} summary{cursor:pointer;color:var(--acc);font-size:13px}
+  a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="toolbar">
+    <button onclick="exportState()">⬇ 匯出確認狀態 (JSON)</button>
+    <button onclick="resetState()" style="background:#3a3f4b;color:#ddd">重置</button>
+    <span class="stat" id="progress">—</span>
+    <span class="stat">狀態存於本機 localStorage（逐項點 ✓已確認 / ?有疑問 / —未確認）</span>
+  </div>
+
+  <h1>Clone / Subclone 重建全景 + ISM 可行性裁決</h1>
+  <div class="sub">2026-06-21 · build_branch research/subclonal-reconstruction-202606 · workflow ww3nitd8n evaluator <b style="color:var(--ok)">PASS</b>（0 fabrication / 0 overclaim / 0 redline）</div>
+
+  <div class="banner">
+    <b>可信度</b>：ISM 內部數字 = tier ⭐ + L1-L5（溯源 situation inventory <code>20260617</code> + memories）；外部 = <span class="pill l3">L3</span> agent WebFetch（帶 PMID，投稿前過 <code>/citation-verification</code>）。
+    本頁僅呈現<b>已驗證結論</b>（conclusions HTML）。完整內容見主 doc <code>InterSubMod/docs/method_comparison/20260621_clone_subclone_reconstruction_landscape_and_ism_feasibility_01.md</code>。
+  </div>
+
+  <!-- ============ A. VERDICT ============ -->
+  <h2>A. 可行性裁決（一頁 Verdict-Pyramid）</h2>
+  <div class="verdict">
+    <div class="hl">論文目標「Subclonal reconstruction using somatic haplotagging and methylation profiles (ONT)」<span class="pill ok">可完成</span> —— 但<span class="red">僅在嚴格 frame 下</span>，且 <b class="warn">HD-1 未解前 reconstruction-spine 宣稱受限</b>。</div>
+    <p class="note" style="margin:8px 0 0">一句話：論文做得成 = 「在 <b>genetic 骨幹</b>上、用 <b>read 層次多證據</b>、對<b>特定區域</b>的 subclone 做<b>有 documented confounds 的個案刻畫與驗證</b>（proof-of-concept, <span class="star">⭐3</span> 單樣本 → G-A 後 ⭐4）」；<span class="red">不是</span>「用甲基重建全基因組 subclone 樹、勝過既有方法」。</p>
+  </div>
+
+  <div class="twocol">
+    <div class="col ok">
+      <h3>✅ 可完成（as framed）</h3>
+      <ul>
+        <li>區域內 / read 層次 / 多證據（haplotag + multi-sSNV + methylation）subclone <b>characterization / verification</b>（chr2:18M 旗艦 PRIMARY-verified）</li>
+        <li>ASM 存在 + somatic-enrichment 刻畫，並<b>誠實標 non-filter</b>（honest-negative 本身可發表）</li>
+        <li>跨 6 樣本 / 3 癌種 reproducibility ⭐3（6/6 excess-over-null；G-A 後 ⭐4）</li>
+        <li>Sanctioned <b>整合 innovation</b>（三件式 on bulk ONT）</li>
+        <li>methyl-phasing-assist T1 unphase rescue（0.885）supporting</li>
+        <li>a-priori 軸 C′ = 唯一合法 non-circular 管道（~7.6%；優勢 = <b>可解釋非偵測力</b>）</li>
+      </ul>
+    </div>
+    <div class="col no">
+      <h3>❌ 不可宣稱（overclaim 紅線）</h3>
+      <ul>
+        <li>methylation 驅動的 <b>genome-wide</b> subclonal reconstruction surpassing existing</li>
+        <li>完整 clonal <b>phylogeny / CCF tree / lineage tree</b>（學派 1-2 定義）</li>
+        <li><b>tumor-only 無監督</b> subclone 偵測（已 NEGATIVE，noise≈structure 83-100%）</li>
+        <li>methylation 當<b>獨立 discriminator / variant filter</b>（DEAD 4 路）</li>
+        <li>「對手用 short-read」或「對手缺顯著性檢定」<span class="red">（reviewer reject）</span></li>
+        <li>「distance-based 甲基重建新穎」（Sgootr 2023 單細胞已建）／ 18086020 timing 當定論</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>決定強度的 gate（解前不可 overclaim）</h3>
+  <div class="gates">
+    <div class="gate"><b>HD-1</b> phasing spine by-construction 循環 → R-SELFREF 或降 characterization</div>
+    <div class="gate"><b>G-B</b> subclone 甲基 somatic vs germline = <b>UNDETERMINED</b>（受 LOH-unmask 82-91% 壓制）</div>
+    <div class="gate"><b>G-A</b> COLO829 缺 + zhenyu112 SPOF → 封頂 ⭐3</div>
+    <div class="gate"><b>V-1</b> 乾淨 cis 1/816 under-tested</div>
+    <div class="gate"><b>大規模驗證</b> = future work</div>
+  </div>
+
+  <h3 style="color:var(--ism)">「ISM 能做別人不能」的誠實答案</h3>
+  <p class="note">不是無人有的<b>能力</b>，是<b>先驗元件於尚空交集的新穎組合 + 資料-regime niche</b>。<b>別人更強處</b>：single-cell 甲基做 genome-wide lineage（觀測 CELL = 真重建）；SNV-CCF + phylogeny + allele-CNA 做正式 reconstruction；DeCiFer 解 multiplicity；ROCIT 已做 read-level 甲基 tumour-origin genome-wide（supervised/無 normal）。ISM 在這些軸<b>不領先、不宜宣稱領先</b>。</p>
+
+  <!-- ============ B. LANDSCAPE ============ -->
+  <h2>B. Clone/Subclone 重建學派全景（6 學派）</h2>
+
+  <div class="grp">
+    <div class="grplab" style="color:var(--gene)">遺傳骨幹（學派 1-4）— 零甲基 · 非 read-level · 與 ISM 互補（0 真 CONFLICT）</div>
+    <div class="cards">
+      <div class="sch gene"><h4>① SNV / VAF-CCF clustering</h4>
+        <div class="m">PyClone-VI · DPClust · SciClone · MOBSTER</div>
+        <div class="can">CAN：bulk 反卷積 CCF clonal/subclonal 群、cohort-scale</div>
+        <div class="cant">CANNOT：multiplicity 不可識別；只產 cluster 非 tree</div></div>
+      <div class="sch gene"><h4>② Phylogeny / clonal-tree</h4>
+        <div class="m">PhyloWGS · Canopy · CITUP · LICHeE</div>
+        <div class="can">CAN：建完整 lineage tree + per-subclone genotype</div>
+        <div class="cant">CANNOT：tree 非唯一；單 bulk 嚴重欠約束</div></div>
+      <div class="sch gene"><h4>③ Allele-specific CNA</h4>
+        <div class="m">ASCAT · Battenberg · TITAN · MEDICC2</div>
+        <div class="can">CAN：purity/ploidy/allele-CN、call LOH、CN phylogeny</div>
+        <div class="cant">CANNOT：purity-ploidy 不可識別；WGD 等價；<span class="red">LOH-unmask 82-91%</span></div></div>
+      <div class="sch gene"><h4>④ Multiplicity / timing</h4>
+        <div class="m">DeCiFer · MutationTimeR · PCAWG-11</div>
+        <div class="can">CAN：解 multiplicity(DCF)、mutation 定年排序</div>
+        <div class="cant">CANNOT：CN-known 仍不足定 m；單 slice 僅部分重建</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="grplab" style="color:var(--sc)">⑤ single-cell（DNA + 甲基）— 甲基 lineage 唯一真實 regime · 不同 regime 非競爭</div>
+    <div class="cards">
+      <div class="sch sc"><h4>⑤ single-cell methylation lineage</h4>
+        <div class="m">Gaiti · Epiclomal · MethylTree · EPI-Clone · Sgootr</div>
+        <div class="can">CAN：甲基近-100% 重建 lineage/epiclone（真重建）</div>
+        <div class="cant">CANNOT：需 single-cell + label；Liu-Goretsky/Lee 靠物理預分選</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="grplab" style="color:var(--lr)">⑥ long-read phasing + read-level 甲基分群 — ISM 最近鄰與真實邊界</div>
+    <div class="cards">
+      <div class="sch lr"><h4>⑥a long-read phasing</h4>
+        <div class="m">longphase-S（ISM 骨幹）· MethPhaser(+Cancer) · NanoMethPhase · Wakhan</div>
+        <div class="cant">多數<b>不做 subclone</b>；bulk 無跨 phase-set linkage</div></div>
+      <div class="sch lr"><h4>⑥b read-level 甲基分群</h4>
+        <div class="m">cvlr · ASMS · qFDRP · CpelNano · MethylBERT</div>
+        <div class="cant"><b>不分離 ASM 與 somatic subclone</b>；無 matched-normal 錨點</div></div>
+      <div class="sch lr"><h4>⑥c 2025-26 新競品 <span class="pill l3">L3 未全文核</span></h4>
+        <div class="m">ROCIT · TumorLens · MethPhaser-Cancer · DPClust-on-LR</div>
+        <div class="cant">各佔不同子集（見 §E）；正快速填補白地</div></div>
+    </div>
+  </div>
+
+  <div class="ismbox">
+    <h3>🎯 Where ISM Sits</h3>
+    <p style="margin:4px 0">ISM <b>不佔據任何「沒人做過」的能力空白</b>；它佔據<b>先驗元件的新穎組合於一個尚空的交集</b>：</p>
+    <div class="axis3">
+      <span>① unsupervised read×read 距離矩陣 PERMANOVA 結構檢定</span>
+      <span>② normal-baseline somatic cis-test</span>
+      <span>③ somatic-subclone target</span>
+      <span style="background:rgba(111,179,255,.14);border-color:var(--gene)">on bulk ONT · read level</span>
+    </div>
+    <p class="note" style="margin:8px 0 0">每單元件皆 <b>prior art</b>（Sgootr 距離式 / qFDRP NHD / cvlr·ASMS read 分群 + 檢定 / longphase-S 骨幹）；<b>整合</b>才是 claim。reconstruction 由 <b>somatic haplotagging（genetic）驅動</b>，甲基 = corroborate（germline-haplotype 層；非 driver）。<br>
+    <b>觀測單元根本差異（理解樞紐）</b>：single-cell 觀測 <b>CELL</b>（跨 locus 物理連鎖）→ 能拼全基因組家譜；bulk long-read 觀測 <b>READ</b>（局部單分子、無跨 locus 細胞 linkage、無跨 phase-set linkage）→ ISM <b>物理上限於 regional</b>。</p>
+  </div>
+
+  <!-- ============ C. COMPARISON ============ -->
+  <h2>C. ISM vs 最近鄰對照表</h2>
+  <p class="note">🔴 差異<b>不是</b>「有無檢定」或「short vs long read」（cvlr/ASMS/MethylBERT 全 ONT-capable 且全有 randomization 檢定），而是<b>檢定對象 + normal 錨點 + target 的整合</b>。<span class="note">（PERMANOVA perm 次數待 C++ 源碼核）</span></p>
+  <div style="overflow-x:auto">
+  <table>
+    <tr><th>方法</th><th>regime</th><th class="c">read-level</th><th class="c">methyl</th><th class="c">normal-anchored cis</th><th class="c">unsup. structure test</th><th class="c">subclone target</th><th class="c">genome-wide recon</th><th>validation</th></tr>
+    <tr class="ismrow"><td>ISM</td><td>bulk ONT</td><td class="c yes">✅ read×read 距離矩陣</td><td class="c yes">✅ corroborate</td><td class="c yes">✅</td><td class="c yes">✅ PERMANOVA+PERMDISP</td><td class="c yes">✅ a-priori ~7.6%</td><td class="c non">❌ regional</td><td>⭐3 single（HCC1395）→⭐4 待 G-A；HD-1/G-B/V-1 open</td></tr>
+    <tr><td>cvlr</td><td>bulk ONT</td><td class="c yes">✅</td><td class="c yes">✅</td><td class="c non">❌</td><td class="c par">◐ 甲基差量 vs 1000-rand</td><td class="c non">❌ germline ASM</td><td class="c non">❌</td><td>published 2023</td></tr>
+    <tr><td>ASMS</td><td>bulk ONT</td><td class="c yes">✅</td><td class="c yes">✅</td><td class="c non">❌</td><td class="c par">◐ 5000-perm 差量</td><td class="c non">❌ germline ASM</td><td class="c non">❌</td><td>preprint 2024</td></tr>
+    <tr><td>MethylBERT</td><td>bulk ONT-capable</td><td class="c yes">✅</td><td class="c yes">✅</td><td class="c non">❌</td><td class="c non">❌ supervised deconv</td><td class="c par">◐ tumour/normal deconv</td><td class="c non">❌</td><td>published 2025</td></tr>
+    <tr><td>single-cell 甲基<br><span class="note">Epiclomal/MethylTree/Sgootr</span></td><td>single-cell</td><td class="c par">per-CELL</td><td class="c yes">✅ lineage signal</td><td class="c non">❌</td><td class="c par">◐ sc regime</td><td class="c yes">✅ 真重建</td><td class="c yes">✅ sc lineage tree</td><td>published；<b>不同 regime</b></td></tr>
+    <tr><td>SNV-CCF<br><span class="note">PyClone-VI/DPClust</span></td><td>bulk WGS/WES</td><td class="c non">❌ aggregate VAF</td><td class="c non">❌</td><td class="c non">❌</td><td class="c non">❌ CCF cluster</td><td class="c yes">✅ CCF 群</td><td class="c yes">✅ per-mutation</td><td>cohort-validated；<b>互補骨幹</b></td></tr>
+  </table>
+  </div>
+  <p class="note">ISM 唯一在「unsupervised 距離矩陣<b>結構</b>檢定 + normal-anchored cis + somatic-subclone target」三軸<b>同時</b> ✅；<code>genome-wide recon</code> 欄 ISM 刻意 ❌ = others do better 之處。◐ = 部分/相關但非同物。</p>
+
+  <!-- ============ D. BLIND-SPOT ============ -->
+  <h2>D. Blind-spot 檢核表（每次分析前對照 · 逐項確認）</h2>
+  <div id="blindspots"></div>
+
+  <!-- ============ E. UNKNOWNS + COMPETITORS ============ -->
+  <h2>E. 未知與分歧 + 2025-26 競品（逐項確認）</h2>
+  <div id="unknowns"></div>
+
+  <h3>🆕 2025-26 競品全文核狀態 <span class="pill ok">已核 + 建卡（庫 69→72）</span></h3>
+  <p class="note">🔴 <b>頭條：四者 whitespace_threat 全 = LOW → ISM 三軸整合白地經實測仍站得住</b>（最尖 ROCIT 三軸 0/3 重疊）。</p>
+  <table>
+    <tr><th>競品</th><th>它做什麼（全文核確認）</th><th>vs ISM niche</th><th>狀態 / tier</th></tr>
+    <tr><td><b>ROCIT</b><br><span class="note">Baker/Spellman 2026 · PMC12991090</span></td><td>supervised transformer 把每 read 分 tumour/非tumour；甲基=driver</td><td><span class="non">supervised / binary / 無 normal / 非 subclone</span> → <b>0/3</b> 重疊；最尖反襯</td><td><span class="pill ok">fulltext ✓ A</span><br><span class="note">🔴 PacBio 實證 ONT aspirational</span></td></tr>
+    <tr><td><b>TumorLens</b><br><span class="note">Paulin/Sedlazeck 2026 · PMC13015642</span></td><td>統一 bulk-ONT 多組學偵測；ASM 限 74 HLA/APM 為 immune-escape</td><td>偵測+詮釋，10kb window 非 read-level，非 subclone → 0/3</td><td><span class="pill ok">fulltext ✓ B</span><br><span class="note">同 Sedlazeck 生態系 must-cite</span></td></tr>
+    <tr><td><b>MethPhaser-Cancer</b><br><span class="note">Yilei Fu 2023 Rice 博論章節</span></td><td>tumor purity + k=2 read 二分（停 phasing 層）</td><td>非 subclone；germline/purity 上游</td><td><span class="pill warn">C · L3</span><br><span class="non">🔴 非論文（無 DOI/code，模擬）；「2026 論文」=幻覺已排除</span></td></tr>
+    <tr><td><b>O'Neill 2024</b><br><span class="note">Cell Genomics · PMC11605692</span></td><td>cancer cohort landscape：SV+phasing+甲基地景；read-level haplotype-phased aDMR</td><td><span class="non">🔴 不做 DPClust/subclone（term-search=0）</span>；germline-aDMR 軸；非「分離 DMR track」</td><td><span class="pill ok">peer-reviewed A</span></td></tr>
+    <tr><td><b>McAuley 2025 rectal</b><br><span class="note">bioRxiv · 單病人</span></td><td>單病人 concordance + 甲基 DMR-vs-adjacent-normal（「分離 DMR track」例）</td><td>非 subclone（snippet 未現）；不同 granularity</td><td><span class="warn">C · abstract-only（全文 403）</span></td></tr>
+  </table>
+  <p class="note">🔴 <b>三個一手更正</b>：① MethPhaser-Cancer = 博論章節非論文（purity 非 subclone）；② ROCIT = PacBio 實證非 ONT；③ <b>O'Neill 不做 DPClust/subclone</b> → 我先前「DPClust-on-LR field default」框架錯，該 composite pipeline 作為單一論文並不存在。<br>
+  白地裁決 = <b>PARTLY-FILLED</b>：ISM 三軸交集無單一方法佔滿（屬「先驗元件的新穎整合」非真空），但 ROCIT/TumorLens 是 must-cite must-distinguish 鄰居 → <b>窄誠實 framing 強制</b>。已建 5 卡（3 新 + O'Neill 更新 + MethPhaser addendum）；McAuley/MethPhaser-Cancer 全文待補（投稿前 head-to-head）。</p>
+
+  <h2>來源</h2>
+  <p class="note">主 doc：<code>InterSubMod/docs/method_comparison/20260621_clone_subclone_reconstruction_landscape_and_ism_feasibility_01.md</code> ·
+  教學 AI 指南：<code>InterSubMod/docs/method_comparison/20260621_clone_subclone_teaching_guide_for_ai_01.md</code> ·
+  組合判讀：<code>20260620_somatic_locus_methylation_combination_enumeration_01.md</code> ·
+  內部數字 SoT：<code>20260617_structure_label_situation_inventory_01.md</code> ·
+  外部 69 源庫：<code>/big7_disk/liaoyoyo2001/external_validation/</code>。
+  外部 citation 帶 PMID（見主 doc §11）；投稿前過 <code>/citation-verification</code>。</p>
+
+</div>
+
+<script>
+const BLINDSPOTS=[
+ ["LOH-unmask 既存 ASM（82–91%）","LOH 區「等位甲基」先當既存 ASM 顯形，非新 somatic"],
+ ["epiallele over-cluster","read 內相關把 1 clone 切成 k=3-4；切群前過 correlation-preserving null"],
+ ["double-dip","無監督「挑最分得開再測」= 循環（noise≈structure 83-100%）"],
+ ["homopolymer 假群","chr2 pos4 20bp poly-T 製造假 read 群（看 reads.tsv 側欄）"],
+ ["SampleASM 飽和假象","96.5% 命中 → 勿引用為「幾乎都有甲基訊號」"],
+ ["germline vs residual 意義相反","都用 normal 但結論相反（germline=非 somatic / residual=tumor-specific），禁合併"],
+ ["cross-phase-set 無連結","per-block call 不能串成 genome-wide lineage（需外部 anchor）"],
+ ["confirmed ≥2 群 ≠ subclone","85% 對齊 germline/carrier = cis-ASM"],
+ ["half-ALT non-identifiable","半帶不能單獨宣稱 subclone（multiplicity）"],
+ ["reviewer-reject 雷","禁說「對手用 short-read」或「對手缺顯著性檢定」"],
+];
+const UNKNOWNS=[
+ ["G-B：subclone 甲基 somatic-specific 還是 germline-allelic？","UNDETERMINED（最關鍵）；需 within-haplotype somatic-vs-baseline control；受 LOH-unmask 壓制"],
+ ["bulk 區域 read-level 能否在單樣本「確認」subclone？","結構性存疑（非僅資料量）；組合窮舉證多數 undecidable"],
+ ["乾淨 somatic-cis 真實稀有度","僅測 HCC1395 1/816 loci（under-tested）→ full-locus × 6-sample"],
+ ["我們曾誤判已更正：ASMS「缺檢定」口徑錯","ASMS 實有 5000-perm 檢定 → 對外禁用「對手缺檢定」"],
+ ["2025-26 競品正快速填補白地","ROCIT/TumorLens/MethPhaser-Cancer/DPClust-on-LR（L3，全文核 + head-to-head 必做）"],
+ ["HD-1：phasing spine by-construction 循環","未解 → 骨幹宣稱受限；R-SELFREF 或降 characterization"],
+];
+const KEY="ism_landscape_confirm_v1";
+let state=JSON.parse(localStorage.getItem(KEY)||"{}");
+function render(list,elid,prefix){
+  const el=document.getElementById(elid);el.innerHTML="";
+  list.forEach((it,i)=>{
+    const id=prefix+i;const cur=state[id]||"";
+    const d=document.createElement("div");d.className="item";
+    d.innerHTML=`<div class="body"><div class="t">${it[0]}</div><div class="d">${it[1]}</div></div>
+      <div class="stbtns">
+        <button data-id="${id}" data-v="y" class="${cur==='y'?'on y':''}">✓已確認</button>
+        <button data-id="${id}" data-v="q" class="${cur==='q'?'on q':''}">?有疑問</button>
+        <button data-id="${id}" data-v="n" class="${cur==='n'?'on n':''}">—未確認</button>
+      </div>`;
+    el.appendChild(d);
+  });
+}
+function bind(){document.querySelectorAll(".stbtns button").forEach(b=>{
+  b.onclick=()=>{const id=b.dataset.id,v=b.dataset.v;state[id]=(state[id]===v?"":v);
+    localStorage.setItem(KEY,JSON.stringify(state));renderAll();};});}
+function prog(){const all=BLINDSPOTS.length+UNKNOWNS.length;let y=0,q=0;
+  Object.values(state).forEach(v=>{if(v==='y')y++;if(v==='q')q++;});
+  document.getElementById("progress").textContent=`已確認 ${y} · 有疑問 ${q} · /${all} 項`;}
+function renderAll(){render(BLINDSPOTS,"blindspots","bs");render(UNKNOWNS,"unknowns","uk");bind();prog();}
+function exportState(){const blob=new Blob([JSON.stringify({when:new Date().toISOString(),state},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ism_landscape_confirm.json";a.click();}
+function resetState(){if(confirm("重置所有確認狀態？")){state={};localStorage.removeItem(KEY);renderAll();}}
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solver 複雜度逐步驟分析 — 布爾超立方體最小 group-Steiner 樹集合</title>
+<style>
+:root{--bg:#ffffff;--fg:#0f172a;--mut:#64748b;--line:#e2e8f0;--card:#f8fafc;
+--acc:#2563eb;--hot:#dc2626;--ok:#0d9488;--amber:#ea580c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","PingFang TC",
+"Microsoft JhengHei",'Helvetica Neue',Arial,sans-serif;line-height:1.72;font-size:15.5px}
+.wrap{max-width:1080px;margin:0 auto;padding:34px 22px 80px}
+h1{font-size:26px;line-height:1.35;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:20px;margin:44px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:16px;margin:26px 0 8px;color:#1e293b}
+.sub{color:var(--mut);font-size:13.5px;margin-bottom:20px}
+.tldr{background:linear-gradient(180deg,#f0f9ff,#f8fafc);border:1px solid #bae6fd;
+border-left:5px solid var(--acc);border-radius:10px;padding:16px 20px;margin:20px 0 8px}
+.tldr b{color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:11px;margin:18px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+.kpi .v{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.kpi .l{font-size:11.5px;color:var(--mut);margin-top:2px}
+.kpi.hot .v{color:var(--hot)} .kpi.ok .v{color:var(--ok)} .kpi.acc .v{color:var(--acc)}
+figure{margin:22px 0;padding:14px;background:#fff;border:1px solid var(--line);border-radius:11px}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:12.5px;color:var(--mut);margin-top:10px;padding-top:9px;
+border-top:1px dashed var(--line)}
+.tw{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th{background:#f1f5f9;text-align:left;padding:9px 11px;border-bottom:2px solid #cbd5e1;
+font-weight:600;white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover{background:#fafcff}
+code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px;
+font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.math{background:#fbfdff;border:1px solid #dbeafe;border-radius:9px;padding:14px 18px;
+margin:14px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;
+overflow-x:auto;line-height:2}
+.box{border:1px solid var(--line);border-radius:9px;padding:14px 18px;margin:16px 0;
+background:var(--card)}
+.box.warn{background:#fffbeb;border-color:#fcd34d}
+.box.dang{background:#fef2f2;border-color:#fecaca}
+.box.good{background:#f0fdfa;border-color:#99f6e4}
+.box h4{margin:0 0 7px;font-size:14px}
+.hot{color:var(--hot)} .ok{color:var(--ok)} .mut{color:var(--mut)}
+.tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600}
+.tag.warn{background:#fee2e2;color:#b91c1c}
+.tag.amber{background:#ffedd5;color:#c2410c}
+ol,ul{padding-left:22px} li{margin:5px 0}
+footer{margin-top:52px;padding-top:18px;border-top:2px solid var(--line);
+font-size:12.5px;color:var(--mut)}
+.proof{border-left:3px solid #cbd5e1;padding:4px 0 4px 16px;margin:12px 0;font-size:14.5px}
+@media(prefers-color-scheme:dark){
+:root{--bg:#0b1120;--fg:#e2e8f0;--mut:#94a3b8;--line:#1e293b;--card:#0f172a}
+body{background:var(--bg)} figure{background:#0f172a}
+figure svg{filter:invert(.92) hue-rotate(180deg)}
+th{background:#1e293b;border-bottom-color:#334155} tbody tr:hover{background:#111c33}
+code,.math{background:#111c33;border-color:#1e293b}
+.tldr{background:#0f1e33;border-color:#1e3a5f}
+.box.warn{background:#2a2410;border-color:#78350f}
+.box.dang{background:#2a1414;border-color:#7f1d1d}
+.box.good{background:#0d2926;border-color:#115e59}
+}
+</style>
+<div class="wrap">
+
+<h1>布爾超立方體上「最小 group-Steiner 樹集合」<br>逐步驟計算量與理論上界</h1>
+<div class="sub">solver: <code>tree_enumeration_solver.py</code>（2026-07-06）　·
+參數 MAX_SNV=8、extra_cap=4、per_level_budget=150,000
+　·　全部數字由 <code>20260725_solver_complexity_stepwise_01.data.json</code> 注入</div>
+
+<div class="tldr">
+<b>一句話：</b>求「所有最小樹的集合」的成本 <b>91.1% 集中在單一階段（S5 逐層節點集搜尋）</b>，
+其候選數有<b>精確上界 164,221</b>（最壞約 1.641 秒／unit）。
+樹的<b>計數是多項式</b>（A(N)=Π d<sub>N</sub>(x)），<b>列舉才是指數</b>。
+理論絕對上界 A<sub>max</sub>(8) ≈ 7.7×10<sup>145</sup> 在 caps 下不可達；
+HCC1395 實測最大僅 <b>125 棵</b>。
+</div>
+
+<div class="grid">
+<div class="kpi hot"><div class="v">91.1%</div>
+<div class="l">S5 佔總時間</div></div>
+<div class="kpi acc"><div class="v">164,221</div>
+<div class="l">S5 候選數上界 @P=45</div></div>
+<div class="kpi"><div class="v">1.641 s</div>
+<div class="l">最壞 wall-time／unit</div></div>
+<div class="kpi hot"><div class="v">10<sup>145</sup></div>
+<div class="l">A_max(8) 絕對上界</div></div>
+<div class="kpi ok"><div class="v">125</div>
+<div class="l">實測最大樹數</div></div>
+<div class="kpi ok"><div class="v">28/28</div>
+<div class="l">鏡像驗證通過</div></div>
+</div>
+
+<h2>§1　問題物件：超立方體、Steiner 點、group</h2>
+<p>每個區域內的 <i>k</i> 個 somatic sSNV 構成布爾超立方體 <code>{0,1}^k</code> 的座標軸。
+一條 ONT read 的基因型向量 = 一個頂點；根固定在 germline all-REF（<code>0^k</code>）；
+邊只允許 <b>unit-flip</b>（一次獲得一個突變，popcount 遞增）。</p>
+
+<figure><svg viewBox="0 0 760 478" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="k=3 布爾超立方體 Hasse 圖"><rect width="760" height="478" fill="white"/><line x1="18" y1="362" x2="742" y2="362" stroke="#e2e8f0" stroke-dasharray="3 5"/><text x="22" y="353" font-size="11" fill="#94a3b8">popcount 0</text><line x1="18" y1="267" x2="742" y2="267" stroke="#e2e8f0" stroke-dasharray="3 5"/><text x="22" y="258" font-size="11" fill="#94a3b8">popcount 1</text><line x1="18" y1="172" x2="742" y2="172" stroke="#e2e8f0" stroke-dasharray="3 5"/><text x="22" y="163" font-size="11" fill="#94a3b8">popcount 2</text><line x1="18" y1="77" x2="742" y2="77" stroke="#e2e8f0" stroke-dasharray="3 5"/><text x="22" y="68" font-size="11" fill="#94a3b8">popcount 3</text><line x1="380.0" y1="362" x2="180.0" y2="267" stroke="#0f766e" stroke-width="2.6"/><line x1="380.0" y1="362" x2="380.0" y2="267" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="380.0" y1="362" x2="580.0" y2="267" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="380.0" y1="267" x2="180.0" y2="172" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="180.0" y1="267" x2="180.0" y2="172" stroke="#0f766e" stroke-width="2.6"/><line x1="580.0" y1="267" x2="380.0" y2="172" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="180.0" y1="267" x2="380.0" y2="172" stroke="#0f766e" stroke-width="2.6"/><line x1="580.0" y1="267" x2="580.0" y2="172" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="380.0" y1="267" x2="580.0" y2="172" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="580.0" y1="172" x2="380.0" y2="77" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="380.0" y1="172" x2="380.0" y2="77" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><line x1="180.0" y1="172" x2="380.0" y2="77" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/><circle cx="380.0" cy="362" r="21" fill="#fff" stroke="#64748b" stroke-width="2.2" stroke-dasharray="none"/><text x="380.0" y="366" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">RRR</text><circle cx="180.0" cy="267" r="21" fill="#fff" stroke="#7c3aed" stroke-width="2.2" stroke-dasharray="4 3"/><text x="180.0" y="271" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">ARR</text><text x="150.0" y="265" font-size="10.5" text-anchor="end" fill="#7c3aed">必須插入的</text><text x="150.0" y="279" font-size="10.5" text-anchor="end" fill="#7c3aed">隱藏祖先</text><circle cx="380.0" cy="267" r="21" fill="#fff" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="none"/><text x="380.0" y="271" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">RAR</text><circle cx="580.0" cy="267" r="21" fill="#fff" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="none"/><text x="580.0" y="271" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">RRA</text><circle cx="180.0" cy="172" r="21" fill="#2563eb" stroke="#2563eb" stroke-width="2.2" stroke-dasharray="none"/><text x="180.0" y="176" font-size="11" font-family="monospace" text-anchor="middle" fill="white">AAR</text><circle cx="380.0" cy="172" r="21" fill="#2563eb" stroke="#2563eb" stroke-width="2.2" stroke-dasharray="none"/><text x="380.0" y="176" font-size="11" font-family="monospace" text-anchor="middle" fill="white">ARA</text><circle cx="580.0" cy="172" r="21" fill="#fff" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="none"/><text x="580.0" y="176" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">RAA</text><circle cx="380.0" cy="77" r="21" fill="#fff" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="none"/><text x="380.0" y="81" font-size="11" font-family="monospace" text-anchor="middle" fill="#334155">AAA</text><rect x="500" y="48" width="238" height="62" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.2" opacity=".95"/><text x="514" y="70" font-size="10.5" fill="#475569">AAR 與 ARA 唯一的共同 unit-pred</text><text x="514" y="87" font-size="10.5" fill="#475569">= ARR,但 ARR <tspan font-weight="600">未被觀測</tspan></text><text x="514" y="102" font-size="10.5" font-weight="600" fill="#7c3aed">→ 必須插入為 Steiner 點</text><line x1="18" y1="412" x2="742" y2="412" stroke="#e2e8f0"/><circle cx="35" cy="432" r="7" fill="#2563eb" stroke="#2563eb" stroke-width="2"/><text x="54" y="436" font-size="11.5" fill="#475569">觀測到的基因型(terminal)</text><circle cx="405" cy="432" r="7" fill="#fff" stroke="#7c3aed" stroke-width="2" stroke-dasharray="4 3"/><text x="424" y="436" font-size="11.5" fill="#475569">未觀測祖先 = Steiner 點</text><line x1="24" y1="453" x2="46" y2="453" stroke="#0f766e" stroke-width="2.4"/><text x="54" y="457" font-size="11.5" fill="#475569">選中的樹邊(unit-flip)</text><line x1="394" y1="453" x2="416" y2="453" stroke="#94a3b8" stroke-width="2.4" stroke-dasharray="4 4"/><text x="424" y="457" font-size="11.5" fill="#475569">候選但未選的邊</text></svg>
+<figcaption><b>圖 1．</b>k=3 的 Hasse 圖（solver 實際運作的空間），示範<b>隱藏節點「非插不可」</b>的最小情形。
+實心藍 = 觀測到的完整基因型（terminals）；虛線紫 = 未觀測的祖先 clone，即 <b>Steiner 點</b>；
+粗綠 = 被選中的樹邊；灰色 = 未被任何觀測需要、<b>不進最小樹</b>的頂點。
+所有邊都由下往上、一次只翻一個 bit — 這是 infinite-sites 假設的幾何化。<br>
+觀測到 <code>AAR</code> 與 <code>ARA</code>，兩者唯一的共同 unit-pred 是 <code>ARR</code>；
+<code>ARR</code> 沒被任何 read 觀測到，但若不插入它，兩個觀測就無法在單調樹上連通 —
+<b>這就是「未觀測祖先 clone」在數學上被迫存在的地方</b>。此例 e<sub>min</sub>=1。</figcaption></figure>
+
+<h3>long-read 的部分覆蓋，如何變成「group」</h3>
+<p>這是本形式化最關鍵的一步：read 只穿過區域的一部分時，未覆蓋位點記為 <code>X</code>（未知，非 0）。
+一個含 <i>u</i> 個 <code>X</code> 的觀測，對應超立方體上一個 <b>2^u 個頂點的子立方體（面）</b>；
+樹只要<b>碰到其中任一個</b>就算解釋了這條 read。這正是 group-Steiner 的「group」。</p>
+
+<figure><svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="singleton group 與 subcube group 對照"><rect width="760" height="330" fill="white"/><text x="160" y="24" font-size="13.5" font-weight="600" text-anchor="middle" fill="#0f172a">完整覆蓋 → singleton group</text><text x="26" y="56" font-size="11" fill="#64748b">ONT read 覆蓋:</text><rect x="110" y="42" width="32" height="24" rx="4" fill="#bfdbfe" stroke="#94a3b8" stroke-width="1"/><text x="126" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#1e40af">A</text><text x="126" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV1</text><rect x="150" y="42" width="32" height="24" rx="4" fill="#dbeafe" stroke="#94a3b8" stroke-width="1"/><text x="166" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#1e40af">R</text><text x="166" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV2</text><rect x="190" y="42" width="32" height="24" rx="4" fill="#bfdbfe" stroke="#94a3b8" stroke-width="1"/><text x="206" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#1e40af">A</text><text x="206" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV3</text><text x="26" y="118" font-size="11" fill="#64748b">誘導出的群:</text><rect x="24" y="132" width="300" height="72" rx="10" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"/><circle cx="66" cy="166" r="19" fill="#2563eb" opacity=".14" stroke="#2563eb" stroke-width="2"/><text x="66" y="170" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">ARA</text><text x="98" y="170" font-size="11.5" fill="#475569">相容頂點</text><text x="24" y="226" font-size="11.5" fill="#2563eb">樹必須「包含」這個頂點</text><line x1="380.0" y1="14" x2="380.0" y2="320" stroke="#e2e8f0" stroke-width="1.5"/><text x="540.0" y="24" font-size="13.5" font-weight="600" text-anchor="middle" fill="#0f172a">部分覆蓋 → subcube group</text><text x="406.0" y="56" font-size="11" fill="#64748b">ONT read 覆蓋:</text><rect x="490.0" y="42" width="32" height="24" rx="4" fill="#bfdbfe" stroke="#94a3b8" stroke-width="1"/><text x="506.0" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#1e40af">A</text><text x="506.0" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV1</text><rect x="530.0" y="42" width="32" height="24" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/><text x="546.0" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#94a3b8">?</text><text x="546.0" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV2</text><rect x="570.0" y="42" width="32" height="24" rx="4" fill="#dbeafe" stroke="#94a3b8" stroke-width="1"/><text x="586.0" y="59" font-size="12" font-family="monospace" text-anchor="middle" fill="#1e40af">R</text><text x="586.0" y="80" font-size="9.5" text-anchor="middle" fill="#94a3b8">sSNV3</text><text x="406.0" y="118" font-size="11" fill="#64748b">誘導出的群:</text><rect x="404.0" y="132" width="300" height="128" rx="10" fill="none" stroke="#ea580c" stroke-width="2" stroke-dasharray="6 4"/><circle cx="446.0" cy="166" r="19" fill="#ea580c" opacity=".14" stroke="#ea580c" stroke-width="2"/><text x="446.0" y="170" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">ARR</text><text x="478.0" y="170" font-size="11.5" fill="#475569">相容頂點</text><circle cx="446.0" cy="222" r="19" fill="#ea580c" opacity=".14" stroke="#ea580c" stroke-width="2"/><text x="446.0" y="226" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">AAR</text><text x="478.0" y="226" font-size="11.5" fill="#475569">相容頂點</text><text x="404.0" y="282" font-size="11.5" fill="#ea580c">樹只需「碰到其中一個」</text></svg>
+<figcaption><b>圖 2．</b>左：完整覆蓋 → singleton group（樹必須<i>包含</i>該頂點）。
+右：部分覆蓋 → subcube group（樹只需<i>碰到其中一個</i>）。
+<b>測序讀長這個物理限制，被直接翻譯成 group 約束</b> — 這是把腫瘤重建 cast 成
+group-Steiner 的實質內容，也是與既有腫瘤系統發生法的分野。</figcaption></figure>
+
+<h2>§2　七個步驟與各自的計算量</h2>
+<figure><svg viewBox="0 0 980 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="七步驟流程與成本"><rect width="980" height="250" fill="white"/><rect x="21.0" y="54" width="122" height="104" rx="9" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/><text x="82.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#cbd5e1">S1</text><text x="82.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">解析觀測</text><text x="82.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">O((f+p)k)</text><text x="82.0" y="142" font-size="11" text-anchor="middle" fill="#94a3b8">~0%</text><path d="M145.0 106 L155.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="157.0" y="54" width="122" height="104" rx="9" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/><text x="218.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#cbd5e1">S2</text><text x="218.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">universe</text><text x="218.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">O((f+p)k)</text><text x="218.0" y="142" font-size="11" text-anchor="middle" fill="#94a3b8">~0%</text><path d="M281.0 106 L291.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="293.0" y="54" width="122" height="104" rx="9" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/><text x="354.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#cbd5e1">S3</text><text x="354.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">建 subcube group</text><text x="354.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">O(Σ2^u·k)</text><text x="354.0" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#cbd5e1">0.0%</text><path d="M417.0 106 L427.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="429.0" y="54" width="122" height="104" rx="9" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/><text x="490.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#cbd5e1">S4</text><text x="490.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">建候選 pool</text><text x="490.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">O((f+p2^k)2^k)</text><text x="490.0" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#cbd5e1">0.2%</text><path d="M553.0 106 L563.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="565.0" y="54" width="122" height="104" rx="9" fill="#fef2f2" stroke="#dc2626" stroke-width="2.4"/><text x="626.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#dc2626">S5</text><text x="626.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">逐層最小解搜尋</text><text x="626.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">Σ C(P,e)×O(·)</text><text x="626.0" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#dc2626">91.1%</text><path d="M689.0 106 L699.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="701.0" y="54" width="122" height="104" rx="9" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/><text x="762.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#cbd5e1">S6</text><text x="762.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">分析式計數</text><text x="762.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">O(|N|·k²)</text><text x="762.0" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#cbd5e1">0.1%</text><path d="M825.0 106 L835.0 106" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#ah)"/><rect x="837.0" y="54" width="122" height="104" rx="9" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.4"/><text x="898.0" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="#0d9488">S7</text><text x="898.0" y="96" font-size="10.5" text-anchor="middle" fill="#334155">實體化樹</text><text x="898.0" y="118" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#64748b">Θ(A(N))</text><text x="898.0" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#0d9488">8.6%</text><defs><marker id="ah" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#cbd5e1"/></marker></defs><text x="490.0" y="30" font-size="12.5" text-anchor="middle" fill="#475569">實測時間佔比(28 案例合計 3378 ms) — <tspan fill="#dc2626" font-weight="700">S5 是唯一主導項</tspan></text><text x="490.0" y="185" font-size="11" text-anchor="middle" fill="#64748b">多項式階段 ————————————————— | S5 組合爆炸(有 budget 硬上限) | S7 指數(生產無上限)</text><rect x="21.0" y="204" width="1.2" height="20" fill="#cbd5e1" opacity=".85"/><rect x="21.1876" y="204" width="2.0636" height="20" fill="#cbd5e1" opacity=".85"/><rect x="23.2512" y="204" width="854.5179999999999" height="20" fill="#dc2626" opacity=".85"/><text x="450.51019999999994" y="218" font-size="10.5" text-anchor="middle" fill="white" font-weight="600">S5 91.1%</text><rect x="877.7692" y="204" width="1.2" height="20" fill="#cbd5e1" opacity=".85"/><rect x="878.6134" y="204" width="80.3866" height="20" fill="#0d9488" opacity=".85"/><text x="918.8067" y="218" font-size="10.5" text-anchor="middle" fill="white" font-weight="600">S7 8.6%</text></svg>
+<figcaption><b>圖 3．</b>七步驟 pipeline。百分比為 28 個合成案例的實測時間佔比
+（合計 3378 ms）。<b>S5 是唯一主導項</b>；S3/S4 的理論上界看似嚇人，
+實際被 <code>|pool| ≤ 2^k</code> 壓住（實測最大僅 1,939 次子集操作、
+1.78 ms）。</figcaption></figure>
+
+<div class="tw"><table class=""><thead><tr><th>#</th><th>步驟</th><th>程式位置</th><th>理論成本</th><th>實測佔比</th></tr></thead><tbody><tr><td>S1</td><td>解析觀測</td><td><code>:118-119</code></td><td>O((f+p)·k)</td><td>~0%</td></tr><tr><td>S2</td><td>universe</td><td><code>:121</code></td><td>O((f+p)·k)</td><td>~0%</td></tr><tr><td>S3</td><td>建 subcube group</td><td><code>:35-42,122</code></td><td>O(Σᵢ2^uᵢ·k) ≤ O(p·2^k·k)</td><td>0.0%</td></tr><tr><td>S4</td><td>建候選 Steiner pool</td><td><code>:127-136</code></td><td>O(Σ_m 2^|m|) ≤ O((f+p·2^k)·2^k)，去重後 |pool| ≤ 2^k</td><td>0.2%</td></tr><tr><td><b>S5</b></td><td><b>逐層最小解搜尋</b></td><td><code>:144-157</code></td><td><b>Σ_{e≤E} C(P,e) × O(f + p·2^k + |N|·k)</b></td><td><b class="hot">91.1%</b></td></tr><tr><td>S6</td><td>分析式計數 + 相容性</td><td><code>:173-187</code></td><td>O(|𝒩|·|N|·k²) — <b>多項式</b></td><td>0.1%</td></tr><tr><td>S7</td><td>實體化樹</td><td><code>:191-201</code></td><td>Θ(A_total) — <b>指數</b></td><td>8.6%</td></tr></tbody></table></div>
+
+<div class="box">
+<h4>符號</h4>
+<code>k</code> = sSNV 數（≤8）　<code>f</code> = 完整觀測數　<code>p</code> = partial 觀測數
+<code>u_i</code> = 第 i 條 partial 的未覆蓋位點數　<code>P</code> = 候選 Steiner 節點池大小
+<code>e</code> = hidden 節點數　<code>N</code> = 節點集　<code>𝒩</code> = 可行節點集族
+</div>
+
+<h3>驗證器成本：V4/V5 等於把主導階段再跑一次</h3>
+<p>V4（獨立重算最小性）重跑第 <code>e_min−1</code> 層，V5（獨立重算完整性）重跑第 <code>e_min</code> 層。
+實測其合計為 S5 的 <b>0.92–0.98×</b>。
+生產預設 <code>VERIFY_EVERY=1</code>（每個 unit 全跑），故實際總成本 ≈ 2× S5。</p>
+<div class="tw"><table class=""><thead><tr><th>案例</th><th>S5 (ms)</th><th>V4 (ms)</th><th>V5 (ms)</th><th>(V4+V5)/S5</th></tr></thead><tbody><tr><td>C_fullonly_k8_f1</td><td>3.28</td><td>0.55</td><td>2.66</td><td>0.98×</td></tr><tr><td>C_fullonly_k8_f2</td><td>26.00</td><td>2.30</td><td>21.53</td><td>0.92×</td></tr><tr><td>F_k4_all_alt</td><td>3.52</td><td>0.55</td><td>2.91</td><td>0.98×</td></tr></tbody></table></div>
+
+<h2>§3　理論最大量（數學推導）</h2>
+
+<h3>3.1　狀態空間的天然屏障</h3>
+<div class="math">|{0,1}<sup>k</sup>| = 2<sup>k</sup> ≤ 2<sup>8</sup> = 256　　⇒　　P ≤ 2<sup>k</sup> − 1 = <b>255</b></div>
+<p>候選 pool 是超立方體頂點的子集，去重後<b>無論 f、p 多大都不超過 256</b>。這是第一道硬上限。</p>
+<div class="tw"><table class=""><thead><tr><th>k</th><th>頂點數 2^k</th><th>P 上限</th></tr></thead><tbody><tr><td>2</td><td>4</td><td>3</td></tr><tr><td>3</td><td>8</td><td>7</td></tr><tr><td>4</td><td>16</td><td>15</td></tr><tr><td>5</td><td>32</td><td>31</td></tr><tr><td>6</td><td>64</td><td>63</td></tr><tr><td>7</td><td>128</td><td>127</td></tr><tr><td>8</td><td>256</td><td>255</td></tr></tbody></table></div>
+
+<h3>3.2　S5 候選數的精確上界 — 出現「鋸齒」</h3>
+<p>迴圈在<b>第一個</b> C(P,e) &gt; B（B=150,000）處中斷，故最壞候選總數為：</p>
+<div class="math">Cand(P) = Σ<sub>e=0..E(P)</sub> C(P,e)，　　E(P) = min( 4,　min{e : C(P,e) &gt; B} − 1 )</div>
+<p>以大整數精確計算全部 P ∈ [0,255] 得：</p>
+<div class="math">max<sub>P</sub> Cand(P) = <b class="hot">164,221</b>　（於 P = 45，E = 4）</div>
+
+<figure><svg viewBox="0 0 940 404" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Step5 候選數隨 P 變化的鋸齒曲線"><rect width="940" height="404" fill="white"/><line x1="66" y1="334.0" x2="918" y2="334.0" stroke="#e2e8f0"/><text x="58" y="338.0" font-size="10.5" text-anchor="end" fill="#94a3b8">10^0</text><line x1="66" y1="279.01076138775096" x2="918" y2="279.01076138775096" stroke="#e2e8f0"/><text x="58" y="283.01076138775096" font-size="10.5" text-anchor="end" fill="#94a3b8">10^1</text><line x1="66" y1="224.02152277550198" x2="918" y2="224.02152277550198" stroke="#e2e8f0"/><text x="58" y="228.02152277550198" font-size="10.5" text-anchor="end" fill="#94a3b8">10^2</text><line x1="66" y1="169.03228416325294" x2="918" y2="169.03228416325294" stroke="#e2e8f0"/><text x="58" y="173.03228416325294" font-size="10.5" text-anchor="end" fill="#94a3b8">10^3</text><line x1="66" y1="114.04304555100393" x2="918" y2="114.04304555100393" stroke="#e2e8f0"/><text x="58" y="118.04304555100393" font-size="10.5" text-anchor="end" fill="#94a3b8">10^4</text><line x1="66" y1="59.05380693875492" x2="918" y2="59.05380693875492" stroke="#e2e8f0"/><text x="58" y="63.05380693875492" font-size="10.5" text-anchor="end" fill="#94a3b8">10^5</text><line x1="66.0" y1="30" x2="66.0" y2="334" stroke="#f1f5f9"/><text x="66.0" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">0</text><line x1="172.91764705882355" y1="30" x2="172.91764705882355" y2="334" stroke="#f1f5f9"/><text x="172.91764705882355" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">32</text><line x1="279.8352941176471" y1="30" x2="279.8352941176471" y2="334" stroke="#f1f5f9"/><text x="279.8352941176471" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">64</text><line x1="386.7529411764706" y1="30" x2="386.7529411764706" y2="334" stroke="#f1f5f9"/><text x="386.7529411764706" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">96</text><line x1="493.67058823529413" y1="30" x2="493.67058823529413" y2="334" stroke="#f1f5f9"/><text x="493.67058823529413" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">128</text><line x1="600.5882352941177" y1="30" x2="600.5882352941177" y2="334" stroke="#f1f5f9"/><text x="600.5882352941177" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">160</text><line x1="707.5058823529412" y1="30" x2="707.5058823529412" y2="334" stroke="#f1f5f9"/><text x="707.5058823529412" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">192</text><line x1="814.4235294117647" y1="30" x2="814.4235294117647" y2="334" stroke="#f1f5f9"/><text x="814.4235294117647" y="350" font-size="10.5" text-anchor="middle" fill="#94a3b8">224</text><path d="M66.0,334.0" fill="none" stroke="#cbd5e1" stroke-width="2.4"/><path d="M69.3,317.4" fill="none" stroke="#a5b4fc" stroke-width="2.4"/><path d="M72.7,300.9 L393.4,131.3 L396.8,130.8 L400.1,130.4 L403.5,129.9 L406.8,129.4 L410.1,128.9 L413.5,128.5 L416.8,128.0 L420.2,127.6 L423.5,127.1 L426.8,126.7 L430.2,126.3 L433.5,125.8 L436.9,125.4 L440.2,125.0 L443.6,124.5 L446.9,124.1 L450.2,123.7 L453.6,123.3 L456.9,122.9 L460.3,122.5 L463.6,122.1 L466.9,121.7 L470.3,121.3 L473.6,120.9 L477.0,120.5 L480.3,120.1 L483.6,119.7 L487.0,119.4 L490.3,119.0 L493.7,118.6 L497.0,118.2 L500.4,117.9 L503.7,117.5 L507.0,117.2 L510.4,116.8 L513.7,116.4 L517.1,116.1 L520.4,115.7 L523.7,115.4 L527.1,115.0 L530.4,114.7 L533.8,114.4 L537.1,114.0 L540.4,113.7 L543.8,113.3 L547.1,113.0 L550.5,112.7 L553.8,112.4 L557.2,112.0 L560.5,111.7 L563.8,111.4 L567.2,111.1 L570.5,110.8 L573.9,110.4 L577.2,110.1 L580.5,109.8 L583.9,109.5 L587.2,109.2 L590.6,108.9 L593.9,108.6 L597.2,108.3 L600.6,108.0 L603.9,107.7 L607.3,107.4 L610.6,107.1 L614.0,106.8 L617.3,106.5 L620.6,106.2 L624.0,106.0 L627.3,105.7 L630.7,105.4 L634.0,105.1 L637.3,104.8 L640.7,104.6 L644.0,104.3 L647.4,104.0 L650.7,103.7 L654.0,103.5 L657.4,103.2 L660.7,102.9 L664.1,102.7 L667.4,102.4 L670.8,102.1 L674.1,101.9 L677.4,101.6 L680.8,101.3 L684.1,101.1 L687.5,100.8 L690.8,100.6 L694.1,100.3 L697.5,100.1 L700.8,99.8 L704.2,99.6 L707.5,99.3 L710.8,99.1 L714.2,98.8 L717.5,98.6 L720.9,98.3 L724.2,98.1 L727.6,97.8 L730.9,97.6 L734.2,97.4 L737.6,97.1 L740.9,96.9 L744.3,96.7 L747.6,96.4 L750.9,96.2 L754.3,96.0 L757.6,95.7 L761.0,95.5 L764.3,95.3 L767.6,95.0 L771.0,94.8 L774.3,94.6 L777.7,94.4 L781.0,94.1 L784.4,93.9 L787.7,93.7 L791.0,93.5 L794.4,93.3 L797.7,93.0 L801.1,92.8 L804.4,92.6 L807.7,92.4 L811.1,92.2 L814.4,92.0 L817.8,91.8 L821.1,91.5 L824.4,91.3 L827.8,91.1 L831.1,90.9 L834.5,90.7 L837.8,90.5 L841.2,90.3 L844.5,90.1 L847.8,89.9 L851.2,89.7 L854.5,89.5 L857.9,89.3 L861.2,89.1 L864.5,88.9 L867.9,88.7 L871.2,88.5 L874.6,88.3 L877.9,88.1 L881.2,87.9 L884.6,87.7 L887.9,87.5 L891.3,87.3 L894.6,87.1 L898.0,86.9 L901.3,86.7 L904.6,86.5 L908.0,86.4 L911.3,86.2 L914.7,86.0 L918.0,85.8" fill="none" stroke="#60a5fa" stroke-width="2.4"/><path d="M76.0,284.3 L219.7,102.4 L223.0,100.9 L226.4,99.4 L229.7,97.9 L233.1,96.5 L236.4,95.0 L239.7,93.7 L243.1,92.3 L246.4,91.0 L249.8,89.6 L253.1,88.4 L256.4,87.1 L259.8,85.8 L263.1,84.6 L266.5,83.4 L269.8,82.2 L273.2,81.1 L276.5,79.9 L279.8,78.8 L283.2,77.7 L286.5,76.6 L289.9,75.5 L293.2,74.5 L296.5,73.4 L299.9,72.4 L303.2,71.4 L306.6,70.4 L309.9,69.4 L313.2,68.4 L316.6,67.4 L319.9,66.5 L323.3,65.6 L326.6,64.6 L330.0,63.7 L333.3,62.8 L336.6,61.9 L340.0,61.1 L343.3,60.2 L346.7,59.3 L350.0,58.5 L353.3,57.6 L356.7,56.8 L360.0,56.0 L363.4,55.2 L366.7,54.4 L370.0,53.6 L373.4,52.8 L376.7,52.0 L380.1,51.3 L383.4,50.5 L386.8,49.8 L390.1,49.0" fill="none" stroke="#0d9488" stroke-width="2.4"/><path d="M79.4,267.8 L82.7,252.0 L86.0,237.4 L89.4,224.3 L92.7,212.4 L96.1,201.6 L99.4,191.8 L102.8,182.8 L106.1,174.5 L109.4,166.9 L112.8,159.8 L116.1,153.2 L119.5,147.0 L122.8,141.2 L126.1,135.6 L129.5,130.4 L132.8,125.5 L136.2,120.8 L139.5,116.3 L142.8,112.0 L146.2,107.9 L149.5,103.9 L152.9,100.1 L156.2,96.5 L159.6,93.0 L162.9,89.6 L166.2,86.3 L169.6,83.2 L172.9,80.1 L176.3,77.1 L179.6,74.2 L182.9,71.4 L186.3,68.7 L189.6,66.1 L193.0,63.5 L196.3,61.0 L199.6,58.6 L203.0,56.2 L206.3,53.9 L209.7,51.6 L213.0,49.4 L216.4,47.2" fill="none" stroke="#dc2626" stroke-width="2.4"/><line x1="66" y1="49.37068267701068" x2="918" y2="49.37068267701068" stroke="#dc2626" stroke-dasharray="6 4" stroke-width="1.6" opacity=".7"/><text x="914" y="42.37068267701068" font-size="10.5" text-anchor="end" fill="#dc2626">per_level_budget = 150,000</text><circle cx="216.35294117647058" cy="47.207547169811335" r="4.2" fill="white" stroke="#0f172a" stroke-width="1.8"/><circle cx="219.69411764705882" cy="102.43075045576802" r="4.2" fill="white" stroke="#0f172a" stroke-width="1.8"/><circle cx="390.09411764705885" cy="49.02390556115739" r="4.2" fill="white" stroke="#0f172a" stroke-width="1.8"/><circle cx="393.43529411764706" cy="131.3140220521648" r="4.2" fill="white" stroke="#0f172a" stroke-width="1.8"/><circle cx="918.0" cy="85.79158430797932" r="4.2" fill="white" stroke="#0f172a" stroke-width="1.8"/><text x="224.35294117647058" y="39.207547169811335" font-size="11.5" font-weight="700" fill="#dc2626">P=45 → 164,221 (全域最大)</text><text x="227.69411764705882" y="118.43075045576802" font-size="11" fill="#475569">P=46 → 16,262(驟降 10×)</text><text x="386.09411764705885" y="39.02390556115739" font-size="11" fill="#0d9488">P=97 → 152,194</text><text x="401.43529411764706" y="147.3140220521648" font-size="11" fill="#475569">P=98 → 4,852(驟降 31×)</text><text x="470.0" y="16" font-size="12.5" text-anchor="middle" fill="#334155">Step 5 最壞候選數 Cand(P) — 顏色 = 實際搜到的最深層 E</text><text x="492.0" y="370" font-size="11" text-anchor="middle" fill="#64748b">P = 候選 Steiner 節點池大小(上限 255)</text><text x="70" y="396" font-size="10.5" fill="#94a3b8">實際搜到的最深層 E:</text><line x1="188" y1="392" x2="206" y2="392" stroke="#cbd5e1" stroke-width="2.6"/><text x="211" y="396" font-size="10.5" fill="#475569">E=0</text><line x1="250" y1="392" x2="268" y2="392" stroke="#a5b4fc" stroke-width="2.6"/><text x="273" y="396" font-size="10.5" fill="#475569">E=1</text><line x1="312" y1="392" x2="330" y2="392" stroke="#60a5fa" stroke-width="2.6"/><text x="335" y="396" font-size="10.5" fill="#475569">E=2</text><line x1="374" y1="392" x2="392" y2="392" stroke="#0d9488" stroke-width="2.6"/><text x="397" y="396" font-size="10.5" fill="#475569">E=3</text><line x1="436" y1="392" x2="454" y2="392" stroke="#dc2626" stroke-width="2.6"/><text x="459" y="396" font-size="10.5" fill="#475569">E=4</text></svg>
+<figcaption><b>圖 4．</b>Cand(P) 的鋸齒結構。顏色代表實際搜到的最深層 E。
+<b>成本對問題規模是非單調的</b>：P 從 45→46 時，因 C(46,4)=163,185 超過 budget，
+第 4 層被整層砍掉，成本反而<b>驟降 10×</b>。P 從 97→98 同理驟降 31×。
+換言之「問題變大」可以「變便宜」，代價是被誠實標成 capped。</figcaption></figure>
+
+<div class="tw"><table class=""><thead><tr><th>P</th><th>E</th><th>候選總數</th><th>說明</th></tr></thead><tbody><tr><td>45</td><td>4</td><td>164,221</td><td>← 全域最大</td></tr><tr><td>46</td><td>3</td><td>16,262</td><td>驟降 10×</td></tr><tr><td>97</td><td>3</td><td>152,194</td><td>次高峰</td></tr><tr><td>98</td><td>2</td><td>4,852</td><td>驟降 31×</td></tr><tr><td>255</td><td>2</td><td>32,641</td><td>最大 P 反而便宜</td></tr></tbody></table></div>
+
+<div class="box good">
+<h4>最壞 wall-time</h4>
+實測吞吐 2.44–9.99 µs/候選（median 6.11，n=15）⇒
+164,221 × 9.99 µs = <b>1.641 秒／unit</b>（最壞）；
+median 情境 1.003 秒。
+</div>
+
+<h3>3.3　樹數定理（S6/S7 的數學基礎）</h3>
+<div class="box">
+<h4>定理</h4>
+設 ∅ ∈ N ⊆ {0,1}<sup>k</sup> 且 N 為 unit-flip-closed（每個非根 x∈N 至少有一個 unit-pred 在 N 中）。
+則以 ∅ 為根、邊皆 unit-flip 的生成樹（arborescence）數目恰為
+<div class="math">A(N) = Π<sub>x∈N, x≠∅</sub> d<sub>N</sub>(x)，　　d<sub>N</sub>(x) = #{ j∈x : x∖{j} ∈ N }</div>
+</div>
+<div class="proof">
+<b>證明．</b>（⊇）每個非根節點 x 獨立選一個 parent ∈ {x∖{j} : j∈x} ∩ N（closed 保證非空，共 d<sub>N</sub>(x) 種）。
+所得圖中每個非根節點恰一入邊；沿 parent 指標走，popcount <b>嚴格遞減 1</b> ⇒ 不可能成環，
+且必在有限步抵達唯一無父節點 ∅ ⇒ root-connected。故為合法 arborescence。<br>
+（⊆）反之，任一合法 arborescence 中每個非根節點恰有一個 parent，且該 parent 必為其 unit-pred 且屬於 N，
+故對應唯一一組選擇。<br>
+兩者互逆 ⇒ 雙射 ⇒ 計數為乘積。∎
+</div>
+
+<figure><svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="樹數定理示意"><rect width="820" height="300" fill="white"/><line x1="410" y1="250" x2="250" y2="176" stroke="#94a3b8" stroke-width="2"/><line x1="410" y1="250" x2="570" y2="176" stroke="#94a3b8" stroke-width="2"/><line x1="250" y1="176" x2="410" y2="102" stroke="#94a3b8" stroke-width="2"/><line x1="570" y1="176" x2="410" y2="102" stroke="#94a3b8" stroke-width="2"/><line x1="410" y1="102" x2="410" y2="34" stroke="#94a3b8" stroke-width="2"/><circle cx="410" cy="250" r="23" fill="#fff" stroke="#64748b" stroke-width="2.2"/><text x="410" y="254" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">RRR</text><circle cx="250" cy="176" r="23" fill="#eff6ff" stroke="#2563eb" stroke-width="2.2"/><text x="250" y="180" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">ARR</text><text x="280" y="170" font-size="12.5" font-weight="700" fill="#0d9488">d=1</text><circle cx="570" cy="176" r="23" fill="#eff6ff" stroke="#2563eb" stroke-width="2.2"/><text x="570" y="180" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">RAR</text><text x="600" y="170" font-size="12.5" font-weight="700" fill="#0d9488">d=1</text><circle cx="410" cy="102" r="23" fill="#eff6ff" stroke="#2563eb" stroke-width="2.2"/><text x="410" y="106" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">AAR</text><text x="440" y="96" font-size="12.5" font-weight="700" fill="#dc2626">d=2</text><text x="440" y="113" font-size="10" fill="#dc2626">兩個父選擇</text><circle cx="410" cy="34" r="23" fill="#eff6ff" stroke="#2563eb" stroke-width="2.2"/><text x="410" y="38" font-size="11" font-family="monospace" text-anchor="middle" fill="#0f172a">AAA</text><text x="440" y="28" font-size="12.5" font-weight="700" fill="#0d9488">d=1</text><rect x="26" y="34" width="196" height="92" rx="9" fill="#f8fafc" stroke="#e2e8f0"/><text x="40" y="58" font-size="12" font-weight="600" fill="#0f172a">A(N) = Π d(x)</text><text x="40" y="80" font-size="12" font-family="monospace" fill="#334155">= 1 × 1 × 2 × 1</text><text x="40" y="102" font-size="14" font-family="monospace" font-weight="700" fill="#dc2626">= 2 棵樹</text><text x="40" y="118" font-size="10" fill="#64748b">(AAR 選 ARR 或 RAR)</text><text x="794" y="58" font-size="11.5" text-anchor="end" fill="#0d9488">計數 O(|N|·k) → 多項式</text><text x="794" y="78" font-size="11.5" text-anchor="end" fill="#dc2626">列舉 Θ(A(N)) → 指數</text><text x="794" y="102" font-size="11" text-anchor="end" fill="#64748b">「數得出來,列不出來」</text></svg>
+<figcaption><b>圖 5．</b>定理示意。只有 <code>AAR</code> 有兩個 unit-pred（d=2），其餘皆 d=1，
+故 A(N)=1×1×2×1=2 棵樹。<b>推論：計數只需 O(|N|·k) 次查詢（多項式），
+列舉需 Θ(A(N))（指數）</b> — 這就是工作站能標「N 樹 = M 形狀」而不必真的生成 N 棵樹的原因。</figcaption></figure>
+
+<h3>3.4　絕對理論最大樹數</h3>
+<p>A(N) 在 N = <b>整個超立方體</b>時最大：popcount = j 的節點有 C(k,j) 個，每個的 d = j（所有 unit-pred 都在）。故</p>
+<div class="math">A<sub>max</sub>(k) = Π<sub>j=1..k</sub> j<sup>C(k,j)</sup></div>
+<p>k=8 時展開為　1<sup>8</sup> · 2<sup>28</sup> · 3<sup>56</sup> · 4<sup>70</sup> · 5<sup>56</sup> · 6<sup>28</sup> · 7<sup>8</sup> · 8<sup>1</sup>　=</p>
+<div class="math" style="word-break:break-all;font-size:12px">76958943408207994310451133909928754016691287539660927138035169837998325372031682525056204800000000000000000000000000000000000000000000000000000000</div>
+<div class="math">≈ <b class="hot">7.696 × 10<sup>145</sup></b>　（146 位數）</div>
+<div class="tw"><table class=""><thead><tr><th>k</th><th>頂點數</th><th>A_max(k)</th><th>位數</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>1</td><td>1</td></tr><tr><td>2</td><td>4</td><td>2</td><td>1</td></tr><tr><td>3</td><td>8</td><td>24</td><td>2</td></tr><tr><td>4</td><td>16</td><td>20736</td><td>5</td></tr><tr><td>5</td><td>32</td><td>309586821120</td><td>12</td></tr><tr><td>6</td><td>64</td><td>≈ 1.150e+28</td><td>29</td></tr><tr><td>7</td><td>128</td><td>≈ 1.157e+65</td><td>66</td></tr><tr><td>8</td><td>256</td><td>≈ 7.696e+145</td><td>146</td></tr></tbody></table></div>
+
+<h3>3.5　caps 下的<i>可達</i>上界（遠低於絕對上界）</h3>
+<div class="box warn">
+A<sub>max</sub>(8) 要求 N 含全部 256 個頂點，即 f + e = 255；
+但 <code>extra_cap=4</code> ⇒ 需 f ≥ 251 個相異完整觀測
+（實際 f 最大只有 5）。<b>絕對上界不可達。</b>
+</div>
+<div class="math">A(N) ≤ k<sup>(f + extra_cap)</sup>　　⇒　　A<sub>total</sub> ≤ |𝒩| × k<sup>(f+4)</sup>，
+　|𝒩| ≤ C(P, e<sub>min</sub>) ≤ 150,000</div>
+<div class="tw"><table class=""><thead><tr><th>f（完整觀測數）</th><th>每個 N 的上界 8^(f+4)</th><th>位數</th></tr></thead><tbody><tr><td>1</td><td>32,768</td><td>5</td></tr><tr><td>2</td><td>262,144</td><td>6</td></tr><tr><td>3</td><td>2,097,152</td><td>7</td></tr><tr><td>5</td><td>134,217,728</td><td>9</td></tr><tr><td>8</td><td>68,719,476,736</td><td>11</td></tr><tr><td>12</td><td>281,474,976,710,656</td><td>15</td></tr></tbody></table></div>
+
+<h2>§4　理論 vs 實際</h2>
+<figure><svg viewBox="0 0 880 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="理論上界與實際最大樹數對比"><rect width="880" height="210" fill="white"/><text x="440.0" y="22" font-size="12.5" text-anchor="middle" fill="#334155">樹數:理論絕對上界 vs HCC1395 實測(log₁₀ 尺標)</text><line x1="70" y1="78" x2="850" y2="78" stroke="#cbd5e1" stroke-width="1.4"/><line x1="70.0" y1="73" x2="70.0" y2="83" stroke="#cbd5e1"/><text x="70.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^0</text><line x1="200.0" y1="73" x2="200.0" y2="83" stroke="#cbd5e1"/><text x="200.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^25</text><line x1="330.0" y1="73" x2="330.0" y2="83" stroke="#cbd5e1"/><text x="330.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^50</text><line x1="460.0" y1="73" x2="460.0" y2="83" stroke="#cbd5e1"/><text x="460.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^75</text><line x1="590.0" y1="73" x2="590.0" y2="83" stroke="#cbd5e1"/><text x="590.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^100</text><line x1="720.0" y1="73" x2="720.0" y2="83" stroke="#cbd5e1"/><text x="720.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^125</text><line x1="850.0" y1="73" x2="850.0" y2="83" stroke="#cbd5e1"/><text x="850.0" y="99" font-size="10.5" text-anchor="middle" fill="#94a3b8">10^150</text><rect x="70" y="48" width="10.90393206764189" height="18" rx="4" fill="#0d9488" opacity=".85"/><text x="88.90393206764189" y="62" font-size="11.5" font-weight="700" fill="#0d9488">實測最大 125 棵</text><rect x="70" y="112" width="754.0" height="18" rx="4" fill="#dc2626" opacity=".72"/><text x="78" y="126" font-size="11.5" font-weight="700" fill="white">理論絕對上界 A_max(8) ≈ 7.7 × 10^145</text><text x="440.0" y="196" font-size="12" text-anchor="middle" fill="#475569">差距約 <tspan font-weight="700" fill="#dc2626">143 個數量級</tspan> — 因為真實演化資料是巢狀稀疏,不是隨機基因型</text></svg>
+<figcaption><b>圖 6．</b>理論絕對上界與實測最大值的距離。</figcaption></figure>
+
+<figure><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="真實資料問題規模分佈"><rect width="880" height="250" fill="white"/><text x="66" y="26" font-size="12.5" font-weight="600" fill="#0f172a">k = sSNV 數(超立方體維度)</text><rect x="66" y="69.99999999999999" width="38" height="120.00000000000001" rx="3" fill="#2563eb" opacity=".8"/><text x="85.0" y="63.999999999999986" font-size="10.5" text-anchor="middle" fill="#334155">43.2%</text><text x="85.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">2</text><rect x="116" y="123.64836692147324" width="38" height="66.35163307852676" rx="3" fill="#2563eb" opacity=".8"/><text x="135.0" y="117.64836692147324" font-size="10.5" text-anchor="middle" fill="#334155">23.9%</text><text x="135.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">3</text><rect x="166" y="153.25225851285614" width="38" height="36.74774148714385" rx="3" fill="#2563eb" opacity=".8"/><text x="185.0" y="147.25225851285614" font-size="10.5" text-anchor="middle" fill="#334155">13.2%</text><text x="185.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">4</text><rect x="216" y="170.29186935371786" width="38" height="19.70813064628214" rx="3" fill="#2563eb" opacity=".8"/><text x="235.0" y="164.29186935371786" font-size="10.5" text-anchor="middle" fill="#334155">7.1%</text><text x="235.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">5</text><rect x="266" y="178.4920083391244" width="38" height="11.507991660875607" rx="3" fill="#2563eb" opacity=".8"/><text x="285.0" y="172.4920083391244" font-size="10.5" text-anchor="middle" fill="#334155">4.1%</text><text x="285.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">6</text><rect x="316" y="182.93954134815846" width="38" height="7.060458651841556" rx="3" fill="#2563eb" opacity=".8"/><text x="335.0" y="176.93954134815846" font-size="10.5" text-anchor="middle" fill="#334155">2.5%</text><text x="335.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">7</text><rect x="366" y="173.4051424600417" width="38" height="16.594857539958305" rx="3" fill="#2563eb" opacity=".8"/><text x="385.0" y="167.4051424600417" font-size="10.5" text-anchor="middle" fill="#334155">6.0%</text><text x="385.0" y="206" font-size="11" text-anchor="middle" fill="#64748b">8</text><text x="66" y="230" font-size="11" fill="#64748b">median 3 · mean 3.37 · max 8</text><text x="480.0" y="26" font-size="12.5" font-weight="600" fill="#0f172a">n_trees ≥ 門檻的比例</text><rect x="480.0" y="70.0" width="34" height="120.0" rx="3" fill="#0d9488" opacity=".8"/><text x="497.0" y="64.0" font-size="9.5" text-anchor="middle" fill="#334155">100.0%</text><text x="497.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥1</text><rect x="532.0" y="148.816" width="34" height="41.184" rx="3" fill="#0d9488" opacity=".8"/><text x="549.0" y="142.816" font-size="9.5" text-anchor="middle" fill="#334155">34.3%</text><text x="549.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥2</text><rect x="584.0" y="174.832" width="34" height="15.168000000000001" rx="3" fill="#0d9488" opacity=".8"/><text x="601.0" y="168.832" font-size="9.5" text-anchor="middle" fill="#334155">12.6%</text><text x="601.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥4</text><rect x="636.0" y="180.256" width="34" height="9.743999999999998" rx="3" fill="#0d9488" opacity=".8"/><text x="653.0" y="174.256" font-size="9.5" text-anchor="middle" fill="#334155">8.1%</text><text x="653.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥8</text><rect x="688.0" y="187.624" width="34" height="2.376" rx="3" fill="#ea580c" opacity=".8"/><text x="705.0" y="181.624" font-size="9.5" text-anchor="middle" fill="#334155">2.0%</text><text x="705.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥32</text><rect x="740.0" y="189.2" width="34" height="0.8" rx="3" fill="#ea580c" opacity=".8"/><text x="757.0" y="183.2" font-size="9.5" text-anchor="middle" fill="#334155">0.2%</text><text x="757.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥100</text><rect x="792.0" y="189.2" width="34" height="0.8" rx="3" fill="#ea580c" opacity=".8"/><text x="809.0" y="183.2" font-size="9.5" text-anchor="middle" fill="#334155">0.0%</text><text x="809.0" y="206" font-size="10" text-anchor="middle" fill="#64748b">≥1000</text><text x="480.0" y="230" font-size="11" fill="#64748b">median 1 · mean 3.53 · max 125 · 全體共 66,837 棵</text></svg>
+<figcaption><b>圖 7．</b>HCC1395 真實問題規模分佈（18,931 個 lineage unit）。
+k 的中位數僅 3；<b>0.00% 的 unit 樹數 ≥ 1000</b>，
+全體加總只有 66,837 棵。</figcaption></figure>
+
+<div class="tw"><table class=""><thead><tr><th>量</th><th>理論最大</th><th>實測最大</th><th>實測 median</th><th>差距</th></tr></thead><tbody><tr><td>k（維度）</td><td>8</td><td>8</td><td>3</td><td>—</td></tr><tr><td>P（節點池）</td><td>255</td><td>—</td><td>—</td><td>—</td></tr><tr><td>S5 候選數</td><td>164,221</td><td>—</td><td>—</td><td>—</td></tr><tr><td>e_min（隱藏節點）</td><td>4（+greedy）</td><td>16</td><td>1</td><td>—</td></tr><tr><td><b>n_trees（樹數）</b></td><td><b>≈ 7.7 × 10¹⁴⁵</b></td><td><b class="hot">125</b></td><td><b>1</b></td><td><b>10^143</b></td></tr></tbody></table></div>
+
+<p><b>為什麼實際離理論這麼遠？</b>因為真實演化資料是<b>巢狀、稀疏</b>的（perfect phylogeny 結構），
+不是隨機基因型。合成測試用<i>隨機</i>基因型時 capped 率高達
+14/28，真實資料只有 4.37% —
+<b>隨機輸入才是對抗性最壞情況</b>。</p>
+
+<div class="tw"><table class=""><thead><tr><th>L1 分類</th><th>unit 數</th><th>佔比</th></tr></thead><tbody><tr><td>determined</td><td>12,024</td><td>63.5%</td></tr><tr><td>ambiguous_structure(多完成/多結構)</td><td>6,051</td><td>32.0%</td></tr><tr><td>capped(太密;枚舉未完)</td><td>828</td><td>4.4%</td></tr><tr><td>recurrence_required</td><td>28</td><td>0.1%</td></tr></tbody></table></div>
+
+<h3>實測案例（依候選數排序前 12）</h3>
+<div class="tw"><table class=""><thead><tr><th>案例</th><th>k</th><th>f</th><th>p</th><th>P</th><th>e_min</th><th>候選數</th><th>n_trees</th><th>S5 (ms)</th><th>cap 成因</th></tr></thead><tbody><tr><td>E_mix_k8_f2_p4</td><td>8</td><td>2</td><td>4</td><td>97</td><td>10</td><td>152,194</td><td>4</td><td>406.51</td><td><span class="tag warn">budget</span></td></tr><tr><td>C_fullonly_k8_f4</td><td>8</td><td>4</td><td>0</td><td>41</td><td>6</td><td>112,792</td><td>1</td><td>953.67</td><td><span class="tag amber">extra_cap→greedy</span></td></tr><tr><td>B_fullonly_k8_f3</td><td>8</td><td>3</td><td>0</td><td>72</td><td>9</td><td>62,269</td><td>8</td><td>439.67</td><td><span class="tag warn">budget</span></td></tr><tr><td>B_fullonly_k7_f3</td><td>7</td><td>3</td><td>0</td><td>64</td><td>6</td><td>43,745</td><td>1</td><td>261.27</td><td><span class="tag warn">budget</span></td></tr><tr><td>D_partial_k8_w3_p8</td><td>8</td><td>0</td><td>8</td><td>63</td><td>8</td><td>41,728</td><td>2</td><td>101.73</td><td><span class="tag warn">budget</span></td></tr><tr><td>F_k6_all_alt</td><td>6</td><td>1</td><td>0</td><td>62</td><td>5</td><td>39,774</td><td>1</td><td>229.59</td><td><span class="tag warn">budget</span></td></tr><tr><td>E_mix_k8_f2_p2</td><td>8</td><td>2</td><td>2</td><td>61</td><td>11</td><td>37,882</td><td>8</td><td>111.64</td><td><span class="tag warn">budget</span></td></tr><tr><td>F_k8_all_alt</td><td>8</td><td>1</td><td>0</td><td>254</td><td>7</td><td>32,386</td><td>1</td><td>230.65</td><td><span class="tag warn">budget</span></td></tr><tr><td>C_fullonly_k8_f32</td><td>8</td><td>32</td><td>0</td><td>154</td><td>23</td><td>11,936</td><td>768</td><td>119.21</td><td><span class="tag warn">budget</span></td></tr><tr><td>C_fullonly_k8_f16</td><td>8</td><td>16</td><td>0</td><td>136</td><td>18</td><td>9,317</td><td>8</td><td>83.37</td><td><span class="tag warn">budget</span></td></tr><tr><td>D_partial_k8_w3_p16</td><td>8</td><td>0</td><td>16</td><td>127</td><td>11</td><td>8,129</td><td>2</td><td>22.56</td><td><span class="tag warn">budget</span></td></tr><tr><td>E_mix_k8_f2_p8</td><td>8</td><td>2</td><td>8</td><td>117</td><td>13</td><td>6,904</td><td>2</td><td>18.71</td><td><span class="tag warn">budget</span></td></tr></tbody></table></div>
+
+<h2>§5　兩個誠實的工程邊界</h2>
+<div class="box dang">
+<h4>① S7 在生產是無上限的</h4>
+<code>ANALYSIS_TREE_CAP=0</code> ⇒ <code>store_limit=None</code> ⇒
+<b>全部樹都實體化</b>（非工作站顯示用的 32）。理論上這是 Θ(A_total) 的指數步；
+實務上因實測 max=125 而無害，但<b>理論上無界</b>。
+若骨幹擴大或 MAX_SNV 調高，這裡會先爆。
+</div>
+<div class="box warn">
+<h4>② capped 有兩種成因，意義不同</h4>
+<ul>
+<li><b>budget 超支</b>（473 個）＝ 問題太密，<b>放棄搜尋</b>。</li>
+<li><b>extra_cap 耗盡 → greedy fallback</b>（355 個）
+＝ 真的需要 &gt;4 個隱藏節點，<b>退化成單一貪婪解</b>。</li>
+</ul>
+後者不只是「沒枚舉完」，而是<b>連最小性都不保證</b>。兩者目前共用同一個 <code>capped</code> 標籤，
+論文中值得分開陳述。
+</div>
+
+<h2>§6　一句話口徑</h2>
+<div class="tldr">
+求最小 group-Steiner 樹<b>集合</b>的成本集中在「逐層節點集搜尋」：候選數為
+Σ<sub>e≤E</sub> C(P,e)，在 P ≤ 2<sup>k</sup>−1 = 255、extra_cap=4、
+budget=150,000 三重限制下有<b>精確上界 164,221</b>
+（最壞約 1.641 秒／unit）。樹的<b>計數</b>由
+A(N)=Π d<sub>N</sub>(x) 在 O(|N|·k) 內完成（多項式），<b>列舉</b>才是 Θ(A(N))（指數）。
+理論絕對上界 A<sub>max</sub>(8)=Π<sub>j</sub> j<sup>C(8,j)</sup> ≈ 7.7×10<sup>145</sup> 在 caps 下不可達；
+HCC1395 實測最大 125 棵、全基因組共 66,837 棵。
+</div>
+
+<footer>
+<p><b>數據來源（皆本輪實跑、可重算）：</b></p>
+<ul>
+<li><code>complexity_bench.py</code> → 28 案例逐階段實測；
+鏡像忠實度驗證 <b>28/28 通過</b>
+（自製計時版的 e_min／n_trees／capped 與官方 <code>enumerate_min_trees</code> 完全一致）。</li>
+<li><code>complexity_theory.py</code> → 大整數精確上界（非浮點估算）。</li>
+<li>真實分佈：<code>docs/methodology/_assets/20260618_subcluster_pilot/layered_reconstruction_HCC1395.json</code></li>
+<li>solver：<code>docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/tree_enumeration_solver.py (2026-07-06)</code></li>
+</ul>
+<div class="box warn" style="margin-top:14px">
+<h4>⚠ 真實分佈的適用範圍</h4>
+2026-07-11 稽核判定為 upstream-mismatched engineering baseline(6/7 歷史 tagged BAM 受 --truth-bed 限制)。此處僅用於『計算規模量級』參考,不得作為正式 Results 的比例數字。
+（問題尺寸分佈的<i>量級</i>不受 truth-BED 影響，故用於計算量分析成立；但比例數字不可外引。）
+</div>
+<p style="margin-top:16px">所有數字由 <code>20260725_solver_complexity_stepwise_01.data.json</code> 注入產生；
+缺 required key 時 builder 直接 refuse（§13-A 反捏造）。重建：
+<code>python3 assemble_data.py &amp;&amp; python3 build_report.py</code></p>
+</footer>
+</div>

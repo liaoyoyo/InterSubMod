@@ -1,0 +1,171 @@
+<title>within-HP near vs distal 甲基分層 — HCC1395</title>
+<style>
+:root{--bg:#fbfbfc;--fg:#1b1f24;--mut:#5b6672;--card:#fff;--line:#e3e6ea;
+--ok:#2E7D32;--bad:#B2182B;--tp:#0072B2;--fp:#D55E00;--accent:#0072B2}
+@media (prefers-color-scheme:dark){:root{--bg:#14171a;--fg:#e8eaed;--mut:#9aa4af;
+--card:#1c2024;--line:#2b3137;--ok:#7cc47f;--bad:#f08a80;--tp:#5aa9dd;--fp:#f0985c;--accent:#5aa9dd}}
+:root[data-theme=dark]{--bg:#14171a;--fg:#e8eaed;--mut:#9aa4af;--card:#1c2024;--line:#2b3137;
+--ok:#7cc47f;--bad:#f08a80;--tp:#5aa9dd;--fp:#f0985c;--accent:#5aa9dd}
+:root[data-theme=light]{--bg:#fbfbfc;--fg:#1b1f24;--mut:#5b6672;--card:#fff;--line:#e3e6ea;
+--ok:#2E7D32;--bad:#B2182B;--tp:#0072B2;--fp:#D55E00;--accent:#0072B2}
+body{background:var(--bg);color:var(--fg);font:15px/1.7 -apple-system,"Noto Sans CJK TC","Microsoft JhengHei",sans-serif;
+margin:0;padding:32px 20px 80px}
+.wrap{max-width:940px;margin:0 auto}
+h1{font-size:26px;line-height:1.35;margin:0 0 6px}
+h2{font-size:19px;margin:44px 0 6px;padding-top:16px;border-top:1px solid var(--line)}
+h2 .lv{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--mut);
+border:1px solid var(--line);border-radius:4px;padding:2px 6px;margin-right:8px;vertical-align:2px}
+.sub{color:var(--mut);font-size:13px;margin:0 0 26px}
+.verdict{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);
+border-radius:10px;padding:18px 22px;margin:22px 0}
+.verdict .vt{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--bad);margin-bottom:6px}
+.verdict p{margin:0;font-size:16.5px;line-height:1.65}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px;margin:20px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 16px}
+.kpi .k{font-size:11.5px;color:var(--mut);margin-bottom:5px}
+.kpi .v{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .n{font-size:11.5px;color:var(--mut);margin-top:4px}
+.gate{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 17px;margin:10px 0}
+.gate.ok{border-left:5px solid var(--ok)} .gate.bad{border-left:5px solid var(--bad)}
+.gtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gtag{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--mut)}
+.gname{font-size:15.5px;font-weight:700;flex:1}
+.gv{font-size:12px;font-weight:700;padding:2px 9px;border-radius:11px;border:1px solid currentColor}
+.gate.ok .gv{color:var(--ok)} .gate.bad .gv{color:var(--bad)}
+.gwhy{margin:8px 0 6px;font-size:14px;color:var(--fg)}
+.gev{margin:0;font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
+figure{margin:18px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 14px;overflow-x:auto}
+figcaption{font-size:13.5px;color:var(--mut);margin-top:10px;padding:0 4px}
+figcaption b{color:var(--fg)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:11.5px;color:var(--mut);font-weight:600;letter-spacing:.03em}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+details{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:12px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:650;font-size:14.5px}
+details p,details li{font-size:13.5px;color:var(--fg)}
+.note{font-size:13px;color:var(--mut);border-left:3px solid var(--line);padding-left:12px;margin:14px 0}
+code{background:rgba(127,127,127,.13);padding:1px 5px;border-radius:3px;font-size:12.5px}
+</style>
+<div class="wrap">
+<h1>within-HP 條件下的 near vs distal 甲基分層</h1>
+<p class="sub">HCC1395 · 20260119_all-with-w5000_1 · 產生日期 2026-07-26 · 全部數字由
+<code>20260726_within_hp_near_distal.data.json</code> 注入</p>
+
+<div class="verdict"><div class="vt">結論 — 陰性</div>
+<p>在同一個 germline HP 家族內比較 ALT vs REF read，甲基差異<b>不隨距離衰減</b>（否定點源 cis 足跡），
+但殘存的均勻超額在<b>非體細胞的 FP 對照位點上反而更大</b>。
+因此 within-HP 的 ALT/REF 甲基差異<b>沒有可歸因於 somatic lineage 的成分</b>。</p></div>
+
+<div class="kpis">
+<div class="kpi"><div class="k">超額值跨距離變化</div><div class="v">+0.0087 → +0.0090</div>
+<div class="n">0.5 kb 至 5 kb，完全持平</div></div>
+<div class="kpi"><div class="k">CpG 數配對後 near/distal</div><div class="v">1.02</div>
+<div class="n">配對前 1.43（p=3e-15）</div></div>
+<div class="kpi"><div class="k">TP 對 null 的比值</div><div class="v">1.20</div>
+<div class="n">體細胞真陽性位點</div></div>
+<div class="kpi"><div class="k">FP 對照對 null 的比值</div><div class="v">1.25</div>
+<div class="n">非體細胞 — 反而更高</div></div>
+</div>
+
+<h2><span class="lv">L1</span>四道關卡：三道通過，第四道不通過</h2>
+<p class="sub" style="margin-bottom:14px">每道關卡各排除一個可能解釋。前三道成功把混淆源移除，
+第四道用來檢驗「剩下的是不是 lineage」—— 而它沒有通過。</p>
+<div class="gate ok"><div class="gtop"><span class="gtag">關卡 1</span><span class="gname">germline ASM</span><span class="gv">由設計排除</span></div><p class="gwhy">只比較<b>同一個 germline HP 家族內部</b>的 ALT vs REF read。germline 單倍型專一甲基化在兩組中完全相同，相減即抵消。</p><p class="gev">可測單元 1,200 個（位點×HP），其中 385 個 p&lt;0.05（32.1%）</p></div><div class="gate ok"><div class="gtop"><span class="gtag">關卡 2</span><span class="gname">CpG 取樣噪音</span><span class="gv">已排除</span></div><p class="gwhy">近端 CpG 數天生較少（中位 15 個 vs 45 個），平均後噪音較大，會偽裝成「近端效應較強」。取相同 CpG 數重算即可檢驗。</p><p class="gev">比值由 1.43（p=2.8e-15）降到 1.02（p=0.44，不顯著）</p></div><div class="gate ok"><div class="gtop"><span class="gtag">關卡 3</span><span class="gname">somatic-cis 足跡</span><span class="gv">已排除</span></div><p class="gwhy">點源的 cis 足跡必須<b>隨距離衰減</b>。以置換 null 校正後，超額值在 0.5 kb 到 5 kb 之間完全持平。</p><p class="gev">超額 +0.0087 → +0.0090（跨 5 個距離帶，無衰減）</p></div><div class="gate bad"><div class="gtop"><span class="gtag">關卡 4</span><span class="gname">somatic lineage 殘餘</span><span class="gv">未通過</span></div><p class="gwhy">殘存的均勻超額若源於腫瘤譜系，體細胞 TP 位點應<b>高於</b>非體細胞 FP 對照。實測相反。</p><p class="gev">TP 超額 +0.0092（比值 1.20）< FP 超額 +0.0140（比值 1.25）</p></div>
+
+<h2><span class="lv">L2</span>證據一：甲基差異不隨距離衰減，否定點源 cis 足跡</h2>
+<figure><svg viewBox="0 0 780 360" width="100%" role="img" aria-label="distance decay observed vs null"><rect x="66" y="26" width="532" height="282" fill="none" stroke="currentColor" stroke-opacity=".16"/><line x1="66" y1="308.0" x2="598" y2="308.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="311.5" text-anchor="end" font-size="11" fill="#5b6672">0.000</text><line x1="66" y1="251.6" x2="598" y2="251.6" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="255.1" text-anchor="end" font-size="11" fill="#5b6672">0.016</text><line x1="66" y1="195.2" x2="598" y2="195.2" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="198.7" text-anchor="end" font-size="11" fill="#5b6672">0.032</text><line x1="66" y1="138.8" x2="598" y2="138.8" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="142.3" text-anchor="end" font-size="11" fill="#5b6672">0.048</text><line x1="66" y1="82.4" x2="598" y2="82.4" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="85.9" text-anchor="end" font-size="11" fill="#5b6672">0.064</text><line x1="66" y1="26.0" x2="598" y2="26.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="29.5" text-anchor="end" font-size="11" fill="#5b6672">0.080</text><line x1="91.6" y1="26" x2="91.6" y2="308" stroke="currentColor" stroke-opacity=".07"/><text x="91.6" y="325" text-anchor="middle" font-size="10.5" fill="#5b6672">0–500</text><line x1="142.7" y1="26" x2="142.7" y2="308" stroke="currentColor" stroke-opacity=".07"/><text x="142.7" y="325" text-anchor="middle" font-size="10.5" fill="#5b6672">500–1000</text><line x1="219.5" y1="26" x2="219.5" y2="308" stroke="currentColor" stroke-opacity=".07"/><text x="219.5" y="325" text-anchor="middle" font-size="10.5" fill="#5b6672">1000–2000</text><line x1="347.3" y1="26" x2="347.3" y2="308" stroke="currentColor" stroke-opacity=".07"/><text x="347.3" y="325" text-anchor="middle" font-size="10.5" fill="#5b6672">2000–3500</text><line x1="511.0" y1="26" x2="511.0" y2="308" stroke="currentColor" stroke-opacity=".07"/><text x="511.0" y="325" text-anchor="middle" font-size="10.5" fill="#5b6672">3500–5200</text><text x="332" y="348" text-anchor="middle" font-size="11.5" fill="#5b6672">CpG 與 sSNV 的距離 (bp)</text><text transform="translate(15,167) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#5b6672">|Δβ| 中位（每個 CpG）</text><polygon points="91.6,129.6 142.7,124.1 219.5,120.9 347.3,113.2 511.0,105.8 511.0,137.6 347.3,145.0 219.5,153.3 142.7,157.9 91.6,160.2" fill="#0072B2" fill-opacity=".13"/><polygon points="91.6,71.4 142.7,67.3 219.5,63.6 347.3,53.9 511.0,48.5 511.0,97.6 347.3,103.8 219.5,111.9 142.7,117.1 91.6,120.2" fill="#D55E00" fill-opacity=".13"/><polyline points="91.6,129.6 142.7,124.1 219.5,120.9 347.3,113.2 511.0,105.8" fill="none" stroke="#0072B2" stroke-width="2.6" stroke-linejoin="round"/><circle cx="91.6" cy="129.6" r="3.6" fill="#0072B2"/><circle cx="142.7" cy="124.1" r="3.6" fill="#0072B2"/><circle cx="219.5" cy="120.9" r="3.6" fill="#0072B2"/><circle cx="347.3" cy="113.2" r="3.6" fill="#0072B2"/><circle cx="511.0" cy="105.8" r="3.6" fill="#0072B2"/><polyline points="91.6,160.2 142.7,157.9 219.5,153.3 347.3,145.0 511.0,137.6" fill="none" stroke="#9ecae1" stroke-width="2.2" stroke-dasharray="6 4" stroke-linejoin="round"/><circle cx="91.6" cy="160.2" r="3.6" fill="#9ecae1"/><circle cx="142.7" cy="157.9" r="3.6" fill="#9ecae1"/><circle cx="219.5" cy="153.3" r="3.6" fill="#9ecae1"/><circle cx="347.3" cy="145.0" r="3.6" fill="#9ecae1"/><circle cx="511.0" cy="137.6" r="3.6" fill="#9ecae1"/><polyline points="91.6,71.4 142.7,67.3 219.5,63.6 347.3,53.9 511.0,48.5" fill="none" stroke="#D55E00" stroke-width="2.6" stroke-linejoin="round"/><circle cx="91.6" cy="71.4" r="3.6" fill="#D55E00"/><circle cx="142.7" cy="67.3" r="3.6" fill="#D55E00"/><circle cx="219.5" cy="63.6" r="3.6" fill="#D55E00"/><circle cx="347.3" cy="53.9" r="3.6" fill="#D55E00"/><circle cx="511.0" cy="48.5" r="3.6" fill="#D55E00"/><polyline points="91.6,120.2 142.7,117.1 219.5,111.9 347.3,103.8 511.0,97.6" fill="none" stroke="#F0B27A" stroke-width="2.2" stroke-dasharray="6 4" stroke-linejoin="round"/><circle cx="91.6" cy="120.2" r="3.6" fill="#F0B27A"/><circle cx="142.7" cy="117.1" r="3.6" fill="#F0B27A"/><circle cx="219.5" cy="111.9" r="3.6" fill="#F0B27A"/><circle cx="347.3" cy="103.8" r="3.6" fill="#F0B27A"/><circle cx="511.0" cy="97.6" r="3.6" fill="#F0B27A"/><rect x="612" y="32" width="156" height="110" rx="6" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-opacity=".12"/><line x1="624" y1="52" x2="650" y2="52" stroke="#0072B2" stroke-width="2.8"/><text x="656" y="56" font-size="11.5" fill="currentColor">TP 觀察</text><line x1="624" y1="76" x2="650" y2="76" stroke="#9ecae1" stroke-width="2.8" stroke-dasharray="6 4"/><text x="656" y="80" font-size="11.5" fill="currentColor">TP 置換 null</text><line x1="624" y1="100" x2="650" y2="100" stroke="#D55E00" stroke-width="2.8"/><text x="656" y="104" font-size="11.5" fill="currentColor">FP 觀察（對照）</text><line x1="624" y1="124" x2="650" y2="124" stroke="#F0B27A" stroke-width="2.8" stroke-dasharray="6 4"/><text x="656" y="128" font-size="11.5" fill="currentColor">FP 置換 null</text></svg>
+<figcaption>實線為觀察值，虛線為<b>置換 null</b>（把同一批 read 的 ALT/REF 標籤隨機重排後重算）。
+陰影 = 超額。原始觀察值隨距離<i>微升</i>，但 null 同步上升（窗口邊緣覆蓋較低、噪音較大）——
+兩者相減後的超額才是訊號，而它是平的。<b>點源 cis 足跡必然衰減，此處沒有衰減。</b>
+同時注意橘色 FP 對照的陰影帶比藍色 TP <b>更寬</b>。</figcaption></figure>
+
+<figure><svg viewBox="0 0 780 300" width="100%" role="img" aria-label="excess over null"><rect x="66" y="26" width="532" height="222" fill="none" stroke="currentColor" stroke-opacity=".16"/><line x1="66" y1="248.0" x2="598" y2="248.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="251.5" text-anchor="end" font-size="11" fill="#5b6672">0.000</text><line x1="66" y1="203.6" x2="598" y2="203.6" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="207.1" text-anchor="end" font-size="11" fill="#5b6672">0.004</text><line x1="66" y1="159.2" x2="598" y2="159.2" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="162.7" text-anchor="end" font-size="11" fill="#5b6672">0.008</text><line x1="66" y1="114.8" x2="598" y2="114.8" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="118.3" text-anchor="end" font-size="11" fill="#5b6672">0.012</text><line x1="66" y1="70.4" x2="598" y2="70.4" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="73.9" text-anchor="end" font-size="11" fill="#5b6672">0.016</text><line x1="66" y1="26.0" x2="598" y2="26.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="29.5" text-anchor="end" font-size="11" fill="#5b6672">0.020</text><line x1="91.6" y1="26" x2="91.6" y2="248" stroke="currentColor" stroke-opacity=".07"/><text x="91.6" y="265" text-anchor="middle" font-size="10.5" fill="#5b6672">0–500</text><line x1="142.7" y1="26" x2="142.7" y2="248" stroke="currentColor" stroke-opacity=".07"/><text x="142.7" y="265" text-anchor="middle" font-size="10.5" fill="#5b6672">500–1000</text><line x1="219.5" y1="26" x2="219.5" y2="248" stroke="currentColor" stroke-opacity=".07"/><text x="219.5" y="265" text-anchor="middle" font-size="10.5" fill="#5b6672">1000–2000</text><line x1="347.3" y1="26" x2="347.3" y2="248" stroke="currentColor" stroke-opacity=".07"/><text x="347.3" y="265" text-anchor="middle" font-size="10.5" fill="#5b6672">2000–3500</text><line x1="511.0" y1="26" x2="511.0" y2="248" stroke="currentColor" stroke-opacity=".07"/><text x="511.0" y="265" text-anchor="middle" font-size="10.5" fill="#5b6672">3500–5200</text><text x="332" y="288" text-anchor="middle" font-size="11.5" fill="#5b6672">CpG 與 sSNV 的距離 (bp)</text><text transform="translate(15,137) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#5b6672">超額 = 觀察 − null</text><polyline points="91.6,151.7 142.7,141.7 219.5,146.1 347.3,147.9 511.0,147.8" fill="none" stroke="#0072B2" stroke-width="2.6" stroke-linejoin="round"/><circle cx="91.6" cy="151.7" r="3.6" fill="#0072B2"/><circle cx="142.7" cy="141.7" r="3.6" fill="#0072B2"/><circle cx="219.5" cy="146.1" r="3.6" fill="#0072B2"/><circle cx="347.3" cy="147.9" r="3.6" fill="#0072B2"/><circle cx="511.0" cy="147.8" r="3.6" fill="#0072B2"/><polyline points="91.6,94.5 142.7,91.3 219.5,96.0 347.3,90.7 511.0,93.3" fill="none" stroke="#D55E00" stroke-width="2.6" stroke-linejoin="round"/><circle cx="91.6" cy="94.5" r="3.6" fill="#D55E00"/><circle cx="142.7" cy="91.3" r="3.6" fill="#D55E00"/><circle cx="219.5" cy="96.0" r="3.6" fill="#D55E00"/><circle cx="347.3" cy="90.7" r="3.6" fill="#D55E00"/><circle cx="511.0" cy="93.3" r="3.6" fill="#D55E00"/><rect x="612" y="32" width="156" height="62" rx="6" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-opacity=".12"/><line x1="624" y1="52" x2="650" y2="52" stroke="#0072B2" stroke-width="2.8"/><text x="656" y="56" font-size="11.5" fill="currentColor">TP 超額</text><line x1="624" y1="76" x2="650" y2="76" stroke="#D55E00" stroke-width="2.8"/><text x="656" y="80" font-size="11.5" fill="currentColor">FP 超額（對照）</text></svg>
+<figcaption>只畫超額值，把上圖的結論獨立出來。TP 五個距離帶為
++0.0087、+0.0096、+0.0092、+0.0090、+0.0090，變異小於 0.001；FP 對照在<b>每一個距離帶都高於 TP</b>。</figcaption></figure>
+
+<h2><span class="lv">L2</span>證據二：near &gt; distal 是 CpG 取樣噪音，不是生物訊號</h2>
+<figure><svg viewBox="0 0 780 300" width="100%" role="img" aria-label="matched near distal"><line x1="66" y1="216.0" x2="726" y2="216.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="219.5" text-anchor="end" font-size="11" fill="#5b6672">0.000</text><line x1="66" y1="168.5" x2="726" y2="168.5" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="172.0" text-anchor="end" font-size="11" fill="#5b6672">0.010</text><line x1="66" y1="121.0" x2="726" y2="121.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="124.5" text-anchor="end" font-size="11" fill="#5b6672">0.020</text><line x1="66" y1="73.5" x2="726" y2="73.5" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="77.0" text-anchor="end" font-size="11" fill="#5b6672">0.030</text><line x1="66" y1="26.0" x2="726" y2="26.0" stroke="currentColor" stroke-opacity=".09"/><text x="58" y="29.5" text-anchor="end" font-size="11" fill="#5b6672">0.040</text><rect x="126" y="53.0" width="74" height="163.0" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="163" y="46.0" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">0.0343</text><text x="163" y="233" text-anchor="middle" font-size="11" fill="#5b6672">near ≤1 kb</text><rect x="218" y="101.9" width="74" height="114.1" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="255" y="94.9" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">0.0240</text><text x="255" y="233" text-anchor="middle" font-size="11" fill="#5b6672">distal ≥2 kb</text><text x="209" y="256" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">未配對 CpG 數</text><text x="209" y="274" text-anchor="middle" font-size="11.5" fill="#B2182B">比值 1.43 · p=2.8e-15 · 顯著</text><text x="209" y="290" text-anchor="middle" font-size="10.5" fill="#5b6672">near 只有 15 個 CpG、distal 有 45 個</text><rect x="426" y="52.2" width="74" height="163.8" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="463" y="45.2" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">0.0345</text><text x="463" y="233" text-anchor="middle" font-size="11" fill="#5b6672">near ≤1 kb</text><rect x="518" y="55.1" width="74" height="160.9" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="555" y="48.1" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">0.0339</text><text x="555" y="233" text-anchor="middle" font-size="11" fill="#5b6672">distal ≥2 kb</text><text x="509" y="256" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">配對 CpG 數後</text><text x="509" y="274" text-anchor="middle" font-size="11.5" fill="#2E7D32">比值 1.02 · p=0.44 · 不顯著</text><text x="509" y="290" text-anchor="middle" font-size="10.5" fill="#5b6672">兩側取相同 CpG 數</text><text transform="translate(15,121) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#5b6672">|Δβ| 中位（每個 位點×HP 單元）</text></svg>
+<figcaption>初步分析顯示 near 的 |Δβ| 明顯大於 distal（比值 1.43，p=2.8e-15），看似支持 cis 足跡。
+但每個單元的 near 只有中位 15 個 CpG、distal 有 45 個 —— 平均項數少一半以上，
+離散度自然較大。<b>兩側取相同 CpG 數重算後差異消失</b>（比值 1.02，p=0.44）。
+這是本輪最容易誤判的一步。</figcaption></figure>
+
+<h2><span class="lv">L2</span>證據三：體細胞位點沒有超過它自己的陰性對照</h2>
+<table><thead><tr><th>位點集合</th><th class="num">位點池</th><th class="num">可測單元</th>
+<th class="num">CpG 數</th><th class="num">觀察</th><th class="num">null</th>
+<th class="num">超額</th><th class="num">比值</th></tr></thead><tbody>
+<tr><td><b style="color:var(--tp)">TP</b> 體細胞真陽性</td><td class="num">30,490</td><td class="num">1,500</td>
+<td class="num">145,250</td><td class="num">0.0546</td><td class="num">0.0455</td>
+<td class="num">+0.0092</td><td class="num">1.20</td></tr>
+<tr><td><b style="color:var(--fp)">FP</b> 非體細胞對照</td><td class="num">4,842</td><td class="num">1,395</td>
+<td class="num">129,044</td><td class="num">0.0708</td><td class="num">0.0569</td>
+<td class="num">+0.0140</td><td class="num">1.25</td></tr>
+</tbody></table>
+<p class="note">若均勻超額源自腫瘤譜系，TP 應高於 FP。實際 <b>TP − FP = -0.0048</b>（比值差 -0.04），
+方向與 lineage 假說相反。FP 的絕對噪音較高（null 0.0569 vs 0.0455），
+所以應以<b>比值</b>比較 —— TP 在兩個指標上都沒有勝出。</p>
+
+<h2><span class="lv">L2</span>個別位點仍有大效應，但無法歸因</h2>
+<p class="sub" style="margin-bottom:8px">下列為 within-HP 檢定中 |Δ| 最大且顯著的位點。
+它們是真實的資料特徵，可作<b>描述性註記</b>；但依上述三項證據，
+不能宣稱這些差異來自 subclone 譜系。</p>
+<table><thead><tr><th>位點</th><th>germline HP</th><th class="num">Δβ (ALT−REF)</th>
+<th class="num">p</th><th class="num">ALT / REF read 數</th></tr></thead><tbody><tr><td class="mono">chr4_133690193</td><td>HP2</td><td class="num">-0.345</td><td class="num">3.1e-06</td><td class="num">13 / 18</td></tr><tr><td class="mono">chr4_136204826</td><td>HP1</td><td class="num">+0.302</td><td class="num">4.5e-07</td><td class="num">16 / 20</td></tr><tr><td class="mono">chr1_58061920</td><td>HP1</td><td class="num">+0.270</td><td class="num">6.6e-07</td><td class="num">12 / 29</td></tr><tr><td class="mono">chr9_25934073</td><td>HP1</td><td class="num">-0.260</td><td class="num">1.1e-05</td><td class="num">19 / 16</td></tr><tr><td class="mono">chr7_79757081</td><td>HP2</td><td class="num">-0.219</td><td class="num">5.0e-13</td><td class="num">34 / 51</td></tr></tbody></table>
+
+<h2><span class="lv">L3</span>方法、定義與限制</h2>
+
+<details><summary>名詞與座標軸定義</summary>
+<ul>
+<li><b>germline HP 家族</b>：HP tag 破折號前的第一碼。<code>1</code> 與 <code>1-1</code> 同族、
+<code>2</code> 與 <code>2-1</code> 同族。同族內比較 ALT vs REF 時，germline 單倍型專一甲基化（ASM）在兩組完全相同，
+因此自動抵消 —— 這正是專案既有的「HP1-1 vs HP1-2 = clonal 而非 ASM」定義。</li>
+<li><b>Δβ</b>：同一個 CpG 上，ALT read 的平均甲基化值減去 REF read 的平均值。範圍 −1 到 +1，
+本文一律取絕對值中位數（分布右偏，平均值受極端值主導）。</li>
+<li><b>置換 null</b>：保持 read 集合與兩組人數不變，隨機重排 ALT/REF 標籤後重算 |Δβ|。
+它回答的是「ALT/REF 這個切法，是否比同一批 read 的任意切法差更多」。</li>
+<li><b>超額</b> = 觀察中位 − null 中位。<b>比值</b> = 觀察中位 ÷ null 中位（尺度無關，用於跨集合比較）。</li>
+<li><b>near / distal</b>：CpG 距 sSNV ≤1,000 bp 為 near、≥2,000 bp 為 distal（中間留白避免邊界效應）。</li>
+</ul></details>
+
+<details><summary>統計設計與門檻</summary>
+<ul>
+<li>窗口 ±5,000 bp；每組至少 6 條 tumor read；每個 CpG 兩組各至少 4 條有效讀值。</li>
+<li>檢定：Mann-Whitney U (two-sided)。距離曲線的比較單位是 CpG，near/distal 的比較單位是 位點×HP 單元。</li>
+<li>每個單元做 3 次置換；在 10<sup>5</sup> 量級的 CpG 上 null 中位已穩定。這是<b>集合層</b>的 null，
+不是逐位點的顯著性校正。</li>
+<li>取樣：位點以固定亂數種子（20260726）隨機打亂後掃描至額度為止，非全量。
+TP 掃描 3,202 個位點、FP 4,842 個。</li>
+</ul></details>
+
+<details><summary>限制（必讀）</summary>
+<ul>
+<li><b>FP 不是純 germline-het null。</b>FP 集合富含 artifact，絕對噪音較高。它是<b>方向正確</b>的對照
+（若 lineage 有貢獻，TP 應超過 FP），但不能取代正式的 germline-het 對照。</li>
+<li><b>單一樣本、單一資料線</b>（HCC1395、2026-01 w5000 archive）。跨樣本未驗證。</li>
+<li><b>覆蓋深度偏誤</b>：要求同一 HP 內各有 ≥6 條 ALT 與 REF read，
+46.8% 的 TP 位點才可測 —— 結果偏向高覆蓋區。</li>
+<li><b>CN 未在本輪控制</b>（依當輪指示暫置）。CN gain 會同時影響 ALT read 比例與甲基分布，
+惟本輪的關鍵比較是 TP vs FP，兩者都受 CN 影響，方向性結論不因此翻轉。</li>
+<li>本分析回答的是「ALT/REF 這個切法是否帶額外甲基訊號」，<b>不是</b>「這些區域有沒有甲基差異」。
+後者為真（見既有 ASM 結果），但那屬 germline haplotype 軸。</li>
+</ul></details>
+
+<details><summary>資料來源與可重現性</summary>
+<p>archive：<code>/big7_disk/liaoyoyo2001/big7_disk_output/bip8_output_archive/20260119_all-with-w5000_1</code></p>
+<p>來源 JSON（已隨報告封存於 <code>sources/</code>）：<code>tp_fp_control.json</code>、<code>within_hp_decay.json</code>、<code>within_hp_near_distal.json</code>、<code>within_hp_test.json</code></p>
+<p>重建：<code>python3 assemble_data.py &amp;&amp; python3 build_page.py</code></p>
+<p>本頁所有數字皆由 <code>20260726_within_hp_near_distal.data.json</code> 注入；缺少必要 key 時 builder 直接拋錯，不渲染占位值。</p>
+</details>
+
+<h2><span class="lv">L3</span>這對既有結論的影響</h2>
+<p>與 <code>project_methylation_use_exhausted_bounded_auxiliary</code>（甲基用途已窮盡 = bounded-auxiliary）
+及 <code>project_methyl_allele_axis_backbone_coenrichment_refuted</code>（allele 軸 × 骨幹共同富集已否決）
+<b>一致</b>，並補上先前缺的一環：那兩份記錄把 allele 軸訊號歸因於 somatic-cis 足跡，
+本輪直接檢定該假設，發現<b>連 cis 足跡也不成立</b> —— 距離曲線是平的，
+而殘餘的均勻成分在非體細胞對照上更強。結論方向不變（甲基不作為 subclone 譜系證據），
+但歸因需修正為「一般性的 allele-split 效應」，而非「突變局部 cis 足跡」。</p>
+<p class="note">重新開啟條件：具備正式 germline-het null、CN-neutral 且足量的樣本，
+且在<b>固定局部突變密度</b>下 TP 的比值仍顯著高於對照。</p>
+</div>

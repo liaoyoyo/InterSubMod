@@ -11,12 +11,14 @@ data_sources: docs/methodology/_assets/20260618_subcluster_pilot/layered_reconst
 
 > **目的**：把「從 sSNV 比例 → 區域比例 → 樹/read 層次」的每一個數字，定義清楚**單位、分子、分母、關係**，讓每次檢視都能確認完整狀況、比例計算方式唯一、關係與格式明確。
 > **鐵則（§13.0）**：每個比例都標「分子 ÷ 分母（分母是什麼層的單位）」；分母不同 → 數字不可直接比。
+>
+> 🟠 **2026-07-12 canonical override**：本檔的單位 ontology仍可用，但表內所有113,997骨幹與funnel/determinacy/multi-HP百分比是歷史engineering baseline。完整LongPhase-S recalibration universe是normalized paired ClairS raw-all biallelic sSNVs；canonical tree input是同一run的`_sc.vcf PASS`；ClairS PASS只作sensitivity。raw-all producer/receipt已7/7 PASS，fresh layered consumer仍未7/7/無root `_SUCCESS`，故不得由本檔恢復正式Results。`somatic`只表示operational caller/LongPhase-S selection，不是已獨立確認的true somatic。
 
 ---
 
 ## §1 單位階層（6 層，細 → 粗 → 樹內）
 
-> 🔴🔴 **骨幹來源重大更正（2026-07-09，使用者揪出）+ 全 7 樣本重跑中**：caller 是 **ClairS（paired tumor-normal，非 ClairS-TO）**，已用 normal 做 paired somatic calling + germline 濾除（FILTER=Germline）。舊 `is_somatic` 粗重檢（normal pileup VAF<5%）**冗餘且誤殺 429 個 SEQC2-TP 真 somatic**（全 normal VAF 5-30% borderline）→ **已移除**，改用 **ClairS PASS = LongPhase-S 輸出 `_sc.vcf`（somatic_pass）為骨幹**。**下方 U2-U6 + §2 比例是舊骨幹（23,810）數字，重跑後更新。**
+> 🔴🔴 **骨幹來源更正（2026-07-12，覆寫下方歷史表）**：caller是paired ClairS；LongPhase-S吃normalized raw-all biallelic sSNVs做完整雙向recalibration，建樹才取same-run `_sc.vcf PASS`。舊`is_somatic`與「ClairS PASS=完整LPS input」都已淘汰。下方U1–U6、§2、§3數字與「true somatic／已確認somatic」字樣只可按歷史工程快照閱讀，不可作現行Methods/Results。
 
 | Lv | 單位 | 定義 | HCC1395 計數 | 來源 |
 |----|------|------|------|------|
@@ -98,7 +100,9 @@ data_sources: docs/methodology/_assets/20260618_subcluster_pilot/layered_reconst
 | 關係 | 基數 | 說明 |
 |------|------|------|
 | sSNV → region | many : 1 | 多 sSNV 組成一 region（≥2）|
-| read → HP-family | 1 : 1 | 每 read 依 germline tag 歸一家族（1/2/3/none）|
+| read → HP-family | 1 : 1 | 每 read 依 raw HP 歸 `1/2/3/4/none`；`1/1-1/1-2→1`、`2/2-1/2-2→2`，3/4 保留 auxiliary |
+| read alignment → raw HP/PS | 1 : 0..1 | clean contract 以 `QNAME+chrom+start+end+FLAG+CIGAR digest` exact join；HP 完整 9 態保存，PS 逐 alignment 保存 |
+| PS → topology | 0 : 1 | **PS 只作 phase-block QC，不是 topology edge／lineage label**；每 region 另報 `phase_set_counts`、`phase_set_HP_counts` 與 mixed-PS flag |
 | read → region | many : many | 一 read 可跨多 region；一 region 多 read |
 | **region → lineage-unit** | 1 : 1..3 | 每個有 mutation 的 germline 家族 → 一 lineage-unit |
 | **lineage-unit → tree** | 1 : 1..N | determined→1；ambiguous→N（枚舉全集）；capped→部分 |
@@ -151,7 +155,7 @@ n_trees_stored, L2_cn_verdict, L2_m_channel, verify{V1..V7}, verify_pass, max_va
 | **NAF=0%**（somatic 判準）| 同上 FORMAT 欄 `NAF` | NAF=normal allele freq；`NAF==0` → normal 無此 ALT → 真 somatic（HCC1395 96.8%）| verify script FORMAT 解析 |
 | **caller** | somatic_pass header `##source` / `##cmdline` | `ClairS v0.4.0` + `--normal_bam_fn` = paired（非 ClairS-TO）| `zcat ... \| grep '^##cmdline'` |
 | **區數 / multi-HP / all-det**（U3）| `layered_region_view_{S}.json` census | region 主分母；all-det=全 germline(1/2) lineage 都 determined | `census.n_regions / hp_multiplicity / region_determinacy` |
-| **V1-V7** | region-view `L1.all_V1V7_pass` | solver 獨立重算（golden+3723 隨機 0-mismatch）| verify script |
+| **V1-V7** | region-view `L1.all_eligible_V1V7_pass` | 所有 non-capped eligible units 實際執行 V1-V7；capped 明列 not-applicable。另有 8 golden + 5 seeds×800=4,000 stress，0 mismatch | `verify_layered_v2.py` + `full_v4v5_verification.py` |
 
 **一致性檢查**（verify script 內建）：region-view `U1_sSNV_somatic_total` **必等於** somatic_pass 重算數（欄末 ✓）→ 骨幹數字端到端無漂移。
 

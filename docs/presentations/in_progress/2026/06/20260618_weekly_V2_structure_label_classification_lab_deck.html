@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--
+  title: 週報 — 甲基聚類 × 標籤「狀況」檢驗與分類方法（V2 為主軸）
+  template: Lab Report Deck System (claude.ai/design project a2063071, 自包含複製其 tokens + slide.css 慣例)
+  date: 2026-06-18
+  build_branch: research/subclonal-reconstruction-202606 @ 17bb385
+  scope: HCC1395 單樣本 · 全基因組 30,490 somatic 位點 (output/_wg_d1_unified, paired) — single-sample · Tier 3
+  brand_rules: 細標題(400) · outlined pill · HP1=#4188C7 HP2=#1F3A93 somatic=#E97B3C error=#E0352B · 無 emoji 無漸層 · 箭頭為唯一繪製形狀 · 頁碼 < N >
+  data_sources: 20260617_structure_label_situation_inventory_01.md, 20260618_ism_method_soundness_validation_01.md, 20260618_distance_matrix_cluster_validation_methods_for_methylation_01.md, 20260613_external_validation_library_index_01.md
+  note: 內容/數字沿用已驗證 V2（..._classification_slides_02.standalone.html）；本檔為實驗室模板樣式版（restyle，非複製）。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週報 · 甲基聚類 × 標籤狀況分類（Lab Deck）</title>
+<style>
+:root{
+  --ink:#000; --paper:#fff; --navy:#021442; --ice:#DBEFF9;
+  --accent-1:#4188C7; --accent-2:#7BBFEA; --accent-3:#92DCD9; --accent-4:#FFF8DD; --accent-6:#FFAC27;
+  --germline-hp1:#4188C7; --germline-hp2:#1F3A93; --germline-light:#BDD7EE; --maternal-light:#C6E0B4;
+  --somatic-warm:#E97B3C; --error-red:#E0352B; --reference-gray:#A6A6A6;
+  --fg-1:#000; --fg-2:#262626; --fg-3:#595959; --fg-4:#A6A6A6; --fg-5:#D9D9D9;
+  --bg-2:#F7F9FC; --bg-3:#EEF3F8; --bg-4:#DBEFF9;
+  --border-1:#D9D9D9; --border-2:#A6A6A6;
+  --font-display:'Noto Sans TC','PingFang TC','微軟正黑體','Microsoft JhengHei',Inter,sans-serif;
+  --font-body:'Inter','Noto Sans TC','Calibri','PingFang TC','微軟正黑體',sans-serif;
+  --font-mono:'JetBrains Mono','Menlo','Consolas',monospace;
+  --arrow-color:#4472C4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#15171c;font-family:var(--font-body);color:var(--fg-1)}
+
+/* nav bar */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:14px;
+  background:#0b1220;color:#cbd5e1;padding:7px 16px;font-size:13px;font-family:var(--font-display);border-bottom:1px solid #1e293b}
+.nav b{color:#fff}
+.nav .sp{flex:1}
+.nav button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:var(--font-display)}
+.nav button:hover{background:#334155}
+.nav .cnt{font-family:var(--font-mono)}
+
+/* deck stage: fixed 1920x1080 scaled to fit */
+.deck{position:fixed;inset:0;top:38px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:1920px;height:1080px;position:relative;transform-origin:center center;background:#fff;
+  box-shadow:0 12px 48px rgba(0,0,0,.5);flex:0 0 auto}
+section.slide{position:absolute;inset:0;background:#fff;overflow:hidden;display:none}
+section.slide.active{display:block}
+
+.slide-pad{padding:72px 96px 88px;height:100%;box-sizing:border-box;display:flex;flex-direction:column}
+.slide-title{font-family:var(--font-display);font-weight:400;font-size:72px;line-height:1.1;letter-spacing:-0.005em;color:var(--fg-1);margin:0 0 28px}
+.slide-title .cont{color:var(--fg-3);font-size:46px}
+.slide-subtitle{font-family:var(--font-display);font-weight:400;font-size:32px;color:var(--fg-3);margin:0 0 36px}
+.eyebrow{font-family:var(--font-display);font-size:24px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-1);font-weight:600;margin-bottom:18px}
+.page-n{position:absolute;right:64px;bottom:36px;font-family:var(--font-display);font-size:24px;color:var(--fg-3);letter-spacing:.06em}
+
+.pill{display:inline-flex;align-items:center;padding:10px 24px;border:1.5px solid var(--border-1);border-radius:6px;background:#fff;font-family:var(--font-display);font-weight:500;font-size:24px;color:var(--fg-1);box-shadow:0 1px 2px rgba(0,0,0,.04);white-space:nowrap}
+.pill--lg{font-size:30px;padding:12px 28px}
+.pill--sm{font-size:20px;padding:6px 16px}
+.pill--hp1{border-color:var(--germline-hp1);color:var(--germline-hp1)}
+.pill--hp2{border-color:var(--germline-hp2);color:var(--germline-hp2)}
+.pill--som{border-color:var(--somatic-warm);color:var(--somatic-warm)}
+.pill--core{border-color:var(--navy);border-width:2px;color:var(--navy)}
+
+.hbar{display:inline-flex;align-items:center;justify-content:center;padding:12px 40px;color:#fff;font-family:var(--font-display);font-weight:700;font-size:32px;border-radius:4px;background:var(--accent-1)}
+.hbar--somatic{background:var(--somatic-warm)}
+.hbar--navy{background:var(--navy)}
+
+.panel{background:#fff;border:1px solid var(--border-1);border-radius:8px;padding:24px 28px}
+.panel--ice{background:var(--ice);border-color:#BBD6EE}
+.panel--cream{background:var(--accent-4);border-color:#EED892}
+.panel--muted{background:var(--bg-3);border-color:var(--border-1)}
+
+.bullet{display:flex;gap:16px;align-items:flex-start;font-size:28px;line-height:1.5;color:var(--fg-2)}
+.bullet::before{content:"";flex:0 0 auto;width:12px;height:12px;background:var(--accent-1);border-radius:2px;margin-top:16px}
+.bullet.som::before{background:var(--somatic-warm)}
+
+.legend{display:inline-flex;align-items:center;gap:10px;font-size:22px;color:var(--fg-2)}
+.legend .d{width:16px;height:16px;border-radius:50%;display:inline-block}
+
+.data-flag{font-family:var(--font-display);font-weight:600;color:var(--error-red);font-size:24px}
+
+.kpi-row{display:flex;gap:64px}
+.kpi .v{font-family:var(--font-display);font-size:84px;font-weight:300;color:var(--navy);line-height:1}
+.kpi .v.som{color:var(--somatic-warm)} .kpi .v.blue{color:var(--accent-1)}
+.kpi .l{font-family:var(--font-body);font-size:24px;color:var(--fg-3);margin-top:12px;max-width:340px}
+
+.step{display:flex;align-items:baseline;gap:14px;font-family:var(--font-display)}
+.step .n{font-weight:600;font-size:28px;color:var(--accent-1);min-width:120px}
+.step .t{font-size:28px;color:var(--fg-2)}
+
+.eq{font-family:var(--font-mono);font-size:26px;color:var(--navy);background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px 16px;display:inline-block}
+.mono{font-family:var(--font-mono)}
+
+.ribbon{position:relative;height:30px;border-radius:15px;border:1px solid #8FAADC}
+.ribbon--pat{background:var(--germline-light)} .ribbon--mat{background:var(--maternal-light)}
+.ribbon .v{position:absolute;top:4px;bottom:4px;width:11px;border-radius:2px}
+.v-hp1{background:var(--germline-hp1)} .v-hp2{background:var(--germline-hp2)} .v-som{background:var(--somatic-warm)}
+
+.flow-row{display:flex;align-items:center;gap:14px}
+.flow-col{display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* numbered conclusion card */
+.ncard{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:24px 26px;flex:1}
+.ncard .h{font-family:var(--font-display);font-weight:700;font-size:30px;color:var(--navy);margin:0 0 10px;display:flex;align-items:center;gap:12px}
+.ncard .num{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--accent-1);color:#fff;font-size:24px;font-weight:700;flex:0 0 auto}
+.ncard.c2 .num{background:var(--accent-3);color:var(--navy)} .ncard.c3 .num{background:var(--somatic-warm)}
+.ncard p{margin:0;font-size:23px;line-height:1.5;color:var(--fg-2)}
+
+/* timeline */
+.tl{display:flex;gap:0;align-items:stretch}
+.tl .stop{flex:1;position:relative;padding:0 28px}
+.tl .stop .dot{width:22px;height:22px;border-radius:50%;background:var(--accent-1)}
+.tl .stop.s2 .dot{background:var(--accent-3)} .tl .stop.s3 .dot{background:var(--somatic-warm)}
+.tl .line{position:absolute;top:10px;left:0;right:0;height:2px;background:var(--border-2)}
+.tl .when{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--navy);margin:18px 0 8px}
+.tl .what{font-size:24px;color:var(--fg-2);line-height:1.45}
+
+table.mt{border-collapse:collapse;font-size:26px;font-family:var(--font-display)}
+table.mt th,table.mt td{border:1px solid var(--border-1);padding:12px 22px;text-align:left}
+table.mt th{background:var(--bg-3);font-weight:700;color:var(--navy)}
+table.mt td.r{text-align:right;font-family:var(--font-mono)}
+table.mt tr.hi td{background:var(--accent-4)}
+
+.foot{position:absolute;left:96px;bottom:36px;font-family:var(--font-body);font-size:20px;color:var(--fg-4)}
+
+@media print{
+  body{background:#fff}
+  .nav{display:none}
+  .deck{position:static;display:block;overflow:visible}
+  .stage{transform:none!important;box-shadow:none;page-break-after:always;margin:0 auto}
+  section.slide{display:block!important;position:relative}
+  @page{size:1920px 1080px;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <b>週報 · 甲基聚類 × 標籤狀況分類</b>
+  <span style="color:#64748b">Lab Report Deck · V2 為主軸</span>
+  <span class="sp"></span>
+  <button onclick="window.print()">列印 / PDF</button>
+  <span class="cnt" id="cnt">1 / 9</span>
+  <button id="prev">◀</button>
+  <button id="next">▶</button>
+</div>
+
+<div class="deck"><div class="stage" id="stage">
+
+<!-- ===== S1 Title ===== -->
+<section class="slide active">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">計算基因體實驗室 · 週報 2026-06-18</div>
+    <h1 style="font-family:var(--font-display);font-weight:400;font-size:104px;line-height:1.08;letter-spacing:-0.01em;margin:0 0 24px;color:var(--ink)">甲基聚類 × 標籤「狀況」<br>清楚的<span style="color:var(--accent-1)">檢驗</span>與<span style="color:var(--accent-1)">分類</span>方法</h1>
+    <div class="slide-subtitle" style="margin:0 0 44px">無監督 UPGMA → PERMANOVA 配 PERMDISP → 標籤關聯 → 狀況分類 ｜ subclone 判讀是下一步</div>
+    <div class="flow-row" style="gap:16px">
+      <span class="pill pill--lg">報告人：廖子游</span>
+      <span class="pill pill--lg">指導教授：黃耀廷</span>
+      <span class="pill pill--lg pill--core">Tier 3 · SOUND_WITH_CAVEATS</span>
+    </div>
+    <div style="margin-top:28px;font-size:24px;color:var(--fg-3)">HCC1395 單樣本 · 全基因組 30,490 somatic 位點 · <span class="mono">output/_wg_d1_unified</span>（paired）</div>
+  </div>
+</section>
+
+<!-- ===== S2 Outline ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <h1 class="slide-title">本週重點（以 V2 為主軸）</h1>
+    <div style="display:flex;flex-direction:column;gap:26px;margin-top:18px">
+      <div class="step"><span class="n">1 前提</span><span class="t">我們在問什麼：甲基結構 ↔ 標籤，目標是<b>乾淨地分類</b>（subclone 是下一步）</span></div>
+      <div class="step"><span class="n">2 邏輯鏈</span><span class="t">方法五步：建結構 → 統計驗證 → 標籤關聯 → 狀況分類 → 兩層輸出</span></div>
+      <div class="step"><span class="n">3 數據佐證</span><span class="t">全基因組狀況分類計數 + tumor-only vs tumor+normal 對齊強度</span></div>
+      <div class="step"><span class="n">4 結論</span><span class="t">方法 SOUND_WITH_CAVEATS：有效 · 合理 · 可行（外部論文佐證）</span></div>
+      <div class="step"><span class="n">5 未來</span><span class="t">啟用 PERMDISP → 補 k/穩定性 → subclone 判讀 → 跨樣本復現</span></div>
+    </div>
+    <div class="foot">來源：situation_inventory_01.md · ism_method_soundness_01.md · distance_matrix_cluster_validation_01.md</div>
+    <div class="page-n">&lt; 2 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S3 前提 Premise ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">前提說明</div>
+    <h1 class="slide-title">我們在問什麼</h1>
+    <div class="flow-row" style="gap:18px;margin:8px 0 38px">
+      <span class="pill pill--lg">甲基結構</span>
+      <svg width="64" height="18" viewBox="0 0 64 18"><line x1="2" y1="9" x2="52" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="52,2 63,9 52,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill pill--lg">與「哪種標籤」高關聯？</span>
+      <svg width="64" height="18" viewBox="0 0 64 18"><line x1="2" y1="9" x2="52" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="52,2 63,9 52,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill pill--lg pill--core">分類成「狀況」</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:stretch">
+      <div class="panel panel--ice" style="flex:1.3">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:30px;color:var(--navy);margin-bottom:14px">本週目標</div>
+        <div style="font-size:28px;line-height:1.55;color:var(--fg-2)">把每個 somatic 位點的「甲基聚類結構」與「已知標籤（HP / 等位基因）」之間的關係，用<b>統計檢定乾淨地分類</b>成可解釋的「狀況」——這是下游一切判讀的基礎。</div>
+      </div>
+      <div class="panel panel--cream" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="data-flag" style="margin-bottom:10px">分類 ≠ subclone</div>
+        <div style="font-size:25px;line-height:1.5;color:var(--fg-2)">「有結構」很普遍（全基因組約 <b>91.7%</b> region 為 Weak/Noise）。<b>判讀哪些是真 subclone 是獨立的下一步</b>，需 cis-control / 連鎖 / CN 驗證。</div>
+      </div>
+    </div>
+    <div class="page-n">&lt; 3 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S4 邏輯鏈 method pipeline ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">邏輯鏈 · 方法</div>
+    <h1 class="slide-title">方法五步 ── 順序是鐵則</h1>
+    <div class="flow-row" style="gap:10px;margin:6px 0 32px;flex-wrap:nowrap">
+      <span class="pill" style="text-align:center">建結構<br><span style="font-size:18px;color:var(--fg-3)">UPGMA 分群</span></span>
+      <svg width="48" height="18" viewBox="0 0 48 18"><line x1="2" y1="9" x2="36" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="36,2 47,9 36,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill pill--core" style="text-align:center">統計驗證<br><span style="font-size:18px;color:var(--fg-3)">PERMANOVA+PERMDISP</span></span>
+      <svg width="48" height="18" viewBox="0 0 48 18"><line x1="2" y1="9" x2="36" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="36,2 47,9 36,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill" style="text-align:center">標籤關聯<br><span style="font-size:18px;color:var(--fg-3)">哪種標籤</span></span>
+      <svg width="48" height="18" viewBox="0 0 48 18"><line x1="2" y1="9" x2="36" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="36,2 47,9 36,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill" style="text-align:center">狀況分類<br><span style="font-size:18px;color:var(--fg-3)">對齊/多群/多標籤</span></span>
+      <svg width="48" height="18" viewBox="0 0 48 18"><line x1="2" y1="9" x2="36" y2="9" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="36,2 47,9 36,16" fill="var(--arrow-color)"/></svg>
+      <span class="pill pill--som" style="text-align:center">兩層輸出<br><span style="font-size:18px;color:var(--fg-3)">tumor-only / +normal</span></span>
+    </div>
+    <div style="display:flex;gap:28px;align-items:stretch">
+      <div class="panel" style="flex:1.4">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:28px;color:var(--navy);margin-bottom:12px">建結構（無監督）</div>
+        <div style="font-size:25px;line-height:1.55;color:var(--fg-2);margin-bottom:12px">read 兩兩算甲基不相似度 → 階層分群，<b>標籤完全不進入</b>。</div>
+        <span class="eq">δ(p,q)=p(1−q)+(1−p)q</span>
+        <div style="font-size:22px;color:var(--fg-3);margin-top:12px">信心權重 w(p)=2|p−0.5| · C_min=3 · UPGMA average-linkage</div>
+      </div>
+      <div class="panel panel--ice" style="flex:1">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:28px;color:var(--navy);margin-bottom:12px">stack 鐵則</div>
+        <div style="font-size:30px;font-family:var(--font-display);font-weight:600;margin-bottom:12px"><span style="color:var(--navy)">existence</span> → <span style="color:var(--accent-6)">k</span> → <span style="color:var(--somatic-warm)">stability</span></div>
+        <div class="data-flag" style="font-size:22px">k-selection / 穩定性 = 已知缺口</div>
+        <div style="font-size:22px;color:var(--fg-3);margin-top:8px">先 gate「有沒有結構」，否則在無結構區硬選 k＝製造假群。</div>
+      </div>
+    </div>
+    <div class="page-n">&lt; 4 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S5 邏輯鏈 cont. 統計驗證 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">邏輯鏈 (cont.) · 統計驗證</div>
+    <h1 class="slide-title">PERMANOVA 配 PERMDISP <span class="cont">（核心）</span></h1>
+    <div style="display:flex;gap:28px;align-items:stretch;margin-top:6px">
+      <div class="panel" style="flex:1">
+        <div class="hbar" style="font-size:26px;padding:8px 24px;margin-bottom:16px">PERMANOVA</div>
+        <div style="font-size:26px;line-height:1.5;color:var(--fg-2)">群在<b>距離空間</b>是否真分離？打亂標籤建 null，看觀測 pseudo-F 是否落右尾。</div>
+        <div style="margin-top:14px"><span class="eq" style="font-size:23px">F = (SS組間/(k−1)) / (SS組內/(N−k))</span></div>
+        <div style="font-size:22px;color:var(--fg-3);margin-top:10px">99 次排列 · min_reads=5 · 存在性檢定</div>
+      </div>
+      <div class="panel" style="flex:1">
+        <div class="hbar hbar--somatic" style="font-size:26px;padding:8px 24px;margin-bottom:16px">PERMDISP</div>
+        <div style="font-size:26px;line-height:1.5;color:var(--fg-2)">排除「<b>只是較離散</b>、非型態不同」的假象（Anderson&Walsh 2013：兩者一組）。</div>
+        <div class="data-flag" style="margin-top:16px">!! PERMDISP 此 run 未開（enable_dispersion=false）→ 啟用為收尾動作</div>
+      </div>
+    </div>
+    <div class="panel panel--muted" style="margin-top:22px">
+      <div style="font-size:25px;line-height:1.5;color:var(--fg-2)"><b>為何 SOUND：</b>成熟框架（Legendre & Legendre《Numerical Ecology》/ Anderson 2001 / McArdle & Anderson 2001 + 微生物組 β-diversity 先例）；<b>非循環</b>——HP 標籤來自 somatic_haplotag（零甲基，源碼證實），是「甲基結構 vs 獨立基因標籤」對齊，非自證。</div>
+    </div>
+    <div class="foot">演算法：StructureTest.cpp run_permanova + check_dispersion · GlobalTest.cpp（Cramér's V / Fisher 輔）</div>
+    <div class="page-n">&lt; 5 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S6 數據 狀況分類 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">數據圖表佐證</div>
+    <h1 class="slide-title">全基因組狀況分類</h1>
+    <div class="kpi-row" style="margin:14px 0 34px">
+      <div class="kpi"><div class="v blue">22,497</div><div class="l">① 對齊（一結構 → 一標籤）· 73.78%</div></div>
+      <div class="kpi"><div class="v">8,077</div><div class="l">② 多結構 → 一標籤 · 26.49%</div></div>
+      <div class="kpi"><div class="v som">510</div><div class="l">③ 一結構 → 多標籤 · 1.67%</div></div>
+    </div>
+    <div style="display:flex;gap:18px;align-items:center;margin-bottom:14px">
+      <span class="pill pill--hp1">對齊：群 = 標籤</span>
+      <span class="pill pill--core">多結構一標籤：同標籤內再分 ≥2 群</span>
+      <span class="pill pill--som">一結構多標籤：cluster ⊥ label</span>
+    </div>
+    <div class="panel panel--cream">
+      <div class="data-flag" style="font-size:22px;margin-bottom:6px">分類 ≠ subclone</div>
+      <div style="font-size:24px;color:var(--fg-2);line-height:1.45">「有結構」普遍（~91.7% region 為 Weak/Noise）→ 狀況只代表通過了哪些檢定，<b>subclone 判讀是下一步</b>。</div>
+    </div>
+    <div class="foot">來源：situation_inventory_01.md §0（as-of 2026-06-18）· 30,490 somatic 位點 · HCC1395 paired</div>
+    <div class="page-n">&lt; 6 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S7 數據 cont. 兩層 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">數據圖表佐證 (cont.)</div>
+    <h1 class="slide-title">tumor-only vs tumor + normal</h1>
+    <div style="display:flex;gap:44px;align-items:center;margin-top:12px">
+      <div style="flex:1.05">
+        <div style="font-family:var(--font-display);font-size:26px;color:var(--navy);font-weight:600;margin-bottom:24px">對齊強度的中位 Cramér's V（加 normal 才升高）</div>
+        <!-- functional bar chart: data, not decoration -->
+        <svg width="640" height="300" viewBox="0 0 640 300">
+          <line x1="70" y1="250" x2="600" y2="250" stroke="var(--border-2)" stroke-width="1.5"/>
+          <text x="40" y="60" font-size="20" fill="var(--fg-4)" font-family="var(--font-mono)">V</text>
+          <!-- tumor-only 0.319 (left, lower) -->
+          <rect x="150" y="130" width="120" height="120" fill="var(--somatic-warm)"/>
+          <text x="210" y="118" text-anchor="middle" font-size="30" font-weight="700" fill="var(--somatic-warm)" font-family="var(--font-mono)">0.319</text>
+          <text x="210" y="280" text-anchor="middle" font-size="24" fill="var(--fg-2)" font-family="var(--font-display)">① 只 tumor</text>
+          <!-- tumor+normal 0.665 (right, higher) -->
+          <rect x="400" y="40" width="120" height="210" fill="var(--accent-1)"/>
+          <text x="460" y="28" text-anchor="middle" font-size="30" font-weight="700" fill="var(--accent-1)" font-family="var(--font-mono)">0.665</text>
+          <text x="460" y="280" text-anchor="middle" font-size="24" fill="var(--fg-2)" font-family="var(--font-display)">② tumor + normal</text>
+          <!-- rise arrow (allowed: arrow) -->
+          <line x1="278" y1="120" x2="392" y2="58" stroke="var(--arrow-color)" stroke-width="2.5"/>
+          <polygon points="384,50 398,54 388,66" fill="var(--arrow-color)"/>
+        </svg>
+      </div>
+      <div style="flex:1">
+        <div class="kpi-row" style="gap:0;flex-direction:column">
+          <div class="kpi" style="margin-bottom:28px"><div class="v blue">51.6%</div><div class="l">tumor-only 對齊保持率（可測 159 中 82）</div></div>
+          <div class="kpi"><div class="v">89.7%</div><div class="l">read-level 重建對拍準確率（校準）</div></div>
+        </div>
+        <div class="panel panel--ice" style="margin-top:26px">
+          <div style="font-size:25px;color:var(--fg-2);line-height:1.5">中位 V 從 paired <b>0.665</b> 掉到 tumor-only <b>0.319</b> → 對齊強度<b>約半數來自 normal reads</b>。兩組結果分開列，供下一步取用。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：situation_inventory_01.md §0 / §6.4（as-of 2026-06-18）· read-set：GlobalTest paired vs !is_tumor tumor-only</div>
+    <div class="page-n">&lt; 7 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S8 結論 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">結論</div>
+    <h1 class="slide-title">方法 SOUND_WITH_CAVEATS</h1>
+    <div style="display:flex;gap:22px;margin:8px 0 26px">
+      <div class="ncard c1"><div class="h"><span class="num">1</span>有效</div><p>PERMANOVA = 甲基領域 best-in-class 存在性檢定；分類<b>窮舉覆蓋</b>每個位點，並分 tumor-only / tumor+normal 兩層。</p></div>
+      <div class="ncard c2"><div class="h"><span class="num">2</span>合理</div><p>建在成熟框架（Legendre · Anderson 2001 · McArdle + 微生物組 β-diversity 先例）；<b>非循環</b>（HP 零甲基）；read-level 有 qFDRP / cvlr 先例。</p></div>
+      <div class="ncard c3"><div class="h"><span class="num">3</span>可行</div><p>PERMANOVA + PERMDISP <b>已實作 C++</b>；單細胞先例 PDclust / scMelody / SINCEF 同骨架；外部 <b>61 源（59 親讀）· 無同-regime 衝突</b>。</p></div>
+    </div>
+    <div class="panel panel--muted">
+      <div style="font-family:var(--font-display);font-weight:600;font-size:24px;color:var(--navy);margin-bottom:10px">誠實邊界（Remarks）</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px 28px">
+        <span class="bullet" style="font-size:23px">分類 ≠ subclone（有結構普遍 ~91.7%）</span>
+        <span class="bullet som" style="font-size:23px">PERMDISP 此 run 未開 · k/穩定性缺口</span>
+        <span class="bullet" style="font-size:23px">勿稱「獨有顯著性檢定」（cvlr/ASMS 皆有 randomization）→ 增量在檢定對象</span>
+        <span class="bullet" style="font-size:23px">characterization-only · 甲基屬 germline-haplotype 層 · filter 方向 DEAD</span>
+      </div>
+    </div>
+    <div style="margin-top:18px"><span class="pill pill--core">Tier 3</span> <span class="pill">單樣本 HCC1395</span></div>
+    <div class="page-n">&lt; 8 &gt;</div>
+  </div>
+</section>
+
+<!-- ===== S9 未來 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">未來方向</div>
+    <h1 class="slide-title">下一步</h1>
+    <div class="tl" style="margin-top:40px">
+      <div class="stop s1"><div class="line"></div><div class="dot"></div><div class="when">近期</div><div class="what">① 啟用 PERMDISP（報告 dispersion warning）<br>② 補 k-selection + 穩定性（silhouette / clusterboot）</div></div>
+      <div class="stop s2"><div class="line"></div><div class="dot"></div><div class="when">中期</div><div class="what">③ 依「兩層輸出」乾淨基礎<br>進入 <b>subclone 判讀</b>（a-priori 條件化軸 + cis-control）</div></div>
+      <div class="stop s3"><div class="line"></div><div class="dot"></div><div class="when">跨樣本</div><div class="what">④ COLO829 等跨樣本復現<br>解除單樣本 Tier 3 上限</div></div>
+    </div>
+    <div class="panel panel--cream" style="margin-top:52px">
+      <div style="font-size:25px;color:var(--fg-2);line-height:1.5"><b>最 load-bearing 缺口：</b>啟用 PERMDISP + within-haplotype somatic-vs-baseline 控制 ── 這是把「characterize」claim 從存在級推進到 somatic-specificity 的關鍵閘門。</div>
+    </div>
+    <div class="page-n">&lt; 9 &gt;</div>
+  </div>
+</section>
+
+</div></div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0,N=slides.length,stage=document.getElementById('stage'),cnt=document.getElementById('cnt');
+  function fit(){var s=Math.min((window.innerWidth-40)/1920,(window.innerHeight-78)/1080);stage.style.transform='scale('+s+')';}
+  function show(n){i=Math.max(0,Math.min(N-1,n));slides.forEach(function(s,k){s.classList.toggle('active',k===i);});cnt.textContent=(i+1)+' / '+N;}
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){show(i+1);e.preventDefault();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(N-1);}
+  });
+  window.addEventListener('resize',fit);
+  fit();show(0);
+})();
+</script>
+</body>
+</html>

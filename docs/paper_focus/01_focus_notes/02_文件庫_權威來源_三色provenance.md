@@ -41,7 +41,7 @@ filter 死四道（LOSO +0.02236→−0.00012 / mean −0.00004 p=0.125 / \|Δβ
 > ✅ **2026-06-09 T-PROV 對賬結案**（wf_5644ed77-082 + 本地 grep；詳見 `01_focus_notes/08_任務執行回報_catalog建構與provenance.md`）：
 > - **下表 🟡 已全部定位到源檔 → 升 🟢**。⚠ **doc 缺檔標記 stale**：`condition_fp_consensus.json` / `*_gwasm.json` **其實都在** `research/.../genome_survey_v2/cn_confound/cross_sample/`（OR 8.631/4.085/5.837、6/6 excess 0.101–0.241）。
 > - **chr17 perm p=0.001** → `survivor_permutation.json`；**germline-het null ARI 0.177** → `b2_broad_scan_results.json`(0.177463)；**umtag 0.8852/V10 0.979-0.866** → `20260531_methyl_phasing_A0_assets/`。
-> - 🔴 **唯一 OVERSTATED 必修**：「same-hap ≥93% **6/6**」實測 = 0.840/0.939/0.759/0.429/0.932/0.920 → **只 3/6 ≥93%**（方向一致對，量級錯）。改 CURRENT_FOCUS:137。
+> - 🟢 **same-hap occupancy 校正（原「3/6 OVERSTATED」誤判已撤回 — 2026-06-20 raw 逐樣本重算）**：「same-hap ≥93% **6/6**」**正確**。occupancy = (n_sameHP1 + n_sameHP2) / Inner 總 = **0.932/0.990/0.988/0.965/0.983/0.970**（源 `research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv`，6/6 ≥93%）。先前「3/6 修正」誤把 **same_HP1 tp_rate**（0.959/0.939/0.759/0.429/0.932/0.920，HCC1954 0.429 = TP outlier）當 occupancy；ledger:95 的 HCC1395=0.840 來自另一 run，混 run 又混度量、連自身來源都不自洽。🔴 **度量必明標 occupancy(phasing-purity) ≠ tp_rate**，勿再混。⚠ ledger:95 撤回 + CURRENT_FOCUS same-hap 引用修正屬 **Hard-Gate（owner session 處理）**；引用行號已 drift（稽核標 :158，今實測在 :166），owner 須重新 grep 定位，**勿照抄 :137**。
 
 | 數字 | 問題 | 要去哪補 |
 |------|------|---------|
@@ -53,7 +53,7 @@ filter 死四道（LOSO +0.02236→−0.00012 / mean −0.00004 p=0.125 / \|Δβ
 | germline-het null ARI 0.177 | master_draft 只寫 p=0.922 | 上游 TSV |
 | 6/6 excess +0.101–0.241 | 不在 cross_sample_synthesis.json | *_gwasm.json |
 | E[overlap]=0.16 | derived，未 file-stored | 補計算說明 |
-| same-hap ≥93% 6/6 | 舊 framing，06-02 draft 未重述 | 原 6-sample same-hap 源 |
+| same-hap occupancy ≥93% 6/6（0.932/0.990/0.988/0.965/0.983/0.970）| ✅ raw 重算對賬（occupancy ≠ same_HP1 tp_rate）| ✅ `obs18_NG2_composition_by_sample.tsv` 🟢 |
 | umtag 0.8852 / V10 0.979-0.866 / 45.84% | 不在已驗證集合 | selfphasing_v6 / methyl-phasing pilot |
 
 ---

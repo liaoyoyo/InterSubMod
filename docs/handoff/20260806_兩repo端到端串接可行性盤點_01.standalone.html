@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InterSubMod × LongLineage 端到端串接可行性盤點</title>
+<style>
+:root{
+  --bg:#fbfbfa; --fg:#1f2328; --muted:#5b6570; --line:#e2e5e9; --card:#fff;
+  --accent:#0b6fa4; --ok:#137a4b; --warn:#a15c00; --bad:#b3261e; --chip:#eef2f6;
+  --code:#f4f6f8;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#14171a; --fg:#e6e8ea; --muted:#9aa4ad; --line:#2b3237; --card:#1b1f23;
+        --accent:#5eb3e4; --ok:#4cc38a; --warn:#e0a33e; --bad:#f2776b; --chip:#232a30; --code:#1e2429;}
+}
+:root[data-theme="dark"]{--bg:#14171a; --fg:#e6e8ea; --muted:#9aa4ad; --line:#2b3237; --card:#1b1f23;
+  --accent:#5eb3e4; --ok:#4cc38a; --warn:#e0a33e; --bad:#f2776b; --chip:#232a30; --code:#1e2429;}
+:root[data-theme="light"]{--bg:#fbfbfa; --fg:#1f2328; --muted:#5b6570; --line:#e2e5e9; --card:#fff;
+  --accent:#0b6fa4; --ok:#137a4b; --warn:#a15c00; --bad:#b3261e; --chip:#eef2f6; --code:#f4f6f8;}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.68 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;}
+.wrap{max-width:1060px;margin:0 auto;padding:32px 20px 96px}
+header{border-bottom:2px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+h1{font-size:1.72rem;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:.92rem}
+h2{font-size:1.24rem;margin:44px 0 12px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:26px 0 8px}
+p{margin:10px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.87em;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.5;
+  border:1px solid var(--line)}
+.verdict{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:10px;padding:18px 20px;margin:20px 0}
+.verdict strong{color:var(--accent)}
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;background:var(--card)}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--chip);font-weight:600;white-space:nowrap;position:sticky;top:0}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:.76rem;font-weight:600;white-space:nowrap}
+.t-ok{background:rgba(19,122,75,.13);color:var(--ok)}
+.t-warn{background:rgba(161,92,0,.14);color:var(--warn)}
+.t-bad{background:rgba(179,38,30,.13);color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:15px 17px}
+.card h4{margin:0 0 7px;font-size:.94rem}
+.card .n{font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.15}
+.card .d{color:var(--muted);font-size:.83rem;margin-top:3px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.fact.bad{border-left:4px solid var(--bad)}
+.fact.warn{border-left:4px solid var(--warn)}
+.fact.ok{border-left:4px solid var(--ok)}
+.fact h3{margin-top:0}
+figure{margin:20px 0}
+figure svg{width:100%;height:auto;display:block;background:var(--card);
+  border:1px solid var(--line);border-radius:10px}
+figcaption{color:var(--muted);font-size:.83rem;margin-top:7px;text-align:center}
+ul,ol{padding-left:22px}li{margin:5px 0}
+.ev{color:var(--muted);font-size:.8rem;font-family:ui-monospace,monospace}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:.82rem}
+.toggle{position:fixed;top:14px;right:14px;background:var(--card);border:1px solid var(--line);
+  color:var(--fg);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:.82rem;z-index:9}
+</style>
+</head>
+<body>
+<button class="toggle" onclick="var r=document.documentElement,d=(r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));r.setAttribute('data-theme',d==='dark'?'light':'dark')">◐ 主題</button>
+<div class="wrap">
+
+<header>
+  <h1>InterSubMod × LongLineage 端到端串接可行性盤點</h1>
+  <div class="sub">2026-08-06 · task type: D handoff / B validation · scope：全流程、兩 repo、無 subset<br>
+  證據來源：2026-08-05/06 實際指令輸出與原始碼行號（15 面向機器盤點 + 主 session 一手實測）</div>
+</header>
+
+<div class="verdict">
+  <strong>結論：可以建成你要的流程 —— 但不是「把現有兩支程式接起來」就行。</strong>
+  需要新建 <strong>3 個中介元件</strong>，並且要先做 <strong>1 個科學裁決</strong>與 <strong>1 個資源決策</strong>。
+  現況是<em>零件很齊、契約很嚴、但沒有一條打通的路</em>。9 項目標中只有 1 項真正 MISSING，其餘是「接縫」而非「零件」問題。
+</div>
+
+<div class="grid">
+  <div class="card"><h4>InterSubMod CLI</h4><div class="n">28</div>
+    <div class="d">功能選項（21 add_option + 7 add_flag），實跑 --help 驗證</div></div>
+  <div class="card"><h4>LongLineage 可用 subcommand</h4><div class="n">1 / 4</div>
+    <div class="d">僅 dataset-gate；run 與 probe 皆 KernelBlocked exit 6</div></div>
+  <div class="card"><h4>兩 repo 寫 BAM 能力</h4><div class="n">0</div>
+    <div class="d">sam_write1 / bam_write1 全 repo 零命中</div></div>
+  <div class="card"><h4>可立即使用的樣本</h4><div class="n">7 / 7</div>
+    <div class="d">sidecar production_tagging 全 PASS</div></div>
+  <div class="card"><h4>/big7_disk 餘量</h4><div class="n">617 GB</div>
+    <div class="d">99% 已用 — 落地 tagged BAM 的硬限制</div></div>
+  <div class="card"><h4>LongLineage 科學 artifact</h4><div class="n">9</div>
+    <div class="d">site_reads / methyl_calls / m1_* / cooccurrence_* / topology_units / summary</div></div>
+</div>
+
+<h2>1 · 兩個 repo 的關係（與直覺不同）</h2>
+<p>LongLineage <strong>不是 InterSubMod 的 fork</strong>，而是<strong>宣告式 clean-room 重建</strong>：
+git root commit 完全不同（ISM <code>71ce312e</code> / LL <code>7a8f75e8</code>，LL 僅 18 commits），
+用 21 條 source_to_target 映射 + 17 條 authority 條目把 ISM commit <code>0ee2fa1b</code> 釘死。</p>
+
+<div class="tw"><table>
+<tr><th></th><th>InterSubMod (ISM)</th><th>LongLineage (LL)</th></tr>
+<tr><td>定位</td><td>研究原型：C++ 核心 + 大量 Python 探索</td><td>工業化重寫：truth-isolated、fail-closed</td></tr>
+<tr><td>輸出層級</td><td><strong>per-region</strong>（193 欄寬表）</td><td><strong>per-read</strong>（site_reads / methyl_calls）</td></tr>
+<tr><td>HP 來源</td><td>從 BAM aux tag 讀</td><td><strong>明文禁止讀 BAM tag</strong>，只認 sidecar</td></tr>
+<tr><td>PS tag</td><td><strong>C++ 完全沒讀</strong>（grep 零命中）</td><td>sidecar 第 9 欄，一級公民</td></tr>
+</table></div>
+
+<h3>真正共用的 4 個格式（雙邊源碼寫死）</h3>
+<p>其中最關鍵的是 <strong>HP/PS sidecar TSV</strong> —— ISM 生產端與 LL 的 C++ 常數 <strong>byte-identical</strong>：</p>
+<pre>#CHROM	START0	END0	QNAME	FLAG	MAPQ	CIGAR_B2	HP	PS</pre>
+<p class="ev">LL 端定義：LongLineage/include/longlineage/io/sidecar.hpp:18 · 實測 zcat sidecar 首行完全一致</p>
+<p>另三個：<code>layered_sample_output_manifest</code> v1.0.0（LL 的 C++ 直接 parse 並驗 SHA）、
+<code>layered_run_receipt</code> / <code>layered_success_marker</code>、
+<code>longphase_raw_all_receipt_closeout</code>。</p>
+<p><strong>沒有任何腳本同時執行兩個 binary</strong>（雙向 grep 皆 NOT_FOUND）。</p>
+
+<h2>2 · 現在真的能跑什麼（實測，非文件宣稱）</h2>
+
+<div class="fact bad">
+<h3>🔴 LongLineage 主線跑不起來</h3>
+<p><code>longlineage --help</code> 自帶輸出：<em>「Production run is fail-closed until P3, P4 and P5 are VERIFIED.」</em></p>
+<p>機械真值 <code>state/release_attestation.json</code>：<code>attestation_state: "NOT_READY"</code>，
+P3/P4/P5 全 <code>BLOCKED</code>，blockers 為 M1 / M2-cooccurrence / topology parity 與 ranking 皆 NOT_VERIFIED。</p>
+<div class="tw"><table>
+<tr><th>subcommand</th><th>狀態</th><th>說明</th></tr>
+<tr><td><code>preflight</code></td><td><span class="tag t-ok">可跑</span></td><td>驗 8 角色 manifest</td></tr>
+<tr><td><code>run</code></td><td><span class="tag t-bad">KernelBlocked</span></td><td>longlineage_main.cpp:967-970 直接回 exit 6</td></tr>
+<tr><td><code>probe</code></td><td><span class="tag t-bad">KernelBlocked</span></td><td>同上</td></tr>
+<tr><td><code>dataset-gate</code></td><td><span class="tag t-warn">唯一出科學結果的路</span></td>
+    <td>但 VCF census <strong>硬編碼 HCC1395 的 113061/79687/33374</strong>，換樣本即失敗（需改 C++ 重編）</td></tr>
+</table></div>
+<p><strong>關鍵澄清</strong>：BLOCKED 指的是 <em>parity 證據不存在</em>，不是程式碼不存在。
+M1/M2/topology 的 kernel 都已實作，且被 dataset-gate 實際執行過。</p>
+</div>
+
+<div class="fact ok">
+<h3>✅ 實體資料 7 樣本齊全，可立即使用</h3>
+<p><code>run_status.tsv</code> 實測 <strong>7/7 production_tagging PASS</strong>：
+HCC1395 (40,859,727 rows)、HCC1395_DORADO (40,033,094)、COLO829 (8,255,461)、
+H1437 (14,434,968)、H2009 (21,690,297)、HCC1937、HCC1954。</p>
+<p>HCC1395 sidecar 實體：<code>read_tags.tsv.gz</code> 1,433,423,193 bytes + <code>.tbi</code> 910,475 bytes。</p>
+</div>
+
+<h2>3 · 三個必須先知道的結構性事實</h2>
+
+<div class="fact bad">
+<h3>事實 A · 兩支 C++ 都完全沒有寫 BAM 的能力</h3>
+<p>ISM：<code>sam_write1</code> / <code>bam_write1</code> / <code>sam_hdr_write</code> 全 repo 出現 <strong>0 次</strong>。
+LL：<code>src/io/</code> 8 個 .cpp 全為唯讀 API。現存 tagged BAM 全由<strong>外部工具 LongPhase-S</strong> 產生。</p>
+<p>而且<strong>現行架構刻意反對落地 BAM</strong>：第二代 producer 用 <code>mkfifo</code> 把 tagged BAM 導進 pipe，
+由 pysam 抽成 sidecar 後，<strong>跑完還斷言目錄內不得存在任何 *.bam</strong>。
+authority 記錄 7/7 皆 <code>"persisted_tagged_bam": false</code>。</p>
+<p>第一代確實落地過 —— 磁碟上仍有 <strong>14 個 tagged BAM</strong>（7 樣本 × 2 模式），95 GB–452 GB 不等
+（HCC1395 paired_full = 278,270,281,041 bytes）。<strong>但 /big7_disk 只剩 617 GB。</strong></p>
+<p style="border-top:1px solid var(--line);padding-top:10px;margin-top:12px">
+<strong style="color:var(--ok)">✅ 好消息：寫回 BAM 技術上完全可行。</strong>
+sidecar 的 QNAME 是<strong>明文 UUID</strong>（實測 <code>ec1d98d5-5fcf-45fc-9691-7641e8731385</code>），
+而 LL 的 <code>read_id = lowercase SHA-256(QNAME)</code> 是<strong>確定性正向計算</strong>。
+讀 BAM 時對每條 QNAME 重算 SHA-256 即可 join，<strong>不需要任何反查表</strong>。</p>
+</div>
+
+<div class="fact warn">
+<h3>事實 B · 兩套系統對「甲基能不能進重建」的立場直接衝突</h3>
+<div class="tw"><table>
+<tr><th></th><th>InterSubMod（論文既有結論）</th><th>LongLineage（現行程式碼）</th></tr>
+<tr><td>甲基角色</td><td><strong>bounded-auxiliary，絕不進重建 likelihood</strong>（cis-ASM 循環）</td>
+    <td><strong>M1 甲基分群是 topology unit 的必要 gate</strong></td></tr>
+<tr><td>機制</td><td>甲基只做負篩 + L3 旗標</td>
+    <td><code>m2_eligible</code> 前置 = M1 <code>stable_null_multigroup</code>（甲基分出 ≥2 群且穩定）</td></tr>
+</table></div>
+<p>⇒ 在 LL 裡，<strong>甲基沒分出群的位點永遠不會有拓撲解</strong>。這是選擇性偏誤來源，
+任何跨系統比較都必須明說，否則會產生與論文既有結論矛盾的敘述。</p>
+</div>
+
+<div class="fact warn">
+<h3>事實 C · LongLineage 的「拓撲」不是一棵樹</h3>
+<p><code>topology_unit</code> 的 unit = <strong>1 focal + ≤3 partner = 最多 4 個位點</strong>。
+所以 LL 產出的是<strong>數萬個彼此獨立的 4-locus 局部 hypercube 解</strong>，不是全域 subclonal tree。
+LL 自己承認缺「跨 unit 組裝層」。全域組裝在 ISM 的 layered per-HP-family solver。</p>
+<p>另外 ISM 的 <code>tree.nwk</code> 是 <strong>read×read 甲基距離的階層分群樹</strong>（葉 = read_name），
+<strong>不是 clone/subclone 譜系樹</strong> —— 容易誤讀。</p>
+</div>
+
+<h2>4 · 你的 9 項目標逐項判定</h2>
+<div class="tw"><table>
+<tr><th>#</th><th>目標</th><th>判定</th><th>關鍵理由</th></tr>
+<tr><td>G1</td><td>輸入檔案 → 一套程式串接執行</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td>ISM 有 <code>run_benchmark.sh</code> 做到「BAM+VCF 一鍵到 metrics.json」；但 reconstruction 線入口吃 manifest 非 BAM+VCF，兩線互不相接。<strong>無 workflow engine</strong>（無 Makefile/Snakefile/nextflow/CWL）。無跨 repo orchestrator。</td></tr>
+<tr><td>G2</td><td>建立 read 之間的關聯關係</td><td><span class="tag t-ok">EXISTS</span>（受限）</td>
+<td>LL 的 <code>cooccurrence_pairs</code>/<code>sites</code> + joint signature 已實作並跑過。<strong>但只有 HCC1395 可跑</strong>。ISM 側 Python 骨幹 <code>sm_linkage_genomewide</code> <strong>輸出丟掉 read 身分</strong>，只到位點對層。</td></tr>
+<tr><td>G3</td><td>整體拓撲 + 輸出拓撲資料</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td><code>topology_unit</code> 契約極完整（solver_route / objective_state / family_state / ranking_state 四態分離 + abstain 理由）。但只到 4-locus 局部解，缺全域組裝層。LL 的 edge score <strong>永遠 NOT_RUN</strong>。</td></tr>
+<tr><td>G4</td><td>輸出帶分析標籤的 BAM</td><td><span class="tag t-bad">MISSING</span></td>
+<td>兩邊零寫 BAM 能力。唯一的 pysam 寫 BAM 程式碼是兩支 contract test 的合成 fixture。且無選定的 aux tag 命名空間（2026-05 構想提議的 <code>MC:Z</code> <strong>與 SAM 保留 tag 撞名</strong>）。</td></tr>
+<tr><td>G5</td><td>甲基輸入 BAM + 指定標籤 → 關聯輸出</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td>ISM 甲基路徑完整。但：① <code>methylation.csv</code> <strong>首欄是矩陣列號不是 read_name</strong>，綁定靠<strong>隱含列序契約</strong>；② <strong>PS tag 完全沒讀</strong>；③ 二值化閾值<strong>三套不一致</strong>（0.8/0.2、0.5、128/255）。</td></tr>
+<tr><td>G6</td><td>用標籤輸出關聯程度 + 甲基觀察圖</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td>已有 SoT：<code>scripts/ism_heatmap_std.py</code>（492 行，read×CpG β 熱圖 + 側欄 HP/ALT/T-N/Strand/cluster），20+ renderer import 它，並有 drift 稽核。但輸入是 region 輸出，不是 BAM 標籤。</td></tr>
+<tr><td>G7</td><td>Python 完整顯示樣本數據</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td>資產多但碎片化：<code>scripts/</code> 268 個 .py、89 個 tracked .py 自己吐 HTML。分析層 283 個 py 中 <strong>156 個 ad-hoc read_csv</strong>，無 schema。</td></tr>
+<tr><td>G8</td><td>清楚的 HTML 數據頁面</td><td><span class="tag t-ok">EXISTS</span>（未通用化）</td>
+<td>通用 generator <code>build_workstation.py</code> 在 <code>.claude/skills/verify-workstation/tools/</code>（317 行，缺必填值 <code>exit 3</code> 拒絕渲染 = 由構造防捏造）。<strong>但全 repo 只有 1 個複用者</strong>。成品已有（7 樣本 HTML，15–188 MB）。</td></tr>
+<tr><td>G9</td><td>整套執行腳本</td><td><span class="tag t-warn">PARTIAL</span></td>
+<td>ISM 18 支 <code>run_*.sh</code>、LL 30 支 .sh。但<strong>兩邊都沒有單一端到端腳本</strong>，LL 需人工串 4 支。</td></tr>
+</table></div>
+<p><strong>總評：1 個真 MISSING（G4）、7 個 PARTIAL、1 個 EXISTS。缺的是「接縫」而非「零件」。</strong></p>
+
+<h2>5 · 建議的可行架構</h2>
+<p>核心判斷：<strong>串接點選 sidecar TSV</strong>（唯一 byte-level 一致的介面），
+沿用同一格式向外擴充「輸出側標籤」，避免發明新契約。</p>
+
+<figure>
+<svg viewBox="0 0 980 560" role="img" aria-label="端到端串接架構圖">
+<defs>
+<marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+<polygon points="0 0, 9 3.5, 0 7" fill="currentColor"/></marker>
+</defs>
+<g font-family="system-ui,sans-serif" color="#7b8794">
+<!-- input -->
+<rect x="300" y="16" width="380" height="86" rx="9" fill="none" stroke="#0b6fa4" stroke-width="2"/>
+<text x="490" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#0b6fa4">【輸入層】8 角色 · 7 樣本實體已齊</text>
+<text x="490" y="62" text-anchor="middle" font-size="11.5" fill="#5b6570">raw BAM + .bai　│　PASS biallelic sSNV VCF + index</text>
+<text x="490" y="80" text-anchor="middle" font-size="11.5" fill="#5b6570">HP/PS sidecar + .tbi　│　reference FASTA + .fai</text>
+<text x="490" y="96" text-anchor="middle" font-size="10.5" fill="#137a4b">sidecar 由 LongPhase-S somatic_haplotag 產生（已存在）</text>
+
+<line x1="490" y1="102" x2="490" y2="126" stroke="currentColor" stroke-width="1.6"/>
+<line x1="240" y1="126" x2="740" y2="126" stroke="currentColor" stroke-width="1.6"/>
+<line x1="240" y1="126" x2="240" y2="150" stroke="currentColor" stroke-width="1.6" marker-end="url(#a)"/>
+<line x1="740" y1="126" x2="740" y2="150" stroke="currentColor" stroke-width="1.6" marker-end="url(#a)"/>
+
+<!-- A -->
+<rect x="80" y="152" width="320" height="94" rx="9" fill="none" stroke="#5b6570" stroke-width="1.6"/>
+<text x="240" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2328">[A] inter_sub_mod</text>
+<text x="240" y="197" text-anchor="middle" font-size="11" fill="#5b6570">per-region 統計（193 欄寬表）</text>
+<text x="240" y="214" text-anchor="middle" font-size="11" fill="#5b6570">+ read×CpG 甲基矩陣 + phylo_groups.tsv</text>
+<text x="240" y="234" text-anchor="middle" font-size="10.5" fill="#a15c00">⚠ cluster id 完全不落檔</text>
+
+<!-- B -->
+<rect x="580" y="152" width="320" height="94" rx="9" fill="none" stroke="#5b6570" stroke-width="1.6"/>
+<text x="740" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2328">[B] longlineage dataset-gate</text>
+<text x="740" y="197" text-anchor="middle" font-size="11" fill="#5b6570">9 個 artifact：site_reads / methyl_calls</text>
+<text x="740" y="214" text-anchor="middle" font-size="11" fill="#5b6570">m1_* / cooccurrence_* / topology_units</text>
+<text x="740" y="234" text-anchor="middle" font-size="10.5" fill="#a15c00">⚠ 目前僅 HCC1395（census 硬編碼）</text>
+
+<!-- join key -->
+<line x1="240" y1="246" x2="240" y2="276" stroke="currentColor" stroke-width="1.6"/>
+<line x1="740" y1="246" x2="740" y2="276" stroke="currentColor" stroke-width="1.6"/>
+<line x1="240" y1="276" x2="740" y2="276" stroke="currentColor" stroke-width="1.6"/>
+<rect x="360" y="262" width="260" height="28" rx="6" fill="#eef2f6" stroke="#0b6fa4" stroke-width="1.4"/>
+<text x="490" y="281" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0b6fa4">join key = SHA-256(QNAME) · 確定性可重算</text>
+<line x1="490" y1="290" x2="490" y2="316" stroke="currentColor" stroke-width="1.6" marker-end="url(#a)"/>
+
+<!-- new1 -->
+<rect x="270" y="318" width="440" height="76" rx="9" fill="none" stroke="#b3261e" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="490" y="342" text-anchor="middle" font-size="13" font-weight="700" fill="#b3261e">★ 新建 1 · label-sidecar writer</text>
+<text x="490" y="362" text-anchor="middle" font-size="10.5" fill="#5b6570">#CHROM START0 END0 QNAME FLAG MAPQ CIGAR_B2 HP PS</text>
+<text x="490" y="380" text-anchor="middle" font-size="10.5" font-weight="600" fill="#137a4b">+ CLUSTER + FAMILY + LINEAGE + METHYL_GROUP</text>
+
+<line x1="490" y1="394" x2="490" y2="410" stroke="currentColor" stroke-width="1.6"/>
+<line x1="250" y1="410" x2="730" y2="410" stroke="currentColor" stroke-width="1.6"/>
+<line x1="250" y1="410" x2="250" y2="432" stroke="currentColor" stroke-width="1.6" marker-end="url(#a)"/>
+<line x1="730" y1="410" x2="730" y2="432" stroke="currentColor" stroke-width="1.6" marker-end="url(#a)"/>
+
+<!-- new2 -->
+<rect x="60" y="434" width="380" height="86" rx="9" fill="none" stroke="#b3261e" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="250" y="458" text-anchor="middle" font-size="13" font-weight="700" fill="#b3261e">★ 新建 2 · bam-tagger（選用）</text>
+<text x="250" y="478" text-anchor="middle" font-size="11" fill="#5b6570">raw BAM + label sidecar → tagged BAM</text>
+<text x="250" y="495" text-anchor="middle" font-size="10.5" fill="#5b6570">重算 SHA-256(QNAME) 對齊</text>
+<text x="250" y="512" text-anchor="middle" font-size="10.5" fill="#a15c00">⚠ 受 617 GB 磁碟限制 → --regions 限子集</text>
+
+<!-- new3 -->
+<rect x="540" y="434" width="380" height="86" rx="9" fill="none" stroke="#b3261e" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="730" y="458" text-anchor="middle" font-size="13" font-weight="700" fill="#b3261e">★ 新建 3 · spec builder</text>
+<text x="730" y="478" text-anchor="middle" font-size="11" fill="#5b6570">artifact → workstation_spec.json</text>
+<text x="730" y="495" text-anchor="middle" font-size="11" fill="#5b6570">→ build_workstation.py → standalone HTML</text>
+<text x="730" y="512" text-anchor="middle" font-size="10.5" fill="#137a4b">✓ 複用既有 §13-A refuse-on-missing generator</text>
+
+<text x="490" y="546" text-anchor="middle" font-size="10.5" fill="#7b8794">紅色虛線 = 需新建　│　實線框 = 現有可用</text>
+</g>
+</svg>
+<figcaption>建議架構：以 sidecar TSV 為串接點，三個新建元件補上接縫</figcaption>
+</figure>
+
+<h3>需新建的 3 個元件</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>元件</th><th>為什麼是它</th></tr>
+<tr><td>★1</td><td><strong>label-sidecar writer</strong></td>
+<td>解 G4 的<strong>根本問題</strong>（per-read 標籤無持久化）。用 sidecar 而非 BAM 可同時避開磁碟與 fail-closed policy 衝突。ISM 的 cluster id 目前<strong>完全不落檔</strong>，這步把它救回來。</td></tr>
+<tr><td>★2</td><td><strong>bam-tagger</strong></td>
+<td>真正產出「帶標籤的 BAM」給 IGV/samtools。技術可行（事實 A）。需先定 aux tag 命名空間，<strong>避開 SAM 保留 tag</strong>。</td></tr>
+<tr><td>★3</td><td><strong>spec builder</strong></td>
+<td>補 G7/G8 的空洞：「從資料到 workstation_spec.json」之間<strong>現在完全是空的</strong>，這是通用 generator 只有 1 個複用者的根因。</td></tr>
+</table></div>
+
+<h3>必須先做的 2 個決策</h3>
+<ol>
+<li><strong>科學裁決（事實 B）</strong>：LL 用甲基當 topology gate，與論文既有「甲基絕不進重建」結論衝突。
+要嘛接受並在所有輸出標註選擇性偏誤，要嘛改 LL 的 gate 邏輯（會撞 C++ Hard Gate + parity 重驗）。</li>
+<li><strong>資源決策（事實 A）</strong>：/big7_disk 只剩 617 GB。落地 tagged BAM 需先清理，
+或只做子集 tagged BAM，或維持 sidecar-only。</li>
+</ol>
+
+<h3>已可直接複用、不必重寫的資產</h3>
+<ul>
+<li><code>InterSubMod/scripts/ism_heatmap_std.py</code> — 甲基 × read 標籤熱圖的 SoT（含側欄規格 + drift 稽核）</li>
+<li><code>.claude/skills/verify-workstation/tools/build_workstation.py</code> — 由構造防捏造的 HTML generator</li>
+<li><code>LongLineage/schema/</code> — 9 個 artifact 的完整 schema（topology_unit 四態分離設計品質很高）</li>
+<li><code>LongLineage/presentation/build_hcc1395_validated_report.py</code> — 5,503 行，fail-closed，已跑出成品</li>
+</ul>
+
+<h2>6 · 風險清單（會讓串接靜默出錯的坑）</h2>
+<div class="tw"><table>
+<tr><th>風險</th><th>證據</th><th>影響</th></tr>
+<tr><td><span class="tag t-bad">高</span> 甲基↔read 靠隱含列序</td>
+<td><code>methylation.csv</code> 首欄是列號；唯一綁定在 <code>ReadAggregator.cpp:63-64</code></td>
+<td>任何過濾/重排不同步 → <strong>甲基配到別條 read 的 HP，無 assert 會抓到</strong></td></tr>
+<tr><td><span class="tag t-bad">高</span> significance_summary.csv 跨 run schema 不相容</td>
+<td>源碼宣告 193 欄，canonical 舊 run 實檔 59 欄，kde_smoke 117 欄，<strong>無版本欄位</strong></td>
+<td>下游解析器靜默錯位</td></tr>
+<tr><td><span class="tag t-warn">中</span> 二值化三套閾值</td><td>0.8/0.2 vs 0.5 vs 128/255</td>
+<td>同一 CpG 因走哪條路而判定不同，跨模組數字不可比</td></tr>
+<tr><td><span class="tag t-warn">中</span> linkage_matrix.csv 其實是 TSV</td><td>副檔名與分隔符不符</td>
+<td><code>pandas.read_csv</code> 預設逗號 → 整列變單欄，<strong>不報錯</strong></td></tr>
+<tr><td><span class="tag t-warn">中</span> sidecar join 全有全無</td>
+<td>LL 用 (QNAME, contig, start0, end0, FLAG, CIGAR BLAKE2b-64) exact join，<strong>無 fallback</strong></td>
+<td>任一位元組不一致 → 整個 block FULL_IDENTITY_MISMATCH 失敗</td></tr>
+<tr><td><span class="tag t-warn">中</span> ISM↔LL 反向綁定 fail-closed</td>
+<td>ISM 綁 <code>1d19…</code>(1054B)，LL 現為 <code>79d4…</code>(1976B)</td>
+<td>論文核心 binary 目前無法重編</td></tr>
+<tr><td><span class="tag t-warn">中</span> read name 有 /1 /2 後綴</td><td><code>ReadParser.cpp:106-112</code></td>
+<td>join 回 BAM 需先剝除（ONT 長 read 不受影響）</td></tr>
+<tr><td><span class="tag t-warn">低</span> --threads 預設不符文件</td>
+<td>help 寫「Default: 1」，<code>Config.hpp:43</code> 實際 <code>= 16</code></td><td>資源估算會錯</td></tr>
+<tr><td><span class="tag t-warn">低</span> --distance-metric 預設被覆寫</td>
+<td><code>Config.hpp:40</code> 是 BERNOULLI，但 ArgParser 無條件 clear 後填 NHD</td><td>不明講就得到 NHD</td></tr>
+</table></div>
+
+<footer>
+盤點方法：14 面向並行機器掃描（每項要求 file:line 證據）+ 主 session 一手實跑驗證。<br>
+Markdown 留底：<code>InterSubMod/docs/handoff/20260806_兩repo端到端串接可行性盤點_01.md</code><br>
+本頁所有數字均來自 2026-08-05/06 實際指令輸出或原始碼行號，無估計值、無預期值。
+</footer>
+
+</div>
+</body>
+</html>

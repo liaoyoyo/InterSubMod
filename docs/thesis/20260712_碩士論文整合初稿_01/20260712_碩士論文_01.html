@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="奈米孔長讀長資料之可稽核區域突變狀態候選樹重建—碩士論文可審閱整合初稿">
+  <title>碩士論文摘要檢視｜可稽核區域突變狀態候選樹重建</title>
+  <style>
+    :root {
+      --ink: #17324d;
+      --text: #283d48;
+      --muted: #5c6d75;
+      --paper: #fbfbf8;
+      --panel: #ffffff;
+      --line: #cbd5d9;
+      --blue-soft: #eaf1f3;
+      --green: #2f6a48;
+      --green-soft: #edf5ef;
+      --amber: #755b29;
+      --amber-soft: #f3efe4;
+      --red: #8a4034;
+      --red-soft: #faeeee;
+      --max: 980px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--text);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      line-height: 1.78;
+    }
+    a { color: #235f78; text-underline-offset: 3px; }
+    a:hover { color: #17324d; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--ink);
+      color: white;
+      border-bottom: 4px solid #5e8797;
+    }
+    .topbar-inner {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .topbar strong { font-size: 15px; letter-spacing: .02em; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border: 1px solid #e5c477;
+      border-radius: 999px;
+      color: #fff4c9;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .layout {
+      max-width: 1420px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 38px;
+      padding: 32px 28px 72px;
+    }
+    nav {
+      position: sticky;
+      top: 76px;
+      align-self: start;
+      max-height: calc(100vh - 100px);
+      overflow: auto;
+      padding: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    nav h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: var(--ink);
+    }
+    nav a {
+      display: block;
+      padding: 6px 4px;
+      border-bottom: 1px solid #edf0f1;
+      color: #415964;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    nav a:hover { color: var(--ink); background: #f5f7f6; }
+    main { min-width: 0; }
+    .title-page {
+      min-height: 78vh;
+      padding: 70px 54px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 8px solid var(--ink);
+    }
+    .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .08em; font-size: 13px; }
+    h1 {
+      margin: 18px 0 20px;
+      color: var(--ink);
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(38px, 6vw, 66px);
+      line-height: 1.16;
+      letter-spacing: -.02em;
+    }
+    .subtitle {
+      max-width: 820px;
+      color: #4d626c;
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(19px, 2.5vw, 27px);
+      line-height: 1.45;
+    }
+    .english-title { margin-top: 28px; max-width: 850px; color: #61727a; font-size: 16px; }
+    .identity { margin-top: 54px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 28px; font-size: 14px; }
+    .notice {
+      margin-top: 28px;
+      padding: 16px 18px;
+      border-left: 5px solid #a4772d;
+      background: var(--amber-soft);
+      color: #59451f;
+      font-size: 14px;
+    }
+    section.chapter {
+      max-width: var(--max);
+      margin: 68px auto 0;
+      padding: 44px 50px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+    .chapter-number { margin: 0 0 8px; color: var(--green); font-weight: 800; letter-spacing: .12em; font-size: 13px; }
+    h2.chapter-title {
+      margin: 0 0 28px;
+      color: var(--ink);
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: 35px;
+      line-height: 1.25;
+    }
+    h3 {
+      margin: 42px 0 12px;
+      color: var(--ink);
+      font-size: 23px;
+      line-height: 1.35;
+      border-bottom: 2px solid #dfe7e9;
+      padding-bottom: 8px;
+    }
+    h4 { margin: 28px 0 8px; color: #284b5b; font-size: 18px; }
+    p { margin: 12px 0; }
+    .lead { font-size: 19px; color: #334f5c; }
+    .assertion {
+      margin: 24px 0;
+      padding: 18px 20px;
+      background: var(--blue-soft);
+      border-left: 5px solid #537f91;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .callout-green, .callout-amber, .callout-red {
+      margin: 20px 0;
+      padding: 16px 18px;
+      border-left: 5px solid;
+    }
+    .callout-green { background: var(--green-soft); border-color: var(--green); }
+    .callout-amber { background: var(--amber-soft); border-color: #9a742e; }
+    .callout-red { background: var(--red-soft); border-color: var(--red); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+    .pass { color: #24583b; background: #dcecdf; border: 1px solid #9fc2a8; }
+    .partial { color: #6b501c; background: #f1e5c3; border: 1px solid #d0b774; }
+    .blocked { color: #7b332a; background: #f2d8d4; border: 1px solid #d49b92; }
+    figure { margin: 34px 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #fff; }
+    figcaption { margin-top: 10px; color: var(--muted); font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin: 22px 0 30px; font-size: 14px; }
+    th { text-align: left; background: #eef2f3; color: var(--ink); font-weight: 800; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid #d8e0e3; vertical-align: top; }
+    tbody tr:nth-child(even) { background: #fafbf9; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; background: #f0f2f1; padding: 2px 5px; border-radius: 4px; }
+    pre { overflow: auto; padding: 16px; background: #162a38; color: #e8f0f3; border-radius: 6px; line-height: 1.5; }
+    pre code { background: transparent; padding: 0; color: inherit; }
+    .equation { margin: 22px 0; padding: 16px; text-align: center; background: #f7f8f6; border: 1px solid #dce2e3; font-family: Georgia, serif; font-size: 18px; overflow-x: auto; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 24px 0; }
+    .metric { padding: 18px; border: 1px solid var(--line); background: #fff; }
+    .metric strong { display: block; color: var(--ink); font-size: 27px; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    details { margin: 18px 0; border: 1px solid var(--line); background: #fff; }
+    summary { cursor: pointer; padding: 12px 16px; color: var(--ink); font-weight: 800; }
+    details > div { padding: 0 16px 16px; }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    footer {
+      max-width: var(--max);
+      margin: 54px auto 0;
+      padding: 28px 36px;
+      color: #52636b;
+      background: #eef2f1;
+      border-top: 4px solid var(--ink);
+      font-size: 13px;
+    }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; padding: 18px 14px 52px; }
+      nav { position: static; max-height: none; }
+      section.chapter { padding: 30px 23px; margin-top: 34px; }
+      .title-page { padding: 44px 25px; min-height: auto; }
+      .metric-grid, .two-col, .identity { grid-template-columns: 1fr; }
+      .topbar-inner { align-items: flex-start; flex-direction: column; }
+    }
+    @media print {
+      @page { size: A4; margin: 18mm 16mm 18mm 20mm; }
+      body { background: white; font-size: 10.5pt; }
+      .topbar, nav { display: none; }
+      .layout { display: block; padding: 0; max-width: none; }
+      .title-page { min-height: 255mm; border: 0; page-break-after: always; }
+      section.chapter { max-width: none; margin: 0; padding: 0; border: 0; page-break-before: always; }
+      h2, h3 { break-after: avoid; }
+      table, figure, .callout-green, .callout-amber, .callout-red { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+      footer { max-width: none; margin-top: 20mm; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <strong>InterSubMod｜碩士論文摘要檢視版</strong>
+      <span class="status">PARTIAL EVIDENCE · clean-v3 verifier FAILED</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="論文目錄">
+      <h2>目錄</h2>
+      <a href="#title">題名與版本</a>
+      <a href="#abstract-zh">中文摘要</a>
+      <a href="#abstract-en">English Abstract</a>
+      <a href="#ch1">第一章　緒論</a>
+      <a href="#ch2">第二章　背景與相關研究</a>
+      <a href="#ch3">第三章　資料、系統與方法</a>
+      <a href="#ch4">第四章　結果</a>
+      <a href="#ch5">第五章　討論</a>
+      <a href="#ch6">第六章　結論</a>
+      <a href="#refs">參考文獻</a>
+      <a href="#appendix">附錄與 blocked ledger</a>
+      <a href="#provenance">Provenance</a>
+    </nav>
+
+    <main>
+      <article id="title" class="title-page">
+        <div class="eyebrow">MASTER'S THESIS · REVIEW DRAFT</div>
+        <h1>奈米孔長讀長資料之可稽核區域突變狀態候選樹重建</h1>
+        <div class="subtitle">整合體細胞單倍型標記與單分子突變共現</div>
+        <div class="english-title">Auditable Regional Mutation-State Candidate-Tree Reconstruction from Nanopore Long Reads: Integrating Somatic Haplotagging and Single-Molecule Mutation Co-occurrence</div>
+        <div class="identity">
+          <div>學校／系所：［待填］</div><div>學位：碩士</div>
+          <div>研究生：［待填］</div><div>指導教授：［待填］</div>
+          <div>版本日期：2026-07-12</div><div>Build：6067568</div>
+        </div>
+        <div class="notice"><strong>版本聲明：</strong>本檢視版對應同資料夾 Markdown source。Raw-all producer 已 7/7 完成；clean layered-v3 的 7 個 workers 亦均 exit 0，但 final verifier exit 7、terminal <code>FAILED</code>，沒有 aggregate <code>_SUCCESS</code>。故全樣本 topology rates 明示為 blocked，不以未 release outputs 或 historical percentages 代填；正式口試／submission readiness 目前為 <strong>NO-GO</strong>。</div>
+      </article>
+
+      <section id="abstract-zh" class="chapter">
+        <p class="chapter-number">摘要</p>
+        <h2 class="chapter-title">中文摘要</h2>
+        <p class="lead">本研究建立一套把「單分子 evidence」與「生物 clone confirmation」分開的可驗證工程框架。</p>
+        <p>腫瘤 bulk sequencing 的 VAF 同時受到細胞族群比例、正常細胞混入、copy number、mutation multiplicity 與抽樣誤差影響。ONT 長讀可在同一 DNA 分子上同時觀察 sSNV、相位、haplotype 與 modified-base tags，提供群體統計以外的物理連結；但若未區分 caller label、HP family、mutation-state candidate tree 與 biological clone，容易把演算法輸出過度解讀成真實家譜。</p>
+        <p>本研究以 paired ClairS normalized raw-all biallelic sSNVs 作 LongPhase-S 完整 recalibration universe，以 same-run <code>_sc.vcf PASS</code> 作 primary tree input。分析單位為 region × mutation-bearing HP1/HP2 family；HP1/HP2 只是 homologous haplotypes 的 allelic partition。對通過預先宣告資料完整性與計算界線的 unit，由 read–mutation matrix 建立 observed terminal states，並在 rooted monotone Boolean state space 中列舉全部 minimum feasible mutation-state candidate trees；域外單位明示 capped。CN 只作後驗解讀、read AF 只作候選內探索排序、methylation 只作 bounded characterization。</p>
+        <div class="metric-grid" aria-label="摘要主要數據">
+          <div class="metric"><strong>7 / 7</strong><span>raw-all producer contract</span></div>
+          <div class="metric"><strong>.9276 / .9339</strong><span>HCC VAF Jaccard / CCC</span></div>
+          <div class="metric"><strong>0 / 7</strong><span>fresh final verifier pass</span></div>
+        </div>
+        <p>Legacy HCC1395 artifact 的 18,103 個 checked units 為 0 recorded fail，但不是 fresh 7-dataset validation；舊 4,000-case stress summary 因 capped cases 被直接計入 pass、未保存 checked/skipped 分母，已撤回正向 claim。PyClone-VI independent fits 的 clonal/subclonal kappa 為 .544，subclonal mutation-set Jaccard 為 .381。Fresh full-scope workers 雖 7/7 exit 0，final verifier 卻 exit 7、0/7 pass，故本研究只支持待驗證的 regional hypotheses，不支持已確認的 biological clone genealogy。</p>
+        <p><strong>關鍵詞：</strong>奈米孔定序、腫瘤內異質性、體細胞單倍型標記、單分子突變共現、區域突變狀態樹、有界完整解列舉、可重現生物資訊、甲基化</p>
+      </section>
+
+      <section id="abstract-en" class="chapter" lang="en">
+        <p class="chapter-number">ABSTRACT</p>
+        <h2 class="chapter-title">English Abstract</h2>
+        <p>Bulk variant allele fractions confound cellular prevalence with normal contamination, copy number, mutation multiplicity, and sampling noise. This thesis presents a verifiable, fail-closed framework that uses normalized raw-all paired ClairS records, same-run LongPhase-S recalibration, read-level somatic haplotype evidence, and complete enumeration of regional mutation-state candidate trees.</p>
+        <p>The primary unit is a genomic region crossed with a mutation-bearing HP1 or HP2 family. Haplotype tags are treated as allelic partitions rather than clone labels. Every minimum feasible candidate tree is retained only for units satisfying predeclared integrity and computational bounds; determined, ambiguous, recurrence-required, underdetermined/incomplete, and capped states remain explicit outcomes. Copy number, read allele fraction, and methylation are restricted to bounded auxiliary roles.</p>
+        <p>The producer contract completed all seven dataset rows. A legacy HCC1395 artifact recorded zero failures among 18,103 checked units, but it is not a fresh seven-dataset validation. The legacy 4,000-case stress headline is withdrawn because capped cases were counted as passes and checked/skipped denominators were not preserved. HCC1395 technical sources showed high raw-VAF reproducibility, whereas independent PyClone-VI fits showed only moderate reproducibility of minor-clone assignments. All seven fresh workers exited successfully, but the final verifier exited with code 7 and zero of seven datasets passed. The framework therefore supports hypotheses awaiting end-to-end validation, not confirmed biological clone genealogies.</p>
+      </section>
+
+      <section id="ch1" class="chapter">
+        <p class="chapter-number">第一章</p>
+        <h2 class="chapter-title">緒論：長讀增加 evidence，但不自動消除不可識別性</h2>
+        <div class="assertion">中心命題：同一分子上的突變共現能縮小區域演化的可行解空間；只有保存完整解集合與 refusal reasons，才能避免把 heuristic 當成 biological certainty。</div>
+        <h3>1.1 腫瘤異質性是一個反問題</h3>
+        <p>Bulk sequencing 將多個細胞族群混合後觀察。VAF 是 cellular prevalence、purity、copy number、mutation multiplicity 與 read sampling 的合成量。PyClone、PhyloWGS 與 Pairtree 可從 frequency/CN evidence 推估 clusters 或 global phylogeny，但 single-sample frequencies 通常不足以唯一決定 mutation co-occurrence 或 tree topology。</p>
+        <h3>1.2 長讀提供同一分子的物理連結</h3>
+        <p>LongPhase/LongPhase-S 讓 read-based phase 與 somatic haplotagging 可被納入分析；SAM/BAM 的 MM/ML tags 亦能承載 modified-base evidence。這些 tags 增加可觀察資訊，卻不等同 clone labels 或 lineage truth。</p>
+        <h3>1.3 研究缺口與四個 RQ</h3>
+        <ol>
+          <li>如何建立 caller、recalibration、sidecar 與 tree consumer 的 record-level contract？</li>
+          <li>如何形式化 region × HP-family 並保存全部最小相容候選解？</li>
+          <li>如何驗證 implementation consistency 而不混稱 biological accuracy？</li>
+          <li>跨技術來源的 VAF／conditional subclone structure 可再現到何種程度？</li>
+        </ol>
+        <figure><img src="figures/01_research_narrative_map.svg" alt="研究缺口、工程解法、可支持與不可支持主張的流程圖"><figcaption>圖 1｜研究主軸：把看見訊號與證明 biological clone 分開。</figcaption></figure>
+        <h3>1.4 貢獻與 claim ceiling</h3>
+        <p>貢獻包含 fail-closed input contract、typed analysis ontology、bounded complete candidate enumeration、layered validation 與 bounded multimodal interpretation。本論文的最高主張是 regional mutation-state hypothesis generator；無 single-cell／multi-region truth 時不稱 confirmed clone genealogy。</p>
+      </section>
+
+      <section id="ch2" class="chapter">
+        <p class="chapter-number">第二章</p>
+        <h2 class="chapter-title">背景與相關研究：不同工具處理不同 estimands</h2>
+        <h3>2.1 Somatic caller 與 phasing</h3>
+        <p>ClairS 處理 paired long-read somatic small variants；ClairS-TO 與 DeepSomatic tumor-only mode 則處理缺少 matched normal 的不同 evidence regime。LongPhase 提供 small/SV phasing，LongPhase-S 提供 somatic haplotagging、tumor DNA fraction estimation 與 bidirectional recalibration。Caller <code>PASS</code>、PON tag、Verdict 與 benchmark truth 均不可互換。</p>
+        <h3>2.2 完整 HP vocabulary 與語意邊界</h3>
+        <p>LongPhase-S 的完整字串集合為 <code>.</code>、<code>1</code>、<code>2</code>、<code>3</code>、<code>4</code>、<code>1-1</code>、<code>2-1</code>、<code>1-2</code>、<code>2-2</code>。本文以 HP1/HP2 作 primary allelic families；HP3/HP4 與 extended states作 auxiliary。未定向時不稱 paternal/maternal；PS 只作 phase/QC。</p>
+        <h3>2.3 CCF clustering、global phylogeny 與 regional linkage</h3>
+        <table>
+          <thead><tr><th>方法層</th><th>輸入</th><th>輸出</th><th>本文定位</th></tr></thead>
+          <tbody>
+            <tr><td>PyClone(-VI)</td><td>counts + purity + CN</td><td>cluster / cellular prevalence</td><td>conditional sensitivity；非 tree truth</td></tr>
+            <tr><td>PhyloWGS / Pairtree</td><td>VAF/CCF/CN，多樣本較佳</td><td>global tree posterior</td><td>互補 estimand</td></tr>
+            <tr><td>本研究</td><td>same-molecule states + HP family</td><td>regional complete candidate set</td><td>primary method</td></tr>
+          </tbody>
+        </table>
+        <h3>2.4 Perfect phylogeny 與 missing data</h3>
+        <p>Rooted all-zero model 中，任一對 mutations 不可同時觀察到 <code>10</code>、<code>01</code>、<code>11</code>，本文稱 rooted three-gamete condition。Hidden/Steiner-like states 是連接 terminal states 的數學節點，不是隱藏 clone。一般 unrooted Hamming Steiner NP-completeness 不直接證明本研究 bounded rooted solver 的 complexity。</p>
+        <h3>2.5 Methylation 是 bounded evidence</h3>
+        <p>NanoMethPhase、MethPhaser 與特定 single-cell methylation lineage studies 支持 allele-specific／lineage-associated methylation 可含資訊；它們不證明 bulk ONT methylation 能確認本文 candidate tree。既有 filter/rescue/ranker effect 未穩定泛化，因此本文只保留 characterization。</p>
+        <h3>2.6 本研究的直接新穎性增量</h3>
+        <table>
+          <thead><tr><th>方法層</th><th>仍有缺口</th><th>本研究新增</th><th>不宣稱</th></tr></thead>
+          <tbody>
+            <tr><td>Caller／haplotagging</td><td>跨工具 record／read identity 可漂移</td><td>raw-all → recalibration → sidecar → tree 的 typed fail-closed contract</td><td>新的 caller accuracy</td></tr>
+            <tr><td>Bulk CCF／global tree</td><td>single-sample frequency 不直接觀察同分子共現</td><td>HP family 內的 regional read-level constraints</td><td>取代 whole-tumor phylogeny</td></tr>
+            <tr><td>Perfect phylogeny／IDP</td><td>未綁 production artifacts、cap 與 terminal receipts</td><td>partial subcubes、bounded complete enumeration、V1–V7</td><td>解決 unrestricted Steiner problem</td></tr>
+            <tr><td>Single-best-tree pipeline</td><td>preference 容易被誤認為 certainty</td><td>analytical set／count 與 display cap 分離，保留 refusal</td><td>排序等於 posterior 或 truth</td></tr>
+          </tbody>
+        </table>
+        <div class="assertion">Novelty delta：本研究新增的是可稽核的域內完整性與拒絕語意，不是 biological accuracy oracle。</div>
+      </section>
+
+      <section id="ch3" class="chapter">
+        <p class="chapter-number">第三章</p>
+        <h2 class="chapter-title">資料、系統與方法：Contract → Constraints → Complete candidates → Refusal</h2>
+        <figure><img src="figures/02_layered_evidence_pipeline.svg" alt="從 ClairS raw-all 經 LongPhase-S、read evidence、候選樹到 validation ladder 的流程圖"><figcaption>圖 2｜每一層 evidence 只回答一種問題。</figcaption></figure>
+        <h3>3.1 Data scope 與 canonical contract</h3>
+        <p>Scope 為 GRCh38 chr1–22、7 dataset rows／6 cell lines。Canonical chain 是 <code>paired ClairS raw-all → normalization → LongPhase-S → same-run _sc.vcf PASS → tree consumer</code>；ClairS PASS 只作 sensitivity。HCC1395 與 HCC1395_DORADO 共用 biological ID，但現有 artifacts 不足以宣稱 library 或 raw-signal 批次完全獨立。</p>
+        <table>
+          <thead><tr><th>Dataset</th><th>Biological ID／角色</th><th>CN role</th><th>論文用途</th></tr></thead>
+          <tbody>
+            <tr><td>HCC1395</td><td>HCC1395／ONT canonical</td><td>SEQC2 measured</td><td>canonical + technical pair</td></tr>
+            <tr><td>HCC1395_DORADO</td><td>HCC1395／platform replica</td><td>same-cell-line sensitivity；非獨立 measurement</td><td>technical reproducibility</td></tr>
+            <tr><td>COLO829</td><td>COLO829／canonical</td><td>unavailable</td><td>framework；不作 CCF fit</td></tr>
+            <tr><td>H1437</td><td>H1437／canonical</td><td>SAVANA measured</td><td>full-scope validation</td></tr>
+            <tr><td>H2009</td><td>H2009／canonical</td><td>SAVANA measured</td><td>full-scope validation</td></tr>
+            <tr><td>HCC1937</td><td>HCC1937／canonical</td><td>unavailable</td><td>framework；不作 CCF fit</td></tr>
+            <tr><td>HCC1954</td><td>HCC1954／canonical</td><td>SAVANA measured</td><td>full-scope validation</td></tr>
+          </tbody>
+        </table>
+        <div class="callout-amber"><strong>Dataset provenance blocker：</strong>正式稿仍需補 7-row public accession、tumor-normal IDs、ONT library/chemistry、basecaller model/version、coverage/read N50、reference hashes 與 caller/runtime table；缺值不由檔名推測。</div>
+        <pre><code>U0 truth flags absent       U4 all-site ledger conserved
+U1 record continuity       U5 bounded sidecar equivalence
+U2 exact tag capture       U6 frozen provenance
+U3 exact sidecar join      U7 atomic lifecycle
+FAIL any gate → no _SUCCESS; no historical BAM fallback</code></pre>
+        <h3>3.2 Region × HP-family unit</h3>
+        <p>相鄰 sSNV gap ≤50 kb 的 connected component 定義 region；total span 可大於 50 kb。Primary unit 是 dataset × chromosome × region × mutation-bearing HP1/HP2 family。Root-only 是 reference control，HP3/H4 auxiliary 不進 primary denominator。</p>
+        <h3>3.3 Read–mutation matrix</h3>
+        <div class="equation">X<sub>u</sub> ∈ {0, 1, ?}<sup>|R<sub>u</sub>| × k</sup></div>
+        <p><code>1</code> 表示 ALT support，<code>0</code> 表示 REF support，<code>?</code> 表示 coverage/quality不足。Unique mutation-bearing row patterns 形成 observed terminals；全零向量作 root。</p>
+        <div class="equation">a ≼ b ⇔ ∀j, a<sub>j</sub> ≤ b<sub>j</sub>　；　h(N)=|N ∖ ({root} ∪ F)|</div>
+        <p>Full patterns 必須成為 nodes；partial patterns 表成 Boolean subcubes。Extra pool 是所有 full/subcube members 的 subsets 去重後，排除 root 與 full observations。Solver 逐 hidden-node level 窮舉 coverage + unit-flip-closed node sets，於第一個可行 level 停止，再列舉所有 unit-predecessor parent choices。這只在宣告 pool、hidden/budget caps 與 analytical cap=0 下提供條件式完備性。</p>
+        <h3>3.4 Bounded complete enumeration</h3>
+        <table>
+          <thead><tr><th>Bound</th><th>Frozen value</th><th>意義</th></tr></thead>
+          <tbody>
+            <tr><td>Mutation dimension</td><td>MAX_SNV=8</td><td>Boolean state space ≤256</td></tr>
+            <tr><td>Hidden search</td><td>extra_cap=4</td><td>超出即不宣稱 complete</td></tr>
+            <tr><td>Per-level budget</td><td>150,000</td><td>超出即 capped</td></tr>
+            <tr><td>Analytical cap</td><td>0</td><td>不截斷 analytical candidates</td></tr>
+            <tr><td>Display cap</td><td>32</td><td>只限 UI，不得當分析集合</td></tr>
+            <tr><td>Verification</td><td>every unit</td><td>V1–V7；V4/V5 另一路徑重算</td></tr>
+          </tbody>
+        </table>
+        <pre><code>for e = 0..4:
+  if combinations(pool,e) &gt; 150000: return CAPPED
+  retain every node set satisfying full/partial coverage + unit closure
+  if any feasible set exists: stop at minimum e
+enumerate every legal parent-choice tree for all minimum node sets
+run V1–V7; display cap may not truncate the analytical set</code></pre>
+        <p><strong>完整性句型：</strong>只有 input/schema 通過、未觸及任何 cap、candidate set 完整且 V1–V7 通過的 unit，才稱列舉全部最小可行候選樹。</p>
+        <figure><img src="figures/06_worked_candidate_tree_example.svg" alt="兩個突變與三條完整或部分覆蓋 reads 產生兩棵同樣最小候選樹的可手算示例"><figcaption>方法範例 A｜兩棵同樣最小的 candidates 都保留，因此 verdict 是 ambiguous。</figcaption></figure>
+        <h3>3.5 Output ontology</h3>
+        <table>
+          <thead><tr><th>狀態</th><th>定義</th><th>Claim</th></tr></thead>
+          <tbody>
+            <tr><td>determined</td><td>complete/non-capped，恰一個 minimum solution</td><td>模型與 evidence 下唯一 candidate</td></tr>
+            <tr><td>ambiguous</td><td>minimum solutions &gt;1</td><td>完整保留多解</td></tr>
+            <tr><td>recurrence-required</td><td>有 recurrence、無 recurrence-free minimum solution</td><td>rooted compatibility conflict</td></tr>
+            <tr><td>underdetermined／incomplete</td><td>n_trees=0、set不完整或 required artifact/read support不足</td><td>不補成單解</td></tr>
+            <tr><td>capped</td><td>超過 computation cap</td><td>計算邊界，不稱無解</td></tr>
+          </tbody>
+        </table>
+        <h3>3.6 Auxiliary roles 與 validation ladder</h3>
+        <p>Read AF 只在候選內排序；CN 只作 recurrence/multiplicity 後驗解讀；methylation 只作 within-family characterization。Validation 分成 contract integrity、solver consistency、technical reproducibility、biological confirmation。</p>
+        <figure><img src="figures/03_claim_boundary.svg" alt="工程、技術與生物證據的主張邊界矩陣"><figcaption>圖 3｜工程零錯誤、技術再現性與生物確認不是同一證據層。</figcaption></figure>
+        <details>
+          <summary>V1–V7 與 U0–U7 的可稽核定義</summary>
+          <div>
+            <table>
+              <thead><tr><th>Solver check</th><th>通過條件</th></tr></thead>
+              <tbody>
+                <tr><td>V1</td><td>unit-flip edges、每非 root 一個 parent、root-connected、無環</td></tr>
+                <tr><td>V2</td><td>所有 full states 與 partial subcubes 被覆蓋</td></tr>
+                <tr><td>V3</td><td>observed states 為合法 node-set 子集</td></tr>
+                <tr><td>V4</td><td>另一路徑證明較少一個 hidden node 時無可行解</td></tr>
+                <tr><td>V5</td><td>另一路徑重算 analytical tree count；不等同 exact tree-set equality proof</td></tr>
+                <tr><td>V6</td><td>class 與 recurrence flags 邏輯一致</td></tr>
+                <tr><td>V7</td><td>determined 必須 one-tree、recurrence-free、non-capped、complete</td></tr>
+              </tbody>
+            </table>
+            <p>V4/V5 是同一形式模型的另一程式路徑重算，不是 biological 或 exact tree-set oracle。U0–U7 依序檢查 truth-free production scope、record continuity、tag capture、sidecar join、all-site ledger、bounded sidecar equivalence、frozen provenance 與 atomic lifecycle。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="ch4" class="chapter">
+        <p class="chapter-number">第四章</p>
+        <h2 class="chapter-title">結果：工程契約已驗證，技術再現性 partial，biological truth 未完成</h2>
+        <h3>4.1 Raw-all producer 7/7 <span class="badge pass">PASS</span></h3>
+        <table>
+          <thead><tr><th>Dataset</th><th>Input</th><th>Rescue</th><th>Removal</th></tr></thead>
+          <tbody>
+            <tr><td>HCC1395</td><td>134,122</td><td>4,592</td><td>5,528</td></tr>
+            <tr><td>HCC1395_DORADO</td><td>123,240</td><td>5,162</td><td>4,404</td></tr>
+            <tr><td>COLO829</td><td>43,014</td><td>2,002</td><td>740</td></tr>
+            <tr><td>H1437</td><td>83,261</td><td>5,168</td><td>1,091</td></tr>
+            <tr><td>H2009</td><td>168,638</td><td>6,285</td><td>2,095</td></tr>
+            <tr><td>HCC1937</td><td>59,161</td><td>5,616</td><td>3,049</td></tr>
+            <tr><td>HCC1954</td><td>26,823</td><td>3,359</td><td>537</td></tr>
+            <tr><th>總計</th><th>638,259</th><th>32,184</th><th>17,444</th></tr>
+          </tbody>
+        </table>
+        <p>Rescue/removal 皆非零，證明原 ClairS PASS 不能代理 LongPhase-S canonical tree universe。7/7 只表示 producer contract complete，不表示整個 reconstruction complete。</p>
+        <h3>4.2 Solver legacy audit <span class="badge partial">CONDITIONAL</span></h3>
+        <div class="metric-grid">
+          <div class="metric"><strong>18,103</strong><span>legacy HCC checked；0 recorded fail</span></div>
+          <div class="metric"><strong>828</strong><span>legacy capped/not-applicable</span></div>
+          <div class="metric"><strong>4,000</strong><span>stress generated；valid checked denominator unknown</span></div>
+          <div class="metric"><strong>0</strong><span>independent biological tree truths</span></div>
+        </div>
+        <div class="callout-amber"><strong>Claim correction：</strong>18,103 只作 historical HCC implementation audit；legacy stress counter 把 capped case 計為 pass，故「4,000／0 mismatch」headline 撤回。Fresh 7-dataset consistency 尚未成立。</div>
+        <h3>4.3 HCC raw-VAF technical reproducibility <span class="badge partial">PARTIAL</span></h3>
+        <table>
+          <thead><tr><th>Scope</th><th>Union</th><th>Shared</th><th>Jaccard</th><th>Spearman</th><th>CCC</th><th>MAE</th></tr></thead>
+          <tbody>
+            <tr><td>Latest / all caller</td><td>82,705</td><td>76,721</td><td>.9276</td><td>.9093</td><td>.9339</td><td>.0624</td></tr>
+            <tr><td>Latest / SEQC2</td><td>31,429</td><td>30,265</td><td>.9630</td><td>.9170</td><td>.9560</td><td>.0600</td></tr>
+          </tbody>
+        </table>
+        <p>93.07% exact shared loci 落在 simplified binomial 95% difference band，但只有 50.50% loci 的 |ΔVAF|≤.05；主要結構高度一致不代表每位點相同，也不代表 tree accuracy。</p>
+        <h3>4.4 PyClone minor membership 僅中度再現 <span class="badge partial">PARTIAL</span></h3>
+        <table>
+          <thead><tr><th>Independent-fit metric</th><th>Main</th><th>Near-integer CN</th></tr></thead>
+          <tbody>
+            <tr><td>ARI</td><td>.539</td><td>.573</td></tr>
+            <tr><td>NMI</td><td>.339</td><td>.390</td></tr>
+            <tr><td>Clonal/subclonal κ</td><td>.544</td><td>.577</td></tr>
+            <tr><td>Subclonal-set Jaccard</td><td><strong>.381</strong></td><td><strong>.411</strong></td></tr>
+            <tr><td>Hungarian overall</td><td>98.29%</td><td>98.96%</td></tr>
+          </tbody>
+        </table>
+        <p>Overall 98% 被 clonal majority 支配，不能代理 minor reproducibility。PyClone-VI 支持 major backbone 與低 CCF component，但不輸出 tree truth。</p>
+        <h3>4.5 Clean layered-v3 <span class="badge blocked">TERMINAL FAILED / BLOCKED</span></h3>
+        <div class="callout-red"><strong>Evidence cutoff：2026-07-12 12:27:13 +08:00。</strong>7/7 sample workers return code 0，但 final verifier return code 7，<code>all_pass=false</code>、0/7 dataset pass。7/7 sample contracts 發生 <code>E_SCHEMA_INVALID</code>；H1437、H2009、HCC1395_DORADO、HCC1937、HCC1954 另有 <code>E_POST_INPUT_IDENTITY</code>。無 <code>_SUCCESS</code>，故未 release outputs 與 44.7%、34.9%、32.6%、56.2%、92.86% historical rates 均不得進正式 Results。</div>
+        <figure><img src="figures/04_current_evidence_snapshot.svg" alt="目前 producer、solver、技術再現與 clean-v3 的研究證據快照"><figcaption>圖 4｜不同 evidentiary endpoints 必須分開報告。</figcaption></figure>
+      </section>
+
+      <section id="ch5" class="chapter">
+        <p class="chapter-number">第五章</p>
+        <h2 class="chapter-title">討論：完整表達不確定性是科學軟體的核心功能</h2>
+        <h3>5.1 資料契約本身是研究貢獻</h3>
+        <p>科學軟體最危險的 failure mode 是程式完成但 estimand 已被 silent scope drift 改變。本研究將 raw-all、recalibrated PASS、sensitivity PASS、sidecar、CN、AF、methylation 與 truth resources 型別化；角色不符即 fail-closed。32,184 rescue 與 17,444 removal 具體說明 input contract 會改變研究 universe。</p>
+        <h3>5.2 多解與拒絕不是失敗</h3>
+        <p>Ambiguous、recurrence-required、underdetermined／incomplete 與 capped 反映現有 evidence 的資訊上限。若只保存第一棵 tree，後續「驗證」只會確認早期 heuristic；保存完整 candidate set 才允許真正的獨立 evidence 消歧。</p>
+        <h3>5.3 Technical reproducibility ≠ biological accuracy</h3>
+        <p>HCC1395/DORADO 適合測試同 cell line 的技術來源效應，不是 biological replicates。VAF、HP 與 methylation 多源自同一 reads，也不是完全正交。故本文不使用「三訊號共同確認 clone」的措辭。</p>
+        <h3>5.4 CN、purity 與 multiplicity</h3>
+        <div class="equation">E[VAF] ≈ (ρ · f · m) / (ρ · C<sub>T</sub> + (1−ρ) · C<sub>N</sub>)</div>
+        <p>在 ρ、C<sub>T</sub> 或 mutant multiplicity m 不確定時，read AF 不能直接稱 CCF。缺 reviewed allele-specific CN 的 COLO829/HCC1937 不以 CN=2 代填，展示 fail-closed principle。</p>
+        <h3>5.5 Methylation 的負向結果</h3>
+        <p>早期 methylation filter/ranker cross-validation effect collapse，故主線 retired。保留負向結果可防止 selection bias，並將未來問題改寫為「在獨立 lineage truth 下是否提供增量資訊」，而非再調 threshold。</p>
+        <h3>5.6 限制與下一步</h3>
+        <ul>
+          <li>Clean full-sample workers 7/7 完成，但 final verifier terminal FAILED；本稿沒有 final rates。</li>
+          <li>資料是 6 cell lines，不代表 patient cohort。</li>
+          <li>Regional candidate tree 不是 whole-tumor genealogy。</li>
+          <li>Read errors、missingness、gap threshold 與 state cap 需要 sensitivity。</li>
+          <li>Biological confirmation 需 independent CN/purity、single-cell、multi-region 或 longitudinal evidence。</li>
+        </ul>
+        <figure><img src="figures/05_thesis_completion_gates.svg" alt="從 claim lock、producer、clean-v3、result freeze 到生物確認的五個 gate"><figcaption>圖 5｜方法與章節可先鎖定；正式 rates 與 biological confirmation 各有獨立 gate。</figcaption></figure>
+      </section>
+
+      <section id="ch6" class="chapter">
+        <p class="chapter-number">第六章</p>
+        <h2 class="chapter-title">結論：誠實拒絕比強迫單解更接近可驗證科學</h2>
+        <p class="lead">本研究把 ONT read-level sSNV co-occurrence 與 somatic haplotagging 轉成一套可稽核的 regional mutation-state candidate-tree framework。</p>
+        <p>在工程層，系統以 normalized raw-all、same-run LongPhase-S recalibration、all-site ledger、sidecar identity 與 terminal receipts 鎖定資料角色。在演算法層，系統對通過宣告界線的 units 保存全部 minimum feasible candidates，並將 determined、ambiguous、recurrence-required、underdetermined／incomplete、capped 明示為結果。在科學層，現有證據支持主要技術訊號可再現，但不支持唯一真實 clone genealogy。</p>
+        <div class="assertion">Final bounded claim：本方法是具 explicit uncertainty 的 regional hypothesis generator；biological clone confirmation 仍需正交 lineage evidence。</div>
+      </section>
+
+      <section id="refs" class="chapter">
+        <p class="chapter-number">參考文獻</p>
+        <h2 class="chapter-title">核心一手來源</h2>
+        <ol>
+          <li>Nowell PC. Clonal evolution of tumor cell populations. <em>Science</em>. 1976. <a href="https://doi.org/10.1126/science.959840">doi:10.1126/science.959840</a>.</li>
+          <li>Greaves M, Maley CC. Clonal evolution in cancer. <em>Nature</em>. 2012. <a href="https://doi.org/10.1038/nature10762">doi:10.1038/nature10762</a>.</li>
+          <li>Tarabichi M, et al. Practical guide to cancer subclonal reconstruction. <em>Nature Methods</em>. <a href="https://doi.org/10.1038/s41592-020-01013-2">doi:10.1038/s41592-020-01013-2</a>.</li>
+          <li>Zheng Z, et al. ClairS. <em>Nature Methods</em>. 2026. <a href="https://doi.org/10.1038/s41592-026-03152-4">doi:10.1038/s41592-026-03152-4</a>.</li>
+          <li>Lin JH, et al. LongPhase. <em>Bioinformatics</em>. 2022. <a href="https://doi.org/10.1093/bioinformatics/btac058">doi:10.1093/bioinformatics/btac058</a>.</li>
+          <li>Ho et al. LongPhase-S. bioRxiv preprint. <a href="https://doi.org/10.1101/2025.11.20.689492">doi:10.1101/2025.11.20.689492</a>.</li>
+          <li>Gillis S, Roth A. PyClone-VI. <em>BMC Bioinformatics</em>. 2020. <a href="https://doi.org/10.1186/s12859-020-03919-2">doi:10.1186/s12859-020-03919-2</a>.</li>
+          <li>Deshwar AG, et al. PhyloWGS. <em>Genome Biology</em>. 2015. <a href="https://doi.org/10.1186/s13059-015-0602-8">doi:10.1186/s13059-015-0602-8</a>.</li>
+          <li>Gusfield D. Efficient algorithms for inferring evolutionary trees. <em>Networks</em>. 1991. <a href="https://doi.org/10.1002/net.3230210104">doi:10.1002/net.3230210104</a>.</li>
+          <li>Pe’er I, et al. Incomplete directed perfect phylogeny. <em>SIAM J Comput</em>. <a href="https://doi.org/10.1137/S0097539702406510">doi:10.1137/S0097539702406510</a>.</li>
+          <li>Foulds LR, Graham RL. Steiner problem in phylogeny. 1982. <a href="https://doi.org/10.1016/S0196-8858(82)80004-3">doi:10.1016/S0196-8858(82)80004-3</a>.</li>
+          <li>Fang LT, et al. SEQC2 benchmark truth. <em>Nature Biotechnology</em>. <a href="https://doi.org/10.1038/s41587-021-00993-6">doi:10.1038/s41587-021-00993-6</a>.</li>
+          <li>GA4GH. <a href="https://samtools.github.io/hts-specs/SAMtags.pdf">SAM Optional Fields Specification</a>.</li>
+          <li>Akbari V, et al. NanoMethPhase. <em>Genome Biology</em>. <a href="https://doi.org/10.1186/s13059-021-02283-5">doi:10.1186/s13059-021-02283-5</a>.</li>
+          <li>Fu et al. MethPhaser. <em>Nature Communications</em>. <a href="https://doi.org/10.1038/s41467-024-49588-0">doi:10.1038/s41467-024-49588-0</a>.</li>
+          <li>Gaiti F, et al. Epigenetic evolution and lineage histories. <em>Nature</em>. <a href="https://doi.org/10.1038/s41586-019-1198-z">doi:10.1038/s41586-019-1198-z</a>.</li>
+        </ol>
+        <details>
+          <summary>本研究 evidence artifacts</summary>
+          <div>
+            <ul>
+              <li><code>InterSubMod/docs/CURRENT_FOCUS.md</code></li>
+              <li><code>/big7_disk/liaoyoyo2001/external_validation/_schema/paper_claims.tsv</code></li>
+              <li><code>InterSubMod/research/20260710_layered_reconstruction_v2/20260711_ClairS_LongPhaseS_sSNV位點與ReadTag契約稽核_01.md</code></li>
+              <li><code>InterSubMod/output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/raw_all_receipt_closeout.json</code></li>
+              <li><code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/data/full_v4v5_verification_HCC1395.json</code></li>
+              <li><code>InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/02_layered_chain_audit.md</code> 與 <code>03_verification_risk_audit.md</code></li>
+              <li><code>InterSubMod/research/20260712_vaf_ccf_subclone_crosssoftware_validation/</code> 兩份驗證報告</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="appendix" class="chapter">
+        <p class="chapter-number">附錄</p>
+        <h2 class="chapter-title">主張矩陣與 blocked ledger</h2>
+        <table>
+          <thead><tr><th>Claim</th><th>Evidence</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Producer contract 7/7</td><td>receipts + closeout</td><td><span class="badge pass">可進正文</span></td></tr>
+            <tr><td>Legacy solver audit</td><td>HCC 18,103 checked；0 recorded fail</td><td><span class="badge partial">historical only</span></td></tr>
+            <tr><td>Legacy 4,000-case stress</td><td>checked/skipped denominator invalid</td><td><span class="badge blocked">withdrawn</span></td></tr>
+            <tr><td>Major VAF structure reproducible</td><td>HCC technical sources</td><td><span class="badge partial">technical only</span></td></tr>
+            <tr><td>Clean full-sample topology rates</td><td>workers 7/7 exit 0；verifier exit 7、0/7 pass</td><td><span class="badge blocked">blocked</span></td></tr>
+            <tr><td>Candidate tree = biological clone</td><td>無 lineage truth</td><td><span class="badge blocked">unsupported</span></td></tr>
+          </tbody>
+        </table>
+        <h3>Result freeze 最小條件</h3>
+        <ol>
+          <li>先修正 <code>E_SCHEMA_INVALID</code> 與 <code>E_POST_INPUT_IDENTITY</code>，再取得 aggregate <code>_SUCCESS</code> 與 7/7 canonical/sensitivity receipts。</li>
+          <li>修正 legacy stress counter，保存 generated／checked／capped-skipped／failed 分母並重跑。</li>
+          <li>U0–U7 全部 PASS；candidate set 未截斷。</li>
+          <li>補齊 accession、pair IDs、ONT chemistry/basecaller、coverage/N50 與 runtime table。</li>
+          <li>Immutable summary、SHA-256、稿件 commit 與 number provenance。</li>
+          <li>摘要、第四章、結論、圖 4 與口試稿同步更新。</li>
+        </ol>
+        <div class="callout-red">在上述條件完成前，舊 44.7%、34.9%、32.6%、56.2%、92.86% 均不得作 final paper result。</div>
+      </section>
+
+      <footer id="provenance">
+        <strong>Provenance</strong><br>
+        Source Markdown：<code>20260712_碩士論文_01.md</code> · Figures：<code>figures/01–06_*.svg</code><br>
+        Analysis-code snapshot：<code>research/subclonal-reconstruction-202606@6067568</code>；本稿目錄尚未納入該 commit。<br>
+        Runtime evidence cutoff：2026-07-12 12:27:13 +08:00 · State：terminal FAILED · Status：draft / partial evidence<br>
+        本 HTML 為離線摘要檢視 companion；完整章節、命令與附錄以同資料夾 Markdown 為準。零 CDN、零外部 JavaScript。
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

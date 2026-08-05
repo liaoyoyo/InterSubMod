@@ -1,0 +1,168 @@
+<title>sSNV-lineage × 甲基標記層 — HCC1395</title>
+<style>
+:root{--bg:#fbfbfc;--fg:#1b1f24;--mut:#5b6672;--card:#fff;--line:#e3e6ea;
+--ok:#2E7D32;--bad:#B2182B;--a:#0072B2}
+@media (prefers-color-scheme:dark){:root{--bg:#14171a;--fg:#e8eaed;--mut:#9aa4af;--card:#1c2024;
+--line:#2b3137;--ok:#7cc47f;--bad:#f08a80;--a:#5aa9dd}}
+:root[data-theme=dark]{--bg:#14171a;--fg:#e8eaed;--mut:#9aa4af;--card:#1c2024;--line:#2b3137;
+--ok:#7cc47f;--bad:#f08a80;--a:#5aa9dd}
+:root[data-theme=light]{--bg:#fbfbfc;--fg:#1b1f24;--mut:#5b6672;--card:#fff;--line:#e3e6ea;
+--ok:#2E7D32;--bad:#B2182B;--a:#0072B2}
+body{background:var(--bg);color:var(--fg);font:15px/1.7 -apple-system,"Noto Sans CJK TC","Microsoft JhengHei",sans-serif;margin:0;padding:32px 20px 80px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:26px;margin:0 0 6px;line-height:1.35}
+h2{font-size:19px;margin:46px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+h2 .lv{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--mut);border:1px solid var(--line);
+border-radius:4px;padding:2px 6px;margin-right:8px;vertical-align:2px}
+h3{font-size:15.5px;margin:22px 0 6px}
+.sub{color:var(--mut);font-size:13px;margin:0 0 24px}
+.verdict{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);
+border-radius:10px;padding:18px 22px;margin:22px 0}
+.verdict .vt{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--bad);margin-bottom:6px}
+.verdict p{margin:0 0 8px;font-size:16px;line-height:1.66}.verdict p:last-child{margin:0}
+.use{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--ok);
+border-radius:10px;padding:16px 20px;margin:18px 0}
+.use .vt{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--ok);margin-bottom:6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:20px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 16px}
+.kpi .k{font-size:11.5px;color:var(--mut);margin-bottom:5px}
+.kpi .v{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .n{font-size:11.5px;color:var(--mut);margin-top:4px}
+figure{margin:16px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 14px;overflow-x:auto}
+figcaption{font-size:13.5px;color:var(--mut);margin-top:10px;padding:0 4px}
+figcaption b{color:var(--fg)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:11.5px;color:var(--mut);font-weight:600}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:12px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:650;font-size:14.5px}
+.note{font-size:13px;color:var(--mut);border-left:3px solid var(--line);padding-left:12px;margin:14px 0}
+code{background:rgba(127,127,127,.13);padding:1px 5px;border-radius:3px;font-size:12.5px}
+ol.why > li{margin-bottom:14px}
+.tagbad{color:var(--bad);font-weight:700}.tagok{color:var(--ok);font-weight:700}
+</style>
+<div class="wrap">
+<h1>sSNV-lineage 分群下的甲基標記層</h1>
+<p class="sub">HCC1395 · 20260119_all-with-w5000_1 · 2026-07-26 · 全基因組 9,346 位點 / 9,414 個 位點×HP 單元 ·
+數字由 <code>20260726_ssnv_lineage_x_methyl.data.json</code> 注入</p>
+
+<div class="verdict"><div class="vt">兩個問題的實測答案</div>
+<p><b>Q1 為何 HP 下 ALT 內還會看到多群？</b>主因是<b>分群程序本身</b>——匹配的單峰 null 在同一門檻下也產生
+5% 的「兩群」，而管線的 <code>optimal_k</code> 值域根本沒有 1。扣掉 null 後確實還有真實多峰
+（ALT 23.9%），但<b>同位點的 REF 群是 23.6%，一樣多</b>（配對 p=0.29）——
+所以那是<b>區域屬性</b>（epiallele／PMD 式的分子間異質性），不是等位或譜系屬性。</p>
+<p><b>Q2 與 sSNV-lineage 分群是否高度相關？</b><span class="tagbad">否，接近零。</span>
+骨幹位點 M2 比例 3.7% vs 孤立位點 3.6%（OR=1.03, p=0.854）。
+唯一看似有訊號的 M1 位移（+1.7pp, p=0.007）在<b>固定局部突變密度後完全消失</b>。</p></div>
+
+<div class="kpis">
+<div class="kpi"><div class="k">ALT 內多群（超 null-95th）</div><div class="v">23.9%</div>
+<div class="n">REF 對照 23.6% · null 5.0%</div></div>
+<div class="kpi"><div class="k">M2 僅 ALT 多群（含效應量閘）</div><div class="v">3.8%</div>
+<div class="n">356 個單元，保守定義</div></div>
+<div class="kpi"><div class="k">骨幹 vs 孤立的 M2 差異</div><div class="v">OR 1.03</div>
+<div class="n">p=0.854，無富集</div></div>
+<div class="kpi"><div class="k">標記層規模</div><div class="v">9,414</div>
+<div class="n">位點×HP 單元 · 25 欄</div></div>
+</div>
+
+<h2><span class="lv">L1</span>Q1 為何會看到「ALT 內多群」—— 四個成因，逐一量化</h2>
+<ol class="why">
+<li><b>分群程序保證產生分群</b>（最大宗）。任何 1 維資料做 k=2 最佳切分都會得到「兩群」；
+用同 n 同 SD 的<b>單峰高斯</b>重抽，在同一門檻下也有 5% 被判為多群。
+管線自己的 <code>optimal_k</code> 在 30,476 個位點中<b>從未輸出 1</b>（值域 2–6），
+結構上就不可能回答「其實只有一群」。</li>
+<li><b>真實的分子間異質性存在，但屬區域屬性</b>。扣除 null 後 ALT 有 23.9% 超標，
+遠高於 5% 的期望值 —— 這是真的。但<b>同位點 REF 群 23.6%</b>，兩者無差異。
+癌症基因組的 partially methylated domain 與 epiallele 隨機性會讓整個區域的分子彼此不同，
+與該位點帶不帶突變無關。</li>
+<li><b>read 覆蓋範圍差異</b>（已排除）。每條 read 覆蓋不同 CpG 子集，逐 read 平均會混入「覆蓋差異」。
+改用共同-CpG 集（中位 21 個，全窗 99 個）後分離度中位由
+3.25 變 3.21 —— 影響可忽略，不是主因。</li>
+<li><b>正反股（strand）</b>（已排除）。ALT 分群與股別顯著關聯者僅 4.6%，
+等同 5% 的偽陽性率。</li>
+</ol>
+<figure><svg viewBox="0 0 760 300" width="100%" role="img" aria-label="alt ref null multimodality"><line x1="70" y1="216.0" x2="700" y2="216.0" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="219.5" text-anchor="end" font-size="11" fill="#999999">0%</text><line x1="70" y1="184.3" x2="700" y2="184.3" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="187.8" text-anchor="end" font-size="11" fill="#999999">5%</text><line x1="70" y1="152.7" x2="700" y2="152.7" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="156.2" text-anchor="end" font-size="11" fill="#999999">10%</text><line x1="70" y1="121.0" x2="700" y2="121.0" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="124.5" text-anchor="end" font-size="11" fill="#999999">15%</text><line x1="70" y1="89.3" x2="700" y2="89.3" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="92.8" text-anchor="end" font-size="11" fill="#999999">20%</text><line x1="70" y1="57.7" x2="700" y2="57.7" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="61.2" text-anchor="end" font-size="11" fill="#999999">25%</text><line x1="70" y1="26.0" x2="700" y2="26.0" stroke="currentColor" stroke-opacity=".09"/><text x="62" y="29.5" text-anchor="end" font-size="11" fill="#999999">30%</text><rect x="150" y="64.9" width="108" height="151.1" rx="4" fill="#0072B2" fill-opacity=".85"/><text x="204.0" y="55.9" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">23.9%</text><text x="204.0" y="234" text-anchor="middle" font-size="11.5" fill="#999999">ALT 群內</text><rect x="320" y="66.4" width="108" height="149.6" rx="4" fill="#5b6672" fill-opacity=".85"/><text x="374.0" y="57.4" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">23.6%</text><text x="374.0" y="234" text-anchor="middle" font-size="11.5" fill="#999999">REF 群內（內建對照）</text><rect x="490" y="184.3" width="108" height="31.7" rx="4" fill="#999999" fill-opacity=".85"/><text x="544.0" y="175.3" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">5.0%</text><text x="544.0" y="234" text-anchor="middle" font-size="11.5" fill="#999999">匹配單峰 null</text><line x1="150" y1="184.3" x2="638" y2="184.3" stroke="#B2182B" stroke-width="2" stroke-dasharray="7 4"/><text x="646" y="188.3" font-size="11.5" fill="#B2182B">分群法本身的底線</text><text x="380.0" y="264" text-anchor="middle" font-size="12" fill="currentColor">ALT 與 REF 幾乎相同（配對 p=0.29）→ 多群是<tspan font-weight="700">區域屬性</tspan>，不是等位屬性</text><text transform="translate(16,121.0) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#999999">分離度超過 null-95th 的比例</text></svg>
+<figcaption>三根柱同一門檻、同一統計量。<b>ALT 與 REF 幾乎重合</b>是關鍵：
+若多群源自突變譜系，只有 ALT 該升高。虛線是分群法本身的底線。</figcaption></figure>
+<p class="note">還有兩個<b>本輪未能分離</b>的候選成因：<b>CN 增益</b>（同一 HP 家族內有多份拷貝，
+各拷貝甲基狀態可不同 —— HCC1395 52% 單元為 gain）與<b>細胞型別混雜／HP 指派誤差</b>。
+兩者都會產生「區域性、非等位專一」的多群，與觀察到的模式一致，但需要 single-cell 或 CN-neutral 足量樣本才能拆開。</p>
+
+<h2><span class="lv">L1</span>Q2 標記層：sSNV-lineage 狀態 × 甲基標記狀態</h2>
+<figure><svg viewBox="0 0 780 250" width="100%" role="img" aria-label="lineage by methyl state"><text x="316.0" y="40" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">M2</text><text x="316.0" y="54" text-anchor="middle" font-size="10" fill="#999999">僅 ALT 內多群</text><text x="448.0" y="40" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">M3</text><text x="448.0" y="54" text-anchor="middle" font-size="10" fill="#999999">區域性多群</text><text x="580.0" y="40" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">M1</text><text x="580.0" y="54" text-anchor="middle" font-size="10" fill="#999999">ALT/REF 位移</text><text x="712.0" y="40" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">M0</text><text x="712.0" y="54" text-anchor="middle" font-size="10" fill="#999999">無標記</text><text x="236" y="86.0" text-anchor="end" font-size="11.5" font-weight="600" fill="currentColor">L1_BACKBONE</text><text x="236" y="99.0" text-anchor="end" font-size="10" fill="#999999">n=5,613</text><rect x="253" y="65" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.34" stroke="currentColor" stroke-opacity=".13"/><text x="316.0" y="84.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">3.7%</text><text x="316.0" y="97.0" text-anchor="middle" font-size="9.5" fill="#999999">210</text><rect x="385" y="65" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.20" stroke="currentColor" stroke-opacity=".13"/><text x="448.0" y="84.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">1.4%</text><text x="448.0" y="97.0" text-anchor="middle" font-size="9.5" fill="#999999">81</text><rect x="517" y="65" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.59" stroke="currentColor" stroke-opacity=".13"/><text x="580.0" y="84.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">8.1%</text><text x="580.0" y="97.0" text-anchor="middle" font-size="9.5" fill="#999999">454</text><rect x="649" y="65" width="126" height="40" rx="3" fill="#999999" fill-opacity="0.67" stroke="currentColor" stroke-opacity=".13"/><text x="712.0" y="84.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">86.7%</text><text x="712.0" y="97.0" text-anchor="middle" font-size="9.5" fill="#999999">4,868</text><text x="236" y="132.0" text-anchor="end" font-size="11.5" font-weight="600" fill="currentColor">L2_WEAK_LINK</text><text x="236" y="145.0" text-anchor="end" font-size="10" fill="#999999">n=999</text><rect x="253" y="111" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.38" stroke="currentColor" stroke-opacity=".13"/><text x="316.0" y="130.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">4.4%</text><text x="316.0" y="143.0" text-anchor="middle" font-size="9.5" fill="#999999">44</text><rect x="385" y="111" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.18" stroke="currentColor" stroke-opacity=".13"/><text x="448.0" y="130.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">1.1%</text><text x="448.0" y="143.0" text-anchor="middle" font-size="9.5" fill="#999999">11</text><rect x="517" y="111" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.54" stroke="currentColor" stroke-opacity=".13"/><text x="580.0" y="130.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">7.2%</text><text x="580.0" y="143.0" text-anchor="middle" font-size="9.5" fill="#999999">72</text><rect x="649" y="111" width="126" height="40" rx="3" fill="#999999" fill-opacity="0.68" stroke="currentColor" stroke-opacity=".13"/><text x="712.0" y="130.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">87.3%</text><text x="712.0" y="143.0" text-anchor="middle" font-size="9.5" fill="#999999">872</text><text x="236" y="178.0" text-anchor="end" font-size="11.5" font-weight="600" fill="currentColor">L3_ISOLATED</text><text x="236" y="191.0" text-anchor="end" font-size="10" fill="#999999">n=2,802</text><rect x="253" y="157" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.33" stroke="currentColor" stroke-opacity=".13"/><text x="316.0" y="176.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">3.6%</text><text x="316.0" y="189.0" text-anchor="middle" font-size="9.5" fill="#999999">102</text><rect x="385" y="157" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.19" stroke="currentColor" stroke-opacity=".13"/><text x="448.0" y="176.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">1.2%</text><text x="448.0" y="189.0" text-anchor="middle" font-size="9.5" fill="#999999">35</text><rect x="517" y="157" width="126" height="40" rx="3" fill="#0072B2" fill-opacity="0.50" stroke="currentColor" stroke-opacity=".13"/><text x="580.0" y="176.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">6.5%</text><text x="580.0" y="189.0" text-anchor="middle" font-size="9.5" fill="#999999">182</text><rect x="649" y="157" width="126" height="40" rx="3" fill="#999999" fill-opacity="0.68" stroke="currentColor" stroke-opacity=".13"/><text x="712.0" y="176.0" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">88.6%</text><text x="712.0" y="189.0" text-anchor="middle" font-size="9.5" fill="#999999">2,483</text><text x="390.0" y="234" text-anchor="middle" font-size="12" fill="currentColor">每一直行由上到下幾乎不變 —— sSNV-lineage 狀態<tspan font-weight="700">不預測</tspan>甲基標記狀態</text></svg>
+<figcaption>每格為該 lineage 列中的百分比（下方小字為單元數）。
+<b>三列數值幾乎一致</b> —— 知道一個位點在骨幹上、弱串聯、或孤立，對它的甲基標記狀態沒有預測力。</figcaption></figure>
+
+<h3>唯一看似有訊號的 M1，在密度分層下消失</h3>
+<figure><svg viewBox="0 0 780 320" width="100%" role="img" aria-label="m1 density stratification"><line x1="72" y1="216.0" x2="720" y2="216.0" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="219.5" text-anchor="end" font-size="11" fill="#999999">0%</text><line x1="72" y1="184.3" x2="720" y2="184.3" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="187.8" text-anchor="end" font-size="11" fill="#999999">2%</text><line x1="72" y1="152.7" x2="720" y2="152.7" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="156.2" text-anchor="end" font-size="11" fill="#999999">4%</text><line x1="72" y1="121.0" x2="720" y2="121.0" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="124.5" text-anchor="end" font-size="11" fill="#999999">6%</text><line x1="72" y1="89.3" x2="720" y2="89.3" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="92.8" text-anchor="end" font-size="11" fill="#999999">8%</text><line x1="72" y1="57.7" x2="720" y2="57.7" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="61.2" text-anchor="end" font-size="11" fill="#999999">10%</text><line x1="72" y1="26.0" x2="720" y2="26.0" stroke="currentColor" stroke-opacity=".09"/><text x="64" y="29.5" text-anchor="end" font-size="11" fill="#999999">12%</text><rect x="110" y="80.9" width="58" height="135.1" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="139" y="74.9" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">8.5</text><rect x="180" y="107.5" width="58" height="108.5" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="209" y="101.5" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">6.9</text><text x="174" y="236" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">全體(未分層)</text><text x="174" y="254" text-anchor="middle" font-size="11" fill="#B2182B">+1.7pp · p=0.007  顯著</text><text x="174" y="270" text-anchor="middle" font-size="10" fill="#999999">n=5,613 / 2,802</text><rect x="272" y="98.3" width="58" height="117.7" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="301" y="92.3" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">7.4</text><rect x="342" y="109.4" width="58" height="106.6" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="371" y="103.4" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">6.7</text><text x="336" y="236" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">密度 0</text><text x="336" y="254" text-anchor="middle" font-size="11" fill="#2E7D32">+0.7pp · p=0.735  不顯著</text><text x="336" y="270" text-anchor="middle" font-size="10" fill="#999999">n=148 / 2,258</text><rect x="434" y="95.9" width="58" height="120.1" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="463" y="89.9" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">7.6</text><rect x="504" y="100.7" width="58" height="115.3" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="533" y="94.7" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">7.3</text><text x="498" y="236" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">密度 1</text><text x="498" y="254" text-anchor="middle" font-size="11" fill="#2E7D32">+0.3pp · p=0.922  不顯著</text><text x="498" y="270" text-anchor="middle" font-size="10" fill="#999999">n=1,846 / 467</text><rect x="596" y="71.7" width="58" height="144.3" rx="3" fill="#0072B2" fill-opacity="0.85"/><text x="625" y="65.7" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">9.1</text><rect x="666" y="92.6" width="58" height="123.4" rx="3" fill="#5b6672" fill-opacity="0.45"/><text x="695" y="86.6" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">7.8</text><text x="660" y="236" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">密度 2-3</text><text x="660" y="254" text-anchor="middle" font-size="11" fill="#2E7D32">+1.3pp · p=0.841  不顯著</text><text x="660" y="270" text-anchor="middle" font-size="10" fill="#999999">n=2,656 / 77</text><rect x="96" y="22" width="176" height="256" rx="6" fill="#B2182B" fill-opacity=".07"/><text x="390.0" y="294" text-anchor="middle" font-size="12" fill="currentColor">左側未分層看似有富集；<tspan font-weight="700" fill="#B2182B">一旦固定局部突變密度就消失</tspan></text><text transform="translate(16,121.0) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#999999">M1 位移旗標比例</text></svg>
+<figcaption>M1（within-HP ALT/REF 位移）未分層時骨幹 8.5% vs 孤立 6.9%（p=0.007）。
+但骨幹位點的局部 sSNV 密度中位為 2、孤立位點為 0 —— 密度同時驅動「有沒有串聯 partner」與
+「附近有多少突變的 cis 效應」。<b>固定密度後三層全部不顯著</b>。
+這與 2026-07-26 稍早否決的「共同富集」是同一個混淆源。</figcaption></figure>
+
+<h2><span class="lv">L2</span>標記層檔案：欄位與使用規則</h2>
+<div class="use"><div class="vt">可以這樣用</div>
+<p>把它當作<b>描述性註記</b>：「這個位點在 sSNV 骨幹上是什麼狀態、它的甲基觀測長什麼樣、
+哪些技術旗標亮了」。適合挑案例、做圖、寫 limitation、排除低品質位點。</p>
+<p style="margin-top:8px;color:var(--bad)"><b>不可以這樣用：</b>把 M1/M2 當作某位點屬於某 subclone 的證據，
+或宣稱甲基佐證了遺傳骨幹。上面三張圖就是反證。</p></div>
+<p><code>InterSubMod/docs/reports/in_progress/2026/07/20260726_ssnv_lineage_x_methyl_annotation/ssnv_lineage_x_methyl_annotation.tsv</code>
+（9,414 列 × 25 欄）</p>
+<table><thead><tr><th style="width:38%">欄位</th><th>意義</th></tr></thead><tbody><tr><td class="mono">chrom · pos · hp</td><td>位點座標與 germline HP 家族（1 或 2）</td></tr><tr><td class="mono">lineage_state</td><td>L1_BACKBONE / L2_WEAK_LINK / L3_ISOLATED — 由 n_partners、both_somatic、max_coread 決定</td></tr><tr><td class="mono">n_partners · max_coread · top_rel · both_somatic</td><td>sSNV 共現骨幹原始欄位</td></tr><tr><td class="mono">local_density_50kb</td><td>±50 kb 內其他 TP sSNV 數 —— <b>必要控制變項</b></td></tr><tr><td class="mono">methyl_state</td><td>M2_ALT_ONLY_MULTI / M3_REGION_MULTI / M1_ALTREF_SHIFT / M0_NONE</td></tr><tr><td class="mono">flag_alt_multi · flag_ref_multi</td><td>分離度 ≥ 匹配單峰 null 的 95 百分位（3.86）；REF 為內建對照</td></tr><tr><td class="mono">flag_altref_shift</td><td>within-HP ALT vs REF：p&lt;0.05 且 |Δβ|≥0.10 且置換 null 超額 &gt;0</td></tr><tr><td class="mono">flag_strand_assoc</td><td>ALT 分群與正反股顯著關聯（技術性疑慮旗標）</td></tr><tr><td class="mono">d_altref · p_altref · excess_vs_null</td><td>within-HP 位移的效應量、p 值、對置換 null 的超額</td></tr><tr><td class="mono">sep_alt · dsplit_alt · sep_ref · sep_null</td><td>組內分離度、兩子群 Δβ、REF 對照、匹配單峰 null</td></tr><tr><td class="mono">pipeline_optimal_k · pipeline_passed_gating · v_alt · v_hp</td><td>原管線分群判定與兩軸 Cramér's V</td></tr><tr><td class="mono">cn_state · is_loh · n_alt · n_ref · n_common_cpg</td><td>CN 狀態與可用資料量</td></tr></tbody></table>
+
+<h3>M2 且落在骨幹上的位點（效應量最大的 10 個，僅供挑案例）</h3>
+<table><thead><tr><th>位點</th><th>HP</th><th class="num">子群 Δβ</th><th class="num">分離度 S</th>
+<th class="num">ALT/REF</th><th class="num">partners</th><th>CN</th><th class="num">管線 k</th></tr></thead>
+<tbody><tr><td class="mono">chr7:36599703</td><td>HP2</td><td class="num">+0.587</td><td class="num">4.99</td><td class="num">26/16</td><td class="num">2</td><td>gain</td><td class="num">2</td></tr><tr><td class="mono">chr3:159027373</td><td>HP2</td><td class="num">+0.480</td><td class="num">6.98</td><td class="num">27/41</td><td class="num">1</td><td>loh</td><td class="num">3</td></tr><tr><td class="mono">chr7:80055524</td><td>HP2</td><td class="num">+0.468</td><td class="num">4.06</td><td class="num">25/76</td><td class="num">1</td><td>gain</td><td class="num">2</td></tr><tr><td class="mono">chr8:77768663</td><td>HP1</td><td class="num">+0.466</td><td class="num">4.41</td><td class="num">30/48</td><td class="num">1</td><td>loh</td><td class="num">2</td></tr><tr><td class="mono">chr4:114209221</td><td>HP1</td><td class="num">+0.463</td><td class="num">5.38</td><td class="num">27/25</td><td class="num">2</td><td>gain</td><td class="num">2</td></tr><tr><td class="mono">chr5:119703787</td><td>HP1</td><td class="num">+0.461</td><td class="num">4.11</td><td class="num">17/33</td><td class="num">2</td><td>loh</td><td class="num">2</td></tr><tr><td class="mono">chr10:1976472</td><td>HP1</td><td class="num">+0.442</td><td class="num">6.39</td><td class="num">23/26</td><td class="num">2</td><td>loh</td><td class="num">3</td></tr><tr><td class="mono">chr8:122210394</td><td>HP2</td><td class="num">+0.418</td><td class="num">7.50</td><td class="num">55/69</td><td class="num">1</td><td>loh</td><td class="num">2</td></tr><tr><td class="mono">chr14:90542056</td><td>HP2</td><td class="num">+0.410</td><td class="num">5.44</td><td class="num">60/31</td><td class="num">2</td><td>gain</td><td class="num">2</td></tr><tr><td class="mono">chr15:66534600</td><td>HP2</td><td class="num">+0.404</td><td class="num">4.21</td><td class="num">25/15</td><td class="num">1</td><td>gain</td><td class="num">2</td></tr></tbody></table>
+<p class="note">這些是<b>真實的資料特徵</b>（Δβ 達 0.4–0.6，遠高於雜訊），值得肉眼檢視熱圖。
+但依上表，同樣強度的分群在孤立位點與 REF 群中出現得一樣頻繁，所以<b>單看這張表無法反推譜系</b>。</p>
+
+<h2><span class="lv">L2</span>甲基資料資產盤點</h2>
+<table><thead><tr><th>資料</th><th>路徑</th><th>範圍</th><th>說明</th></tr></thead><tbody><tr><td><b>read × CpG 甲基矩陣</b></td><td class="mono">methylation/methylation.csv (+ _forward/_reverse)</td><td>每位點 ±5 kb</td><td>原始觀測；本輪全部統計的基礎</td></tr><tr><td><b>CpG 座標</b></td><td class="mono">methylation/cpg_sites.tsv</td><td>每位點</td><td>支援 near/distal 距離分層</td></tr><tr><td><b>read 標註</b></td><td class="mono">reads/reads.tsv</td><td>每位點</td><td>hp / alt_support / strand / mapq / is_tumor</td></tr><tr><td><b>read×read 距離矩陣</b></td><td class="mono">distance/BERNOULLI/matrix*.csv</td><td>每位點</td><td>分群輸入；有 forward/reverse 分股版</td></tr><tr><td><b>管線分群判定</b></td><td class="mono">clustering/significance.json</td><td>30,476 位點</td><td>optimal_k / passed_gating / Cramér's V（ALT 軸與 HP 軸）</td></tr><tr><td><b>樹與葉序</b></td><td class="mono">clustering/{tree.nwk, linkage_matrix.csv, leaf_order.txt}</td><td>每位點</td><td>階層分群結構</td></tr><tr><td><b>熱圖</b></td><td class="mono">plots/BERNOULLI/*.png</td><td>每位點</td><td>距離熱圖 + 分群熱圖</td></tr><tr><td><b>5-態甲基分類</b></td><td class="mono">methyl_class_x_linkage_annotation.tsv</td><td>30,077 位點</td><td>A_ALLELE_clean / B_HP_ASM / C_other / D_split_unaligned / E_unstable</td></tr><tr><td><b>within-HP 統計（本輪新增）</b></td><td class="mono">sources/methyl_locus_scan.tsv</td><td>9,414 位點×HP</td><td>共同-CpG 集上的 ALT/REF 位移、置換 null 超額、組內分離度、匹配單峰 null</td></tr></tbody></table>
+
+<h2><span class="lv">L3</span>定義、方法與限制</h2>
+<details><summary>狀態定義（lineage 軸與 methyl 軸）</summary>
+<p><b>lineage 軸</b>（來自 sSNV 共現骨幹）：<b>L1_BACKBONE</b> = ≥1 partner·雙端 somatic·coread≥6；<b>L2_WEAK_LINK</b> = 有 partner 但未過閘；<b>L3_ISOLATED</b> = 無 partner</p>
+<p><b>methyl 軸</b>（本輪定義，全部對 null 校準）：</p>
+<ul>
+<li><b>M2_ALT_ONLY_MULTI</b>：ALT 群分離度 ≥ null-95th <b>且</b> 兩子群 |Δβ|≥0.20，<b>且</b> REF 群未達門檻。
+最保守 —— 要求內建對照乾淨。</li>
+<li><b>M3_REGION_MULTI</b>：ALT 與 REF 都達門檻 → 區域屬性。</li>
+<li><b>M1_ALTREF_SHIFT</b>：within-HP ALT vs REF 平均位移顯著且 |Δβ|≥0.10 且超過置換 null。</li>
+<li><b>M0_NONE</b>：以上皆非。</li>
+</ul></details>
+
+<details><summary>null 的建構（為何門檻是 3.86 而不是拍腦袋）</summary>
+<p>每個單元各自產生匹配的 null：同 n、同 SD 的單峰高斯重抽 3 次，各自求最佳 2-切分的分離度。
+全基因組 9,414 個 null 的 95 百分位 = <b>3.86</b>。用它當門檻時，null 自身的通過率
+依定義為 5.0%，觀察值超出的部分才是訊號。</p>
+<p>另一個獨立 null 是<b>置換 null</b>（保持 read 集合不變、隨機重排 ALT/REF 標籤），用於 M1 的超額計算。</p></details>
+
+<details><summary>限制</summary>
+<ul>
+<li><b>單樣本</b>（HCC1395）、單一 2026-01 w5000 資料線。跨 7 樣本未驗證。</li>
+<li><b>覆蓋門檻</b>：同一 HP 內各需 ≥6 條 read 且共同 CpG ≥8，9,346/30,490 位點才進入標記層 ——
+偏向高覆蓋區。</li>
+<li><b>CN 未拆開</b>：52% 單元為 gain、47% 為 LOH，CN-neutral 極少，
+無法用它作乾淨對照。</li>
+<li><b>M2 與 REF 對照不完全對稱</b>：M2 額外要求 |Δβ|≥0.20（REF 未存該欄），故 M2 為<b>保守</b>估計；
+公平的對稱比較見第一張圖。</li>
+<li>lineage 狀態沿用 2026-07-26 的串聯註記，未納入分層樹求解器的拓撲狀態。</li>
+</ul></details>
+
+<details><summary>可重現性</summary>
+<p>archive：<code>/big7_disk/liaoyoyo2001/big7_disk_output/bip8_output_archive/20260119_all-with-w5000_1</code></p>
+<p>掃描腳本與中間檔已封存於 <code>sources/</code>：
+<code>full_methyl_scan.py</code>（9,414 單元）、<code>sig_scan.tsv</code>（30,476 位點）、
+<code>build_annotation.py</code>、<code>methyl_locus_scan.tsv</code>、<code>annotation_summary.json</code>。</p>
+<p>重建：<code>python3 sources/build_annotation.py</code> → <code>python3 build_page.py</code></p></details>
+
+<h2><span class="lv">L3</span>管線自身分群判定（作為對照）</h2>
+<table><thead><tr><th>optimal_k</th><th class="num">位點數</th><th class="num">佔比</th></tr></thead>
+<tbody><tr><td>optimal_k = 2</td><td class="num">23,209</td><td class="num">76.2%</td></tr><tr><td>optimal_k = 3</td><td class="num">4,247</td><td class="num">13.9%</td></tr><tr><td>optimal_k = 4</td><td class="num">1,145</td><td class="num">3.8%</td></tr><tr><td>optimal_k = 5</td><td class="num">1,391</td><td class="num">4.6%</td></tr><tr><td>optimal_k = 6</td><td class="num">484</td><td class="num">1.6%</td></tr></tbody></table>
+<p class="note">9,628 / 30,476（31.6%）通過管線 gating。注意 <code>optimal_k</code> 沒有 1 這個選項 ——
+這是「為何總是看到多群」最直接的結構性解釋。</p>
+</div>

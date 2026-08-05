@@ -1,0 +1,57 @@
+{
+  "approval_status": "APPROVED_FOR_FULL_TASK_B_RUN",
+  "authority_id": "20260717_all_ssnv_focal_alt_task_b_release_v3",
+  "authority_manifest": {
+    "mode": "0o444",
+    "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/provenance/source_authorities/20260717_all_ssnv_focal_alt_release_source_authority.v3.json",
+    "sha256": "8cef3ea666101f19a7d6dd3cc335be09f8d80f905a2437d29673fa7132560e9e",
+    "size_bytes": 9872
+  },
+  "private_key_retirement": {
+    "passphrase_lifecycle": "discarded_after_single_signature",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260717_all_ssnv_v3/ed25519_private_encrypted_unrecoverable_after_signing.pem",
+    "required_post_signature_mode": "0o0"
+  },
+  "public_key": {
+    "mode": "0o444",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260717_all_ssnv_v3/ed25519_public.pem",
+    "sha256": "60ebac3ee2ebfbf69a80331b40410b365c0315d41363d59ee0b44f6dbf5040e4",
+    "size_bytes": 113
+  },
+  "review_approvals": [
+    {
+      "findings_closed": true,
+      "model": "claude-sonnet-5",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260717_external_claude_reviewer_A_v6_output.json",
+        "sha256": "fe4207f32a0c234cfb37ffd9c6cac49bb3f5aded0b829fe78e5ff4b0608e8fff",
+        "size_bytes": 4050
+      },
+      "review_scope": "P0 pre-run source-integrity review of the v3 real-FD Ed25519 release-authority chain, performed against absolute paths. Covers release_source_authority.py, finalize_task_b_result_release.py, real-FD and terminal-chain tests, canonical JUnit XML, claim-contract-v5, and all three external public keys. Formal authority/signatures and runtime artifacts were correctly absent at P0.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "19c373f7895034e303deda11f9b62dd17bf8df5f07d9e33b3953b65560a173ec",
+      "reviewer_id": "7c1e3b8a-2f4d-4b6a-9e2c-5a8f1d0c6b3e",
+      "reviewer_label": "External Reviewer A v6c (absolute-path v3 real-FD review)",
+      "verdict": "APPROVE"
+    },
+    {
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260717_external_claude_reviewer_B_v6_output.json",
+        "sha256": "e330df7335776ff69fadbf7ab5b2a1506b9afb5690dc01bb289da83c4738820a",
+        "size_bytes": 4070
+      },
+      "review_scope": "Fresh independent read-only P0 pre-run scientific-contract non-regression review of the v3 all-sSNV focal-ALT release source authority: git HEAD, independently recomputed 23-role source-set identity/modes, v2->v3 real-FD Ed25519 delta isolation, claim-contract-v5 identity, 380-test canonical XML, M1/M2/G1/G2/R1/B1/C1 selection/denominator/threshold/multiple-testing/four-state/matched-normal/tumor-REF/CN boundaries and claim ceiling, ten user-facing report outputs, and archived v1/v2 non-reusability. Approval attests only that the exact v3 source design and scientific boundaries are adequate to begin the formal Task-B run; it is not a biological result.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "19c373f7895034e303deda11f9b62dd17bf8df5f07d9e33b3953b65560a173ec",
+      "reviewer_id": "b7f4e2a1-9c3d-4e58-a1f6-2d8c05e7b934",
+      "reviewer_label": "external_claude_reviewer_B_v6",
+      "verdict": "APPROVE"
+    }
+  ],
+  "schema_name": "intersubmod.release_source_authority.approval",
+  "schema_version": "1.0.0"
+}

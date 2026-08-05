@@ -48,7 +48,7 @@ provenance_note: 「我們的數字」皆引自既有 validated KB(已標來源,
   - **Martin-Trujillo 2017**（PMC5589900）：CN-normal 樣本中 imprinted allelic 甲基異常 **82–92% 由 CN 解釋**。← 直接背書我們 HP-axis held-CN 設計擊敗的 confound。
   - **O'Neill/POG 2024**（PMC11605692）：4.46M aDMR，mean **23.6K/tumor**（~5× normal），**79% 落 CNV/LOH**，**recurrent** RET(26)/CDKN2A(9)。
   - Schalkwyk 2010：germline >35,000 cis-ASM（baseline floor）。
-- **我們**（HCC1395 單樣本 ⭐3 單 pipeline）：strong-ASM **0.34%**、**無方向**(hypo44/hyper56)；BRCA2 HP-axis Δβ=−0.122（~80% copy + 邊際真 cis d_within=−0.023 p=0.022）；ASM×CN ρ=−0.055（**非 CN-driven**）；cross-sample 6/6 excess；somatic private **0/38**。
+- **我們**（HCC1395 單樣本 ⭐3 單 pipeline）：strong-ASM **0.34%**、**無方向**(hypo44/hyper56)；BRCA2 HP-axis Δβ=−0.122（= **subclone/copy 主導**：HP1-1=somatic subclone tag 非 copy、非 CN-dosage；d_copy −0.11 + 邊際 focal cis d_within=−0.023 p=0.024；**% 不 robust**）；ASM×CN ρ=−0.055 + copy-DOSAGE falsified（**非 CN-driven**）；cross-sample 6/6 excess；somatic private **0/38**。
 - **VERDICT = DIFFERENT CALIBER（主），一處低-power 方向張力**：
   - 我們 0.34% 是 **stringent within-sample somatic-controlled HP-axis read-率**；文獻 5–9× / 4.46M 是 **cross-individual / haplotype-anchored DMR 計數**（含 germline cis-ASM + CN/LOH-driven allelic 甲基）→ **不同分母，非矛盾**。
   - 「無方向」是 somatic-controlled 軸的**預期簽名**（germline allelic bias 被扣除後 hypo/hyper 應趨平衡）；Do2020 的 hypo-dominance 在 cross-individual 軸（含未扣的 germline）。
@@ -90,7 +90,7 @@ provenance_note: 「我們的數字」皆引自既有 validated KB(已標來源,
 | 層 | 內容 |
 |----|------|
 | **林（aggregate）** | 我們的全部 ASM 結論 = 單樣本 HCC1395 ⭐3 單 pipeline；外部 cohort（Do2020 n=16 癌、POG n=189）在更高 caliber 確認**現象真實**但我們**無 recurrence power** |
-| **樹1（canonical）** | BRCA2 promoter：我們 −0.122（~80% copy）；POG 報 BRCA1/RAD51C/MLH1 是 **promoter hyper**(HRD/Lynch) 非 aDMR → 我們 BRCA2 hypo **勿當 TSG-silencing 證據** |
+| **樹1（canonical）** | BRCA2 promoter：我們 −0.122（= **subclone/copy 主導**，HP1-1=subclone tag 非 copy、非 CN-dosage；% 不 robust）；POG 報 BRCA1/RAD51C/MLH1 是 **promoter hyper**(HRD/Lynch) 非 aDMR → 我們 BRCA2 hypo **勿當 TSG-silencing 證據** |
 | **樹2（extreme/outlier）** | chr17/TBC1D16 = 我們唯一乾淨 cis exemplar（d_within=0.142 p=0.001）；對應 Do2020/Schalkwyk 的 cis-driven by sequence |
 | **樹3（well-explained）** | structure-vs-disorder：Landau 2014 **明文排除 ASM 是 disorder 來源** → 機制示範我們 PERMANOVA 量的是不同東西 |
 

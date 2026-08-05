@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="InterSubMod sSNV 共現、布爾超立方體、帶根有向群組 Steiner 樹與 VAF 排序的白話教學。">
+  <title>sSNV 共現 × 布爾超立方體 × VAF 排序｜InterSubMod 方法教學</title>
+  <style>
+    :root {
+      --paper: #f3efe5;
+      --paper-deep: #e9e1d2;
+      --card: #fffdf7;
+      --ink: #17262d;
+      --muted: #5b686d;
+      --line: #c9c1b2;
+      --grid: rgba(23, 38, 45, 0.055);
+      --teal: #087b78;
+      --teal-soft: #dcefed;
+      --orange: #d56b2f;
+      --orange-soft: #f8e4d4;
+      --red: #a33b35;
+      --red-soft: #f3ddda;
+      --blue: #2d5e7b;
+      --blue-soft: #dce8ef;
+      --gold: #a6791c;
+      --gold-soft: #f1e7c8;
+      --shadow: 0 16px 42px rgba(23, 38, 45, 0.10);
+      --radius: 18px;
+      --mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Noto Serif TC", "Songti TC", serif;
+      --sans: "Aptos", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        var(--paper);
+      background-size: 26px 26px;
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.72;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: var(--orange); }
+    code, kbd, samp { font-family: var(--mono); }
+    code {
+      padding: .1em .32em;
+      border-radius: 5px;
+      background: rgba(23, 38, 45, .07);
+      font-size: .92em;
+    }
+    pre {
+      margin: 1rem 0;
+      padding: 1rem 1.15rem;
+      overflow: auto;
+      color: #e9f3f2;
+      background: #18313a;
+      border-radius: 12px;
+      border-left: 5px solid var(--teal);
+      font-family: var(--mono);
+      font-size: .88rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    h1, h2, h3, h4 {
+      margin-top: 0;
+      color: var(--ink);
+      line-height: 1.18;
+    }
+    h1, h2 { font-family: var(--serif); }
+    h1 {
+      max-width: 980px;
+      margin-bottom: 1.05rem;
+      font-size: clamp(2.7rem, 6.2vw, 6.8rem);
+      font-weight: 700;
+      letter-spacing: -.045em;
+    }
+    h2 {
+      margin-bottom: 1.1rem;
+      font-size: clamp(2rem, 3.7vw, 3.45rem);
+      letter-spacing: -.035em;
+    }
+    h3 { margin-bottom: .55rem; font-size: 1.3rem; }
+    p { margin: .55rem 0 1rem; }
+    ul, ol { padding-left: 1.25rem; }
+    li + li { margin-top: .35rem; }
+    strong { color: #102127; }
+
+    .skip-link {
+      position: fixed;
+      z-index: 1000;
+      top: .5rem;
+      left: .5rem;
+      padding: .65rem 1rem;
+      transform: translateY(-150%);
+      color: white;
+      background: var(--ink);
+      border-radius: 8px;
+    }
+    .skip-link:focus { transform: none; }
+
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      overflow: hidden;
+      padding: clamp(2rem, 6vw, 6rem) clamp(1.25rem, 7vw, 8rem) 4rem;
+      color: #f8f2e7;
+      background:
+        radial-gradient(circle at 82% 22%, rgba(8, 123, 120, .45), transparent 29%),
+        radial-gradient(circle at 12% 84%, rgba(213, 107, 47, .28), transparent 30%),
+        #142a32;
+      border-bottom: 7px solid var(--orange);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .14;
+      background-image:
+        linear-gradient(rgba(255,255,255,.17) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.17) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(to bottom, black, transparent 92%);
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(310px, .8fr);
+      gap: clamp(2rem, 5vw, 6rem);
+      align-items: center;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .hero h1, .hero h2, .hero strong { color: #fffaf0; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: 1rem;
+      color: #b8dfdc;
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 2.5rem;
+      height: 3px;
+      background: var(--orange);
+    }
+    .hero-lede {
+      max-width: 850px;
+      margin: 0 0 1.4rem;
+      color: #d9e5e3;
+      font-size: clamp(1.08rem, 1.65vw, 1.38rem);
+    }
+    .hero-note {
+      max-width: 840px;
+      padding: .9rem 1rem;
+      color: #fff1df;
+      background: rgba(213, 107, 47, .13);
+      border: 1px solid rgba(248, 228, 212, .3);
+      border-left: 5px solid var(--orange);
+      border-radius: 10px;
+      font-size: .94rem;
+    }
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      margin: 1.35rem 0 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .42rem .72rem;
+      color: inherit;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: .73rem;
+      letter-spacing: .02em;
+    }
+    .hero-figure {
+      position: relative;
+      min-height: 480px;
+    }
+    .hero-figure svg {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+      filter: drop-shadow(0 28px 38px rgba(0,0,0,.32));
+    }
+    .hero-caption {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: min(340px, 90%);
+      padding: .9rem 1rem;
+      color: #e2ecea;
+      background: rgba(10, 30, 36, .82);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      font-size: .84rem;
+    }
+
+    .utility-bar {
+      position: sticky;
+      z-index: 80;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: .65rem clamp(1rem, 4vw, 4rem);
+      color: #eef5f3;
+      background: rgba(20, 42, 50, .96);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(10px);
+    }
+    .utility-title {
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: .75rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .utility-actions { display: flex; gap: .45rem; flex-shrink: 0; }
+    button {
+      padding: .48rem .7rem;
+      color: inherit;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 7px;
+      font: 700 .75rem var(--sans);
+      cursor: pointer;
+    }
+    button:hover { background: rgba(255,255,255,.16); }
+    button:focus-visible, a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f4b078;
+      outline-offset: 3px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      max-width: 1580px;
+      margin: 0 auto;
+    }
+    .toc {
+      position: sticky;
+      top: 52px;
+      align-self: start;
+      max-height: calc(100vh - 52px);
+      overflow: auto;
+      padding: 2.2rem 1.1rem 3rem;
+      border-right: 1px solid var(--line);
+    }
+    .toc-title {
+      margin: 0 0 .8rem;
+      color: var(--muted);
+      font: 700 .72rem var(--mono);
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .toc ol { margin: 0; padding: 0; list-style: none; counter-reset: toc; }
+    .toc li { margin: 0; counter-increment: toc; }
+    .toc a {
+      display: grid;
+      grid-template-columns: 1.8rem 1fr;
+      gap: .2rem;
+      padding: .45rem .45rem;
+      color: var(--muted);
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      font-size: .81rem;
+      line-height: 1.35;
+    }
+    .toc a::before {
+      content: counter(toc, decimal-leading-zero);
+      color: var(--orange);
+      font-family: var(--mono);
+      font-size: .68rem;
+    }
+    .toc a:hover, .toc a.active {
+      color: var(--ink);
+      background: rgba(255,255,255,.5);
+      border-left-color: var(--teal);
+    }
+
+    main { min-width: 0; }
+    .chapter {
+      position: relative;
+      padding: clamp(3.6rem, 7vw, 7.5rem) clamp(1.25rem, 5.6vw, 6.2rem);
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 58px;
+    }
+    .chapter:nth-child(even) { background: rgba(255,255,255,.34); }
+    .chapter-inner { max-width: 1120px; margin: 0 auto; }
+    .chapter-kicker {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      margin-bottom: .8rem;
+      color: var(--teal);
+      font: 800 .76rem var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .chapter-kicker::after {
+      content: "";
+      width: 5rem;
+      height: 2px;
+      background: currentColor;
+    }
+    .section-lede {
+      max-width: 900px;
+      margin: 0 0 2rem;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .assertion {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+      padding: 1.25rem 1.35rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 7px solid var(--teal);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .assertion-label {
+      display: inline-block;
+      margin-bottom: .45rem;
+      color: var(--teal);
+      font: 800 .68rem var(--mono);
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .warning .assertion-label { color: #8a4a20; }
+    .danger .assertion-label { color: var(--red); }
+    .assertion h3 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.45rem); }
+    .assertion-mark {
+      display: grid;
+      place-items: center;
+      width: 2.6rem;
+      height: 2.6rem;
+      color: white;
+      background: var(--teal);
+      border-radius: 50%;
+      font: 900 1.1rem var(--serif);
+    }
+    .assertion p { margin: .15rem 0 0; }
+    .warning { border-left-color: var(--orange); }
+    .warning .assertion-mark { background: var(--orange); }
+    .danger { border-left-color: var(--red); }
+    .danger .assertion-mark { background: var(--red); }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin: 1.2rem 0 2rem;
+    }
+    .card-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card {
+      min-width: 0;
+      padding: 1.25rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(23,38,45,.06);
+    }
+    .card p:last-child { margin-bottom: 0; }
+    .card-tag {
+      display: inline-block;
+      margin-bottom: .7rem;
+      padding: .28rem .55rem;
+      color: var(--teal);
+      background: var(--teal-soft);
+      border-radius: 999px;
+      font: 800 .68rem var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .card-tag.partial { color: #8a451e; background: var(--orange-soft); }
+    .card-tag.rec { color: var(--red); background: var(--red-soft); }
+    .card-tag.historic { color: #70530e; background: var(--gold-soft); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin: 2rem 0;
+      overflow: hidden;
+      color: #edf4f2;
+      background: rgba(255,255,255,.28);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .stat { padding: 1.35rem; background: #17313a; }
+    .stat strong {
+      display: block;
+      color: #fff7e9;
+      font: 700 clamp(1.6rem, 3vw, 2.7rem) var(--serif);
+      line-height: 1;
+    }
+    .stat span { display: block; margin-top: .55rem; color: #bcd0cc; font-size: .82rem; }
+    .stat small { display: block; margin-top: .45rem; color: #91aaa6; line-height: 1.45; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem 1rem;
+      margin: 1rem 0;
+      padding: .8rem 1rem;
+      background: rgba(255,255,255,.54);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: .78rem;
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: .45rem; }
+    .swatch { width: 1rem; height: 1rem; border-radius: 50%; border: 2px solid var(--ink); }
+    .swatch.observed { background: var(--teal); border-color: var(--teal); }
+    .swatch.partial { background: var(--orange-soft); border: 2px dashed var(--orange); }
+    .swatch.hidden { background: transparent; border-color: var(--blue); }
+    .swatch.rec { border: 3px double var(--red); background: var(--red-soft); }
+    .swatch.root { border-radius: 2px; background: var(--ink); border-color: var(--ink); }
+
+    .figure {
+      margin: 1.5rem 0 2.2rem;
+      padding: clamp(.7rem, 2vw, 1.35rem);
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .figure svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 720px;
+    }
+    .figure figcaption {
+      margin-top: .8rem;
+      padding-top: .75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: .83rem;
+    }
+    .figure .figcaption {
+      margin-top: .8rem;
+      padding-top: .75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: .83rem;
+    }
+    svg text { font-family: var(--sans); }
+    svg .mono { font-family: var(--mono); }
+    svg .candidate-edge {
+      fill: none;
+      stroke: #9ba3a4;
+      stroke-width: 2;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+    svg .selected-edge {
+      fill: none;
+      stroke: var(--teal);
+      stroke-width: 4;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+    svg .partial-edge {
+      fill: none;
+      stroke: var(--orange);
+      stroke-width: 3;
+      stroke-dasharray: 8 6;
+      vector-effect: non-scaling-stroke;
+    }
+    svg .recurrence-edge {
+      fill: none;
+      stroke: var(--red);
+      stroke-width: 5;
+      vector-effect: non-scaling-stroke;
+    }
+    svg .node circle, svg .node rect {
+      fill: var(--card);
+      stroke: var(--ink);
+      stroke-width: 2.2;
+      vector-effect: non-scaling-stroke;
+    }
+    svg .node.observed circle { fill: var(--teal-soft); stroke: var(--teal); stroke-width: 3; }
+    svg .node.partial circle { fill: var(--orange-soft); stroke: var(--orange); stroke-dasharray: 6 4; }
+    svg .node.hidden circle { fill: var(--card); stroke: var(--blue); }
+    svg .node.root rect { fill: var(--ink); stroke: var(--ink); }
+    svg .node.root text { fill: white; }
+    svg .svg-label { font-size: 14px; font-weight: 800; }
+    svg .svg-small { font-size: 11px; fill: var(--muted); }
+    svg .svg-kicker { font-size: 11px; font-weight: 800; letter-spacing: .08em; fill: var(--teal); }
+    svg .panel-bg { fill: #faf6ec; stroke: var(--line); stroke-width: 1.3; }
+
+    .equation {
+      margin: 1.2rem 0;
+      padding: 1.15rem 1.3rem;
+      overflow-x: auto;
+      color: #eff7f5;
+      background: #17313a;
+      border-left: 6px solid var(--orange);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .equation math {
+      display: block;
+      margin: .25rem auto;
+      color: #fff7e9;
+      font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+    }
+    .equation .plain {
+      display: block;
+      margin-top: .55rem;
+      color: #b9ceca;
+      font: .78rem var(--mono);
+      text-align: center;
+    }
+    .equation .definition {
+      margin: .7rem auto 0;
+      max-width: 820px;
+      color: #dce8e5;
+      font-size: .82rem;
+      text-align: left;
+    }
+
+    .symbol-table, .compare-table {
+      width: 100%;
+      margin: 1.2rem 0 2rem;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    .symbol-table th, .symbol-table td,
+    .compare-table th, .compare-table td {
+      padding: .8rem .85rem;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    .symbol-table th, .compare-table th {
+      color: #f3f6f5;
+      background: #1e414c;
+      font-size: .78rem;
+      letter-spacing: .03em;
+    }
+    .symbol-table tr:last-child td, .compare-table tr:last-child td { border-bottom: 0; }
+    .symbol-table tbody tr:nth-child(even), .compare-table tbody tr:nth-child(even) { background: #f8f3e9; }
+    .token {
+      display: inline-grid;
+      place-items: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 .4rem;
+      border-radius: .45rem;
+      font: 900 .9rem var(--mono);
+    }
+    .token-r { color: #fff; background: var(--ink); }
+    .token-a { color: #fff; background: var(--orange); }
+    .token-x { color: #725916; background: var(--gold-soft); border: 1px dashed #9b7b26; }
+
+    details {
+      margin: .8rem 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    summary {
+      padding: .95rem 1.1rem;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: "+";
+      display: inline-grid;
+      place-items: center;
+      width: 1.45rem;
+      height: 1.45rem;
+      margin-right: .65rem;
+      color: white;
+      background: var(--teal);
+      border-radius: 50%;
+      font-family: var(--mono);
+    }
+    details[open] summary::before { content: "−"; background: var(--orange); }
+    .details-body { padding: 0 1.15rem 1.15rem 3.2rem; color: var(--muted); }
+
+    .steps {
+      display: grid;
+      gap: .75rem;
+      margin: 1.5rem 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+    .steps > li {
+      display: grid;
+      grid-template-columns: 3.2rem minmax(0, 1fr);
+      gap: .9rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .steps .step-no {
+      display: grid;
+      place-items: center;
+      width: 3.2rem;
+      height: 3.2rem;
+      color: white;
+      background: var(--ink);
+      border-radius: 10px;
+      font: 800 .9rem var(--mono);
+    }
+    .steps li strong { display: block; margin: .1rem 0 .25rem; font-size: 1rem; }
+    .steps li span { display: block; color: var(--muted); }
+    .step {
+      display: grid;
+      grid-template-columns: 3.2rem 1fr;
+      gap: .9rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      counter-increment: step;
+    }
+    .step::before {
+      content: counter(step, decimal-leading-zero);
+      display: grid;
+      place-items: center;
+      width: 3.2rem;
+      height: 3.2rem;
+      color: white;
+      background: var(--ink);
+      border-radius: 10px;
+      font: 800 .9rem var(--mono);
+    }
+    .step h3 { margin: .1rem 0 .25rem; }
+    .step p { margin: 0; color: var(--muted); }
+
+    .audit-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .8rem;
+      padding: 1rem 0;
+      border-bottom: 1px dashed var(--line);
+    }
+    .audit-item:last-child { border-bottom: 0; }
+    .audit-status {
+      align-self: start;
+      padding: .25rem .48rem;
+      color: var(--red);
+      background: var(--red-soft);
+      border-radius: 5px;
+      font: 800 .68rem var(--mono);
+    }
+
+    footer {
+      padding: 3rem clamp(1.25rem, 6vw, 6rem);
+      color: #cddbd8;
+      background: #142a32;
+      border-top: 7px solid var(--teal);
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 2rem;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .footer-inner > * { min-width: 0; }
+    footer h2 { color: #fff8eb; font-size: 2rem; }
+    footer a { color: #b9e1dd; }
+    .provenance {
+      padding: 1rem;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      font: .75rem/1.6 var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 1050px) {
+      .hero { min-height: auto; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-figure { min-height: 360px; max-width: 650px; }
+      .shell { grid-template-columns: 1fr; }
+      .toc { display: none; }
+      .card-grid.three { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { font-size: 16px; }
+      .hero { padding: 2.5rem 1rem 3rem; }
+      .hero-figure { min-height: 280px; }
+      .hero-caption { position: static; width: 100%; margin-top: .75rem; }
+      .utility-title { display: none; }
+      .utility-bar { justify-content: flex-end; }
+      .chapter { padding: 3.5rem 1rem; }
+      .card-grid, .card-grid.three, .stats, .footer-inner { grid-template-columns: 1fr; }
+      .assertion { grid-template-columns: 1fr; }
+      .symbol-table, .compare-table { display: block; overflow-x: auto; }
+      .figure { margin-inline: -.25rem; padding: .45rem; }
+      .details-body { padding-left: 1.1rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 12mm; }
+      body { color: #000; background: #fff; font-size: 10.5pt; }
+      .hero { min-height: auto; padding: 20mm 10mm; color: #000; background: #fff; border: 3px solid #000; }
+      .hero::before { display: none; }
+      .hero h1, .hero h2, .hero strong, .hero-lede, .hero-note { color: #000; }
+      .hero-inner { grid-template-columns: 1.2fr .8fr; }
+      .hero-badges .badge { color: #000; border-color: #555; }
+      .hero-caption { position: static; width: 100%; color: #000; background: #fff; border-color: #777; }
+      .utility-bar, .toc, .skip-link, button { display: none !important; }
+      .shell { display: block; }
+      .chapter { padding: 12mm 0; break-before: page; background: #fff !important; }
+      .chapter:first-child { break-before: auto; }
+      .card, .figure, .assertion, details, .stat, .equation { break-inside: avoid; box-shadow: none; }
+      .stats { box-shadow: none; }
+      .stat, .equation { color: #000; background: #fff; border: 1px solid #333; }
+      .stat strong, .stat span, .equation math, .equation .plain, .equation .definition { color: #000; }
+      details:not([open]) > *:not(summary) { display: block !important; }
+      details summary { display: none; }
+      .details-body { padding: 1rem; }
+      footer { color: #000; background: #fff; border-top: 3px solid #000; }
+      footer h2, footer a { color: #000; }
+      .provenance { border-color: #333; background: #fff; }
+      a { color: #000; text-decoration: none; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; overflow-wrap: anywhere; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+
+  <header class="hero" id="top">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">InterSubMod · Visual Method Atlas · 2026-07-15</div>
+        <h1>sSNV 共現如何長成一棵樹？</h1>
+        <p class="hero-lede">從每條 read 的 <strong>R／A／X</strong> 狀態開始，走進布爾超立方體；再用帶根有向群組 Steiner 枚舉所有最小相容樹，最後理解 VAF 只能排序、不能確認。</p>
+        <div class="hero-note"><strong>教學示意／DEMO：</strong>本頁說明 regional mutation-state candidate trees。它不是 cellular clone truth；最新 canonical v5 目前也尚未使用 VAF 對候選樹排名。</div>
+        <div class="hero-badges">
+          <span class="badge">Canonical 7/7 PASS</span>
+          <span class="badge">chr1–22</span>
+          <span class="badge">LongPhase-S recalibrated PASS</span>
+          <span class="badge">k ≤ 8</span>
+          <span class="badge">MINREAD = 3</span>
+        </div>
+      </div>
+      <div class="hero-figure">
+        <svg viewBox="0 0 620 590" role="img" aria-labelledby="hero-svg-title hero-svg-desc">
+          <title id="hero-svg-title">三個 sSNV 所形成的布爾立方體</title>
+          <desc id="hero-svg-desc">八個突變狀態節點由十二條一次只增加一個突變的候選邊連接，ROOT 為 000。</desc>
+          <defs>
+            <marker id="hero-arrow" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#82c9c4"/>
+            </marker>
+            <filter id="hero-glow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="7" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g fill="none" stroke="#82c9c4" stroke-width="3" opacity=".78" marker-end="url(#hero-arrow)">
+            <path d="M120 455 L255 505"/><path d="M120 455 L94 300"/><path d="M120 455 L255 345"/>
+            <path d="M255 505 L390 395"/><path d="M255 505 L526 445"/>
+            <path d="M94 300 L390 395"/><path d="M94 300 L255 190"/>
+            <path d="M255 345 L526 445"/><path d="M255 345 L255 190"/>
+            <path d="M390 395 L526 240"/><path d="M526 445 L526 240"/><path d="M255 190 L526 240"/>
+          </g>
+          <g fill="#142a32" stroke="#dcefed" stroke-width="4">
+            <circle cx="120" cy="455" r="30" fill="#f2f0e8" stroke="#f2f0e8"/>
+            <circle cx="255" cy="505" r="28"/><circle cx="94" cy="300" r="28"/><circle cx="255" cy="345" r="28"/>
+            <circle cx="390" cy="395" r="28"/><circle cx="526" cy="445" r="28"/><circle cx="255" cy="190" r="28"/>
+            <circle cx="526" cy="240" r="34" fill="#d56b2f" stroke="#ffd4b4" filter="url(#hero-glow)"/>
+          </g>
+          <g fill="#f8f2e7" text-anchor="middle" font-family="SFMono-Regular, monospace" font-size="18" font-weight="700">
+            <text x="120" y="461" fill="#142a32">000</text>
+            <text x="255" y="511">100</text><text x="94" y="306">010</text><text x="255" y="351">001</text>
+            <text x="390" y="401">110</text><text x="526" y="451">101</text><text x="255" y="196">011</text>
+            <text x="526" y="246">111</text>
+          </g>
+          <g fill="#b8d8d4" font-family="Aptos, sans-serif" font-size="14">
+            <text x="68" y="507">ROOT · all-reference</text>
+            <text x="444" y="185">每條箭頭只允許</text>
+            <text x="444" y="205">一個 bit：0 → 1</text>
+          </g>
+        </svg>
+        <div class="hero-caption">記住這張圖：灰／細線可以代表所有合法候選邊；一棵實際候選樹只會選其中一部分，而且每個非 root 節點恰有一個父節點。</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="utility-bar">
+    <div class="utility-title">sSNV 共現 · Boolean hypercube · rooted group-Steiner · VAF ordering</div>
+    <div class="utility-actions">
+      <button type="button" id="expand-all">展開特例</button>
+      <button type="button" id="collapse-all">收合特例</button>
+      <button type="button" id="print-page">列印</button>
+    </div>
+  </div>
+
+  <div class="shell">
+    <nav class="toc" aria-label="章節導覽">
+      <div class="toc-title">教學路線</div>
+      <ol>
+        <li><a href="#overview">整體流程</a></li>
+        <li><a href="#language">R／A／X 語言</a></li>
+        <li><a href="#steiner">Group-Steiner 問題</a></li>
+        <li><a href="#k2">2-sSNV 正方形</a></li>
+        <li><a href="#k3">3-sSNV 立方體</a></li>
+        <li><a href="#partial">Partial 串接</a></li>
+        <li><a href="#special">特例與 recurrence</a></li>
+        <li><a href="#forest">HP forest 與邊界</a></li>
+        <li><a href="#vaf">VAF 排序</a></li>
+        <li><a href="#audit">實作精確性附註</a></li>
+        <li><a href="#glossary">術語與來源</a></li>
+      </ol>
+    </nav>
+
+    <main id="main">
+      <section class="chapter" id="overview">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">01 · MAP</div>
+          <h2>先看全貌：read 是約束，樹是解答集合</h2>
+          <p class="section-lede">這個方法不是先猜一棵樹，再把 reads 塞進去；而是先把每條 read 翻成可觀察的突變狀態約束，接著列舉所有滿足約束、方向合法且額外節點最少的候選樹。</p>
+
+          <div class="assertion">
+            <div>
+              <span class="assertion-label">核心判讀</span>
+              <h3>共現回答「同一分子上看到了什麼」；尚未自動回答「同一細胞族群是誰」。</h3>
+            </div>
+            <p>read-level joint state 比單點 VAF 多保留了突變交集資訊；但 molecule、chromosome copy、cell 與 clone 是四個不同層級。HP、CNA／LOH 與取樣偏差決定能否往細胞層解釋。</p>
+          </div>
+
+          <ol class="steps" aria-label="分析流程">
+            <li>
+              <div class="step-no">1</div>
+              <div><strong>建立 region</strong><span>相鄰 sSNV gap ≤ 50 kb；region 總 span 不另設上限。若超過 <code>MAX_SNV=8</code>，保留最密集的連續 8 個位點。</span></div>
+            </li>
+            <li>
+              <div class="step-no">2</div>
+              <div><strong>read × sSNV 編碼</strong><span>每格標成 R、A 或 X；X 是沒有可用判定，不是 R。</span></div>
+            </li>
+            <li>
+              <div class="step-no">3</div>
+              <div><strong>依 HP family 分開</strong><span>HP1 與 HP2 各自求解；H3／H4／none 是輔助層，不跨 HP 硬接成同一細胞。</span></div>
+            </li>
+            <li>
+              <div class="step-no">4</div>
+              <div><strong>形成 terminal constraints</strong><span>完整 pattern 是一個精確節點；partial pattern 是一群可能節點。pattern-level 支持需達 <code>MINREAD=3</code>。</span></div>
+            </li>
+            <li>
+              <div class="step-no">5</div>
+              <div><strong>在布爾超立方體列舉</strong><span>從全 R root 出發，每條有向邊只容許一個 bit 由 0 變 1，搜尋最少額外節點的所有相容 exact trees。</span></div>
+            </li>
+            <li>
+              <div class="step-no">6</div>
+              <div><strong>保留候選集合</strong><span>輸出 n_trees、hidden／extra nodes、recurrence 狀態與 shape；不是預先強迫每個 region 只剩一棵。</span></div>
+            </li>
+            <li>
+              <div class="step-no">7</div>
+              <div><strong>可選的 VAF ranking</strong><span>只在候選集合內做描述性排序；最新 canonical v5 尚未執行這一步，也沒有因此確認真實拓撲。</span></div>
+            </li>
+          </ol>
+
+          <div class="stats" aria-label="最新 canonical v5 分析單位摘要">
+            <div class="stat"><span>primary HP units</span><strong>72,994</strong><small>每個 region × primary HP family 獨立求解</small></div>
+            <div class="stat"><span>full + partial</span><strong>28,322</strong><small>同時有完整與部分 pattern 約束</small></div>
+            <div class="stat"><span>partial-only overlap</span><strong>44,672</strong><small>只有重疊 partial constraints 的單位</small></div>
+          </div>
+
+          <div class="assertion warning">
+            <div>
+              <span class="assertion-label">Claim ceiling</span>
+              <h3>目前可說「區域 mutation-state 候選樹／ordered forest」；不可直接說「已確認 clone、subclone 或真實祖先」。</h3>
+            </div>
+            <p>這個上限不是否定拓撲的用途；它提醒我們：圖形先描述 read-compatible geometry。要升級到細胞演化，仍需 allele-specific CN、purity、phase continuity、跨區或單細胞證據。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="language">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">02 · OBSERVATION LANGUAGE</div>
+          <h2>R／A／X：先分清楚「看到 REF」與「根本不知道」</h2>
+          <p class="section-lede">假設 region 內有 k 個 sSNV。每條可用 read 會形成長度 k 的 pattern；這是進入超立方體前最重要的語言層。</p>
+
+          <table class="symbol-table">
+            <thead><tr><th>符號</th><th>布爾表示</th><th>可說的事</th><th>不可誤解成</th></tr></thead>
+            <tbody>
+              <tr><td><span class="token token-r">R</span></td><td>0</td><td>該 read 在此位點有可用 REF 判定</td><td>沒有這個突變的細胞一定存在</td></tr>
+              <tr><td><span class="token token-a">A</span></td><td>1</td><td>該 read 在此位點有可用 ALT 判定</td><td>這個 ALT 必然只出現一次</td></tr>
+              <tr><td><span class="token token-x">X</span></td><td>?</td><td>未覆蓋、低品質或其他不可用狀態</td><td><strong>R／0</strong></td></tr>
+            </tbody>
+          </table>
+
+          <div class="card-grid three">
+            <article class="card">
+              <span class="card-tag">FULL</span>
+              <h3><code>ARA</code> → 精確節點 101</h3>
+              <p>同一 alignment 對三個位點都有可用判定，因此這條 full-span pattern 只對應超立方體中的一個節點。</p>
+            </article>
+            <article class="card">
+              <span class="card-tag partial">PARTIAL</span>
+              <h3><code>ARX</code> → 節點群 {100, 101}</h3>
+              <p>第三位未知，兩個 completion 都合理。solver 只要求候選樹至少碰到其中一個。</p>
+            </article>
+            <article class="card">
+              <span class="card-tag partial">PARTIAL</span>
+              <h3><code>XAA</code> → 節點群 {011, 111}</h3>
+              <p>第一位未知不能偷偷補成 R；否則會把真正的 partial constraint 錯縮為 011。</p>
+            </article>
+          </div>
+
+          <div class="equation" aria-label="partial pattern 所對應的節點群公式">
+            <math display="block">
+              <mrow>
+                <mi mathvariant="normal">Γ</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo>
+                <mo>=</mo>
+                <mo>{</mo><mi>x</mi><mo>∈</mo><msup><mrow><mo>{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>}</mo></mrow><mi>k</mi></msup>
+                <mo>:</mo><mi>x</mi><mtext> 與 </mtext><mi>p</mi><mtext> 的所有非 X 位置相容</mtext><mo>}</mo>
+              </mrow>
+            </math>
+            <div class="plain">Γ(p) = { x ∈ {0,1}ᵏ : x matches every non-X entry of p }</div>
+            <p class="definition">Full pattern 的 Γ 只有一個元素；含有 m 個 X 的 partial pattern 最多形成 2ᵐ 個 completion。</p>
+          </div>
+
+          <details>
+            <summary>MINREAD=3 到底是在篩什麼？</summary>
+            <div class="details-body">
+              <p>它是 <strong>pattern-level support gate</strong>：同一個 R／A／X pattern 至少要有 3 條 reads 支持，才進入約束集合。它不是每個節點的 cell count，也不是「一條 read 等於一個 clone」。</p>
+              <p>因此罕見但真實的狀態可能因低於門檻而消失；相反地，達門檻只代表分子證據重複出現，仍需排除 mapping、basecalling、PCR／sampling 與 copy-number 機制。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="chapter" id="steiner">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">03 · FORMAL MODEL</div>
+          <h2>把問題翻成：帶根、有向、群組 terminal 的最小樹枚舉</h2>
+          <p class="section-lede">名字很長，但白話只有三件事：從 0…0 出發、每步只新增一個突變、讓每一組 read constraint 至少被一個節點滿足。</p>
+
+          <div class="equation" aria-label="布爾超立方體狀態空間與合法有向邊">
+            <math display="block">
+              <mrow>
+                <mi mathvariant="double-struck">X</mi><mo>=</mo><msup><mrow><mo>{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>}</mo></mrow><mi>k</mi></msup>
+                <mo>,</mo>
+                <mspace width="1em"/>
+                <msup><mi>0</mi><mi>k</mi></msup><mtext> 為 root</mtext>
+                <mo>,</mo>
+                <mspace width="1em"/>
+                <mi>x</mi><mo>→</mo><mi>y</mi><mo>⇔</mo><mi>y</mi><mo>=</mo><mi>x</mi><mo>+</mo><msub><mi>e</mi><mi>j</mi></msub>
+              </mrow>
+            </math>
+            <div class="plain">X = {0,1}ᵏ ; root = 0ᵏ ; legal edge x → y iff y = x + eⱼ</div>
+            <p class="definition">eⱼ 只把第 j 個 bit 從 0 改成 1。任何 1→0、一次改兩個 bit、或同層跳接都不是合法候選邊。</p>
+          </div>
+
+          <div class="card-grid">
+            <article class="card">
+              <span class="card-tag">必須滿足</span>
+              <h3>Feasibility</h3>
+              <ul>
+                <li>樹包含 root 與所有 full terminals。</li>
+                <li>每個 partial group Γ(p) 至少與樹交會一次。</li>
+                <li>每個非 root 節點恰有一個合法 immediate predecessor。</li>
+                <li>所有選中節點都能從 root 到達。</li>
+              </ul>
+            </article>
+            <article class="card">
+              <span class="card-tag">優先順序</span>
+              <h3>Parsimony</h3>
+              <p>先找 <strong>額外／非 full-terminal 節點最少</strong> 的 feasible node sets；在第一個可行層級保留所有 exact parent assignments。</p>
+              <p>所以結果可以同時有多個 node set，也可以同一 node set 對應多棵樹。</p>
+            </article>
+          </div>
+
+          <div class="figure">
+            <svg viewBox="0 0 1120 390" role="img" aria-labelledby="pipeline-title pipeline-desc">
+              <title id="pipeline-title">從 read patterns 到所有最小相容樹的流程</title>
+              <desc id="pipeline-desc">七個步驟依序為讀取矩陣、HP 分流、full 或 partial terminals、超立方體、最小額外節點、父節點組合、候選樹集合。</desc>
+              <defs>
+                <marker id="pipeline-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#2e6f6a"/>
+                </marker>
+              </defs>
+              <g fill="none" stroke="#2e6f6a" stroke-width="3" marker-end="url(#pipeline-arrow)">
+                <path d="M145 178 H190"/><path d="M305 178 H350"/><path d="M465 178 H510"/>
+                <path d="M625 178 H670"/><path d="M785 178 H830"/><path d="M945 178 H990"/>
+              </g>
+              <g font-family="Aptos, sans-serif" text-anchor="middle">
+                <g transform="translate(25 80)">
+                  <rect width="120" height="196" rx="18" fill="#f3efe3" stroke="#b8aa92"/>
+                  <text x="60" y="32" font-size="14" fill="#6b6254">READ MATRIX</text>
+                  <text x="60" y="74" font-family="monospace" font-weight="700" font-size="20">A R X</text>
+                  <text x="60" y="108" font-family="monospace" font-weight="700" font-size="20">A A R</text>
+                  <text x="60" y="142" font-family="monospace" font-weight="700" font-size="20">X A A</text>
+                  <text x="60" y="178" font-size="13" fill="#6b6254">pattern ≥ 3 reads</text>
+                </g>
+                <g transform="translate(190 80)">
+                  <rect width="115" height="196" rx="18" fill="#e5f0ed" stroke="#76a9a4"/>
+                  <text x="57" y="32" font-size="14" fill="#2e6f6a">HP FAMILY</text>
+                  <rect x="22" y="59" width="72" height="40" rx="20" fill="#2e6f6a"/><text x="58" y="85" fill="#fff" font-weight="700">HP1</text>
+                  <rect x="22" y="117" width="72" height="40" rx="20" fill="#173b45"/><text x="58" y="143" fill="#fff" font-weight="700">HP2</text>
+                </g>
+                <g transform="translate(350 80)">
+                  <rect width="115" height="196" rx="18" fill="#fff7e8" stroke="#d6a85f"/>
+                  <text x="57" y="32" font-size="14" fill="#8c5a12">TERMINALS</text>
+                  <circle cx="38" cy="78" r="16" fill="#d56b2f"/><text x="76" y="83" font-size="15">full</text>
+                  <rect x="22" y="119" width="32" height="32" rx="8" fill="none" stroke="#d6a85f" stroke-width="3" stroke-dasharray="5 4"/>
+                  <text x="80" y="141" font-size="15">group</text>
+                </g>
+                <g transform="translate(510 80)">
+                  <rect width="115" height="196" rx="18" fill="#edf1f1" stroke="#8b9da0"/>
+                  <text x="57" y="32" font-size="14" fill="#425a60">HYPERCUBE</text>
+                  <g stroke="#7d9294" fill="none">
+                    <rect x="25" y="67" width="54" height="54"/><rect x="43" y="89" width="54" height="54"/>
+                    <path d="M25 67 L43 89 M79 67 L97 89 M25 121 L43 143 M79 121 L97 143"/>
+                  </g>
+                  <text x="57" y="174" font-size="13" fill="#425a60">unit 0→1 edges</text>
+                </g>
+                <g transform="translate(670 80)">
+                  <rect width="115" height="196" rx="18" fill="#f6ece5" stroke="#c48864"/>
+                  <text x="57" y="32" font-size="14" fill="#8a4a27">MIN EXTRA</text>
+                  <text x="57" y="95" font-size="48" font-weight="800" fill="#d56b2f">e*</text>
+                  <text x="57" y="135" font-size="13" fill="#6b6254">first feasible level</text>
+                </g>
+                <g transform="translate(830 80)">
+                  <rect width="115" height="196" rx="18" fill="#e5f0ed" stroke="#76a9a4"/>
+                  <text x="57" y="32" font-size="14" fill="#2e6f6a">PARENT SETS</text>
+                  <path d="M58 65 L30 120 M58 65 L86 120" stroke="#2e6f6a" stroke-width="4"/>
+                  <circle cx="58" cy="65" r="12" fill="#173b45"/><circle cx="30" cy="120" r="12" fill="#d56b2f"/><circle cx="86" cy="120" r="12" fill="#d56b2f"/>
+                  <text x="57" y="169" font-size="13" fill="#425a60">enumerate choices</text>
+                </g>
+                <g transform="translate(990 80)">
+                  <rect width="105" height="196" rx="18" fill="#173b45" stroke="#173b45"/>
+                  <text x="52" y="32" font-size="14" fill="#b9d8d4">ALL TREES</text>
+                  <text x="52" y="96" font-size="44" fill="#fff" font-weight="800">T</text>
+                  <text x="52" y="128" font-size="16" fill="#d56b2f">₁ … Tₙ</text>
+                  <text x="52" y="169" font-size="13" fill="#b9d8d4">do not force one</text>
+                </g>
+              </g>
+            </svg>
+            <div class="figcaption"><strong>圖 1｜</strong>read patterns 先定義 constraint；parsimony 再決定搜尋層級；最後完整保留該層所有 exact trees。</div>
+          </div>
+
+          <div class="equation" aria-label="固定節點集合的候選樹數">
+            <math display="block">
+              <mrow>
+                <mi>N</mi><mo stretchy="false">(</mo><mi>T</mi><mo>|</mo><mi>N</mi><mo stretchy="false">)</mo>
+                <mo>=</mo>
+                <munder><mo>∏</mo><mrow><mi>x</mi><mo>∈</mo><mi>N</mi><mo>∖</mo><mo>{</mo><msup><mi>0</mi><mi>k</mi></msup><mo>}</mo></mrow></munder>
+                <mo>|</mo><msub><mi>P</mi><mi>N</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>|</mo>
+              </mrow>
+            </math>
+            <div class="plain">For a fixed feasible node set N: number of trees = ∏ over non-root x of |Pₙ(x)|</div>
+            <p class="definition">Pₙ(x) 是 N 中 x 的合法 immediate predecessors。總候選數還要對所有最小-extra node sets 加總。</p>
+          </div>
+
+          <details>
+            <summary>實際程式真的在跑通用 Group-Steiner optimizer 嗎？</summary>
+            <div class="details-body">
+              <p>不是。這裡的問題可用 Group-Steiner 語言描述，但目前實作利用 <strong>k≤8</strong> 的小狀態空間，直接做 capped exhaustive enumeration：最多 2⁸=256 個布爾狀態。</p>
+              <p>搜尋 extra node 數 <code>e=0…4</code>；每層組合預算 150,000；遇到第一個 feasible e 就停止往更大 e 搜尋。若超過上限則標為 capped／fallback，而不是把不完整搜尋包裝成完整證明。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+      <section class="chapter" id="k2">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">04 · TWO sSNVs</div>
+          <h2>2-sSNV：先把四格正方形看懂</h2>
+          <p class="section-lede">令第一個 bit 是 A、第二個 bit 是 B。所有可能狀態只有 00、10、01、11；合法方向也只有四條。</p>
+
+          <div class="legend" aria-label="SVG 圖例">
+            <span class="legend-item"><span class="swatch root"></span>結構 root</span>
+            <span class="legend-item"><span class="swatch observed"></span>read 完整觀察節點</span>
+            <span class="legend-item"><span class="swatch hidden"></span>補齊連通的 model node</span>
+            <span class="legend-item"><span class="swatch partial"></span>partial terminal group</span>
+            <span class="legend-item"><span class="swatch rec"></span>同一 bit 在不同分枝重複新增</span>
+          </div>
+
+          <div class="figure">
+            <svg id="k2-dag" viewBox="0 0 920 500" role="img" aria-labelledby="k2-title k2-desc">
+              <title id="k2-title">二個 sSNV 的完整有向布爾正方形</title>
+              <desc id="k2-desc">四個節點 00、10、01、11 與四條合法候選邊；每條箭頭一次只將 A 或 B 的一個 bit 從零改為一。</desc>
+              <defs>
+                <marker id="k2-gray-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#9ba3a4"/>
+                </marker>
+              </defs>
+              <rect x="40" y="36" width="840" height="412" rx="24" class="panel-bg"/>
+              <g class="k2-edge candidate-edge" marker-end="url(#k2-gray-arrow)"><path d="M230 345 L650 345"/></g>
+              <g class="k2-edge candidate-edge" marker-end="url(#k2-gray-arrow)"><path d="M205 320 L205 130"/></g>
+              <g class="k2-edge candidate-edge" marker-end="url(#k2-gray-arrow)"><path d="M255 310 L665 115"/></g>
+              <g class="k2-edge candidate-edge" marker-end="url(#k2-gray-arrow)"><path d="M680 315 L680 135"/></g>
+              <text x="442" y="370" class="svg-small">新增 A</text>
+              <text x="174" y="230" class="svg-small" transform="rotate(-90 174 230)">新增 B</text>
+              <text x="438" y="194" class="svg-small" transform="rotate(-25 438 194)">新增 B</text>
+              <text x="710" y="228" class="svg-small" transform="rotate(-90 710 228)">新增 A</text>
+              <g class="node k2-node root" transform="translate(205 345)">
+                <rect x="-42" y="-27" width="84" height="54" rx="9"/><text text-anchor="middle" y="6" class="svg-label">00</text>
+              </g>
+              <g class="node k2-node observed" transform="translate(680 345)">
+                <circle r="34"/><text text-anchor="middle" y="6" class="svg-label">10</text><text text-anchor="middle" y="58" class="svg-small">A</text>
+              </g>
+              <g class="node k2-node observed" transform="translate(205 105)">
+                <circle r="34"/><text text-anchor="middle" y="6" class="svg-label">01</text><text text-anchor="middle" y="-50" class="svg-small">B</text>
+              </g>
+              <g class="node k2-node observed" transform="translate(680 105)">
+                <circle r="38"/><text text-anchor="middle" y="6" class="svg-label">11</text><text text-anchor="middle" y="-54" class="svg-small">A + B</text>
+              </g>
+              <text x="65" y="70" class="svg-kicker">COMPLETE CANDIDATE DAG · 4 NODES / 4 EDGES</text>
+              <text x="65" y="424" class="svg-small">細灰箭頭＝合法但尚未選入某棵樹的候選邊；不是已證實的細胞祖先關係。</text>
+            </svg>
+            <div class="figcaption"><strong>圖 2｜</strong>正方形本身是候選 DAG，不是一棵樹。exact tree 必須從中為每個非 root 節點選一個父節點。</div>
+          </div>
+
+          <table class="compare-table">
+            <thead><tr><th>達 MINREAD 的 full states</th><th>最小解</th><th>樹數</th><th>可以怎麼讀</th></tr></thead>
+            <tbody>
+              <tr><td><code>{10, 01}</code></td><td>00→10；00→01</td><td>1</td><td>唯一 sister geometry；hidden=0。</td></tr>
+              <tr><td><code>{10, 11}</code></td><td>00→10→11</td><td>1</td><td>唯一 linear geometry；B 必須在含 A 的路徑後段新增。</td></tr>
+              <tr><td><code>{11}</code></td><td>00→10→11 <em>或</em> 00→01→11</td><td>2</td><td>只看終點無法區分 A→B 或 B→A；各需 1 個 model node。</td></tr>
+              <tr><td><code>{10, 01, 11}</code></td><td>11 必須選 10 或 01 為父</td><td>2</td><td>任一選法都讓另一個 bit 在另一枝重複新增，故 recurrence-required。</td></tr>
+              <tr><td><code>{1?, ?1}</code></td><td>star、A-chain 或 B-chain</td><td>3</td><td>partial groups 可分別由 10／01 滿足，也可共同由 11 滿足。</td></tr>
+            </tbody>
+          </table>
+
+          <div class="card-grid three">
+            <article class="card">
+              <span class="card-tag">SISTER</span>
+              <h3>{10, 01}</h3>
+              <p><code>00→10</code><br><code>00→01</code></p>
+              <p>兩個 observed states 共享 root；圖形有分枝，但不等於已證明兩個 extant cell clones。</p>
+            </article>
+            <article class="card">
+              <span class="card-tag">DIRECT</span>
+              <h3>{10, 11}</h3>
+              <p><code>00→10→11</code></p>
+              <p>在模型內，11 的合法 immediate predecessor 只剩 10，因此方向被 read states 決定，無需 VAF。</p>
+            </article>
+            <article class="card">
+              <span class="card-tag rec">RECURRENCE</span>
+              <h3>{10, 01, 11}</h3>
+              <p><code>00→10→11</code> 加 <code>00→01</code>，或鏡像版本。</p>
+              <p>兩棵都需要同一突變 bit 在不同分枝新增；Model A 保留，不把它偷偷刪掉。</p>
+            </article>
+          </div>
+
+          <div class="assertion">
+            <div><span class="assertion-label">2-sSNV 最關鍵案例</span><h3>只看到 11，不代表能知道誰先發生。</h3></div>
+            <p>由 00 走到 11 必須經過一個一階狀態，但 10 與 01 都沒被完整 read 觀察。因此 solver 應保留兩條最短路徑，而不是用 VAF 先驗硬選一條。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="k3">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">05 · THREE sSNVs</div>
+          <h2>3-sSNV：正方形升成 8 節點、12 邊的立方體</h2>
+          <p class="section-lede">三個位點 A、B、C 形成四層：1 個 root、3 個單突變、3 個雙突變、1 個三突變。層數是 Hamming weight，不是時間軸的實測刻度。</p>
+
+          <div class="figure">
+            <svg id="k3-dag" viewBox="0 0 1120 650" role="img" aria-labelledby="k3-title k3-desc">
+              <title id="k3-title">三個 sSNV 的完整有向布爾超立方體</title>
+              <desc id="k3-desc">八個節點依突變數分成一、三、三、一四層，十二條箭頭各自只新增 A、B 或 C 中的一個突變。</desc>
+              <defs>
+                <marker id="k3-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#9ba3a4"/>
+                </marker>
+              </defs>
+              <rect x="34" y="38" width="1052" height="560" rx="24" class="panel-bg"/>
+              <g stroke-dasharray="5 7" stroke="#d3c9b8"><path d="M270 75 V560"/><path d="M555 75 V560"/><path d="M840 75 V560"/></g>
+              <g font-weight="800" font-size="13" fill="#6f756f">
+                <text x="105" y="90">L0 · 0 mutations</text><text x="330" y="90">L1 · 1 mutation</text>
+                <text x="620" y="90">L2 · 2 mutations</text><text x="900" y="90">L3 · 3 mutations</text>
+              </g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M190 320 L340 160"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M190 320 L340 320"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M190 320 L340 480"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 160 L630 210"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 160 L630 430"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 320 L630 210"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 320 L630 320"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 480 L630 430"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M410 480 L630 320"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M700 210 L900 320"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M700 320 L900 320"/></g>
+              <g class="k3-edge candidate-edge" marker-end="url(#k3-arrow)"><path d="M700 430 L900 320"/></g>
+              <g class="node k3-node root" transform="translate(155 320)">
+                <rect x="-45" y="-28" width="90" height="56" rx="10"/><text text-anchor="middle" y="6" class="svg-label">000</text>
+              </g>
+              <g class="node k3-node observed" transform="translate(375 150)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">100</text><text text-anchor="middle" y="-48" class="svg-small">A</text></g>
+              <g class="node k3-node observed" transform="translate(375 320)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">010</text><text text-anchor="middle" y="-48" class="svg-small">B</text></g>
+              <g class="node k3-node observed" transform="translate(375 490)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">001</text><text text-anchor="middle" y="58" class="svg-small">C</text></g>
+              <g class="node k3-node observed" transform="translate(665 200)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">110</text><text text-anchor="middle" y="-48" class="svg-small">A+B</text></g>
+              <g class="node k3-node observed" transform="translate(665 320)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">011</text><text text-anchor="middle" y="-48" class="svg-small">B+C</text></g>
+              <g class="node k3-node observed" transform="translate(665 440)"><circle r="34"/><text text-anchor="middle" y="6" class="svg-label">101</text><text text-anchor="middle" y="58" class="svg-small">A+C</text></g>
+              <g class="node k3-node observed" transform="translate(940 320)"><circle r="39"/><text text-anchor="middle" y="6" class="svg-label">111</text><text text-anchor="middle" y="-54" class="svg-small">A+B+C</text></g>
+              <text x="68" y="570" class="svg-small">每一條灰線都是合法候選邊；一棵 exact tree 只選其中使所有 terminals 可從 000 到達的一部分。</text>
+            </svg>
+            <div class="figcaption"><strong>圖 3｜</strong>節點數為 2³=8，合法有向邊數為 3×2²=12；四層節點數依序為 1–3–3–1。</div>
+          </div>
+
+          <div class="assertion warning">
+            <div><span class="assertion-label">只觀察 111</span><h3>三個突變的先後共有 3! = 6 條同長最短路徑。</h3></div>
+            <p>中間兩個狀態都未被 full read 觀察；因此 hidden／model nodes=2、exact trees=6。資料只告訴我們終點三個 ALT 共現，沒有告訴我們 acquisition order。</p>
+          </div>
+
+          <div class="figure">
+            <svg id="only111-paths" viewBox="0 0 1120 510" role="img" aria-labelledby="only111-title only111-desc">
+              <title id="only111-title">只觀察 111 時的六條最短候選路徑</title>
+              <desc id="only111-desc">三個突變 A B C 的六種排列各形成一條由 000 到 111 的三步路徑，全部需要兩個未完整觀察的中介節點。</desc>
+              <g class="only111-path" transform="translate(45 70)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">01 · A → B → C</text><text x="18" y="68" class="mono svg-label">000 → 100 → 110 → 111</text>
+              </g>
+              <g class="only111-path" transform="translate(400 70)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">02 · A → C → B</text><text x="18" y="68" class="mono svg-label">000 → 100 → 101 → 111</text>
+              </g>
+              <g class="only111-path" transform="translate(755 70)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">03 · B → A → C</text><text x="18" y="68" class="mono svg-label">000 → 010 → 110 → 111</text>
+              </g>
+              <g class="only111-path" transform="translate(45 210)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">04 · B → C → A</text><text x="18" y="68" class="mono svg-label">000 → 010 → 011 → 111</text>
+              </g>
+              <g class="only111-path" transform="translate(400 210)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">05 · C → A → B</text><text x="18" y="68" class="mono svg-label">000 → 001 → 101 → 111</text>
+              </g>
+              <g class="only111-path" transform="translate(755 210)">
+                <rect width="320" height="105" rx="15" class="panel-bg"/><text x="18" y="27" class="svg-kicker">06 · C → B → A</text><text x="18" y="68" class="mono svg-label">000 → 001 → 011 → 111</text>
+              </g>
+              <rect x="45" y="365" width="1030" height="84" rx="15" fill="#173b45"/>
+              <text x="78" y="400" fill="#b9d8d4" font-size="14" font-weight="800">SAME READ EVIDENCE · SAME PARSIMONY</text>
+              <text x="78" y="429" fill="#fff7e9" font-size="20" font-weight="800">full={111} · minimum extra/model nodes=2 · exact trees=6</text>
+            </svg>
+            <div class="figcaption"><strong>圖 4｜</strong>不能因為「111 是最高層」就憑空決定中間順序；六條路徑對目前 read constraint 完全等價。</div>
+          </div>
+
+          <div class="card-grid three">
+            <article class="card"><span class="card-tag">UNIQUE CHAIN</span><h3>{100,110,111}</h3><p><code>000→100→110→111</code></p><p>每個 observed state 都只剩一個可行 immediate predecessor。</p></article>
+            <article class="card"><span class="card-tag">FORK AFTER A</span><h3>{100,110,101}</h3><p><code>000→100</code>，再分到 <code>110</code> 與 <code>101</code>。</p><p>shape 是 Sister＋Direct geometry；不是直接證明三個 cell populations。</p></article>
+            <article class="card"><span class="card-tag">THREE SISTERS</span><h3>{100,010,001}</h3><p>三個一階 states 都直接接 root。</p><p>唯一 star geometry；但 root 是結構基準，不必是被 reads 觀察到的正常細胞。</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="partial">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">06 · PARTIAL OVERLAP</div>
+          <h2>Partial reads 怎麼「串接」：交會約束，不是假造長 read</h2>
+          <p class="section-lede"><code>AAX=11?</code> 與 <code>XAA=?11</code> 各自定義一個 terminal group。它們在 111 交會，但兩條不同 reads 的片段不能被宣稱來自同一分子。</p>
+
+          <div class="equation" aria-label="兩個 partial patterns 的 terminal groups 與交集">
+            <math display="block">
+              <mrow>
+                <mi mathvariant="normal">Γ</mi><mo stretchy="false">(</mo><mn>11</mn><mo>?</mo><mo stretchy="false">)</mo>
+                <mo>=</mo><mo>{</mo><mn>110</mn><mo>,</mo><mn>111</mn><mo>}</mo>
+                <mo>,</mo><mspace width="1em"/>
+                <mi mathvariant="normal">Γ</mi><mo stretchy="false">(</mo><mo>?</mo><mn>11</mn><mo stretchy="false">)</mo>
+                <mo>=</mo><mo>{</mo><mn>011</mn><mo>,</mo><mn>111</mn><mo>}</mo>
+                <mo>,</mo><mspace width="1em"/>
+                <mi mathvariant="normal">Γ</mi><mo stretchy="false">(</mo><mn>11</mn><mo>?</mo><mo stretchy="false">)</mo>
+                <mo>∩</mo><mi mathvariant="normal">Γ</mi><mo stretchy="false">(</mo><mo>?</mo><mn>11</mn><mo stretchy="false">)</mo>
+                <mo>=</mo><mo>{</mo><mn>111</mn><mo>}</mo>
+              </mrow>
+            </math>
+            <div class="plain">Γ(11?)={110,111}; Γ(?11)={011,111}; intersection={111}</div>
+          </div>
+
+          <div class="figure">
+            <svg id="partial-seven" viewBox="0 0 1160 770" role="img" aria-labelledby="partial-seven-title partial-seven-desc">
+              <title id="partial-seven-title">AAX 與 XAA 兩個 partial constraints 的七個最小候選樹</title>
+              <desc id="partial-seven-desc">六條通過 111 的線性路徑，加上一棵由 010 分枝到 110 與 011 的樹；全部同為最少三個額外節點且不需 recurrence。</desc>
+              <defs><marker id="partial-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2e6f6a"/></marker></defs>
+              <rect x="35" y="35" width="1090" height="102" rx="18" fill="#fff3de" stroke="#d6a85f"/>
+              <text x="66" y="72" class="svg-kicker" fill="#8c5a12">TWO GROUP CONSTRAINTS</text>
+              <text x="66" y="108" class="mono svg-label">11? → {110,111}      ?11 → {011,111}      shared completion → 111</text>
+              <g class="partial-candidate" transform="translate(35 175)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">01 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→100→110→111</text><text x="18" y="94" class="svg-small">110 滿足 11?；111 滿足 ?11</text>
+              </g>
+              <g class="partial-candidate" transform="translate(410 175)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">02 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→100→101→111</text><text x="18" y="94" class="svg-small">111 同時命中兩個 groups</text>
+              </g>
+              <g class="partial-candidate" transform="translate(785 175)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">03 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→010→110→111</text><text x="18" y="94" class="svg-small">110 滿足 11?；111 滿足 ?11</text>
+              </g>
+              <g class="partial-candidate" transform="translate(35 330)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">04 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→010→011→111</text><text x="18" y="94" class="svg-small">011 滿足 ?11；111 滿足 11?</text>
+              </g>
+              <g class="partial-candidate" transform="translate(410 330)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">05 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→001→101→111</text><text x="18" y="94" class="svg-small">111 同時命中兩個 groups</text>
+              </g>
+              <g class="partial-candidate" transform="translate(785 330)">
+                <rect width="340" height="120" rx="15" class="panel-bg"/><text x="18" y="29" class="svg-kicker">06 · LINEAR</text><text x="18" y="67" class="mono svg-label">000→001→011→111</text><text x="18" y="94" class="svg-small">011 滿足 ?11；111 滿足 11?</text>
+              </g>
+              <g class="partial-candidate" transform="translate(222 485)">
+                <rect width="716" height="145" rx="15" fill="#e5f0ed" stroke="#76a9a4"/>
+                <text x="22" y="31" class="svg-kicker">07 · BRANCH</text>
+                <path d="M112 96 H250 M250 96 L410 65 M250 96 L410 123" class="selected-edge" marker-end="url(#partial-arrow)"/>
+                <g class="node root" transform="translate(78 96)"><rect x="-34" y="-22" width="68" height="44" rx="7"/><text text-anchor="middle" y="5" class="svg-label">000</text></g>
+                <g class="node hidden" transform="translate(250 96)"><circle r="28"/><text text-anchor="middle" y="5" class="svg-label">010</text></g>
+                <g class="node partial" transform="translate(445 65)"><circle r="28"/><text text-anchor="middle" y="5" class="svg-label">110</text></g>
+                <g class="node partial" transform="translate(445 123)"><circle r="28"/><text text-anchor="middle" y="5" class="svg-label">011</text></g>
+                <text x="505" y="72" class="svg-small">命中 11?</text><text x="505" y="130" class="svg-small">命中 ?11</text>
+              </g>
+              <rect x="222" y="665" width="716" height="62" rx="14" fill="#173b45"/>
+              <text x="250" y="703" fill="#fff7e9" font-size="18" font-weight="800">minimum extra nodes = 3 · exact trees = 7 · recurrence-free = 7</text>
+            </svg>
+            <div class="figcaption"><strong>圖 5｜</strong>七棵候選都同時滿足兩個 partial groups。solver 是在共同候選 node set 中求交會，不是把兩條 reads 接成一條不存在的 111 molecule。</div>
+          </div>
+
+          <div class="card-grid">
+            <article class="card"><span class="card-tag partial">合理的串接</span><h3>Constraint intersection</h3><p>所有 partial groups 一起限制同一棵候選樹；某節點可以同時滿足多組，也可以由不同節點各自滿足。</p></article>
+            <article class="card"><span class="card-tag rec">不合理的串接</span><h3>Read concatenation</h3><p>read 1 的左半段加 read 2 的右半段，不能宣稱為同一分子上的 full state。真正 exact co-occurrence 仍需要一條 read 完整跨過相應位點。</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="special">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">07 · EDGE CASES</div>
+          <h2>最重要反例：唯一樹也可能必須 recurrence</h2>
+          <p class="section-lede">考慮 full states <code>{001,010,110,101}</code>。這組資料只有一棵最小 exact tree，但 A 必須在 B 分枝與 C 分枝各新增一次。</p>
+
+          <div class="figure">
+            <svg id="unique-recurrence-svg" viewBox="0 0 1050 560" role="img" aria-labelledby="rec-title rec-desc">
+              <title id="rec-title">唯一但 recurrence-required 的三 sSNV 候選樹</title>
+              <desc id="rec-desc">由 root 000 分到 observed states 001 與 010，再各自以紅色邊新增同一突變 A 成為 101 與 110；樹數為一但同一 A bit 在兩枝重複。</desc>
+              <defs>
+                <marker id="rec-teal-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2e6f6a"/></marker>
+                <marker id="rec-red-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#a23b35"/></marker>
+              </defs>
+              <rect x="40" y="40" width="970" height="440" rx="24" class="panel-bg"/>
+              <path d="M220 260 L425 145" class="selected-edge" marker-end="url(#rec-teal-arrow)"/>
+              <path d="M220 280 L425 390" class="selected-edge" marker-end="url(#rec-teal-arrow)"/>
+              <path d="M490 135 L770 135" class="recurrence-edge" marker-end="url(#rec-red-arrow)"/>
+              <path d="M490 395 L770 395" class="recurrence-edge" marker-end="url(#rec-red-arrow)"/>
+              <g class="node root" transform="translate(175 270)"><rect x="-47" y="-29" width="94" height="58" rx="9"/><text text-anchor="middle" y="6" class="svg-label">000</text></g>
+              <g class="node observed" transform="translate(455 130)"><circle r="35"/><text text-anchor="middle" y="6" class="svg-label">001</text><text text-anchor="middle" y="-50" class="svg-small">C</text></g>
+              <g class="node observed" transform="translate(455 400)"><circle r="35"/><text text-anchor="middle" y="6" class="svg-label">010</text><text text-anchor="middle" y="58" class="svg-small">B</text></g>
+              <g class="node observed" transform="translate(810 130)"><circle r="38"/><text text-anchor="middle" y="6" class="svg-label">101</text><text text-anchor="middle" y="-52" class="svg-small">A+C</text></g>
+              <g class="node observed" transform="translate(810 400)"><circle r="38"/><text text-anchor="middle" y="6" class="svg-label">110</text><text text-anchor="middle" y="60" class="svg-small">A+B</text></g>
+              <text x="605" y="105" fill="#a23b35" font-weight="900">A：0→1</text>
+              <text x="605" y="370" fill="#a23b35" font-weight="900">A：0→1 再一次</text>
+              <rect x="255" y="496" width="540" height="48" rx="12" fill="#a23b35"/>
+              <text x="525" y="527" text-anchor="middle" fill="#fff" font-size="17" font-weight="900">n_trees=1 · hidden=0 · recurrence_required</text>
+            </svg>
+            <div class="figcaption"><strong>圖 6｜</strong>「唯一」只表示目前形式約束下 exact tree 唯一；不表示 infinite-sites 無 recurrence，也不表示已驗證為生物真樹。</div>
+          </div>
+
+          <div class="assertion danger">
+            <div><span class="assertion-label">四個不同命題</span><h3>unique ≠ recurrence-free ≠ all nodes observed ≠ biological truth</h3></div>
+            <p>這四件事必須分開欄位報告。Model A 的價值正是保留 recurrence-required 解，不用 infinite-sites 假設把與 reads 相容的結構預先排除。</p>
+          </div>
+
+          <details open>
+            <summary>特例 1｜hidden／extra node 不等於 hidden clone</summary>
+            <div class="details-body">
+              <p>它只表示該節點不是達 MINREAD 的 full observed terminal，卻被模型選來連通 root、或用來滿足 partial group。它可能是未取樣中介狀態，也可能只是 partial completion；不能直接命名為仍存在的 subclone。</p>
+            </div>
+          </details>
+          <details>
+            <summary>特例 2｜root 000 是結構基準，不是已觀察祖先</summary>
+            <div class="details-body">
+              <p>root 讓所有路徑有共同起點，代表在這 k 個局部 sSNV 上全為 reference。它不保證樣本裡真的有一群 000 細胞，也不代表正常細胞或腫瘤 founder 已被 read 直接看到。</p>
+            </div>
+          </details>
+          <details>
+            <summary>特例 3｜兩個 cap 不可混為一談</summary>
+            <div class="details-body">
+              <p><strong>輸入 cap：</strong><code>MAX_SNV=8</code> 決定 region 超過 8 個 sSNV 時，只分析最密集連續 8 個。<strong>搜尋 cap：</strong>extra nodes 僅搜 e=0…4、每層預算 150,000。另有 display cap 32 只限制畫面列出幾棵，不應改變分析集合。</p>
+            </div>
+          </details>
+          <details>
+            <summary>特例 4｜CNA／LOH 不只扭曲 VAF，也會改變 read-state 的細胞解釋</summary>
+            <div class="details-body">
+              <p>allele-specific amplification 可讓同一個 cell 的 HP1-derived copy A=10、copy B=11；同 HP 看到 10 與 11 因而不必然是兩群細胞。deletion／LOH 也可能移除既有突變，違反模型的 0→1 單調方向。</p>
+              <p>目前 L2 CN 只在 L1 建樹後，以 region midpoint 的 segment annotation 協助標記 recurrence／multiplicity；不回頭重建 L1 topology，也不等於已知 allele-specific 1+1。要稱為 cellular ancestry，仍需 allele-specific copy number、mutation multiplicity、purity 與 subclonal CNA 模型。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+      <section class="chapter" id="forest">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">08 · HP-ORDERED FOREST</div>
+          <h2>同一 region 的 HP1 與 HP2：兩棵分開的樹，不是一棵跨 HP 細胞樹</h2>
+          <p class="section-lede">Primary analysis 先把可追溯到 parental homolog 1 與 2 的 reads 分家，再對每個 <strong>region × mutation-bearing HP family</strong> 獨立求解。區域結果是有 family 欄位順序的 forest／Cartesian product；「ordered」不表示 HP1 比 HP2 更早。</p>
+
+          <div class="figure">
+            <svg id="hp-forest-svg" viewBox="0 0 1120 570" role="img" aria-labelledby="forest-title forest-desc">
+              <title id="forest-title">同一區域由 HP1 與 HP2 兩個獨立候選樹組成 ordered forest</title>
+              <desc id="forest-desc">左側 HP1 family tree 與右側 HP2 family tree 各自從 root 出發；中間紅色叉號表示目前方法不建立跨 HP 邊，也不配對為同一細胞。</desc>
+              <defs><marker id="forest-arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2e6f6a"/></marker></defs>
+              <rect x="38" y="42" width="470" height="420" rx="24" fill="#e5f0ed" stroke="#76a9a4"/>
+              <rect x="612" y="42" width="470" height="420" rx="24" fill="#f3efe3" stroke="#b8aa92"/>
+              <text x="72" y="80" class="svg-kicker">FAMILY 1 · tags 1 / 1-1 / 1-2</text>
+              <text x="646" y="80" class="svg-kicker">FAMILY 2 · tags 2 / 2-1 / 2-2</text>
+              <g transform="translate(105 115)">
+                <path d="M80 245 L190 145 M80 245 L190 305 M220 145 L335 145" class="selected-edge" marker-end="url(#forest-arrow)"/>
+                <g class="node root" transform="translate(55 245)"><rect x="-38" y="-25" width="76" height="50" rx="8"/><text text-anchor="middle" y="6" class="svg-label">000</text></g>
+                <g class="node observed" transform="translate(210 135)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">100</text></g>
+                <g class="node observed" transform="translate(210 315)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">010</text></g>
+                <g class="node observed" transform="translate(365 135)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">110</text></g>
+              </g>
+              <g transform="translate(675 115)">
+                <path d="M80 245 L190 245 M220 245 L335 160 M220 245 L335 325" class="selected-edge" marker-end="url(#forest-arrow)"/>
+                <g class="node root" transform="translate(55 245)"><rect x="-38" y="-25" width="76" height="50" rx="8"/><text text-anchor="middle" y="6" class="svg-label">000</text></g>
+                <g class="node hidden" transform="translate(210 245)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">001</text></g>
+                <g class="node partial" transform="translate(365 150)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">101</text></g>
+                <g class="node partial" transform="translate(365 335)"><circle r="31"/><text text-anchor="middle" y="6" class="svg-label">011</text></g>
+              </g>
+              <g transform="translate(560 246)" stroke="#a23b35" stroke-width="7" stroke-linecap="round">
+                <path d="M-18 -18 L18 18 M18 -18 L-18 18"/>
+              </g>
+              <text x="560" y="300" text-anchor="middle" fill="#a23b35" font-size="13" font-weight="900">NO CROSS-HP EDGE</text>
+              <rect x="160" y="490" width="800" height="54" rx="13" fill="#173b45"/>
+              <text x="560" y="523" text-anchor="middle" fill="#fff7e9" font-size="18" font-weight="800">F(region) = ( T_HP1 , T_HP2 , … ) · family-specific candidate product</text>
+            </svg>
+            <div class="figcaption"><strong>圖 7｜</strong>HP 是 homologous haplotype background。兩側一起出現在同一 region，仍沒有資訊知道 HP1 state 與哪個 HP2 state 位於同一顆細胞。</div>
+          </div>
+
+          <div class="equation" aria-label="區域候選 forest 數量為各 HP family 候選樹數的乘積">
+            <math display="block">
+              <mrow>
+                <msub><mi>C</mi><mtext>region</mtext></msub>
+                <mo>=</mo>
+                <munder><mo>∏</mo><mrow><mi>h</mi><mo>∈</mo><msub><mi>H</mi><mtext>primary</mtext></msub></mrow></munder>
+                <msub><mi>n</mi><mtext>trees,h</mtext></msub>
+              </mrow>
+            </math>
+            <div class="plain">C_region = ∏ over primary HP families h of n_trees,h</div>
+            <p class="definition">這是候選 forest 組合數，不是 region 內 clone 數。若 HP1 有 2 棵、HP2 有 3 棵，區域有 2×3=6 種 ordered forest combinations。</p>
+          </div>
+
+          <table class="compare-table">
+            <thead><tr><th>層</th><th>目前如何處理</th><th>科學意義上限</th></tr></thead>
+            <tbody>
+              <tr><td>HP family 1</td><td><code>1 / 1-1 / 1-2</code> 合併為 parental family 1；fine tag 另存</td><td>同一 homolog background，不是 clone ID</td></tr>
+              <tr><td>HP family 2</td><td><code>2 / 2-1 / 2-2</code> 合併為 parental family 2；fine tag 另存</td><td>同一 homolog background，不是另一群細胞</td></tr>
+              <tr><td>H3／H4／none</td><td>保存為 unresolved/shared/unphased auxiliary</td><td>不進 primary lineage denominator</td></tr>
+              <tr><td>PS</td><td>保存並作 phase continuity／mixed-PS QC</td><td>目前不切 topology，也不建立 edge</td></tr>
+              <tr><td>region</td><td>相鄰 sSNV gap≤50 kb 的 connected component</td><td>regional，不是 whole-genome phylogeny</td></tr>
+            </tbody>
+          </table>
+
+          <details>
+            <summary>mixed-PS 要怎麼解釋？</summary>
+            <div class="details-body">
+              <p>同一 HP label 跨 phase sets 不自動保證整段 biological phase continuity。最新 canonical 中 PS 先作 QC，不拿來切 tree；因此 mixed-PS region 的局部候選仍可報，但若要把方向升級為跨 block 的生物相位主張，需另做 phase-continuity gate 或正交 phasing 驗證。</p>
+            </div>
+          </details>
+
+          <div class="card-grid">
+            <article class="card">
+              <span class="card-tag">為何 chr1–22</span>
+              <h3>目前 canonical 是 autosomal scope</h3>
+              <p>核心模型以兩條 homologous copies 與固定 diploid 背景作主要語境。chrX／Y 受 biological sex、ploidy、PAR 與 X-inactivation／mapping 特性影響，需另立規則。</p>
+            </article>
+            <article class="card">
+              <span class="card-tag partial">不是丟掉 X／Y</span>
+              <h3>sex chromosomes 保留在 ledger</h3>
+              <p>它們目前是 out-of-scope census，而非「沒有生物意義」。要納入正式樹，應先按 sex、PAR/non-PAR、allele-specific CN 與 phase policy 分層後再跑。</p>
+            </article>
+          </div>
+
+          <div class="assertion warning">
+            <div><span class="assertion-label">Clone boundary</span><h3>同 HP 內有多個 read states，只能提高「多個分子狀態／lineage-compatible states」的證據。</h3></div>
+            <p>它比只看 marginal VAF 更接近物理 linkage；但 allele-specific duplication 可讓一個 cell 的兩個 HP1-derived copies 分別是 10 與 11。沒有 CN/multiplicity model 時，仍不能把每個 node 一對一翻譯為 extant clone。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="vaf">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">09 · OPTIONAL HEURISTIC</div>
+          <h2>VAF 能做什麼：在已存在的候選樹內排序</h2>
+          <p class="section-lede">直覺是祖先突變應出現在至少不低於後代的分子比例，因此沿每條 edge 比較 ancestor-site read-AF 與新取得突變的 read-AF。這是方向性 heuristic，不是 posterior。</p>
+
+          <div class="assertion danger">
+            <div><span class="assertion-label">歷史分析限定</span><h3>最新 canonical v5 尚未執行 VAF candidate ranking。</h3></div>
+            <p>下列公式忠實說明 2026-07-11／12 historical layered-v2 派生分析的 same-HP read-AF ranking。不可把該比例移植為 canonical v5 的正式結果，也不可稱為已確認最可能真樹。</p>
+          </div>
+
+          <div class="equation" aria-label="same HP family read allele fraction">
+            <math display="block">
+              <mrow>
+                <msub><mi>f</mi><mi>j</mi></msub>
+                <mo>=</mo>
+                <mfrac><msub><mi>n</mi><mrow><mtext>ALT</mtext><mo>,</mo><mi>j</mi></mrow></msub>
+                <mrow><msub><mi>n</mi><mrow><mtext>REF</mtext><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>n</mi><mrow><mtext>ALT</mtext><mo>,</mo><mi>j</mi></mrow></msub></mrow></mfrac>
+              </mrow>
+            </math>
+            <div class="plain">fⱼ = ALTⱼ / (REFⱼ + ALTⱼ), computed within the same HP family; X/unusable calls are excluded</div>
+            <p class="definition">不同 site 的分母可能不同；它是 callable molecules 的 marginal fraction，不是 exact multi-locus state fraction，更不是 cancer cell fraction。</p>
+          </div>
+
+          <div class="equation" aria-label="VAF ordering score for one candidate tree">
+            <math display="block">
+              <mrow>
+                <mi>S</mi><mo stretchy="false">(</mo><mi>T</mi><mo stretchy="false">)</mo>
+                <mo>=</mo>
+                <munder><mo>∑</mo><mrow><mi>p</mi><mo>→</mo><mi>c</mi><mo>∈</mo><mi>E</mi><mo stretchy="false">(</mo><mi>T</mi><mo stretchy="false">)</mo></mrow></munder>
+                <munder><mo>∑</mo><mrow><mi>a</mi><mo>∈</mo><mi>A</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow></munder>
+                <mo stretchy="false">(</mo><msub><mi>f</mi><mi>a</mi></msub><mo>−</mo><msub><mi>f</mi><mi>j</mi></msub><mo stretchy="false">)</mo>
+              </mrow>
+            </math>
+            <div class="plain">For edge p→c that acquires mutation j: add fₐ−fⱼ for every mutation a already present in parent p</div>
+            <p class="definition">root edge 沒有 ancestor mutations，因此貢獻 0。正式 top set 為 exact Fraction score 的 argmax；完全同分的候選全部保留。</p>
+          </div>
+
+          <div class="figure">
+            <svg id="vaf-two-example" viewBox="0 0 1120 560" role="img" aria-labelledby="vaf2-title vaf2-desc">
+              <title id="vaf2-title">兩個 sSNV 候選方向的 VAF 分數示例</title>
+              <desc id="vaf2-desc">A 的 read AF 為 0.60，B 為 0.40；A 先 B 後的候選得分加 0.20，B 先 A 後得分負 0.20，但這只是排序不是確認。</desc>
+              <rect x="38" y="38" width="1044" height="430" rx="24" class="panel-bg"/>
+              <text x="72" y="80" class="svg-kicker">WORKED EXAMPLE · fA=0.60 · fB=0.40</text>
+              <g transform="translate(80 125)">
+                <text x="0" y="24" font-weight="800">site A</text><rect x="95" y="2" width="360" height="30" rx="15" fill="#dce9e6"/><rect x="95" y="2" width="216" height="30" rx="15" fill="#2e6f6a"/><text x="470" y="24" class="mono svg-label">0.60</text>
+                <text x="0" y="82" font-weight="800">site B</text><rect x="95" y="60" width="360" height="30" rx="15" fill="#eee4d3"/><rect x="95" y="60" width="144" height="30" rx="15" fill="#d56b2f"/><text x="470" y="82" class="mono svg-label">0.40</text>
+              </g>
+              <g transform="translate(625 125)">
+                <rect width="390" height="112" rx="15" fill="#e5f0ed" stroke="#76a9a4"/>
+                <text x="20" y="30" class="svg-kicker">CANDIDATE T₁ · A THEN B</text>
+                <text x="20" y="66" class="mono svg-label">00 → 10 → 11</text>
+                <text x="20" y="94" fill="#2e6f6a" font-weight="900">S(T₁)=fA−fB=+0.20</text>
+              </g>
+              <g transform="translate(625 260)">
+                <rect width="390" height="112" rx="15" fill="#f6e6e2" stroke="#c97970"/>
+                <text x="20" y="30" class="svg-kicker" fill="#8f3530">CANDIDATE T₂ · B THEN A</text>
+                <text x="20" y="66" class="mono svg-label">00 → 01 → 11</text>
+                <text x="20" y="94" fill="#a23b35" font-weight="900">S(T₂)=fB−fA=−0.20</text>
+              </g>
+              <rect x="80" y="390" width="935" height="52" rx="12" fill="#173b45"/>
+              <text x="548" y="422" text-anchor="middle" fill="#fff7e9" font-size="17" font-weight="800">第一順位 = {T₁}；語意只能是 VAF-supported heuristic top，不是 confirmed ancestry</text>
+            </svg>
+            <div class="figcaption"><strong>圖 8｜</strong>若 fA=fB，兩棵 exact tie；若 CN amplification 使後發 B 的 molecule fraction 反而較高，ranking 甚至可能反向。</div>
+          </div>
+
+          <div class="equation" aria-label="三突變線性樹的 VAF 分數化簡">
+            <math display="block">
+              <mrow>
+                <mi>S</mi><mo stretchy="false">(</mo><mi>x</mi><mo>→</mo><mi>y</mi><mo>→</mo><mi>z</mi><mo stretchy="false">)</mo>
+                <mo>=</mo><mo stretchy="false">(</mo><msub><mi>f</mi><mi>x</mi></msub><mo>−</mo><msub><mi>f</mi><mi>y</mi></msub><mo stretchy="false">)</mo>
+                <mo>+</mo><mo stretchy="false">(</mo><msub><mi>f</mi><mi>x</mi></msub><mo>−</mo><msub><mi>f</mi><mi>z</mi></msub><mo stretchy="false">)</mo>
+                <mo>+</mo><mo stretchy="false">(</mo><msub><mi>f</mi><mi>y</mi></msub><mo>−</mo><msub><mi>f</mi><mi>z</mi></msub><mo stretchy="false">)</mo>
+                <mo>=</mo><mn>2</mn><mo stretchy="false">(</mo><msub><mi>f</mi><mi>x</mi></msub><mo>−</mo><msub><mi>f</mi><mi>z</mi></msub><mo stretchy="false">)</mo>
+              </mrow>
+            </math>
+            <div class="plain">For a 3-event chain, the middle mutation cancels: S = 2(f_first − f_last)</div>
+            <p class="definition">這揭露 score 的盲點：它可能無法區分中間順序。例 fA=0.70、fB=0.50、fC=0.20 時 A-B-C 得 1.00；但 fA=0.60、fB=fC=0.20 時 A-B-C、A-C-B 與 A→{B,C} fork 都可得 0.80，並列甚至跨 shape。</p>
+          </div>
+
+          <div class="card-grid three">
+            <article class="card"><span class="card-tag">結果 1</span><h3>唯一 top exact tree</h3><p>候選內分數最高者唯一；仍稱 VAF-prioritized，不稱真樹。</p></article>
+            <article class="card"><span class="card-tag partial">結果 2</span><h3>同 shape 內並列</h3><p>突變標籤／順序仍不定，但 branching skeleton 可能相同。</p></article>
+            <article class="card"><span class="card-tag rec">結果 3</span><h3>跨 shape 並列／不可評估</h3><p>第一順位仍有不同 geometry，或因缺 AF、recurrence、candidate mismatch 而 fail-closed。</p></article>
+          </div>
+
+          <h3>為什麼 site VAF 不等於 CCF？</h3>
+          <div class="equation" aria-label="含 purity clone fraction copy number 與 mutation multiplicity 的期望 VAF">
+            <math display="block">
+              <mrow>
+                <mi mathvariant="normal">E</mi><mo>[</mo><msub><mi mathvariant="normal">VAF</mi><mi>j</mi></msub><mo>]</mo>
+                <mo>=</mo>
+                <mfrac>
+                  <mrow><mi>ρ</mi><munder><mo>∑</mo><mi>c</mi></munder><msub><mi>π</mi><mi>c</mi></msub><msub><mi>m</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub></mrow>
+                  <mrow><mn>2</mn><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo stretchy="false">)</mo><mo>+</mo><mi>ρ</mi><munder><mo>∑</mo><mi>c</mi></munder><msub><mi>π</mi><mi>c</mi></msub><msub><mi>C</mi><mrow><mi>c</mi><mi>j</mi></mrow></msub></mrow>
+                </mfrac>
+              </mrow>
+            </math>
+            <div class="plain">E[VAFⱼ] = ρ Σc πc mcj / [ 2(1−ρ) + ρ Σc πc Ccj ]</div>
+            <p class="definition">ρ=tumor purity；πc=clone c 的 cell fraction；Ccj=該 clone/site 的 total copy number；mcj=mutation multiplicity。相同 CCF 可因 CN／multiplicity 產生不同 VAF，反之亦然。</p>
+          </div>
+
+          <table class="compare-table">
+            <thead><tr><th>風險</th><th>如何讓排序誤導</th><th>應對</th></tr></thead>
+            <tbody>
+              <tr><td>allele-specific CNA／LOH</td><td>放大後發 allele、刪掉祖先 allele，使 fancestor≥fdescendant 失效</td><td>加入 allele-specific CN 與 multiplicity</td></tr>
+              <tr><td>callable denominator 不同</td><td>每個 site 由不同 read 集估 AF</td><td>報有效分母、joint callability、bootstrap</td></tr>
+              <tr><td>同批 reads 重用</td><td>read states 建候選、read-AF 再排序，並非獨立驗證</td><td>稱輔助排序；以 held-out／正交資料驗證</td></tr>
+              <tr><td>score cancellation／比較數</td><td>中間節點消去；不同樹累加項數可能不同</td><td>另報 normalized sensitivity，不取代 official exact argmax</td></tr>
+              <tr><td>softmax</td><td>看似機率，但溫度任意且無生成模型校準</td><td>不可稱 posterior</td></tr>
+            </tbody>
+          </table>
+
+          <div class="assertion">
+            <div><span class="assertion-label">較完整的 future model</span><h3>把 joint read states 與 CN-aware marginal counts 放進同一生成式 likelihood。</h3></div>
+            <p>讓 candidate tree、clone fractions、allele-specific CN、mutation multiplicity、read error 與 missingness 一起產生資料；再以 held-out reads／independent assay 校準。這比把同批 reads 的 marginal AF 當第二張選票更合理。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="audit">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">10 · PRECISION AUDIT</div>
+          <h2>Exact tree、shape 與分類：三層不要混在一起</h2>
+          <p class="section-lede">mutation labels 被拿掉後，只剩 branching skeleton。兩棵 acquisition order 不同的 exact trees，可能屬於同一個 unlabeled topology。</p>
+
+          <div class="card-grid">
+            <article class="card"><span class="card-tag">EXACT TREE</span><h3>A→B→C</h3><p><code>000→100→110→111</code></p><p>保留 A/B/C 身分與方向。</p></article>
+            <article class="card"><span class="card-tag">SAME SHAPE</span><h3>A→C→B</h3><p><code>000→100→101→111</code></p><p>突變順序不同，但去除 labels 後都是四節點直線。</p></article>
+          </div>
+
+          <table class="compare-table">
+            <thead><tr><th>幾何類</th><th>圖論定義</th><th>不能直接翻譯成</th></tr></thead>
+            <tbody>
+              <tr><td>Single-only</td><td>非 root mutation states 間無分枝，也沒有多層 ancestor–descendant path</td><td>樣本中只有一個 clone</td></tr>
+              <tr><td>Sister-only</td><td>至少一個 branching point，但沒有多層 mutation-state path</td><td>已證明有多個並存 clones</td></tr>
+              <tr><td>Direct-only</td><td>有多層 ancestor–descendant path，但沒有分枝</td><td>已證明 ancestral 與 derived subclone 都仍存在</td></tr>
+              <tr><td>Sister＋Direct</td><td>同時含 branching 與多層 path</td><td>已確認多 clone 且其中有 subclone</td></tr>
+            </tbody>
+          </table>
+
+          <div class="assertion warning">
+            <div><span class="assertion-label">合理用語</span><h3>說 geometry、candidate state、model-implied order；不要把 shape 名稱變成細胞人口普查。</h3></div>
+            <p>Direct edge 表示在 monotone Boolean model 中，child state 的 ALT set 比 parent 多一個；未證明兩個 state 都對應可分離、仍存在的 cell populations。</p>
+          </div>
+
+          <h3>目前實作需要保留在方法章的三個精確附註</h3>
+          <div class="audit-item">
+            <span class="audit-status">TERM</span>
+            <div><strong><code>determined</code> 語意仍需一致化。</strong><p>形式規格表曾限定「唯一、0 hidden」；目前 solver 對 non-capped、n_trees=1 且存在 recurrence-free 解即標 determined，即使 n_hidden&gt;0。現階段最安全寫法是 <em>model-determined</em>，並永遠同報 n_hidden、candidate completeness 與 full/partial provenance。</p></div>
+          </div>
+          <div class="audit-item">
+            <span class="audit-status">COUNT</span>
+            <div><strong>read counts 是 MINREAD gate，不是 tree objective 的支持度加權。</strong><p>pattern 通過門檻後進 constraint；目前 structural solver 最小化 extra nodes 並枚舉父節點選擇，不會因 100 reads 對 3 reads 就自動偏好某棵樹。</p></div>
+          </div>
+          <div class="audit-item">
+            <span class="audit-status">COMMENT</span>
+            <div><strong>solver 內一段舊註解的「multiple predecessor ⇔ recurrence」不是一般真命題。</strong><p>實際判定已用 rooted three-gamete compatibility，邏輯正確；上方唯一 recurrence 反例正好證明每個節點即使各只有一個父候選，整棵樹仍可能讓同一 bit 在兩枝重複。</p></div>
+          </div>
+          <div class="audit-item">
+            <span class="audit-status">UNIVERSE</span>
+            <div><strong>從未在任何 full／partial pattern 出現 A 的 bit 會從 active universe 修剪。</strong><p>這是觀察驅動的 parsimony pruning；X-only 且從未見 ALT 的位置不會被當作可自由新增的 mutation。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="glossary">
+        <div class="chapter-inner">
+          <div class="chapter-kicker">11 · QUICK REFERENCE</div>
+          <h2>一頁查表：教授追問時先回答哪一層</h2>
+
+          <table class="symbol-table">
+            <thead><tr><th>詞</th><th>精確定義</th><th>一句防誤解</th></tr></thead>
+            <tbody>
+              <tr><td>full terminal</td><td>所有 k 個位點皆為 R/A 的 exact observed state</td><td>observed molecule pattern，不等於 observed clone</td></tr>
+              <tr><td>partial group</td><td>含 X pattern 的所有 compatible completions</td><td>X 不是 R</td></tr>
+              <tr><td>hidden／extra node</td><td>非 full terminal、但被最小解選中的 mutation-state node</td><td>不是 hidden clone</td></tr>
+              <tr><td>exact tree T</td><td>有 mutation labels 與方向的 unit-flip arborescence</td><td>candidate，不是 truth</td></tr>
+              <tr><td>topology／shape</td><td>移除 mutation labels 後的 branching geometry</td><td>不含哪個 mutation 先後</td></tr>
+              <tr><td>recurrence-required</td><td>所有最小解都讓至少一個 mutation bit 在不同邊重複取得</td><td>需 CN/multiplicity 通道解讀</td></tr>
+              <tr><td>HP</td><td>homologous haplotype tag/family 的 allelic partition</td><td>不是 paternal/maternal，也不是 clone</td></tr>
+              <tr><td>PS</td><td>phase-set continuity／QC 標籤</td><td>目前不建立 topology edge</td></tr>
+              <tr><td>read-AF</td><td>同 HP、同 site 可判 reads 中 ALT 比例</td><td>不是 exact-state fraction／CCF／posterior</td></tr>
+            </tbody>
+          </table>
+
+          <div class="card-grid three">
+            <article class="card"><span class="card-tag">可以說</span><h3>Reads constrain</h3><p>「同一分子 sSNV 共現排除了部分不相容候選，並在 bounded state space 保留全部最小 exact trees。」</p></article>
+            <article class="card"><span class="card-tag partial">需要條件</span><h3>Cellular hypothesis</h3><p>「在 CN-neutral、phase coherent、multiplicity=1 等前提下，此 geometry 與某種 clone/subclone 關係相容。」</p></article>
+            <article class="card"><span class="card-tag rec">不可說</span><h3>Confirmed truth</h3><p>「VAF 最高分就是正向祖先真樹」「每個 node 就是一個仍存在 clone」「HP1 與 HP2 可直接跨樹配成細胞」。</p></article>
+          </div>
+
+          <h3>本頁的本地證據來源</h3>
+          <ul>
+            <li><a href="../../research/20260710_layered_reconstruction_v2/20260714_LongPhaseS_PASS_sSNV共現與拓撲最新分析_01.md">20260714 LongPhase-S PASS sSNV 共現與拓撲最新分析</a>：canonical v5 scope、72,994 units、full/partial 與 PS 統計。</li>
+            <li><a href="20260704_formal_problem_statement_topology_from_cooccurrence_01.md">20260704 共現拓撲形式化問題</a>：Boolean lattice、minimal compatible trees 與 claim boundary。</li>
+            <li><a href="_assets/20260627_subclone_4axis_teaching/scripts/tree_enumeration_solver.py">tree_enumeration_solver.py</a>：R/A/X parser、group coverage、bounded exhaustive enumeration、recurrence 與 V1–V7。</li>
+            <li><a href="_assets/20260627_subclone_4axis_teaching/scripts/layered_tree_reconstruction.py">layered_tree_reconstruction.py</a>：HP-family unit、CN 後驗通道、ordered regional aggregation、analysis/display caps。</li>
+            <li><a href="../../research/20260711_read_group_C_tree_T_topology_report/scripts/build_vaf_top_tie_census.py">build_vaf_top_tie_census.py</a>：historical exact Fraction same-HP read-AF score 與 tie handling。</li>
+            <li><a href="../../research/20260710_layered_reconstruction_v2/20260711_ClairS_LongPhaseS_sSNV位點與ReadTag契約稽核_01.md">LongPhase-S sSNV 位點與 read-tag 契約稽核</a>：九種 HP 詞彙、family folding、PS role 與驗證邊界。</li>
+          </ul>
+
+          <div class="assertion">
+            <div><span class="assertion-label">最短口試版本</span><h3>「reads 定可相容集合，parsimony 定最小層，VAF 只排候選；CN/LOH 決定能否往細胞演化解釋。」</h3></div>
+            <p>若教授再追問，就依序補：X 是 missing、HP 是 allele、hidden 是 state、shape 是 geometry、ranking 不是 posterior。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <h2>一句話帶走</h2>
+        <p><strong>Read-state 決定哪些區域突變狀態樹可能；HP／PS／CN 決定可以解釋到哪一層；VAF 最多描述性排序候選，不能單獨創造或確認祖先關係。</strong></p>
+        <p>本頁是 F：教學示意。不可用作「最可能真樹」「已確認 clone／subclone」或「真實 cellular ancestry」的 validation evidence。</p>
+      </div>
+      <div class="provenance">
+        建立：2026-07-15 · Asia/Taipei<br>
+        Canonical context：20260713_layered_reconstruction_v3_raw_all_lps_pass_v5<br>
+        Scope：chr1–22 · LongPhase-S recalibrated FILTER=PASS · 7/7 datasets<br>
+        Artifact：single-file standalone HTML · inline SVG · native MathML · no external dependency
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var allDetails = Array.prototype.slice.call(document.querySelectorAll("details"));
+      var expand = document.getElementById("expand-all");
+      var collapse = document.getElementById("collapse-all");
+      var printButton = document.getElementById("print-page");
+      if (expand) expand.addEventListener("click", function () { allDetails.forEach(function (d) { d.open = true; }); });
+      if (collapse) collapse.addEventListener("click", function () { allDetails.forEach(function (d) { d.open = false; }); });
+      if (printButton) printButton.addEventListener("click", function () { window.print(); });
+
+      var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+      var sections = tocLinks.map(function (a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+      if ("IntersectionObserver" in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            tocLinks.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id); });
+          });
+        }, { rootMargin: "-20% 0px -68% 0px" });
+        sections.forEach(function (section) { observer.observe(section); });
+      }
+    }());
+  </script>
+</body>
+</html>

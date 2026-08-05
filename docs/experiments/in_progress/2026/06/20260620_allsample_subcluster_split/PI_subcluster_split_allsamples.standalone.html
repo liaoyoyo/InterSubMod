@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全7樣本 subcluster 切割總帳 — PI report</title>
+<style>
+:root{--ink:#1a1a1a;--mut:#666;--line:#e2ddd3;--bg:#faf8f3;--acc:#8a5a2b;--ok:#1f7a4d;--warn:#b3541e;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Helvetica Neue","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.65}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 28px 80px}
+header h1{font-size:25px;margin:0 0 6px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:4px}
+nav{position:sticky;top:0;background:rgba(250,248,243,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 0;margin:18px 0 24px;font-size:13px;z-index:10}
+nav a{color:var(--acc);text-decoration:none;margin-right:16px;white-space:nowrap}
+nav a:hover{text-decoration:underline}
+h2{font-size:19px;border-left:4px solid var(--acc);padding-left:10px;margin:34px 0 14px}
+.head{background:linear-gradient(180deg,#fff,#fcfaf5);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:8px 0 8px}
+.head .big{font-size:16px;font-weight:600}
+.head .big b{color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:6px 0 10px}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;font-weight:600}
+thead th{background:#f1ece2;color:#4a4036;font-size:12px;position:sticky;top:46px}
+tbody tr:hover{background:#fcf8f0}
+.jac{font-weight:700;color:var(--acc)}
+.pos{color:var(--ok)} .neg{color:var(--warn)} .miss{color:var(--mut);text-align:center}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:13px 16px;margin:10px 0;font-size:14px}
+.card.warn{border-left-color:var(--warn)}
+.card b{color:var(--acc)}
+.note{font-size:12px;color:var(--mut)}
+.pill{display:inline-block;background:#efe7d8;color:#6a4a22;border-radius:20px;padding:1px 9px;font-size:11px;margin-left:6px}
+ul{margin:6px 0 6px 0;padding-left:20px} li{margin:4px 0;font-size:14px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--mut)}
+code{background:#f1ece2;padding:1px 5px;border-radius:4px;font-size:12px}
+</style></head><body><div class="wrap">
+<header>
+<h1>全 7 樣本 subcluster 切割總帳<span class="pill">PI report</span></h1>
+<div class="sub">canonical paired_full longphase-s tagged BAM · tumor-only · 全基因組 · 3 癌種 7 樣本</div>
+<div class="sub">binary <code>inter_sub_mod @ feat/summary-nreadsvalid e57a7ab</code> · ISM <code>w=5000 BERNOULLI C_min=3 SKIP</code> · 2026-06-20</div>
+</header>
+
+<nav>
+<a href="#tldr">結論</a><a href="#main">主表 A/C Venn</a><a href="#tpfp">TP vs FP</a>
+<a href="#bands">品質分帶</a><a href="#obs">跨樣本觀察</a><a href="#method">方法/驗證</a><a href="#caveat">口徑</a>
+</nav>
+
+<section id="tldr">
+<div class="head">
+<div class="big">7 樣本全部：「切得出群」(A=cansplit) 與「標籤對齊乾淨 PERMANOVA」(C) 的 Jaccard <b>一律偏低（0.091–0.161）</b>。</div>
+<p style="margin:10px 0 0;font-size:14px">兩種訊號擷取到<b>大致不相交</b>的位點集合，跨 3 癌種穩健重現 HCC1395 單樣本發現 → <b>無監督切群數 ≠ 可確認 subclone</b>。</p>
+</div>
+</section>
+
+<section id="main">
+<h2>1 · 主表 — A/C clean-location Venn（全基因組 TP）</h2>
+<table><thead><tr><th>樣本</th><th>N</th><th>A=cansplit</th><th>C=clean PERMANOVA</th><th>A∩C</th><th>A−C</th><th>C−A</th><th>Jaccard</th></tr></thead>
+<tbody><tr><td>HCC1395</td><td>29,754</td><td>5,816 (19.5%)</td><td>8,247 (27.7%)</td><td>1,359 (4.6%)</td><td>4,457</td><td>6,888</td><td class='jac'>0.107</td></tr><tr><td>HCC1395_DORADO</td><td>29,889</td><td>7,111 (23.8%)</td><td>6,662 (22.3%)</td><td>1,419 (4.7%)</td><td>5,692</td><td>5,243</td><td class='jac'>0.115</td></tr><tr><td>COLO829</td><td>35,185</td><td>7,799 (22.2%)</td><td>5,522 (15.7%)</td><td>1,487 (4.2%)</td><td>6,312</td><td>4,035</td><td class='jac'>0.126</td></tr><tr><td>H2009</td><td>132,909</td><td>54,939 (41.3%)</td><td>29,069 (21.9%)</td><td>11,622 (8.7%)</td><td>43,317</td><td>17,447</td><td class='jac'>0.161</td></tr><tr><td>H1437</td><td>67,468</td><td>16,582 (24.6%)</td><td>15,181 (22.5%)</td><td>3,114 (4.6%)</td><td>13,468</td><td>12,067</td><td class='jac'>0.109</td></tr><tr><td>HCC1937</td><td>12,393</td><td>1,875 (15.1%)</td><td>2,800 (22.6%)</td><td>388 (3.1%)</td><td>1,487</td><td>2,412</td><td class='jac'>0.091</td></tr><tr><td>HCC1954</td><td>17,909</td><td>6,493 (36.3%)</td><td>5,423 (30.3%)</td><td>1,646 (9.2%)</td><td>4,847</td><td>3,777</td><td class='jac'>0.16</td></tr></tbody></table>
+<p class="note">A = 無監督 UPGMA+silhouette best_k≥2（tumor reads）；C = LabelHP 或 LabelAllele PERMANOVA p&lt;0.05 且非 dispersion。</p>
+</section>
+
+<section id="tpfp">
+<h2>2 · TP vs FP 比例對照</h2>
+<table><thead><tr><th>樣本</th><th>TP N</th><th>TP A%</th><th>TP C%</th><th>TP Jac</th><th>FP N</th><th>FP A%</th><th>FP C%</th><th>FP Jac</th><th>ΔA%</th><th>ΔC%</th></tr></thead>
+<tbody><tr><td>HCC1395</td><td>29,754</td><td>19.5%</td><td>27.7%</td><td>0.107</td><td>627</td><td>38.8%</td><td>28.1%</td><td>0.177</td><td class='neg'>-19.3</td><td class='neg'>-0.4</td></tr><tr><td>HCC1395_DORADO</td><td>29,889</td><td>23.8%</td><td>22.3%</td><td>0.115</td><td>240</td><td>26.2%</td><td>12.5%</td><td>0.107</td><td class='neg'>-2.4</td><td class='pos'>+9.8</td></tr><tr><td>COLO829</td><td>35,185</td><td>22.2%</td><td>15.7%</td><td>0.126</td><td>2,273</td><td>21.9%</td><td>17.7%</td><td>0.131</td><td class='pos'>+0.3</td><td class='neg'>-2.0</td></tr><tr><td>H2009</td><td>132,909</td><td>41.3%</td><td>21.9%</td><td>0.161</td><td>86 ⚠</td><td>27.9%</td><td>9.3%</td><td>0.143</td><td class='pos'>+13.4</td><td class='pos'>+12.6</td></tr><tr><td>H1437</td><td>67,468</td><td>24.6%</td><td>22.5%</td><td>0.109</td><td>8 ⚠</td><td>12.5%</td><td>0.0%</td><td>0.0</td><td class='pos'>+12.1</td><td class='pos'>+22.5</td></tr><tr><td>HCC1937</td><td>12,393</td><td>15.1%</td><td>22.6%</td><td>0.091</td><td>195</td><td>15.9%</td><td>3.6%</td><td>0.027</td><td class='neg'>-0.8</td><td class='pos'>+19.0</td></tr><tr><td>HCC1954</td><td>17,909</td><td>36.3%</td><td>30.3%</td><td>0.16</td><td>29 ⚠</td><td>13.8%</td><td>34.5%</td><td>0.0</td><td class='pos'>+22.5</td><td class='neg'>-4.2</td></tr></tbody></table>
+<div class="card warn"><b>FP 也一樣會切。</b> 可靠的大-N FP 樣本（HCC1395 FP=627、COLO829 FP=2273）的 cansplit% 與 TP <b>相當或更高</b>（HCC1395 FP A=38.8% &gt; TP 19.5%）→ <b>切群能力不區分 TP/FP</b>，與既有「ASM/結構非 usable filter」一致。</div>
+<p class="note">⚠ 標記者 FP N&lt;100（H1437=8 / HCC1954=29 / H2009=86）為低 N 噪音，ΔA/ΔC 不可解讀。Pooled: TP N=325,507 A=30.9% C=22.4%；FP N=3,458 A=25.0% C=18.3%（pooled 受最大樣本主導，僅參考）。</p>
+</section>
+
+<section id="bands">
+<h2>3 · 切割品質總帳（cant vs cansplit + 分帶）</h2>
+<table><thead><tr><th>樣本</th><th>N</th><th>insuff(n&lt;6)</th><th>cant(切不出)</th><th>cansplit</th><th>clear(V≥.7+sig)</th><th>mid</th><th>weak</th><th>vweak</th><th>degen</th></tr></thead>
+<tbody><tr><td>HCC1395</td><td>29,754</td><td>700 (2.4%)</td><td>23,238 (78.1%)</td><td>5,816 (19.5%)</td><td>2,897 (9.7%)</td><td>711</td><td>465</td><td>1,192</td><td>551</td></tr><tr><td>HCC1395_DORADO</td><td>29,889</td><td>3,913 (13.1%)</td><td>18,865 (63.1%)</td><td>7,111 (23.8%)</td><td>3,572 (12.0%)</td><td>754</td><td>538</td><td>1,249</td><td>998</td></tr><tr><td>COLO829</td><td>35,185</td><td>2,142 (6.1%)</td><td>25,244 (71.7%)</td><td>7,799 (22.2%)</td><td>859 (2.4%)</td><td>706</td><td>1,645</td><td>3,540</td><td>1,049</td></tr><tr><td>H2009</td><td>132,909</td><td>3,080 (2.3%)</td><td>74,890 (56.3%)</td><td>54,939 (41.3%)</td><td>1,466 (1.1%)</td><td>1,481</td><td>3,805</td><td>41,594</td><td>6,593</td></tr><tr><td>H1437</td><td>67,468</td><td>21,099 (31.3%)</td><td>29,787 (44.1%)</td><td>16,582 (24.6%)</td><td>3,382 (5.0%)</td><td>2,421</td><td>2,700</td><td>4,851</td><td>3,228</td></tr><tr><td>HCC1937</td><td>12,393</td><td>120 (1.0%)</td><td>10,398 (83.9%)</td><td>1,875 (15.1%)</td><td>515 (4.2%)</td><td>173</td><td>206</td><td>787</td><td>194</td></tr><tr><td>HCC1954</td><td>17,909</td><td>451 (2.5%)</td><td>10,965 (61.2%)</td><td>6,493 (36.3%)</td><td>925 (5.2%)</td><td>863</td><td>1,453</td><td>3,175</td><td>77</td></tr></tbody></table>
+<p class="note">分帶 clear/mid/weak 依 build_spectrum_html.py 顯示定義重建（V 邊界±1-3 容差）；insuff/cant/cansplit/degen/vweak 為確定性定義。</p>
+</section>
+
+<section id="obs">
+<h2>4 · 跨樣本觀察（見樹也見林）</h2>
+<ul>
+<li><b>Aggregate</b>：Jaccard(A,C) 全 7 樣本 0.091–0.161 一律偏低 → 切群 vs 標籤對齊大致不相交，跨 3 癌種穩健。</li>
+<li><b>Canonical</b>：HCC1395 paired_full（A 19.5% / C 27.7% / J 0.107）≈ pileup-track 參考（19.7% / 29.0% / 0.118）→ 換 BAM track 幾乎不動主數字。</li>
+<li><b>Outlier</b>：H2009 cansplit 41.3% 最高但 vweak 41,594（占 cansplit 76%）= 過度切分無意義；H1437 insuff 21,099（31.3%）最高=低覆蓋；COLO829 clear 僅 2.4% 最低。</li>
+<li><b>Well-explained</b>：低 Jaccard + FP 同樣會切 → 重現「within_clean≠subclone」「切不出≠沒訊號」「ASM 非 usable filter」框架。</li>
+</ul>
+</section>
+
+<section id="method">
+<h2>5 · 方法與驗證</h2>
+<div class="card"><b>邏輯驗證（信任基礎）</b>：driver 先用 HCC1395 <b>pileup-track</b> 既有資料重算，A/C/A∩C/A−C/C−A/Jaccard <b>位元符合</b>參考表（5997 / 8833 / 1560 / 4437 / 7273 / 0.118）才上線跑全樣本。</div>
+<p style="font-size:14px">每樣本：單次 ISM scan（保留 distance matrix）→ 逐字 <code>wg_contingency</code> 的 UPGMA+silhouette best_k → 逐字 <code>permanova_clean_and_4group.py</code> Q1 Venn。單次 ISM 取代原始 2-pass（per-region 矩陣位元相同）。每樣本 <code>insuff+cant+cansplit=N</code>、<code>分帶=cansplit</code>、Venn 關係全部加總一致 ✓。</p>
+</section>
+
+<section id="caveat">
+<h2>6 · 口徑（給審稿/PI）</h2>
+<ul>
+<li><b>tumor-only</b>：normal BAM 各樣本來源不對稱；cansplit 分群本就只用 tumor reads，故統一 tumor-only 使 7 樣本完全可比；對 A 無影響、C 自洽可算。</li>
+<li><b>track</b>：原始參考(5997/8833/0.118)為 pileup-track；本表為 paired_full longphase-s，HCC1395 兩者極接近。</li>
+<li><b>FP 低 N</b>：H1437/HCC1954/H2009 的 FP region 數 &lt;100，個別比例為噪音。</li>
+<li><b>tier ⭐3</b>：單 binary / 單 pipeline；cross-platform 復現需外部工具。</li>
+</ul>
+</section>
+
+<footer>
+provenance: binary <code>inter_sub_mod @ feat/summary-nreadsvalid e57a7ab</code> · 數字注入自 <code>summary_all_samples.json</code> + <code>tp_fp_comparison.json</code>（§13-A 由構造防捏造，非手打）· 生成 2026-06-20 ·
+報告目錄 <code>InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/</code>
+</footer>
+</div></body></html>

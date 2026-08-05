@@ -116,6 +116,23 @@ all-REF / unsampled common ancestor   ← root = parsimony 假說, 非 spanning 
 - **升 tier 前置（→L3+）**：(a) per-read 5mC partition permutation test；(b) normal-anchored cis/ASM control 分離 subclone-甲基 vs ASM-on-retained-LOH（**已部分跑：clean 子集 vs confounded 子集**）；(c) 第二 LOH 位點/第二樣本。
 - ⚠ DORADO tagged BAM 曾被 cleanup（20260420 版）但 20260315 complete_matrix 版有 HP tag 仍在；CpG 2.2 資料方向與 user 手標相反（以實測為準）。
 
+## A9 🔑 甲基分析有幫助到 subclone 分析嗎？（核心問題的誠實答案）
+
+> **一句話**：**有幫助，但是「有界的輔助角色（corroborate / bridge / characterize），不是獨立判別器」，且幫助綁在 normal-anchored ASM-control 之上。** 這正是論文主軸「甲基 corroborate 非 validated discriminator」的乾淨實例。
+
+**✅ 甲基實際幫到的 4 點（每點有 verified 證據）**：
+1. **橋接基因上連不起來的 block**：beta-left (1)(2) 與 beta-right (4)(6) 相距 >36 kb，read 跨不到 → **無直接 genetic linkage**；是**甲基 coherence 把兩 block 接成同一 beta-like program**（A6 虛線）。→ 甲基補了基因連鎖的空缺。
+2. **補 LongPhase-S fine-tag 分不開的地方**：fine tag（HP2 vs HP2-1）無法乾淨拆開 α/α-1/beta-like，且跨 basecaller 不穩（HKU ALT 多落 HP2-1、DORADO (3)A 落 HP2）→ 甲基提供**額外 regional molecular-state characterization**。
+3. **指派缺 defining 突變的 read**：2 條 ref-genotype（C-G-G）read 帶**乾淨 β 甲基**（3.1 高/2.2 低）→ **epigenotype 追 lineage**，能標示沒蓋到突變的 read。
+4. **跨 basecaller 複製 = 真訊號**：乾淨子集（2.1/2.2/3.1/3.2/5.1/5.2）HKU+DORADO 同方向過 FDR → 甲基判別非視覺印象、非單 basecaller 雜訊。
+
+**⚠ 但「幫助」嚴格有界（必同時講，否則 overclaim）**：
+- **subclone 結構是「基因」定義的**：≥3 molecular states 來自 somatic allele 互斥 linkage（00/10/01/11），**不是甲基**。→ 甲基是 corroborate/characterize，**非 primary discriminator**。
+- **幫助綁在 ASM-control**：3.3/3.4/3.5/4.1 的甲基差其實是**既存 germline ASM 假象**（normal HP1-vs-HP2 已顯著）；**若不先用 normal-anchor 扣掉，naive 甲基分析會誤導**。→ 甲基「有用」的前提是 ISM 把 subclone 訊號與 ASM confound 拆開的能力（C2）。
+- **甲基沒有做到的**：獨立重建 subclone tree、定 clone 數、排演化順序、證明甲基造成突變 —— 全部未證。
+
+**論文用語**：甲基 = **lineage coherence + 區域 characterization + read-assignment**，conditioned on normal-anchored ASM-control；**不是** subclone 的獨立判別/重建工具。
+
 ---
 
 # Part B — 方法實作構想基礎（ISM subclone 分析 pipeline 概念）

@@ -1,46 +1,20 @@
 {
- "N": 34736,
- "n_multi_structured": 10556,
- "type_abs": {
-  "mixed": {
-   "n": 3980,
-   "pct_total": 11.46,
-   "pct_of_multi": 37.7
-  },
-  "many1_結構>標籤": {
-   "n": 3187,
-   "pct_total": 9.17,
-   "pct_of_multi": 30.19
-  },
-  "one2one": {
-   "n": 1739,
-   "pct_total": 5.01,
-   "pct_of_multi": 16.47
-  },
-  "1many_跨標籤": {
-   "n": 1650,
-   "pct_total": 4.75,
-   "pct_of_multi": 15.63
-  }
- },
- "type_x_axis": {
-  "one2one": {
-   "germline_both_families": 1024,
-   "somatic_one_family": 715
-  },
-  "many1_結構>標籤": {
-   "germline_both_families": 1453,
-   "somatic_one_family": 642,
-   "single_label_somatic": 1043,
-   "single_label_germline": 49
-  },
-  "mixed": {
-   "germline_both_families": 2691,
-   "somatic_one_family": 1289
-  },
-  "1many_跨標籤": {
-   "germline_both_families": 1552,
-   "somatic_one_family": 98
-  }
- }
+ "N": 30490,
+ "th_within": 0.5,
+ "th_struct": 0.4,
+ "min_cell": 3,
+ "has_struct": 2477,
+ "one2one": 584,
+ "one2many": 1492,
+ "many2one": 1173,
+ "within_carrier": 351,
+ "both": 772,
+ "onlyA": 401,
+ "onlyB": 720,
+ "AB": 772,
+ "nostruct": 28013,
+ "sig_strict": 584,
+ "sig_loose": 1920,
+ "sig_any": 2637,
+ "nosig": 27853
 }

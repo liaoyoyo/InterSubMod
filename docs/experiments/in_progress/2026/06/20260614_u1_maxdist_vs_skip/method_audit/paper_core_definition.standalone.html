@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>論文核心定義收斂 — a-priori 4-population subclone 模型 + 甲基有用性判準</title>
+<!-- data_sources: /tmp/paperdef.json (verify_apriori.json + apriori_vs_unsup.json + strong_subdivide.json + workflow synthesis) -->
+<!-- build_branch: research/subclonal-reconstruction (verified-facts this session) -->
+<style>
+:root{--mono:"SF Mono",ui-monospace,Menlo,monospace;--bg:#FAF7F0;--card:#fff;--ink:#3a2418;--muted:#8a7a68;--border:#E3DACC;--pass:#2F7D5B;--dead:#9A3B3B;--gold:#8a6d10;--A:#2F7D5B;--B:#5B5BD6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;line-height:1.62;font-size:15px}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:1.55rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 18px}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:15px 0;box-shadow:0 1px 3px rgba(90,60,30,.05)}
+h2{font-size:1.14rem;margin:0 0 8px;display:flex;align-items:center;gap:9px}
+h2 .n{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.82rem;flex:none}
+.lead{color:#5e4a38;font-size:.92rem;margin:0 0 12px}
+.verdict{background:linear-gradient(180deg,#eef6f0,#e3f0ea);border:1px solid #bcdccb;border-left:6px solid var(--pass);border-radius:12px;padding:18px 20px;margin:14px 0}
+.verdict .v{font-size:1.5rem;font-weight:800;color:#1f5f43}
+.fig{margin:10px 0;padding:10px;background:#fcfaf5;border:1px solid var(--border);border-radius:9px}
+ul{margin:6px 0;padding-left:20px} li{margin:5px 0;font-size:.9rem}
+.ok li{color:#1f5f43} .warn li{color:#5e2424}
+.crit{background:#fcefef;border:1px solid #e9cccc;border-left:4px solid var(--dead);border-radius:8px;padding:12px 14px;margin:10px 0}
+.good{background:#eef6f0;border:1px solid #cce5d6;border-left:4px solid var(--pass);border-radius:8px;padding:12px 14px;margin:10px 0}
+.crittext{font-size:.78rem;color:#5e2424;background:#fcefef;border-radius:6px;padding:2px 7px;font-weight:700}
+code{background:#f3ece0;border-radius:4px;padding:1px 5px;font-family:var(--mono);font-size:.82em}
+.roletab{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:6px}
+.roletab th{background:#f3ece0;padding:8px;text-align:left;border-bottom:2px solid var(--border);font-size:.78rem;color:#5e4a38}
+.roletab td{padding:8px;border-bottom:1px solid #f0e9dc;vertical-align:top}
+.badge{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:10px}
+.bok{background:#dcefe3;color:#1f5f43} .bwarn{background:#fbeccb;color:#8a6d10} .bno{background:#f6d8d8;color:#9A3B3B}
+.crit-banner{background:#fff8ec;border:1px dashed var(--gold);border-radius:8px;padding:10px 13px;font-size:.85rem;color:#5e4a38;margin-top:10px}
+.note{font-size:.82rem;color:var(--muted);margin-top:8px}
+</style></head><body><div class="wrap">
+
+<h1>論文核心定義收斂</h1>
+<p class="sub">a-priori 4-population subclone 模型 + 甲基有用性判準（A/B/C）· 4-lens 對抗稽核 · 數字全由 <code>paperdef.json</code> 注入 · Tier 4 paper-scope</p>
+
+<div class="verdict">
+  <div class="v">裁決：ADOPT WITH CORRECTIONS</div>
+  <p style="margin:8px 0 0;color:#3a2418;font-size:.95rem">你的 a-priori 4-population 模型<b>核心正確、採納</b>（collider-免疫 read 切分 + SubcloneDbeta 程式定義 + A/B/C 判準 + CN 排除）；但 <b style="color:#9A3B3B">3 處須修正</b>（判別性宣稱、Strong 非互斥、no-1-2/2-2 重建口徑），且整體單樣本單管線<b>封頂 ⭐3</b>，reconstruction headline 維持「case-demonstration」。</p>
+</div>
+
+<section>
+  <h2><span class="n">1</span>背景事實核對 — HP-tag 與全基因組現況</h2>
+  <p class="lead">longphase-S HP-tag 9-態（KB longphase-s.md L1 對 HaplotagType.h:325-341）：<code>1/2</code>=germline · <code>1-1/2-1</code>=第一條 somatic haplotype（可追 germline HP）· <code>1-2/2-2</code>=第二 clone · <code>3</code>=ambiguous · <code>4</code>=both HP。</p>
+  <div class="fig"><svg viewBox="0 0 920 150" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="10" y="24" font-size="13" font-weight="800" fill="#3a2418">全基因組 HP-tag 分佈（30,490 somatic 位點 reads.tsv 掃描）</text>
+  <rect x="10.0" y="40" width="252.5" height="40" fill="#3B7BC7"/><text x="136.3" y="64" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">2</text><text x="136.3" y="94" text-anchor="middle" fill="#5e4a38" font-size="9">1106k</text><rect x="262.5" y="40" width="251.1" height="40" fill="#5B9BD6"/><text x="388.1" y="64" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">1</text><text x="388.1" y="94" text-anchor="middle" fill="#5e4a38" font-size="9">1100k</text><rect x="513.6" y="40" width="141.8" height="40" fill="#cfc4b4"/><text x="584.5" y="64" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">0</text><text x="584.5" y="94" text-anchor="middle" fill="#5e4a38" font-size="9">621k</text><rect x="655.4" y="40" width="121.9" height="40" fill="#2F7D5B"/><text x="716.4" y="64" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">1-1</text><text x="716.4" y="94" text-anchor="middle" fill="#5e4a38" font-size="9">534k</text><rect x="777.3" y="40" width="119.1" height="40" fill="#3B9C72"/><text x="836.9" y="64" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">2-1</text><text x="836.9" y="94" text-anchor="middle" fill="#5e4a38" font-size="9">521k</text><rect x="896.4" y="40" width="13.6" height="40" fill="#C77B3B"/>
+  <text x="10" y="120" font-size="12" fill="#9A3B3B" font-weight="800">🔴 完全沒有 1-2 / 2-2 / 4（= 第二 somatic haplotype / both-HP 標記）= 0</text>
+  <text x="10" y="140" font-size="10.5" fill="#8a7a68">→ 每 germline HP 至多一條 somatic clone（1-1 / 2-1）。tag 詞彙能編碼第二 clone（11-state enum），此資料「無」是<b>實證</b>非表達限制。</text>
+</svg></div>
+  <div class="crit"><b>🔴 重建口徑修正（必記）</b>：HCC1395 全基因組<b>零 1-2/2-2/4</b> → longphase-S 只解析出每 germline HP <b>一條</b> somatic clone。所以 <b>per-locus haplotag 後綴無法給多 subclone</b>；lineage 必須靠 <b>multi-sSNV somatic-haplotype block</b>（chr2 式，block N50 ~Mb 級）串接。tag 詞彙<u>能</u>編碼第二 clone（11-state enum），此處「無」是<b>實證</b>非表達限制 — 用實證口徑寫，reviewer 無法用 enum 反駁。</div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>✅ 採納：a-priori 4-population read 切分</h2>
+  <p class="lead">每個 region 的 reads 被<b>兩條外生軸</b>切開（都不靠甲基）：germline HP1/HP2（normal phase）× somatic germline-vs-carrier（sSNV haplotag）。群成員由 genotype 決定 → 甲基「組間有差」檢定有<b>合法 permutation null</b>，免掉 unsupervised 分群的 collider/循環。<b>這是模型最強且正確的核心。</b></p>
+  <div class="fig"><svg viewBox="0 0 620 320" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="310" y="22" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2418">a-priori 4-population read 切分（兩軸皆外生於甲基）</text>
+  <text x="310" y="42" text-anchor="middle" font-size="10.5" fill="#8a7a68">群成員由 genotype / HP-tag 決定 → 甲基檢定有合法 permutation null（免 collider）</text>
+  <text x="40" y="80" font-size="11" font-weight="700" fill="#5e4a38">germline 軸（normal phase）↓</text>
+  <text x="300" y="80" font-size="11" font-weight="700" fill="#5e4a38">somatic 軸（sSNV haplotag）→</text>
+  <!-- quadrants -->
+  <rect x="180" y="95" width="200" height="95" fill="#e3f0ea" stroke="#2F7D5B" stroke-width="1.5"/>
+  <rect x="390" y="95" width="200" height="95" fill="#c2e4d1" stroke="#2F7D5B" stroke-width="2.5"/>
+  <rect x="180" y="200" width="200" height="95" fill="#e7eefb" stroke="#3B7BC7" stroke-width="1.5"/>
+  <rect x="390" y="200" width="200" height="95" fill="#dfe8f9" stroke="#3B7BC7" stroke-width="2.5"/>
+  <text x="80" y="148" font-size="12" font-weight="800" fill="#1f5f43">HP1</text>
+  <text x="80" y="252" font-size="12" font-weight="800" fill="#2a5a8a">HP2</text>
+  <text x="280" y="118" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5e4a38">germline（無 sSNV）</text>
+  <text x="490" y="118" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5e4a38">carrier（帶 sSNV）</text>
+  <text x="280" y="150" text-anchor="middle" font-size="12" font-weight="800" fill="#1f5f43">HP1</text>
+  <text x="280" y="168" text-anchor="middle" font-size="9" fill="#5e4a38">ancestral</text>
+  <text x="490" y="150" text-anchor="middle" font-size="12" font-weight="800" fill="#1f5f43">HP1-1</text>
+  <text x="490" y="168" text-anchor="middle" font-size="9" fill="#5e4a38">clone（goal3 核心）</text>
+  <text x="280" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#2a5a8a">HP2</text>
+  <text x="490" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#2a5a8a">HP2-1</text>
+  <text x="310" y="315" text-anchor="middle" font-size="10" fill="#8a7a68">甲基的工作 = 刻畫/排序這 4 群（橫向 = same-haplotype subclone Δβ）</text>
+</svg></div>
+  <div class="good"><code>SubcloneDbeta_HP1</code>（RegionProcessor.hpp:182 + .cpp:1071）= tumor 內 β(HP1 germline) − β(HP1-1 carrier) = same-haplotype subclone（goal3）。a-priori 計數（全 30,490，全部 grep-精確）：GermlineAsm <b>7,733（25.4%）</b> · SubcloneDbeta_HP1 2,369 / HP2 2,340（any 4,596, 15.1%）· SomaticResidual 3,031。</div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>⚠️ 修正：四類是「多標籤」非「互斥分割」</h2>
+  <p class="lead">你提「Strong 細分 4 桶（Germline/Subclone/CN/Epiallele）」方向對，但<b>四類會重疊、不能切不相交桶</b>。應改成<b>多標籤標註</b>。</p>
+  <div class="fig"><svg viewBox="0 0 920 175" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="10" y="24" font-size="13" font-weight="800" fill="#3a2418">Strong 22,310 的 a-priori 標記分解（多標籤，非互斥分割）</text>
+  <text x="10" y="40" font-size="10" fill="#8a7a68">來源 strong_subdivide.json · by_dbeta_combo</text>
+  <rect x="10.0" y="44" width="545.3" height="44" fill="#b8aa96"/><text x="282.7" y="70" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="700">13,518</text><rect x="555.3" y="44" width="210.4" height="44" fill="#9a9088"/><text x="660.5" y="70" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="700">5,216</text><rect x="765.7" y="44" width="103.0" height="44" fill="#2F7D5B"/><text x="817.3" y="70" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="700">2,554</text><rect x="868.8" y="44" width="41.2" height="44" fill="#9A3B3B"/>
+  <text x="10" y="112" font-size="11.5" fill="#9A3B3B" font-weight="800">🔴 60.6%（13,518）無任何 a-priori somatic 標記 = CN/epiallele/未定，<u>不可算 subclone</u></text>
+  <text x="10" y="132" font-size="11" fill="#3a2418"><tspan font-weight="800" fill="#9A3B3B">1,022</tspan> 個同時帶 germline-ASM + subclone Δβ → <b>證明四類非互斥（不能切 4 不相交桶）</b></text>
+  <text x="10" y="152" font-size="11" fill="#1f5f43">帶 subclone Δβ（同 haplotype）= 3,576（16.0%）· 帶 germline-ASM = 6,238</text>
+  <text x="10" y="170" font-size="10" fill="#8a7a68">CN/LOH（situation 3）須當<b>排除前置濾鏡</b>，先剔除再談 subclone 歸因</text>
+</svg></div>
+  <div class="fig"><svg viewBox="0 0 620 220" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="310" y="22" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2418">unsupervised within_clean 是不是 subclone？（Jaccard 0.123）</text>
+  <circle cx="240" cy="120" r="80" fill="#5B5BD6" fill-opacity="0.16" stroke="#5B5BD6" stroke-width="2"/>
+  <circle cx="360" cy="120" r="82" fill="#2F7D5B" fill-opacity="0.16" stroke="#2F7D5B" stroke-width="2"/>
+  <text x="180" y="95" text-anchor="middle" font-size="11" font-weight="800" fill="#3a3aa8">within_clean</text>
+  <text x="180" y="110" text-anchor="middle" font-size="9.5" fill="#5B5BD6">unsup 4,323</text>
+  <text x="420" y="95" text-anchor="middle" font-size="11" font-weight="800" fill="#1f5f43">a-priori subclone</text>
+  <text x="420" y="110" text-anchor="middle" font-size="9.5" fill="#2F7D5B">4,596</text>
+  <text x="195" y="128" text-anchor="middle" font-size="15" font-weight="800" fill="#3a3aa8">3,348</text>
+  <text x="300" y="124" text-anchor="middle" font-size="14" font-weight="800" fill="#3a2418">975</text>
+  <text x="405" y="128" text-anchor="middle" font-size="15" font-weight="800" fill="#1f5f43">3,621</text>
+  <text x="310" y="210" text-anchor="middle" font-size="10.5" fill="#9A3B3B" font-weight="700">within_clean 中 55.1%（2,382）無 anchor=epiallele；僅 25.5% 有 a-priori subclone 標記</text>
+</svg></div>
+  <div class="crit"><b>對我前一份分析的直接修正</b>：我把 unsupervised <code>within_clean</code>（16.5%）標成「subclone 相關」是<b>錯的</b> — 它與 a-priori SubcloneDbeta 的 Jaccard 僅 <b>0.123</b>，其中 <b>55.1%（2,382）無任何 anchor = epiallele</b>。改標為「situation-4 epiallele/未錨定（collider 風險）」。</div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>⚠️ 修正：判別性宣稱（最重要的誠實修正）</h2>
+  <p class="lead">你的「a-priori 在 Noise 0% vs unsupervised 83%」<b>兩個數字都錯</b>。真相見下。</p>
+  <div class="fig"><svg viewBox="0 0 620 230" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img">
+  <text x="310" y="22" text-anchor="middle" font-size="13" font-weight="800" fill="#3a2418">判別性真相：a-priori ≈ unsupervised-clean（深=Strong 淺=Noise）</text>
+  <line x1="60" y1="172" x2="560" y2="172" stroke="#E3DACC"/>
+  <text x="150" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3a2418">a-priori SubcloneDbeta</text><rect x="118" y="52" width="28" height="23" fill="#2F7D5B" transform="translate(0,97)"/><rect x="154" y="52" width="28" height="11" fill="#b8aa96" transform="translate(0,109)"/><text x="132" y="186" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2F7D5B">16.4%</text><text x="168" y="186" text-anchor="middle" font-size="9.5" fill="#8a7a68">7.6%</text>
+  <text x="310" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3a2418">unsup-clean within</text><rect x="278" y="52" width="28" height="21" fill="#5B5BD6" transform="translate(0,99)"/><rect x="314" y="52" width="28" height="10" fill="#b8aa96" transform="translate(0,110)"/><text x="292" y="186" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5B5BD6">15.3%</text><text x="328" y="186" text-anchor="middle" font-size="9.5" fill="#8a7a68">6.8%</text>
+  <text x="470" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#9A3B3B">unsup-LOOSE bimodal</text>
+  <rect x="438" y="62" width="64" height="110" fill="#9A3B3B"/>
+  <text x="470" y="186" text-anchor="middle" font-size="11" font-weight="800" fill="#9A3B3B">98.3%</text>
+  <text x="470" y="205" text-anchor="middle" font-size="9" fill="#8a7a68">幾乎全位點（飽和=不判別）</text>
+  <text x="230" y="218" text-anchor="middle" font-size="10" fill="#8a7a68">a-priori 7.6% in Noise（非 0%）· 與 clean 統計打平 → 優勢在<b>可解釋/合法 null</b>非偵測力</text>
+</svg></div>
+  <div class="crit">
+    <b>真相</b>：a-priori SubcloneDbeta 在 Noise = <b>7.6%（非 0%）</b>、Strong 16.4%（~2× 富集）；unsupervised-<b>clean</b> = 15.3%/6.8% <b>與 a-priori 統計打平</b>；真正不判別的是 unsupervised-<b>loose</b> bimodal = <b>98.3%</b>（幾乎全位點，比 83% 更糟）。<br>
+    → a-priori 的真正優勢 = <b>可解釋性 / 因果錨定 + 合法 null</b>（7.6%-in-Noise 是有意義的 bounded floor 非 tautology），<b>不是偵測力</b>。論文每句改寫成「causally interpretable / correctly-nulled / identifiable」，<u>絕不寫「more discriminative」</u>（reviewer 會重現此數字打臉）。
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>甲基有用性判準（A/B/C）— 採納 + 逐角色校準</h2>
+  <p class="lead">標準正確：<b>甲基有用 iff 在 haplotag 已定義的 a-priori 群上、用合法 null、提供 haplotag 之外的資訊</b>。但各角色強度須誠實標。</p>
+  <table class="roletab">
+    <thead><tr><th>角色</th><th>定義</th><th>現狀 / 校準</th><th>可用？</th></tr></thead>
+    <tbody>
+    <tr><td><b>A 刻畫</b></td><td>same-hap carrier 群（HP1 vs HP1-1）有獨特 HP-軸甲基特徵</td><td>population 層 ~7.7% TP 位點有；但<b>somatic-specificity UNDETERMINED</b>（G-B within-hap somatic-vs-baseline 控制未跑）；carrier-arm 小 n 脆弱（2369/2340 = 上界）</td><td><span class="badge bwarn">存在級·待 G-B</span></td></tr>
+    <tr><td><b>B 排序/分支</b></td><td>甲基梯度沿 sSNV-block → 相對時序（chr2）</td><td><b>illustrative case</b>：單位點、小 n（pos4=20bp poly-T artifact、target 落 HC gap 不可評、VAF 無法排 siblings）；定性排序非 CCF 量化</td><td><span class="badge bwarn">假說級·case demo</span></td></tr>
+    <tr><td><b>C 精修</b></td><td>somatic haplotype 內甲基揭露 sSNV 漏掉的更細結構</td><td>HCC1395 <b>無更細 a-priori anchor</b>（只一條 1-1）→ 與 epiallele 不可分（V11c usability NEGATIVE、ambiguous reads 偏錯 8/8）</td><td><span class="badge bno">不可驗·此樣本 drop/defer</span></td></tr>
+    <tr><td><b>2′ allele-axis</b></td><td>ALT vs REF 內甲基差（AltSubcloneDbeta 4,454）</td><td>非與 HP-軸 SubcloneDbeta 同級 — <b>baseline-allelic 混淆</b>（TP 11.1% &lt; germline-het null 15.2%），須自帶 germline-het 對照</td><td><span class="badge bno">須 null 控制·分開列</span></td></tr>
+    </tbody>
+  </table>
+  <div class="good" style="margin-top:12px"><b>最終判準（&lt;120 字，可投稿口徑）</b><br><span style="font-size:.9rem">Methylation is useful for subclonal reconstruction iff it adds information BEYOND the somatic haplotag, on read groups the haplotag already defines a-priori (germline-HP x somatic carrier), in bounded roles with a valid null: (A) CHARACTERIZE — a same-haplotype carrier group (HP1 vs HP1-1) shows a distinct HP-axis methylation signature, reported as population-level prevalence (~7.7% TP loci) with carrier-group n fragility, somatic-specificity flagged undetermined until the within-haplotype somatic-vs-baseline control runs; (B) ORDER/BRANCH — a methylation gradient along a sSNV-linked block imposes a relative ordering (chr2 demo, illustrative, small-n). It is NOT a stronger DETECTOR (a-priori ~= unsupervised-clean on raw stats); its value is causal labeling/identifiability. Role C (refine) does NOT qualify without a finer a-priori anchor — else it is non-identifiable epiallele.</span></div>
+</section>
+
+<section>
+  <h2><span class="n">6</span>修訂計畫（前一份分析要改什麼）</h2>
+  <p class="lead">底層<b>計算不動</b>（facts D-F 全 grep-精確）；改的是<b>敘述/標籤</b>。逐項：</p>
+  <ol style="font-size:.88rem;line-height:1.7"><li>1. PURGE the discriminability overstatement everywhere in the prior set-analysis HTML + narrative. Delete every '0% noise' and '83%' phrasing. Replace with verified fact E numbers: a-priori SubcloneDbeta(any) = 16.4% Strong / 14.1% Weak / 7.6% Noise; unsupervised-CLEAN = 15.3% / 6.8% (TIED with a-priori-clean); unsupervised-LOOSE = 98.3% of all loci (saturated/non-identifiable). Add one explicit sentence: 'a-priori and clean-unsupervised are statistically tied on raw discriminability; the a-priori advantage is identifiability/causal-anchoring + a valid null, NOT detection power.'</li><li>2. REPLACE the MECE 4-bucket subdivision of Strong with a NON-EXCLUSIVE multi-label annotation table. Tabulate (from strong_subdivide.json by_dbeta_combo on the source branch): germline-ASM-only ~5,216 / subclone-only ~2,554 / BOTH germline+subclone 1,022 / a-priori-UNMARKED 13,518 (60.6%). Caption: 1,022 co-occurrence proves non-disjointness; 60.6% unmarked = CN/epiallele/unexplained, explicitly NOT 'subclone'. Add a decision-tree note that CN/LOH (situation 3) is an EXCLUSION pre-filter applied before subclone attribution.</li><li>3. RE-LABEL within_clean (16.5%, fact F) from 'subclone-related' to 'situation-4 epiallele/unanchored (collider/epiallele risk)' in the prior set-analysis HTML — its current label contradicts both the model's situation (4) and the a-priori-anchor discipline (unsupervised 2-means has no a-priori somatic marker). This is a wording fix, no recomputation.</li><li>4. ADD an n_carrier fragility caveat block to the 2369/2340 SubcloneDbeta_Sig counts (cite RegionProcessor.hpp:182 / fact C): report them as aggregate prevalence (~7.7% TP loci) + per-locus n_carrier + UPPER-bound flag; remove any per-locus subclone-methylation assertion lacking n-stratified CIs.</li><li>5. RESCOPE the reconstruction-backbone section on EMPIRICAL grounds: state that the per-locus haplotag suffix is empirically single-somatic-haplotype-per-germline-HP in this data (fact B: zero 1-2/2-2/4 genome-wide), so lineage MUST be reconstructed by linking sSNVs into megabase blocks (somatic-haplotype block N50 ~1.08 Mb in HCC1395). Do NOT claim a tag-representational impossibility. Present chr2 multi-sSNV block as the concrete role-B case-demonstration, flagged single-locus / small-n / pos4-homopolymer / CCF-demo-level.</li><li>6. INSERT the G-B caveat wherever SubcloneDbeta-sig is used to assert methylation characterization: 'existence-level HP-axis signal; somatic-specificity UNDETERMINED pending the within-haplotype somatic-vs-baseline control (G-B open)'; and a hard rule that p=0.922 is NEVER cited as NEGATIVE.</li><li>7. SEPARATE AltSubcloneDbeta (allele-axis, needs germline-het null, TP 11.1% < null 15.2%) from HP-axis SubcloneDbeta in every results table; label it 'allele-marked, requires null control', not a co-equal subclone signal.</li><li>8. DROP role C from the HCC1395 claim set (or mark 'deferred — needs multi-carrier tags / external sub-lineage truth'); downgrade role B from 'timing/ordering established' to 'illustrative ordering hypothesis, small-n, single-locus'.</li><li>9. WEEKLY update: log that the a-priori 4-population model is ADOPTED-WITH-CORRECTIONS as the paper-core read-partition definition; that the discriminability framing was a falsified overstatement now corrected to identifiability/anchoring; that no-1-2/2-2 caps the in-pipeline claim at single-carrier-clone-per-HP characterization (sample-level multi-subclone via external truth); whole model tier-capped at 3 (single sample / single pipeline); none of this overturns established verdicts (ASM real, germline-level, filter-DEAD, a-priori-anchor-required). Stamp build_branch/HEAD on the revised HTML.</li><li>10. After edits, run number_provenance.py audit on the revised HTML against the verified-facts source files; confirm every metric (7733/25.4%, 2369/7.8%, 2340/7.7%, 16.4/14.1/7.6, 15.3/6.8, 98.3, 1,022, 13,518/60.6%) greps back to a bounded source before marking the HTML validated.</li></ol>
+  <div class="crit-banner"><b>未解風險（投稿前必補）</b><ul class="warn" style="margin:4px 0"><li>Single sample (HCC1395) + single longphase-S pipeline = self-referential; whole model tier-capped at 3. COLO829 / cross-sample HP-axis replication not done => any 'reconstruction' headline stays red-team REFUTED as-stated.</li><li>G-B within-haplotype somatic-vs-baseline control is UNRUN => role-A somatic-specificity is genuinely undetermined; the SubcloneDbeta within-HP permutation cannot isolate somatic from residual germline-allelic/epiallelic effects. This is the single most load-bearing open gate for the 'characterize' claim.</li><li>The 60.6% a-priori-unmarked Strong mass (13,518 loci) is an under-determined CN/epiallele/unexplained residual; if it is later mis-absorbed into 'subclone' the non-MECE error re-enters. Needs an explicit CN/LOH exclusion pre-filter to keep Strong-CN out of Strong-Subclone.</li><li>n_carrier paucity on the 2369/2340 sig loci is uncontrolled; non-random carrier subsampling (by read length / CpG coverage / mapping) can re-import an allele-of-origin signal, so 2369 is an upper bound, not a count of verified clone-distinct loci.</li><li>chr2 role-B demo has known artifacts (pos4 20bp poly-T homopolymer; carrier marker 18,086,020 not in somatic VCF; target 18,086,269 in HC gap unevaluable; VAF cannot exclude siblings) — ordering is qualitative at one locus, CCF->timing is not quantified.</li><li>AltSubcloneDbeta allele-axis lacks its germline-het null; if presented as a co-equal somatic signal it imports baseline-allelic confound (TP 11.1% < null 15.2%).</li><li>External truth dependency: sample-level multi-subclone rests on Fang2021/Velazquez2020 (HCC1395/COLO829 only; H1437/H2009/HCC1937/HCC1954 lack dedicated truth) — orthogonal citation, not method output; HCC1937!=HCC1395 confusion risk noted.</li><li>Source artifacts (strong_subdivide.json, methyl_discrimination_pvalues.py) and the hpp line numbers live on other branches (feat/summary-nreadsvalid); current branch research/subclonal-reconstruction-202606 lacks them — revision-plan steps 2/10 must run against the correct branch/worktree before the HTML is re-validated.</li></ul></div>
+</section>
+
+<section style="background:#f6efe2">
+  <h2><span class="n">∑</span>一句話（給教授）</h2>
+  <ul style="font-size:.95rem;line-height:1.8">
+    <li><b>a-priori haplotag 切 4 群 + 甲基刻畫</b>的框架<b>正確採納</b> — 重建骨幹 = somatic haplotagging（sSNV-block 串接），甲基 = 刻畫/排序（有界、非 driver）。</li>
+    <li><b>誠實修正</b>：a-priori 的優勢是<u>可解釋/合法 null</u>非偵測力（與 unsupervised-clean 統計打平）；unsupervised within_clean 55% 是 epiallele 不可算 subclone。</li>
+    <li><b>口徑封頂</b>：HCC1395 無 1-2/2-2 → 是「每 HP 單 clone 刻畫」非「多 subclone 重建」；多 subclone 靠外部真值（Fang2021）；單樣本單管線 ⭐3。</li>
+    <li><b>最 load-bearing 缺口</b>：G-B within-haplotype somatic-vs-baseline 控制未跑 → A 角色 somatic-specificity 仍 undetermined。</li>
+  </ul>
+  <p class="note">溯源：<code>paperdef.json</code> ← verify_apriori / apriori_vs_unsup / strong_subdivide.json + 4-lens workflow synthesis。每個數字 grep 可溯。</p>
+</section>
+
+</div></body></html>

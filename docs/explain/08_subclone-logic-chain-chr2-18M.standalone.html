@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>為什麼能用「sSNV + 甲基」推出 clone / subclone 並標記？— chr2:18M 邏輯鏈</title>
+<!--
+  doc_type: explain_page (first-principles teaching narrative)  id: 08_subclone-logic-chain-chr2-18M  version: v1  created: 2026-06-17
+  build_branch: research/subclonal-reconstruction-202606
+  audience: 完全不熟此專案的教授（具基本癌症基因體背景）；framing = 聚焦邏輯鏈、淡化背景；靜態教學為主（互動判讀見頁 07）
+  goal: 講清楚「為什麼能從 sSNV(基因) + 甲基(表觀) 在同一條 long read 上推出 clone/subclone 並給正確 tag」，以及「為什麼偵測甲基對這問題重要」
+  SoT(權威): docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md
+  data_sources: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv
+  provenance-verified: 所有 metric（HP 計數 / lineage anchor / 0 違反 / 甲基 meanM + FDR + clean/confounded 分類 / pos4 allele 計數 / CCF）皆親讀 independent_audit.json 並逐筆核對 07 工作站注入值；無捏造、無預期值。色彩=甲基率分桶（值為精確真值，色為視覺分級）。
+  CSS: 內聯 explain.css v2.1（暖色盤）讓本頁可攜（可單獨寄給教授不破版）。與頁 04/05/06/07 同盤。
+-->
+<style>
+/* ===== 內聯 explain.css v2.1（canonical 暖色盤）===== */
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --c-alpha:#2F6690; --c-beta:#B06A16;
+  --m0:#2c5dab; --m1:#c8323c; --mmid:#e6e1d8;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.05rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:900px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.58rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:920px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.1rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+.takeaway.warn{border-color:var(--c-warn);border-left-color:var(--c-warn);color:#5e3c10} .takeaway.warn .lab{color:var(--c-warn)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+em.q{font-style:normal;background:var(--c-cs-soft);color:#3f2c70;padding:0 4px;border-radius:3px;font-weight:600}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.08rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:5px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:165px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.55rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)} .kpi.info{border-left:4px solid var(--c-info)} .kpi.warn{border-left:4px solid var(--c-warn)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+/* 強制 SVG 內所有文字使用 CJK-capable 字體棧，避免等寬/無 CJK 字型造成中文變方框(tofu) */
+figure svg text,figure svg tspan{font-family:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei","Noto Sans CJK SC","Heiti TC",sans-serif}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card>summary .term{font-family:var(--mono);color:var(--c-cs);font-size:.95em}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+details.card.def{border-left:4px solid var(--c-cs)} details.card.cav{border-left:4px solid var(--c-warn)} details.card.method{border-left:4px solid var(--c-info)}
+.intuition{background:var(--c-cs-soft);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.9rem;margin:var(--sp-2) 0}
+.intuition b{color:var(--c-cs)}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.why{background:var(--c-info-soft);border:1px solid var(--c-info);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.95rem}
+.why .lab{font-family:var(--mono);font-size:.64rem;color:var(--c-info);letter-spacing:1px;text-transform:uppercase;font-weight:800;display:block;margin-bottom:5px}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.legend{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:.8rem;margin:var(--sp-2) 0;color:var(--c-text-soft)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+.chain{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:var(--sp-3) 0;font-size:.86rem}
+.chain .node{background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:5px 10px;font-weight:600}
+.chain .node.a{border-color:var(--c-pass);color:var(--c-pass)} .chain .node.b{border-color:var(--c-info);color:var(--c-info)}
+.chain .arrow{color:var(--c-accent);font-weight:800}
+.svgnote{font-size:9px;fill:#6B6B66}
+@media(max-width:720px){.kpi{min-width:140px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例校正 04</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">權威 audit 05</a>
+    <a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">互動工作站 07</a>
+    <a href="#why">為何要甲基</a><a href="#s1">①兩種記號</a><a href="#s2">②LOH無塵室</a><a href="#s3">③條碼分叉</a><a href="#s4">④甲基印證</a><a href="#s5">⑤對照濾假</a><a href="#s6">⑥標tag</a><a href="#limit">限制</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋頁 08 · 第一性原理邏輯鏈 · 給教授的「為什麼可行」走查</div>
+  <h1>為什麼能用「點突變 + 甲基」<br>推出 clone / subclone，並給每條 read 正確的標記？</h1>
+  <p class="lede">以 HCC1395 在 <code>chr2:18,066,481–18,110,828</code>（6 個 sSNV 跨 18,068,480–18,108,828）的一段 <strong>LOH 區</strong>為例，逐步拆開這條推理鏈。本頁<strong>不講背景、直接走邏輯</strong>：為什麼 LOH 讓訊號變乾淨 → 為什麼點突變能切出互斥譜系 → 為什麼甲基能<strong>獨立印證</strong>同一個切分 → 為什麼要用正常組織對照濾掉假訊號 → 最後怎麼給每條 read 正確的 tag。每一步都標清楚<strong>哪些是觀測、哪些是推論</strong>。</p>
+</header>
+
+<!-- ============ L0 BLUF ============ -->
+<div class="bluf">
+  <h2>L0 一條邏輯鏈看懂</h2>
+  <div class="chain">
+    <span class="node">LOH＝無塵室</span><span class="arrow">→</span>
+    <span class="node a">點突變(sSNV)＝譜系條碼</span><span class="arrow">→</span>
+    <span class="node b">甲基＝獨立印證的指紋</span><span class="arrow">→</span>
+    <span class="node">扣 normal 濾假</span><span class="arrow">→</span>
+    <span class="node">每條 read 標 tag（α / α-1 / β）</span>
+  </div>
+  <p>關鍵前提是 <span class="key">LOH（雜合性缺失）</span>：這段 DNA 只剩單一條親本染色體。於是同一條染色體上 read 之間的差異，<strong>不可能</strong>是「兩條親本本來就不同」造成的 → 一定是腫瘤後天累積的 <strong>somatic</strong> 變化。點突變把 read 切成<strong>互斥的譜系</strong>（α / β），而甲基化模式<strong>沿著同樣的譜系一起變</strong> — 這是一條<strong>與點突變不同來源的正交軸</strong>，互相印證了同一個 subclone 切分（其「獨立性」僅限正常組織無等位差異的乾淨 CpG，見 §⑤）。</p>
+  <p class="pi">▸ <b>給教授一句話：</b>在這個 LOH 區裡，「LOH → somatic 點突變定義的 α/β 兩譜系 → 甲基沿譜系變化」這條骨幹在實際資料中<b>獲證、且跨 basecaller 複製</b>（basecaller = 把測序電訊號翻成 ATCG 的軟體；HKU 與 DORADO 是兩套不同軟體跑<u>同一批 read</u> → 屬<b>技術重現、非獨立病人</b>）。但這是一個<b>有界</b>的結論（<span class="badge tier">tier L2</span>，單位點 × 單樣本 × 單 pipeline）：真實譜系是 <b>~3 條</b>不是「5 群」、突變先後順序是<b>推論不是觀測</b>、乾淨的甲基訊號只限於<b>正常組織沒有等位差異</b>的 CpG 子集。</p>
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">0</div><div class="k">α / β 兩譜系互斥的「違反」read（HKU + DORADO 皆 0）</div></div>
+    <div class="kpi pass"><div class="v">4 / 236</div><div class="k">LOH：HP1 殘餘 read（≈1.7%）→ 幾乎只剩單一親本</div></div>
+    <div class="kpi info"><div class="v">3.1 / 3.2</div><div class="k">扣 normal ASM（等位特異甲基：兩親本本來就不同的甲基）後最乾淨、且跨 basecaller 複製的甲基 CpG</div></div>
+    <div class="kpi warn"><div class="v">~3</div><div class="k">可信譜系數（原「5 群」校正後；pos4 是定序假象）</div></div>
+  </div>
+</div>
+
+<!-- ============ WHY methylation (放最前面，因為這是教授最想問的) ============ -->
+<section id="why">
+  <h3><span class="num">⓪</span> 先回答最關鍵的問題：為什麼非得「偵測甲基」不可？</h3>
+  <p class="sub">如果只看點突變就能重建 subclone，何必費力去讀甲基？因為點突變這條軸<strong>太稀疏、太脆弱</strong>，單靠它常常標不準。甲基提供了三件點突變做不到的事 —— 但也有一條必須誠實守住的邊界。</p>
+
+  <div class="why">
+    <span class="lab">甲基的三個不可替代價值</span>
+    <ol style="margin:6px 0 0;padding-left:1.3em">
+      <li><b>正交印證</b>：點突變在這 40 kb 只有 6 個、覆蓋又低，很多 read 跨不過任何一個資訊位點。甲基是<u>密集</u>的第二條軸（這裡 10 個 CpG），在基因條碼模糊處仍能印證同一個譜系切分 —— 兩條獨立證據指向同一個分群，可信度遠高於單軸。</li>
+      <li><b>救援標記</b><span class="muted">（方法定位，本案例尚未逐 read 量化）</span>：純靠點突變無法定相（phase）的 read，<u>原理上可</u>用甲基指紋補回它屬於哪條譜系 → 給出更完整的 tag。<span class="muted">本案例已實證的是「正交印證」（FDR 通過）；逐 read 救援是設計理據、待量化。</span></li>
+      <li><b>刻畫功能</b>：甲基告訴你這個 subclone「<u>關掉了哪些基因</u>」= 生物學行為，而不只是身分標籤。點突變只說「它不一樣」，甲基說「它哪裡不一樣、可能造成什麼」。</li>
+    </ol>
+  </div>
+  <div class="ironclad">
+    <b>🔴 但守住這條邊界（本頁全程不越線）</b>
+    <ol>
+      <li>這裡甲基是<b>印證 / 刻畫（characterization）軸，不是驅動者、更不是變異 filter</b>。「用甲基當 filter 去濾真假突變」那條路在本專案已驗證為 <span class="badge b-dead">DEAD</span>。</li>
+      <li>乾淨案例<b>依賴三個前提</b>：① LOH（單一親本）② somatic 定義的譜系 ③ 用正常組織對照扣掉既存的等位甲基差異。缺一就不能外推到一般非-LOH 位點。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ §1 兩種記號在同一條分子 ============ -->
+<section id="s1">
+  <h3><span class="num">①</span> 為什麼「長 read」是關鍵：同一條分子上同時讀到兩種記號</h3>
+  <p class="sub">整條推理之所以成立，物理基礎是：<strong>一條 ONT long read = 一個 DNA 分子 = 一顆腫瘤細胞的單條染色體</strong>。在這同一條分子上，我們同時讀到兩種記號 —— 改變字母的<strong>點突變</strong>（基因條碼）與不改字母、只改化學標記的<strong>甲基化</strong>（表觀指紋）。短 read 跨不過這 40 kb，無法把多個記號綁在同一條分子上，這條推理就斷了。</p>
+
+  <figure>
+    <div class="figtitle">圖 1 · 一條 long read 上的兩層記號（基因條碼 + 甲基指紋）</div>
+    <svg viewBox="0 0 1000 300" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="同一條 read 上的點突變與甲基記號">
+      <!-- molecule -->
+      <text x="500" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#1c1b19">一條 ONT long read（約 17 kb 中位長度）跨過整個 chr2:18.07–18.11M 區</text>
+      <rect x="80" y="128" width="840" height="34" rx="8" fill="#F0EDE6" stroke="#5C5A54" stroke-width="1.5"/>
+      <text x="500" y="150" text-anchor="middle" font-size="11" fill="#5C5A54">= 一顆腫瘤細胞的單條染色體</text>
+      <!-- 基因條碼 layer (above) -->
+      <text x="74" y="78" text-anchor="end" font-size="11" font-weight="700" fill="#2F6690">基因條碼</text>
+      <text x="74" y="92" text-anchor="end" font-size="9" fill="#5C5A54">(6 sSNV)</text>
+      <g font-size="11" text-anchor="middle">
+        <!-- pos1 80, p2 165, p3 445, p4 659, p5 730, p6 920 -->
+        <line x1="80" y1="100" x2="80" y2="128" stroke="#2F6690" stroke-width="1.5"/>
+        <rect x="68" y="72" width="24" height="26" rx="3" fill="#E2ECF3" stroke="#2F6690"/><text x="80" y="90" font-weight="700">1</text>
+        <line x1="165" y1="100" x2="165" y2="128" stroke="#2F6690" stroke-width="1.5"/>
+        <rect x="153" y="72" width="24" height="26" rx="3" fill="#E2ECF3" stroke="#2F6690"/><text x="165" y="90" font-weight="700">2</text>
+        <line x1="445" y1="100" x2="445" y2="128" stroke="#9A3B3B" stroke-width="1.5"/>
+        <rect x="433" y="72" width="24" height="26" rx="3" fill="#F3E2E2" stroke="#9A3B3B"/><text x="445" y="90" font-weight="700" fill="#9A3B3B">3</text>
+        <line x1="659" y1="100" x2="659" y2="128" stroke="#B06A16" stroke-width="1.5"/>
+        <rect x="647" y="72" width="24" height="26" rx="3" fill="#F6EBD8" stroke="#B06A16"/><text x="659" y="90" font-weight="700" fill="#B06A16">4</text>
+        <line x1="730" y1="100" x2="730" y2="128" stroke="#2F6690" stroke-width="1.5"/>
+        <rect x="718" y="72" width="24" height="26" rx="3" fill="#E2ECF3" stroke="#2F6690"/><text x="730" y="90" font-weight="700">5</text>
+        <line x1="920" y1="100" x2="920" y2="128" stroke="#2F6690" stroke-width="1.5"/>
+        <rect x="908" y="72" width="24" height="26" rx="3" fill="#E2ECF3" stroke="#2F6690"/><text x="920" y="90" font-weight="700">6</text>
+      </g>
+      <!-- 甲基指紋 layer (below): lollipops -->
+      <text x="74" y="214" text-anchor="end" font-size="11" font-weight="700" fill="#9A3B3B">甲基指紋</text>
+      <text x="74" y="228" text-anchor="end" font-size="9" fill="#5C5A54">(10 CpG)</text>
+      <g>
+        <!-- CpG x: 2.1=195 2.2=245 3.1=548 3.2=561 3.3=599 3.4=614 3.5=654 4.1=660 5.1=748 5.2=750 ; alternate filled(methylated)/open -->
+        <!-- filled = 高甲基 (示意) ; open = 低甲基 (示意) -->
+        <line x1="195" y1="162" x2="195" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="195" cy="206" r="6.5" fill="#c8323c" stroke="#9A3B3B"/>
+        <line x1="245" y1="162" x2="245" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="245" cy="206" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+        <line x1="548" y1="162" x2="548" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="548" cy="206" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+        <line x1="561" y1="162" x2="561" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="561" cy="206" r="6.5" fill="#c8323c" stroke="#9A3B3B"/>
+        <line x1="599" y1="162" x2="599" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="599" cy="206" r="6.5" fill="#c8323c" stroke="#9A3B3B"/>
+        <line x1="614" y1="162" x2="614" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="614" cy="206" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+        <line x1="654" y1="162" x2="654" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="654" cy="206" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+        <line x1="660" y1="162" x2="660" y2="208" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="672" cy="214" r="6.5" fill="#c8323c" stroke="#9A3B3B"/>
+        <line x1="748" y1="162" x2="748" y2="200" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="744" cy="206" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+        <line x1="756" y1="162" x2="756" y2="208" stroke="#9A3B3B" stroke-width="1.2"/><circle cx="760" cy="214" r="6.5" fill="#fff" stroke="#9A3B3B"/>
+      </g>
+      <g font-size="10" fill="#5C5A54"><text x="160" y="246" text-anchor="middle"><tspan fill="#c8323c">●</tspan> 甲基化 &#160;<tspan fill="#9A3B3B">○</tspan> 未甲基化（此圖為示意位置，非單一 read 真值）</text></g>
+      <!-- short read contrast -->
+      <rect x="80" y="266" width="60" height="14" rx="3" fill="#fff" stroke="#9A3B3B" stroke-dasharray="3 2"/>
+      <text x="150" y="277" font-size="10" fill="#9A3B3B">短 read 只能覆蓋這麼一小段 → 跨不過多個記號 → 無法把它們綁在同一條分子上</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>上排藍/紅/橘 = 6 個點突變的位置（基因條碼）；下排棒棒糖 = 10 個 CpG 的甲基狀態（表觀指紋）。<b>核心：</b>只有 long read 能在<u>同一條分子</u>上同時讀到上下兩排，因此能把「這條 read 帶哪些突變」與「它的甲基長相」綁在一起。<b>本圖甲基填色為示意位置</b>（真值熱圖見圖 4）；位置座標 = <code>independent_audit.json: snvs / cpg_c_positions</code> 線性映射。</figcaption>
+  </figure>
+
+  <details class="card def"><summary><span class="term">點突變 vs 甲基化</span>一個改字母、一個改化學標記，兩者都會遺傳給後代</summary>
+    <div class="body"><div class="intuition"><b>直覺：</b><b>點突變（sSNV）</b>是 DNA 字母被改寫（如 C→G），一旦發生，這個細胞的所有後代都帶著 → 是穩定的「<u>譜系條碼</u>」。<b>甲基化（5mC）</b>是在 C 上掛一個化學標記，不改字母但會改變基因開關；它也會在細胞分裂時被複製繼承，但比點突變更可塑 → 是「<u>譜系指紋</u>」。兩者都沿著細胞家族遺傳，所以都能用來追譜系，但性質互補。</div></div>
+  </details>
+</section>
+
+<!-- ============ §2 LOH 無塵室 ============ -->
+<section id="s2">
+  <h3><span class="num">②</span> 為什麼這個位點特別乾淨：LOH 是一間「無塵室」</h3>
+  <p class="sub">一般位點每個人有兩條親本染色體（HP1 + HP2），它們本來就可能不同（germline 差異）。所以兩條 read 不一樣，未必是腫瘤造成的 —— 這是個 confound。<strong>LOH 把其中一條整段刪掉</strong>，只剩單一親本。於是任何 read 間差異都<strong>必然是後天的</strong>，subclone 訊號就浮出來了。</p>
+
+  <figure>
+    <div class="figtitle">圖 2 · LOH「無塵室」：從兩條親本 → 只剩一條 → 差異必為 somatic</div>
+    <svg viewBox="0 0 1000 320" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="LOH 無塵室示意">
+      <!-- left: normal -->
+      <text x="210" y="30" text-anchor="middle" font-size="13" font-weight="700">正常細胞</text>
+      <text x="210" y="48" text-anchor="middle" font-size="10" fill="#5C5A54">兩條親本染色體都在</text>
+      <rect x="120" y="70" width="180" height="22" rx="11" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+      <text x="110" y="86" text-anchor="end" font-size="11" font-weight="700" fill="#2F6690">HP1</text>
+      <rect x="120" y="104" width="180" height="22" rx="11" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+      <text x="110" y="120" text-anchor="end" font-size="11" font-weight="700" fill="#B06A16">HP2</text>
+      <text x="210" y="158" text-anchor="middle" font-size="10" fill="#5C5A54">read 不同 → 可能只是「兩親本本來不同」</text>
+      <text x="210" y="172" text-anchor="middle" font-size="10" fill="#9A3B3B" font-weight="700">⚠ germline 差異 = confound</text>
+      <!-- arrow -->
+      <text x="500" y="95" text-anchor="middle" font-size="22" fill="#D97757" font-weight="800">⟶</text>
+      <text x="500" y="118" text-anchor="middle" font-size="11" fill="#D97757" font-weight="700">LOH</text>
+      <text x="500" y="134" text-anchor="middle" font-size="9.5" fill="#5C5A54">丟失一條</text>
+      <!-- right: tumor LOH -->
+      <text x="790" y="30" text-anchor="middle" font-size="13" font-weight="700">腫瘤（此 LOH 區）</text>
+      <text x="790" y="48" text-anchor="middle" font-size="10" fill="#5C5A54">HP1 幾乎整段丟失</text>
+      <rect x="700" y="70" width="180" height="22" rx="11" fill="#fff" stroke="#2F6690" stroke-width="1.2" stroke-dasharray="5 3" opacity="0.6"/>
+      <text x="690" y="86" text-anchor="end" font-size="11" font-weight="700" fill="#9aa" >HP1</text>
+      <text x="893" y="86" font-size="9.5" fill="#9A3B3B">僅 4 條殘餘 (1.7%)</text>
+      <rect x="700" y="104" width="180" height="22" rx="11" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+      <text x="690" y="120" text-anchor="end" font-size="11" font-weight="700" fill="#B06A16">HP2</text>
+      <rect x="700" y="138" width="180" height="22" rx="11" fill="#FBEEDD" stroke="#B06A16" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <text x="690" y="154" text-anchor="end" font-size="10.5" font-weight="700" fill="#B06A16">HP2-1</text>
+      <text x="893" y="154" font-size="9.5" fill="#5C5A54">同一 PS=16735547（phase block）</text>
+      <!-- logic box -->
+      <rect x="120" y="200" width="760" height="92" rx="10" fill="#E4F0EA" stroke="#2F7D5B"/>
+      <text x="140" y="226" font-size="12" font-weight="800" fill="#2F7D5B">為什麼這讓訊號乾淨：</text>
+      <text x="140" y="250" font-size="11.5" fill="#1f4f3a">只剩單一親本染色體 → 同一條染色體上 read 之間的差異，<tspan font-weight="800">不可能</tspan>來自「兩條親本本來不同」</text>
+      <text x="140" y="272" font-size="11.5" fill="#1f4f3a">→ <tspan font-weight="800">必然是腫瘤後天累積的 somatic 變化</tspan>。HP2-1 不是第二條親本，而是 HP2 上帶 somatic 變異的<tspan font-weight="800">子家族</tspan>（subclone 雛形）。</text>
+    </svg>
+    <figcaption><b>名詞：</b>HP1 / HP2 = 一對親本染色體（haplotag = 把每條 read 判給它來自哪條親本的標記）；HP2-1 = HP2 上再分出、帶 somatic 變異的子家族。<b>怎麼讀：</b>左 = 正常細胞兩條親本都在，read 差異有 germline confound；右 = 此 LOH 區 HP1 只剩 <b>4 / 236 tagged ≈ 1.7%</b>（DORADO 1 / 280 ≈ 0.4%），實際分析的 read 幾乎全在 HP2 / HP2-1。HP2 與 HP2-1 共用同一 phase block <code>PS=16735547</code> = 同一條 haplotype 的 sub-haplotype 切分。<b>來源：</b><code>independent_audit.json: samples.HKU_T.hp_parent_counts {2:232, 1:4, None:44}</code>、<code>benchmark_context.overlapping_loh_intervals: chr2:16,146,119-22,100,000=loh</code>（SEQC2 CNV/LOH BED）。</figcaption>
+  </figure>
+  <div class="takeaway pass"><span class="lab">這一步成立 · L2</span>LOH 獲證（HP1 1.7% 殘餘 + 單一 PS），且落在 SEQC2 獨立標註的 LOH 區內 → 這是後面所有推理的<b>乾淨前提</b>。</div>
+</section>
+
+<!-- ============ §3 sSNV 條碼 → 互斥 → 姊妹分支 ============ -->
+<section id="s3">
+  <h3><span class="num">③</span> 為什麼點突變能切出 subclone：互斥 → 姊妹分支</h3>
+  <p class="sub">承 §②：因為是 LOH 單一親本，read 上的字母差異不可能是「兩親本本來不同」，只能是後天 somatic → <strong>於是一條 read 帶哪組突變，就等於它的譜系標籤</strong>（而非定序錯誤）。把每條 read 在 6 個點突變的字母排出來，會看到兩種<strong>互斥</strong>的模式：α（只有 pos3 突變成 A）與 β（pos1/2/6 突變、pos3 還是參考）。關鍵在於 <strong>沒有任何一條 read 同時帶兩組突變</strong>（0 違反）→ 用最簡原則（parsimony）只能解釋成它們是從共同祖先分出去的<strong>姊妹分支</strong>。<span class="muted">⚠ 下面會看到：β 本身又分相距 ~40 kb 的左塊 (1)(2) 與右塊 (4)(6)，兩塊之間沒有跨距 read，屬「甲基橋接的推論」而非直接的點突變 linkage —— 本頁嚴格區分這兩者。</span></p>
+
+  <figure>
+    <div class="figtitle">圖 3 · read 條碼的互斥 → 推出姊妹分支樹</div>
+    <svg viewBox="0 0 1000 440" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="互斥條碼推出姊妹樹（β 分左右塊，甲基橋接）">
+      <!-- matrix header -->
+      <g font-size="11" text-anchor="middle" font-weight="700">
+        <text x="120" y="34" text-anchor="start">代表 read（· = 未覆蓋此點）</text>
+        <text x="360" y="34">(1)</text><text x="430" y="34">(2)</text><text x="500" y="34" fill="#9A3B3B">(3)</text><text x="570" y="34" fill="#B06A16">(4)</text><text x="640" y="34">(5)</text><text x="710" y="34">(6)</text>
+        <text x="820" y="34">譜系 tag</text>
+      </g>
+      <g font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="13" text-anchor="middle">
+        <!-- α row -->
+        <text x="120" y="68" text-anchor="start" font-size="11" font-weight="700" fill="#2F6690">α 代表</text>
+        <rect x="335" y="50" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="360" y="69">C</text>
+        <rect x="405" y="50" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="430" y="69">G</text>
+        <rect x="475" y="50" width="50" height="28" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/><text x="500" y="69" font-weight="700" fill="#9A3B3B">A</text>
+        <rect x="545" y="50" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="570" y="69">C</text>
+        <rect x="615" y="50" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="640" y="69">G</text>
+        <rect x="685" y="50" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="710" y="69">C</text>
+        <text x="820" y="69" font-size="12" font-weight="700" fill="#2F6690">α</text>
+        <!-- α-1 row（紫=子譜系）-->
+        <text x="120" y="106" text-anchor="start" font-size="11" font-weight="700" fill="#5B3FA0">α-1 代表</text>
+        <rect x="335" y="88" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="360" y="107">C</text>
+        <rect x="405" y="88" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="430" y="107">G</text>
+        <rect x="475" y="88" width="50" height="28" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/><text x="500" y="107" font-weight="700" fill="#9A3B3B">A</text>
+        <rect x="545" y="88" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="570" y="107">C</text>
+        <rect x="615" y="88" width="50" height="28" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/><text x="640" y="107" font-weight="700" fill="#5B3FA0">C</text>
+        <rect x="685" y="88" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="710" y="107">C</text>
+        <text x="820" y="107" font-size="12" font-weight="700" fill="#5B3FA0">α-1</text>
+        <line x1="100" y1="126" x2="900" y2="126" stroke="#E3DACC" stroke-dasharray="4 3"/>
+        <!-- β-left row: (1)(2) alt, pos3 ref, (4)(5)(6) 未覆蓋 -->
+        <text x="120" y="150" text-anchor="start" font-size="11" font-weight="700" fill="#B06A16">β-left 代表</text>
+        <rect x="335" y="132" width="50" height="28" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/><text x="360" y="151" font-weight="700" fill="#B06A16">G</text>
+        <rect x="405" y="132" width="50" height="28" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/><text x="430" y="151" font-weight="700" fill="#B06A16">C</text>
+        <rect x="475" y="132" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="500" y="151">G</text>
+        <rect x="545" y="132" width="50" height="28" fill="#F7F5EF" stroke="#E3DACC"/><text x="570" y="151" fill="#B9B6AE">·</text>
+        <rect x="615" y="132" width="50" height="28" fill="#F7F5EF" stroke="#E3DACC"/><text x="640" y="151" fill="#B9B6AE">·</text>
+        <rect x="685" y="132" width="50" height="28" fill="#F7F5EF" stroke="#E3DACC"/><text x="710" y="151" fill="#B9B6AE">·</text>
+        <text x="820" y="151" font-size="11" font-weight="700" fill="#B06A16">β-left</text>
+        <!-- β-right row: (1)(2) 未覆蓋, pos3 ref, (4)alt (6)alt -->
+        <text x="120" y="188" text-anchor="start" font-size="11" font-weight="700" fill="#B06A16">β-right 代表</text>
+        <rect x="335" y="170" width="50" height="28" fill="#F7F5EF" stroke="#E3DACC"/><text x="360" y="189" fill="#B9B6AE">·</text>
+        <rect x="405" y="170" width="50" height="28" fill="#F7F5EF" stroke="#E3DACC"/><text x="430" y="189" fill="#B9B6AE">·</text>
+        <rect x="475" y="170" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="500" y="189">G</text>
+        <rect x="545" y="170" width="50" height="28" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/><text x="570" y="189" font-weight="700" fill="#B06A16" font-size="11">alt*</text>
+        <rect x="615" y="170" width="50" height="28" fill="#E4F0EA" stroke="#E3DACC"/><text x="640" y="189">G</text>
+        <rect x="685" y="170" width="50" height="28" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/><text x="710" y="189" font-weight="700" fill="#B06A16">G</text>
+        <text x="820" y="189" font-size="11" font-weight="700" fill="#B06A16">β-right</text>
+      </g>
+      <!-- exclusivity callout on pos3 -->
+      <rect x="475" y="48" width="50" height="150" fill="none" stroke="#9A3B3B" stroke-width="2" rx="4"/>
+      <text x="500" y="214" text-anchor="middle" font-size="10" fill="#9A3B3B" font-weight="700">pos3：α=A、β=G(ref) → 0 read 同時帶 α 與 β 突變（互斥）</text>
+      <!-- counts -->
+      <text x="60" y="236" text-anchor="start" font-size="10.5" fill="#5C5A54">anchor 計數：α(pos3=A)=<tspan font-weight="700">30</tspan> · β-strict(1∨2∨6)=<tspan font-weight="700">49</tspan> · α∧β 違反=<tspan font-weight="700" fill="#2F7D5B">0</tspan>（HKU；DORADO 28 / 44 / 0）</text>
+      <!-- tree -->
+      <g>
+        <text x="500" y="262" text-anchor="middle" font-size="11" fill="#5C5A54">↓ 互斥 + parsimony 推出 ↓</text>
+        <circle cx="500" cy="288" r="8" fill="#9aa"/><text x="500" y="282" text-anchor="middle" font-size="10" fill="#5C5A54">all-REF 共同祖先（推論）</text>
+        <line x1="500" y1="296" x2="300" y2="330" stroke="#2F6690" stroke-width="2" stroke-dasharray="5 3"/>
+        <line x1="500" y1="296" x2="720" y2="330" stroke="#B06A16" stroke-width="2" stroke-dasharray="5 3"/>
+        <!-- α side -->
+        <circle cx="300" cy="338" r="8" fill="#2F6690"/><text x="300" y="358" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">α：pos3 G&gt;A</text>
+        <line x1="300" y1="346" x2="300" y2="388" stroke="#2F6690" stroke-width="2"/>
+        <circle cx="300" cy="396" r="7" fill="#5B3FA0"/><text x="300" y="416" text-anchor="middle" font-size="10" fill="#5B3FA0">α-1：+pos5 G&gt;C（巢狀；provisional HKU 4/DOR 2）</text>
+        <!-- β side: 兩塊靠甲基橋接（無直接 genetic linkage） -->
+        <rect x="555" y="316" width="400" height="94" rx="9" fill="none" stroke="#B06A16" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <text x="568" y="332" text-anchor="start" font-size="10" fill="#B06A16" font-weight="700">β 程式（與 α 互斥）</text>
+        <circle cx="640" cy="355" r="7" fill="#B06A16"/><text x="640" y="375" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B06A16">β-left：(1)(2)</text>
+        <circle cx="870" cy="355" r="7" fill="#B06A16"/><text x="870" y="375" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B06A16">β-right：(4)(6)</text>
+        <line x1="647" y1="355" x2="863" y2="355" stroke="#5B3FA0" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="755" y="402" text-anchor="middle" font-size="9.5" fill="#5B3FA0" font-weight="700">甲基橋接推論（無跨距 read · L3）</text>
+      </g>
+    </svg>
+    <figcaption><b>怎麼讀：</b><span style="background:#F3E2E2;padding:0 3px;border-radius:2px;color:#9A3B3B;font-weight:700">紅</span> = α 定義突變 (pos3=A)；<span style="background:#F6EBD8;padding:0 3px;border-radius:2px;color:#B06A16;font-weight:700">橘</span> = β 定義突變；<span style="background:#ECE6F6;padding:0 3px;border-radius:2px;color:#5B3FA0;font-weight:700">紫</span> = 子譜系 α-1 (pos5)；<b>·</b> = 該 read 未覆蓋此點。<b>核心邏輯（觀測）：</b>pos3 在 α 突變、在 β 為 ref，且<u>沒有一條 read 同時帶 α 與 β 突變</u>（0 違反）→ 不能同一譜系 → parsimony 推出 α / β 為<b>姊妹分支</b>；pos5 只出現在帶 pos3=A 的 read（完美巢狀）→ α-1 是 α 子分支（<b>provisional</b>，直接支持 HKU 4 / DORADO 2 條）。<b>誠實分界（推論）：</b>β 的<u>左塊 (1)(2)</u> 與<u>右塊 (4)(6)</u> 相距 ~36–40 kb、<u>沒有跨距 read</u> 直接把它們連在同一條分子上（見下表）→ 它們同屬 β 是靠「互斥 + 甲基一致性」的<b>推論（虛線, L3）</b>，不是點突變的直接 linkage。<code>(4)alt*</code> = pos4 落在 20bp 同聚物上，字母為 T/DEL/G 混合不可信（見 §⑥）。<b>來源：</b><code>independent_audit.json: lineage_anchor_counts</code>、<code>linkage_bq10</code>。</figcaption>
+  </figure>
+
+  <h4 class="mini">read-level linkage（兩事件是否落在同一條 read 上）</h4>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>事件組合</th><th>HKU 共現 (11=兩者皆突變)</th><th>判讀</th></tr></thead>
+    <tbody>
+      <tr><td>(1)G vs (2)C</td><td>n=31，11=<b>13</b></td><td>同支（co-occur）→ 都屬 β</td></tr>
+      <tr><td>(1)G vs (3)A</td><td>n=13，11=<b>0</b></td><td><b>互斥</b> → α 與 β 不同支</td></tr>
+      <tr><td>(2)C vs (3)A</td><td>n=17，11=<b>0</b></td><td><b>互斥</b></td></tr>
+      <tr><td>(3)A vs (5)C</td><td>n=13，11=4（且 01=0）</td><td>pos5 巢狀於 pos3=A → α-1（provisional）</td></tr>
+      <tr><td>(4)alt vs (6)G</td><td>n=19，11=<b>10</b></td><td>同 state → β-right 內 (4)(6) 共現</td></tr>
+      <tr style="background:#F6EBD8"><td>(1)/(2) vs (6)　<span class="muted">跨塊</span></td><td>n=1–2，11=<b>0</b>（DORADO n=0）</td><td><b>無跨距 read</b> → β 左塊 (1)(2) 與右塊 (4)(6) <b>無直接 linkage</b>，靠甲基橋接（推論）</td></tr>
+    </tbody>
+  </table></div>
+  <div class="takeaway pass"><span class="lab">這一步成立（分清觀測 vs 推論）· L2</span><b>觀測：</b>點突變條碼把 read 切成與 α <b>互斥的 β 程式</b>（pos3：0 違反，跨 basecaller 複製），pos5 再切出 α-1（provisional，直接支持 HKU 4 / DORADO 2 條）。<b>推論（L3）：</b>β 的左塊 (1)(2) 與右塊 (4)(6) 之間<u>沒有跨距 read</u>，它們同屬 β 是靠「互斥 + 甲基一致性」的推論，<b>不是</b>直接的點突變 linkage。<b>這就是「從點突變找到 subclone」的機制 —— 但它只給「身分」，還沒給功能、也標不到所有 read（下一步交給甲基）。</b></div>
+</section>
+
+<!-- ============ §4 甲基沿譜系一起變 ============ -->
+<section id="s4">
+  <h3><span class="num">④</span> 為什麼甲基能「印證」這個切分：第二條獨立的軸</h3>
+  <p class="sub">現在把甲基疊上去。對每個 CpG，比較 <strong>α 的 read</strong> 與 <strong>β 的 read</strong> 的平均甲基率。如果甲基只是隨機噪音，兩群不該有系統差異。但實際上多個 CpG 在 α / β 之間<strong>乾淨地分開、且方向一致</strong> —— 帶 α 條碼的同一批分子也帶 α 的甲基長相。這是一條<strong>與點突變不同來源的正交證據軸</strong>，印證了同一個 subclone 切分；最強的 <code>3.1 / 3.2</code> 連換一個 basecaller（DORADO）都複製。<span class="muted">（注意：此「不同來源」僅對正常組織無等位差異的乾淨 CpG 成立；§⑤ 會看到 4 個 CpG 的甲基其實與 haplotype 綁定、並非獨立。）</span></p>
+
+  <figure>
+    <div class="figtitle">圖 4 · 甲基率沿 α / β 譜系分開（tumor，跨 basecaller）</div>
+    <svg viewBox="0 0 760 470" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="甲基 α vs β 熱圖">
+      <rect width="760" height="470" fill="#fff"/>
+      <!-- column headers -->
+      <text x="60" y="34" font-size="12" font-weight="700" fill="#1c1b19">CpG</text>
+      <text x="225" y="26" text-anchor="middle" font-size="11" fill="#2F6690" font-weight="700">HKU</text>
+      <text x="455" y="26" text-anchor="middle" font-size="11" fill="#B06A16" font-weight="700">DORADO</text>
+      <text x="185" y="42" text-anchor="middle" font-size="11" font-weight="700">α</text>
+      <text x="285" y="42" text-anchor="middle" font-size="11" font-weight="700">β</text>
+      <text x="415" y="42" text-anchor="middle" font-size="11" font-weight="700">α</text>
+      <text x="515" y="42" text-anchor="middle" font-size="11" font-weight="700">β</text>
+      <text x="640" y="42" text-anchor="middle" font-size="11" font-weight="700">複製?</text>
+      <!-- rows: y from 56 step 38 ; cell w 92 h 30 ; α x140 β x240 (HKU); DORα x370 DORβ x470 -->
+      <!-- helper colors: deep blue #2c5dab, lt blue #7c98c2, grey #c8c8c0, lt red #d16a6c, deep red #c8323c -->
+      <!-- 2.1 a0.75 b0.48 | dorN/A -->
+      <g font-size="11" text-anchor="middle">
+        <text x="60" y="76" font-weight="700" fill="#1c1b19">2.1</text>
+        <rect x="140" y="58" width="90" height="30" rx="3" fill="#d16a6c"/><text x="185" y="77" fill="#fff">0.75</text>
+        <rect x="240" y="58" width="90" height="30" rx="3" fill="#c8c8c0"/><text x="285" y="77" fill="#1c1b19">0.48</text>
+        <rect x="370" y="58" width="90" height="30" rx="3" fill="#EFEDE6"/><text x="415" y="77" fill="#9aa" font-size="9">n=1</text>
+        <rect x="470" y="58" width="90" height="30" rx="3" fill="#EFEDE6"/><text x="515" y="77" fill="#9aa" font-size="9">n=1</text>
+        <text x="640" y="77" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="114" font-weight="700" fill="#1c1b19">2.2</text>
+        <rect x="140" y="96" width="90" height="30" rx="3" fill="#c8323c"/><text x="185" y="115" fill="#fff">0.90</text>
+        <rect x="240" y="96" width="90" height="30" rx="3" fill="#7c98c2"/><text x="285" y="115" fill="#1c1b19">0.22</text>
+        <rect x="370" y="96" width="90" height="30" rx="3" fill="#c8323c"/><text x="415" y="115" fill="#fff" font-size="10">0.80</text>
+        <rect x="470" y="96" width="90" height="30" rx="3" fill="#2c5dab"/><text x="515" y="115" fill="#fff" font-size="10">0.01</text>
+        <text x="640" y="115" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="152" font-weight="700" fill="#5B3FA0">3.1 ★</text>
+        <rect x="140" y="134" width="90" height="30" rx="3" fill="#7c98c2"/><text x="185" y="153" fill="#1c1b19">0.22</text>
+        <rect x="240" y="134" width="90" height="30" rx="3" fill="#c8323c"/><text x="285" y="153" fill="#fff">0.92</text>
+        <rect x="370" y="134" width="90" height="30" rx="3" fill="#2c5dab"/><text x="415" y="153" fill="#fff" font-size="10">0.07</text>
+        <rect x="470" y="134" width="90" height="30" rx="3" fill="#c8323c"/><text x="515" y="153" fill="#fff" font-size="10">1.00</text>
+        <text x="640" y="153" fill="#2F7D5B" font-size="11" font-weight="700">✓</text>
+
+        <text x="60" y="190" font-weight="700" fill="#5B3FA0">3.2 ★</text>
+        <rect x="140" y="172" width="90" height="30" rx="3" fill="#c8323c"/><text x="185" y="191" fill="#fff">0.97</text>
+        <rect x="240" y="172" width="90" height="30" rx="3" fill="#7c98c2"/><text x="285" y="191" fill="#1c1b19">0.14</text>
+        <rect x="370" y="172" width="90" height="30" rx="3" fill="#c8323c"/><text x="415" y="191" fill="#fff" font-size="10">1.00</text>
+        <rect x="470" y="172" width="90" height="30" rx="3" fill="#2c5dab"/><text x="515" y="191" fill="#fff" font-size="10">0.01</text>
+        <text x="640" y="191" fill="#2F7D5B" font-size="11" font-weight="700">✓</text>
+
+        <text x="60" y="228" font-weight="700" fill="#1c1b19">3.3</text>
+        <rect x="140" y="210" width="90" height="30" rx="3" fill="#c8c8c0"/><text x="185" y="229" fill="#1c1b19">0.42</text>
+        <rect x="240" y="210" width="90" height="30" rx="3" fill="#d16a6c"/><text x="285" y="229" fill="#fff">0.84</text>
+        <rect x="370" y="210" width="90" height="30" rx="3" fill="#7c98c2"/><text x="415" y="229" fill="#1c1b19" font-size="10">0.26</text>
+        <rect x="470" y="210" width="90" height="30" rx="3" fill="#c8323c"/><text x="515" y="229" fill="#fff" font-size="10">0.99</text>
+        <text x="640" y="229" fill="#2F7D5B" font-size="11" font-weight="700">✓</text>
+
+        <text x="60" y="266" font-weight="700" fill="#1c1b19">3.4</text>
+        <rect x="140" y="248" width="90" height="30" rx="3" fill="#2c5dab"/><text x="185" y="267" fill="#fff">0.04</text>
+        <rect x="240" y="248" width="90" height="30" rx="3" fill="#d16a6c"/><text x="285" y="267" fill="#fff">0.87</text>
+        <rect x="370" y="248" width="90" height="30" rx="3" fill="#7c98c2"/><text x="415" y="267" fill="#1c1b19" font-size="10">0.26</text>
+        <rect x="470" y="248" width="90" height="30" rx="3" fill="#d16a6c"/><text x="515" y="267" fill="#fff" font-size="10">0.86</text>
+        <text x="640" y="267" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="304" font-weight="700" fill="#1c1b19">3.5</text>
+        <rect x="140" y="286" width="90" height="30" rx="3" fill="#2c5dab"/><text x="185" y="305" fill="#fff">0.01</text>
+        <rect x="240" y="286" width="90" height="30" rx="3" fill="#d16a6c"/><text x="285" y="305" fill="#fff">0.87</text>
+        <rect x="370" y="286" width="90" height="30" rx="3" fill="#c8c8c0"/><text x="415" y="305" fill="#1c1b19" font-size="10">0.38</text>
+        <rect x="470" y="286" width="90" height="30" rx="3" fill="#d16a6c"/><text x="515" y="305" fill="#fff" font-size="10">0.84</text>
+        <text x="640" y="305" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="342" font-weight="700" fill="#1c1b19">4.1</text>
+        <rect x="140" y="324" width="90" height="30" rx="3" fill="#c8323c"/><text x="185" y="343" fill="#fff">0.98</text>
+        <rect x="240" y="324" width="90" height="30" rx="3" fill="#7c98c2"/><text x="285" y="343" fill="#1c1b19">0.14</text>
+        <rect x="370" y="324" width="90" height="30" rx="3" fill="#c8323c"/><text x="415" y="343" fill="#fff" font-size="10">0.97</text>
+        <rect x="470" y="324" width="90" height="30" rx="3" fill="#c8c8c0"/><text x="515" y="343" fill="#1c1b19" font-size="10">0.40</text>
+        <text x="640" y="343" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="380" font-weight="700" fill="#1c1b19">5.1</text>
+        <rect x="140" y="362" width="90" height="30" rx="3" fill="#2c5dab"/><text x="185" y="381" fill="#fff">0.03</text>
+        <rect x="240" y="362" width="90" height="30" rx="3" fill="#c8323c"/><text x="285" y="381" fill="#fff">0.95</text>
+        <rect x="370" y="362" width="90" height="30" rx="3" fill="#c8c8c0"/><text x="415" y="381" fill="#1c1b19" font-size="9">0.50 n2</text>
+        <rect x="470" y="362" width="90" height="30" rx="3" fill="#c8323c"/><text x="515" y="381" fill="#fff" font-size="9">1.00 n1</text>
+        <text x="640" y="381" fill="#9aa" font-size="10">—</text>
+
+        <text x="60" y="418" font-weight="700" fill="#1c1b19">5.2</text>
+        <rect x="140" y="400" width="90" height="30" rx="3" fill="#2c5dab"/><text x="185" y="419" fill="#fff">0.03</text>
+        <rect x="240" y="400" width="90" height="30" rx="3" fill="#c8323c"/><text x="285" y="419" fill="#fff">0.99</text>
+        <rect x="370" y="400" width="90" height="30" rx="3" fill="#2c5dab"/><text x="415" y="419" fill="#fff" font-size="9">0.01 n2</text>
+        <rect x="470" y="400" width="90" height="30" rx="3" fill="#c8323c"/><text x="515" y="419" fill="#fff" font-size="9">1.00 n1</text>
+        <text x="640" y="419" fill="#9aa" font-size="10">—</text>
+      </g>
+      <!-- ramp legend -->
+      <text x="60" y="452" font-size="10" fill="#5C5A54">甲基率分桶：</text>
+      <rect x="140" y="443" width="28" height="13" fill="#2c5dab"/><text x="172" y="453" font-size="9" fill="#5C5A54">0</text>
+      <rect x="188" y="443" width="28" height="13" fill="#7c98c2"/>
+      <rect x="220" y="443" width="28" height="13" fill="#c8c8c0"/><text x="252" y="453" font-size="9" fill="#5C5A54">0.5</text>
+      <rect x="268" y="443" width="28" height="13" fill="#d16a6c"/>
+      <rect x="300" y="443" width="28" height="13" fill="#c8323c"/><text x="332" y="453" font-size="9" fill="#5C5A54">1（高甲基）</text>
+      <text x="440" y="453" font-size="9.5" fill="#5C5A54">★ = 扣 normal 後最乾淨且 DORADO 複製（見 §⑤）</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>每列一個 CpG，左半 HKU、右半 DORADO，各分 α / β 兩欄；藍=低甲基、紅=高甲基，格內數字為精確 meanM（色為視覺分桶）。<b>核心：</b>多個 CpG 在 α / β 之間方向一致地分開（如 3.1 α低β高、3.2 α高β低），而且 <code>3.1 / 3.2</code> 連換 basecaller 都複製（FDR：HKU 3.3e-04 / 4.1e-05；DORADO 皆 2.4e-05）→ 不是噪音，是真的沿譜系變化。<b>DORADO α/β 在 5.1/5.2 僅 n=1–2，不足採信</b>。<b>來源：</b><code>independent_audit.json: methyl_alpha_vs_pos3_ref</code>（HKU）+ DORADO 對應欄；07 工作站同源注入。</figcaption>
+  </figure>
+  <div class="takeaway warn"><span class="lab">這一步成立但有界 · L2</span>甲基沿 α / β 方向一致地分開 = <b>lineage coherence（譜系一致性）</b>，<u>印證</u>了 §③ 的切分；但這<b>不證明甲基能獨立定義 clone</b>。而且這些 α/β 差異裡，有一部分其實是「正常組織本來就有的等位差異」假冒的 —— 必須先用正常組織對照濾掉（見 §⑤），乾淨子集才算數。</div>
+</section>
+
+<!-- ============ §5 normal 對照濾假 ============ -->
+<section id="s5">
+  <h3><span class="num">⑤</span> 為什麼要再用正常組織對照：濾掉「假的」甲基訊號</h3>
+  <p class="sub">這一步是誠實的關鍵。<strong>不是所有 α / β 甲基差異都是 subclone 後天造成的</strong>。有些 CpG 在<strong>正常組織</strong>本來就有「等位特異甲基（germline ASM）」—— 兩條親本的甲基本來就不同。這種差異即使沒有腫瘤也會出現，會<strong>冒充</strong>成 subclone 訊號。所以拿配對的正常組織（matched-normal）的 HP1 vs HP2 當對照：normal 本來就有差異的 CpG → 標記為 confounded（不能採信）；normal 平的、只有腫瘤裡才分開的 → 才是乾淨的後天訊號。</p>
+
+  <figure>
+    <div class="figtitle">圖 5 · 正常組織對照：哪些甲基是乾淨的後天訊號？</div>
+    <svg viewBox="0 0 760 460" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="normal 對照分類">
+      <rect width="760" height="460" fill="#fff"/>
+      <text x="56" y="34" font-size="12" font-weight="700">CpG</text>
+      <text x="190" y="26" text-anchor="middle" font-size="11" fill="#5C5A54" font-weight="700">腫瘤 α / β</text>
+      <text x="190" y="40" text-anchor="middle" font-size="9.5" fill="#9aa">(是否分開)</text>
+      <text x="420" y="26" text-anchor="middle" font-size="11" fill="#9A3B3B" font-weight="700">正常組織 HP1 / HP2</text>
+      <text x="420" y="40" text-anchor="middle" font-size="9.5" fill="#9aa">(對照：本來就有差異?)</text>
+      <text x="660" y="34" text-anchor="middle" font-size="11" font-weight="700">判定</text>
+      <!-- rows -->
+      <g font-size="11" text-anchor="middle">
+        <!-- helper: tumor split shown as two small cells; normal two small cells; both numeric -->
+        <!-- 2.1 CLEAN: tumor 0.75/0.48 ; normal 0.03/0.04 flat -->
+        <text x="56" y="74" font-weight="700">2.1</text>
+        <rect x="120" y="58" width="64" height="28" rx="3" fill="#d16a6c"/><text x="152" y="76" fill="#fff" font-size="10">0.75</text>
+        <rect x="190" y="58" width="64" height="28" rx="3" fill="#c8c8c0"/><text x="222" y="76" font-size="10">0.48</text>
+        <rect x="356" y="58" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="76" fill="#fff" font-size="10">0.03</text>
+        <rect x="426" y="58" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="76" fill="#fff" font-size="10">0.04</text>
+        <rect x="600" y="60" width="120" height="24" rx="11" fill="#E4F0EA" stroke="#2F7D5B"/><text x="660" y="76" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN</text>
+
+        <text x="56" y="112" font-weight="700">2.2</text>
+        <rect x="120" y="96" width="64" height="28" rx="3" fill="#c8323c"/><text x="152" y="114" fill="#fff" font-size="10">0.90</text>
+        <rect x="190" y="96" width="64" height="28" rx="3" fill="#7c98c2"/><text x="222" y="114" font-size="10">0.22</text>
+        <rect x="356" y="96" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="114" fill="#fff" font-size="10">0.04</text>
+        <rect x="426" y="96" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="114" fill="#fff" font-size="10">0.01</text>
+        <rect x="600" y="98" width="120" height="24" rx="11" fill="#E4F0EA" stroke="#2F7D5B"/><text x="660" y="114" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN</text>
+
+        <text x="56" y="150" font-weight="700" fill="#5B3FA0">3.1 ★</text>
+        <rect x="120" y="134" width="64" height="28" rx="3" fill="#7c98c2"/><text x="152" y="152" font-size="10">0.22</text>
+        <rect x="190" y="134" width="64" height="28" rx="3" fill="#c8323c"/><text x="222" y="152" fill="#fff" font-size="10">0.92</text>
+        <rect x="356" y="134" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="152" fill="#fff" font-size="10">0.05</text>
+        <rect x="426" y="134" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="152" fill="#fff" font-size="10">0.04</text>
+        <rect x="600" y="136" width="120" height="24" rx="11" fill="#D8EBD8" stroke="#2F7D5B" stroke-width="1.5"/><text x="660" y="152" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN ★</text>
+
+        <text x="56" y="188" font-weight="700" fill="#5B3FA0">3.2 ★</text>
+        <rect x="120" y="172" width="64" height="28" rx="3" fill="#c8323c"/><text x="152" y="190" fill="#fff" font-size="10">0.97</text>
+        <rect x="190" y="172" width="64" height="28" rx="3" fill="#7c98c2"/><text x="222" y="190" font-size="10">0.14</text>
+        <rect x="356" y="172" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="190" fill="#fff" font-size="10">0.05</text>
+        <rect x="426" y="172" width="64" height="28" rx="3" fill="#7c98c2"/><text x="458" y="190" font-size="10">0.12</text>
+        <rect x="600" y="174" width="120" height="24" rx="11" fill="#D8EBD8" stroke="#2F7D5B" stroke-width="1.5"/><text x="660" y="190" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN ★</text>
+
+        <!-- 3.3 confounded normal 0.81/0.05 -->
+        <text x="56" y="226" font-weight="700">3.3</text>
+        <rect x="120" y="210" width="64" height="28" rx="3" fill="#c8c8c0"/><text x="152" y="228" font-size="10">0.42</text>
+        <rect x="190" y="210" width="64" height="28" rx="3" fill="#d16a6c"/><text x="222" y="228" fill="#fff" font-size="10">0.84</text>
+        <rect x="356" y="210" width="64" height="28" rx="3" fill="#d16a6c"/><text x="388" y="228" fill="#fff" font-size="10">0.81</text>
+        <rect x="426" y="210" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="228" fill="#fff" font-size="10">0.05</text>
+        <rect x="600" y="212" width="120" height="24" rx="11" fill="#F3E2E2" stroke="#9A3B3B"/><text x="660" y="228" fill="#9A3B3B" font-size="9.5" font-weight="700">CONFOUNDED</text>
+
+        <text x="56" y="264" font-weight="700">3.4</text>
+        <rect x="120" y="248" width="64" height="28" rx="3" fill="#2c5dab"/><text x="152" y="266" fill="#fff" font-size="10">0.04</text>
+        <rect x="190" y="248" width="64" height="28" rx="3" fill="#d16a6c"/><text x="222" y="266" fill="#fff" font-size="10">0.87</text>
+        <rect x="356" y="248" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="266" fill="#fff" font-size="10">0.03</text>
+        <rect x="426" y="248" width="64" height="28" rx="3" fill="#d16a6c"/><text x="458" y="266" fill="#fff" font-size="10">0.85</text>
+        <rect x="600" y="250" width="120" height="24" rx="11" fill="#F3E2E2" stroke="#9A3B3B"/><text x="660" y="266" fill="#9A3B3B" font-size="9.5" font-weight="700">CONFOUNDED</text>
+
+        <text x="56" y="302" font-weight="700">3.5</text>
+        <rect x="120" y="286" width="64" height="28" rx="3" fill="#2c5dab"/><text x="152" y="304" fill="#fff" font-size="10">0.01</text>
+        <rect x="190" y="286" width="64" height="28" rx="3" fill="#d16a6c"/><text x="222" y="304" fill="#fff" font-size="10">0.87</text>
+        <rect x="356" y="286" width="64" height="28" rx="3" fill="#d16a6c"/><text x="388" y="304" fill="#fff" font-size="10">0.58</text>
+        <rect x="426" y="286" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="304" fill="#fff" font-size="10">0.01</text>
+        <rect x="600" y="288" width="120" height="24" rx="11" fill="#F3E2E2" stroke="#9A3B3B"/><text x="660" y="304" fill="#9A3B3B" font-size="9.5" font-weight="700">CONFOUNDED</text>
+
+        <text x="56" y="340" font-weight="700">4.1</text>
+        <rect x="120" y="324" width="64" height="28" rx="3" fill="#c8323c"/><text x="152" y="342" fill="#fff" font-size="10">0.98</text>
+        <rect x="190" y="324" width="64" height="28" rx="3" fill="#7c98c2"/><text x="222" y="342" font-size="10">0.14</text>
+        <rect x="356" y="324" width="64" height="28" rx="3" fill="#c8323c"/><text x="388" y="342" fill="#fff" font-size="10">0.89</text>
+        <rect x="426" y="324" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="342" fill="#fff" font-size="10">0.08</text>
+        <rect x="600" y="326" width="120" height="24" rx="11" fill="#F3E2E2" stroke="#9A3B3B"/><text x="660" y="342" fill="#9A3B3B" font-size="9.5" font-weight="700">CONFOUNDED</text>
+
+        <text x="56" y="378" font-weight="700">5.1</text>
+        <rect x="120" y="362" width="64" height="28" rx="3" fill="#2c5dab"/><text x="152" y="380" fill="#fff" font-size="10">0.03</text>
+        <rect x="190" y="362" width="64" height="28" rx="3" fill="#c8323c"/><text x="222" y="380" fill="#fff" font-size="10">0.95</text>
+        <rect x="356" y="362" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="380" fill="#fff" font-size="10">0.04</text>
+        <rect x="426" y="362" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="380" fill="#fff" font-size="10">0.03</text>
+        <rect x="600" y="364" width="120" height="24" rx="11" fill="#E4F0EA" stroke="#2F7D5B"/><text x="660" y="380" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN</text>
+
+        <text x="56" y="416" font-weight="700">5.2</text>
+        <rect x="120" y="400" width="64" height="28" rx="3" fill="#2c5dab"/><text x="152" y="418" fill="#fff" font-size="10">0.03</text>
+        <rect x="190" y="400" width="64" height="28" rx="3" fill="#c8323c"/><text x="222" y="418" fill="#fff" font-size="10">0.99</text>
+        <rect x="356" y="400" width="64" height="28" rx="3" fill="#2c5dab"/><text x="388" y="418" fill="#fff" font-size="10">0.03</text>
+        <rect x="426" y="400" width="64" height="28" rx="3" fill="#2c5dab"/><text x="458" y="418" fill="#fff" font-size="10">0.03</text>
+        <rect x="600" y="402" width="120" height="24" rx="11" fill="#E4F0EA" stroke="#2F7D5B"/><text x="660" y="418" fill="#2F7D5B" font-size="10" font-weight="700">CLEAN</text>
+      </g>
+      <text x="56" y="448" font-size="9.5" fill="#5C5A54">分類規則（由資料算出，非手填）：normal HP1-vs-HP2 Mann-Whitney FDR &lt; 0.05 ⇒ CONFOUNDED；否則 CLEAN。★ = CLEAN ∩ DORADO 複製。</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>左 = 腫瘤 α/β（同圖 4），右 = 配對正常組織的 HP1/HP2。<b>關鍵對比：</b>3.3/3.4/3.5/4.1 在<u>正常組織就已經分很開</u>（如 3.4 normal 0.03 vs 0.85）→ 這是既存的 germline ASM，不能算 subclone 新生 → <span class="badge b-dead">CONFOUNDED</span>；而 2.1/2.2/3.1/3.2/5.1/5.2 正常組織是平的、只有腫瘤裡才分開 → <span class="badge b-pass">CLEAN</span>（真後天訊號）。<b>最強 = {3.1, 3.2}</b>（乾淨 ∩ 跨 basecaller 複製）。<b>來源：</b><code>independent_audit.json: methyl_normal_hp1_vs_hp2</code> 的 norm_fdr 欄。</figcaption>
+  </figure>
+  <div class="takeaway warn"><span class="lab">誠實校正 · L2</span>乾淨的 subclone-甲基訊號<b>真實存在，但只限正常組織沒有等位差異的 CpG 子集</b>（最強 3.1/3.2）。這也說明<b>為什麼非有正常組織對照不可</b> —— 少了它，會把 4 個 germline-ASM 的 CpG 誤當成 subclone 訊號。</div>
+</section>
+
+<!-- ============ §6 給出正確的 tag ============ -->
+<section id="s6">
+  <h3><span class="num">⑥</span> 怎麼給每條 read「正確的 tag」：三層證據疊加</h3>
+  <p class="sub">把前面所有訊號合起來，就能給每條 read 一個正確的標記。標記是<strong>三層疊加</strong>：① 它在哪條染色體（haplotag HP）→ ② 它帶哪組點突變（α / β）→ ③ 有沒有子分支突變（pos5 → α-1）。甲基指紋在每一步<strong>提升信心、並補上點突變標不到的 read</strong>。</p>
+
+  <figure>
+    <div class="figtitle">圖 6 · 一條 read 如何被標上正確的 tag（三層決策）</div>
+    <svg viewBox="0 0 1000 340" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="標 tag 三層決策流">
+      <!-- input -->
+      <rect x="30" y="150" width="120" height="44" rx="8" fill="#F0EDE6" stroke="#5C5A54"/><text x="90" y="170" text-anchor="middle" font-size="11" font-weight="700">一條 read</text><text x="90" y="186" text-anchor="middle" font-size="9.5" fill="#5C5A54">(一個分子)</text>
+      <text x="165" y="176" font-size="16" fill="#D97757" font-weight="800">→</text>
+      <!-- layer 1 -->
+      <rect x="185" y="120" width="150" height="104" rx="8" fill="#E2ECF3" stroke="#2F6690"/>
+      <text x="260" y="142" text-anchor="middle" font-size="11" font-weight="800" fill="#2F6690">① 染色體層</text>
+      <text x="260" y="162" text-anchor="middle" font-size="10" fill="#1c1b19">haplotag HP</text>
+      <text x="260" y="184" text-anchor="middle" font-size="13" font-weight="700" fill="#2F6690">HP2</text>
+      <text x="260" y="204" text-anchor="middle" font-size="9" fill="#5C5A54">(LOH → 幾乎都 HP2；α、β 都在此 HP2 內)</text>
+      <text x="350" y="176" font-size="16" fill="#D97757" font-weight="800">→</text>
+      <!-- layer 2 -->
+      <rect x="370" y="120" width="170" height="104" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+      <text x="455" y="142" text-anchor="middle" font-size="11" font-weight="800" fill="#2F7D5B">② 譜系層</text>
+      <text x="455" y="162" text-anchor="middle" font-size="10" fill="#1c1b19">點突變條碼</text>
+      <text x="420" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#2F6690">α</text>
+      <text x="445" y="186" text-anchor="middle" font-size="11" fill="#5C5A54">或</text>
+      <text x="478" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#B06A16">β</text>
+      <text x="455" y="206" text-anchor="middle" font-size="9" fill="#5C5A54">(pos3=A? vs 1/2/6 突變?)</text>
+      <text x="555" y="176" font-size="16" fill="#D97757" font-weight="800">→</text>
+      <!-- layer 3 -->
+      <rect x="575" y="120" width="170" height="104" rx="8" fill="#ECE6F6" stroke="#5B3FA0"/>
+      <text x="660" y="142" text-anchor="middle" font-size="11" font-weight="800" fill="#5B3FA0">③ 子譜系層</text>
+      <text x="660" y="162" text-anchor="middle" font-size="10" fill="#1c1b19">pos5 突變?</text>
+      <text x="660" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#5B3FA0">α → α-1</text>
+      <text x="660" y="206" text-anchor="middle" font-size="9" fill="#5C5A54">(pos5=C 巢狀於 α)</text>
+      <text x="760" y="176" font-size="16" fill="#D97757" font-weight="800">→</text>
+      <!-- output -->
+      <rect x="785" y="138" width="185" height="68" rx="8" fill="#fff" stroke="#D97757" stroke-width="2"/>
+      <text x="877" y="160" text-anchor="middle" font-size="11" font-weight="800" fill="#D97757">正確 tag</text>
+      <text x="877" y="184" text-anchor="middle" font-size="12" font-weight="700">α / α-1 / β-like</text>
+      <!-- methylation booster bar -->
+      <rect x="185" y="248" width="560" height="40" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-dasharray="0"/>
+      <text x="465" y="266" text-anchor="middle" font-size="11" font-weight="700" fill="#9A3B3B">甲基指紋（圖 4/5 的乾淨 CpG，如 3.1/3.2）</text>
+      <text x="465" y="282" text-anchor="middle" font-size="10" fill="#9A3B3B">↑ 在每一層提升信心 ＋ 補上點突變覆蓋不到、無法定相的 read</text>
+      <line x1="260" y1="248" x2="260" y2="226" stroke="#9A3B3B" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <line x1="455" y1="248" x2="455" y2="226" stroke="#9A3B3B" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <line x1="660" y1="248" x2="660" y2="226" stroke="#9A3B3B" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="500" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#1c1b19">標記 = 染色體(HP) × 譜系(α/β) × 子譜系(α-1)，甲基在旁邊加固</text>
+      <text x="500" y="60" text-anchor="middle" font-size="10" fill="#5C5A54">基因條碼決定 tag，甲基指紋確認（並可救援標不到的 read）→ 兩條不同來源的軸一致才最可信</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>由左到右三層決策得到一條 read 的最終 tag；下方紅條 = 甲基指紋在每層加固；「救援基因標不到的 read」為<b>方法定位</b>（本案例未逐 read 量化）。這就是「對應給予較合適正確的 tag」的具體機制。<b>來源：</b>HP <code>samples.HKU_T.hp_counts</code>、α/β <code>lineage_anchor_counts</code>、α-1 <code>linkage_bq10.E3_vs_E5</code>。</figcaption>
+  </figure>
+
+  <div class="ironclad">
+    <b>🔴 標 tag 時必守的三條誠實底線（對抗式複核抓出的過度宣稱已撤回）</b>
+    <ol>
+      <li><b>是「~3 條譜系」不是「5 群」。</b>pos4(<code>chr2:18,096,269</code>) 後面緊接一段 <code>20bp poly-T</code> 同聚物（ONT 最易出錯的情境），它的 G/T/DEL 三態是<u>定序抖動</u>（HKU bq20 計數 C:21 / T:13 / DEL:10 / G:4，且 4 條 G 全是 reverse strand），不是三個真 subclone。pos4 變異本身真，但三態不可拆成三群 → 併成<b>一個 pos4-altered 的 β 子狀態</b>。</li>
+      <li><b>突變的「先後順序」是 parsimony 推論，不是觀測。</b>α / β 是姊妹分支，不能用局部 VAF 排誰先誰後（局部 VAF 被 LOH 扭曲）；(4)(6) 共現也無法排序。任何「先突變/後突變」的句子都屬<b>推論層（L3）</b>。</li>
+      <li><b>pos3 是「真值空隙」不是 FP。</b>pos3(<code>chr2:18,086,020</code>) 落在 SEQC2 高信賴區間的<u>空隙</u>裡 → 外部真值<b>無法評估</b>（不是被判為假陽性）；它當 α 的 pivot 只有內部 read linkage 支持，外部無真值可確認。</li>
+      <li><b>β 的左塊 (1)(2) 與右塊 (4)(6) 是「甲基橋接的推論」，不是點突變的直接 linkage。</b>兩塊相距 ~36–40 kb、<u>沒有跨距 read</u> 把它們連在同一條分子上（HKU 跨塊 n=1–2、11=0；DORADO n=0）→ 它們同屬一個 β 程式，是靠「與 α 互斥 + 甲基一致性」<b>推論</b>出來的（L3，圖 3 以虛線標示）。勿寫成「點突變直接證明 β 是單一分支」。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ §7 為何要甲基（收尾對照） ============ -->
+<section id="s7">
+  <h3><span class="num">⑦</span> 收尾對照：只有點突變 vs 加上甲基</h3>
+  <p class="sub">把「為什麼要偵測甲基」用一張對照圖收尾。左邊是只靠點突變能做到的（稀疏、有 read 標不到、低訊號變異難確認）；右邊是加上甲基後多出來的能力。</p>
+
+  <figure>
+    <div class="figtitle">圖 7 · 沒有甲基 vs 有甲基</div>
+    <svg viewBox="0 0 1000 320" role="img" font-family="-apple-system,system-ui,'Noto Sans CJK TC','PingFang TC','Microsoft JhengHei','Noto Sans CJK SC','Heiti TC',sans-serif" aria-label="有無甲基對照">
+      <!-- left panel -->
+      <rect x="30" y="50" width="450" height="250" rx="10" fill="#FBF5F2" stroke="#9A3B3B"/>
+      <text x="255" y="78" text-anchor="middle" font-size="13" font-weight="800" fill="#9A3B3B">只有點突變(sSNV)</text>
+      <text x="255" y="100" text-anchor="middle" font-size="10.5" fill="#5C5A54">40 kb 只有 6 個資訊位點 · 覆蓋低</text>
+      <!-- sparse reads -->
+      <g stroke="#9A3B3B" stroke-width="2">
+        <line x1="70" y1="130" x2="200" y2="130"/><line x1="250" y1="130" x2="360" y2="130"/>
+        <line x1="90" y1="152" x2="180" y2="152"/>
+        <line x1="120" y1="174" x2="280" y2="174"/>
+      </g>
+      <text x="440" y="134" text-anchor="end" font-size="10" fill="#9A3B3B">部分 read 跨不到任何位點 → ?</text>
+      <text x="60" y="210" font-size="11" fill="#9A3B3B">✗ 很多 read 無法定相 → 標不到 tag</text>
+      <text x="60" y="232" font-size="11" fill="#9A3B3B">✗ 低-VAF 變異（如 pos5 僅少數 read）難確認</text>
+      <text x="60" y="254" font-size="11" fill="#9A3B3B">✗ 只知道「身分不同」，不知功能</text>
+      <text x="60" y="280" font-size="11" fill="#9A3B3B">✗ 單一證據軸 → 容易把噪音當訊號</text>
+      <!-- right panel -->
+      <rect x="520" y="50" width="450" height="250" rx="10" fill="#EFF6F1" stroke="#2F7D5B"/>
+      <text x="745" y="78" text-anchor="middle" font-size="13" font-weight="800" fill="#2F7D5B">＋ 偵測甲基</text>
+      <text x="745" y="100" text-anchor="middle" font-size="10.5" fill="#5C5A54">同 40 kb 多了 10 個 CpG · 密集第二軸</text>
+      <!-- dense methyl -->
+      <g>
+        <line x1="560" y1="130" x2="930" y2="130" stroke="#2F7D5B" stroke-width="2"/>
+        <circle cx="585" cy="130" r="4" fill="#c8323c"/><circle cx="620" cy="130" r="4" fill="#fff" stroke="#2F7D5B"/><circle cx="660" cy="130" r="4" fill="#c8323c"/><circle cx="700" cy="130" r="4" fill="#fff" stroke="#2F7D5B"/><circle cx="740" cy="130" r="4" fill="#c8323c"/><circle cx="780" cy="130" r="4" fill="#fff" stroke="#2F7D5B"/><circle cx="820" cy="130" r="4" fill="#c8323c"/><circle cx="860" cy="130" r="4" fill="#fff" stroke="#2F7D5B"/><circle cx="900" cy="130" r="4" fill="#c8323c"/>
+      </g>
+      <text x="540" y="210" font-size="11" fill="#1f4f3a">✓ <tspan font-weight="700">正交印證</tspan>：第二軸與基因條碼一致 → 可信度高</text>
+      <text x="540" y="232" font-size="11" fill="#1f4f3a">◷ <tspan font-weight="700">救援標記（原理上）</tspan>：可補回基因標不到的 read（待量化）</text>
+      <text x="540" y="254" font-size="11" fill="#1f4f3a">✓ <tspan font-weight="700">刻畫功能</tspan>：知道 subclone 關掉了哪些基因</text>
+      <text x="540" y="280" font-size="11" fill="#1f4f3a">✓ 跨 basecaller 複製（3.1/3.2）→ 不是噪音</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>左 = 只有點突變的稀疏世界（很多 read 標不到）；右 = 加上甲基的密集第二軸。<b>這就是為什麼要偵測甲基</b>：不是取代點突變，而是補上點突變做不到的正交印證（本案例已實證），以及救援標記與功能刻畫（方法定位、待量化）。<b>●</b> = 甲基化、<b>○</b> = 未甲基化（示意）。</figcaption>
+  </figure>
+
+  <div class="takeaway pass"><span class="lab">本頁總結</span>在 LOH 無塵室裡，點突變把 read 切成互斥的 α / β 譜系，甲基沿同一個切分獨立印證並補足標記 —— 這就是「<b>從 sSNV + 甲基推出 clone/subclone 並標 tag</b>」可行的原因。偵測甲基的價值在於它是<b>第二條獨立、密集、可刻畫功能</b>的軸；但結論<b>有界</b>（L2、~3 譜系、僅乾淨 CpG 子集、甲基為印證非驅動非 filter）。</div>
+</section>
+
+<!-- ============ §8 限制 ============ -->
+<section id="limit">
+  <h3><span class="num">⑧</span> 限制與證據邊界（教學頁不藏 caveat）</h3>
+  <p class="sub">這些是把本頁結論寫進論文/報告時必須一起帶上的邊界。完整權威裁決見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a> 與 <code>verdict_02</code>。</p>
+
+  <details class="card cav"><summary>整體 tier = <span class="badge tier">L2</span>：單位點 × 單樣本 × 單 pipeline</summary>
+    <div class="body">cross-basecaller（HKU vs DORADO）是同一細胞株的<b>技術/資料重現</b>，不是獨立的生物學重複。要升 ⭐4 需要第二個樣本（如 COLO829）或第二個 LOH 位點。</div></details>
+  <details class="card cav"><summary>pos3 落 SEQC2 高信賴區間「空隙」→ 外部真值不可評估（非 FP）</summary>
+    <div class="body">α 譜系的 pivot 突變只有內部 read linkage 支持，外部真值集無法確認此點。</div></details>
+  <details class="card cav"><summary>甲基 confound 未完全形式排除</summary>
+    <div class="body">3.3/3.4/3.5/4.1 在配對正常組織已有顯著 germline ASM；乾淨子集限於正常組織無 HP 差異的 CpG。且「LOH 前既存的等位甲基差異被保留、再被 somatic 切分」這條機制，無丟失 allele 可對照，<b>無法被本資料形式排除</b> → 保守視為「這些 CpG epigenetically labile」並排除。</div></details>
+  <details class="card cav"><summary>「0 違反」僅限 strict 定義；DORADO normal 未 tag</summary>
+    <div class="body">放寬的 pos4-β 定義在 DORADO 有 1 條 discordant read；多組遠距 pair 無跨距 read，故「0 observed」非強跨資料複製。germline-ASM confound 檢定僅靠 HKU normal，confound 側未跨 basecaller 複製。</div></details>
+  <details class="card cav"><summary>外部驗證三層裁決（防 over-claim）</summary>
+    <div class="body">① 區域有 somatic 事件 = <b>YES</b>；② 被外部 characterize 為 subclone = <b>PARTIAL</b>（sample-level YES〔Fang 2021〕、locus-level NO）；③ 我方假想樹被外部逐節點 reproduce = <b>NO</b>。<b>禁</b>寫「確認 5 subclone / 完整演化樹」「SEQC2 驗證此區是一個 subclone」「甲基 driver / 獨立重建」「DORADO 是獨立病人」。</div></details>
+
+  <div class="takeaway warn"><span class="lab">可防守的一句話（投稿口徑）</span>A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence. —— <b>不是</b> "Confirmed five-subclone evolutionary reconstruction."</div>
+
+  <div class="rel">
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例校正走查 04</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">權威 audit 05</a>
+    <a href="06_ism-subclone-pipeline-concept.standalone.html">ISM subclone pipeline 構想 06</a>
+    <a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">互動判讀工作站 07</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <h4>Provenance · 可重現性</h4>
+  <p>build branch <code>research/subclonal-reconstruction-202606</code> · 教學頁，給完全不熟此專案的教授（聚焦邏輯鏈、淡化背景；靜態）。</p>
+  <p>權威 SoT：<code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md</code></p>
+  <p>數據來源（所有 metric 注入，§13-A 反捏造）：</p>
+  <ul>
+    <li><code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json</code>（HP 計數 / lineage anchor / 0 違反 / 甲基 α-vs-β + normal HP1-vs-HP2 FDR / pos4 allele 計數）</li>
+    <li><code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv</code>（CCF 梯度）</li>
+  </ul>
+  <p>scope: PARTIAL — chr2:18,066,481–18,110,828 單位點 × HCC1395 單樣本 × HKU+DORADO。所有 metric 親讀來源檔逐筆核對；圖中色彩為甲基率視覺分桶（格內數字為精確真值）。qualitative 裁決轉錄自 verdict_02。本頁與頁 07（互動判讀工作站）同源同數字，敘事角度互補。</p>
+</footer>
+
+</div>
+</body>
+</html>

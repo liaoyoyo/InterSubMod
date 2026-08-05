@@ -1,0 +1,593 @@
+{
+  "$schema": "authority_manifest.schema.json",
+  "schema_name": "intersubmod.exact_ps_tree_research.ai_handoff_authority",
+  "schema_version": "1.0.0",
+  "handoff_id": "intersubmod-exactps-readaf-cnv-20260801",
+  "as_of_date": "2026-08-01",
+  "task_type": "D_handoff_to_external",
+  "project": {
+    "name": "InterSubMod exact-PS x HP regional mutation-state candidate-tree reconstruction",
+    "repo_root": "/big7_disk/liaoyoyo2001/InterSubMod",
+    "primary_goal": "Reconstruct auditable local read-compatible minimum mutation-state candidate trees and report identifiability without overstating cellular lineage.",
+    "project_status": "FROZEN_TECHNICAL_RESULTS_WITH_EXPLICIT_ABSTAIN",
+    "paper_status": "STALE_DRAFT_REQUIRES_20260724_PLUS_RESULTS_INTEGRATION"
+  },
+  "scope": {
+    "technical_datasets": [
+      "HCC1395",
+      "HCC1395_DORADO",
+      "COLO829",
+      "H1437",
+      "H2009",
+      "HCC1937",
+      "HCC1954"
+    ],
+    "biological_ids": 6,
+    "technical_pair_note": "HCC1395 and HCC1395_DORADO are one biological cell line measured with different technical pipelines.",
+    "chromosomes": [
+      "chr1",
+      "chr2",
+      "chr3",
+      "chr4",
+      "chr5",
+      "chr6",
+      "chr7",
+      "chr8",
+      "chr9",
+      "chr10",
+      "chr11",
+      "chr12",
+      "chr13",
+      "chr14",
+      "chr15",
+      "chr16",
+      "chr17",
+      "chr18",
+      "chr19",
+      "chr20",
+      "chr21",
+      "chr22"
+    ],
+    "primary_grain": [
+      "dataset",
+      "chromosome",
+      "exact_nonmissing_phase_set",
+      "primary_hp",
+      "strict_read_linked_component",
+      "bounded_local_block"
+    ],
+    "linkage_min_distinct_molecules": 3,
+    "maximum_original_block_k": 12,
+    "maximum_active_k": 12
+  },
+  "model_contract": {
+    "model_name": "minimum group Steiner arborescence on a directed Boolean hypercube with subcube terminal groups",
+    "mutation_model": "recurrence_allowed_camin_sokal_like_upward_hamming_1",
+    "root": "all-reference active-bit state",
+    "edge_cost": "unit",
+    "full_pattern_role": "mandatory_vertex",
+    "partial_pattern_role": "subcube_terminal_group",
+    "primary_objective": "minimum additional non-mandatory vertices",
+    "parent_mapping": "one selected Hamming-1 predecessor per non-root selected vertex",
+    "strict_perfect_phylogeny": false,
+    "persistent_or_dollo_loss_model": false,
+    "read_af_method": "family-specific supported-pattern ALT/(REF+ALT), X excluded from each site denominator",
+    "read_af_role": "deterministic model-conditional ordering heuristic",
+    "methyl_role": "pattern-conditioned association-only sidecar"
+  },
+  "claim_boundary": {
+    "permitted": [
+      "strict read-linked local regions",
+      "complete minimum read-compatible mutation-state candidate families when FAMILY_COMPLETE",
+      "recurrence-allowed Hamming-1 parent-tree candidates",
+      "CN/LOH-unadjusted deterministic read-AF ordering",
+      "exact rooted-unlabeled topology census of global AF-best mathematical trees",
+      "pattern-conditioned regional methylation association"
+    ],
+    "forbidden": [
+      "confirmed cellular clone or subclone",
+      "confirmed biological mutation ancestry",
+      "true whole-sample cancer phylogeny",
+      "CN/LOH-corrected CCF",
+      "calibrated likelihood or posterior probability",
+      "methylation-rescored topology",
+      "cross-HP cellular pairing",
+      "ranked-only topology prevalence generalized to all groups"
+    ],
+    "canonical_sentence": "The frozen analysis reconstructs local recurrence-allowed minimum mutation-state candidate arborescences compatible with exact-PS x HP read evidence; read-AF gives an unadjusted conditional ordering and does not confirm cellular lineage."
+  },
+  "denominators": {
+    "ssnv_dataset_records": {
+      "count": 469849,
+      "scope": "LongPhase-S recalibrated PASS biallelic autosomal dataset-records"
+    },
+    "strict_components": {
+      "count": 255752,
+      "denominator": 255752,
+      "authority_id": "strict_linkage_ready"
+    },
+    "k1_linkage_abstain": {
+      "count": 170131,
+      "denominator": 255752,
+      "percent": 66.5219,
+      "authority_id": "strict_linkage_ready"
+    },
+    "strict_read_linked_w": {
+      "count": 85621,
+      "denominator": 255752,
+      "percent": 33.4781,
+      "scope": "k>=2 strict endpoint read-linked components",
+      "authority_id": "strict_linkage_ready"
+    },
+    "final_groups": {
+      "count": 98955,
+      "denominator": 98955,
+      "authority_id": "all7_summary",
+      "note": "One-to-many bounded partition output from 85,621 W components; 98,955/85,621 is a fan-out ratio, not a prevalence percentage."
+    },
+    "no_active_alt": {
+      "count": 13014,
+      "denominator": 98955,
+      "authority_id": "all7_summary"
+    },
+    "mutation_bearing_units": {
+      "count": 85941,
+      "denominator": 98955,
+      "authority_id": "all7_summary"
+    },
+    "family_complete": {
+      "count": 75224,
+      "denominator": 85941,
+      "percent": 87.5298,
+      "authority_id": "all7_summary"
+    },
+    "resource_abstain": {
+      "count": 10717,
+      "denominator": 85941,
+      "percent": 12.4702,
+      "authority_id": "all7_summary",
+      "note": "All canonical abstains were search-node-guard limited; missingness is concentrated at larger active k and is not random."
+    },
+    "ranked_complete": {
+      "count": 71955,
+      "denominator": 75224,
+      "percent": 95.6543,
+      "authority_id": "all7_summary"
+    },
+    "zero_denominator": {
+      "count": 3224,
+      "denominator": 75224,
+      "percent": 4.2859,
+      "authority_id": "all7_summary"
+    },
+    "af_recurrence_screen_abstain": {
+      "count": 45,
+      "denominator": 75224,
+      "percent": 0.0598,
+      "authority_id": "all7_summary"
+    },
+    "unique_best_tree": {
+      "count": 39648,
+      "denominator": 71955,
+      "percent": 55.1011,
+      "authority_id": "topology_summary"
+    },
+    "tied_same_rooted_unlabeled_topology": {
+      "count": 23858,
+      "denominator": 71955,
+      "percent": 33.1568,
+      "authority_id": "topology_summary"
+    },
+    "tied_cross_topology": {
+      "count": 8449,
+      "denominator": 71955,
+      "percent": 11.7421,
+      "authority_id": "topology_summary"
+    },
+    "one_rooted_unlabeled_topology": {
+      "count": 63506,
+      "denominator": 71955,
+      "percent": 88.2579,
+      "authority_id": "topology_summary",
+      "note": "Ranked-only mathematical shape resolution, not biological topology prevalence."
+    },
+    "methyl_formal_units": {
+      "count": 1045,
+      "denominator": 1045,
+      "authority_id": "methyl_manifest"
+    },
+    "methyl_evaluable_units": {
+      "count": 811,
+      "denominator": 1045,
+      "percent": 77.6077,
+      "authority_id": "methyl_manifest"
+    },
+    "methyl_robust_associations": {
+      "count": 3,
+      "denominator": 811,
+      "percent": 0.3699,
+      "authority_id": "methyl_manifest"
+    }
+  },
+  "tree_decision_policy": [
+    {
+      "status": "NO_MUTATION_TREE_INFERENCE",
+      "condition": "active_k equals zero",
+      "allowed_output": "root-only technical state",
+      "forbidden_claim": "single mutation tree"
+    },
+    {
+      "status": "ABSTAIN_INCOMPLETE",
+      "condition": "objective is not certified or minimum family is not complete",
+      "allowed_output": "reason, guard and any certified bounded objective only",
+      "forbidden_claim": "winner or topology selection"
+    },
+    {
+      "status": "AF_ABSTAIN_RECURRENCE_SCREEN",
+      "condition": "structural family is complete but all minimum sets require recurrence, so ancestry-monotonic read-AF ordering is not applied",
+      "allowed_output": "recurrence-allowed structural candidate set and AF abstain reason",
+      "forbidden_claim": "AF-preferred ancestry direction"
+    },
+    {
+      "status": "ABSTAIN_MODEL_MISMATCH",
+      "condition": "strict perfect phylogeny is requested but recurrence is required",
+      "allowed_output": "model mismatch flag",
+      "forbidden_claim": "perfect phylogeny"
+    },
+    {
+      "status": "EXACT_SINGLE_CANDIDATE_TREE",
+      "condition": "complete model-constrained candidate family contains exactly one tree",
+      "allowed_output": "one local mutation-state candidate arborescence",
+      "forbidden_claim": "confirmed cellular lineage when CN/LOH or biological truth is absent"
+    },
+    {
+      "status": "TOPOLOGY_ONLY",
+      "condition": "multiple candidate trees share one rooted-unlabeled topology and no valid single labeled-tree preference exists",
+      "allowed_output": "canonical graph shape",
+      "forbidden_claim": "unique mutation-labeled tree"
+    },
+    {
+      "status": "CANDIDATE_SET_ONLY",
+      "condition": "multiple candidates remain and read-AF is not evaluable",
+      "allowed_output": "complete candidate set or consensus backbone",
+      "forbidden_claim": "single selected tree"
+    },
+    {
+      "status": "TOPOLOGY_REPRESENTATIVE_ONLY",
+      "condition": "multiple AF-best trees share one topology",
+      "allowed_output": "one deterministic display representative plus invariant and variable edges",
+      "forbidden_claim": "unique labeled tree"
+    },
+    {
+      "status": "CONSENSUS_BACKBONE_ONLY",
+      "condition": "multiple AF-best topology signatures remain",
+      "allowed_output": "edges shared by all legal candidates plus co-top set",
+      "forbidden_claim": "majority-edge synthetic tree"
+    },
+    {
+      "status": "RAW_AF_UNIQUE_REPRESENTATIVE",
+      "condition": "unadjusted read-AF score has one arithmetic winner but CN/LOH or AF stability is not passed",
+      "allowed_output": "one deterministic representative with model-conditional warning",
+      "forbidden_claim": "AF-supported biological single tree"
+    },
+    {
+      "status": "AF_CONDITIONAL_SINGLE_CANDIDATE_TREE",
+      "condition": "complete family, one AF winner, allele-specific copy-neutral applicability and pre-registered AF stability gates all pass",
+      "allowed_output": "one model-conditional single candidate tree",
+      "forbidden_claim": "confirmed cellular lineage without orthogonal biological evidence"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "strict_linkage_ready",
+      "role": "strict_read_linkage_completion_authority",
+      "status": "VALIDATED_ALL7_CHR1_22",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/READY.json",
+      "sha256": "1c95ed3c6509e9477b2ab38dc380d16e8072e0ba0ce8e17f82842dee7a0dd2ee",
+      "schema_version": "1.0.0",
+      "scope": "7 datasets x chr1-22 strict linkage",
+      "claim_boundary": "read linkage only; no directed ancestry or cellular clone tree"
+    },
+    {
+      "artifact_id": "all7_cohort_receipt",
+      "role": "primary_technical_receipt",
+      "status": "FROZEN_TECHNICAL_PASS_INCOMPLETE",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/cohort_receipt.json",
+      "sha256": "384ee7180ce857f0ee0e82d17424b1b19d99c15a0d2220126da72c1ba8c79087",
+      "schema_version": "1.0.0",
+      "scope": "all7 chr1-22",
+      "claim_boundary": "technical identity, execution and conservation; family incomplete; validation evidence ineligible"
+    },
+    {
+      "artifact_id": "all7_summary",
+      "role": "primary_denominator_authority",
+      "status": "FROZEN_TECHNICAL_SUMMARY",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/summary/all7_summary.json",
+      "sha256": "d2edca043564f9da4a5372dc70542b89024040a9b41a6290ccf938d262b46bcd",
+      "schema_version": "1.0.0",
+      "scope": "98,955 final groups",
+      "claim_boundary": "canonical funnel and technical status; not cellular prevalence"
+    },
+    {
+      "artifact_id": "all7_cpp_reader_report",
+      "role": "primary_reader_facing_technical_report",
+      "status": "VALIDATED_TECHNICAL_REPORT_WITH_ABSTAIN",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/20260724_C++_exact_PS拓撲與read_AF全七樣本驗證_01.md",
+      "sha256": "c5ae3aa7b57495cca504f6009fdc18d0b249327bd2d2cecbb1fcfd23e8c6737b",
+      "schema_version": "document",
+      "scope": "all7 chr1-22",
+      "claim_boundary": "technical topology and read-AF report; not a complete or biological clone-tree release"
+    },
+    {
+      "artifact_id": "topology_receipt",
+      "role": "exact_topology_census_receipt",
+      "status": "FROZEN_RANKED_ONLY_TECHNICAL_PASS",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/receipt.v2.json",
+      "sha256": "3a71f3ac6dc26c7268e7859beceb228935c37645a01c69d726fc6b6085bee7ae",
+      "schema_version": "1.0.0",
+      "scope": "71,955 ranked units and 680,527 global-best trees",
+      "claim_boundary": "mathematical rooted shapes only"
+    },
+    {
+      "artifact_id": "topology_summary",
+      "role": "exact_topology_denominator_authority",
+      "status": "FROZEN_RANKED_ONLY_SUMMARY",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/summary.json",
+      "sha256": "3f77559d57b34eebda05d482176738a31ad983e47b7ee26499d69aa2d2984194",
+      "schema_version": "1.0.0",
+      "scope": "71,955 ranked units",
+      "claim_boundary": "unique/tied topology signatures under frozen AF score"
+    },
+    {
+      "artifact_id": "topology_reader_report",
+      "role": "topology_reader_facing_report",
+      "status": "VALIDATED_RANKED_ONLY_REPORT",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/20260724_exactPS最佳樹拓撲Signature精確統計_01.md",
+      "sha256": "ccfef5c6e00fda98cbb9cab0c842ddcc31e33af9db1fbfd96d155ef60e6b8c46",
+      "schema_version": "document",
+      "scope": "71,955 ranked units",
+      "claim_boundary": "rooted-unlabeled mathematical topology only"
+    },
+    {
+      "artifact_id": "candidate_factorization_receipt",
+      "role": "ranked_candidate_tree_factorization",
+      "status": "FROZEN_RANKED_ONLY_TECHNICAL_PASS",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260725_exact_ps_candidate_factorization/all7_v2/receipt.json",
+      "sha256": "54a8a0a00c1cdb1a40fe96b3a528e9142d21c76af55dc8eae553a6f1432b8164",
+      "schema_version": "1.1.0",
+      "scope": "71,955 ranked units",
+      "claim_boundary": "exact minimum/global-best tree counts; does not resolve 10,717 abstains"
+    },
+    {
+      "artifact_id": "read_af_decision_report",
+      "role": "methodological_claim_boundary",
+      "status": "VALIDATED_DECISION_DOCUMENT",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_likelihood_vaf_edge_identifiability_audit/20260724_HP-specific_read-AF與Likelihood路徑排序決策_02.md",
+      "sha256": "2a3a28335540be93e6cb33b210e5b00b2ccde794e22f70c321f2cc1ffedae0ea",
+      "schema_version": "document",
+      "scope": "read-AF, likelihood and CCF identifiability",
+      "claim_boundary": "AF ordering is assumption-conditional and not edge likelihood"
+    },
+    {
+      "artifact_id": "methyl_manifest",
+      "role": "methyl_scope_and_result_contract",
+      "status": "VALIDATED_ASSOCIATION_ONLY",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260727_multisite_pattern_methyl_topology_validation/manifest.yaml",
+      "sha256": "7f8efb5eca9aa62534a3c87189c99a28ff99463674ea97418580498744444ce6",
+      "schema_version": "yaml_contract",
+      "scope": "1,045 formal multi-sSNV pattern units",
+      "claim_boundary": "pattern-conditioned association; no topology rescoring or cellular clone claim"
+    },
+    {
+      "artifact_id": "methyl_sidecar_receipt",
+      "role": "methyl_technical_receipt",
+      "status": "VALIDATED_ASSOCIATION_ONLY",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/sidecar/pattern_methyl_sidecar.v1.receipt.json",
+      "sha256": "90933c1eb415da7d41699c1f4650c8eb1489c017061adaaae6a113e73feae44c",
+      "schema_version": "1",
+      "scope": "methyl sidecar",
+      "claim_boundary": "association authority separated from topology authority"
+    },
+    {
+      "artifact_id": "methyl_report_data",
+      "role": "methyl_result_data_authority",
+      "status": "VALIDATED_ASSOCIATION_ONLY",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/20260727_multisite_pattern_methyl_association_data_06.json",
+      "sha256": "98a980c9fa28ed9859fe9656f3ab089ccfddd7eb907bd3580947ae375d56e3fc",
+      "schema_version": "report_data_v06",
+      "scope": "1,045 formal methyl units",
+      "claim_boundary": "pattern-conditioned association results only"
+    },
+    {
+      "artifact_id": "methyl_reader_report",
+      "role": "methyl_reader_facing_report",
+      "status": "VALIDATED_ASSOCIATION_ONLY",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260727_multisite_pattern_methyl_topology_validation/20260727_多sSNV_pattern與甲基關聯全面驗證_01.md",
+      "sha256": "b78ad76a76799b0d116fa2d4f36a3fda9a0602e715e6ccda56bc7e2afb6cc8aa",
+      "schema_version": "document",
+      "scope": "1,045 formal methyl units",
+      "claim_boundary": "pattern-conditioned association only"
+    }
+  ],
+  "implementation": {
+    "inter_sub_mod_git_head_at_handoff": "387a101e6a3292e0d7f230ba8d20271c7434972a",
+    "long_lineage_git_head_at_handoff": "0167f7e66868500c6cd188e801e168f65a51bcfc",
+    "working_tree_status": "DIRTY_NOT_RELEASE_AUTHORITY",
+    "frozen_binary": {
+      "path": "/bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af",
+      "sha256": "ba13ccf23d091854c191f81dd97fa891368d11179df9a69e915f0340b7233b2e",
+      "relationship_to_current_dirty_sources": "not_proven_byte_reproducible"
+    },
+    "source_snapshots": [
+      {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/cpp/exact_ps_topology_af.cpp",
+        "sha256_at_handoff": "629fc3099272b2471db43afdf29c1d52eb835f6768fedc4886e51fd62387340d"
+      },
+      {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/scripts/run_exact_ps_cpp_topology_all7.py",
+        "sha256_at_handoff": "931f19781e551b7809fff01988989563e814337d08bf0e0a26eef010dc7372ed"
+      },
+      {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/exact_ps_partition_to_mlhp.py",
+        "sha256_at_handoff": "5c6050086f237b5fbaaaf91784819db9ba4d26fd20b7667c2f461c3c3ae7c14a"
+      },
+      {
+        "path": "/big7_disk/liaoyoyo2001/LongLineage/src/solver/obligation_bnb.cpp",
+        "sha256_at_handoff": "c499954e10836b7d0fea0888c5b68779456bec03dadb84d481a89bb10985d97a"
+      },
+      {
+        "path": "/big7_disk/liaoyoyo2001/LongLineage/src/solver/parent_mapping.cpp",
+        "sha256_at_handoff": "95aa509b9bca1e3eef67be25f56b48b42373c5e127decb8a31c7485414163862"
+      }
+    ],
+    "environment_lock": "REQUIRED_BEFORE_RELEASE",
+    "current_targeted_test_evidence": "37 passed in 21.89 seconds for topology, HCC gate, adapter and factorization tests; not a unified whole-project release test"
+  },
+  "known_limitations": [
+    "10,717 mutation-bearing units are explicit resource abstains and are non-randomly concentrated at larger active k.",
+    "Current read-AF uses final-sample molecule prevalence and has no clone-size sampling or overdispersion model.",
+    "Allele-specific CNV, copy-neutral LOH, subclonal CNA, mutation multiplicity, purity and copy loss are not integrated.",
+    "Arithmetic unique AF winners have no bootstrap or posterior stability gate.",
+    "The current output field input_vaf_eligible is false while internal supported-pattern read-AF ranking is still performed; the semantics must be split before release.",
+    "The primary mutation model allows recurrence across branches and is not a strict perfect phylogeny solver.",
+    "The frozen AF layer excludes 45 all-recurrence minimum families because the ancestry-monotonic AF interpretation assumes recurrence-free acquisition; structure remains available.",
+    "Future mixed recurrence-compatible and recurrence-incompatible minimum families need an explicit compatible-subset or whole-unit-abstain policy.",
+    "Local PS x HP blocks cannot be stitched into a whole-sample cellular phylogeny without bridging evidence and a union re-solve.",
+    "Methylation is association-only and cannot select an edge or establish a clone.",
+    "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
+    "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
+  ],
+  "deprecated_sources": [
+    {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/CURRENT_FOCUS.md",
+      "status": "NEEDS_RECONCILIATION",
+      "reason": "Does not cleanly reconcile the 2026-07-23 production strict topology status with the 2026-07-24 research C++ branch."
+    },
+    {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/20260628_subclone_reconstruction_master_spec_01.md",
+      "status": "HISTORICAL_METHOD_REFERENCE",
+      "reason": "Contains legacy k<=8 and perfect-phylogeny wording."
+    },
+    {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260710_layered_reconstruction_v2",
+      "status": "HISTORICAL_NONCANONICAL",
+      "reason": "Legacy 50-kb and mixed-PS grouping with obsolete percentages."
+    },
+    {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/20260725_exactps_recovery.data.json",
+      "status": "OBJECTIVE_H_ONLY",
+      "reason": "Recovers minimum objective h for most abstains but does not enumerate complete candidate families or update topology/read-AF denominators."
+    },
+    {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/thesis/20260712_碩士論文整合初稿_01",
+      "status": "STALE_SCIENTIFIC_CONTENT",
+      "reason": "May be reused as a writing scaffold only."
+    }
+  ],
+  "next_actions": [
+    {
+      "action_id": "P0-1",
+      "sequence": 1,
+      "priority": "P0",
+      "depends_on": [],
+      "owner": "primary_researcher_and_release_agent",
+      "status": "NOT_STARTED",
+      "action": "Create a clean source, binary, command, parameter and environment release manifest.",
+      "verification": "Source, binary, input, output and receipt identities are transitive and reproducible.",
+      "definition_of_done": "A clean rebuild and frozen manifest reproduce the expected smoke-test hashes without using dirty working-tree identity."
+    },
+    {
+      "action_id": "P0-2",
+      "sequence": 2,
+      "priority": "P0",
+      "depends_on": [
+        "P0-1"
+      ],
+      "owner": "method_and_cpp_agent",
+      "status": "NOT_STARTED",
+      "action": "Split caller-VAF eligibility, read-AF ordering eligibility and CN/LOH applicability, and implement tree_decision plus abstain_reason.",
+      "verification": "Tied candidates are never collapsed into a synthetic majority-edge tree and no ranked row is misread as CN/LOH-adjusted.",
+      "definition_of_done": "Schema, C++ output, summary and tests distinguish exact tree, representative, topology-only, candidate-set, recurrence-screen abstain and incomplete abstain."
+    },
+    {
+      "action_id": "P0-3",
+      "sequence": 3,
+      "priority": "P0",
+      "depends_on": [
+        "P0-2"
+      ],
+      "owner": "simulation_and_statistics_agent",
+      "status": "NOT_STARTED",
+      "action": "Run copy-neutral, CNA, LOH, unequal-coverage and AF-stability simulations.",
+      "verification": "Non-identifiable and CN-confounded scenarios never emit a confirmed biological direction.",
+      "definition_of_done": "Pre-registered deterministic and stochastic fixtures report recovery, tie, stability and abstain rates with fixed seeds and receipts."
+    },
+    {
+      "action_id": "P0-4",
+      "sequence": 4,
+      "priority": "P0",
+      "depends_on": [
+        "P0-1",
+        "P0-2",
+        "P0-3"
+      ],
+      "owner": "release_agent",
+      "status": "NOT_STARTED",
+      "action": "Rerun the all7 pipeline from the clean release identity and freeze a new evidence bundle.",
+      "verification": "All sample, denominator, decision and artifact conservation checks pass.",
+      "definition_of_done": "The new cohort receipt, summaries and per-unit outputs are immutable, hashed and reader-claim audited."
+    },
+    {
+      "action_id": "P0-5",
+      "sequence": 5,
+      "priority": "P0",
+      "depends_on": [
+        "P0-4"
+      ],
+      "owner": "thesis_author_and_review_agent",
+      "status": "NOT_STARTED",
+      "action": "Update the thesis Methods, Results, Discussion and figures from this authority bundle.",
+      "verification": "Every number maps to a denominator_registry row and artifact authority.",
+      "definition_of_done": "Independent claim, number, citation and print QA report zero P0/P1 findings."
+    },
+    {
+      "action_id": "P1-1",
+      "sequence": 6,
+      "priority": "P1",
+      "depends_on": [
+        "P0-2"
+      ],
+      "owner": "cn_loh_annotation_agent",
+      "status": "NOT_STARTED",
+      "action": "Add HCC1395 SEQC2 allele-specific CN/LOH annotation as an applicability pilot.",
+      "verification": "Genome build, total/minor CN, segment callability and exclusions are audited separately.",
+      "definition_of_done": "Each pilot block receives a traceable CN/LOH applicability status without converting it into cellular lineage truth."
+    }
+  ],
+  "ai_startup": {
+    "required_read_order": [
+      "authority_manifest.json",
+      "20260801_研究狀態與AI交接手冊_01.md",
+      "20260801_readAF_CNV與單一樹決策規格_01.md",
+      "20260801_權威資料與過期來源登錄_01.md",
+      "denominator_registry.tsv",
+      "20260801_AI新讀者測試與修正紀錄_01.md"
+    ],
+    "required_checks": [
+      "Verify artifact paths and SHA-256 before using results.",
+      "State the analysis unit and denominator before reporting any rate.",
+      "Distinguish technical dataset from biological ID.",
+      "Distinguish mutation-state candidate from cellular clone.",
+      "Apply tree_decision_policy instead of forcing a single tree.",
+      "Treat deprecated_sources as historical context only."
+    ],
+    "stop_conditions": [
+      "Artifact hash mismatch",
+      "Unknown denominator",
+      "Incomplete candidate family",
+      "CN/LOH claim without an applicability source",
+      "Attempt to stitch PS or HP blocks without bridging evidence",
+      "Attempt to use methylation as an edge selector under the current contract"
+    ]
+  }
+}

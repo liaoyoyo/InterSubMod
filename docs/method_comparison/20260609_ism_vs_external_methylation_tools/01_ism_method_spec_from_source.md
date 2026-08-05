@@ -122,7 +122,7 @@ provenance_note: 方法描述(演算法/參數/閾值) = 直接讀 C++/Python �
 | 結果 | 值 | tier | 來源（validated）|
 |------|----|------|------|
 | strong-ASM 全基因組稀有率 | 0.34%（hypo 44% / hyper 56%，無方向偏好）| ⭐3 單樣本 | `knowledge/11_external_literature/02,07` |
-| BRCA2 promoter HP-axis Δβ | −0.122 (n=197)；~80% copy + 邊際真 cis d_within=−0.023 (perm p=0.022) | ⭐3 | `knowledge/11_external_literature/07` |
+| BRCA2 promoter HP-axis Δβ | −0.122；**subclone/copy 主導**（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；d_copy −0.11 + 邊際 focal cis d_within=−0.023, perm p=0.024；**% 不 robust**）| ⭐3 | `knowledge/11_external_literature/07` |
 | 唯一乾淨 cis exemplar | chr17/TBC1D16 d_within=0.142 (perm p=0.001) | ⭐3 | `knowledge/11_external_literature/07` |
 | ASM × CN partial ρ | −0.055（**非** copy-driven）| ⭐3 pilot | `knowledge/11_external_literature/07` |
 | 跨樣本 excess-over-null | 6/6 正（mean 0.168, 3 癌種）；somatic private 0/38 | ⭐3 | `knowledge/11_external_literature/07,08` |

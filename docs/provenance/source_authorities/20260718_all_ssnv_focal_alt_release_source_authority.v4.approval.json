@@ -1,0 +1,57 @@
+{
+  "approval_status": "APPROVED_FOR_FULL_TASK_B_RUN",
+  "authority_id": "20260718_all_ssnv_focal_alt_task_b_release_v4",
+  "authority_manifest": {
+    "mode": "0o444",
+    "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/provenance/source_authorities/20260718_all_ssnv_focal_alt_release_source_authority.v4.json",
+    "sha256": "27cb6210a51551bddfc74c106a423e01bf0b01736634551da5ca0c28e8858cb8",
+    "size_bytes": 9885
+  },
+  "private_key_retirement": {
+    "passphrase_lifecycle": "discarded_after_single_signature",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260718_all_ssnv_v4/ed25519_private_encrypted_unrecoverable_after_signing.pem",
+    "required_post_signature_mode": "0o0"
+  },
+  "public_key": {
+    "mode": "0o444",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260718_all_ssnv_v4/ed25519_public.pem",
+    "sha256": "b71855f5fd9d0e97df0f6186420b5cec95f85d8b462fde0a890443846271bee4",
+    "size_bytes": 113
+  },
+  "review_approvals": [
+    {
+      "findings_closed": true,
+      "model": "claude-sonnet-5",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260718_external_claude_reviewer_A_v7b_output.json",
+        "sha256": "6ff7ea7b848e3e796375710baba821303385f6d36d06661a41e087f365fb7d6c",
+        "size_bytes": 2332
+      },
+      "review_scope": "Live recomputation of the 23-role EXPECTED_SOURCE_PATHS source-set digest; independent per-file stat, SHA-256, and mode reads; independent digest reimplementation matched against the module function and the shell jq/sort/awk/sha256sum pipeline used by both wrappers; first/final Git HEAD and source identity checks.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "9542e7f0f1d12794f7b7736e106f927556d1cc95612d4e99576bb8dd33521a17",
+      "reviewer_id": "f5b10b10-2434-4818-b1b6-0af7fa54a5d3",
+      "reviewer_label": "External Reviewer A v7b",
+      "verdict": "APPROVE"
+    },
+    {
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260718_external_claude_reviewer_B_v7_output.json",
+        "sha256": "52f5db6215d9e02f1d328855dbf5ec4fd79739c0edf0d02aad88c0b6373a96a4",
+        "size_bytes": 3690
+      },
+      "review_scope": "Fresh independent read-only adversarial review at P0 of the v4 source-locked all-sSNV Task-B release chain from release_source_authority.py EXPECTED_SOURCE_PATHS (23 roles): source-authority validator, both formal runners, F1 result-release and F2 report-release finalizer, fd-signature and terminal-chain tests, canonical pytest XML, claim-contract-v5, and external Ed25519 trust anchors. No producers, pytest, signing, or mutation performed.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "9542e7f0f1d12794f7b7736e106f927556d1cc95612d4e99576bb8dd33521a17",
+      "reviewer_id": "e3b9d47c-6a12-4f8e-b0d5-2c9f1a7e64d8",
+      "reviewer_label": "External Reviewer B v7 (adversarial v4 release-chain review)",
+      "verdict": "APPROVE"
+    }
+  ],
+  "schema_name": "intersubmod.release_source_authority.approval",
+  "schema_version": "1.0.0"
+}

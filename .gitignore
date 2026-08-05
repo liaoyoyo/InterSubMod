@@ -315,6 +315,28 @@ docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_matrix.
 docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_meta.tsv
 docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/per_chr/
 
+# === docs/experiments 與 docs/reports 分析輸出資料（added 2026-08-06）===
+# 與 research/** 同性質的缺口：docs/ 下的實驗與報告目錄也放分析輸出。
+# 實測待決 596.3 MB，其中 results/ 子目錄佔 480.8 MB
+#   （單檔最大 significance_summary_H2009.csv 135.80 MB；records_wg2_H2009.json 60.39 MB）。
+# 刻意用「檔案級」pattern 而非 docs/**/results/** —
+#   因為 results/ 內有 2 個 .md 報告，用 dir/** 形式會被誤擋且無法用 negation 救回。
+# ⚠ .standalone.html 全部保留 tracked：2026-05-19 用戶決策（PI 終版、含 provenance footer），
+#    2026-08-06 再次確認維持 — 即使其中 6 個超過 3 MB（最大 14.25 MB 的 workstation）。
+docs/experiments/**/*.csv
+docs/experiments/**/*.tsv
+docs/experiments/**/*.json
+docs/experiments/**/*.log
+docs/reports/**/*.csv
+docs/reports/**/*.tsv
+docs/reports/**/*.json
+docs/reports/**/*.log
+!docs/**/manifest.json
+!docs/**/schemas/*.json
+# 編輯前備份檔（實例：*.standalone.html.premarkers_bak / .prepatch_bak 各約 10.9 MB）。
+# 既有 *.bak 規則匹配不到這種「底線_bak」結尾的命名。
+docs/**/*_bak
+
 # === docs/methodology/_assets — 大型衍生資料（added 2026-08-05）===
 # 背景：research/**/ 早已有 *.json 以外的資料排除規則，但 docs/methodology/_assets/
 #       一直是缺口，導致大量分析衍生資料進了 git。

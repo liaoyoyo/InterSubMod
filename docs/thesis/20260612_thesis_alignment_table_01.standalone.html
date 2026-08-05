@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中文碩論章節對齊表 — Subclonal reconstruction</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.65;font-size:15px}
+  header{padding:24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 4px;font-size:19px}
+  header .sub{color:var(--mut);font-size:12.5px}
+  nav{padding:8px 24px;border-bottom:1px solid var(--line);font-size:13px;position:sticky;top:64px;background:rgba(15,20,25,.92);z-index:9}
+  nav a{color:var(--b);text-decoration:none;margin-right:14px}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:16px 0}
+  h2{font-size:16px;margin:4px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  h2 .n{color:var(--p)}
+  .bluf{background:linear-gradient(135deg,#1c2530,#161b22);border-left:4px solid var(--p)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#1f2733;font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .mut{color:var(--mut)}
+  .tag{display:inline-block;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid}
+  .tag.g{border-color:var(--g);color:var(--g)} .tag.y{border-color:var(--y);color:var(--y)} .tag.r{border-color:var(--r);color:var(--r)} .tag.b{border-color:var(--b);color:var(--b)}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11.5px}
+  ul{margin:5px 0;padding-left:20px} li{margin:2px 0}
+  .small{font-size:12px;color:var(--mut)}
+  .hi{background:#241a1a;border:1px solid #5a3030}
+  .ok{background:#16241a;border:1px solid #2a4a3a}
+  .strike{text-decoration:line-through;color:var(--r)}
+  .legend{font-size:11.5px;color:var(--mut);margin-top:8px}
+  .pin{font-weight:700}
+  .rrow td:first-child{font-weight:700;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>中文碩論章節對齊表 — <span class="b">Subclonal reconstruction</span>（de-confound 防彈脊柱版）</h1>
+  <div class="sub">2026-06-12 · 對齊既有 paper_focus 框架（共識台帳 45 條 / F=0）· 套用 4 校正 · 待你 confirm 後開寫</div>
+</header>
+<nav>
+  <a href="#d">§0 決策</a><a href="#ch">§1 六章</a><a href="#r">§2 結果脊柱</a><a href="#dr">§3 草稿處置</a><a href="#todo">§4 待補</a>
+</nav>
+<div class="wrap">
+
+  <div class="card bluf" id="d">
+    <h2><span class="n">§0</span> 兩決策落地（你已拍板）</h2>
+    <ul>
+      <li><b class="b">標題保留</b>「Subclonal reconstruction using somatic haplotagging and methylation profiles」+ <b>reconciliation</b>：
+        <ul>
+          <li>「reconstruction」= somatic haplotagging（genetic 引擎 / LOH phasing 脊柱）之能力 → 第四章 R6（Grade B+ ⭐3）。</li>
+          <li>「methylation profiles」= 被 characterize 的對象 → 主結果是「甲基跟 germline 非 somatic、不能 filter」的 de-confound floor。</li>
+          <li>動詞：甲基用 characterize/map；reconstruction 只描述骨幹；禁「甲基重建亞克隆」。</li>
+        </ul>
+      </li>
+      <li><b class="g">內文走 de-confound 防彈脊柱</b>（全 🟢 今天可寫）；<b>phasing-assist V1-V12 移第五章 Discussion future tooling</b>；<b>不押 HD-1</b>（phasing 寫 ⭐3 支撐 + by-construction caveat）。</li>
+    </ul>
+    <table>
+      <tr><th class="k">校正</th><th>✅ 正確口徑（全文強制）</th></tr>
+      <tr><td class="k">#1 same-hap</td><td>NG=2 Inner = <b>occupancy 6/6 ≥93%</b>（0.932/0.990/0.988/0.965/0.983/0.970）；度量=occupancy 非 TP-rate。<span class="strike">3/6</span></td></tr>
+      <tr><td class="k">#2 乾淨 cis</td><td><b>HCC1395 816 可測 loci 中僅 1</b>（chr17, ~0.12%）；<span class="strike">1/332,705</span>（未全 cis-tested）</td></tr>
+      <tr><td class="k">#3 chr17</td><td><b>最強 cis 候選（非「乾淨」）</b>：殘餘 allele-axis d=0.183、未過 Cochran、n=30 Bonferroni-marginal</td></tr>
+      <tr><td class="k">#4 subclone</td><td>somatic-specificity = <b>undetermined</b>（押 G-B null 未跑）；勿寫成已 NEGATIVE 也勿寫已 POSITIVE</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="ch">
+    <h2><span class="n">§1</span> 中文碩論六章對齊</h2>
+    <table>
+      <tr><th>章</th><th>核心</th><th class="k">tier</th></tr>
+      <tr><td class="pin">一 緒論</td><td>long-read 單分子同讀 → read-level 問「甲基加什麼/在哪失效」；hook=de-confound floor + rule/exception；reconstruction 歸骨幹</td><td><span class="tag b">🔵</span></td></tr>
+      <tr><td class="pin">二 文獻探討</td><td>業界軸A 率差（germline 軸）vs ISM 軸C read-read 距離+PERMANOVA+normal-cis；癌症 ASM（Do2020/Martin-Trujillo）；epipolymorphism</td><td><span class="tag b">🔵</span>+L3</td></tr>
+      <tr><td class="pin">三 材料與方法</td><td>ISM pipeline（矩陣→距離→reliability-gated 分群→HP/LOH tag→normal-cis）+ catalog 7-TAG + 9 驗證機制 + FDR；<b class="g">既有 ch3 大半可重用</b></td><td><span class="tag g">🟢</span></td></tr>
+      <tr><td class="pin">四 結果</td><td>de-confound 防彈脊柱 R1-R7（見 §2）</td><td><span class="tag g">🟢</span>/<span class="tag y">🟡</span></td></tr>
+      <tr><td class="pin">五 討論</td><td>規則意義 + 例外(chr17) + 邊界機制 + <b>future tooling(phasing-assist V1-V12)</b> + limitations</td><td><span class="tag b">🔵</span>+<span class="tag g">🟢</span></td></tr>
+      <tr><td class="pin">六 結論</td><td>三訊號 same-pipeline cross-check 同一 haplotype 重塑；甲基能 co-validate、不能 filter；交付 catalog + 負結果目錄 + tooling</td><td><span class="tag b">🔵</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="r">
+    <h2><span class="n">§2</span> 第四章 結果 — de-confound 防彈脊柱（R1-R7）</h2>
+    <p class="small">排序：ASM 存在 → 邊界(不能 filter，最硬) → RULE catalog → copy 非 driver → 例外 → phasing 脊柱 → 跨樣本。</p>
+    <table>
+      <tr><th class="k">#</th><th>節題（會說話）</th><th>真值（🟢 除非標註）</th><th class="k">圖</th></tr>
+      <tr class="rrow"><td>R1</td><td>ASM 存在且 somatic-enriched</td><td>TP <b>3.95% &gt; FP 1.07%</b>（subhap-matched 3.77 vs 1.09 ~3.5×）；~4% 低 sens</td><td class="k">fig2 ✅</td></tr>
+      <tr class="rrow"><td>R2<br><span class="r small">最硬</span></td><td>甲基<b>不能</b> filter TP/FP（四道 NEGATIVE）</td><td>(a) LOSO 循環 mean <b>−0.00004 p=0.125</b>；(b) \|Δβ\| <b>AUC=0.505</b> 落 null；(c) ~4% sens + COLO829 TP≈FP；(d) regression OR <b>8.63/4.09/5.84</b></td><td class="k">fig4 ✅</td></tr>
+      <tr class="rrow"><td>R3<br><span class="p small">⭐RULE</span></td><td>catalog：甲基分群是 germline-allelic 非 somatic</td><td>332,705→<b>7 TAG</b>；reliable <b>12,868（3.87%）全 germline-allelic</b>；latent 28,254 無判別；none 291,518；<b>乾淨 cis=816 中僅 1（chr17）</b> <span class="y">⚠#2</span></td><td class="k">fig3 ✅<br>主圖</td></tr>
+      <tr class="rrow"><td>R4</td><td>copy-dosage <b>非</b> driver；cis vs copy partition</td><td>MW <b>p=0.6183</b>；ρ=<b>−0.0829</b> REFUTED；BRCA2=copy-confounded（within −0.023 ≪ copy −0.11）</td><td class="k">fig6 ✅</td></tr>
+      <tr class="rrow"><td>R5<br><span class="y small">例外🟡</span></td><td>chr17/TBC1D16 三訊號 same-pipeline cross-check</td><td>唯一過 within&gt;copy（within <b>0.142</b> ≫ copy 0.029, <b>perm p=0.001</b>）；<span class="y">⚠#3 寫「最強候選非乾淨」+ 揭露殘餘 allele-axis 0.183 + n=30 marginal</span></td><td class="k">fig5/待製</td></tr>
+      <tr class="rrow"><td>R6<br><span class="b small">脊柱</span></td><td>LOH-constrained phasing 軸（reconstruction 元素）</td><td>NG=2 Inner&gt;Outer <b>方向 7/7（W=28 p=0.0078）</b>；same-hap <b>occupancy 6/6 ≥93%</b> <span class="y">⚠#1</span>；AF→NGroups=<b>phasing 非甲基（r=0.656）</b>；<span class="y">by-construction caveat、⭐3 支撐、不押 HD-1</span></td><td class="k">fig5 ✅</td></tr>
+      <tr class="rrow"><td>R7</td><td>跨樣本復現（現象層）</td><td><b>6/6 excess-over-null +0.101–0.241</b>（mean 0.168，3 癌種）；同-locus <b>0/38 private</b>（E[overlap]=0.16）</td><td class="k">待製</td></tr>
+    </table>
+    <p class="small r">🔴 subclone-甲基 somatic-specificity <b>不在 R 系列當已定案</b>，一律 undetermined（押 G-B），放第五章 open-question。</p>
+  </div>
+
+  <div class="card" id="dr">
+    <h2><span class="n">§3</span> 既有 docs/thesis 草稿處置</h2>
+    <table>
+      <tr><th>檔案</th><th>處置</th></tr>
+      <tr><td><code>ch3_methods.md</code></td><td class="g">✅ 大半保留；補 catalog 7-TAG、9 驗證機制、FDR #24、reliability 三態、epipolymorphism 區隔（O11 AUC 0.845→0.530）；phasing-assist 方法移述 Discussion</td></tr>
+      <tr><td><code>ch4_results.md</code></td><td class="y">🔁 重構為 R1-R7 de-confound 脊柱；V10/V6/V11 內容移第五章 future tooling</td></tr>
+      <tr><td><code>00_abstract.md</code></td><td class="y">🔁 重寫：headline 改 de-confound floor；reconstruction 歸骨幹；subclone 改 undetermined</td></tr>
+      <tr><td><code>ch1_introduction.md</code></td><td class="y">🔁 重寫 hook：rule（de-confound）+ exception（chr17+phasing）+ 三 gap</td></tr>
+      <tr><td><code>20260612_thesis_architecture_spec_01.md</code></td><td class="mut">📌 §2/§3 被本對齊表取代；Slide2Thesis 法 + 10 紅線 + 格式保留</td></tr>
+    </table>
+  </div>
+
+  <div class="card hi" id="todo">
+    <h2><span class="n">§4</span> 待補 checklist</h2>
+    <table>
+      <tr><th>項</th><th>影響</th><th class="k">狀態</th></tr>
+      <tr><td><b>G-A</b> V10/V11c+catalog 跨 6 樣本</td><td>R3/R7 ⭐3→⭐4</td><td class="k r">P0 未跑</td></tr>
+      <tr><td><b>G-B</b> within-hap somatic-vs-baseline null</td><td>subclone undetermined→定案</td><td class="k r">P0 未跑</td></tr>
+      <tr><td><b>HD-1</b> R-SELFREF（25-50hr C++）</td><td>R6 grade（不押→可不跑）</td><td class="k y">暫緩</td></tr>
+      <tr><td><b>FDR #24</b> reliable+chr17 null/FDR 校準</td><td>R3/R5 嚴謹度</td><td class="k r">投稿前必補</td></tr>
+      <tr><td><b>Fig 1</b> rule+exception schematic</td><td>Intro/Methods 首圖</td><td class="k y">待製</td></tr>
+      <tr><td>catalog 口徑註（12868/11689/12876；none 291,518）</td><td>R3 正確性</td><td class="k y">撰寫時標</td></tr>
+      <tr><td>citation（過 /citation-verification 守 3 不對齊）</td><td>全文</td><td class="k y">投稿前</td></tr>
+      <tr><td>Table 1 樣本統計 / 軟體版本 / Data&amp;Code</td><td>Methods</td><td class="k mut">{{待填}}</td></tr>
+    </table>
+  </div>
+
+  <div class="card ok">
+    <h2>下一步（你 confirm 後）</h2>
+    <p>對齊表 OK 的話，我依序重寫：<b>① 摘要</b>（de-confound headline）→ <b>② ch4 結果</b>（R1-R7 脊柱，引共識真值）→ <b>③ ch1 緒論</b>（rule+exception hook）→ <b>④ ch3 Methods 補</b>（catalog/驗證機制/FDR）→ <b>⑤ ch5 討論 + ch6 結論</b>。每寫完一塊產 HTML 給你確認、.md 留最終校對。</p>
+    <p class="small">有要調的（脊柱排序 / 標題 reconciliation 措辭 / 哪節先寫 / 待補優先序）直接說。</p>
+  </div>
+
+  <p class="legend">🟢 已 grep/T-PROV 對賬 · 🟡 contingent/待校準 · 🔵 framing · 🔴 待補/決策。來源：共識台帳 §1（45 條 grep-confirmed）/ 正式 v2 / master 表 / VERIFIED_RESULTS；已套用 06-12 稽核 4 校正。本頁不產新數字。</p>
+
+</div>
+</body>
+</html>

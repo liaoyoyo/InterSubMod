@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>chr2:18M Subclone — 位點 × 甲基驗證 × 甲基是否幫助 subclone（CSV 繪製）</title>
+<!--
+  數據來源(全 verified, §13-A 由 CSV 注入非手填):
+  甲基判別 + ASM-control = 20260615_chr2_18M_subclone_independent_verdict_02.md §四/§六
+    = independent_audit.json 機器輸出(byte-identical 可重現)。
+  嵌入 CSV = 20260615_chr2_subclone_methyl_help_data.csv（同層）。
+  linkage/位點狀況 = verdict_02 §二/§三 + A2。build chr2 案例 consolidation 20260615_chr2_subclone_case_and_method_concept_01.md。
+-->
+<style>
+  :root{--ink:#1c2128;--muted:#656d76;--line:#d7dde3;--bg:#f4f6f8;--card:#fff;--accent:#0969da;
+        --clean:#1a7f37;--cleanbg:#e8f5ec;--confound:#cf222e;--confoundbg:#fdecee;
+        --alt:#e8590c;--ref:#1971c2;--hp1:#7048e8;--hp2:#e64980;--ok:#1a7f37;--warn:#9a6700;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,"PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.6;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 26px 60px}
+  h1{font-size:21px;margin:0 0 4px}.sub{color:var(--muted);font-size:13px;margin-bottom:6px}
+  .l0{background:#fff;border-left:4px solid var(--accent);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14.5px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0}
+  h2{font-size:17px;margin:0 0 4px}.lead{color:var(--muted);font-size:13px;margin:0 0 10px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin:8px 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:1px solid #00000022}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+  th{background:var(--bg)}
+  code{background:#eef1f4;padding:1px 5px;border-radius:4px;font-size:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .card{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px}
+  .card.ok{border-left:4px solid var(--ok);background:#f3faf5}
+  .card.warn{border-left:4px solid var(--warn);background:#fffbf0}
+  .card h4{margin:0 0 5px;font-size:14px}
+  .verdict{background:#0d1117;color:#e6edf3;border-radius:10px;padding:14px 18px;font-size:14.5px;margin-top:8px}
+  .verdict b{color:#7ee2a8}
+  .pill{display:inline-block;padding:1px 8px;border-radius:11px;font-size:11.5px;font-weight:600}
+  .p-clean{background:var(--cleanbg);color:var(--clean)}.p-conf{background:var(--confoundbg);color:var(--confound)}
+  .note{color:var(--muted);font-size:12.5px}
+  footer{color:var(--muted);font-size:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:10px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>chr2:18M Subclone 案例 — 位點狀況 × 甲基驗證 × 甲基是否幫助 subclone 分析</h1>
+<div class="sub">HCC1395 · chr2:18,068,480–18,108,828 · HKU_MOD + DORADO cross-check · L2（單位點×單樣本）· 圖由 <code>CSV</code> 繪製（§13-A 注入，非手填）</div>
+
+<div class="l0">
+  <b>一句話結論：</b>在 SEQC2-confirmed LOH 區，subclone 結構由 <b>somatic 變異 linkage（基因）</b>定義；<b>甲基「有幫助」但是有界輔助</b> —— 橋接基因連不起來的 block、補 phasing tag 分不開處、指派缺突變的 read，<b>且必須先用 matched-normal ASM-control 扣掉既存 germline ASM</b>，剩下的乾淨子集才是真 subclone 訊號。甲基 <b>非</b>獨立判別/重建工具。
+</div>
+
+<!-- ===== §1 位點狀況 ===== -->
+<section>
+  <h2>① 位點狀況 — 6 個 somatic 變異</h2>
+  <p class="lead">區域 ~40 kb 內 6 個 sSNV：4 個乾淨 TP、1 個 truth-gap 真 somatic、1 個落 homopolymer。</p>
+  <svg id="locusmap" viewBox="0 0 1040 150" width="100%" role="img" aria-label="6 sSNV 位點圖"></svg>
+  <table>
+    <tr><th>#</th><th>座標</th><th>變異</th><th>狀態</th><th>角色</th></tr>
+    <tr><td>(1)</td><td>18,068,480</td><td>C&gt;G</td><td><span class="pill p-clean">TP HighConf</span></td><td>beta-left block</td></tr>
+    <tr><td>(2)</td><td>18,072,546</td><td>G&gt;C</td><td><span class="pill p-clean">TP HighConf</span></td><td>beta-left block</td></tr>
+    <tr><td><b>(3)</b></td><td><b>18,086,020</b></td><td>G&gt;A</td><td><span class="pill p-conf">truth-gap</span></td><td><b>α defining</b>（真 somatic，落 SEQC2 HC 空隙不可 truth 驗）</td></tr>
+    <tr><td>(4)</td><td>18,096,269</td><td>C&gt;G</td><td><span class="pill p-conf">homopolymer</span></td><td>beta-right（後接 20bp poly-T → G/T/DEL 是 ONT jitter，<b>非 3 subclone</b>）</td></tr>
+    <tr><td>(5)</td><td>18,099,697</td><td>G&gt;C</td><td><span class="pill p-clean">TP</span></td><td><b>α-1 nested</b>（巢狀於 α）</td></tr>
+    <tr><td>(6)</td><td>18,108,828</td><td>C&gt;G</td><td><span class="pill p-clean">TP HighConf</span></td><td>beta-right block</td></tr>
+  </table>
+  <p class="note">LOH 背景：HP2 母本保留 ~98.3%(HKU)/99.6%(DORADO)，normal 6 點全 REF。→ 單親 haplotype 保留，lineage 由 somatic 定義。</p>
+</section>
+
+<!-- ===== §2 甲基驗證結果（CSV 繪製） ===== -->
+<section>
+  <h2>② 甲基驗證結果 — ALT vs REF 每 CpG 的 5mC（CSV 繪製）</h2>
+  <p class="lead">每個變異錨點的 CpG：ALT-genotype read 與 REF-genotype read 的 5mC 平均。<b>分得越開 = 甲基越能跟著該 allele/lineage。</b>綠底=乾淨 tumor-acquired；紅底=被既存 germline ASM confound（見 §3）。三角=DORADO 複製值。</p>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--alt)"></span>ALT-genotype 5mC（HKU）</span>
+    <span><span class="sw" style="background:var(--ref)"></span>REF-genotype 5mC（HKU）</span>
+    <span>▲ DORADO 值</span>
+    <span><span class="sw" style="background:var(--cleanbg);border-color:var(--clean)"></span>乾淨子集</span>
+    <span><span class="sw" style="background:var(--confoundbg);border-color:var(--confound)"></span>confound 子集</span>
+  </div>
+  <svg id="methylchart" viewBox="0 0 1040 320" width="100%" role="img" aria-label="甲基判別圖"></svg>
+  <p class="note">所有乾淨子集（2.1/2.2/3.1/3.2/5.1/5.2）HKU+DORADO 同方向且過 BH-FDR → 真訊號非單 basecaller 雜訊。3.4/3.5 在 DORADO 未過 FDR（▲ 偏淡）。</p>
+</section>
+
+<!-- ===== §3 ASM-control（CSV 繪製） ===== -->
+<section>
+  <h2>③ 為何要扣 confound — matched-normal ASM-control（CSV 繪製）</h2>
+  <p class="lead">關鍵：有些 CpG 在 <b>normal</b> 裡 HP1 vs HP2 <b>本來就有顯著甲基差（既存 germline ASM）</b>。這些位點的 tumor 甲基差<b>不能算 subclone 形成後的新訊號</b> → 保守排除。這就是 ISM 用 normal-anchor 把 subclone 訊號與 ASM confound 拆開的地方。</p>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--hp1)"></span>normal HP1 5mC</span>
+    <span><span class="sw" style="background:var(--hp2)"></span>normal HP2 5mC</span>
+  </div>
+  <svg id="asmchart" viewBox="0 0 1040 230" width="100%" role="img" aria-label="ASM-control 圖"></svg>
+  <p class="note">3.3/3.4/3.5/4.1 normal HP1-vs-HP2 已顯著（FDR≤0.05）→ confound，排除。2.1/2.2/3.1/3.2/5.1/5.2 normal 無 HP 差異 → 乾淨保留。</p>
+</section>
+
+<!-- ===== §4 中間位點狀況 ===== -->
+<section>
+  <h2>④ 中間 / 關鍵位點狀況（決定結構是否成立的三個）</h2>
+  <div class="grid2">
+    <div class="card"><h4>(3) 18,086,020 — α 的 defining + 橋接角色</h4>
+      真 tumor-specific somatic（tumor 29A/30G、normal 0A/18G、mapQ60、雙股、非 homopolymer），但落 SEQC2 HC <b>空隙</b>不可 truth 驗。它與 (1)(2)(4)(6) <b>互斥</b> → 撐起 α / beta-like 分叉。</div>
+    <div class="card"><h4>(4) 18,096,269 — homopolymer 陷阱</h4>
+      後接 <b>20 bp poly-T</b>（GRCh38 親驗）→ ONT 產生 G/T/DEL 混合 call（HKU G4/T13/DEL10/REF21）。<b>不是 3 個 subclone</b>，合併為單一 pos4-altered beta-right state。</div>
+    <div class="card"><h4>(5) 18,099,697 — α-1 nested（provisional）</h4>
+      (5)C 只在帶 (3)A 的 read 出現 → <b>(3)→(5) perfect nesting</b>（唯一有 direct nesting 支持的順序）。但 direct support 僅 HKU 4/DORADO 2 reads → provisional。</div>
+    <div class="card"><h4>beta-left ↔ beta-right — 甲基橋接的中間缺口</h4>
+      (1)(2) 與 (4)(6) 相距 &gt;36 kb，<b>read 跨不到 → 無直接 genetic linkage</b>。靠互斥 + <b>甲基 coherence</b> 暫接為同一 beta-like program（樹上畫<b>虛線</b>）。<b>這是甲基實際補上的缺口。</b></div>
+  </div>
+</section>
+
+<!-- ===== §5 甲基是否幫助 subclone 分析 ===== -->
+<section>
+  <h2>⑤ 🔑 甲基分析有幫助到 subclone 分析嗎？</h2>
+  <p class="lead">有幫助，但是「有界輔助（corroborate / bridge / characterize）」，<b>不是獨立判別器</b>，且幫助綁在 normal-anchor ASM-control 之上。</p>
+  <div class="grid2">
+    <div class="card ok"><h4>✅ 甲基實際幫到</h4>
+      ① <b>橋接</b>基因連不起來的 block（beta-left↔beta-right &gt;36kb）<br>
+      ② <b>補</b> LongPhase-S fine-tag 分不開處（HP2/HP2-1 跨 basecaller 不穩）<br>
+      ③ <b>指派</b>缺 defining 突變的 read（ref-genotype read 帶乾淨 β 甲基 → epigenotype 追 lineage）<br>
+      ④ <b>跨 basecaller 複製</b> = 真訊號非雜訊</div>
+    <div class="card warn"><h4>⚠ 但嚴格有界</h4>
+      ① subclone <b>結構</b>是 somatic linkage（基因）定義的，<b>不是甲基</b> → 甲基 corroborate 非 primary discriminator<br>
+      ② 幫助綁在 <b>ASM-control</b>：不扣 germline ASM，naive 甲基會誤導<br>
+      ③ 甲基<b>沒</b>獨立重建 tree / 定 clone 數 / 排演化順序 / 證甲基造成突變</div>
+  </div>
+  <div class="verdict">
+    <b>論文用語：</b>甲基 = <b>lineage coherence + 區域 characterization + read-assignment</b>，conditioned on normal-anchored ASM-control —— 是論文主軸「甲基 corroborate 非 validated discriminator」的乾淨實例。<br>
+    可防守敘述 = <b>「a regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence」</b>（非 confirmed 5-subclone）。
+  </div>
+</section>
+
+<!-- ===== 附錄 資料表（由 CSV 渲染，確認 SVG 圖 ↔ 表格對齊）===== -->
+<section>
+  <h2>附錄 — 完整數據表（由 CSV 渲染，對照 SVG 圖）</h2>
+  <p class="lead">上方 SVG 圖的每根 bar 對應此表一格；此表由嵌入 CSV 即時渲染（與 <code>...methyl_help_data.csv</code> 同源），用於確認數字對齊。</p>
+  <div style="overflow-x:auto"><table id="datatable"></table></div>
+</section>
+
+<footer>
+  <b>Provenance：</b>甲基判別 + ASM-control 數字由同層 <code>20260615_chr2_subclone_methyl_help_data.csv</code> 注入（§13-A，非手填）；CSV 引自
+  <code>InterSubMod/docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md</code> §四/§六 = <code>independent_audit.json</code> 機器輸出（byte-identical 可重現）。
+  案例整理 <code>InterSubMod/docs/paper_focus/02_paper_framework/20260615_chr2_subclone_case_and_method_concept_01.md</code>。所有數字 grep-verified、無捏造。
+</footer>
+</div>
+
+<script>
+// ===== 嵌入 CSV（與 20260615_chr2_subclone_methyl_help_data.csv 同步）=====
+const CSV = `anchor,cpg,hku_alt,hku_ref,hku_q,dor_alt,dor_ref,dor_q,dor_pass,normal_hp1,normal_hp2,normal_fdr,class
+(2)G>C,2.1,0.141,0.719,7.2e-4,0.012,0.858,1.5e-5,yes,,,,clean
+(2)G>C,2.2,0.112,0.843,2.3e-4,0.241,1.000,1.4e-3,yes,,,,clean
+(3)G>A,3.1,0.222,0.917,3.3e-4,0.074,0.998,2.4e-5,yes,,,,clean
+(3)G>A,3.2,0.970,0.144,4.1e-5,1.000,0.006,2.4e-5,yes,,,,clean
+(3)G>A,3.3,0.416,0.844,0.025,0.257,0.993,6.1e-3,yes,0.814,0.046,0.0070,confound
+(3)G>A,3.4,0.045,0.874,4.1e-5,0.256,0.858,0.060,no,0.033,0.850,0.0070,confound
+(3)G>A,3.5,0.010,0.865,1.7e-3,0.380,0.835,0.084,no,0.583,0.012,0.0496,confound
+(4)non-ref,4.1,0.177,0.975,2.2e-6,0.516,0.991,8.7e-5,yes,0.887,0.078,0.0070,confound
+(5)G>C,5.1,0.116,0.749,3.7e-3,0.005,0.649,2.0e-3,yes,,,,clean
+(5)G>C,5.2,0.030,0.698,1.2e-3,0.010,0.506,2.0e-3,yes,,,,clean
+(6)C>G,5.1,0.939,0.189,1.5e-3,1.000,0.096,6.8e-3,yes,,,,clean
+(6)C>G,5.2,0.885,0.031,5.5e-3,1.000,0.010,5.4e-3,yes,,,,clean`;
+
+function parseCSV(t){
+  const rows=t.trim().split("\n").filter(l=>!l.startsWith("#"));
+  const h=rows.shift().split(",");
+  return rows.map(l=>{const c=l.split(",");const o={};h.forEach((k,i)=>o[k]=c[i]);return o;});
+}
+const D=parseCSV(CSV);
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function txt(x,y,s,a={}){const t=el("text",Object.assign({x,y,"font-size":a.fs||11,"text-anchor":a.ta||"start",fill:a.fill||"#1c2128","font-weight":a.fw||"normal"},{}));t.textContent=s;return t;}
+
+// ---------- §1 locus map ----------
+(function(){
+  const svg=document.getElementById("locusmap");
+  const X0=40,X1=1000,Y=70,minB=18068480,maxB=18108828;
+  const sx=b=>X0+(b-minB)/(maxB-minB)*(X1-X0);
+  svg.appendChild(el("line",{x1:X0,y1:Y,x2:X1,y2:Y,stroke:"#9aa4ad","stroke-width":2}));
+  svg.appendChild(txt(X0,28,"chr2:18,068,480 – 18,108,828（~40 kb，LOH 區，HP2 母本保留）",{fw:700,fs:13}));
+  const loci=[
+    {p:18068480,l:"(1)",c:"#1a7f37",s:"TP"},{p:18072546,l:"(2)",c:"#1a7f37",s:"TP"},
+    {p:18086020,l:"(3)",c:"#cf222e",s:"truth-gap·α"},{p:18096269,l:"(4)",c:"#9a6700",s:"homopolymer"},
+    {p:18099697,l:"(5)",c:"#1a7f37",s:"α-1 nested"},{p:18108828,l:"(6)",c:"#1a7f37",s:"TP"}];
+  loci.forEach(o=>{const x=sx(o.p);
+    svg.appendChild(el("line",{x1:x,y1:Y-9,x2:x,y2:Y+9,stroke:o.c,"stroke-width":3}));
+    svg.appendChild(el("circle",{cx:x,cy:Y,r:5,fill:o.c}));
+    svg.appendChild(txt(x,Y-16,o.l,{ta:"middle",fw:700,fs:12,fill:o.c}));
+    svg.appendChild(txt(x,Y+30,o.s,{ta:"middle",fs:10,fill:"#656d76"}));});
+})();
+
+// ---------- shared bar chart ----------
+function groupedBars(svgId,rows,series,opts){
+  const svg=document.getElementById(svgId);
+  const W=1040,H=opts.H,padL=46,padR=14,padT=24,padB=opts.padB,plotH=H-padT-padB;
+  const n=rows.length, gw=(W-padL-padR)/n, bw=Math.min(opts.bw||18, gw/(series.length+1));
+  // y axis 0..1
+  [0,.25,.5,.75,1].forEach(v=>{const y=padT+plotH*(1-v);
+    svg.appendChild(el("line",{x1:padL,y1:y,x2:W-padR,y2:y,stroke:"#eef1f4"}));
+    svg.appendChild(txt(padL-6,y+3,v.toFixed(2),{ta:"end",fs:10,fill:"#8a939c"}));});
+  svg.appendChild(txt(12,padT+plotH/2,"5mC",{ta:"middle",fs:11,fill:"#656d76"}));
+  rows.forEach((r,i)=>{
+    const gx=padL+i*gw;
+    if(opts.tint){const cls=r.class;const bg=cls==="clean"?"#e8f5ec":"#fdecee";
+      svg.appendChild(el("rect",{x:gx+1,y:padT,width:gw-2,height:plotH,fill:bg,opacity:.55,rx:3}));}
+    series.forEach((s,j)=>{
+      const v=parseFloat(r[s.key]); if(isNaN(v))return;
+      const bx=gx+ (gw-series.length*bw)/2 + j*bw;
+      const bh=plotH*v, by=padT+plotH-bh;
+      svg.appendChild(el("rect",{x:bx,y:by,width:bw-2,height:bh,fill:s.color,rx:2,opacity:s.op||1}));
+      // DORADO marker
+      if(s.dorKey){const dv=parseFloat(r[s.dorKey]);if(!isNaN(dv)){const dy=padT+plotH*(1-dv);
+        const faint=(r.dor_pass==="no");
+        const tri=`${bx+(bw-2)/2-4},${dy+5} ${bx+(bw-2)/2+4},${dy+5} ${bx+(bw-2)/2},${dy-3}`;
+        svg.appendChild(el("polygon",{points:tri,fill:s.color,stroke:"#fff","stroke-width":.6,opacity:faint?.32:.92}));}}
+    });
+    // x label
+    svg.appendChild(txt(gx+gw/2,H-padB+14,r.cpg,{ta:"middle",fs:10.5,fw:600}));
+    if(opts.anchorLabel) svg.appendChild(txt(gx+gw/2,H-padB+27,r.anchor,{ta:"middle",fs:9,fill:"#8a939c"}));
+  });
+}
+
+// ---------- §2 methylation discrimination ----------
+groupedBars("methylchart",D,
+  [{key:"hku_alt",color:"#e8590c",dorKey:"dor_alt"},{key:"hku_ref",color:"#1971c2",dorKey:"dor_ref"}],
+  {H:320,padB:46,bw:20,tint:true,anchorLabel:true});
+
+// ---------- §3 ASM-control (confound CpG only) ----------
+const CONF=D.filter(r=>r.class==="confound");
+groupedBars("asmchart",CONF,
+  [{key:"normal_hp1",color:"#7048e8"},{key:"normal_hp2",color:"#e64980"}],
+  {H:230,padB:40,bw:30,tint:false,anchorLabel:true});
+
+// ---------- 附錄 資料表（由 CSV 渲染）----------
+(function(){
+  const t=document.getElementById("datatable");
+  const cols=[["anchor","變異"],["cpg","CpG"],["hku_alt","HKU ALT"],["hku_ref","HKU REF"],["hku_q","HKU q"],
+    ["dor_alt","DOR ALT"],["dor_ref","DOR REF"],["dor_q","DOR q"],["dor_pass","DOR過FDR"],
+    ["normal_hp1","norm HP1"],["normal_hp2","norm HP2"],["normal_fdr","ASM FDR"],["class","類別"]];
+  const thead=document.createElement("tr");
+  cols.forEach(c=>{const th=document.createElement("th");th.textContent=c[1];thead.appendChild(th);});
+  t.appendChild(thead);
+  D.forEach(r=>{const tr=document.createElement("tr");
+    if(r.class==="confound")tr.style.background="#fdecee"; else tr.style.background="#f3faf5";
+    cols.forEach(c=>{const td=document.createElement("td");
+      let v=r[c[0]]; if(v===""||v===undefined)v="—";
+      if(c[0]==="class")v=r.class==="clean"?"乾淨":"confound";
+      td.textContent=v; td.style.textAlign=(/alt|ref|q|hp|fdr/.test(c[0]))?"right":"left";
+      tr.appendChild(td);});
+    t.appendChild(tr);});
+})();
+</script>
+</body>
+</html>

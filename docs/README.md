@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-11 10:00
-更新時間: 2026-03-26 19:45
+更新時間: 2026-07-23 19:00
 目標: 提供 docs/ 目錄的最新結構、命名規範與工作流程，並提供 AI 漸進查閱指引
 處理範圍: docs/ 全目錄（archive/deep 歷史快照除外）
 關聯檔案:
@@ -13,11 +13,18 @@
 
 # InterSubMod 文檔庫
 
+> 🟢 **Canonical root（2026-08-01）**：研究真值在 `/big7_disk/liaoyoyo2001/InterSubMod`；`/big8_disk/...` 是三月快照。exact-PS×HP strict read-linkage L1 已 7/7 完成（W=85,621）；其後續 recurrence-allowed candidate analysis 有 98,955 final groups、71,955 read-AF ranked units 與 exact topology census，但 cellular clone count、CN/LOH-aware parent→child 與全樣本 biological tree 仍未建立。`research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 是 historical pre-strict candidate census，不能當成最新 strict 結果。
+
 ## 快速導航
 
 ### 常用入口
 
 - [當前目標](CURRENT_FOCUS.md)
+- [**2026-08-01 Exact-PS×HP／read-AF／CNV AI 交接入口**](handoff/README.md) ← 最新 authority manifest、單一樹決策、分母與過期來源登錄
+- [**Exact-PS 全 7 資料集最終 HTML observation**](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260801_exact_ps_observation_report/all7_v1/report.standalone.html) ← 13/13 authority hashes、responsive/no-JS/A4 QA PASS；CN/LOH=`NOT_INTEGRATED`
+- [**HTML builder／finalizer／QA 重生說明**](../research/20260801_exact_ps_observation_report/00_INDEX.md) ← Python 最後輸出階段與 fail-closed release 契約
+- [**Exact-PS strict read-linkage 全資料集報告與完成層級稽核**](../research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/) ← L1 7/7；strict topology與clone/fusion 0/7
+- [**Historical pre-strict LongPhase-S PASS candidate-tree census**](../research/20260710_layered_reconstruction_v2/20260714_LongPhaseS_PASS_sSNV共現與拓撲最新分析_01.md) ← 舊 grouping 的歷史比較，不是 current strict topology
 - [**AI 啟動壓縮上下文與研究索引**](references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md) ← 每次研究前快速掌握專案邏輯、重要數據、任務順序與待決策問題
 - [**研究構想總索引**](concepts/2026/04/20260409_研究構想總索引_01.md) ← 研究大圖景、發展樹、理論基礎、論文大綱
 - [研究歷史索引](experiments/INDEX.md)

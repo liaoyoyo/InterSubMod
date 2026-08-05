@@ -1,9 +1,10 @@
 <!--
 建立時間: 2026-07-04
-更新: 2026-07-06 v4 (定案落地) — +§7.5 覆蓋公理(禁丟節點) + 複雜度邊界(poly 島 Gusfield/Pe'er-IDP vs NP-hard Steiner) + 「枚舉非 optimize 非 rank」紅線 + 「定不出來即答案=枚舉輸出」; §7 解法1 標 Pe'er-IDP; §13 補 citation; 對齊已 commit 的 20260705 複雜度定位
+更新: 2026-07-11 v5 (術語校正；演算法不變) — rooted all-zero 模型的衝突條件寫作 rooted three-gamete；等價於把 0^k root 加入後的 four-gamete test
+      2026-07-06 v4 (定案落地) — +§7.5 覆蓋公理(禁丟節點) + 複雜度邊界(poly 島 Gusfield/Pe'er-IDP vs NP-hard Steiner) + 「枚舉非 optimize 非 rank」紅線 + 「定不出來即答案=枚舉輸出」; §7 解法1 標 Pe'er-IDP; §13 補 citation; 對齊已 commit 的 20260705 複雜度定位
       v3 (2026-07-04 使用者定案 Model A) — unit-flip-tree 核心 + Boolean lattice + Model A(recurrence 允許) + 多重度擔子 + 四解法 + minimal-compatible-set; v2(共同設計) v1(初形式化) 併入
 類型: 形式化問題敘述（純數學/演算法,application-agnostic）
-狀態: formal spec v3 (application terms stripped)
+狀態: formal spec v5 (Model A 定案；2026-07-11 術語校正，演算法不變；application terms stripped)
 用途: formal methods framing 候選 / 自足抽象問題定義
 -->
 
@@ -35,14 +36,14 @@
 
 ## §4 模型選擇（定案 Model A）
 
-| | 每位元翻轉次數 | support set | 四型違反 |
+| | 每位元翻轉次數 | support set | rooted three-gamete 違反（補 root 後等價 four-gamete） |
 |---|---|---|---|
 | Model B（單次翻轉 / laminar-realizable）| 全樹 $\le1$ 次 | 必 laminar | → **conflict** |
 | **Model A（本問題採用）** | 可在不同分支**重複** $0\to1$ | 無 laminar 約束 | → **recurrence-required（非 conflict）** |
 
 **Model A 定義**：樹 $T=(V,E)$，$V\subseteq X$，$\mathrm{root}=0^k$，每邊為合法 unit-flip；**同一位元 $j$ 允許在多條邊上翻轉**（recurrence）。
 
-🔴 **Model A 的擔子（consequence，必記）**：四型違反在 Model A 下是合法 recurrence，**不被 flag**。但**多重度假象**（座標 $x$ 有效 $m_f(x)>1$）與真 recurrence **在觀測上不可分**（皆表現為某位元翻兩次）。故 **Model A 必須有一個獨立多重度通道 $m_f(x)$（不得由 B 導出）** 來區分：
+🔴 **Model A 的擔子（consequence，必記）**：rooted three-gamete 違反（觀測到 10、01、11；all-zero root 補成 00 後即 four-gamete）在 Model A 下是合法 recurrence，**不被 flag**。但**多重度假象**（座標 $x$ 有效 $m_f(x)>1$）與真 recurrence **在觀測上不可分**（皆表現為某位元翻兩次）。故 **Model A 必須有一個獨立多重度通道 $m_f(x)$（不得由 B 導出）** 來區分：
 $$\text{recurrence-required 邊}\ \begin{cases}m>1\ \Rightarrow\ \text{多重度 artifact（棄）}\\ m\le1\ \Rightarrow\ \text{候選真 recurrence（留）}\end{cases}$$
 無獨立 $m$ → Model A **over-build**（默默接受 artifact 樹）。此即 v2 §14「$m$ 由何獨立通道估」在 Model A 下**升為必需**。
 
@@ -98,7 +99,7 @@ solver 的演算法邊界**刻意對齊真實計算複雜度分界**——可解
 
 | 階段 | 數學問題 | 複雜度 | solver 立場 | Citation |
 |---|---|---|---|---|
-| 骨幹（完整觀測 four-gamete） | directed perfect phylogeny | **poly** | 算到底、確定 | Gusfield 1991, *Networks* 21(1):19–28 |
+| 骨幹（完整觀測 rooted three-gamete；等價 root-augmented four-gamete） | directed perfect phylogeny | **poly** | 算到底、確定 | Gusfield 1991, *Networks* 21(1):19–28 |
 | **部分觀測補全（$?$-entry）** | **Incomplete Directed Perfect Phylogeny (IDP)** | **poly→linear** | 算到底（可行性有嚴格基礎）| **Pe'er, Pupko, Shamir, Sharan 2004, *SIAM J Comput* 33(3):590–607** |
 | incompatible 選丟 loci | Min Character Removal ≡ Vertex Cover | NP-hard (FPT-in-$k$) | **不解最佳化 → 枚舉/flag** | Day & Sankoff 1986 |
 | 混合觀測拆列 | Min Conflict-Free Row Split | NP-hard + inapprox | flag | Hujdurović et al. 2018 |
@@ -142,7 +143,7 @@ $$\text{determined}\ \Rightarrow\ \text{唯一最小樹};\qquad \text{else}\ \Ri
 
 ## §9 研究含意（Model A 對現行 pipeline 的翻案）
 
-現行程式碼 = **Model B**（`classify()` 四型 = conflict；118 incompatible 一律歸多重度 artifact）。改採 **Model A** →
+現行程式碼 = **Model B**（`classify()` 以 rooted three-gamete／root-augmented four-gamete 違反判 conflict；118 incompatible 一律歸多重度 artifact）。改採 **Model A** →
 - 這 118 區從「conflict/artifact」重判為 **recurrence-required**；
 - 送**獨立 $m$-通道**拆：$m>1$ → 確為多重度 artifact（與舊結論一致）；$m\le1$ → **候選真 recurrence 樹**（新結構，舊 Model B 漏掉）；
 - **前置硬需求**：$m_f(x)$ 的獨立來源（如外部拷貝數/多重度估，非自 B）。無此則 Model A 無法安全落地。
@@ -176,7 +177,7 @@ $$\text{determined}\ \Rightarrow\ \text{唯一最小樹};\qquad \text{else}\ \Ri
 ## §13 演算法定位（citation-verification 待驗；使用者提供）
 
 > ⚠ 演算法層定位，非核心形式化；論文採用前跑 `/citation-verification`。
-- laminar / 全三型相容性核心（**Gusfield 1991, *Networks* 21(1):19–28**, perfect-phylogeny）——對應骨幹（完整觀測）多項式建構。
+- laminar / rooted three-gamete 相容性核心（觀測 10、01、11 不可齊現；加入 all-zero root 後等價 four-gamete；**Gusfield 1991, *Networks* 21(1):19–28**, perfect-phylogeny）——對應骨幹（完整觀測）多項式建構。
 - 🎯 **部分觀測補全（$?$-entry）= Incomplete Directed Perfect Phylogeny，Pe'er, Pupko, Shamir, Sharan 2004, *SIAM J Comput* 33(3):590–607**（poly→linear）——§7 解法1 completion step + §7.5.2 的嚴格基礎；救回空向量非工程 trick。
 - 同片段近端事件對加強推論（TreeClone, arXiv:1703.03853）——本框架擴到多位點片段標籤 + 可辨識性。
 - 相容樹不確定性呈現（PhyloSub, arXiv:1210.3384；multiplicity non-identifiable: **DeCiFer, Satas et al. 2021, *Cell Syst* 12(10):1004**）——對應 §5/§6「輸出即測度」+ §7.5.4「定不出來即答案」。

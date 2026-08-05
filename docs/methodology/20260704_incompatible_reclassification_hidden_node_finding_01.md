@@ -102,3 +102,15 @@ v1 曾宣稱「117 可救 / incompatible 118→1」— **錯,是 over-claim**。
 | HCC1954 | 1979 | 858 | 30% | 1140 |
 
 全 7 樣本救回 **15,979 區**;每樣本「新total − 救回 = 舊 with-vector」逐一對上（**full-cov census 0 regression、救回純 additive**）。🔴 救回率 13%–55% 隨覆蓋深度變（H2009 深/HCC1937 淺），非方法差異。6 樣本 cn=unknown → m-通道不可用、救回只依 tree_shape 分類。備份 `scratchpad/CANON_pregap1_*`。
+
+## ✅ 方法重現性驗證（2026-07-06）— HCC1395 basecaller-invariant
+同細胞株 HCC1395、不同 basecaller（**5khz vs DORADO**）→ 重建**比例幾乎相同、絕對數隨資料量**：
+| | 5khz | DORADO |
+|---|---|---|
+| branched/有樹 | **29.4%** | **30.2%** |
+| linear/有樹 | 19.1% | 21.5% |
+| single/有樹 | 51.5% | 48.3% |
+| 有樹(絕對) | 3876 | 2378（0.61×）|
+| 總 sSNV | 21508 | 9387（**0.44×**）|
+
+**裁決**：重建「形狀分布=生物」跨 basecaller 穩定（branched 29% vs 30%，<2% 差）；絕對數差=**純測序深度/資料量**（DORADO ~44% sSNV → ~61% 有樹），**非生物差異、非方法 artifact**。→ 論文 method-validation 可用（reviewer 常問 basecaller/run 穩定性）。🔴 跨樣本比較只比比例不比絕對數；不報 p 值（pseudoreplication 真 n=7）；COLO829 single 67% = 低coread artifact 非生物。詳 memory `project_hcc1395_basecaller_reproducibility_validation`。

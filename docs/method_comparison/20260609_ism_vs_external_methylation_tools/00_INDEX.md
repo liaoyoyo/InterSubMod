@@ -71,6 +71,7 @@ provenance_note: 本 INDEX 為導航/摘要; 數字皆引自子文件(已各標�
 ## 狀態與下一步
 - ✅ **Phase A 完成**（2026-06-10）：源碼確認 + 82 工具 survey + 對照矩陣 + 交叉分析 + 改進建議。產出 6 .md + HTML + 原始資料。
 - ⏳ **Phase B 待用戶核准**：實機下載運行 benchmark（06 已規劃；涉及下載外部工具 + 長 compute，未自動啟動）。
+- ✅ **Phase C 完成（2026-06-13）：外部源實體下載 + 親讀驗證庫**。28 源（含本 survey 的 cvlr/ASMS/qFDRP + 新軸 subclonal-recon/cancer-phaser/甲基-lineage）已 git clone repo + 下載 PDF + 逐源親讀源碼/全文建 **CONTEXT 卡**，位於 **repo 外** `/big7_disk/liaoyoyo2001/external_validation/`；repo 內橋接索引 = `InterSubMod/docs/method_comparison/20260613_external_validation_library_index_01.md`。**🔴 校正本 survey 之口徑**：ASMS/cvlr **都有 randomization 顯著性檢定**（非「缺檢定」）；MethylBERT **碼原生支援 ONT**（非純二代）→ ISM 對外差異點改述為「無監督距離矩陣結構 PERMANOVA + normal-baseline cis-test + somatic-subclone 目標」。
 
 ## Provenance
 - 外部工具事實：workflow **wf_9e64e51d-03d**（24 agents：10 survey + 8 deep-read + 5 cross + 1 synth-critic；全程 WebSearch→WebFetch 一手來源；~46 min，2.3M tokens）。原始：`_assets/workflow_raw_result.json`。

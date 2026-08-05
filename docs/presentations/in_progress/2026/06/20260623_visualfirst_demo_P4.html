@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!--
+  title: visual-first 示範 P4 v3「對齊 haplotype → cis-ASM」— 概念確認後繪製
+  date: 2026-06-23
+  概念（用戶確認）：① cis-ASM 本質=甲基綁在 haplotype 上（圖示）② 對齊數量 TP 5538/FP 1349，germline 比例反而更高
+  數據：phylo_weak_structure_counts.json（落檔）TP S1 5538(18.41%) / FP S1 1349(28.95%)
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>visual-first 示範 v3 · P4 對齊→cis-ASM</title>
+<style>
+:root{
+  --ink:#000;--navy:#021442;--ice:#DBEFF9;--accent-1:#4188C7;
+  --somatic-warm:#E97B3C;--error-red:#E0352B;--indep:#2E8B57;--neutral:#6B7280;
+  --hi-red:#D6584F;--lo-blue:#3F6BB0;
+  --fg-1:#000;--fg-2:#262626;--fg-3:#595959;--fg-4:#A6A6A6;--bg-3:#EEF3F8;
+  --border-1:#D9D9D9;--border-2:#A6A6A6;
+  --font-display:'Noto Sans TC','PingFang TC','微軟正黑體',Inter,sans-serif;
+  --font-mono:'JetBrains Mono','Menlo',monospace;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:#15171c;font-family:var(--font-display);color:var(--fg-1);display:flex;align-items:center;justify-content:center;min-height:100vh}
+.stage{width:1280px;height:720px;position:relative;background:#fff;box-shadow:0 12px 48px rgba(0,0,0,.5)}
+.label{position:absolute;top:8px;left:14px;font-family:var(--font-mono);font-size:12px;color:#fff;background:rgba(0,0,0,.5);padding:3px 10px;border-radius:5px;z-index:5}
+.pad{padding:42px 60px;height:100%;display:flex;flex-direction:column}
+.eyebrow{font-size:17px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-1);font-weight:600;margin-bottom:8px}
+.takeaway{font-weight:400;font-size:40px;line-height:1.1;margin:0 0 4px;color:var(--ink)}
+.takeaway b{color:var(--somatic-warm);font-weight:700}
+.sub{font-size:19px;color:var(--fg-3);margin:0 0 18px}
+.row{display:flex;gap:34px;align-items:stretch;flex:1}
+.col{flex:1;border:1.5px solid var(--border-1);border-radius:12px;padding:20px 24px;display:flex;flex-direction:column}
+.col--left{background:#fdf8f4;border-color:#f0d6c4}
+.col--right{background:var(--bg-3)}
+.col h3{margin:0 0 14px;font-size:23px;font-weight:700}
+.col--left h3{color:var(--somatic-warm)}.col--right h3{color:var(--navy)}
+/* 右側數量 block */
+.qrow{margin:6px 0 18px}
+.qhead{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+.qhead .who{font-size:21px;font-weight:600}
+.qhead .n{font-family:var(--font-mono);font-size:40px;font-weight:700;line-height:1}
+.qhead .unit{font-size:18px;color:var(--fg-3)}
+.bar{height:30px;border-radius:6px;position:relative}
+.bar .pct{position:absolute;right:10px;top:3px;color:#fff;font-family:var(--font-mono);font-weight:700;font-size:18px}
+.qnote{margin-top:auto;background:#fff;border:2px solid var(--somatic-warm);border-radius:8px;padding:12px 16px;font-size:20px;font-weight:600;color:var(--somatic-warm);text-align:center}
+.redbar{margin-top:14px;background:#fdecea;border-left:5px solid var(--error-red);border-radius:6px;padding:11px 18px;font-size:21px;font-weight:600;color:var(--error-red)}
+.page-n{position:absolute;right:44px;bottom:22px;font-size:17px;color:var(--fg-3)}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <span class="label">✅ visual-first v3 · 概念確認後繪製</span>
+  <div class="pad">
+    <div class="eyebrow">④ 核心發現</div>
+    <h1 class="takeaway">甲基對齊 haplotype → 很可能是 <b>cis-ASM</b>（非 subclone）</h1>
+    <div class="sub">cis-ASM = 甲基差異綁在 germline allele 上的正常等位現象，連 normal 都有</div>
+    <div class="row">
+
+      <!-- 左：cis-ASM 本質（read × CpG 示意）-->
+      <div class="col col--left">
+        <h3>什麼是 cis-ASM：甲基綁在 haplotype 上</h3>
+        <svg width="100%" viewBox="0 0 540 300" style="flex:1">
+          <!-- HP1：高甲基（紅）-->
+          <text x="10" y="52" font-size="20" font-weight="700" fill="var(--hi-red)">HP1</text>
+          <text x="10" y="74" font-size="14" fill="var(--fg-3)">高甲基</text>
+          <line x1="100" y1="40" x2="460" y2="40" stroke="var(--border-2)" stroke-width="2"/>
+          <line x1="100" y1="64" x2="460" y2="64" stroke="var(--border-2)" stroke-width="2"/>
+          <line x1="100" y1="88" x2="460" y2="88" stroke="var(--border-2)" stroke-width="2"/>
+          <g fill="var(--hi-red)">
+            <circle cx="140" cy="40" r="8"/><circle cx="220" cy="40" r="8"/><circle cx="300" cy="40" r="8"/><circle cx="380" cy="40" r="8"/><circle cx="440" cy="40" r="8"/>
+            <circle cx="140" cy="64" r="8"/><circle cx="220" cy="64" r="8"/><circle cx="300" cy="64" r="8"/><circle cx="380" cy="64" r="8"/><circle cx="440" cy="64" r="8"/>
+            <circle cx="140" cy="88" r="8"/><circle cx="220" cy="88" r="8"/><circle cx="300" cy="88" r="8"/><circle cx="380" cy="88" r="8"/><circle cx="440" cy="88" r="8"/>
+          </g>
+          <!-- 分隔 -->
+          <line x1="10" y1="116" x2="500" y2="116" stroke="var(--border-1)" stroke-dasharray="5 4"/>
+          <!-- HP2：低甲基（藍）-->
+          <text x="10" y="158" font-size="20" font-weight="700" fill="var(--lo-blue)">HP2</text>
+          <text x="10" y="180" font-size="14" fill="var(--fg-3)">低甲基</text>
+          <line x1="100" y1="146" x2="460" y2="146" stroke="var(--border-2)" stroke-width="2"/>
+          <line x1="100" y1="170" x2="460" y2="170" stroke="var(--border-2)" stroke-width="2"/>
+          <line x1="100" y1="194" x2="460" y2="194" stroke="var(--border-2)" stroke-width="2"/>
+          <g fill="none" stroke="var(--lo-blue)" stroke-width="2">
+            <circle cx="140" cy="146" r="8"/><circle cx="220" cy="146" r="8"/><circle cx="300" cy="146" r="8"/><circle cx="380" cy="146" r="8"/><circle cx="440" cy="146" r="8"/>
+            <circle cx="140" cy="170" r="8"/><circle cx="220" cy="170" r="8"/><circle cx="300" cy="170" r="8"/><circle cx="380" cy="170" r="8"/><circle cx="440" cy="170" r="8"/>
+            <circle cx="140" cy="194" r="8"/><circle cx="220" cy="194" r="8"/><circle cx="300" cy="194" r="8"/><circle cx="380" cy="194" r="8"/><circle cx="440" cy="194" r="8"/>
+          </g>
+          <!-- read 標 + CpG 圖例 -->
+          <text x="480" y="68" font-size="13" fill="var(--fg-4)">reads</text>
+          <text x="480" y="174" font-size="13" fill="var(--fg-4)">reads</text>
+          <!-- 結論 -->
+          <text x="270" y="244" text-anchor="middle" font-size="20" font-weight="700" fill="var(--somatic-warm)">甲基差異「綁在 haplotype 上」= cis-ASM</text>
+          <text x="270" y="274" text-anchor="middle" font-size="17" fill="var(--fg-2)">等位特異甲基 · 由 allele 決定 · normal 也有</text>
+          <text x="270" y="296" text-anchor="middle" font-size="15" fill="var(--fg-3)">● 高甲基 CpG　○ 低甲基 CpG</text>
+        </svg>
+      </div>
+
+      <!-- 右：對齊數量（TP/FP）-->
+      <div class="col col--right">
+        <h3>對齊 haplotype 的位點：有多少？</h3>
+        <div class="qrow">
+          <div class="qhead"><span class="who" style="color:var(--accent-1)">somatic (TP)</span><span class="n" style="color:var(--accent-1)">5,538</span><span class="unit">個</span></div>
+          <div class="bar" style="background:var(--accent-1);width:55%"><span class="pct">18.41%</span></div>
+        </div>
+        <div class="qrow">
+          <div class="qhead"><span class="who" style="color:var(--neutral)">germline (FP)</span><span class="n" style="color:var(--neutral)">1,349</span><span class="unit">個</span></div>
+          <div class="bar" style="background:var(--neutral);width:86%"><span class="pct">28.95%</span></div>
+        </div>
+        <div class="qnote">germline 對齊比例（28.95%）<br>反而比 somatic（18.41%）<b>更高</b></div>
+        <div class="redbar">→ 「對齊」偏向 cis-ASM 等位現象，不是 subclone 檢定</div>
+      </div>
+
+    </div>
+    <div class="page-n">&lt; 4 / 7 &gt;</div>
+  </div>
+</div>
+
+</body>
+</html>

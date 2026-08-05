@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大規模驗證 Handoff — Subclonal reconstruction 論文</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;--teal:#39c5cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.65;font-size:15px}
+  header{padding:24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 4px;font-size:19px}
+  header .sub{color:var(--mut);font-size:12.5px}
+  .wrap{max-width:1060px;margin:0 auto;padding:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:15px 0}
+  h2{font-size:16px;margin:4px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .bluf{background:linear-gradient(135deg,#1c2530,#161b22);border-left:4px solid var(--p)}
+  .vcard{border:1px solid var(--line);border-radius:10px;padding:13px 16px;margin:11px 0}
+  .vcard.top{border-color:#5a3030;background:#1f1616}
+  .vcard h3{margin:0 0 6px;font-size:14.5px}
+  .vid{display:inline-block;font-weight:800;color:var(--p);margin-right:7px}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .teal{color:var(--teal)} .mut{color:var(--mut)}
+  .badge{display:inline-block;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid;margin-left:5px}
+  .badge.r{border-color:var(--r);color:var(--r)} .badge.y{border-color:var(--y);color:var(--y)} .badge.g{border-color:var(--g);color:var(--g)} .badge.b{border-color:var(--b);color:var(--b)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#1f2733;font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  ul{margin:5px 0;padding-left:18px} li{margin:3px 0}
+  .lab{font-size:11.5px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.4px}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11px}
+  .small{font-size:12px;color:var(--mut)}
+  .ok{color:var(--g)} .no{color:var(--r)}
+</style>
+</head>
+<body>
+<header>
+  <h1>大規模搜尋與驗證 Handoff — Subclonal reconstruction 論文</h1>
+  <div class="sub">2026-06-12 · 給另一 session 執行 · 把 proof-of-concept 主軸升級為 validated · .md：<code>InterSubMod/docs/thesis/20260612_largescale_verification_handoff_01.md</code></div>
+</header>
+<div class="wrap">
+
+  <div class="card bluf">
+    <h2>一句話：四個必驗，決定論文能多強</h2>
+    <table>
+      <tr><th class="k">驗證</th><th>一句話問題</th><th>決定論文什麼</th></tr>
+      <tr><td class="k r"><b>V-1</b> 🔴</td><td><b>乾淨 somatic cis 真稀有，還是只測了 816？</b></td><td>de-confound「稀有」claim 能否成立（你的頭號關切）</td></tr>
+      <tr><td class="k r"><b>V-2</b> 🔴</td><td>能否系統化找「甲基+多點突變共同支持 subclone」位點 + 標準化判準？</td><td><b>主軸 R5 從個案升 systematic</b></td></tr>
+      <tr><td class="k"><b>V-3</b></td><td>chr2 主 demo 圖的數字真值？</td><td>Fig 1 能否寫真值</td></tr>
+      <tr><td class="k"><b>V-4</b></td><td>BRCA2 單點個案有無乾淨 cis（去 copy）？</td><td>BRCA2 當單點 narrative exemplar 的誠實口徑</td></tr>
+    </table>
+    <p class="small">外加既有 open gap V-5~V-9 解鎖 tier ⭐3→⭐4 + 誠實定案。</p>
+  </div>
+
+  <div class="card">
+    <h2>🔴 頭號 — V-1：乾淨 somatic cis 真稀有 vs 分析不全面</h2>
+    <div class="vcard top">
+      <h3><span class="vid">V-1</span>稽核已點出：「1/816」只因 cis-test <b>只跑 HCC1395 816 個 HP-axis loci</b>；332,705 <b>從未全 cis-tested</b>（校正 #2：勿把未測當已驗陰性）<span class="badge y">🟡 under-tested</span></h3>
+      <p><span class="lab">要做</span> normal-anchored cis-test 擴大到<b>所有合格位點 × 全 6 樣本</b>（起手：catalog reliable 12,868 + latent 28,254；每位點 d_somatic/d_cis/d_drift + copy-partition）。</p>
+      <p><span class="lab">腳本</span> <code>scripts/34_control_loci_cohesion_cistest.py</code> + <code>37_copy_partition_confirm.py</code> + <code>03_step4...py</code></p>
+      <p><span class="lab">成功判準</span> <span class="ok">(a) 仍 &lt;1% 跨樣本一致 → 「稀有」成立、headline 站得住</span>；<span class="no">(b) 大量新乾淨 cis → 「稀有」是 under-test artifact、論文須改述</span>。<b>兩種都站得住，但措辭不同 — 必須測。</b></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔴 主軸核心 — V-2：subclone 重建 個案 → 系統化 + 判準</h2>
+    <div class="vcard top">
+      <h3><span class="vid">V-2</span>把「ISM 找到甲基+多點突變共同支持 subclone」從<b>個案</b>升<b>系統化（有判準、有計數）</b><span class="badge y">⭐3 個案</span></h3>
+      <p><span class="lab">要做</span> ① 定義標準化判準（pre-register）：窗內 ≥N somatic 變異（ClairS+DeepVariant 一致）+ 甲基分群與突變分群一致（ARI/PERMANOVA）+ LOH 脈絡 + 可建假想子單倍型（如 chr2 的 2-1/2-1-1/…）。② 全基因組 × 6 樣本掃描套判準 → 位點清單 + 頻率。③ 每位點輸出甲基+突變矩陣 + 假想樹 + 一致性指標。</p>
+      <p><span class="lab">⚠ 前置</span> 需確認 6 樣本是否都有 DeepVariant somatic call（圖2 用 google=DeepVariant）；若只 HCC1395 有 → 補或標範圍。</p>
+      <p><span class="lab">成功判準</span> <span class="ok">找到 ≥K 位點 + 跨樣本可見 → R5 升 validated</span>；否則維持 proof-of-concept 但有判準 + 頻率上界。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>兩個 exemplar 的數字溯源 — V-3 / V-4</h2>
+    <div class="vcard">
+      <h3><span class="vid">V-3</span>chr2:18M 主 demo 數字溯源</h3>
+      <p class="small">圖1/圖2（HCC1395 chr2:18,068,480–18,100,683；somatic A/G @18,086,020 ClairS 79、DeepVariant 58；假想分類 2-1/2-1-1/2-2-x）<b>未經本流程溯源</b> → 重跑 ISM+pileup 確認所有數字、兩 caller 一致。<b>成功 = 每個進 Fig 1 的數字都 grep 得到。</b></p>
+    </div>
+    <div class="vcard">
+      <h3><span class="vid">V-4</span>BRCA2 單點 exemplar 重驗（你偏好此例）</h3>
+      <p class="small">BRCA2 目前 <b class="y">copy-confounded</b>（d_within −0.023 ≪ d_copy −0.11）非乾淨 cis。→ copy-partition + per-read residual permutation（2000× null）重驗，定論<b>有無乾淨 somatic-cis 成分</b>。<br>成功 = BRCA2 cis 有/無定論 + 可放圖的整合數據。<b>影響</b>：BRCA2 敘述口徑（illustrative-integration + caveat vs 部分 cis；cis 錨仍備 chr17）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>既有 open gap — V-5~V-9（解鎖 tier + 誠實定案）</h2>
+    <table>
+      <tr><th class="k">#</th><th>gap</th><th>問題</th><th>成功=解鎖</th><th class="k">優先</th></tr>
+      <tr><td class="k r"><b>V-5</b></td><td>G-A 跨樣本</td><td>V10/V11c/catalog 跨 6 樣本重現？（A0 腳本 <code>--bam</code> 換樣本）</td><td>主軸 ⭐3→⭐4</td><td class="k">P0</td></tr>
+      <tr><td class="k r"><b>V-6</b> 🔴</td><td>G-B within-hap null</td><td>subclone 甲基是否 somatic-specific？<b>正確 null=within-haplotype somatic-vs-baseline</b>（非 germline-het null）</td><td>「甲基 corroborate subclone」undetermined→validated</td><td class="k">P0</td></tr>
+      <tr><td class="k r"><b>V-7</b> 🔴</td><td>FDR #24</td><td>reliable 12,868 + chr17 p=0.001 的 null/FDR 校準（含 n_reads 校正，O11 教訓）</td><td>Methods 嚴謹度、數字穩固</td><td class="k">投稿前</td></tr>
+      <tr><td class="k"><b>V-8</b></td><td>HD-1 R-SELFREF</td><td>phasing by-construction 循環（~25-50hr C++）</td><td>R6 能否寫 positive（不押也可）</td><td class="k">P1</td></tr>
+      <tr><td class="k"><b>V-9</b></td><td>G-C/G-D/G-E</td><td>cis vs 突變足跡分離 / 重建 demo / 第二 pipeline 破自我參照</td><td>R5 精確度 / Fig1 / 破 ⭐3</td><td class="k">P1-2</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>驗證完成後，論文如何上修（護欄解除條件）</h2>
+    <table>
+      <tr><th>護欄（現）</th><th>解除條件</th></tr>
+      <tr><td>假想樹 hypothetical</td><td>V-2 判準+ARI 達標 → 「criteria-based 重建」</td></tr>
+      <tr><td>甲基 corroborate 非 validated</td><td><b>V-6 within-hap null 過</b> → 才可寫「甲基（去混淆後）支持 subclone」</td></tr>
+      <tr><td>乾淨 cis「816 中 1」</td><td><b>V-1 擴測</b> → 真實分母 + 跨樣本率</td></tr>
+      <tr><td>大規模驗證 = future</td><td>V-2 完成 → 「systematic（N 位點）」</td></tr>
+      <tr><td>single-sample ⭐3</td><td><b>V-5 G-A 6 樣本</b> → ⭐4</td></tr>
+      <tr><td>BRCA2 copy caveat</td><td><b>V-4 重驗</b> → illustrative vs 部分 cis</td></tr>
+    </table>
+    <p class="small">回填紀律（§13）：每項跑完先落檔→Read 回真值→才改論文；更新 VERIFIED_RESULTS/共識台帳/對齊表 + 標 build_commit；<b>勿在未跑完前先改論文措辭</b>。</p>
+  </div>
+
+  <div class="card" style="background:#16241a;border-color:#2a4a3a">
+    <h2>要你確認</h2>
+    <ul>
+      <li>這份 handoff <b>有沒有漏掉</b>你想大規模驗證的項目？</li>
+      <li>V-1 / V-2 兩個頭號方向對不對？判準（V-2）你心中有沒有特定門檻？</li>
+      <li>chr2 主 demo / BRCA2 的原始數據路徑你手上有嗎（給我可直接寫進 V-3/V-4，否則另一 session 重跑）？</li>
+      <li>確認後我可以：(a) 繼續寫第四章（R5 用 {{待填}} 佔位待驗證回填），或 (b) 等你那邊驗證完成再寫 R5。你決定。</li>
+    </ul>
+  </div>
+
+  <p class="small mut">數字來源：共識台帳 §1 / 對齊表 / VERIFIED_RESULTS；本頁列驗證項目不產新數字。chr2/BRCA2 具體數字待 V-3/V-4 溯源。</p>
+
+</div>
+</body>
+</html>

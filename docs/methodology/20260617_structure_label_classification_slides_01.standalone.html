@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<!--
+  title: 甲基聚類 × 標籤相關性「狀況分類」— 演算法講解簡報（給教授）
+  date: 2026-06-17
+  build_branch: research/subclonal-reconstruction-202606 @ ea26e06
+  audience: 教授 / lab meeting (~8-10 min)
+  scope: HCC1395 單樣本 · 全基因組 30,490 somatic 位點 (output/_wg_d1_unified, paired run) — single-sample partial
+  data_sources: 20260617_structure_label_situation_inventory_01.md
+  algorithm_refs: src/core/DistanceMatrix.cpp (calculate_bernoulli:240-301, BERNOULLI enum:341/609), src/core/GlobalTest.cpp:149-304, src/core/RegionProcessor.cpp:1041/1064/1075/1089/1107/1172, src/core/MathUtils.cpp:154-206
+  provenance: 所有 metric 數字皆引自上方 data_sources 之已驗證文件 (status: data-verified, verify_breakdown.py 25/25 PASS)；示意圖 (SVG-A/B/D) 為機制示意非真值，已於圖右下標「示意」。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>甲基聚類 × 標籤狀況分類 — 講解簡報</title>
+<style>
+  :root{
+    --blue:#2563eb; --indigo:#4f46e5; --teal:#0d9488; --amber:#d97706;
+    --red:#dc2626; --green:#16a34a; --slate:#475569;
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --bg:#0f172a; --paper:#ffffff;
+    --hp1:#2563eb; --hp2:#d97706; --meth:#1e293b; --unmeth:#cbd5e1; --na:#f1f5f9;
+    --font: "Noto Sans CJK TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    --mono: "JetBrains Mono","Noto Sans Mono CJK TC","Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);font-family:var(--font);color:var(--ink);line-height:1.5}
+
+  /* ---- top bar ---- */
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;
+    background:#0b1220;color:#e2e8f0;padding:8px 16px;font-size:13px;border-bottom:1px solid #1e293b}
+  .topbar b{color:#fff}
+  .topbar .spacer{flex:1}
+  .topbar button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;
+    padding:5px 10px;cursor:pointer;font-family:var(--font);font-size:12px}
+  .topbar button:hover{background:#334155}
+  .progress{height:3px;background:var(--blue);width:0;transition:width .2s;position:sticky;top:41px;z-index:49}
+
+  /* ---- deck ---- */
+  .deck{max-width:1180px;margin:18px auto 60px;padding:0 16px}
+  .slide{display:none}
+  .slide.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:.3}to{opacity:1}}
+
+  .canvas{background:var(--paper);aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;border-top:7px solid var(--blue)}
+  .slide[data-accent=blue]   .canvas{border-color:var(--blue)}
+  .slide[data-accent=indigo] .canvas{border-color:var(--indigo)}
+  .slide[data-accent=teal]   .canvas{border-color:var(--teal)}
+  .slide[data-accent=amber]  .canvas{border-color:var(--amber)}
+  .slide[data-accent=red]    .canvas{border-color:var(--red)}
+  .slide[data-accent=slate]  .canvas{border-color:var(--slate)}
+  .canvas-inner{flex:1;padding:26px 34px;display:flex;flex-direction:column;min-height:0}
+
+  .shead{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .badge{font-family:var(--mono);font-weight:700;font-size:13px;color:#fff;background:var(--blue);
+    border-radius:6px;padding:3px 9px;letter-spacing:.5px}
+  .slide[data-accent=indigo] .badge{background:var(--indigo)}
+  .slide[data-accent=teal] .badge{background:var(--teal)}
+  .slide[data-accent=amber] .badge{background:var(--amber)}
+  .slide[data-accent=red] .badge{background:var(--red)}
+  .slide[data-accent=slate] .badge{background:var(--slate)}
+  .shead h2{font-size:25px;margin:0;color:var(--ink)}
+  .shead .sub{color:var(--muted);font-size:14px;margin-left:auto;text-align:right}
+
+  .body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .row{display:flex;gap:20px;align-items:center}
+  .row.top{align-items:flex-start}
+  .col{flex:1;min-width:0}
+  ul.pts{margin:4px 0;padding-left:20px}
+  ul.pts li{margin:5px 0;font-size:15.5px}
+  ul.pts li b{color:var(--ink)}
+  .mini{font-size:13px;color:var(--muted)}
+  .k{font-family:var(--mono);font-size:.92em;background:#f1f5f9;border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px;color:#334155}
+  .hl-red{color:var(--red);font-weight:700}
+  .hl-blue{color:var(--blue);font-weight:700}
+  .hl-green{color:var(--green);font-weight:700}
+  .hl-amber{color:var(--amber);font-weight:700}
+
+  .callout{border-left:4px solid var(--amber);background:#fffbeb;padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px}
+  .callout.red{border-color:var(--red);background:#fef2f2}
+  .callout.blue{border-color:var(--blue);background:#eff6ff}
+  .callout.green{border-color:var(--green);background:#f0fdf4}
+
+  .sfoot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px;margin-top:6px;
+    display:flex;gap:14px;flex-wrap:wrap}
+  .sfoot .src{font-family:var(--mono)}
+  .partial{display:inline-block;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;
+    border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700}
+
+  /* stat boxes */
+  .stat{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:120px}
+  .stat .num{font-size:30px;font-weight:800;font-family:var(--mono);line-height:1}
+  .stat .num.blue{color:var(--blue)} .stat .num.red{color:var(--red)}
+  .stat .num.green{color:var(--green)} .stat .num.amber{color:var(--amber)}
+  .stat .lab{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+
+  table.t{border-collapse:collapse;width:100%;font-size:13px}
+  table.t th,table.t td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  table.t th{background:#f8fafc;font-weight:700}
+  table.t td.r,table.t th.r{text-align:right;font-family:var(--mono)}
+  table.t tr.em td{background:#fffbeb}
+
+  /* speaker notes */
+  .notes{margin:12px 2px 0;background:#0b1220;color:#cbd5e1;border-radius:10px;overflow:hidden;border:1px solid #1e293b}
+  .notes>summary{cursor:pointer;padding:9px 16px;font-size:13px;font-weight:700;color:#93c5fd;
+    background:#111a2e;user-select:none;list-style:none}
+  .notes>summary::-webkit-details-marker{display:none}
+  .notes>summary::before{content:"🎤 講稿 ";}
+  .notes[open]>summary{border-bottom:1px solid #1e293b}
+  .notes .nbody{padding:12px 18px;font-size:14.5px;line-height:1.7}
+  .notes .nbody p{margin:0 0 9px}
+  .notes .nbody .q{color:#fbbf24;font-weight:700}
+  .notes .nbody .k{background:#1e293b;border-color:#334155;color:#cbd5e1}
+  .notes .nbody b{color:#fff}
+
+  .schematic-tag{font-size:11px;fill:#94a3b8;font-family:var(--font)}
+  svg{display:block;max-width:100%;height:auto}
+  svg text{font-family:var(--font)}
+  svg text.mono{font-family:"JetBrains Mono","Courier New",monospace}
+
+  .hint{text-align:center;color:#64748b;font-size:12px;margin-top:10px}
+  @media print{
+    .topbar,.progress,.hint{display:none}
+    .slide{display:block!important;page-break-after:always;margin-bottom:20px}
+    .canvas{box-shadow:none;border:1px solid #ccc}
+    .notes{border:1px solid #ccc;background:#fff;color:#000}
+    .notes .nbody .q{color:#b45309}.notes .nbody b{color:#000}.notes>summary{color:#000;background:#f1f5f9}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <b>甲基聚類 × 標籤狀況分類</b>
+  <span style="color:#64748b">演算法講解 · HCC1395 單樣本</span>
+  <span class="spacer"></span>
+  <button id="btnNotes">隱藏講稿</button>
+  <button onclick="window.print()">列印 / PDF</button>
+  <span id="counter" style="font-family:var(--mono)">1 / 9</span>
+  <button id="prev">◀</button>
+  <button id="next">▶</button>
+</div>
+<div class="progress" id="bar"></div>
+
+<div class="deck" id="deck">
+
+<!-- ========================= S0 TITLE ========================= -->
+<section class="slide active" data-accent="slate">
+  <div class="canvas">
+    <div class="canvas-inner" style="justify-content:center">
+      <div style="text-align:center">
+        <div class="badge" style="background:var(--slate);display:inline-block;margin-bottom:16px">方法講解 · 2026-06-17</div>
+        <h1 style="font-size:34px;margin:0 0 10px;color:var(--ink)">甲基聚類結構 ↔ 標籤關聯：<br>完整「狀況分類」怎麼算出來</h1>
+        <p style="font-size:17px;color:var(--muted);max-width:760px;margin:6px auto 18px">
+          把每個 somatic 位點的「無監督甲基聚類」與「a-priori 標籤」的關係，<br>
+          窮舉地分成 <b class="hl-blue">3 種狀況</b> —— 本簡報講解<b>如何算、為何有效、代表什麼</b>，並以真實數字佐證。
+        </p>
+        <div class="row" style="justify-content:center;gap:14px;margin-top:6px">
+          <div class="stat"><span class="num blue">30,490</span><span class="lab">somatic 位點<br>(TP+FP，全基因組)</span></div>
+          <div class="stat"><span class="num">3</span><span class="lab">狀況分類<br>(對齊 / 一標籤多群 / 一群多標籤)</span></div>
+          <div class="stat"><span class="num green">25/25</span><span class="lab">數字一致性驗證<br>verify_breakdown.py PASS</span></div>
+        </div>
+        <p style="margin-top:20px"><span class="partial">⚠ 單樣本 HCC1395</span>
+          <span class="mini">　資料：<span class="k">output/_wg_d1_unified</span>（paired run）· 跨 6 樣本復現為 next step</span></p>
+      </div>
+    </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p>各位老師好。今天我要講的是我們最近完成的一個方法 —— <b>怎麼把「甲基化的聚類結構」和「我們已知的標籤」之間的關係，系統性地分類</b>。</p>
+    <p>背景是 subclonal reconstruction：我們想知道，腫瘤裡甲基化的差異，到底是<b>跟著 haplotype / 等位基因</b>走，還是<b>另外形成了子結構</b>（可能是亞克隆）。</p>
+    <p>這次的資料是 <b>HCC1395 單一樣本、全基因組 30,490 個 somatic 位點</b>。我先強調兩件事：第一，所有數字都經過 <span class="k">verify_breakdown.py</span> 25/25 一致性驗證，是腳本算出來落檔再注入、不是手打的；第二，<span class="q">這是單樣本結果</span>，跨 6 樣本的復現是我們下一步。</p>
+    <p>整場大約 8 到 10 分鐘，分三條主線：方法框架、方法創新、以及我們看到的關鍵生物現象。</p>
+  </div></details>
+</section>
+
+<!-- ========================= S1 方法 + 創新 (SVG-A) ========================= -->
+<section class="slide" data-accent="blue">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S1</span><h2>怎麼算出甲基聚類 —— 完全無監督</h2>
+      <span class="sub">創新點：read×read 距離 + 階層聚類<br>（不是 modkit/DSS 的 per-site 率差）</span></div>
+    <div class="body">
+      <!-- SVG-A : unsupervised clustering pipeline -->
+      <svg viewBox="0 0 1080 300" role="img" aria-label="無監督甲基聚類流程">
+        <!-- step1 matrix -->
+        <text x="78" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">① read × CpG 甲基矩陣</text>
+        <text x="78" y="42" text-anchor="middle" font-size="11" fill="#64748b">每位點 ±5000bp 窗口</text>
+        <g transform="translate(20,54)">
+          <!-- column header -->
+          <text x="118" y="-2" text-anchor="middle" font-size="10" fill="#94a3b8">CpG 1→8</text>
+          <!-- 6 reads x 8 cpg -->
+          <!-- row labels -->
+          <g font-size="9" fill="#64748b" text-anchor="end">
+            <text x="-4" y="22">r1</text><text x="-4" y="42">r2</text><text x="-4" y="62">r3</text>
+            <text x="-4" y="82">r4</text><text x="-4" y="102">r5</text><text x="-4" y="122">r6</text>
+          </g>
+          <!-- cells: 1=meth dark, 0=unmeth light, n=na. design two read-groups -->
+          <!-- group A (r1-r3): mostly methylated pattern ; group B (r4-r6): mostly unmeth -->
+          <g>
+            <!-- helper via explicit rects -->
+            <!-- r1 -->
+            <rect x="0"  y="12" width="18" height="18" fill="#1e293b"/><rect x="20" y="12" width="18" height="18" fill="#1e293b"/><rect x="40" y="12" width="18" height="18" fill="#cbd5e1"/><rect x="60" y="12" width="18" height="18" fill="#1e293b"/><rect x="80" y="12" width="18" height="18" fill="#1e293b"/><rect x="100" y="12" width="18" height="18" fill="#f1f5f9"/><rect x="120" y="12" width="18" height="18" fill="#1e293b"/><rect x="140" y="12" width="18" height="18" fill="#1e293b"/>
+            <!-- r2 -->
+            <rect x="0"  y="32" width="18" height="18" fill="#1e293b"/><rect x="20" y="32" width="18" height="18" fill="#1e293b"/><rect x="40" y="32" width="18" height="18" fill="#1e293b"/><rect x="60" y="32" width="18" height="18" fill="#f1f5f9"/><rect x="80" y="32" width="18" height="18" fill="#1e293b"/><rect x="100" y="32" width="18" height="18" fill="#1e293b"/><rect x="120" y="32" width="18" height="18" fill="#1e293b"/><rect x="140" y="32" width="18" height="18" fill="#cbd5e1"/>
+            <!-- r3 -->
+            <rect x="0"  y="52" width="18" height="18" fill="#1e293b"/><rect x="20" y="52" width="18" height="18" fill="#cbd5e1"/><rect x="40" y="52" width="18" height="18" fill="#1e293b"/><rect x="60" y="52" width="18" height="18" fill="#1e293b"/><rect x="80" y="52" width="18" height="18" fill="#1e293b"/><rect x="100" y="52" width="18" height="18" fill="#1e293b"/><rect x="120" y="52" width="18" height="18" fill="#cbd5e1"/><rect x="140" y="52" width="18" height="18" fill="#1e293b"/>
+            <!-- r4 -->
+            <rect x="0"  y="72" width="18" height="18" fill="#cbd5e1"/><rect x="20" y="72" width="18" height="18" fill="#cbd5e1"/><rect x="40" y="72" width="18" height="18" fill="#f1f5f9"/><rect x="60" y="72" width="18" height="18" fill="#cbd5e1"/><rect x="80" y="72" width="18" height="18" fill="#cbd5e1"/><rect x="100" y="72" width="18" height="18" fill="#cbd5e1"/><rect x="120" y="72" width="18" height="18" fill="#cbd5e1"/><rect x="140" y="72" width="18" height="18" fill="#1e293b"/>
+            <!-- r5 -->
+            <rect x="0"  y="92" width="18" height="18" fill="#cbd5e1"/><rect x="20" y="92" width="18" height="18" fill="#1e293b"/><rect x="40" y="92" width="18" height="18" fill="#cbd5e1"/><rect x="60" y="92" width="18" height="18" fill="#cbd5e1"/><rect x="80" y="92" width="18" height="18" fill="#f1f5f9"/><rect x="100" y="92" width="18" height="18" fill="#cbd5e1"/><rect x="120" y="92" width="18" height="18" fill="#cbd5e1"/><rect x="140" y="92" width="18" height="18" fill="#cbd5e1"/>
+            <!-- r6 -->
+            <rect x="0"  y="112" width="18" height="18" fill="#cbd5e1"/><rect x="20" y="112" width="18" height="18" fill="#cbd5e1"/><rect x="40" y="112" width="18" height="18" fill="#cbd5e1"/><rect x="60" y="112" width="18" height="18" fill="#1e293b"/><rect x="80" y="112" width="18" height="18" fill="#cbd5e1"/><rect x="100" y="112" width="18" height="18" fill="#cbd5e1"/><rect x="120" y="112" width="18" height="18" fill="#f1f5f9"/><rect x="140" y="112" width="18" height="18" fill="#cbd5e1"/>
+          </g>
+        </g>
+        <!-- legend for matrix -->
+        <g transform="translate(20,196)" font-size="10" fill="#475569">
+          <rect x="0" y="0" width="12" height="12" fill="#1e293b"/><text x="16" y="10">甲基化 p→1</text>
+          <rect x="78" y="0" width="12" height="12" fill="#cbd5e1"/><text x="94" y="10">未甲基 p→0</text>
+          <rect x="160" y="0" width="12" height="12" fill="#f1f5f9" stroke="#e2e8f0"/><text x="176" y="10">缺失→SKIP</text>
+        </g>
+
+        <!-- arrow 1 -->
+        <g transform="translate(196,120)">
+          <line x1="0" y1="0" x2="56" y2="0" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="28" y="-22" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">配對距離</text>
+          <text x="28" y="-8" text-anchor="middle" font-size="10" fill="#475569">BERNOULLI</text>
+          <text x="28" y="18" text-anchor="middle" font-size="9.5" fill="#64748b">δ=p(1−q)+(1−p)q</text>
+          <text x="28" y="30" text-anchor="middle" font-size="9.5" fill="#64748b">權重 2|p−0.5|</text>
+        </g>
+
+        <!-- step2 distance matrix -->
+        <text x="330" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">② read–read 距離矩陣</text>
+        <g transform="translate(280,66)">
+          <!-- 6x6 small heat: within-group small (light), across-group large (dark) -->
+          <!-- We'll draw a 6x6 grid; block A=r1-3, B=r4-6 -->
+          <g>
+            <!-- row1 --><rect x="0" y="0" width="16" height="16" fill="#eef2ff"/><rect x="16" y="0" width="16" height="16" fill="#c7d2fe"/><rect x="32" y="0" width="16" height="16" fill="#c7d2fe"/><rect x="48" y="0" width="16" height="16" fill="#4338ca"/><rect x="64" y="0" width="16" height="16" fill="#4338ca"/><rect x="80" y="0" width="16" height="16" fill="#4f46e5"/>
+            <!-- row2 --><rect x="0" y="16" width="16" height="16" fill="#c7d2fe"/><rect x="16" y="16" width="16" height="16" fill="#eef2ff"/><rect x="32" y="16" width="16" height="16" fill="#c7d2fe"/><rect x="48" y="16" width="16" height="16" fill="#4f46e5"/><rect x="64" y="16" width="16" height="16" fill="#4338ca"/><rect x="80" y="16" width="16" height="16" fill="#4338ca"/>
+            <!-- row3 --><rect x="0" y="32" width="16" height="16" fill="#c7d2fe"/><rect x="16" y="32" width="16" height="16" fill="#c7d2fe"/><rect x="32" y="32" width="16" height="16" fill="#eef2ff"/><rect x="48" y="32" width="16" height="16" fill="#4338ca"/><rect x="64" y="32" width="16" height="16" fill="#4f46e5"/><rect x="80" y="32" width="16" height="16" fill="#4338ca"/>
+            <!-- row4 --><rect x="0" y="48" width="16" height="16" fill="#4338ca"/><rect x="16" y="48" width="16" height="16" fill="#4f46e5"/><rect x="32" y="48" width="16" height="16" fill="#4338ca"/><rect x="48" y="48" width="16" height="16" fill="#eef2ff"/><rect x="64" y="48" width="16" height="16" fill="#c7d2fe"/><rect x="80" y="48" width="16" height="16" fill="#c7d2fe"/>
+            <!-- row5 --><rect x="0" y="64" width="16" height="16" fill="#4338ca"/><rect x="16" y="64" width="16" height="16" fill="#4338ca"/><rect x="32" y="64" width="16" height="16" fill="#4f46e5"/><rect x="48" y="64" width="16" height="16" fill="#c7d2fe"/><rect x="64" y="64" width="16" height="16" fill="#eef2ff"/><rect x="80" y="64" width="16" height="16" fill="#c7d2fe"/>
+            <!-- row6 --><rect x="0" y="80" width="16" height="16" fill="#4f46e5"/><rect x="16" y="80" width="16" height="16" fill="#4338ca"/><rect x="32" y="80" width="16" height="16" fill="#4338ca"/><rect x="48" y="80" width="16" height="16" fill="#c7d2fe"/><rect x="64" y="80" width="16" height="16" fill="#c7d2fe"/><rect x="80" y="80" width="16" height="16" fill="#eef2ff"/>
+          </g>
+          <text x="48" y="116" text-anchor="middle" font-size="10" fill="#64748b">近=淺　遠=深</text>
+        </g>
+
+        <!-- arrow 2 -->
+        <g transform="translate(384,120)">
+          <line x1="0" y1="0" x2="56" y2="0" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="28" y="-10" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">UPGMA</text>
+          <text x="28" y="16" text-anchor="middle" font-size="9.5" fill="#64748b">average-linkage</text>
+        </g>
+
+        <!-- step3 dendrogram -->
+        <text x="556" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">③ 階層聚類樹</text>
+        <g transform="translate(472,70)" stroke="#334155" stroke-width="2" fill="none">
+          <!-- leaves x at 8,28,48 (groupA) 80,100,120 (groupB) y=92 baseline -->
+          <line x1="8" y1="92" x2="8" y2="60"/><line x1="28" y1="92" x2="28" y2="60"/>
+          <line x1="8" y1="60" x2="28" y2="60"/><line x1="18" y1="60" x2="18" y2="44"/>
+          <line x1="18" y1="44" x2="48" y2="44"/><line x1="48" y1="92" x2="48" y2="44"/>
+          <line x1="33" y1="44" x2="33" y2="20"/>
+          <line x1="80" y1="92" x2="80" y2="60"/><line x1="100" y1="92" x2="100" y2="60"/>
+          <line x1="80" y1="60" x2="100" y2="60"/><line x1="90" y1="60" x2="90" y2="44"/>
+          <line x1="90" y1="44" x2="120" y2="44"/><line x1="120" y1="92" x2="120" y2="44"/>
+          <line x1="105" y1="44" x2="105" y2="20"/>
+          <line x1="33" y1="20" x2="105" y2="20"/><line x1="69" y1="20" x2="69" y2="8"/>
+        </g>
+        <!-- cut line -->
+        <g transform="translate(472,70)">
+          <line x1="-6" y1="32" x2="132" y2="32" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <text x="138" y="35" font-size="10" fill="#dc2626">silhouette 剪 k</text>
+        </g>
+
+        <!-- arrow 3 -->
+        <g transform="translate(622,120)">
+          <line x1="0" y1="0" x2="50" y2="0" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+        </g>
+
+        <!-- step4 clusters -->
+        <text x="820" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">④ 得到 k 個甲基群</text>
+        <g transform="translate(700,52)">
+          <circle cx="60" cy="40" r="40" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="40" cy="34" r="6" fill="#2563eb"/><circle cx="62" cy="28" r="6" fill="#2563eb"/><circle cx="78" cy="46" r="6" fill="#2563eb"/><circle cx="50" cy="54" r="6" fill="#2563eb"/>
+          <text x="60" y="96" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">cluster C1</text>
+          <circle cx="190" cy="44" r="40" fill="#ffedd5" stroke="#d97706" stroke-width="2"/>
+          <circle cx="170" cy="38" r="6" fill="#d97706"/><circle cx="192" cy="32" r="6" fill="#d97706"/><circle cx="208" cy="50" r="6" fill="#d97706"/><circle cx="180" cy="58" r="6" fill="#d97706"/>
+          <text x="190" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#d97706">cluster C2</text>
+        </g>
+
+        <!-- no-label banner -->
+        <rect x="690" y="168" width="370" height="30" rx="6" fill="#f0fdf4" stroke="#16a34a"/>
+        <text x="875" y="187" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">✓ 標籤完全不進入這四步（無監督）</text>
+
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <text x="1064" y="294" text-anchor="end" class="schematic-tag">示意</text>
+      </svg>
+    </div>
+    <div class="sfoot">
+      <span class="src">演算法：DistanceMatrix.cpp:240–301 (calculate_bernoulli) · BERNOULLI enum:341 · UPGMA</span>
+      <span class="src">參數出處：situation_inventory_01.md §1 Q1–Q2</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">這一頁是整個方法的地基：我們的甲基聚類是怎麼長出來的。</span></p>
+    <p>第一步，每個 somatic 位點，我們抓它前後各 5000 bp 窗口裡的所有 reads，建一個 <b>read × CpG 的甲基化矩陣</b>，每格是那條 read 在那個 CpG 的甲基化機率（model 給的 ML 值除以 255）。</p>
+    <p>第二步是關鍵 —— <b>怎麼定義兩條 read 有多「不像」</b>。我們用 BERNOULLI 距離：<span class="k">δ(p,q)=p(1−q)+(1−p)q</span>，直覺上就是「兩條 read 在同一個 CpG 上甲基化狀態不一致的期望機率」。再乘一個信心權重 <span class="k">w(p)=2|p−0.5|</span> —— <b>越接近 0 或 1（越確定）的位點權重越高，p≈0.5（最不確定）的權重趨近 0</b>。最後 <span class="k">Dist=Σ(w·δ)/Σw</span>，共同有效 CpG 要 ≥ C_min=3，缺失就 SKIP。</p>
+    <p>第三步把這個 N×N 距離矩陣丟進 <b>UPGMA average-linkage 階層聚類</b>，長出一棵樹；第四步用 <b>silhouette 分數</b>在 k=2 到 6 之間挑分得最乾淨的 k，剪樹得到甲基群。</p>
+    <p><span class="q">這裡要對教授強調的創新點：整個過程標籤完全沒進來，是純粹從甲基化模式自己長出來的</b>。</span>這跟 modkit、DSS 那種「比較兩組的 per-site 甲基化率差」很不一樣 —— 它們需要你先指定分組，我們是<b>無監督</b>地問「reads 自己會不會分群」。公式細節我放在附錄。</p>
+  </div></details>
+</section>
+
+<!-- ========================= S2 對齊檢驗 (SVG-B) ========================= -->
+<section class="slide" data-accent="indigo">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S2</span><h2>核心機制：「對齊」怎麼判 —— cluster × 標籤 列聯表</h2>
+      <span class="sub">無監督群是否自動沿標籤分離？</span></div>
+    <div class="body">
+     <div class="row top">
+      <div class="col" style="flex:1.35">
+      <!-- SVG-B: contingency table two states -->
+      <svg viewBox="0 0 660 290" role="img" aria-label="對齊檢驗列聯表兩種狀態">
+        <!-- LEFT: aligned -->
+        <text x="150" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#16a34a">對齊 · GlobalP ≤ 0.05</text>
+        <!-- table grid -->
+        <g transform="translate(70,40)">
+          <text x="55" y="-4" text-anchor="middle" font-size="11" fill="#475569">標籤 (HP)</text>
+          <text x="-30" y="50" text-anchor="middle" font-size="11" fill="#475569" transform="rotate(-90 -30 50)">cluster</text>
+          <!-- headers -->
+          <text x="35" y="14" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="700">HP1</text>
+          <text x="95" y="14" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">HP2</text>
+          <text x="-6" y="44" text-anchor="end" font-size="11" fill="#0f172a">C1</text>
+          <text x="-6" y="84" text-anchor="end" font-size="11" fill="#0f172a">C2</text>
+          <!-- cells: diagonal heavy -->
+          <rect x="10" y="24" width="50" height="40" fill="#4338ca"/><text x="35" y="49" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">38</text>
+          <rect x="70" y="24" width="50" height="40" fill="#e0e7ff"/><text x="95" y="49" text-anchor="middle" font-size="13" fill="#3730a3">3</text>
+          <rect x="10" y="64" width="50" height="40" fill="#e0e7ff"/><text x="35" y="89" text-anchor="middle" font-size="13" fill="#3730a3">4</text>
+          <rect x="70" y="64" width="50" height="40" fill="#4338ca"/><text x="95" y="89" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">41</text>
+        </g>
+        <text x="150" y="178" text-anchor="middle" font-size="12" fill="#15803d" font-weight="700">對角線濃 → Cramér's V 高</text>
+        <text x="150" y="196" text-anchor="middle" font-size="11" fill="#475569">cluster 追隨標籤</text>
+
+        <!-- divider -->
+        <line x1="330" y1="30" x2="330" y2="210" stroke="#e2e8f0" stroke-width="1.5"/>
+
+        <!-- RIGHT: not aligned -->
+        <text x="500" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">不對齊 · GlobalP > 0.05</text>
+        <g transform="translate(420,40)">
+          <text x="55" y="-4" text-anchor="middle" font-size="11" fill="#475569">標籤 (HP)</text>
+          <text x="35" y="14" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="700">HP1</text>
+          <text x="95" y="14" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">HP2</text>
+          <text x="-6" y="44" text-anchor="end" font-size="11" fill="#0f172a">C1</text>
+          <text x="-6" y="84" text-anchor="end" font-size="11" fill="#0f172a">C2</text>
+          <rect x="10" y="24" width="50" height="40" fill="#a5b4fc"/><text x="35" y="49" text-anchor="middle" font-size="13" fill="#1e1b4b">21</text>
+          <rect x="70" y="24" width="50" height="40" fill="#a5b4fc"/><text x="95" y="49" text-anchor="middle" font-size="13" fill="#1e1b4b">19</text>
+          <rect x="10" y="64" width="50" height="40" fill="#a5b4fc"/><text x="35" y="89" text-anchor="middle" font-size="13" fill="#1e1b4b">22</text>
+          <rect x="70" y="64" width="50" height="40" fill="#a5b4fc"/><text x="95" y="89" text-anchor="middle" font-size="13" fill="#1e1b4b">20</text>
+        </g>
+        <text x="500" y="178" text-anchor="middle" font-size="12" fill="#b91c1c" font-weight="700">均勻分布 → V 低</text>
+        <text x="500" y="196" text-anchor="middle" font-size="11" fill="#475569">同群混多標籤 (狀況③)</text>
+
+        <!-- bottom formula band -->
+        <rect x="40" y="224" width="580" height="50" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+        <text x="330" y="244" text-anchor="middle" font-size="12.5" fill="#3730a3" font-weight="700">三軸各一張表：allele(ALT/REF) · HP-family · HP-fine(4 群)</text>
+        <text x="330" y="263" text-anchor="middle" font-size="12" fill="#4338ca">χ² + Cramér's V (Cochran 可靠性 gate) + Fisher-Freeman-Halton　→　<tspan font-weight="700">GlobalP = min(三軸) ≤ 0.05</tspan></text>
+        <text x="654" y="286" text-anchor="end" class="schematic-tag">示意</text>
+      </svg>
+      </div>
+      <div class="col" style="flex:.85">
+        <ul class="pts">
+          <li><b>為何有效：</b>群是<b>無監督</b>長出來的；若它<b>自動沿標籤分離</b>（對角線濃），代表甲基結構與該標籤<b>真的相關</b>，不是我們硬塞的。</li>
+          <li><b>三軸非互斥</b>：一個位點可同時在 hp-fine / hp-family / allele 對齊；取最嚴的 <span class="k">min</span> 當 GlobalP。</li>
+          <li>HP-fine 對齊檢定<b>只用 4 群</b>（HP1/HP1-1/HP2/HP2-1）；HP3、unphase 只當組成計數。</li>
+        </ul>
+        <div class="callout blue" style="margin-top:6px">全體 Fisher 顯著（任一軸）：<b class="hl-blue">22,632（74.23%）</b></div>
+      </div>
+     </div>
+    </div>
+    <div class="sfoot">
+      <span class="src">GlobalTest.cpp:149–304 · Cramér's V: MathUtils.cpp:154–206</span>
+      <span class="src">來源：situation_inventory_01.md §1 Q3</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">有了甲基群之後，下一個問題是：這個群「對齊」到我們已知的標籤了嗎？</span>這就是整個分類的核心判準。</p>
+    <p>做法很直接：把<b>無監督 cluster</b>當成表的列、<b>標籤</b>當成行，做一張列聯表。左邊這張，C1 幾乎全是 HP1、C2 幾乎全是 HP2 —— <b>對角線很濃</b>，這時 Cramér's V 高，我們說它「對齊」。右邊這張四格差不多平均，cluster 跟標籤沒關係，V 低，就是「不對齊」。</p>
+    <p><span class="q">為什麼這個判準有意義？</span>因為群是甲基化<b>自己</b>長出來的，標籤沒參與。如果它還是乖乖沿著 HP 或等位基因分開，那代表「甲基結構」跟「基因型」之間是<b>真的有關聯</b>，不是被我們硬分的。</p>
+    <p>細節上：我們對<b>三個軸</b>各做一張表 —— 等位基因 ALT/REF、HP-family、以及 HP-fine（四群）。每張表算卡方、Cramér's V（V 有一個 Cochran 可靠性 gate，期望次數太小就壓成 0），還有 Fisher-Freeman-Halton 精確檢定。最後 <span class="k">GlobalP 取三軸最小值</span>，≤0.05 就算對齊。所以一個位點可以<b>同時</b>在好幾個軸對齊，三軸是非互斥的。公式我放附錄。全基因組有 22,632 個位點（74%）至少一個軸顯著。</p>
+  </div></details>
+</section>
+
+<!-- ========================= S3 三狀況 (SVG-C) ========================= -->
+<section class="slide" data-accent="teal">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S3</span><h2>三種狀況 —— 每個位點都落在其中</h2>
+      <span class="sub">框架本身：完整、無監督、可窮舉</span></div>
+    <div class="body">
+      <!-- SVG-C: three situations + 6-cell partition -->
+      <svg viewBox="0 0 1080 300" role="img" aria-label="三種狀況與六格 partition">
+        <!-- panel 1: aligned -->
+        <g transform="translate(0,0)">
+          <rect x="10" y="6" width="330" height="150" rx="10" fill="#f0fdfa" stroke="#0d9488"/>
+          <text x="175" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#0f766e">① 對齊（一結構 → 一標籤）</text>
+          <!-- two pure clusters -->
+          <circle cx="95" cy="92" r="34" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="80" cy="86" r="5.5" fill="#2563eb"/><circle cx="104" cy="82" r="5.5" fill="#2563eb"/><circle cx="98" cy="104" r="5.5" fill="#2563eb"/><circle cx="84" cy="100" r="5.5" fill="#2563eb"/>
+          <circle cx="245" cy="92" r="34" fill="#ffedd5" stroke="#d97706" stroke-width="2"/>
+          <circle cx="230" cy="86" r="5.5" fill="#d97706"/><circle cx="254" cy="82" r="5.5" fill="#d97706"/><circle cx="248" cy="104" r="5.5" fill="#d97706"/><circle cx="234" cy="100" r="5.5" fill="#d97706"/>
+          <text x="175" y="146" text-anchor="middle" font-size="12" fill="#475569">群 = 標籤，乾淨對應</text>
+        </g>
+        <!-- panel 2: one-label-multi-group -->
+        <g transform="translate(370,0)">
+          <rect x="10" y="6" width="330" height="150" rx="10" fill="#eff6ff" stroke="#2563eb"/>
+          <text x="175" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1d4ed8">② 一標籤多群（多結構 → 一標籤）</text>
+          <!-- one HP box, two subclusters -->
+          <rect x="55" y="52" width="240" height="84" rx="10" fill="#fff" stroke="#2563eb" stroke-dasharray="5 4"/>
+          <text x="175" y="68" text-anchor="middle" font-size="11" fill="#2563eb">單一 HP（tumor reads）</text>
+          <circle cx="110" cy="104" r="24" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+          <circle cx="102" cy="100" r="4.5" fill="#1d4ed8"/><circle cx="118" cy="98" r="4.5" fill="#1d4ed8"/><circle cx="110" cy="112" r="4.5" fill="#1d4ed8"/>
+          <circle cx="232" cy="104" r="24" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="1.5"/>
+          <circle cx="224" cy="100" r="4.5" fill="#1e3a8a"/><circle cx="240" cy="98" r="4.5" fill="#1e3a8a"/><circle cx="232" cy="112" r="4.5" fill="#1e3a8a"/>
+          <text x="175" y="150" text-anchor="middle" font-size="12" fill="#475569">同標籤內再分裂（subclone 方向）</text>
+        </g>
+        <!-- panel 3: one-group-multi-label -->
+        <g transform="translate(740,0)">
+          <rect x="10" y="6" width="330" height="150" rx="10" fill="#fef2f2" stroke="#dc2626"/>
+          <text x="175" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#b91c1c">③ 一群多標籤（一結構 → 多標籤）</text>
+          <circle cx="175" cy="94" r="42" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+          <circle cx="150" cy="84" r="5.5" fill="#2563eb"/><circle cx="196" cy="80" r="5.5" fill="#d97706"/><circle cx="165" cy="104" r="5.5" fill="#2563eb"/><circle cx="190" cy="106" r="5.5" fill="#d97706"/><circle cx="175" cy="90" r="5.5" fill="#d97706"/><circle cx="158" cy="100" r="5.5" fill="#2563eb"/>
+          <text x="175" y="150" text-anchor="middle" font-size="12" fill="#475569">一群混兩種標籤 (cluster ⊥ label)</text>
+        </g>
+
+        <!-- counts row -->
+        <g transform="translate(0,168)">
+          <rect x="10" y="0" width="330" height="40" rx="8" fill="#0d9488"/>
+          <text x="175" y="26" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" class="mono">22,497　(73.78%)</text>
+          <rect x="380" y="0" width="330" height="40" rx="8" fill="#2563eb"/>
+          <text x="545" y="26" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" class="mono">8,077　(26.49%)</text>
+          <rect x="750" y="0" width="330" height="40" rx="8" fill="#dc2626"/>
+          <text x="915" y="26" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" class="mono">510　(1.67%)</text>
+        </g>
+
+        <!-- partition note -->
+        <text x="540" y="232" text-anchor="middle" font-size="12.5" fill="#475569">⚠ 三狀況<b>重疊、非互斥</b>（對齊 ∩ 一標籤多群 = 6,180）；乾淨版 = 6 格互斥 partition（下，Σ=30,490）</text>
+        <!-- 6-cell mini grid -->
+        <g transform="translate(330,244)" font-size="11">
+          <rect x="0" y="0" width="140" height="22" fill="#ccfbf1" stroke="#99f6e4"/><text x="70" y="15" text-anchor="middle" fill="#0f766e">對齊×單群 16,317</text>
+          <rect x="142" y="0" width="140" height="22" fill="#ccfbf1" stroke="#99f6e4"/><text x="212" y="15" text-anchor="middle" fill="#0f766e">對齊×多群 6,180</text>
+          <rect x="284" y="0" width="120" height="22" fill="#fee2e2" stroke="#fecaca"/><text x="344" y="15" text-anchor="middle" fill="#b91c1c">③ 510</text>
+          <rect x="0" y="22" width="282" height="20" fill="#f1f5f9" stroke="#e2e8f0"/><text x="141" y="37" text-anchor="middle" fill="#64748b">無群 7,483（含 5,725 單群 + 1,758 多群）</text>
+          <rect x="284" y="22" width="120" height="20" fill="#f8fafc" stroke="#e2e8f0"/><text x="344" y="37" text-anchor="middle" fill="#94a3b8">Σ = 30,490</text>
+        </g>
+      </svg>
+    </div>
+    <div class="sfoot">
+      <span class="src">來源：situation_inventory_01.md §0 + §2（6 格 partition）</span>
+      <span class="partial">單樣本 HCC1395</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">這一頁是「框架本身」—— 我們的第二條 take-home。</span>把對齊檢驗套到全基因組每一個位點，<b>每個位點都會落進三種狀況之一</b>。</p>
+    <p><b>狀況① 對齊</b>：群乾淨地對到標籤，一個結構對一個標籤。<b>22,497 個，佔 74%</b>，是大宗。</p>
+    <p><b>狀況② 一標籤多群</b>：在<b>同一個 HP 標籤之內</b>，甲基化又分出 ≥2 群 —— 也就是「同一個標籤、多個結構」。這是<b>跟 subclone 最相關的方向</b>，因為它代表標籤分不出來、但甲基化分得出來的子結構。8,077 個，佔 26%。</p>
+    <p><b>狀況③ 一群多標籤</b>：群成立、但不追隨標籤，一群裡混了兩種標籤。只有 510 個，1.7%，很稀少。</p>
+    <p><span class="q">要誠實提醒老師一件事：</span>這三個狀況的定義<b>彼此會重疊</b>，比如「對齊」又「在 HP 內多群」的有 6,180 個。所以如果要一個<b>乾淨、互斥、加起來剛好 30,490</b> 的版本，是下面那個 6 格表。框架的價值在於：它<b>無監督、可窮舉、覆蓋每一個位點</b>，而不是只挑顯著的看。</p>
+  </div></details>
+</section>
+
+<!-- ========================= S4 read-set + Δβ (SVG-D) ========================= -->
+<section class="slide" data-accent="amber">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S4</span><h2>嚴謹度關鍵：哪些 read 進入檢定，決定結論性質</h2>
+      <span class="sub">paired vs tumor-only —— 源碼逐軸證實</span></div>
+    <div class="body">
+     <div class="row top">
+      <div class="col" style="flex:1.3">
+      <!-- SVG-D: read-set split + delta-beta -->
+      <svg viewBox="0 0 640 300" role="img" aria-label="read-set 分流與 Subclone Δβ">
+        <!-- read pool -->
+        <text x="80" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">read pool</text>
+        <g transform="translate(20,30)">
+          <!-- tumor reads red border, normal reads blue border -->
+          <rect x="0" y="0" width="120" height="120" rx="10" fill="#fafafa" stroke="#cbd5e1"/>
+          <circle cx="28" cy="26" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="58" cy="22" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="90" cy="30" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="34" cy="58" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="74" cy="60" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="30" cy="92" r="9" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+          <circle cx="64" cy="94" r="9" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+          <circle cx="96" cy="88" r="9" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(20,156)" font-size="10.5" fill="#475569">
+          <circle cx="8" cy="6" r="7" fill="#fecaca" stroke="#dc2626"/><text x="20" y="10">tumor read</text>
+          <circle cx="92" cy="6" r="7" fill="#dbeafe" stroke="#2563eb"/><text x="104" y="10">normal read</text>
+        </g>
+
+        <!-- branch A: GlobalTest paired -->
+        <g transform="translate(150,52)">
+          <line x1="0" y1="0" x2="44" y2="-22" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+        </g>
+        <rect x="200" y="18" width="420" height="56" rx="9" fill="#f0fdf4" stroke="#16a34a"/>
+        <text x="214" y="40" font-size="13" font-weight="700" fill="#15803d">對齊 / GlobalTest</text>
+        <text x="214" y="60" font-size="12" fill="#166534">全部 reads 進入　=　<tspan font-weight="700">PAIRED（tumor + normal）</tspan>　← 無 is_tumor 過濾</text>
+
+        <!-- branch B: Subclone delta-beta tumor only -->
+        <g transform="translate(150,92)">
+          <line x1="0" y1="0" x2="44" y2="40" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+        </g>
+        <rect x="200" y="104" width="420" height="92" rx="9" fill="#fff7ed" stroke="#d97706"/>
+        <text x="214" y="126" font-size="13" font-weight="700" fill="#b45309">Subclone Δβ（狀況②方向）</text>
+        <text x="214" y="145" font-size="12" fill="#9a3412"><tspan class="mono">if(!is_tumor) continue;</tspan>　=　<tspan font-weight="700">TUMOR-ONLY</tspan></text>
+        <!-- within one HP split germline vs carrier -->
+        <g transform="translate(214,154)">
+          <circle cx="14" cy="16" r="11" fill="#fed7aa" stroke="#d97706"/><text x="14" y="20" text-anchor="middle" font-size="9" fill="#7c2d12">germ</text>
+          <text x="40" y="20" font-size="12" fill="#9a3412">vs</text>
+          <circle cx="74" cy="16" r="11" fill="#fdba74" stroke="#c2410c"/><text x="74" y="20" text-anchor="middle" font-size="9" fill="#7c2d12">carr</text>
+          <text x="100" y="20" font-size="12.5" font-weight="700" fill="#b45309">Δβ = β(carrier) − β(germline)</text>
+        </g>
+
+        <!-- bottom note -->
+        <rect x="20" y="206" width="600" height="78" rx="8" fill="#fffbeb" stroke="#fcd34d"/>
+        <text x="34" y="228" font-size="12" fill="#92400e">其餘軸：<tspan font-weight="700">GermlineAsmDbeta</tspan> = normal-only（定義 germline）；</text>
+        <text x="34" y="247" font-size="12" fill="#92400e"><tspan font-weight="700">SomaticResidual / HP_Residual</tspan> = needs both（tumor − normal 殘差）。</text>
+        <text x="34" y="270" font-size="12.5" font-weight="700" fill="#b91c1c">🔴 所以「對齊」這個基礎分類是 paired，不是純 tumor-only 訊號。</text>
+
+        <defs>
+          <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <text x="634" y="296" text-anchor="end" class="schematic-tag">示意</text>
+      </svg>
+      </div>
+      <div class="col" style="flex:.8">
+        <ul class="pts">
+          <li><b>為何重要：</b>同一套甲基聚類，<b>放不同 read-set 進去，結論性質就不同</b>。對齊用了 normal reads，所以它<b>不是純腫瘤訊號</b>。</li>
+          <li>真正 <b>tumor-only</b> 的是<b>狀況②</b>與 Subclone Δβ：<span class="k">!is_tumor continue</span> 只留腫瘤 read。</li>
+          <li>這是<b>源碼逐軸證實</b>（非 agent 回報）：GlobalTest 無 is_tumor 過濾；Δβ 軸有。</li>
+        </ul>
+        <div class="callout">這一點直接決定下一頁的關鍵發現。</div>
+      </div>
+     </div>
+    </div>
+    <div class="sfoot">
+      <span class="src">GlobalTest.cpp:149–304（paired）· RegionProcessor.cpp:1064/1075/1089/1172（!is_tumor）· :1041（tumor−normal）</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">這一頁是方法上最容易被忽略、但最關鍵的嚴謹度問題：到底是哪些 read 進到檢定裡？</span></p>
+    <p>同樣一套甲基聚類，<b>放進去的 read-set 不一樣，結論的性質就完全不一樣</b>。我們把每個軸對應到源碼，逐一確認 —— 這是讀 C++ 確認的，不是憑印象。</p>
+    <p><b>「對齊」這條（GlobalTest）：所有 read 都進去，tumor + normal 混在一起，叫 PAIRED</b>，因為程式碼裡沒有 is_tumor 過濾。</p>
+    <p>而<b>真正只看腫瘤的</b>是狀況② 跟 Subclone Δβ 這條：程式碼用 <span class="k">if(!is_tumor) continue;</span> 把 normal read 濾掉，在<b>同一個 HP 之內</b>，比較「帶 somatic 突變的 carrier read」跟「純 germline read」的甲基化差，<span class="k">Δβ = β(carrier) − β(germline)</span>。另外 germline ASM 那條只用 normal，residual 那條需要 tumor 減 normal。</p>
+    <p><span class="q">這裡的紅字要講清楚：</span>因為「對齊」混了 normal reads，所以<b>它不是純粹的腫瘤內訊號</b>。這個觀察直接帶出下一頁 —— 我們把 read-set 換成 tumor-only 再校準一次，會看到什麼。</p>
+  </div></details>
+</section>
+
+<!-- ========================= S5 關鍵發現 (SVG-E) ========================= -->
+<section class="slide" data-accent="red">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S5</span><h2>關鍵發現 —— 真實數字怎麼說</h2>
+      <span class="sub">Level-2 read-level 校準（300 位點，seed 42）</span></div>
+    <div class="body">
+      <!-- SVG-E: V drop + discriminability + subclone sparse -->
+      <svg viewBox="0 0 1080 248" role="img" aria-label="關鍵發現三圖">
+        <!-- chart 1: V drop slope -->
+        <g transform="translate(0,0)">
+          <text x="170" y="18" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0f172a">對齊強度約半數來自 normal</text>
+          <!-- axes -->
+          <line x1="60" y1="40" x2="60" y2="180" stroke="#cbd5e1"/>
+          <line x1="60" y1="180" x2="300" y2="180" stroke="#cbd5e1"/>
+          <text x="34" y="46" font-size="10" fill="#94a3b8">V</text>
+          <!-- scale 0..0.8 ; y=180 ->0, y=40 ->0.8 ; val v -> y=180-(v/0.8*140) -->
+          <!-- paired 0.665 -> y=180-116.4=63.6 ; tumor 0.319 -> y=180-55.8=124.2 -->
+          <circle cx="120" cy="63.6" r="7" fill="#2563eb"/>
+          <circle cx="240" cy="124.2" r="7" fill="#d97706"/>
+          <line x1="120" y1="63.6" x2="240" y2="124.2" stroke="#dc2626" stroke-width="2.5"/>
+          <text x="120" y="52" text-anchor="middle" font-size="13" font-weight="800" fill="#2563eb" class="mono">0.665</text>
+          <text x="240" y="115" text-anchor="middle" font-size="13" font-weight="800" fill="#d97706" class="mono">0.319</text>
+          <text x="120" y="196" text-anchor="middle" font-size="11" fill="#475569">paired</text>
+          <text x="240" y="196" text-anchor="middle" font-size="11" fill="#475569">tumor-only</text>
+          <text x="170" y="222" text-anchor="middle" font-size="11" fill="#b91c1c" font-weight="700">median Cramér's V 掉約一半</text>
+          <text x="170" y="238" text-anchor="middle" font-size="10.5" fill="#64748b">tumor-only 對齊保持 82/159 = 51.6%</text>
+        </g>
+
+        <!-- divider -->
+        <line x1="350" y1="30" x2="350" y2="210" stroke="#e2e8f0"/>
+
+        <!-- chart 2: discriminability normal vs tumor -->
+        <g transform="translate(372,0)">
+          <text x="170" y="18" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0f172a">HP-甲基判別力：誰較強</text>
+          <!-- stacked horizontal bar total width 300 at x=20..320 -->
+          <!-- normal 70.73% -> 212.2 ; tumor 29.24% -> 87.7 -->
+          <rect x="20" y="70" width="212" height="46" fill="#2563eb"/>
+          <rect x="232" y="70" width="88" height="46" fill="#d97706"/>
+          <text x="126" y="99" text-anchor="middle" font-size="14" font-weight="800" fill="#fff" class="mono">70.73%</text>
+          <text x="276" y="99" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" class="mono">29.24%</text>
+          <text x="126" y="134" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="700">normal 較強 (14,268)</text>
+          <text x="276" y="134" text-anchor="middle" font-size="10.5" fill="#d97706" font-weight="700">tumor 強</text>
+          <text x="170" y="170" text-anchor="middle" font-size="11.5" fill="#b91c1c" font-weight="700">→ HP 甲基「多是 germline 起源」</text>
+          <text x="170" y="190" text-anchor="middle" font-size="10.5" fill="#64748b">純 tumor 自足僅 149（0.49%）</text>
+          <text x="170" y="206" text-anchor="middle" font-size="10.5" fill="#64748b">需 normal 才有訊號 18,156（59.55%）</text>
+        </g>
+
+        <!-- divider -->
+        <line x1="722" y1="30" x2="722" y2="210" stroke="#e2e8f0"/>
+
+        <!-- chart 3: subclone sparse PATTERN vs LEVEL -->
+        <g transform="translate(744,0)">
+          <text x="168" y="18" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0f172a">真 subclone 訊號稀少</text>
+          <!-- bars: LEVEL 7910 big, PATTERN 354 tiny. scale max 7910 -> 150px height -->
+          <!-- LEVEL height 150 ; PATTERN height = 354/7910*150 = 6.7 -->
+          <rect x="60" y="30" width="64" height="150" fill="#fca5a5"/>
+          <text x="92" y="24" text-anchor="middle" font-size="12" font-weight="800" fill="#b91c1c" class="mono">7,910</text>
+          <text x="92" y="196" text-anchor="middle" font-size="10.5" fill="#475569">LEVEL（寬鬆</text>
+          <text x="92" y="209" text-anchor="middle" font-size="10.5" fill="#475569">mean-β 雙峰）</text>
+          <rect x="200" y="173.3" width="64" height="6.7" fill="#15803d"/>
+          <text x="232" y="166" text-anchor="middle" font-size="12" font-weight="800" fill="#15803d" class="mono">354</text>
+          <text x="232" y="196" text-anchor="middle" font-size="10.5" fill="#475569">PATTERN（嚴格</text>
+          <text x="232" y="209" text-anchor="middle" font-size="10.5" fill="#475569">silhouette 驗）</text>
+          <text x="168" y="232" text-anchor="middle" font-size="11" fill="#b91c1c" font-weight="700">多群 ≠ 真 subclone（多為整體高低位移）</text>
+        </g>
+      </svg>
+    </div>
+    <div class="sfoot">
+      <span class="src">來源：situation_inventory_01.md §0（Level-2）· §6.2（判別力）· §6.4 · Q5（PATTERN/LEVEL）</span>
+      <span class="partial">單樣本 HCC1395</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">這一頁是第三條 take-home：真實數字告訴我們什麼生物現象。</span>三張圖，三個發現。</p>
+    <p><b>左圖 —— 對齊強度約半數來自 normal。</b>我們做了一個 read-level 校準：抽 300 個對齊位點，<b>只留 tumor reads</b> 重算同一個關聯。可測的 159 個裡，只有 <b>51.6%（82 個）</b>還保持對齊；中位 Cramér's V 從 paired 的 <b>0.665 掉到 tumor-only 的 0.319</b>，掉了大約一半。<span class="q">也就是說，對齊的強度有約一半是 normal reads 撐起來的。</span>順帶一提，「結構訊號」整體從 paired 的 81% 砍到 tumor-only 最寬也只有 38.6%，方向一致。</p>
+    <p><b>中圖 —— HP 甲基多是 germline 起源。</b>在有 HP 判別力的位點裡，<b>normal 較強的佔 70.73%，tumor 較強的只有 29.24%</b>。純 tumor 自足的訊號只有 149 個（0.49%），有將近 60% 的訊號其實需要 normal 才看得出來。所以 HP 軸的甲基差異，<b>主要是 germline-driven</b>，腫瘤自己造成的是少數。</p>
+    <p><b>右圖 —— 真 subclone 訊號很稀少。</b>狀況②裡，用寬鬆的「平均 β 雙峰」判，有 7,910 個；但用<b>嚴格的 silhouette 幾何驗</b>，只剩 <b>354 個</b>。<span class="q">這提醒我們：多群不等於真 subclone</b>，大部分只是整體甲基化高低的位移，不是真的有兩個子結構。</span></p>
+  </div></details>
+</section>
+
+<!-- ========================= S6 結論 ========================= -->
+<section class="slide" data-accent="slate">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">S6</span><h2>結論 · 誠實邊界 · 下一步</h2></div>
+    <div class="body">
+      <div class="row top" style="gap:24px">
+        <div class="col">
+          <h3 style="margin:0 0 6px;color:var(--ink);font-size:16px">三條 take-home</h3>
+          <div class="callout blue"><b>① 框架：</b>無監督甲基聚類 + 三軸對齊檢驗 → 每個位點窮舉落入 <b>3 狀況</b>（22,497 / 8,077 / 510）。</div>
+          <div class="callout green" style="margin-top:8px"><b>② 創新：</b>read×read 距離 + 階層聚類 + normal-baseline read-set 拆分，不同於 modkit/DSS 的 per-site 率差。</div>
+          <div class="callout red" style="margin-top:8px"><b>③ 發現：</b>對齊<b>多為 germline-driven</b>（normal 70.73%）、tumor-only 強度<b>掉半</b>（V 0.665→0.319）、真 subclone <b>稀少</b>（PATTERN 354）。</div>
+        </div>
+        <div class="col">
+          <h3 style="margin:0 0 6px;color:var(--ink);font-size:16px">誠實邊界</h3>
+          <ul class="pts" style="font-size:14px">
+            <li>「是訊號」<b>≠</b>「是 subclone」：狀況只代表<b>通過了哪些驗證</b>，生物身分待 cis-control / multi-sSNV linkage+CCF / CN 軸驗。</li>
+            <li>Level-1 是<b>歸屬</b>非逐 cell 對應；Level-2 抽樣校準類別命中 92.6%、軸命中 73.7%。</li>
+            <li>「對齊」基礎是 <b>paired</b>（混 normal）；三軸非互斥；HP-fine 僅 4 群。</li>
+          </ul>
+          <div class="callout" style="margin-top:6px"><b>下一步：</b><span class="partial">單樣本 HCC1395</span> → <b>跨 6 樣本復現</b>；對狀況②高信心子集做 cis-control 排除 germline/artifact。</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfoot">
+      <span class="src">來源：situation_inventory_01.md §7（誠實邊界）</span>
+      <span class="src">附錄含公式全集與完整數字表 →</span>
+    </div>
+   </div>
+  </div>
+  <details class="notes" open><summary></summary><div class="nbody">
+    <p><span class="q">總結三條 take-home。</span></p>
+    <p><b>框架</b>：我們有一套無監督、可窮舉的方法，把每個位點分到三種狀況。<b>創新</b>：用 read×read 距離做無監督聚類，再用 normal baseline 把 read-set 拆開校準，這跟現有工具的 per-site 率差思路不同。<b>發現</b>：對齊主要是 germline-driven、腫瘤自己的訊號掉一半、真正的 subclone 子結構其實很稀少。</p>
+    <p><span class="q">但我必須把邊界講清楚，這對審稿和對老師都重要：</span>每個狀況只代表它<b>通過了哪些統計驗證</b>，<b>不等於</b>已經確認是 subclone。要確認生物身分，還需要 cis-control 排除 germline ASM、需要 multi-sSNV 連鎖加 CCF、需要 CN 軸。另外這是<b>單一樣本</b>，跨 6 樣本的復現是我們明確的下一步，我也會挑狀況②裡 silhouette 驗過的高信心子集去做 cis-control。</p>
+    <p>公式的完整版和所有數字表我放在後面的附錄，老師如果要追問細節我可以翻過去。謝謝。</p>
+  </div></details>
+</section>
+
+<!-- ========================= A1 附錄：公式 ========================= -->
+<section class="slide" data-accent="slate">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">附錄 A</span><h2>公式全集（教授追問備查）</h2></div>
+    <div class="body" style="justify-content:flex-start;gap:14px">
+      <table class="t">
+        <tr><th style="width:30%">項目</th><th>公式 / 定義</th><th style="width:26%">出處</th></tr>
+        <tr><td><b>BERNOULLI 配對距離</b></td>
+          <td><span class="k">δ(p,q)=p(1−q)+(1−p)q</span>；信心權重 <span class="k">w(p)=2|p−0.5|</span>；<span class="k">Dist=Σ(w·δ)/Σw</span>；C_min=3，nan→SKIP</td>
+          <td class="src">DistanceMatrix.cpp:240–301<br>md §1 Q1</td></tr>
+        <tr><td><b>聚類</b></td>
+          <td>UPGMA average-linkage；k 掃 [2, min(6, n/2)]，取最大 silhouette；不平衡則 k+1（unbalanced bump）</td>
+          <td class="src">RegionProcessor.cpp:2475–2490<br>md §1 Q2</td></tr>
+        <tr><td><b>Cramér's V</b></td>
+          <td><span class="k">V = √( χ² / ( n · (k−1) ) )</span>，k = min(列,行)；Cochran 可靠性 gate：期望次數 &lt;5 的格 &gt;20% → V 壓 0（不可靠）</td>
+          <td class="src">MathUtils.cpp:154–206</td></tr>
+        <tr><td><b>對齊 GlobalP</b></td>
+          <td>三軸（allele / HP-family / HP-fine）各算 χ² + V + Fisher-Freeman-Halton；<span class="k">GlobalP = min(p_alt, p_hp, p_hp_family)</span>；≤0.05 = 對齊</td>
+          <td class="src">GlobalTest.cpp:149–304<br>md §1 Q3</td></tr>
+        <tr><td><b>Subclone Δβ</b></td>
+          <td>單一 HP 內、tumor-only（<span class="k">!is_tumor continue</span>）：<span class="k">Δβ = β(carrier) − β(germline)</span>；permutation 定顯著</td>
+          <td class="src">RegionProcessor.cpp:1075/1089/1172</td></tr>
+        <tr><td><b>PERMANOVA</b>（結構檢定）</td>
+          <td><span class="k">pseudo-F = (SS_between/(k−1)) / (SS_within/(N−k))</span>；999 次 permutation 取 p</td>
+          <td class="src">StructureTest.hpp</td></tr>
+      </table>
+      <div class="callout">⚠ 過往發現：PERMANOVA 被算但<b>未被舊 verdict 引用</b>（structure_label_association_explained 詳述 double-dip）；本框架以 GlobalP + within-HP 重新分類。</div>
+    </div>
+    <div class="sfoot"><span class="src">演算法引用皆指向 src/core/*.cpp；參數值出處為已驗證 situation_inventory_01.md</span></div>
+   </div>
+  </div>
+  <details class="notes"><summary></summary><div class="nbody">
+    <p>備查頁。如果老師問距離怎麼定義、Cramér's V 的可靠性 gate、或 PERMANOVA 的 pseudo-F，這裡都列了公式跟源碼行號。</p>
+    <p>特別一提 Cochran gate：列聯表如果有超過兩成的格子期望次數小於 5，卡方近似就不可靠，這時我們把 V 壓成 0，寧可低估也不虛報。</p>
+  </div></details>
+</section>
+
+<!-- ========================= A2 附錄：完整數字表 ========================= -->
+<section class="slide" data-accent="slate">
+  <div class="canvas">
+   <div class="canvas-inner">
+    <div class="shead"><span class="badge">附錄 B</span><h2>完整數字表（全部可溯源）</h2></div>
+    <div class="body" style="justify-content:flex-start">
+     <div class="row top" style="gap:20px;align-items:flex-start">
+      <div class="col">
+        <h3 style="font-size:14px;margin:0 0 4px">訊號分層（tumor 自足 vs 需 normal）</h3>
+        <table class="t">
+          <tr><th>層</th><th>意義</th><th class="r">位點</th><th class="r">%</th></tr>
+          <tr><td>T1</td><td>tumor 偵測 + normal 確認 somatic</td><td class="r">5,635</td><td class="r">18.48</td></tr>
+          <tr><td>T2a</td><td>tumor 偵測但未分（需 normal）</td><td class="r">4,698</td><td class="r">15.41</td></tr>
+          <tr><td>T2b</td><td>tumor 偵測但 normal 顯 germline</td><td class="r">1,431</td><td class="r">4.69</td></tr>
+          <tr><td>T3</td><td>僅 normal 軸偵測</td><td class="r">6,458</td><td class="r">21.18</td></tr>
+          <tr><td>T4</td><td>純 germline（normal）</td><td class="r">2,724</td><td class="r">8.93</td></tr>
+          <tr><td>T5</td><td>無標記訊號</td><td class="r">9,544</td><td class="r">31.30</td></tr>
+          <tr class="em"><td colspan="2">純 tumor 自足</td><td class="r">149</td><td class="r">0.49</td></tr>
+          <tr class="em"><td colspan="2">需 normal 才有訊號</td><td class="r">18,156</td><td class="r">59.55</td></tr>
+        </table>
+      </div>
+      <div class="col">
+        <h3 style="font-size:14px;margin:0 0 4px">對齊位點再歸因（n=22,497）</h3>
+        <table class="t">
+          <tr><th>再歸因</th><th class="r">位點</th><th class="r">% 對齊</th></tr>
+          <tr><td>germline ASM only</td><td class="r">3,454</td><td class="r">15.35</td></tr>
+          <tr><td>somatic-specific only</td><td class="r">6,366</td><td class="r">28.30</td></tr>
+          <tr><td>both flagged</td><td class="r">2,841</td><td class="r">12.63</td></tr>
+          <tr class="em"><td>neither（未定）</td><td class="r">9,836</td><td class="r">43.72</td></tr>
+        </table>
+        <h3 style="font-size:14px;margin:12px 0 4px">「有訊號 vs 無訊號」依定義（嚴→寬）</h3>
+        <table class="t">
+          <tr><th>定義</th><th class="r">有訊號</th><th class="r">%</th></tr>
+          <tr class="em"><td>A 結構訊號 ★推薦</td><td class="r">24,765</td><td class="r">81.22</td></tr>
+          <tr><td>B 結構＋對齊</td><td class="r">22,497</td><td class="r">73.78</td></tr>
+          <tr><td>D pipeline verdict</td><td class="r">28,327</td><td class="r">92.91</td></tr>
+          <tr><td>E 寬（含 SampleASM）⚠</td><td class="r">30,144</td><td class="r">98.87</td></tr>
+        </table>
+        <p class="mini" style="margin-top:4px">⚠ 定義 E 是 SampleASM 飽和灌出的假象，勿當「幾乎所有位點都有甲基訊號」引用。</p>
+      </div>
+     </div>
+    </div>
+    <div class="sfoot"><span class="src">全部來源：situation_inventory_01.md §0.5 / §6.2 / §6.3 · verify_breakdown.py 25/25 PASS</span></div>
+   </div>
+  </div>
+  <details class="notes"><summary></summary><div class="nbody">
+    <p>這頁是完整數字備查。重點兩個：第一，訊號分層裡<b>純 tumor 自足只有 0.49%</b>，將近六成需要 normal，這呼應了「對齊主要是 germline-driven」。第二，對齊位點再歸因裡<b>有 43.72% 是 neither、也就是 germline 跟 somatic 都分不開</b>，所以我們很謹慎、不貿然歸類。</p>
+    <p>另外「有訊號比例」高度依賴定義 —— 我們建議用定義 A（純結構訊號，81%）。定義 E 的 98.9% 是 SampleASM 這個飽和軸灌出來的，不能拿來說「幾乎所有位點都有甲基訊號」。</p>
+  </div></details>
+</section>
+
+</div><!-- /deck -->
+
+<p class="hint">← → 切頁　·　按「隱藏講稿」做投影模式　·　「列印 / PDF」匯出　·　來源：InterSubMod/docs/methodology/20260617_structure_label_situation_inventory_01.md（data-verified 25/25）</p>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, N=slides.length;
+  var counter=document.getElementById('counter');
+  var bar=document.getElementById('bar');
+  function show(n){
+    i=Math.max(0,Math.min(N-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('active',k===i);});
+    counter.textContent=(i+1)+' / '+N;
+    bar.style.width=((i+1)/N*100)+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.addEventListener('keydown',function(e){
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'){show(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);}
+    else if(e.key==='Home'){show(0);}
+    else if(e.key==='End'){show(N-1);}
+  });
+  // toggle notes
+  var notesOn=true;
+  document.getElementById('btnNotes').onclick=function(){
+    notesOn=!notesOn;
+    document.querySelectorAll('.notes').forEach(function(d){ if(notesOn){d.setAttribute('open','');}else{d.removeAttribute('open');} });
+    this.textContent=notesOn?'隱藏講稿':'顯示講稿';
+  };
+  show(0);
+})();
+</script>
+</body>
+</html>

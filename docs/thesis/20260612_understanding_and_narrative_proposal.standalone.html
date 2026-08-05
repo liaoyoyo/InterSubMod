@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理解整理 + 敘述方式提案 — Subclonal reconstruction 碩論</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;--teal:#39c5cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.72;font-size:15px}
+  header{padding:24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 4px;font-size:19px}
+  header .sub{color:var(--mut);font-size:12.5px}
+  nav{padding:8px 24px;border-bottom:1px solid var(--line);font-size:13px;position:sticky;top:64px;background:rgba(15,20,25,.92);z-index:9}
+  nav a{color:var(--b);text-decoration:none;margin-right:14px}
+  .wrap{max-width:1020px;margin:0 auto;padding:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0}
+  h2{font-size:16.5px;margin:4px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  h2 .n{color:var(--p)}
+  h3{font-size:14px;margin:14px 0 4px;color:var(--teal)}
+  .story{background:linear-gradient(135deg,#16202a,#141a20);border-left:4px solid var(--teal)}
+  .story ol{padding-left:22px;margin:8px 0}
+  .story li{margin:9px 0}
+  .claim{background:#1c1726;border-left:4px solid var(--p)}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .mut{color:var(--mut)} .teal{color:var(--teal)}
+  .tag{display:inline-block;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid}
+  .tag.g{border-color:var(--g);color:var(--g)} .tag.y{border-color:var(--y);color:var(--y)}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11.5px}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#1f2733;font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  .opt{border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:8px 0}
+  .opt.rec{border-color:#2a4a3a;background:#13201a}
+  .opt b{font-size:14px}
+  ul{margin:5px 0;padding-left:20px} li{margin:3px 0}
+  .small{font-size:12px;color:var(--mut)}
+  .ask{background:#241a1a;border:1px solid #5a3030}
+  .ask .q{background:#1f2733;border-radius:8px;padding:10px 14px;margin:9px 0}
+  .ask .q b{color:var(--p)}
+  .legend{font-size:11.5px;color:var(--mut);margin-top:8px}
+  .hinge{font-style:italic;color:var(--y)}
+</style>
+</head>
+<body>
+<header>
+  <h1>理解整理 ＋ 敘述方式提案 — <span class="b">Subclonal reconstruction</span> 中文碩論</h1>
+  <div class="sub">2026-06-12 · 先讓你確認「我懂你的研究」→ 再確認你的構想/目標 → 敲定敘述框架（narrative-frame N1-N2）</div>
+</header>
+<nav>
+  <a href="#story">①研究故事</a><a href="#claim">②carrying claim</a><a href="#ceiling">③誠實天花板</a><a href="#scene">④場景5W</a><a href="#frame">⑤框架提案</a><a href="#ask">⑥要你確認</a>
+</nav>
+<div class="wrap">
+
+  <div class="card story" id="story">
+    <h2><span class="n">①</span> 研究故事（白話版 — 這是我對你研究的理解，請看對不對）</h2>
+    <ol>
+      <li><b class="teal">獨特條件</b>：ONT long-read 能在<b>同一條 read</b> 同時讀到三種訊號——somatic 突變、germline 單倍型、甲基化（5mC）。這讓我們能在 read 層級問一個別人問不了的問題：腫瘤看到的甲基化差異，到底是 <b>somatic（腫瘤新生）</b>，還是只是 <b>germline（天生）/ 拷貝數</b> 的假象？</li>
+      <li><b class="teal">缺口</b>：過去文獻看到腫瘤「等位基因特異性甲基化（ASM）」很多，但 (i) 沒人在 read 層級把它跟 germline-allelic / copy 背景<b>分開（de-confound）</b>；(ii) 沒人公開證偽「甲基能不能拿來<b>篩 somatic 變異真偽</b>」；(iii) somatic-controlled 的 ASM 樣貌沒被界定。</li>
+      <li><b class="p">主發現＝規則（de-confound floor）</b>：用 ISM 掃 6 樣本 <b>332,705 位點</b>，可靠的甲基 read 分群只有 <b>12,868（3.87%）</b>，而且<b>壓倒性是 germline-allelic</b>（跟天生單倍型走，不是 somatic）；816 個可測位點裡<b>只有 1 個（chr17）</b>是乾淨 somatic cis 候選；而且甲基<b>完全不能篩</b> somatic 變異真偽（四道獨立證據）。→ 把看似豐富的腫瘤 ASM 誠實拆成「大多是 germline 背景」。<span class="tag g">🟢</span></li>
+      <li><b class="y">例外</b>：<b>chr17/TBC1D16</b> 這一個位點，somatic / 單倍型 / 甲基三訊號（同 pipeline）對齊同一 LOH 重塑事件；TBC1D16 剛好是已知癌症甲基化基因（hypo→EGFR 黑色素瘤轉移），生物學「一致」（非「證實」）。<span class="tag y">🟡</span></li>
+      <li><b class="b">重建脊柱（標題的 reconstruction）</b>：LOH 約束下，somatic haplotagging（<b>genetic 引擎</b>）把 read 分到子單倍型、重建 LOH-constrained 子克隆結構（方向 7/7、same-hap occupancy 6/6 ≥93%）。<b>這是「reconstruction」的來源——由 genetic 骨幹完成、甲基是 characterize。</b></li>
+      <li><b class="teal">跨樣本</b>：現象層 6/6 跨三癌種復現（excess-over-null +0.10–0.24），但同一位點是樣本私有（0/38）。</li>
+      <li><b class="r">誠實天花板</b>：甲基是 germline-haplotype 層級；subclone 層級能否用甲基判別<b>還 undetermined</b>（正確對照 G-B 沒跑）；單樣本/單 pipeline ⭐3。</li>
+      <li><b class="teal">交付</b>：read-level de-confounded 癌症 ASM 目錄 + 誠實負結果（甲基不能 filter）+ 甲基輔助 phasing 的 tooling 展望。</li>
+    </ol>
+  </div>
+
+  <div class="card claim" id="claim">
+    <h2><span class="n">②</span> 論文要 carry 的一句話（候選 — 你最想讓讀者記住哪個？）</h2>
+    <div class="opt rec">
+      <b class="g">候選 A（建議 / 最防彈）— de-confound floor</b>
+      <p>「在 read 層級，腫瘤的甲基化分群<b>主要跟隨 germline 而非 somatic</b>、且<b>不能</b>用來篩變異真偽；我們把看似豐富的癌症 ASM de-confound 成一個誠實目錄，並標出唯一的 somatic 例外（chr17）。」</p>
+      <p class="small">→ 全 🟢、今天可寫、最防 overclaim、Genome Biology tier。標題的 reconstruction 由 genetic 骨幹（R6）承載。</p>
+    </div>
+    <div class="opt">
+      <b class="y">候選 B — 三訊號 co-validation 重塑</b>
+      <p>「long-read 讓 somatic／單倍型／甲基三訊號在 read 層級 cross-check 同一 LOH 子克隆重塑事件。」</p>
+      <p class="small">→ 較吸睛，但 🟡 contingent（chr17 單 locus + by-construction + HD-1）；紅隊對「正交共驗證」措辭有意見（同 pipeline 非真正獨立）。</p>
+    </div>
+    <div class="opt">
+      <b class="teal">候選 C — 甲基輔助 phasing 的 tooling 潛力</b>
+      <p>「甲基化追蹤 haplotype 結構，開啟甲基輔助相位救援（held-out 0.885、非-copy 0.979≥0.866）。」</p>
+      <p class="small">→ 這是 future tooling（第五章），單樣本，不適合當 carrying claim；當亮點補強可以。</p>
+    </div>
+  </div>
+
+  <div class="card" id="ceiling">
+    <h2><span class="n">③</span> 誠實天花板（不可違反 — 全文一致）</h2>
+    <ul>
+      <li>甲基 = <b>germline-haplotype 層級</b>；分不同 haplotype 強、within-haplotype 弱。</li>
+      <li>甲基<b>絕非</b> variant TP/FP filter（死四道）。</li>
+      <li>subclone-甲基 somatic-specificity = <b>undetermined</b>（G-B null 未跑）；勿寫成已 NEGATIVE 也勿寫成已 POSITIVE。</li>
+      <li>chr17 = <b>最強 cis 候選非「乾淨」</b>；乾淨 cis = 816 可測中僅 1（非 1/332,705）。</li>
+      <li>same-hap = <b>occupancy 6/6 ≥93%</b>；三訊號用「<b>same-pipeline cross-check</b>」非「orthogonal co-validation」。</li>
+      <li>single-pipeline / 單樣本 ⭐3 上限；reconstruction 只描述 genetic 骨幹，甲基一律 characterize。</li>
+    </ul>
+  </div>
+
+  <div class="card" id="scene">
+    <h2><span class="n">④</span> narrative-frame N1 — 場景識別（5W）</h2>
+    <table>
+      <tr><th class="k">維度</th><th>本論文</th></tr>
+      <tr><td class="k">Who 受眾</td><td>碩論口委（中文、需可懂/教學性）+ PI（嚴謹）；後續鋪英文期刊 reviewer</td></tr>
+      <tr><td class="k">Why 目的</td><td>報告新發現 + 説服「此研究有貢獻」 + <b>誠實界定</b>甲基能/不能（答辯防守）</td></tr>
+      <tr><td class="k">What 內容</td><td>新發現（de-confound floor）+ 比較（vs 外部工具）+ 數據（catalog/四道）+ 故事（rule/exception）</td></tr>
+      <tr><td class="k">When 時長</td><td>紙本碩論（細節無限）+ 口試答辯</td></tr>
+      <tr><td class="k">How 形式</td><td>paper（中文碩論，Slide2Thesis 格式可轉）</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="frame">
+    <h2><span class="n">⑤</span> narrative-frame N2 — 框架推薦（適合的敘述方式）</h2>
+    <h3>主框架（macro 弧，給摘要 + 緒論）= ABT + SCQA</h3>
+    <p class="hinge">「Long-read 能在一條 read 同讀三訊號（And），看似有豐富的腫瘤 ASM（And），<b>但</b> read 層級它跟 germline 非 somatic、且不能篩變異（But），<b>因此</b>我們交付一個 de-confounded 目錄 + 唯一的 somatic 例外（Therefore）。」</p>
+    <p class="small">理由：de-confound 故事天生是「看似…但其實…因此…」的 ABT 結構；SCQA 漏斗（Situation→Complication→Question→Answer）對齊論文 Intro 的 CARS，把「apparent ASM」當 Complication、「是 somatic 嗎」當 Question。MethPhaser/NanoMethPhase 也都用「However」當鉸鏈。</p>
+    <h3>Results 骨架 = Rule + Exception 雙主軸 + Assertion-Evidence 標題</h3>
+    <p class="small">規則（de-confound floor：R1-R4,R7）→ 例外（chr17 + phasing 脊柱：R5-R6）；每節小標寫成「會說話的結論句」（如「甲基分群跟隨 germline 而非 somatic」）非 topic 標籤。</p>
+    <h3>結論 = Verdict-Pyramid</h3>
+    <p class="small">先講判決（甲基能 co-validate、不能 filter），再層層證據。</p>
+    <h3 class="mut">備框架 / 不選</h3>
+    <p class="small"><b>備：</b>Duarte Sparkline（what-is vs what-could-be）——若想更凸顯 future tooling 可局部切換。<br>
+    <b class="r">不選：</b>Hero's Journey / 三幕劇——對 de-confound characterization 太戲劇、易 overclaim，與誠實天花板衝突。</p>
+  </div>
+
+  <div class="card ask" id="ask">
+    <h2><span class="n">⑥</span> 要你確認 / 修正的事（你的構想與目標）</h2>
+    <div class="q"><b>1. carrying claim</b>：②的 A / B / C 哪個是你最想讓讀者記住的？（或你心中其實是別的？）我建議 A（de-confound floor）當主、B 當亮點、C 當 future。</div>
+    <div class="q"><b>2. 目標讀者/語氣優先</b>：碩論口委（中文教學可懂）為主？還是更偏 PI 嚴謹 / 為英文期刊鋪路？影響術語密度與深度。</div>
+    <div class="q"><b>3. 敘述框架</b>（narrative-frame C2）：接受 ⑤ 的「ABT+SCQA macro / Rule+Exception Results / Verdict-Pyramid」？還是要換/微調？</div>
+    <div class="q"><b>4. 你的構想補充</b>：上面①研究故事有沒有講錯/漏掉你在意的？你對這篇論文還有什麼特定目標（如：主打某個亮點、為某期刊量身、答辯要守住哪條線）？</div>
+    <p class="small">你回完這四點，我就鎖定敘述框架（C2）開始照①摘要→②結果→③緒論… 重寫，每塊產 HTML 給你確認。</p>
+  </div>
+
+  <p class="legend">🟢 已 grep/T-PROV 對賬 · 🟡 contingent/待校準。數字來源：共識台帳 §1 / 正式 v2 / VERIFIED_RESULTS；已套用 06-12 稽核 4 校正。本頁不產新數字。narrative-frame N1-N2：催 C1 場景 + C2 框架待你 ack。</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+  20260621_baseline_discipline.standalone.html
+  資料源 (verified): InterSubMod/docs/methodology/20260621_baseline_discipline_conceptual_definitions_01.md
+  外部 verdict: 3 agent 文獻核 (a1609556/a9ea12bb/ae55213f) — 外部 citation=L3, 投稿前 /citation-verification
+  此 HTML 僅呈現已驗證內容 (conclusions HTML)；逐項確認存 localStorage。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baseline-discipline 詞典 — 逐項對照</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1e222c;--ink:#e8eaf0;--mut:#9aa3b2;--line:#2a2f3a;
+    --acc:#5b9dff;--ok:#3fbf7f;--nq:#f4b740;--risk:#ff8a4c;--no:#ff6b6b;--ism:#b48cff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","PingFang TC",Roboto,sans-serif;line-height:1.62;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 80px}
+  h1{font-size:24px;margin:0 0 4px}h2{font-size:19px;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;margin:16px 0 6px;color:var(--acc)}
+  .sub{color:var(--mut);font-size:13px}
+  .banner{background:linear-gradient(90deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--ism);border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px;color:var(--mut)}
+  .big{background:rgba(180,140,255,.08);border:1px solid var(--ism);border-radius:10px;padding:14px 16px;margin:12px 0}
+  .big b{color:var(--ism)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;vertical-align:middle}
+  .pill.ok{background:rgba(63,191,127,.16);color:var(--ok);border:1px solid var(--ok)}
+  .pill.nq{background:rgba(244,183,64,.16);color:var(--nq);border:1px solid var(--nq)}
+  .pill.risk{background:rgba(255,138,76,.16);color:var(--risk);border:1px solid var(--risk)}
+  .pill.no{background:rgba(255,107,107,.16);color:var(--no);border:1px solid var(--no)}
+  .pill.l3{background:rgba(180,140,255,.14);color:var(--ism);border:1px solid var(--ism)}
+  .toolbar{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.94);backdrop-filter:blur(4px);border-bottom:1px solid var(--line);padding:8px 0;margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar button{background:#222732;color:#cdd3de;border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
+  .toolbar button.exp{background:var(--acc);color:#04132e;font-weight:600;border:0}
+  .toolbar .stat{color:var(--mut);font-size:12px}
+  .grplab{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);margin:16px 0 6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:9px 0;border-left:4px solid var(--line)}
+  .card.ok{border-left-color:var(--ok)}.card.nq{border-left-color:var(--nq)}.card.risk{border-left-color:var(--risk)}.card.no{border-left-color:var(--no)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+  .card .term{font-size:16px;font-weight:700}
+  .grid{display:grid;grid-template-columns:88px 1fr;gap:3px 10px;margin:7px 0 0;font-size:13px}
+  .grid .k{color:var(--mut);font-weight:600}
+  .grid .v .no{color:var(--no);font-weight:600}
+  .act{margin-top:7px;font-size:12.5px;color:#d7dce6;background:var(--panel2);border-radius:6px;padding:6px 9px}
+  .act b{color:var(--risk)}
+  .stbtns{display:flex;gap:4px;flex-shrink:0}
+  .stbtns button{border:1px solid var(--line);background:#222732;color:var(--mut);border-radius:5px;padding:3px 7px;font-size:11px;cursor:pointer}
+  .stbtns button.on.y{background:var(--ok);color:#062;border-color:var(--ok)}
+  .stbtns button.on.q{background:var(--nq);color:#321;border-color:var(--nq)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--acc)}
+  code{background:#222732;padding:1px 5px;border-radius:4px;font-size:12px}
+  .chain{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px;line-height:2}
+  .chain .step{display:inline-block;background:#222732;border:1px solid var(--line);border-radius:6px;padding:3px 9px;margin:2px}
+  .chain .arr{color:var(--acc);margin:0 2px}
+  .red{color:var(--no)}.amber{color:var(--nq)}.green{color:var(--ok)}
+  a{color:var(--acc)}
+</style></head>
+<body><div class="wrap">
+
+  <div class="toolbar">
+    <button class="exp" onclick="exportState()">⬇ 匯出確認 (JSON)</button>
+    <button onclick="filt('all')">全部</button>
+    <button onclick="filt('no')">🔴 誤用</button>
+    <button onclick="filt('risk')">RISK</button>
+    <button onclick="filt('nq')">NEEDS-QUALIFIER</button>
+    <button onclick="filt('ok')">MATCH</button>
+    <span class="stat" id="progress">—</span>
+  </div>
+
+  <h1>Baseline-discipline 概念詞典 — 逐項對照</h1>
+  <div class="sub">2026-06-21 · 19 詞 × 測什麼/對照誰/意義/不能說 · 外部 3-agent 文獻核 verdict · 外部 citation <span class="pill l3">L3</span>（投稿前 /citation-verification）</div>
+
+  <div class="big">
+    <b>🧭 一句話（整份的地基）</b>：任何「測量出來的量」（甲基分群 / Δβ / ASM / 對齊 / 結構 / k 群 / co-occurrence）<b>都不是結果，是中間產物。它的意義 = f(量, 你拿它對照的 baseline)</b>。一個詞把 baseline 藏起來 → 就把中間產物誤當答案。<br>
+    <span class="sub">寫任何 claim 必明寫三件：(1) 測什麼 (2) 對照誰(baseline/null/label/control) (3) 因此意義 + 不能說什麼。缺 (2) = 概念模糊。<br>⚠ 「baseline-dependence」是 sound 原理但<b>非單一可引定理</b> → 投稿拆引（M3C/Şenbabaoğlu null + control-design）。</span>
+  </div>
+
+  <h2>A. 詞典卡片（逐項對照 · 可篩選 verdict · 可逐項確認）</h2>
+
+  <div class="grplab">甲基類</div><div id="g-meth"></div>
+  <div class="grplab">subclone / reconstruction 類</div><div id="g-sub"></div>
+  <div class="grplab">統計 / baseline 類</div><div id="g-stat"></div>
+
+  <h2>B. 字詞關係圖</h2>
+  <h3>(a) 升級鏈（必要非充分 — 每步過了才有資格談下一步，不可跳級）</h3>
+  <div class="chain">
+    <span class="step">有 reads</span><span class="arr">→</span>
+    <span class="step">切得出群</span><span class="arr">→</span>
+    <span class="step">有結構（PERMANOVA sig + 非 PERMDISP）</span><span class="arr">→</span>
+    <span class="step">對齊獨立 a-priori 標籤（CramérV≥0.7）</span><span class="arr">→</span>
+    <span class="step">扣 cis 後仍共分離（normal cis-control）</span><span class="arr">→</span>
+    <span class="step amber">[仍只是 subclone 候選 / characterization]</span><span class="arr">→</span>
+    <span class="step green">需 ground truth（single-cell/multi-region）才 confirm</span>
+    <div class="sub" style="margin-top:8px">多數位點停在前段（85% 對齊但 = cis-ASM）。<span class="green">✅ 外部 verdict：R1 CONFIRMED（PERMDISP 作 location≠dispersion 子步）。</span></div>
+  </div>
+
+  <h3>(b) 包含 ⊃ / 對比 / 前提 / 因果</h3>
+  <table>
+    <tr><th>類型</th><th>關係</th><th>verdict</th></tr>
+    <tr><td>包含 ⊃</td><td>reconstruction ⊃ {CCF+phylogeny+CN deconv}（ISM 真子集）· clone ⊃ subclone · ASM ⊃ {germline/cis/somatic} · confirm ⊃ validate</td><td><span class="pill ok">✅ CONFIRMED</span></td></tr>
+    <tr><td>對比（易混）</td><td>cis-ASM ↔ lineage · 驗證 ↔ 確認 · same-molecule ↔ same-haplotype · location ↔ dispersion · germline-ASM ↔ somatic-ASM · <b>lineage(descent) ↔ cluster</b></td><td><span class="pill ok">✅ CONFIRMED</span></td></tr>
+    <tr><td>前提</td><td>CCF 需 multiplicity · 判 somatic 需 normal · lineage 佐證需扣 cis · confirm 需 ground truth</td><td><span class="pill ok">✅ CONFIRMED</span></td></tr>
+    <tr><td>因果</td><td>epiallele/read-內相關 → over-clustering · somatic SNV → cis-ASM · LOH → 既存 ASM unmask(82-91%)</td><td><span class="pill ok">✅ CONFIRMED</span></td></tr>
+    <tr style="background:rgba(255,107,107,.07)"><td class="red">🔴 更正</td><td><b>co-occurrence → lineage = necessary-not-sufficient</b>：互斥 → 不同 subclone <span class="green">可靠</span>；但<b>共現 → 同譜系須再加 VAF/CCF</b>（Foltz NRAS PMID39149342：G13R+Q61K 同 haplotype 卻不同 subclone，靠 VAF 35.7%/22.2% 區分）。我原本寫「不需模型推論」=錯，已修 V4 doc。</td><td><span class="pill no">🔴 CORRECTED</span></td></tr>
+  </table>
+
+  <h2>C. 投稿紅線速查（最易被 reviewer 抓）</h2>
+  <table>
+    <tr><th>#</th><th>紅線</th><th>為何</th></tr>
+    <tr><td>1</td><td>🔴 <b>「SampleASM」改名「tumor–normal differential methylation (DMR)」</b></td><td>tumor-vs-normal 是跨樣本 DMR 不是 allelic ASM = misnomer</td></tr>
+    <tr><td>2</td><td>🔴 <b>禁「只有 ISM 有顯著性檢定」</b></td><td>cvlr+ASMS 都有 permutation；delta = 檢定<b>對象</b>(距離矩陣結構) + normal-anchor + somatic target</td></tr>
+    <tr><td>3</td><td>🔴 <b>甲基共分離 ≠ 刻畫 subclone（TERM6，最大暴露）</b></td><td>= cis-ASM（同事件）或 lineage，須 cis-control 分（Shoemaker Cat I/II + Onuchic-Do PMID33077733）；扣 cis 前 = G-B 未定</td></tr>
+    <tr><td>4</td><td>🔴 <b>「reconstruction」綁 somatic-haplotagging；甲基永遠用 characterize 動詞</b></td><td>reconstruction 是 Tarabichi 定義的 5-step；ISM 做 subset，禁「we reconstruct subclones using methylation」</td></tr>
+    <tr><td>5</td><td>🔴 <b>lineage ≠ cluster；CCF ≠ VAF；ONT β ≠ array intensity</b></td><td>ISM 有 cluster 非 lineage tree；不算 CCF 故禁把 VAF 當 CCF；ONT β=read-fraction(threshold/depth)</td></tr>
+    <tr><td>6</td><td>⚠ <b>Methods 必寫 2 載重前提</b></td><td>(a) HP 標籤非循環性全靠「phasing 用零甲基」(甲基進 phasing→PERMANOVA 循環)；(b) over-cluster null 須 correlation-preserving</td></tr>
+  </table>
+
+  <h2>來源</h2>
+  <p class="sub">詞典 SoT：<code>InterSubMod/docs/methodology/20260621_baseline_discipline_conceptual_definitions_01.md</code> · V4 task-spec：<code>InterSubMod/docs/plans/20260621_singlemolecule_multisnv_cooccurrence_task_spec_01.md</code> · memory：<code>feedback_baseline_dependence_not_result</code>。外部 verdict = 3 agent 文獻核（L3，投稿前 /citation-verification；尤其 Foltz full-text PMC11326269 核 co-occurrence 更正）。</p>
+
+</div>
+<script>
+const TERMS={
+ meth:[
+  ["ASM (allele-specific methylation)","nq","兩 allele/haplotype 間甲基差","哪兩組軸：HP1/HP2、ALT/REF、(SampleASM=tumor/normal)","依軸；germline-het ASM ≠ somatic ASM","「ASM」不標軸；SampleASM 當 allelic","🔴 永遠標軸；<b>「SampleASM」=misnomer→改「tumor–normal DMR」</b>（非 allelic）"],
+  ["cis-ASM / SD-ASM","ok","變異→局部同分子甲基","變異是否直接造成(vs 譜系獨立)","同一事件的下游","cis-ASM=獨立 lineage 證據","明寫「somatic cis」（SD-ASM 通常指 germline）"],
+  ["甲基共分離 / SubcloneDbeta","risk","甲基隨 carrier-vs-germline tag(或 SNV)Δβ","<b class='no'>cis（normal+遠端）vs lineage</b>","扣 cis 前=cis-vs-lineage 未分(=G-B)","共分離=獨立佐證/subclone","🔴 <b>最大 reviewer 暴露</b>：改「consistent with cis-ASM 或 lineage，單區不能分」；扣 cis 後才說「刻畫」"],
+  ["epiallele / PDR","ok","read 內 CpG 共甲基 pattern","—","單 clone 內亦有(=over-cluster 根源)","epiallele 多群=subclone","定位 <b>structure-not-disorder</b>（對比 Landau PDR）"],
+  ["Δβ / β","nq","兩組 mean β(=M/(M+U)) 相減","哪兩組：Subclone/GermlineAsm/Residual","依組(意義天差地別)","Δβ 不標哪兩組；當 array β","🔴 <b>ONT β=read-fraction(threshold/depth)≠array intensity</b>；Δβ 走 beta-binomial(FIX-1)"],
+  ["甲基分群 (read×read)","nq","read 間甲基距離→群","①i.i.d.null ②corr-null ③標籤 ④normal","依 baseline","分群=subclone；「只有 ISM 有檢定」","🔴 禁「只有 ISM 有顯著性檢定」(cvlr+ASMS 都有 perm)；delta=檢定對象+normal+target"]],
+ sub:[
+  ["subclonal reconstruction","nq","ISM=regional LOH-constrained same-haplotype partition","領域=clone#+CCF+lineage tree+CN/purity deconv(Tarabichi 5-step)","同詞兩義","ISM 做領域定義的 full reconstruction","🔴 「reconstruction」綁 somatic-haplotag；甲基用 characterize 動詞"],
+  ["clone vs subclone","ok","clone=共享突變集群體；subclone=子集/後代(CCF<1)","CCF~1(truncal) vs 低(branch)","—","read-partition 直接=subclone","寫「consistent with subclone」非「=subclone」(除非 CCF 錨)"],
+  ["CCF","ok","f·m/(ρN+2(1−ρ))","需 multiplicity m+purity+CN","細胞分率","VAF=CCF；prevalence 排序","🔴 ISM 不算 CCF→禁把 VAF 當 CCF"],
+  ["multiplicity","ok","帶突變的拷貝數","VAF 單獨不可定(需 allele-specific CN)","—","半帶 ALT=subclone","ISM held-CN/LOH 刻意繞 multiplicity=<b>strength</b>(cite DeCiFer)"],
+  ["lineage / phylogeny","ok","descent path(tree edge)","—","<b class='no'>lineage ≠ cluster(CCF 相似群)</b>","ISM cluster 說成 lineage/tree","🔴 ISM 有 cluster/partition 非 lineage；禁說 phylogeny/tree"],
+  ["co-occurrence / linkage","ok","read 上 SNV 組合(同分子)","same-molecule(強) vs haplotag 延伸(弱)","局部譜系直接證據","co-occurrence=confirmed subclone","增量=加甲基軸非 phasing 本身(Foltz 先驗)"],
+  ["same-molecule vs same-haplotype","nq","直接跨 vs phasing 延伸","molecule>haplotype","證據強度兩級","<b class='no'>同 haplotype=同 subclone/同 cell</b>","ISM 多在 haplotype 層→勿當 same-molecule/same-cell"]],
+ stat:[
+  ["PERMANOVA / 結構","ok","群間 vs 群內距離+null(pseudo-F)","null + PERMDISP(location vs dispersion)","有結構存在","有結構=subclone；對 matrix-derived 群測=循環","✅ 對 HP 標籤非循環(HP 獨立)；配 PERMDISP；非 Euclidean 合法"],
+  ["PERMDISP","ok","距離-to-centroid(spread)","location≠dispersion(Anderson2006)","群是否離散度不同","有 pseudo-F=型別差(未排 dispersion)","dispersion 警告須 surface(LOH 不平衡易假陽)"],
+  ["double-dipping","ok","在資料挑群再測同資料","—","循環推論(Type-I 膨脹)","unsupervised 切群+測=判別器","tumor-only 無監督=double-dip(已 NEGATIVE)；a-priori 軸=remedy"],
+  ["over-clustering / k","ok","切幾群","i.i.d. vs correlation-preserving null","依 null","切 k 群=真 k","🔴 null 須 correlation-preserving 非 i.i.d.；existence-gate-before-k"],
+  ["驗證 vs 確認","ok","validate(對 null/label) vs confirm(對 ground truth)","single-cell/multi-region/longitudinal","單樣本=validate=characterization","單樣本「確認」subclone","Tarabichi 單樣本 weakly-informative；Methods 明定義"],
+  ["HP-tag / haplotag","ok","somatic_haplotag 演算法指派","baseline=phasing 正確","1-1/2-1=第一 somatic hap；-2=第二","tag=已確認 subclone","🔴 非循環性<b>完全靠零甲基 phasing 路徑</b>(載重前提)"]]
+};
+const VLAB={ok:["MATCH","ok"],nq:["NEEDS-QUALIFIER","nq"],risk:["RISK","risk"],no:["誤用/更正","no"]};
+const KEY="baseline_gloss_confirm_v1";let state=JSON.parse(localStorage.getItem(KEY)||"{}");let curFilt="all";
+function render(){
+ ["meth","sub","stat"].forEach(g=>{
+  const el=document.getElementById("g-"+({meth:"meth",sub:"sub",stat:"stat"}[g]));el.innerHTML="";
+  TERMS[g].forEach((t,i)=>{
+   const id=g+i,v=t[1];if(curFilt!=="all"&&v!==curFilt)return;
+   const cur=state[id]||"";const [vl,vc]=VLAB[v];
+   const d=document.createElement("div");d.className="card "+v;
+   d.innerHTML=`<div class="top"><span class="term">${t[0]}</span>
+     <span style="display:flex;gap:6px;align-items:center"><span class="pill ${vc}">${vl}</span>
+     <span class="stbtns"><button data-id="${id}" data-v="y" class="${cur==='y'?'on y':''}">✓</button>
+     <button data-id="${id}" data-v="q" class="${cur==='q'?'on q':''}">?</button></span></span></div>
+     <div class="grid"><span class="k">測什麼</span><span class="v">${t[2]}</span>
+     <span class="k">對照誰</span><span class="v">${t[3]}</span>
+     <span class="k">意義</span><span class="v">${t[4]}</span>
+     <span class="k">🔴 不能說</span><span class="v"><span class="no">${t[5]}</span></span></div>
+     <div class="act"><b>action：</b>${t[6]}</div>`;
+   el.appendChild(d);
+  });
+ });
+ document.querySelectorAll(".stbtns button").forEach(b=>b.onclick=()=>{const id=b.dataset.id,v=b.dataset.v;state[id]=(state[id]===v?"":v);localStorage.setItem(KEY,JSON.stringify(state));render();});
+ let tot=0,y=0,q=0;Object.values(TERMS).forEach(a=>tot+=a.length);Object.values(state).forEach(v=>{if(v==='y')y++;if(v==='q')q++;});
+ document.getElementById("progress").textContent=`已確認 ${y} · 有疑問 ${q} · /${tot} 詞`;
+}
+function filt(f){curFilt=f;render();}
+function exportState(){const b=new Blob([JSON.stringify({when:new Date().toISOString(),state},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="baseline_gloss_confirm.json";a.click();}
+render();
+</script></body></html>

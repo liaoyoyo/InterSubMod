@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>分類結果桑基圖（修正版）— 保留 / 救回 / 移除</title>
+<!-- data_sources: /tmp/sankey_data.json (perlocus_flags.csv + significance_summary.csv, balanced verified) -->
+<style>
+:root{--mono:"SF Mono",ui-monospace,Menlo,monospace;--bg:#FAF7F0;--card:#fff;--ink:#3a2418;--muted:#8a7a68;--border:#E3DACC;--pass:#2F7D5B;--dead:#9A3B3B;--gold:#8a6d10}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 18px}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:15px 0;box-shadow:0 1px 3px rgba(90,60,30,.05)}
+h2{font-size:1.14rem;margin:0 0 8px;display:flex;align-items:center;gap:9px}
+h2 .n{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.82rem;flex:none}
+.lead{color:#5e4a38;font-size:.92rem;margin:0 0 12px}
+.fig{margin:10px 0;padding:12px;background:#fcfaf5;border:1px solid var(--border);border-radius:9px;overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{border:1px solid var(--border);border-radius:9px;padding:11px 13px;background:#fffdf9}
+.kpi .v{font-family:var(--mono);font-size:1.45rem;font-weight:800;line-height:1}
+.kpi .k{font-size:.76rem;color:var(--muted);margin-top:5px}
+.kpi.keep{border-left:4px solid var(--pass)} .kpi.resc{border-left:4px solid #d9a82e} .kpi.rem{border-left:4px solid var(--dead)} .kpi.core{border-left:4px solid #1f7a4d}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;margin:8px 0;color:#5e4a38}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.tab{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:6px}
+.tab th{background:#f3ece0;padding:8px;text-align:left;border-bottom:2px solid var(--border);font-size:.77rem;color:#5e4a38}
+.tab td{padding:8px;border-bottom:1px solid #f0e9dc;vertical-align:top}
+.tab .r{text-align:right;font-family:var(--mono)}
+.badge{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:9px}
+.bcore{background:#dcefe3;color:#1f5f43} .blow{background:#fbeccb;color:#8a6d10} .bmid{background:#eceee5;color:#5e6a4e} .bno{background:#f6d8d8;color:#9A3B3B}
+.crit{background:#fcefef;border:1px solid #e9cccc;border-left:4px solid var(--dead);border-radius:8px;padding:11px 14px;margin:10px 0;font-size:.88rem;color:#5e2424}
+.good{background:#eef6f0;border:1px solid #cce5d6;border-left:4px solid var(--pass);border-radius:8px;padding:11px 14px;margin:10px 0;font-size:.88rem}
+.note{font-size:.82rem;color:var(--muted);margin-top:8px}
+</style></head><body><div class="wrap">
+
+<h1>分類結果桑基圖（修正版）</h1>
+<p class="sub">HCC1395 全基因組 somatic TP 30,490 · 保留（核心 4 狀況 + 救回低信心）/ 移除（3 噪音型）· 數字全由 <code style="font-family:var(--mono)">sankey_data.json</code> 注入、平衡對帳通過</p>
+
+<div class="kpis">
+  <div class="kpi keep"><div class="v">26,121</div><div class="k">🟢 保留（85.7%）</div></div>
+  <div class="kpi core"><div class="v">3,576</div><div class="k">★ a-priori subclone 核心（11.7%）</div></div>
+  <div class="kpi resc"><div class="v">3,810</div><div class="k">🟡 救回·低信心（12.5%）</div></div>
+  <div class="kpi rem"><div class="v">4,369</div><div class="k">🔴 移除·噪音（14.3%）</div></div>
+</div>
+
+<section>
+  <h2><span class="n">1</span>桑基圖 — 從 30,490 到各最終狀況</h2>
+  <div class="legend">
+    <span><i class="sw" style="background:#1f7a4d"></i>a-priori subclone★（核心·高）</span>
+    <span><i class="sw" style="background:#8d9b7e"></i>germline-ASM（非subclone）</span>
+    <span><i class="sw" style="background:#c2a878"></i>無標記（CN/epiallele）</span>
+    <span><i class="sw" style="background:#d9a82e"></i>次級保留（低信心）</span>
+    <span><i class="sw" style="background:#9A3B3B"></i>移除（噪音）</span>
+  </div>
+  <div class="fig"><svg viewBox="0 0 1000 752" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img" aria-label="分類桑基圖"><text x="500" y="26" text-anchor="middle" font-size="15" font-weight="800" fill="#3a2418">分類結果桑基圖（修正版）— 保留 85.7% / 移除 14.3%</text><path d="M 92 46.0 C 242.0 46.0 242.0 46.0 392 46.0 L 392 525.755985569039 C 242.0 525.755985569039 242.0 525.755985569039 92 525.755985569039 Z" fill="#2F7D5B" fill-opacity="0.42"/><path d="M 92 525.755985569039 C 242.0 525.755985569039 242.0 547.755985569039 392 547.755985569039 L 392 628.0 C 242.0 628.0 242.0 606.0 92 606.0 Z" fill="#9A3B3B" fill-opacity="0.42"/><path d="M 424 46.0 C 572.0 46.0 572.0 46.0 720 46.0 L 720 111.67923909478517 C 572.0 111.67923909478517 572.0 111.67923909478517 424 111.67923909478517 Z" fill="#1f7a4d" fill-opacity="0.5"/><path d="M 424 111.67923909478517 C 572.0 111.67923909478517 572.0 120.67923909478517 720 120.67923909478517 L 720 216.49819612987864 C 572.0 216.49819612987864 572.0 207.49819612987864 424 207.49819612987864 Z" fill="#8d9b7e" fill-opacity="0.38"/><path d="M 424 207.49819612987864 C 572.0 207.49819612987864 572.0 225.49819612987864 720 225.49819612987864 L 720 473.7789439160381 C 572.0 473.7789439160381 572.0 455.7789439160381 424 455.7789439160381 Z" fill="#c2a878" fill-opacity="0.38"/><path d="M 424 455.7789439160381 C 572.0 455.7789439160381 572.0 482.77894391603803 720 482.77894391603803 L 720 552.755985569039 C 572.0 552.755985569039 572.0 525.7559855690391 424 525.7559855690391 Z" fill="#d9a82e" fill-opacity="0.5"/><path d="M 424 547.755985569039 C 572.0 547.755985569039 572.0 574.755985569039 720 574.755985569039 L 720 616.2095769104624 C 572.0 616.2095769104624 572.0 589.2095769104624 424 589.2095769104624 Z" fill="#9A3B3B" fill-opacity="0.46"/><path d="M 424 589.2095769104624 C 572.0 589.2095769104624 572.0 625.2095769104624 720 625.2095769104624 L 720 651.0514922925548 C 572.0 651.0514922925548 572.0 615.0514922925548 424 615.0514922925548 Z" fill="#b35858" fill-opacity="0.46"/><path d="M 424 615.0514922925548 C 572.0 615.0514922925548 572.0 660.0514922925548 720 660.0514922925548 L 720 672.9999999999999 C 572.0 672.9999999999999 572.0 627.9999999999999 424 627.9999999999999 Z" fill="#7a2a2a" fill-opacity="0.46"/><rect x="60" y="46.0" width="32" height="560.0" fill="#5e4a38" rx="3"/><text x="54" y="322" text-anchor="end" font-size="12" font-weight="800" fill="#3a2418">somatic TP</text><text x="54" y="338" text-anchor="end" font-size="13" font-weight="800" fill="#3a2418">30,490</text><rect x="392" y="46.0" width="32" height="479.8" fill="#2F7D5B" rx="3"/><text x="408.0" y="283" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">保留</text><text x="408.0" y="299" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">26,121</text><rect x="392" y="547.8" width="32" height="80.2" fill="#9A3B3B" rx="3"/><text x="430" y="592" font-size="11" font-weight="800" fill="#9A3B3B">移除 4,369</text><text x="408.0" y="40" text-anchor="middle" font-size="9.5" fill="#5e4a38">核心22,311（高信心·原Strong）＋救回3,810（低信心·原Weak/Noise）</text><rect x="720" y="46.0" width="32" height="65.7" fill="#1f7a4d" rx="2"/><text x="760" y="76" font-size="11" font-weight="800" fill="#1f7a4d">a-priori subclone★</text><text x="760" y="91" font-size="10" fill="#5e4a38">3,576（11.7%）· <tspan fill="#8a7a68">核心·高</tspan></text><rect x="720" y="120.7" width="32" height="95.8" fill="#8d9b7e" rx="2"/><text x="760" y="166" font-size="11" font-weight="800" fill="#8d9b7e">germline-ASM（非subclone）</text><text x="760" y="181" font-size="10" fill="#5e4a38">5,217（17.1%）· <tspan fill="#8a7a68">核心·中</tspan></text><rect x="720" y="225.5" width="32" height="248.3" fill="#c2a878" rx="2"/><text x="760" y="347" font-size="11" font-weight="800" fill="#9a7a3a">無 a-priori 標記（CN/epiallele）</text><text x="760" y="362" font-size="10" fill="#5e4a38">13,518（44.3%）· <tspan fill="#8a7a68">核心·結構未歸因</tspan></text><rect x="720" y="482.8" width="32" height="70.0" fill="#d9a82e" rx="2"/><text x="760" y="515" font-size="11" font-weight="800" fill="#d9a82e">次級保留（低信心）</text><text x="760" y="530" font-size="10" fill="#5e4a38">3,810（12.5%）· <tspan fill="#8a7a68">救回·低</tspan></text><rect x="720" y="574.8" width="32" height="41.5" fill="#9A3B3B" rx="2"/><text x="760" y="592" font-size="11" font-weight="800" fill="#9A3B3B">Noise·Uncorrelated</text><text x="760" y="607" font-size="10" fill="#5e4a38">2,257（7.4%）· <tspan fill="#8a7a68">移除</tspan></text><rect x="720" y="625.2" width="32" height="25.8" fill="#b35858" rx="2"/><text x="760" y="635" font-size="11" font-weight="800" fill="#b35858">Noise·Uniform</text><text x="760" y="650" font-size="10" fill="#5e4a38">1,407（4.6%）· <tspan fill="#8a7a68">移除</tspan></text><rect x="720" y="660.1" width="32" height="12.9" fill="#7a2a2a" rx="2"/><text x="760" y="669" font-size="11" font-weight="800" fill="#7a2a2a">Noise·Chaotic</text><text x="760" y="684" font-size="10" fill="#5e4a38">705（2.3%）· <tspan fill="#8a7a68">移除</tspan></text></svg></div>
+  <div class="good"><b>讀法</b>：保留 26,121 分兩層信心 — <b>核心 22,311</b>（原 Strong/Subclone，高信心）再依 a-priori 標記細分 4 狀況；<b>救回 3,810</b>（原 Weak/Noise，<b>低信心</b>，靠次級證據）。<b>真正論文相關的只有 a-priori subclone★ 3,576（11.7%）</b>，且帶 n_carrier 脆弱與 G-B somatic-specificity 未定 caveat。</div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>瀑布 — 優先級指派（保留 / 救回 / 移除）</h2>
+  <div class="fig"><svg viewBox="0 0 1000 352" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img" aria-label="瀑布"><text x="12" y="20" font-size="14" font-weight="800" fill="#3a2418">優先級瀑布：每個位點如何被指派</text><text x="12" y="55" font-size="11" font-weight="800" fill="#3a2418">起點：somatic TP 位點</text><rect x="470" y="43" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="43" width="470.0" height="20" fill="#5e4a38" rx="3"/><text x="946" y="58" font-size="10.5" font-weight="800" fill="#5e4a38">30,490（100.0%）</text><text x="12" y="70" font-size="9" fill="#8a7a68">全部候選</text><text x="12" y="101" font-size="11" font-weight="800" fill="#3a2418">① 原 Strong/Subclone？→ 核心保留（高信心）</text><rect x="470" y="89" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="89" width="343.9" height="20" fill="#2F7D5B" rx="3"/><text x="820" y="104" font-size="10.5" font-weight="800" fill="#2F7D5B">22,311（73.2%）</text><text x="12" y="116" font-size="9" fill="#8a7a68">剩 8,179 進次級判定</text><text x="42" y="147" font-size="11" font-weight="600" fill="#3a2418">　└ a-priori subclone★（同 haplotype）</text><rect x="470" y="135" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="135" width="55.1" height="20" fill="#1f7a4d" rx="3"/><text x="531" y="150" font-size="10.5" font-weight="800" fill="#1f7a4d">3,576（11.7%）</text><text x="42" y="162" font-size="9" fill="#8a7a68">paper 核心·n_carrier 脆弱</text><text x="42" y="193" font-size="11" font-weight="600" fill="#3a2418">　└ germline-ASM（非 subclone）</text><rect x="470" y="181" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="181" width="80.4" height="20" fill="#8d9b7e" rx="3"/><text x="556" y="196" font-size="10.5" font-weight="800" fill="#8d9b7e">5,217（17.1%）</text><text x="42" y="208" font-size="9" fill="#8a7a68">germline 層級</text><text x="42" y="239" font-size="11" font-weight="600" fill="#3a2418">　└ 無 a-priori 標記（CN/epiallele/未定）</text><rect x="470" y="227" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="227" width="208.4" height="20" fill="#c2a878" rx="3"/><text x="684" y="242" font-size="10.5" font-weight="800" fill="#c2a878">13,518（44.3%）</text><text x="42" y="254" font-size="9" fill="#8a7a68">結構真實·未歸因</text><text x="12" y="285" font-size="11" font-weight="800" fill="#3a2418">② 次級證據（Δβ/LOH/within/HP-AUC）？→ 救回（低信心）</text><rect x="470" y="273" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="273" width="58.7" height="20" fill="#d9a82e" rx="3"/><text x="535" y="288" font-size="10.5" font-weight="800" fill="#d9a82e">3,810（12.5%）</text><text x="12" y="300" font-size="9" fill="#8a7a68">原 Weak 3213＋Noise 597</text><text x="12" y="331" font-size="11" font-weight="800" fill="#3a2418">③ 皆不通過 → 移除（純噪音）</text><rect x="470" y="319" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="319" width="67.3" height="20" fill="#9A3B3B" rx="3"/><text x="543" y="334" font-size="10.5" font-weight="800" fill="#9A3B3B">4,369（14.3%）</text><text x="12" y="346" font-size="9" fill="#8a7a68">3 子型見下</text></svg></div>
+  <p class="note">三層 gate：① 原 Strong/Subclone → 核心保留；② 剩餘原 Weak/Noise 靠次級證據 → 救回（低信心）；③ 皆不過 → 移除。核心再依 a-priori somatic 標記細分（subclone / germline-ASM / 無標記）。</p>
+</section>
+
+<section>
+  <h2><span class="n">3</span>保留 26,121 細分 — 信心分層</h2>
+  <table class="tab">
+    <thead><tr><th>狀況</th><th>定義</th><th class="r">數量</th><th class="r">% of 保留</th><th>信心</th></tr></thead>
+    <tbody>
+    <tr><td><b>核心 · a-priori subclone★</b></td><td>原 Strong + 同 haplotype subclone Δβ（HP1 vs HP1-1，1,022 同時帶 germline-ASM）</td><td class="r"><b>3,576</b></td><td class="r">13.7%</td><td><span class="badge bcore">核心·高</span><br><span style="font-size:.7rem;color:#9A3B3B">n_carrier 脆弱·somatic 未定</span></td></tr>
+    <tr><td>核心 · germline-ASM</td><td>原 Strong + germline-ASM Δβ（normal 也有），無 subclone 標記</td><td class="r">5,217</td><td class="r">20.0%</td><td><span class="badge bmid">germline 層級</span></td></tr>
+    <tr><td>核心 · 無 a-priori 標記</td><td>原 Strong 但無任何 a-priori somatic/germline Δβ = CN/epiallele/未定</td><td class="r">13,518</td><td class="r">51.8%</td><td><span class="badge bmid">結構真實·未歸因</span></td></tr>
+    <tr style="background:#fffaf0"><td><b>救回 · LabelShift</b></td><td>原 Weak/Noise，Δβ 位移顯著但無 read 分群</td><td class="r">2,131</td><td class="r">8.2%</td><td><span class="badge blow">救回·低</span></td></tr>
+    <tr style="background:#fffaf0"><td>救回 · LOH-Structure</td><td>原 Weak/Noise，SEQC2-LOH + 結構</td><td class="r">609</td><td class="r">2.3%</td><td><span class="badge blow">救回·低</span></td></tr>
+    <tr style="background:#fffaf0"><td>救回 · CN-Substructure</td><td>原 Weak/Noise，within-clean + CN-gain（多為 epiallele）</td><td class="r">627</td><td class="r">2.4%</td><td><span class="badge blow">救回·低</span></td></tr>
+    <tr style="background:#fffaf0"><td>救回 · MultiGroupNoLabel</td><td>原 Weak/Noise，within-clean 乾淨多群（多為 epiallele）</td><td class="r">323</td><td class="r">1.2%</td><td><span class="badge blow">救回·低</span></td></tr>
+    <tr style="background:#fffaf0"><td>救回 · StructureNoLabel</td><td>原 Weak/Noise，僅 HP-AUC≥0.7</td><td class="r">120</td><td class="r">0.5%</td><td><span class="badge blow">救回·低</span></td></tr>
+    </tbody>
+  </table>
+  <div class="crit"><b>🔴 信心修正（對齊 a-priori 模型）</b>：救回的 CN-Sub/MultiGroup 是 unsupervised within-clean，前一輪已證其中 <b>55% 無 a-priori anchor = epiallele</b>（與 SubcloneDbeta Jaccard 僅 0.123），故標<b>低信心</b>，不可當 subclone。核心「無標記」13,518（51.8% of 保留）結構真實但<b>未歸因 somatic</b>，亦非 subclone。</div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>移除 4,369 細分 — 各噪音狀況</h2>
+  <p class="lead">移除＝3 種噪音狀況（皆 a-priori + 結構皆不過），各佔比：</p>
+  <div class="fig" style="padding:16px"><div style="display:flex;align-items:center;gap:10px;margin:7px 0"><div style="width:160px;font-weight:800;color:#9A3B3B;font-size:.85rem">Noise_Uncorrelated</div><div style="flex:1;background:#f0e9dc;border-radius:5px;height:24px;position:relative"><div style="width:51.7%;background:#9A3B3B;height:24px;border-radius:5px"></div><span style="position:absolute;left:8px;top:3px;color:#fff;font-size:.78rem;font-weight:800">2,257（51.7% of 移除）</span></div><div style="width:280px;font-size:.78rem;color:#8a7a68">有變異但不對任何標籤/結構</div></div><div style="display:flex;align-items:center;gap:10px;margin:7px 0"><div style="width:160px;font-weight:800;color:#b35858;font-size:.85rem">Noise_Uniform</div><div style="flex:1;background:#f0e9dc;border-radius:5px;height:24px;position:relative"><div style="width:32.2%;background:#b35858;height:24px;border-radius:5px"></div><span style="position:absolute;left:8px;top:3px;color:#fff;font-size:.78rem;font-weight:800">1,407（32.2% of 移除）</span></div><div style="width:280px;font-size:.78rem;color:#8a7a68">read 太均勻（PairwiseMeanDist<0.15 或 Epipoly<0.2）</div></div><div style="display:flex;align-items:center;gap:10px;margin:7px 0"><div style="width:160px;font-weight:800;color:#7a2a2a;font-size:.85rem">Noise_Chaotic</div><div style="flex:1;background:#f0e9dc;border-radius:5px;height:24px;position:relative"><div style="width:16.1%;background:#7a2a2a;height:24px;border-radius:5px"></div><span style="position:absolute;left:8px;top:3px;color:#fff;font-size:.78rem;font-weight:800">705（16.1% of 移除）</span></div><div style="width:280px;font-size:.78rem;color:#8a7a68">高熵混亂（Epipoly>0.5 或 dist>0.35）</div></div></div>
+  <p class="note">移除佔全體 14.3%。三型按甲基模式分：Uncorrelated（有變異不對標籤）最多 51.7% · Uniform（太均勻）32.2% · Chaotic（高熵）16.1%。</p>
+</section>
+
+<section style="background:#f6efe2">
+  <h2><span class="n">∑</span>一句話總結</h2>
+  <ul style="font-size:.94rem;line-height:1.8">
+    <li><b>保留 85.7% / 移除 14.3%</b>；保留再分<b>核心 22,311（高信心）＋ 救回 3,810（低信心，原 Weak/Noise）</b>。</li>
+    <li><b>真正論文相關 = a-priori subclone★ 3,576（11.7%）</b> — 同 haplotype germline-vs-carrier Δβ，但 n_carrier 脆弱、somatic-specificity 待 G-B 控制。</li>
+    <li>核心「無標記」13,518（最大塊）結構真實但<b>未歸因 = CN/epiallele</b>；救回 within-clean 多為 epiallele → 都<b>不可當 subclone</b>。</li>
+    <li>移除 4,369 = 純噪音 3 型（Uncorrelated 2,257 / Uniform 1,407 / Chaotic 705）。</li>
+  </ul>
+  <p class="note">溯源：<code>sankey_data.json</code> ← perlocus_flags.csv + significance_summary.csv；kept+removed=30,490、core+rescued=26,121、core_combo=22,311、rescued=3,810、removed=4,369 全平衡。</p>
+</section>
+
+</div></body></html>

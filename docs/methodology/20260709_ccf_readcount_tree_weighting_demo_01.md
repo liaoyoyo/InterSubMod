@@ -1,20 +1,22 @@
 <!--
 建立時間: 2026-07-09
-類型: 小規模 demo — read-count(CCF pigeonhole)給等機率樹加權;使用者提案驗證
-狀態: demo 驗證(有效但 reach 有限);可一鍵重驗
+類型: 歷史小規模 demo — family-specific read-AF ordering（舊稱 CCF）
+狀態: superseded_by_layered_v2_read_af_ordering
 build_branch: research/subclonal-reconstruction-202606
 data_sources: docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_region_integration.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/ccf_tree_weighting_demo.json
 provenance: 數字由 scripts/ccf_tree_weighting_demo.py 於 2026-07-09 對 sm_region_integration.json populations(含計數)重算。partial flag: HCC1395 / ambiguous 子集。
 -->
 
-# read-count CCF 加權給等機率樹 — 小規模 demo(使用者提案)
+# Family-specific read-AF ordering — 歷史小規模 demo
 
-> **提案**:把 enumerate_min_trees 的「N 棵等機率樹」用每群 read 數(→per-mutation CCF)加權 → 加權 posterior + 較可能者。約束不變(RRR 根 + 有向 unit-flip),只用 read count(遺傳、非甲基、非循環)。原理:pigeonhole/crossing rule 祖先突變 CCF ≥ 後代突變 CCF。
+> 🔴 **2026-07-10 語意更正**：本頁舊稱「CCF」的量是未經 purity／CN/multiplicity 校正的 family-specific ALT read fraction，**不是真 cancer cell fraction**；winner-clean 也是同一 pigeonhole 規則下的自洽度，非獨立驗證。新的權威入口為 `read_af_tree_ordering_multisample.py`：只納入 mutation-bearing HP1/HP2、對所有候選樹重枚舉，並報 temperature／posterior／margin sensitivity。本頁保留作歷史 demo，不再支撐 current claim。
+
+> **歷史提案**:把 enumerate_min_trees 的「N 棵等機率樹」用每群 read 數（per-mutation read AF）加權。約束不變（RRR 根 + 有向 unit-flip），只用 read count。原理：pigeonhole/crossing heuristic 期待祖先突變 read AF ≥ 後代突變 read AF。
 
 ## §1 方法
-- 每突變 CCF = Σ(含該突變的基因型 read 數) / total。
-- tree score = Σ_edge Σ_(anc∈parent)(CCF[anc] − CCF[acquired]);softmax(TEMP=0.05)→ posterior。
-- violation = 後代 CCF > 祖先 CCF + margin(0.05)= 明確違反 pigeonhole。
+- 每突變 read AF = Σ(含該突變的基因型 read 數) / total。
+- tree score = Σ_edge Σ_(anc∈parent)(readAF[anc] − readAF[acquired]);softmax(TEMP=0.05)→ posterior。
+- violation = 後代 read AF > 祖先 read AF + margin(0.05)。
 
 ## §2 結果(HCC1395,1528 ambiguous 區,n_trees≥2 非 capped)〔L1〕
 | 指標 | 值 |

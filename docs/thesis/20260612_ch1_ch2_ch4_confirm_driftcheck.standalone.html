@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1/2/4章 確認 + drift-check — Subclonal reconstruction 碩論</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;--teal:#39c5cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.62;font-size:14.5px}
+  header{padding:22px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 4px;font-size:18px}
+  header .sub{color:var(--mut);font-size:12px}
+  nav{padding:7px 24px;border-bottom:1px solid var(--line);font-size:12.5px;position:sticky;top:62px;background:rgba(15,20,25,.92);z-index:9}
+  nav a{color:var(--b);text-decoration:none;margin-right:13px}
+  .wrap{max-width:1060px;margin:0 auto;padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 20px;margin:14px 0}
+  h2{font-size:15.5px;margin:3px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h2 .n{color:var(--p)}
+  .drift{background:#16241a;border-left:4px solid var(--g)}
+  table{width:100%;border-collapse:collapse;margin:7px 0;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#1f2733;font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  .ok{color:var(--g);font-weight:700} .warn{color:var(--y)} .ph{color:var(--p)}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .teal{color:var(--teal)} .mut{color:var(--mut)}
+  ul{margin:4px 0;padding-left:18px} li{margin:2px 0}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11px}
+  .sec{margin:6px 0;padding-left:10px;border-left:2px solid var(--line)}
+  .sec b{color:var(--teal)}
+  .badge{display:inline-block;padding:0 6px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid;margin-left:4px}
+  .badge.g{border-color:var(--g);color:var(--g)} .badge.p{border-color:var(--p);color:var(--p)} .badge.y{border-color:var(--y);color:var(--y)}
+  .small{font-size:11.5px;color:var(--mut)}
+  .ask{background:#241a1a;border:1px solid #5a3030}
+</style>
+</head>
+<body>
+<header>
+  <h1>第 1 / 2 / 4 章 確認 ＋ drift-check</h1>
+  <div class="sub">2026-06-12 · Ch4 結果(R5 佔位) + Ch1 緒論 + Ch2 文獻探討 · 逐章對齊主軸/護欄/4校正/框架</div>
+</header>
+<nav>
+  <a href="#drift">★drift-check</a><a href="#ch4">第四章 結果</a><a href="#ch1">第一章 緒論</a><a href="#ch2">第二章 文獻</a><a href="#ph">佔位清單</a><a href="#ask">要你確認</a>
+</nav>
+<div class="wrap">
+
+  <div class="card drift" id="drift">
+    <h2>★ drift-check — 三章對齊「已確認主軸/護欄/校正/框架」</h2>
+    <table>
+      <tr><th>對齊維度</th><th>Ch4 結果</th><th>Ch1 緒論</th><th>Ch2 文獻</th></tr>
+      <tr><td class="k">主軸（個案重建為 climax + de-confound 脈絡）</td><td class="ok">✓ 4.1-4.4 脈絡→4.5 climax</td><td class="ok">✓ 1.3/1.4 重建=骨幹+甲基佐證</td><td class="ok">✓ 2.3 對照 EVOFLUx、誠實邊界</td></tr>
+      <tr><td class="k">標題保留（reconstruction 歸骨幹）</td><td class="ok">✓ 4.6 骨幹</td><td class="ok">✓ 1.3「genetic 引擎骨幹」</td><td class="ok">✓ 2.1 骨幹</td></tr>
+      <tr><td class="k">假想樹 hypothetical</td><td class="ok">✓ 4.5「與資料一致之假想結構」</td><td class="ok">✓「假想結構」</td><td>—</td></tr>
+      <tr><td class="k">甲基 corroborate 非 validated</td><td class="ok">✓ 4.5「佐證角色非判別器」</td><td class="ok">✓「共同提供佐證」</td><td class="ok">✓ 2.4 de-confounded 特徵化</td></tr>
+      <tr><td class="k">大規模驗證=future</td><td class="ok">✓ 4.5/4.7 指 handoff</td><td class="ok">✓ 1.4 後續工作</td><td>—</td></tr>
+      <tr><td class="k">單樣本/單 pipeline ⭐3</td><td class="ok">✓ 章首+4.6</td><td class="ok">✓ 1.3 Q3</td><td>—</td></tr>
+      <tr><td class="k">校正#1 same-hap 6/6 occupancy</td><td class="ok">✓ 4.6（0.932…0.970）+標度量</td><td>—</td><td>—</td></tr>
+      <tr><td class="k">校正#2 乾淨 cis 1/816（非1/332705）</td><td class="ok">✓ 4.3 +under-tested caveat</td><td>—</td><td>—</td></tr>
+      <tr><td class="k">校正#3 chr17 最強候選非乾淨</td><td class="ok">✓ 4.5 揭露殘餘 allele-axis</td><td>—</td><td>—</td></tr>
+      <tr><td class="k">校正#4 subclone undetermined</td><td class="ok">✓ 4.5 不宣稱已驗證判別</td><td class="ok">✓ 1.3 Q3「待對照」</td><td>—</td></tr>
+      <tr><td class="k">框架 ABT+SCQA / Rule+Exception / Assertion-Evidence 標題</td><td class="ok">✓ build-up→climax、會說話標題</td><td class="ok">✓ CARS 漏斗</td><td class="ok">✓ 4 面向地景</td></tr>
+      <tr><td class="k">數字 provenance（🟢 grep / 佔位 / cite）</td><td class="ok">✓ 共識台帳 §1；R5 {{待填}}</td><td class="ph">{{cite}} 待驗</td><td class="ph">{{cite}} 待驗 +守3不對齊</td></tr>
+    </table>
+    <p class="small"><b>結論：三章無偏離。</b>唯一「進取」之處在 4.5 主軸，已用 hypothetical/corroborate/proof-of-concept/⭐3 + 指向 handoff 全數護住。</p>
+  </div>
+
+  <div class="card" id="ch4">
+    <h2><span class="n">第四章 結果</span>（build-up to exemplar climax；<code>ch4_results.md</code>）</h2>
+    <div class="sec"><b>4.1</b> 體細胞 ASM 存在且略偏 somatic 但靈敏度低（TP 3.95% &gt; FP 1.07%，subhap 3.77 vs 1.09 ~3.5×；~4% sens）<span class="badge g">🟢</span></div>
+    <div class="sec"><b>4.2</b> 甲基<b>不能</b> filter TP/FP（四道：LOSO mean −0.00004 p=0.125 / AUC=0.505 / COLO TP≈FP / OR 8.63·4.09·5.84）<span class="badge g">🟢</span></div>
+    <div class="sec"><b>4.3 ⭐RULE</b> 甲基分群跟隨 germline 非 somatic（332,705→7TAG；reliable 12,868/3.87% 全 germline-allelic；<b>乾淨 cis 816 中 1=chr17</b>）+ <span class="y">under-tested caveat + 口徑註</span><span class="badge g">🟢</span></div>
+    <div class="sec"><b>4.4</b> copy 非 driver（MW p=0.6183, ρ=−0.0829）；BRCA2 copy-confounded（within −0.023≪copy −0.11）<span class="badge g">🟢</span></div>
+    <div class="sec"><b>4.5 ⭐主軸 climax</b> 個案展示 ISM 找甲基+多點突變共同佐證之重建：chr2:18M 主 demo<span class="badge p">{{待填}}</span> + chr17 乾淨 cis（within 0.142, perm p=0.001，<span class="y">非「乾淨」caveat</span>）+ BRCA2 illustrative（copy caveat）；<b class="p">假想樹 hypothetical / 甲基 corroborate / proof-of-concept</b></div>
+    <div class="sec"><b>4.6</b> LOH-constrained phasing 骨幹（7/7 W=28 p=0.0078；<b>same-hap occupancy 6/6 ≥93%</b>；AF→NGroups=phasing r=0.656）+ <span class="y">by-construction caveat ⭐3</span><span class="badge g">🟢</span></div>
+    <div class="sec"><b>4.7</b> 跨樣本現象復現（6/6 excess +0.101–0.241；同-locus 0/38 private→個案 sample-specific）<span class="badge g">🟢</span></div>
+  </div>
+
+  <div class="card" id="ch1">
+    <h2><span class="n">第一章 緒論</span>（CARS 漏斗，修訂主軸；<code>ch1_introduction.md</code>）</h2>
+    <div class="sec"><b>1.1 背景動機</b>：腫瘤異質性/亞克隆重建（Tarabichi/PyClone-VI 骨幹）→ ONT 同讀 somatic+haplotype+5mC → 甲基延伸相位（MethPhaser/NanoMethPhase）</div>
+    <div class="sec"><b>1.2 缺口</b>：read 層級「甲基+多點突變能否共同重建/驗證 subclone」未答；三缺口（read-level de-confound 未做 / 甲基-filter 未證偽 / EVOFLUx 樂觀主張在 read-level 骨幹未驗）</div>
+    <div class="sec"><b>1.3 目的+定位</b>：重建=genetic 骨幹、甲基=與多點突變<b>共同佐證</b>；三問題（規則/個案/誠實邊界 ⭐3）</div>
+    <div class="sec"><b>1.4 貢獻+架構</b>：de-confound 目錄(規則) + 個案重建(proof-of-concept) + 誠實限制；預告六章</div>
+  </div>
+
+  <div class="card" id="ch2">
+    <h2><span class="n">第二章 文獻探討</span>（業界地景，引搜尋結果；<code>ch2_related_works.md</code>）</h2>
+    <div class="sec"><b>2.1</b> 亞克隆重建基因骨幹（Tarabichi workflow + PyClone-VI；克隆性假象等限制）</div>
+    <div class="sec"><b>2.2</b> ONT 長讀 + 單倍型解析甲基化（NanoMethPhase 10×無親代 / MethPhaser 延伸 SNV 相位）→ 但延伸的是 germline 層級</div>
+    <div class="sec"><b>2.3</b> 癌症 ASM（Do2020 增多 / Martin-Trujillo CN-confound）+ <b>EVOFLUx 對照</b>（它主張甲基加演化解析；我們誠實發現 read-level 多 germline）+ <span class="y">守 3 不對齊註</span></div>
+    <div class="sec"><b>2.4</b> 甲基方法地景 + <b>ISM 定位</b>：站「read-read 距離+PERMANOVA+normal-cis」軸（vs modkit/DSS 率差軸）；82 工具 6 軸無單一涵蓋；與 epipolymorphism 區隔（O11 AUC 0.845→0.530 覆蓋假象）</div>
+  </div>
+
+  <div class="card" id="ph">
+    <h2><span class="n">佔位清單</span>（待回填，不捏造）</h2>
+    <ul>
+      <li><span class="ph">{{待填}}</span> 4.5 chr2:18M 個案數字（區間/變異數/兩 caller read 計數/ARI/假想分支）→ 驗證 handoff <b>V-3</b> 溯源 + <b>V-2</b> 系統化判準</li>
+      <li><span class="ph">{{cite}}</span> Ch1/Ch2 文獻 ~14 處（Tarabichi/PyClone-VI/NanoMethPhase/MethPhaser/Do2020/Martin-Trujillo/EVOFLUx/Landan2012/Kapoor2023…）→ 過 <code>/citation-verification</code> 核 PMID/DOI</li>
+      <li><span class="warn">守 3 不對齊</span>（BRCA2 hypo≠canonical / Do20 口徑 / CNN-LOH）→ Ch2 定稿前核 KB 11</li>
+      <li>BRCA2 cis 成分 → 驗證 handoff <b>V-4</b> copy-partition 重驗後定口徑</li>
+    </ul>
+  </div>
+
+  <div class="card ask" id="ask">
+    <h2>要你確認</h2>
+    <ul>
+      <li><b>沒偏離主軸吧？</b>（drift-check 全 ✓；唯一進取在 4.5，已用 hypothetical/corroborate/proof-of-concept/⭐3 護住）</li>
+      <li>Ch1/Ch2 的<b>背景敘事</b>對不對（缺口三點、ISM 定位、EVOFLUx 對照）？有要補/刪的文獻面向嗎？</li>
+      <li>4.5 主軸節的<b>敘述骨架</b>（chr2 主 demo + chr17 cis + BRCA2 illustrative；假想樹 + 佐證）符合你的圖意嗎？</li>
+      <li>下一步：<b>④ 第三章 Methods 補</b>（catalog 7-TAG / 9 驗證機制 / FDR / cis-test）→ <b>⑤ 第五章討論 + 第六章結論</b>。繼續？</li>
+    </ul>
+  </div>
+
+  <p class="small mut">.md 全文：<code>InterSubMod/docs/thesis/chapters/{ch4_results,ch1_introduction,ch2_related_works}.md</code>（最終逐字校對時看）。數字來源：共識台帳 §1 grep-confirmed；已套用 4 校正；R5/文獻待回填不捏造。</p>
+
+</div>
+</body>
+</html>

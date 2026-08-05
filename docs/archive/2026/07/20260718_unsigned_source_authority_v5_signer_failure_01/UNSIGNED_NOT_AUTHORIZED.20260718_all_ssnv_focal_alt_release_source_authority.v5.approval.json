@@ -1,0 +1,57 @@
+{
+  "approval_status": "APPROVED_FOR_FULL_TASK_B_RUN",
+  "authority_id": "20260718_all_ssnv_focal_alt_task_b_release_v5",
+  "authority_manifest": {
+    "mode": "0o444",
+    "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/provenance/source_authorities/20260718_all_ssnv_focal_alt_release_source_authority.v5.json",
+    "sha256": "99d743da27779721c75bfe015b1e0d094f69345518279fe564928e9cad1df1b9",
+    "size_bytes": 9921
+  },
+  "private_key_retirement": {
+    "passphrase_lifecycle": "discarded_after_single_signature",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260718_all_ssnv_v5_summary_hotfix/ed25519_private_encrypted_unrecoverable_after_signing.pem",
+    "required_post_signature_mode": "0o0"
+  },
+  "public_key": {
+    "mode": "0o444",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260718_all_ssnv_v5_summary_hotfix/ed25519_public.pem",
+    "sha256": "cd14abe493c146c226ffeea81df571a79ea374e996e59e5d26b06c0fa908b920",
+    "size_bytes": 113
+  },
+  "review_approvals": [
+    {
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260718_external_claude_reviewer_A_v12_all_producers_output.json",
+        "sha256": "4e8caa8522c02fe437c58b959fe204af13ceb1fcaa2ded0d019c04c232aafd40",
+        "size_bytes": 9877
+      },
+      "review_scope": "Fresh independent read-only P0 review of all 23 live EXPECTED_SOURCE_PATHS in scripts/release_source_authority.py plus release-chain runners, finalizers, leaf producers, M2 gate, terminal-chain/normalizer tests, JUnit v15, claim-contract-v5, and the external Ed25519 public key. Bounded direct reads and hash/stat only; no edits, no pytest/producer execution, no signing, no network.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "db0c33f89c31e6b1a3e4cd68a2943df3c109f0e76ddaff40e9e0d2bf78faa3ed",
+      "reviewer_id": "7c3a1e9d-4b62-4f18-9a05-2e6d8f4b1c07",
+      "reviewer_label": "External Reviewer A v12",
+      "verdict": "APPROVE"
+    },
+    {
+      "findings_closed": true,
+      "model": "claude-opus-4-8[1m]",
+      "review_record": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260718_external_claude_reviewer_B_v12_all_producers_output.json",
+        "sha256": "7fe6e1ee28472379dde2bff7902f185fcce00842f4a96fc9bbf02d6c860889e1",
+        "size_bytes": 11300
+      },
+      "review_scope": "Fresh independent adversarial pre-run source review of the full Task-B all-sSNV release chain at HEAD 0ee2fa1 for authority 20260718_all_ssnv_focal_alt_task_b_release_v5. Bounded direct reads only; no execution/signing/pytest/network/edits. Inspected all 23 EXPECTED_SOURCE_PATHS plus completion runner, cooccurrence runner+release finalizer, final dataset builder, result/report finalizer, matched-normal runner+analyzer, CN/CCF annotator, strict producer, primary/frozen auditors, m2_screen_gate, independent M2 auditor, report builder, portable delivery/QA, and the path/stale-token tests. Independently recomputed the 23-source aggregate digest, hashed the v15 JUnit and public key, and confirmed the v5 authority artifacts are absent. Prior verdicts not reused.",
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "db0c33f89c31e6b1a3e4cd68a2943df3c109f0e76ddaff40e9e0d2bf78faa3ed",
+      "reviewer_id": "7c2e5a9d-3f41-4b8e-9a6c-1d0f2e8b4a67",
+      "reviewer_label": "External Reviewer B v12 (adversarial all-producer review)",
+      "verdict": "APPROVE"
+    }
+  ],
+  "schema_name": "intersubmod.release_source_authority.approval",
+  "schema_version": "1.0.0"
+}

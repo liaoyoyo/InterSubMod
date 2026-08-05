@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">論文完成 Gate 與替換點</title>
+  <desc id="desc">從主張鎖定到生物正交驗證的五個 gate，標示已完成、驗證失敗與未完成。</desc>
+  <defs>
+    <marker id="ar" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#315f73"/></marker>
+  </defs>
+  <rect width="1400" height="760" fill="#f8f8f5"/>
+  <text x="70" y="70" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">論文完成路徑：哪些內容已鎖定，哪些只需替換結果</text>
+  <text x="70" y="110" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#52636b">方法、章節與口試主軸可先完成；全樣本數字必須等 terminal receipts，不以歷史結果填空。</text>
+
+  <line x1="150" y1="310" x2="1250" y2="310" stroke="#315f73" stroke-width="5" marker-end="url(#ar)"/>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <circle cx="170" cy="310" r="42" fill="#4f8062"/><text x="170" y="318" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">G0</text>
+    <text x="170" y="390" text-anchor="middle" font-size="18" font-weight="700" fill="#27543a">主張與章節鎖定</text>
+    <text x="170" y="420" text-anchor="middle" font-size="15" fill="#314652">claims/sections registry</text>
+    <text x="170" y="448" text-anchor="middle" font-size="15" fill="#27543a">已完成</text>
+
+    <circle cx="430" cy="310" r="42" fill="#4f8062"/><text x="430" y="318" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">C1</text>
+    <text x="430" y="390" text-anchor="middle" font-size="18" font-weight="700" fill="#27543a">Raw-all producer</text>
+    <text x="430" y="420" text-anchor="middle" font-size="15" fill="#314652">7/7 contract receipts</text>
+    <text x="430" y="448" text-anchor="middle" font-size="15" fill="#27543a">已完成</text>
+
+    <circle cx="690" cy="310" r="42" fill="#aa5a4b"/><text x="690" y="318" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">C2</text>
+    <text x="690" y="390" text-anchor="middle" font-size="18" font-weight="700" fill="#873b31">Clean layered-v3</text>
+    <text x="690" y="420" text-anchor="middle" font-size="15" fill="#314652">workers 7/7 exit 0</text>
+    <text x="690" y="448" text-anchor="middle" font-size="15" fill="#873b31">verifier FAILED</text>
+
+    <circle cx="950" cy="310" r="42" fill="#aa5a4b"/><text x="950" y="318" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">C3</text>
+    <text x="950" y="390" text-anchor="middle" font-size="18" font-weight="700" fill="#873b31">正式 Results freeze</text>
+    <text x="950" y="420" text-anchor="middle" font-size="14" fill="#314652">U0–U7 + stress + metadata</text>
+    <text x="950" y="448" text-anchor="middle" font-size="15" fill="#873b31">未完成</text>
+
+    <circle cx="1210" cy="310" r="42" fill="#aa5a4b"/><text x="1210" y="318" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">C4</text>
+    <text x="1210" y="390" text-anchor="middle" font-size="18" font-weight="700" fill="#873b31">生物正交確認</text>
+    <text x="1210" y="420" text-anchor="middle" font-size="15" fill="#314652">single-cell / multi-region</text>
+    <text x="1210" y="448" text-anchor="middle" font-size="15" fill="#873b31">未完成／未來工作</text>
+  </g>
+
+  <rect x="90" y="520" width="1220" height="145" rx="12" fill="#ffffff" stroke="#8ba4b1" stroke-width="2"/>
+  <text x="120" y="560" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="21" font-weight="700" fill="#17324d">最小替換策略</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="17" fill="#314652">
+    <text x="120" y="600">① 修正 C2 schema/identity failures 並取得 _SUCCESS 後，以 immutable summary 替換第四章與圖 4；不改 RQ、方法與 ceiling。</text>
+    <text x="120" y="634">② C3 補 stress／dataset provenance 後凍結摘要與口試數字；C4 未完成仍以 candidate hypothesis 收尾。</text>
+  </g>
+</svg>

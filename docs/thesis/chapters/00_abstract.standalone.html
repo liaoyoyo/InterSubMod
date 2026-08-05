@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摘要確認 — Subclonal reconstruction 碩論（block ①）</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;--teal:#39c5cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.78;font-size:15px}
+  header{padding:24px;border-bottom:1px solid var(--line)}
+  header h1{margin:0 0 4px;font-size:19px}
+  header .sub{color:var(--mut);font-size:12.5px}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px;display:grid;grid-template-columns:1fr 320px;gap:20px}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:0 0 18px}
+  h2{font-size:16.5px;margin:2px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .abs p{margin:0 0 14px;text-align:justify}
+  .abs .lab{font-size:12px;font-weight:700;color:var(--teal);letter-spacing:.5px}
+  .hinge{color:var(--y);font-weight:700}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .teal{color:var(--teal)} .mut{color:var(--mut)}
+  .num{color:var(--g);font-weight:600}
+  .guard{color:var(--p);font-weight:600}
+  .side .card{position:sticky;top:18px}
+  .side h3{font-size:13px;margin:12px 0 5px;color:var(--teal)}
+  .side ul{margin:4px 0;padding-left:18px;font-size:12.5px} .side li{margin:3px 0}
+  .badge{display:inline-block;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid;margin:2px 3px 2px 0}
+  .badge.g{border-color:var(--g);color:var(--g)} .badge.y{border-color:var(--y);color:var(--y)} .badge.p{border-color:var(--p);color:var(--p)}
+  hr{border:none;border-top:1px solid var(--line);margin:20px 0}
+  .en{color:#cdd6e0;font-size:14px}
+  .small{font-size:12px;color:var(--mut)}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:11.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>摘要確認 — <span class="b">Subclonal reconstruction</span> 中文碩論（撰寫 block ①）</h1>
+  <div class="sub">2026-06-12 · 修訂主軸版（個案驅動重建 proof-of-concept + de-confound 脈絡）· ABT 弧 · 誠實護欄內嵌</div>
+</header>
+<div class="wrap">
+
+  <div class="main">
+    <div class="card abs">
+      <h2>中文摘要</h2>
+      <p><span class="lab">背景</span> 腫瘤之亞克隆結構與演化重建傳統上以體細胞變異為依據。ONT 長讀能於<b>同一條 read</b> 同時取得體細胞變異、germline 單倍型與原生 5mCG 甲基化——一個自然的問題是：<b class="teal">在 read 層級，甲基化狀態能否與多點體細胞突變「共同輔助」區分與驗證亞克隆狀況與其演化？</b> 本研究以 read-level 工具 ISM（read×CpG 矩陣→距離→可靠度閘控分群→單倍型/LOH 標註→normal-anchored cis-test）回答，並先以全基因組目錄界定脈絡。</p>
+      <p><span class="lab">規則（脈絡）</span> 六株癌細胞株 × 三癌別共 <span class="num">332,705</span> 位點之 de-confounded 目錄：可靠甲基分群僅 <span class="num">12,868（3.87%）</span>，且<b>壓倒性跟隨 germline 而非 somatic</b>；816 可測位點中僅 <span class="num">1</span> 個（chr17/TBC1D16，最強 cis 候選）為乾淨 somatic cis；甲基<b>不能</b>做變異真偽過濾器（四道）。</p>
+      <p><span class="lab">主軸（climax）</span> <span class="hinge">然而（however）</span>，正因乾淨 somatic 訊號如此罕見，本研究於特定位點以<b>個案（exemplars）</b>展示其意義：ISM 能找到甲基狀態與多點體細胞突變<b class="p">相互佐證</b>之情形，據以重建出<b class="guard">與 read-level 資料一致之假想亞克隆演化結構</b>（如 HCC1395 之 chr2 區域，體細胞變異經 ClairS 與 DeepVariant 兩呼叫器一致支持；及 chr17/TBC1D16 乾淨 cis 例證）。此為<b class="guard">概念驗證（proof-of-concept）</b>：甲基化扮演<b class="p">佐證</b>角色而非經獨立驗證之判別器，重建之樹為與資料一致之假想結構。</p>
+      <p><span class="lab">結論+限制</span> ISM 使 read 層級整合甲基化與多點體細胞突變、於個案找出並重建亞克隆與演化結構，並以 de-confounded 目錄提供「乾淨 somatic 訊號罕見」之脈絡。<b class="guard">主要限制/後續工作</b>：個案<b>尚未大規模驗證與標準化判準</b>（future）；機制建於<b>單樣本 HCC1395 + 單一定相流程（⭐3）</b>；within-haplotype subclone 甲基 somatic-特異性<b>待正確對照</b>。</p>
+      <hr>
+      <h2>English Abstract</h2>
+      <p class="en"><b class="teal">Background.</b> ONT long-read captures somatic mutations, germline haplotypes and native 5mCG on the <b>same read</b> — can methylation states, together with multiple somatic mutations, jointly help distinguish and validate subclonal states and their evolution at read level? We address this with ISM, delimiting the genome-wide context first.</p>
+      <p class="en"><b class="teal">Rule (context).</b> A de-confounded catalogue of <span class="num">332,705</span> loci across six cell lines: reliable methylation read-clustering exists at only <span class="num">12,868 (3.87%)</span> and is <b>overwhelmingly germline- rather than somatic-allelic</b>; only 1/816 testable loci (chr17/TBC1D16) is a clean somatic cis signal; methylation does <b>not</b> discriminate true/false somatic variants (four lines).</p>
+      <p class="en"><b class="teal">Exemplars (climax).</b> <span class="hinge">However</span>, precisely because clean somatic signals are rare, case studies show where they matter: ISM finds methylation states and multiple somatic mutations that <b class="p">mutually corroborate</b>, reconstructing a <b class="guard">hypothetical subclonal evolutionary structure consistent with the read-level data</b> (a chr2 region in HCC1395, concordantly supported by ClairS and DeepVariant; and the clean-cis exemplar chr17/TBC1D16). This is a proof-of-concept; methylation is <b class="p">corroborating</b>, not an independently validated discriminator.</p>
+      <p class="en"><b class="teal">Conclusions.</b> ISM enables read-level integration of methylation and multiple somatic mutations to find and—in case studies—reconstruct subclonal/evolutionary structure, contextualized by a de-confounded catalogue. Limitations: exemplars not yet validated at scale (future); single cell line + single pipeline (⭐3); within-haplotype subclone-methylation somatic-specificity awaits the correct control.</p>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2 style="font-size:14px">這份摘要落實了什麼</h2>
+      <h3>主軸（你的構想）</h3>
+      <ul>
+        <li>ISM <b>找到</b>位點 + 甲基 <b>與多點突變共同輔助</b>區分/驗證 subclone+演化（個案）</li>
+        <li>de-confound 目錄 = <b>脈絡</b>（凸顯個案罕見/特別）</li>
+      </ul>
+      <h3>敘述框架</h3>
+      <ul><li>ABT 弧：看似豐富→<span class="y">However</span> 多 germline/罕見→因此個案展示</li>
+      <li>Rule(脈絡)+Exception(個案 climax)</li></ul>
+      <h3 class="p">誠實護欄 <span class="badge p">全接受</span></h3>
+      <ul>
+        <li>假想樹 = <b>hypothetical/consistent-with-data</b></li>
+        <li>甲基 = <b>corroborate</b> 非 validated discriminator</li>
+        <li>大規模驗證+判準 = <b>future</b></li>
+        <li>single-sample/pipeline <b>⭐3</b> 明標</li>
+        <li>subclude somatic-specificity = <b>undetermined</b></li>
+      </ul>
+      <h3>數字 provenance</h3>
+      <ul>
+        <li><span class="badge g">🟢</span> 332,705 / 12,868(3.87%) / 1/816 / 四道 / chr17 p=0.001 — 共識台帳 §1 grep-confirmed</li>
+        <li><span class="badge y">⚠</span> chr2:18M 個案數字未驗證 → 摘要僅<b>定性</b>、寫入正文前溯源</li>
+      </ul>
+      <h3 class="r">要你確認</h3>
+      <ul>
+        <li>主軸表達對不對？</li>
+        <li>「proof-of-concept / 佐證 / 假想」措辭你 OK 嗎（口委防守線）？</li>
+        <li>太長/太短？術語密度（口委可懂）？</li>
+      </ul>
+      <p class="small">確認後我接 <b>②第四章結果</b>（R1-R4 脈絡 → R5 chr2 個案 climax → R6/R7）。</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

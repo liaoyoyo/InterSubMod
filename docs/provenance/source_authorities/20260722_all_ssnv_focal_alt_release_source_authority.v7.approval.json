@@ -1,0 +1,175 @@
+{
+  "approval_status": "APPROVED_FOR_FULL_TASK_B_RUN",
+  "authority_id": "20260722_all_ssnv_focal_alt_task_b_release_v7_strict_command_parity",
+  "authority_manifest": {
+    "mode": "0o444",
+    "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/provenance/source_authorities/20260722_all_ssnv_focal_alt_release_source_authority.v7.json",
+    "sha256": "ab68a9d3e8578545e6f930e8f8c79912a132f02692adec3b19542276605b6a0c",
+    "size_bytes": 22140
+  },
+  "private_key_retirement": {
+    "passphrase_lifecycle": "discarded_after_single_signature",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260722_all_ssnv_v10_strict_command_parity_bootstrap/ed25519_private_encrypted_unrecoverable_after_signing.pem",
+    "required_post_signature_mode": "0o0"
+  },
+  "public_key": {
+    "mode": "0o444",
+    "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_release_authority/20260722_all_ssnv_v10_strict_command_parity_bootstrap/ed25519_public.pem",
+    "sha256": "cecb2287cf87f8bd948c7390bd5f7059578966e0fc917de420572ddd82d8f21b",
+    "size_bytes": 113
+  },
+  "review_approvals": [
+    {
+      "canonical_junit": {
+        "artifact": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/logs/pytest_full_pre_authority_v27_git_env_alignment_attested_canonical.xml",
+          "sha256": "2b191fd358d68098abdeab0664466f56061071326a60c0a28c84a4d96dce2a58",
+          "size_bytes": 79536
+        },
+        "counts": {
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 743
+        }
+      },
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "process_attestation": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.json",
+        "sha256": "87616675b7165e196dcac7407c0415eabe5c0b813471f55c69eb63e1a84f6e98",
+        "size_bytes": 24825
+      },
+      "process_attestation_public_key": {
+        "mode": "0o444",
+        "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_external_review_attestation/20260722_reviewer_A_v22_strict_command_parity_bootstrap/ed25519_public.pem",
+        "sha256": "cbf3ad997f9b4f0a174d2ba0482e35334091ea717464e89ac22175481581bd80",
+        "size_bytes": 113
+      },
+      "process_attestation_session_id": "c9b134a3-4327-48e3-a0af-be81fb7c3ca5",
+      "process_attestation_signature": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.json.ed25519.sig",
+        "sha256": "4fc6d6429c8396f6bc9d17a35b04d74ac47d37ae66cec185111bcec2ce2b378b",
+        "size_bytes": 64
+      },
+      "process_records": {
+        "command_record": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.command.json",
+          "sha256": "53df3b8e7275b7fed0a441ea7c99efa9dfce0d71d5515e6f4af6c0212580ee06",
+          "size_bytes": 10915
+        },
+        "request": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.request.md",
+          "sha256": "4a2ea803fa55470230c8da47a9347b0e8f8b6306f1ce1e6cd6c347bcfd689218",
+          "size_bytes": 5418
+        },
+        "stderr": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.stderr.txt",
+          "sha256": "222cc8ea4f254dae65e84ccc87b1f168a0ec967e310f2e7e92202ab8a9bc448a",
+          "size_bytes": 302
+        },
+        "transcript": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_A_v21_strict_command_parity_process_attestation.v1.stream.jsonl",
+          "sha256": "a8d376b7f3115bd939cf2e42fec38a6bac0fce7b072f2185c37b65fd1062635e",
+          "size_bytes": 679760
+        }
+      },
+      "review_scope": "Independent read-only trace of the v7 release-source-authority chain: FD-bound artifact leases with before/after fstat+live-stat ABA/TOCTOU re-binding and process-lifetime descriptor retention; pinned-hash in-memory execution of the v5 evidence validator, v20 normalizer, v22 runner and v6 signer; Ed25519 approval plus detached test-run and dual review signatures verified through /proc/self/fd with pinned OpenSSL under a fully replaced clean subprocess environment; block-specific Git isolation via env replacement plus GIT_CONFIG_NOSYSTEM=1 and GIT_CONFIG_GLOBAL=/dev/null across all five subprocess call sites; exact 23-role source-set digest, 743/0/0/0 canonical JUnit with pinned testcase-inventory sha256, and two distinct signed Claude process attestations bound to source_set_sha256, git_head, assembler and canonical_junit; one-time private keys retired to mode 000.",
+      "reviewed_assembler": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/assemble_release_source_authority_v15.py",
+        "sha256": "5dcec8c2a8b3dd9143a306ca3fe6302ec71a3676cca005ce36e30b2b20421ba5",
+        "size_bytes": 29143
+      },
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "f5ba8a9e786971c4261b51e283a0f9df6e807a8aca695bf5041271fee5420f58",
+      "reviewer_id": "b9e6d4a2-8c3f-4d1e-9a7b-2c5e8f0a1d63",
+      "reviewer_label": "InterSubMod Task-B external Reviewer A v21 final git-env-alignment (claude-opus-4-8)",
+      "verdict": "APPROVE"
+    },
+    {
+      "canonical_junit": {
+        "artifact": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/logs/pytest_full_pre_authority_v27_git_env_alignment_attested_canonical.xml",
+          "sha256": "2b191fd358d68098abdeab0664466f56061071326a60c0a28c84a4d96dce2a58",
+          "size_bytes": 79536
+        },
+        "counts": {
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 743
+        }
+      },
+      "findings_closed": true,
+      "model": "claude-opus-4-8",
+      "process_attestation": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.json",
+        "sha256": "5333fe461463dad40ed91adfa9c9a89fdd61bd5dfeadc4b64c04addceef41e5b",
+        "size_bytes": 25036
+      },
+      "process_attestation_public_key": {
+        "mode": "0o444",
+        "path": "/bip7_disk/liaoyoyo2001/.config/intersubmod_external_review_attestation/20260722_reviewer_B_v22_strict_command_parity_bootstrap/ed25519_public.pem",
+        "sha256": "e4396b37bf5c04b9f61b91028bdd06fa6639503abe58def649cbd60656d8b74a",
+        "size_bytes": 113
+      },
+      "process_attestation_session_id": "aa7d9f9a-e672-4a22-8a11-e3e0995a74c5",
+      "process_attestation_signature": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.json.ed25519.sig",
+        "sha256": "6696c1ddb8f8ef0a7897ed55c1a2039a297aa54687b989f1448f03635a11e213",
+        "size_bytes": 64
+      },
+      "process_records": {
+        "command_record": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.command.json",
+          "sha256": "173bbf68ada82ec5393c4305fdfbc1deb9162aa3e1e6f5b9c96d6a55f06a2883",
+          "size_bytes": 10904
+        },
+        "request": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.request.md",
+          "sha256": "b604846256037f3febdab0d4845c6875196065fee46dc3f00c8b97a2b2c6279f",
+          "size_bytes": 5407
+        },
+        "stderr": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.stderr.txt",
+          "sha256": "222cc8ea4f254dae65e84ccc87b1f168a0ec967e310f2e7e92202ab8a9bc448a",
+          "size_bytes": 302
+        },
+        "transcript": {
+          "mode": "0o444",
+          "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/20260722_external_claude_reviewer_B_v21_strict_command_parity_process_attestation.v1.stream.jsonl",
+          "sha256": "7366f8d675b9a09ed5892b27f25e1610efc25068e7b74bf7b8eded19ab11eb40",
+          "size_bytes": 950889
+        }
+      },
+      "review_scope": "Independent adversarial read-only review of the all-sSNV focal-ALT v7 release-source-authority chain: the 7 protected trust sources, the v27 git-env-alignment attested canonical pytest manifest (743/0/0/0) and its one-time Ed25519 signature, the v15 assembler, v20 normalizer, v22 review runner, v6 one-time signer, v5 signed-evidence validator, FD-lifetime lease, block-specific Git/OpenSSL subprocess environment isolation, no-clobber publication, one-time private-key retirement, old-v4 revocation, and both independent signed Claude process attestations; F1 (independent fixed anchors) and F2 (ABA / post-sign verification) confirmed resolved and regression-locked.",
+      "reviewed_assembler": {
+        "mode": "0o444",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/assemble_release_source_authority_v15.py",
+        "sha256": "5dcec8c2a8b3dd9143a306ca3fe6302ec71a3676cca005ce36e30b2b20421ba5",
+        "size_bytes": 29143
+      },
+      "reviewed_git_head": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99",
+      "reviewed_source_set_sha256": "f5ba8a9e786971c4261b51e283a0f9df6e807a8aca695bf5041271fee5420f58",
+      "reviewer_id": "7d2b9f4e-6a1c-4e83-b5d0-9f3a2c81e64b",
+      "reviewer_label": "InterSubMod Task-B external Reviewer B v21 final git-env-alignment source and release-chain review",
+      "verdict": "APPROVE"
+    }
+  ],
+  "schema_name": "intersubmod.release_source_authority.approval",
+  "schema_version": "1.0.0"
+}

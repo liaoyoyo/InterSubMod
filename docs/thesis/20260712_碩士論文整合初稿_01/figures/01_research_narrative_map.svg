@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">研究主軸：由長讀單分子證據到有界的區域突變狀態候選樹</title>
+  <desc id="desc">顯示研究問題、四層工程流程、可支持結論與生物主張天花板。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#295f76"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="820" fill="#f7f8f5"/>
+  <text x="70" y="70" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">研究主軸：把「看見訊號」與「證明生物克隆」分開</text>
+  <text x="70" y="110" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#4b5d67">核心產物是可稽核的 regional mutation-state candidate trees，不是已確認的 cell-clone genealogy。</text>
+
+  <rect x="70" y="160" width="270" height="210" rx="12" fill="#ffffff" stroke="#8ba4b1" stroke-width="2"/>
+  <text x="95" y="200" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="22" font-weight="700" fill="#17324d">研究缺口</text>
+  <text x="95" y="242" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#314652">
+    <tspan x="95" dy="0">Bulk VAF/CCF 能估群體比例，</tspan>
+    <tspan x="95" dy="29">但缺少同一 DNA 分子上的</tspan>
+    <tspan x="95" dy="29">突變共現與 allelic family。</tspan>
+    <tspan x="95" dy="38" font-weight="700" fill="#a04a3a">風險：把多解硬寫成單一樹。</tspan>
+  </text>
+
+  <line x1="345" y1="265" x2="405" y2="265" stroke="#295f76" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <rect x="420" y="160" width="910" height="210" rx="12" fill="#eaf1f3" stroke="#5b8192" stroke-width="2"/>
+  <text x="450" y="200" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="22" font-weight="700" fill="#17324d">工程解法：四層證據分工</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <rect x="450" y="225" width="190" height="105" rx="8" fill="#ffffff" stroke="#6d8793"/>
+    <text x="470" y="255" font-size="17" font-weight="700" fill="#17324d">① 資料契約</text>
+    <text x="470" y="285" font-size="15" fill="#314652">raw ClairS → normalize</text>
+    <text x="470" y="308" font-size="15" fill="#314652">→ LongPhase-S _sc PASS</text>
+
+    <rect x="665" y="225" width="190" height="105" rx="8" fill="#ffffff" stroke="#6d8793"/>
+    <text x="685" y="255" font-size="17" font-weight="700" fill="#17324d">② 單分子約束</text>
+    <text x="685" y="285" font-size="15" fill="#314652">sSNV co-occurrence</text>
+    <text x="685" y="308" font-size="15" fill="#314652">＋ HP family partition</text>
+
+    <rect x="880" y="225" width="190" height="105" rx="8" fill="#ffffff" stroke="#6d8793"/>
+    <text x="900" y="255" font-size="17" font-weight="700" fill="#17324d">③ 完整候選集</text>
+    <text x="900" y="285" font-size="15" fill="#314652">bounded minimum feasible trees</text>
+    <text x="900" y="308" font-size="15" fill="#314652">多解、capped、拒絕皆保留</text>
+
+    <rect x="1095" y="225" width="205" height="105" rx="8" fill="#ffffff" stroke="#6d8793"/>
+    <text x="1115" y="255" font-size="17" font-weight="700" fill="#17324d">④ 有界輔助證據</text>
+    <text x="1115" y="285" font-size="15" fill="#314652">CN：後驗解讀；AF：排序</text>
+    <text x="1115" y="308" font-size="15" fill="#314652">5mC：characterization</text>
+  </g>
+
+  <line x1="700" y1="375" x2="700" y2="435" stroke="#295f76" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <rect x="70" y="450" width="600" height="260" rx="12" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/>
+  <text x="100" y="492" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="23" font-weight="700" fill="#27543a">可以支持</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#314652">
+    <circle cx="112" cy="540" r="5" fill="#4f8062"/><text x="130" y="546">fail-closed 且可追溯的資料與分析契約</text>
+    <circle cx="112" cy="585" r="5" fill="#4f8062"/><text x="130" y="591">宣告域內 non-capped 單位的全部最小可行候選集</text>
+    <circle cx="112" cy="630" r="5" fill="#4f8062"/><text x="130" y="636">技術再現性、敏感度與未識別性量化</text>
+    <circle cx="112" cy="675" r="5" fill="#4f8062"/><text x="130" y="681">可被後續單細胞／多區域資料檢驗的假說</text>
+  </g>
+
+  <rect x="730" y="450" width="600" height="260" rx="12" fill="#faeeee" stroke="#aa5a4b" stroke-width="2"/>
+  <text x="760" y="492" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="23" font-weight="700" fill="#873b31">目前不能支持</text>
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#314652">
+    <circle cx="772" cy="540" r="5" fill="#aa5a4b"/><text x="790" y="546">HP1／HP2 等同父系／母系或 biological clone</text>
+    <circle cx="772" cy="585" r="5" fill="#aa5a4b"/><text x="790" y="591">候選樹等同唯一真實演化樹</text>
+    <circle cx="772" cy="630" r="5" fill="#aa5a4b"/><text x="790" y="636">read AF 等同 CCF，或甲基化確認 lineage</text>
+    <circle cx="772" cy="675" r="5" fill="#aa5a4b"/><text x="790" y="681">由 cell-line 技術資料外推到病人族群</text>
+  </g>
+
+  <text x="70" y="772" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="15" fill="#5b6870">圖 1｜敘事框架：Problem → Contract → Constraints → Candidate set → Bounded interpretation → Claim ceiling</text>
+</svg>

@@ -19,9 +19,11 @@ CHUNK_IDX = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 OUTSUF = "" if CHUNK_TOTAL == 1 else f"_part{CHUNK_IDX}"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
-TBAM = "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
-VCFD = "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup"
+# per-sample 化(2026-06-30):env 覆寫,預設 HCC1395(regression-safe);SM_VCF_MODE=single 接 6 樣本 single-VCF。
+DATA = os.environ.get("SM_DATA", os.path.normpath(os.path.join(HERE, "..", "data")))
+TBAM = os.environ.get("SM_TBAM", "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam")
+VCFD = os.environ.get("SM_VD", "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup")
+VCF_MODE = os.environ.get("SM_VCF_MODE", "perchrom")
 MAPQ = 20; MINREAD = 3; MINGRP = 12; SEP = 0.2; MINSUB = 4
 
 det = {r["region"]: r for r in json.load(open(f"{DATA}/topology_per_region.json"))["detail"]}
@@ -29,13 +31,20 @@ det = {r["region"]: r for r in json.load(open(f"{DATA}/topology_per_region.json"
 _TBX = {}
 def _tabix(p):
     if p not in _TBX:
-        _TBX[p] = pysam.TabixFile(p) if os.path.exists(p) else None
+        if not os.path.exists(p):
+            _TBX[p] = None
+        else:
+            idx = p + ".tbi" if os.path.exists(p + ".tbi") else (p + ".csi" if os.path.exists(p + ".csi") else None)
+            try:
+                _TBX[p] = pysam.TabixFile(p, index=idx) if idx else pysam.TabixFile(p)
+            except Exception:
+                _TBX[p] = None
     return _TBX[p]
 
 def ref_alt_map(chrom, s, e):
     m = {}
     for src in ("tp", "fp"):
-        p = f"{VCFD}/filtered_snv_{src}_{chrom}.vcf.gz"
+        p = f"{VCFD}/filtered_snv_{src}.vcf.gz" if VCF_MODE == "single" else f"{VCFD}/filtered_snv_{src}_{chrom}.vcf.gz"
         tbx = _tabix(p)
         if tbx is None: continue
         try:

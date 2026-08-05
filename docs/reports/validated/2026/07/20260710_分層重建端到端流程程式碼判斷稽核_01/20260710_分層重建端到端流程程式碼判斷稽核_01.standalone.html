@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="InterSubMod layered reconstruction v2 端到端概念責任面、當前可執行邊界、程式碼、方法、設定與可重現性稽核說明書">
+  <title>Layered Reconstruction v2｜概念端到端與當前執行邊界</title>
+  <style>
+    :root {
+      --paper: #f3f0e8;
+      --paper-deep: #e8e2d5;
+      --panel: #fffdf8;
+      --ink: #16242d;
+      --muted: #5d6a70;
+      --line: #d7d0c3;
+      --teal: #176c70;
+      --teal-pale: #e2f0ed;
+      --blue: #285c78;
+      --blue-pale: #e6eef4;
+      --rust: #a63f32;
+      --rust-pale: #f6e5df;
+      --amber: #a96c10;
+      --amber-pale: #f7edd5;
+      --green: #2f7254;
+      --green-pale: #e4efe7;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --shadow: 0 10px 28px rgba(22, 36, 45, .08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+      line-height: 1.4;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    a { color: var(--teal); text-underline-offset: 3px; }
+    a:hover { color: var(--rust); }
+    :focus-visible { outline: 3px solid #e1a334; outline-offset: 3px; }
+    .skip-link { position: fixed; left: 1rem; top: -5rem; z-index: 100; padding: .7rem 1rem; background: var(--ink); color: white; }
+    .skip-link:focus { top: 1rem; }
+    .scope-ribbon {
+      background: var(--rust);
+      color: white;
+      padding: .62rem clamp(1rem, 4vw, 4rem);
+      font: 700 .82rem/1.4 var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: var(--ink);
+      color: #f9f6ee;
+      padding: clamp(2.4rem, 6vw, 5.6rem) clamp(1.2rem, 5vw, 5.5rem) 3rem;
+      border-bottom: 6px solid var(--teal);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -8rem;
+      top: -10rem;
+      width: 31rem;
+      height: 31rem;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 5rem rgba(255,255,255,.025), inset 0 0 0 10rem rgba(255,255,255,.018);
+      pointer-events: none;
+    }
+    .eyebrow { margin: 0 0 .8rem; color: #9fd3cf; font: 700 .78rem/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    h1 { max-width: 1040px; margin: 0; font-size: clamp(2.15rem, 5vw, 5rem); line-height: 1.2; letter-spacing: -.045em; }
+    .hero .lede { max-width: 920px; margin: 1.4rem 0 0; color: #dce4e4; font-size: clamp(1.02rem, 1.9vw, 1.34rem); }
+    .hero-status {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(220px, .7fr);
+      gap: 1rem;
+      max-width: 1120px;
+      margin-top: 2rem;
+    }
+    .verdict-box, .scope-box {
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.055);
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+    }
+    .verdict-box strong { color: #ffb5a8; }
+    .scope-box strong { color: #a9ddd8; }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      margin-top: 1.3rem;
+    }
+    .hero-meta span { border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: .28rem .68rem; color: #c8d2d3; font: 600 .74rem/1.4 var(--mono); }
+    .metric-band {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .metric { padding: 1.1rem clamp(.75rem, 2vw, 1.4rem); border-right: 1px solid var(--line); }
+    .metric:last-child { border-right: 0; }
+    .metric .number { display: block; color: var(--ink); font: 800 clamp(1.5rem, 3vw, 2.35rem)/1 var(--mono); }
+    .metric .label { display: block; margin-top: .38rem; color: var(--muted); font-size: .78rem; }
+    .app-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); max-width: 1540px; min-width: 0; margin: 0 auto; }
+    .toc {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      overflow: auto;
+      padding: 1.4rem 1.1rem 2rem;
+      border-right: 1px solid var(--line);
+      background: #ece7db;
+    }
+    .toc-title { margin: 0 0 .65rem; font: 800 .77rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .toc a { display: block; margin: .08rem 0; padding: .38rem .55rem; border-left: 3px solid transparent; color: #40505a; text-decoration: none; font-size: .85rem; line-height: 1.4; }
+    .toc a:hover, .toc a.active { color: var(--ink); background: var(--panel); border-left-color: var(--teal); }
+    .toc-tools { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: 1rem 0; }
+    button { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--ink); padding: .48rem .58rem; font: 650 .75rem/1.3 var(--sans); cursor: pointer; }
+    button:hover { border-color: var(--teal); }
+    .toc-note { margin-top: 1rem; padding: .75rem; background: var(--rust-pale); border-left: 4px solid var(--rust); font-size: .75rem; color: #60352e; }
+    main { min-width: 0; padding: clamp(1.3rem, 4vw, 4.2rem) clamp(1rem, 5vw, 5.4rem) 6rem; }
+    section { scroll-margin-top: 1rem; max-width: 1160px; min-width: 0; margin: 0 auto 4.6rem; }
+    h2 { margin: 0 0 1.3rem; font-size: clamp(1.65rem, 3vw, 2.7rem); line-height: 1.2; letter-spacing: -.035em; }
+    h3 { margin: 2rem 0 .7rem; font-size: clamp(1.12rem, 2vw, 1.5rem); line-height: 1.3; }
+    h4 { margin: 1.3rem 0 .45rem; }
+    p { margin: .65rem 0 1rem; }
+    .section-kicker { margin: 0 0 .45rem; color: var(--teal); font: 800 .76rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .section-intro { max-width: 900px; color: var(--muted); font-size: 1.03rem; }
+    .callout { margin: 1.2rem 0; padding: 1rem 1.1rem; border-left: 5px solid var(--blue); background: var(--blue-pale); }
+    .callout.danger { border-color: var(--rust); background: var(--rust-pale); }
+    .callout.warn { border-color: var(--amber); background: var(--amber-pale); }
+    .callout.ok { border-color: var(--green); background: var(--green-pale); }
+    .callout strong { display: block; margin-bottom: .25rem; }
+    .grid-2, .grid-3 { display: grid; gap: 1rem; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.15rem; box-shadow: var(--shadow); }
+    .card h3, .card h4 { margin-top: 0; }
+    .card.blocker { border-top: 6px solid var(--rust); }
+    .card.major { border-top: 6px solid var(--amber); }
+    .card.confirmed { border-top: 6px solid var(--green); }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; border-radius: 999px; padding: .2rem .55rem; font: 750 .7rem/1.4 var(--mono); white-space: nowrap; }
+    .badge.l1 { color: #23573f; background: var(--green-pale); }
+    .badge.l2 { color: #35596c; background: var(--blue-pale); }
+    .badge.l5 { color: #71410b; background: var(--amber-pale); }
+    .badge.p0 { color: white; background: var(--rust); }
+    .badge.p1 { color: #613c08; background: #f1d392; }
+    .badge.p2 { color: #36505d; background: #dce5e8; }
+    .table-wrap { overflow-x: auto; max-width: 100%; min-width: 0; margin: 1rem 0 1.4rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    th { position: sticky; top: 0; z-index: 1; background: #e9e3d6; color: #33434d; text-align: left; font-size: .74rem; letter-spacing: .035em; text-transform: uppercase; }
+    th, td { padding: .68rem .72rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #faf7ef; }
+    code, pre { font-family: var(--mono); }
+    code { color: #245164; background: #e7eceb; border-radius: 4px; padding: .08em .3em; overflow-wrap: anywhere; }
+    pre { position: relative; overflow: auto; margin: 1rem 0; padding: 1rem 1.1rem; background: #182730; color: #e8f0ef; border-radius: 10px; font-size: .82rem; line-height: 1.4; }
+    pre code { color: inherit; background: transparent; padding: 0; }
+    details { max-width: 100%; min-width: 0; margin: .8rem 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+    summary { cursor: pointer; padding: .85rem 1rem; font-weight: 750; color: #263a45; }
+    details[open] summary { border-bottom: 1px solid var(--line); background: #f6f2e9; }
+    .details-body { max-width: 100%; min-width: 0; padding: .2rem 1rem 1rem; }
+    .flow-figure { margin: 1.4rem 0; padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
+    .flow-figure svg { width: 100%; height: auto; display: block; }
+    figcaption { margin-top: .75rem; color: var(--muted); font-size: .82rem; }
+    .formula { padding: 1rem; border: 1px dashed #7d8d91; background: #f8f6f0; font: 650 .88rem/1.6 var(--mono); overflow-x: auto; }
+    .risk-controls { display: flex; flex-wrap: wrap; gap: .5rem; margin: .8rem 0; }
+    .risk-controls button[aria-pressed="true"] { color: white; background: var(--ink); border-color: var(--ink); }
+    .risk-row[hidden] { display: none; }
+    .mini-list { margin: .5rem 0; padding-left: 1.25rem; }
+    .mini-list li { margin: .25rem 0; }
+    .provenance { padding: 1rem; border: 1px solid var(--line); background: #ebe6da; font: .78rem/1.6 var(--mono); overflow-wrap: anywhere; }
+    .footer {
+      background: var(--ink);
+      color: #d5dfdf;
+      padding: 2.3rem clamp(1rem, 5vw, 5rem);
+      border-top: 6px solid var(--rust);
+    }
+    .footer-inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; }
+    .footer strong { color: white; }
+    .footer code { color: #b7e3df; background: rgba(255,255,255,.08); }
+    .mobile-nav { display: none; position: fixed; right: 1rem; bottom: 1rem; z-index: 50; background: var(--ink); color: white; border-color: var(--ink); }
+    @media (max-width: 980px) {
+      .app-shell { display: block; }
+      .toc { position: fixed; inset: 0 auto 0 0; z-index: 40; width: min(86vw, 330px); transform: translateX(-105%); transition: transform .2s ease; box-shadow: var(--shadow); }
+      .toc.open { transform: translateX(0); }
+      .mobile-nav { display: block; }
+      .metric-band { grid-template-columns: repeat(2, 1fr); }
+      .metric { border-bottom: 1px solid var(--line); }
+      .hero-status, .grid-2, .grid-3, .footer-inner { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .metric-band { grid-template-columns: 1fr; }
+      .metric { border-right: 0; }
+      th, td { min-width: 150px; }
+      .hero::after { display: none; }
+    }
+    @media print {
+      .scope-ribbon { background: white; color: var(--rust); border: 2px solid var(--rust); }
+      .hero { background: white; color: black; border-bottom: 3px solid black; padding: 1.2rem 0; }
+      .hero .lede, .eyebrow, .hero-meta span { color: #333; }
+      .toc, .mobile-nav, .toc-tools, .risk-controls { display: none !important; }
+      .app-shell { display: block; }
+      main { padding: 1rem 0; }
+      section { break-inside: avoid; margin-bottom: 2rem; }
+      details { break-inside: avoid; }
+      details > * { display: block !important; }
+      .card, .flow-figure { box-shadow: none; }
+      a { color: black; text-decoration: none; }
+      .footer { background: white; color: black; border-top: 3px solid black; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="scope-ribbon">Comprehensive code &amp; method audit · Dynamic 7-dataset validation incomplete · Not publication evidence</div>
+  <header class="hero">
+    <p class="eyebrow">InterSubMod / Layered reconstruction v2 / 2026-07-10</p>
+    <h1>從 read 到 tree：概念全鏈與當前可執行邊界</h1>
+    <p class="lede">這不是一份「全部正常」的結果簡報，而是一份可逐行追查的流程說明書：涵蓋 ClairS、LongPhase-S、R/A/X read census、HP family、Model-A solver、CN annotation、V1–V7、runner、C++ 平行支線與報告 provenance。</p>
+    <div class="hero-status">
+      <div class="verdict-box"><strong>發布判斷：Conditional NO-GO</strong><br>研究方向可繼續，但在 truth-BED scope、V5 驗證語意與舊數值矛盾修正前，不得升級為發布級 comprehensive validation。</div>
+      <div class="scope-box"><strong>動態範圍：Partial</strong><br>7/7 input preflight 完成；v2 full run 無 sample COMPLETE 與 final verification。</div>
+    </div>
+    <div class="hero-meta">
+      <span>Framework: Diátaxis + A3/ADR</span>
+      <span>Task type: B comprehensive</span>
+      <span>7 datasets / 6 biological samples</span>
+      <span>Scope: chr1–22</span>
+      <span>HEAD: 4fb9e74 · dirty snapshot</span>
+      <span>Status cutoff: 2026-07-11 00:19 +0800 · bip7</span>
+    </div>
+  </header>
+  <div class="metric-band" aria-label="稽核摘要數字">
+    <div class="metric"><span class="number">8</span><span class="label">P0 blockers</span></div>
+    <div class="metric"><span class="number">33</span><span class="label">完整風險項目</span></div>
+    <div class="metric"><span class="number">7/7</span><span class="label">輸入 preflight PASS</span></div>
+    <div class="metric"><span class="number">234/234</span><span class="label">C++ registered tests PASS</span></div>
+    <div class="metric"><span class="number">0/7</span><span class="label">v2 sample COMPLETE at cutoff</span></div>
+  </div>
+  <div class="app-shell">
+    <nav class="toc" id="toc" aria-label="本頁目錄">
+      <p class="toc-title">Contents</p>
+      <div class="toc-tools"><button type="button" id="expandAll">展開全部</button><button type="button" id="collapseAll">收合全部</button></div>
+      <a href="#verdict">01 · 結論與 blocker</a>
+      <a href="#context">02 · 背景與名詞</a>
+      <a href="#map">03 · 兩條流程</a>
+      <a href="#inputs">04 · 7 datasets 輸入</a>
+      <a href="#observations">05 · R/A/X observation</a>
+      <a href="#solver">06 · Tree solver</a>
+      <a href="#layers">07 · L0–L3</a>
+      <a href="#verification">08 · V1–V7</a>
+      <a href="#orchestration">09 · Runner與provenance</a>
+      <a href="#cpp">10 · C++平行支線</a>
+      <a href="#decisions">11 · Decision registry</a>
+      <a href="#risks">12 · Risk register</a>
+      <a href="#tests">13 · 本次驗證</a>
+      <a href="#runbook">14 · 安全runbook</a>
+      <a href="#tutorial">15 · 最小例子</a>
+      <a href="#claims">16 · Claim boundary</a>
+      <a href="#sources">17 · Source mapping</a>
+      <a href="#final">18 · 最終結論</a>
+      <div class="toc-note"><strong>範圍提醒</strong><br>本頁完整稽核程式與方法；真實 BAM 的 clean-tagged 7-dataset rerun 尚未完成。</div>
+    </nav>
+    <button class="mobile-nav" id="mobileNav" type="button" aria-controls="toc" aria-expanded="false">目錄</button>
+    <main id="main">
+      <section id="verdict">
+        <p class="section-kicker">Executive verdict</p>
+        <h2>現在能不能放心使用？</h2>
+        <p class="section-intro">能用來理解、除錯與設計下一輪；不能用來宣稱跨樣本 full validation 已完成。問題不是一句「測試有過」能蓋掉，而是 universe、驗證語意與報告數字三個層次同時存在 blocker。</p>
+        <div class="grid-3">
+          <article class="card blocker"><span class="badge p0">B1 · P0</span><h3>Tagged BAM 與 VCF scope 不一致</h3><p>共有6/7 BAM 在 LongPhase-S haplotag 前受 truth BED 限制，active VCF 卻是未限制 ClairS PASS。HCC1395 只有 31,295/113,997 calls 在 HC BED。</p><p><span class="badge l1">O-L1</span></p></article>
+          <article class="card blocker"><span class="badge p0">B2 · P0</span><h3>V5 不是 tree-set oracle</h3><p>固定反例有 1,119,744 candidates、只存 32、<code>trees_complete=false</code>，V5 與 overall 仍回 true。</p><p><span class="badge l1">O-L1</span></p></article>
+          <article class="card blocker"><span class="badge p0">B3 · P0</span><h3>舊報告數值直接矛盾</h3><p>Git objects <code>d2fd4be:...reconstruction_full_pipeline_narrative_HCC1395.standalone.html</code> 與 <code>11452e5:...full_pipeline_quantitative_table_HCC1395.standalone.html</code> 寫 20/7/0；共同標示來源 <code>ccf_and_cn_multisample.json</code> SHA <code>335d3760…a91f813</code> 是 10/13/4。</p><p><span class="badge l1">O-L1</span></p></article>
+        </div>
+        <div class="callout danger"><strong>發布 gate</strong>在 clean LongPhase-S tagging、V5 降名／新oracle、同run數字重產與7/7 final verifier都完成以前，狀態應是 <code>BLOCKED FOR COMPREHENSIVE VALIDATION</code>。</div>
+        <div class="grid-2">
+          <article class="card confirmed"><h3>已直接確認</h3><ul class="mini-list"><li>7/7 input paths、indices、basic headers可讀。</li><li>8 solver golden、7 v2 synthetic、234 C++ registered tests通過。</li><li>v2 role/missingness/display-vs-analysis設計方向較legacy清楚。</li></ul></article>
+          <article class="card major"><h3>尚未確認</h3><ul class="mini-list"><li>clean-tagged 7-dataset full result。</li><li>threshold robustness與BAM scope修正後effect size。</li><li>single-cell／multi-region biological clone truth。</li></ul></article>
+        </div>
+      </section>
+
+      <section id="context">
+        <p class="section-kicker">Explanation</p>
+        <h2>研究背景、claim ceiling 與必要名詞</h2>
+        <p class="section-intro">Active flow 要做的是：從同一分子跨多個 somatic SNV 的共現，建立區域 mutation-state candidate trees。CN 在建樹後註記；甲基化保持 bounded auxiliary。這不是用甲基化直接提高 caller F1 的舊支線。</p>
+        <div class="grid-3">
+          <article class="card"><h3>Thread D</h3><p>相關。核心 evidence 是 read-level allele co-occurrence 與 HP family。</p></article>
+          <article class="card"><h3>Thread B</h3><p>不重啟。L3 明訂不得 ranking 或 confirmation candidate trees。</p></article>
+          <article class="card"><h3>KDE / caller AF</h3><p>KDE只在C++平行支線；active tree不讀caller AF，用BAM read counts。</p></article>
+        </div>
+        <details open><summary>名詞與禁止混用</summary><div class="details-body"><div class="table-wrap"><table>
+          <thead><tr><th>名詞</th><th>精確定義</th><th>不可混用</th></tr></thead>
+          <tbody>
+            <tr><td>dataset</td><td>一組 BAM/VCF/設定；目前7組</td><td>不是7個independent biological samples</td></tr>
+            <tr><td>operational universe</td><td>manifest選定的ClairS paired PASS SNVs</td><td>不是完整biological truth</td></tr>
+            <tr><td>region</td><td>adjacent gap≤50kb的connected component</td><td>不是total span≤50kb</td></tr>
+            <tr><td>population</td><td>support≥MINREAD的R/A pattern</td><td>不是已確認cell population</td></tr>
+            <tr><td>primary lineage</td><td>mutation-bearing HP1/HP2 family unit</td><td>root-only、HP3、none不進primary denominator</td></tr>
+            <tr><td>determined</td><td>指定模型下唯一最小candidate tree</td><td>不是真實演化史唯一確定</td></tr>
+            <tr><td>capped</td><td>solver搜尋未完成</td><td>不得算pass、determined或exact</td></tr>
+            <tr><td>read-AF</td><td>BAM REF/ALT read fraction heuristic</td><td>purity/CN未校正前不能叫CCF</td></tr>
+          </tbody>
+        </table></div></div></details>
+        <div class="callout warn"><strong>科學 claim ceiling</strong>目前最多是「read-supported regional mutation-state trees under an explicit model」。沒有 orthogonal truth 時，不得寫 confirmed clone history。</div>
+      </section>
+
+      <section id="map">
+        <p class="section-kicker">System map</p>
+        <h2>先分 current 與 target，再分 tree 與 C++ 支線</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>視角</th><th>精確 call chain</th><th>邊界</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Current executable runner</strong></td><td>mutable manifest → 未自動 validator → MLHP → L0–L3 → region view → verifier</td><td><code>verification_summary</code> JSON；無HTML</td></tr>
+            <tr><td><strong>Target fail-closed chain</strong></td><td>validator gate → frozen manifest/source/env/input → observation/solver/layers → independent readback → same-run report</td><td>JSON↔HTML exact regression + publication gate</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout danger"><strong>不可混用</strong>下圖上半是 target architecture，不是當前 runner 已實作的 call graph。目前 preflight 是人工 audit sidecar，HTML 也不在 canonical command 內。</div>
+        <figure class="flow-figure">
+          <svg viewBox="0 0 1080 420" role="img" aria-labelledby="flowTitle flowDesc">
+            <title id="flowTitle">目標 fail-closed layered reconstruction 與 C++ benchmark 平行流程</title>
+            <desc id="flowDesc">上半是目標架構：驗證後manifest進入Python observation、tree solver、CN、readback與same-run HTML；下半InterSubMod C++從TP/FP VCF與tagged BAM產生methylation summaries，不在tree critical path。</desc>
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#51636c"/></marker></defs>
+            <text x="20" y="28" fill="#176c70" font-size="18" font-weight="800">TARGET FAIL-CLOSED LAYERED CHAIN</text>
+            <g fill="#e2f0ed" stroke="#176c70" stroke-width="2"><rect x="20" y="52" width="180" height="62" rx="9"/><rect x="230" y="52" width="180" height="62" rx="9"/><rect x="440" y="52" width="180" height="62" rx="9"/><rect x="650" y="52" width="180" height="62" rx="9"/><rect x="860" y="52" width="190" height="62" rx="9"/></g>
+            <g fill="#16242d" font-size="14" font-weight="700" text-anchor="middle"><text x="110" y="80">Validated + frozen input</text><text x="110" y="99" font-size="12" font-weight="500">fail-closed manifest gate</text><text x="320" y="80">R/A/X observation</text><text x="320" y="99" font-size="12" font-weight="500">gap · cap · reads · HP</text><text x="530" y="80">Model-A solver</text><text x="530" y="99" font-size="12" font-weight="500">minimum hidden nodes</text><text x="740" y="80">L0–L3 layers</text><text x="740" y="99" font-size="12" font-weight="500">role · class · CN · limits</text><text x="955" y="80">Readback + same-run HTML</text><text x="955" y="99" font-size="12" font-weight="500">funnel · hashes · regression</text></g>
+            <g stroke="#51636c" stroke-width="2.2" marker-end="url(#arrow)"><line x1="200" y1="83" x2="226" y2="83"/><line x1="410" y1="83" x2="436" y2="83"/><line x1="620" y1="83" x2="646" y2="83"/><line x1="830" y1="83" x2="856" y2="83"/></g>
+            <line x1="20" y1="152" x2="1050" y2="152" stroke="#d7d0c3" stroke-width="2"/>
+            <text x="20" y="188" fill="#a63f32" font-size="18" font-weight="800">UPSTREAM / PARALLEL BENCHMARK</text>
+            <g fill="#f6e5df" stroke="#a63f32" stroke-width="2"><rect x="20" y="212" width="180" height="62" rx="9"/><rect x="230" y="212" width="180" height="62" rx="9"/><rect x="440" y="212" width="180" height="62" rx="9"/><rect x="650" y="212" width="180" height="62" rx="9"/><rect x="860" y="212" width="190" height="62" rx="9"/></g>
+            <g fill="#16242d" font-size="14" font-weight="700" text-anchor="middle"><text x="110" y="240">ClairS paired VCF</text><text x="110" y="259" font-size="12" font-weight="500">FILTER=PASS input</text><text x="320" y="240">LongPhase-S</text><text x="320" y="259" font-size="12" font-weight="500">tagged BAM + _sc.vcf</text><text x="530" y="240">Truth split</text><text x="530" y="259" font-size="12" font-weight="500">TP / FP benchmark</text><text x="740" y="240">InterSubMod C++</text><text x="740" y="259" font-size="12" font-weight="500">methylation significance</text><text x="955" y="240">Legacy F1/filter</text><text x="955" y="259" font-size="12" font-weight="500">parallel claim space</text></g>
+            <g stroke="#51636c" stroke-width="2.2" marker-end="url(#arrow)"><line x1="200" y1="243" x2="226" y2="243"/><line x1="410" y1="243" x2="436" y2="243"/><line x1="620" y1="243" x2="646" y2="243"/><line x1="830" y1="243" x2="856" y2="243"/></g>
+            <path d="M320 274 C320 335 230 335 230 365 L230 392" fill="none" stroke="#176c70" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+            <rect x="104" y="354" width="252" height="52" rx="9" fill="#e2f0ed" stroke="#176c70" stroke-width="2"/>
+            <text x="230" y="377" fill="#16242d" font-size="13" text-anchor="middle" font-weight="700">tagged BAM is reused upstream</text><text x="230" y="395" fill="#5d6a70" font-size="11" text-anchor="middle">C++ significance is not reused by tree flow</text>
+            <rect x="470" y="330" width="480" height="66" rx="9" fill="#f7edd5" stroke="#a96c10" stroke-width="2"/>
+            <text x="710" y="357" fill="#71410b" font-size="14" text-anchor="middle" font-weight="800">Key contract violation</text><text x="710" y="380" fill="#71410b" font-size="12" text-anchor="middle">6/7 tagged BAMs truth-BED restricted; active VCF universe is not</text>
+          </svg>
+          <figcaption>上半為目標 fail-closed chain；下半為現存 upstream/C++ 平行支線。兩者共享 tagged BAM 上游，但不共享 inference output。</figcaption>
+        </figure>
+      </section>
+
+      <section id="inputs">
+        <p class="section-kicker">Input contract</p>
+        <h2>7 datasets 的實際輸入與版本</h2>
+        <p class="section-intro">Manifest hash <code>fd1a9aec…59415dc</code>。7/7 preflight PASS 只代表路徑、index、基本 header 與 state 可讀；不代表 tagged BAM 的 evidence scope一致。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Dataset</th><th>ClairS</th><th>SNV total</th><th>chr1–22</th><th>Out</th><th>NAF=0</th><th>CN</th><th>Truth BED in BAM</th></tr></thead>
+          <tbody>
+            <tr><td>HCC1395</td><td>0.4.0</td><td>113,997</td><td>80,234</td><td>33,763</td><td>96.8078%</td><td>SEQC2</td><td><span class="badge p0">Yes</span></td></tr>
+            <tr><td>HCC1395_DORADO</td><td>0.4.0</td><td>112,387</td><td>79,120</td><td>33,267</td><td>98.4616%</td><td>SEQC2</td><td><span class="badge p0">Yes</span></td></tr>
+            <tr><td>COLO829</td><td>0.4.1</td><td>38,196</td><td>36,585</td><td>1,611</td><td>97.5469%</td><td>unavailable</td><td>No</td></tr>
+            <tr><td>H1437</td><td>0.4.1</td><td>75,578</td><td>73,243</td><td>2,335</td><td>79.2797%</td><td>SAVANA</td><td><span class="badge p0">Yes</span></td></tr>
+            <tr><td>H2009</td><td>0.4.1</td><td>157,405</td><td>150,370</td><td>7,035</td><td>98.8171%</td><td>SAVANA</td><td><span class="badge p0">Yes</span></td></tr>
+            <tr><td>HCC1937</td><td>0.4.1</td><td>49,548</td><td>15,915</td><td>33,633</td><td>87.4667%</td><td>unavailable</td><td><span class="badge p0">Yes</span></td></tr>
+            <tr><td>HCC1954</td><td>0.4.1</td><td>20,969</td><td>19,743</td><td>1,226</td><td>97.1768%</td><td>SAVANA</td><td><span class="badge p0">Yes</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="grid-2">
+          <div class="callout warn"><strong>Version contract mismatch</strong>Manifest寫ClairS v0.4.0；實際2份0.4.0、5份0.4.1。Validator只查source，不enforce版本。</div>
+          <div class="callout danger"><strong>NAF不是truth criterion</strong>H1437只有79.3% records NAF=0，直接反證「paired PASS等於normal AF零」。</div>
+        </div>
+        <details><summary><code>somatic_pass.vcf.gz</code> 與 <code>_sc.vcf</code> 的角色衝突</summary><div class="details-body"><p>HCC1395 ClairS PASS input是113,997；LongPhase-S <code>_sc.vcf</code>輸出是108,530 PASS + 5,467 LowQual。Wrapper先用同名<code>somatic_pass</code>作input，再覆寫成output PASS，最後刪除；active manifest中的113,997檔實際是input/pre-filter artifact。</p><p><strong>Provenance 未閉環：</strong>count與log能證明現存檔案的內容角色，但無artifact記錄可重建它在wrapper刪除後是如何被保留、複製或重產。現狀是「內容可推定；producer lineage不可完整重建」。</p><div class="callout warn"><strong>需要的命名</strong><code>clairs_paired.pass.input.vcf.gz</code>、<code>longphase_s.recalibrated.all.vcf.gz</code>、<code>longphase_s.recalibrated.pass.vcf.gz</code>，再加producer command/input-output hash/retention policy。</div></div></details>
+      </section>
+
+      <section id="observations">
+        <p class="section-kicker">Observation builder</p>
+        <h2>從 VCF/BAM 到 R/A/X 的每個最低層判斷</h2>
+        <div class="grid-3">
+          <article class="card"><h3>Component</h3><p>sorted SNVs以相鄰gap≤50,000 bp串接；total span沒有上限。</p></article>
+          <article class="card"><h3>Densest 8</h3><p>超過8個SNV時只留span最小的連續8個，其餘進cap-excluded。</p></article>
+          <article class="card"><h3>Support</h3><p>pooled與per-family genotype/pattern最低3 reads；通過後solver不再用read count加權。</p></article>
+        </div>
+        <h3>Pileup contract</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>步驟</th><th>Current behavior</th><th>風險</th></tr></thead>
+          <tbody>
+            <tr><td>Read filter</td><td><code>stepper=samtools</code>、MAPQ≥20、BASEQ≥0</td><td>BASEQ0未做sensitivity；max_depth隱含8,000</td></tr>
+            <tr><td>Observation</td><td>exact REF→R、exact ALT→A、其他/未覆蓋→X</td><td>OTHER與missing在vector同為X</td></tr>
+            <tr><td>Molecule key</td><td><code>query_name</code></td><td>supplementary/multi-alignments可後寫覆蓋或拼接</td></tr>
+            <tr><td>HP/PS</td><td>同query name最後一筆tag</td><td>沒有conflict counter；PS後續未使用</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout warn"><strong>Supplementary 不是理論問題</strong>HCC1395抽查窗有重複QNAME與supplementary alignments；上游又開啟<code>--tagSupplementary</code>。需要明確排除或segment-aware merge policy。</div>
+        <h3>HP family collapse</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Raw HP</th><th>Python family</th><th>資訊損失</th></tr></thead>
+          <tbody><tr><td>1 / 1-1 / 1-2</td><td>1</td><td>somatic suffix消失</td></tr><tr><td>2 / 2-1 / 2-2</td><td>2</td><td>somatic suffix消失</td></tr><tr><td>3</td><td>3</td><td>mutation-bearing時為<code>unresolved_H3_auxiliary</code></td></tr><tr><td>4</td><td>none</td><td>both-germline與missing/unphased混在一起</td></tr></tbody>
+        </table></div>
+        <details open><summary>兩個 denominator holes</summary><div class="details-body">
+          <ol>
+            <li><strong>Full 被重複叫 partial：</strong><code>subread_groups</code>在判斷full前就計所有vectors，所以無X的full vector同時出現在full與subread；可行集合通常不變，但<code>n_partial</code>與UI錯。</li>
+            <li><strong>Pooled retained 但0 family unit：</strong>例如同一pattern三reads分散HP1=2、HP2=1；pooled達3，兩family都不到3，funnel算retained，layered/detail/region卻完全消失。</li>
+          </ol>
+        </div></details>
+        <div class="formula">scope_input = singleton + cap_excluded + read_unsupported + retained<br><span style="color:#a63f32">這只證明branch加總，不證明retained group都有tree unit。</span></div>
+      </section>
+
+      <section id="solver">
+        <p class="section-kicker">Model reference</p>
+        <h2>Model-A solver：最佳化目標、上限與分類</h2>
+        <p class="section-intro">每個genotype是ALT bit set；full observation必須在node set，partial X-pattern是一個subcube。Solver找最少hidden nodes的unit-flip closed node sets，再枚舉所有parent choices。</p>
+        <div class="formula">minimize e = |N \ ({root} ∪ full)|<br>subject to: full ⊆ N; every partial subcube intersects N; every x≠root has a predecessor x−{j} in N</div>
+        <div class="grid-2">
+          <article class="card"><h3>Search limits</h3><ul class="mini-list"><li>k≤8（state space≤256）</li><li>extra hidden cap=4</li><li>per-level budget=150,000</li><li>超出→greedy fallback + <code>capped=true</code></li></ul></article>
+          <article class="card"><h3>Candidate count</h3><p><code>n_trees(N)=Π n_valid_predecessors(x)</code>，再跨minimal feasible N求和。Read count通過MINREAD後不進objective。</p></article>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Class</th><th>精確條件</th><th>安全說法</th></tr></thead>
+          <tbody>
+            <tr><td>determined</td><td>non-capped、存在refree minimal N、n_trees=1</td><td>模型內唯一最小candidate</td></tr>
+            <tr><td>ambiguous</td><td>non-capped、存在refree minimal N、n_trees&gt;1</td><td>多個最小candidate</td></tr>
+            <tr><td>recurrence_required</td><td>所有minimal solutions都需某bit重複取得</td><td>Model A內需要recurrence</td></tr>
+            <tr><td>capped</td><td>hidden/budget search未完成</td><td>not-applicable exact claim</td></tr>
+          </tbody>
+        </table></div>
+        <div class="grid-2">
+          <div class="callout danger"><strong>Capped accounting bug</strong><code>full={RR,AA}</code>強制cap時，top-level n_hidden=0、stored tree n_hidden=1；root被扣兩次。</div>
+          <div class="callout warn"><strong>Order reproducibility</strong>tree list未canonical sort；digest只sort每棵edges，不sorttree list。display prefix可跨process改變。</div>
+        </div>
+      </section>
+
+      <section id="layers">
+        <p class="section-kicker">Layered decisions</p>
+        <h2>L0–L3：哪些證據能改樹，哪些只能註記</h2>
+        <div class="grid-2">
+          <article class="card"><span class="badge l1">L0</span><h3>Family role</h3><p>Primary=mutation-bearing HP1/HP2。Root-only是reference control；HP3 mutation-bearing的正式label是<code>unresolved_H3_auxiliary</code>；none是<code>unphased_auxiliary</code>。</p></article>
+          <article class="card"><span class="badge l1">L1</span><h3>sSNV + solver</h3><p>只用R/A/X constraints與HP family；不讀CN、methylation、purity、VCF AF或truth label。</p></article>
+          <article class="card"><span class="badge l2">L2</span><h3>Post-tree CN</h3><p>只對non-capped recurrence-required unit註記artifact/confounded/candidate/unavailable；不覆寫L1 tree set。</p></article>
+          <article class="card"><span class="badge l5">L3</span><h3>Methylation boundary</h3><p><code>not_evaluated</code>；只允許negative screen/residual flag，禁止ranking與confirmation。</p></article>
+        </div>
+        <h3>CN m-channel</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Evidence</th><th>Verdict</th><th>限制</th></tr></thead>
+          <tbody><tr><td>missing/unknown</td><td>unavailable</td><td>不得當neutral</td></tr><tr><td>integer gain≥3 / loss=0</td><td>artifact_drop</td><td>只在integer BED存在時</td></tr><tr><td>categorical gain/loss</td><td>confounded</td><td>跨sample evidence depth不同</td></tr><tr><td>neutral</td><td>candidate_keep</td><td>不是confirmed convergence</td></tr><tr><td>LOH</td><td>max read-AF &gt;0.7 likely artifact；否則 likely recurrence</td><td>heuristic未校準</td></tr></tbody>
+        </table></div>
+        <div class="callout danger"><strong>CN contract仍不完整</strong>Stage1用右中央SNV，Stage2用首尾算術midpoint；舊HCC snapshot有12/7,928 groups state不同。SEQC2另有overlap與coordinate ambiguity。</div>
+      </section>
+
+      <section id="verification">
+        <p class="section-kicker">Verification semantics</p>
+        <h2>V1–V7 是 implementation checks，不是 external truth</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Check</th><th>實際檢查</th><th>不能證明</th></tr></thead>
+          <tbody>
+            <tr><td>V1</td><td>stored tree unit-flip、one-parent、root-connected、acyclic</td><td>未儲存候選</td></tr>
+            <tr><td>V2</td><td>full與partial coverage</td><td>read→vector是否正確</td></tr>
+            <tr><td>V3</td><td>full observations是nodes subset</td><td>大幅重疊V2</td></tr>
+            <tr><td>V4</td><td>同一pool/helper重搜e_min−1不可行</td><td>不共用實作的formal oracle</td></tr>
+            <tr><td>V5</td><td>重算analytical candidate count</td><td>tree-set identity/completeness</td></tr>
+            <tr><td>V6</td><td>class與flags self-consistent</td><td>模型符合biology</td></tr>
+            <tr><td>V7</td><td>determined須1tree、refree、non-capped</td><td>n_trees的external correctness</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout danger"><strong>Adversarial proof</strong><code>n_trees=1,119,744</code>、stored=32、<code>trees_complete=false</code>，V5與overall仍true。V5應更名<code>count_consistency</code>。</div>
+        <div class="callout warn"><strong>Stress denominator</strong>固定seed前100案是98 checked、2 capped skipped、0 checked failures。Legacy程式把2個skipped也加pass，因此「4,000/4,000」不等於4,000 checked。</div>
+        <div class="callout warn"><strong>Positive analysis cap</strong>unit可以structural checks full-pass但candidate set incomplete；final H6才擋。應分開structural與exhaustiveness兩軸。</div>
+      </section>
+
+      <section id="orchestration">
+        <p class="section-kicker">Orchestration &amp; provenance</p>
+        <h2>Runner 已補了什麼，還缺什麼</h2>
+        <div class="grid-2">
+          <article class="card confirmed"><h3>已有</h3><ul class="mini-list"><li>immutable run root</li><li>manifest copy、params、status</li><li>input/code/output hashes</li><li>5-shard schema/funnel gates</li><li>final verification JSON/TSV</li><li>current child <code>set -euo pipefail</code></li></ul></article>
+          <article class="card blocker"><h3>未 fail-closed</h3><ul class="mini-list"><li>validator未接線</li><li>worker仍讀mutable source manifest</li><li>runner/env/full BAM/integration未鎖</li><li>BAM @PG truth-BED不解析</li><li>無trap/heartbeat/atomic JSON</li><li>verifier相信producer booleans</li></ul></article>
+        </div>
+        <h3>Incomplete run snapshot</h3>
+        <pre><code>observed_at=2026-07-11 00:19:04 +0800
+host=bip7
+RUN_ROOT=/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2
+HCC1395         preflight PASS → mlhp START
+HCC1395_DORADO  preflight PASS → mlhp START
+sample COMPLETE: 0 / 7
+verification_summary.json: absent
+matching pipeline process: not observed on bip7</code></pre>
+        <div class="callout danger"><strong>不能推定成功或失敗原因</strong>可直接觀察的是run root只有4份root-level metadata、run incomplete、在bip7無matching pipeline process。應找launcher/host/root cause，再用新run ID；不可手寫PASS或resume同一immutable root。</div>
+        <h3>User-facing HTML gap</h3>
+        <p>Canonical runner停在JSON verifier，沒有串read-AF、methyl或HTML。既有workstation又對最多32棵display prefix做read-AF排序與forced-edge intersection，並含legacy路徑/欄位/claims。因此「core修好」不等於「HTML自動正確」。</p>
+      </section>
+
+      <section id="cpp">
+        <p class="section-kicker">Parallel branch</p>
+        <h2>InterSubMod C++：同一repo、不同critical path</h2>
+        <p class="section-intro">C++產生methylation significance與legacy F1/filter outputs；active tree不消費它。保留此節是為了避免把KDE、distance或TP/FP誤寫成tree input。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Parameter</th><th>Config initial</th><th>Direct CLI effective</th><th>Benchmark wrapper</th></tr></thead>
+          <tbody><tr><td>window</td><td>1,000</td><td>1,000</td><td>5,000</td></tr><tr><td>threads</td><td>16</td><td>16；help誤寫1</td><td>nproc</td></tr><tr><td>distance</td><td>BERNOULLI</td><td>NHD（ArgParser clear/replace）</td><td>BERNOULLI</td></tr><tr><td>MAPQ / baseQ</td><td>20 / 20</td><td>20 / 20</td><td>20 / 20</td></tr><tr><td>methyl low/high</td><td>.2 / .8</td><td>.2 / .8</td><td>.2 / .8</td></tr><tr><td>expected coverage</td><td>0</td><td>auto-KDE</td><td>auto-KDE</td></tr></tbody>
+        </table></div>
+        <div class="grid-2"><div class="callout warn"><strong>Success propagation</strong><code>RegionProcessor.cpp:1385–1394</code>的summary CSV、<code>:1669–1673</code>的statistics開檔失敗都只log後return；<code>main.cpp:81</code>仍return0。summary/statistics寫入失敗可能不反映在process exit。</div><div class="callout danger"><strong>Lifecycle conflict</strong>LongPhase與cleanup scripts直接rm/rm -rf，且刪active consumer依賴的同名artifact；不符合現行archive governance。</div></div>
+      </section>
+
+      <section id="decisions">
+        <p class="section-kicker">Decision ledger</p>
+        <h2>34 個會改變 universe、分母或 verdict 的分支</h2>
+        <p class="section-intro">這張表是說明書的核心：不是只列參數，而是列出每個 if/else 最終把資料送去哪裡，以及目前是否仍有模糊。</p>
+        <details open><summary>展開完整 decision registry</summary><div class="details-body"><div class="table-wrap"><table>
+          <thead><tr><th>ID</th><th>Condition</th><th>True</th><th>False / exception</th><th>Audit judgement</th></tr></thead>
+          <tbody>
+            <tr><td>D01</td><td>manifest schema2 + count</td><td>create immutable root</td><td>exit</td><td>未驗biological_count policy</td></tr>
+            <tr><td>D02</td><td>REF/ALT各1 base</td><td>SNV universe</td><td>skip</td><td>合理</td></tr>
+            <tr><td>D03</td><td>Tabix fetch success</td><td>records</td><td>return []</td><td>應fail loud</td></tr>
+            <tr><td>D04</td><td>chr1–22</td><td>primary scope</td><td>out-of-scope</td><td>必寫autosomal</td></tr>
+            <tr><td>D05</td><td>adjacent gap≤50kb</td><td>same component</td><td>new component</td><td>total span未封頂</td></tr>
+            <tr><td>D06</td><td>component&lt;2</td><td>singleton</td><td>multi-locus</td><td>合理</td></tr>
+            <tr><td>D07</td><td>component&gt;8</td><td>densest contiguous8</td><td>keep all</td><td>未做sensitivity</td></tr>
+            <tr><td>D08</td><td>del/refskip/no qpos</td><td>skip observation</td><td>check MAPQ/base</td><td>合理</td></tr>
+            <tr><td>D09</td><td>MAPQ&lt;20</td><td>skip</td><td>keep</td><td>未做sensitivity</td></tr>
+            <tr><td>D10</td><td>base=REF/ALT/other</td><td>R/A/X</td><td>—</td><td>BASEQ0風險</td></tr>
+            <tr><td>D11</td><td>HP 1*/2*/3/other</td><td>1/2/3/none</td><td>—</td><td>HP4與missing混同</td></tr>
+            <tr><td>D12</td><td>covered loci=0</td><td>drop read</td><td>count vector</td><td>合理</td></tr>
+            <tr><td>D13</td><td>vector no X</td><td>full + subread</td><td>subread</td><td>full重複叫partial</td></tr>
+            <tr><td>D14</td><td>pooled support insufficient</td><td>unsupported</td><td>retained</td><td>與family gate不同</td></tr>
+            <tr><td>D15</td><td>pattern count≥3</td><td>constraint</td><td>drop</td><td>count後續不加權</td></tr>
+            <tr><td>D16</td><td>CN file absent</td><td>unavailable</td><td>load intervals</td><td>missing≠neutral合理</td></tr>
+            <tr><td>D17</td><td>first s≤mid≤e</td><td>CN label</td><td>neutral</td><td>coordinate/overlap未定</td></tr>
+            <tr><td>D18</td><td>supported ALT</td><td>mutation-bearing</td><td>reference-only</td><td>合理</td></tr>
+            <tr><td>D19</td><td>HP1/2 + mutation</td><td>primary</td><td>aux/control</td><td>符合current spec</td></tr>
+            <tr><td>D20</td><td>budget + e≤4</td><td>exact search</td><td>capped fallback</td><td>fallback不可exact claim</td></tr>
+            <tr><td>D21</td><td>covers + closed</td><td>feasible N</td><td>reject</td><td>model-defined</td></tr>
+            <tr><td>D22</td><td>analysis cap≤0</td><td>all trees</td><td>prefix</td><td>positive cap不應full-pass</td></tr>
+            <tr><td>D23</td><td>capped</td><td>capped class</td><td>refree/recurrence classify</td><td>合理</td></tr>
+            <tr><td>D24</td><td>VERIFY_EVERY=1</td><td>full V1–V7</td><td>V4/V5 sampled</td><td>executed/skipped必保存</td></tr>
+            <tr><td>D25</td><td>failed/skipped/capped</td><td>fail/partial/n-a</td><td>full</td><td>exhaustiveness需另軸</td></tr>
+            <tr><td>D26</td><td>non-capped + complete</td><td>exact shapes/digest</td><td>null</td><td>需canonical order</td></tr>
+            <tr><td>D27</td><td>mutation + recurrence + noncap</td><td>L2 CN</td><td>n/a</td><td>分層合理</td></tr>
+            <tr><td>D28</td><td>CN gain≥3/loss=0</td><td>artifact</td><td>categorical path</td><td>source-specific contract</td></tr>
+            <tr><td>D29</td><td>CN neutral</td><td>candidate_keep</td><td>confounded/unavailable</td><td>不是confirmation</td></tr>
+            <tr><td>D30</td><td>LOH max read-AF&gt;.7</td><td>likely artifact</td><td>likely recurrence</td><td>未校準heuristic</td></tr>
+            <tr><td>D31</td><td>raw JSON parse fail</td><td>silent continue</td><td>join</td><td>不合理</td></tr>
+            <tr><td>D32</td><td>new primary field exists</td><td>use new</td><td>fallback legacy</td><td>v2應拒絕fallback</td></tr>
+            <tr><td>D33</td><td>all verifier checks pass</td><td>exit0</td><td>exit1</td><td>checks非independent</td></tr>
+            <tr><td>D34</td><td>methyl not joined</td><td>not_evaluated</td><td>—</td><td>合理claim ceiling</td></tr>
+          </tbody>
+        </table></div></div></details>
+      </section>
+
+      <section id="risks">
+        <p class="section-kicker">A3 risk register</p>
+        <h2>8 個 P0、22 個 P1、3 個 P2</h2>
+        <p class="section-intro">可用按鈕篩選。P0會改universe、denominator、核心claim或讓驗證失真；P1影響可重現性/局部結果；P2是工程品質。</p>
+        <div class="risk-controls" aria-label="風險篩選">
+          <button type="button" data-risk="all" aria-pressed="true">全部 33</button>
+          <button type="button" data-risk="p0" aria-pressed="false">P0 8</button>
+          <button type="button" data-risk="p1" aria-pressed="false">P1 22</button>
+          <button type="button" data-risk="p2" aria-pressed="false">P2 3</button>
+        </div>
+        <div class="table-wrap"><table id="riskTable">
+          <thead><tr><th>ID</th><th>Severity</th><th>Finding</th><th>Impact</th><th>Acceptance</th></tr></thead>
+          <tbody>
+            <tr class="risk-row" data-level="p0"><td>R01</td><td><span class="badge p0">P0</span></td><td>6/7 tagged BAM truth-BED restricted</td><td>family/tree denominator跨sample不一致</td><td>clean tagging + @PG exact gate</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R02</td><td><span class="badge p0">P0</span></td><td>V5只有count consistency</td><td>不完整tree set仍PASS</td><td>rename + independent set oracle</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R03</td><td><span class="badge p0">P0</span></td><td>HTML 20/7/0 vs JSON 10/13/4</td><td>改變candidate=0結論</td><td>same-run per-unit join + regression</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R04</td><td><span class="badge p0">P0</span></td><td>v2 run incomplete</td><td>無7/7 result</td><td>fresh complete immutable run</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R05</td><td><span class="badge p1">P1</span></td><td>somatic_pass角色碰撞與刪除</td><td>provenance/retention錯亂</td><td>role-specific immutable names</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R06</td><td><span class="badge p1">P1</span></td><td>manifest caller version錯</td><td>cross-version差異隱藏</td><td>per-dataset exact version gate</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R07</td><td><span class="badge p1">P1</span></td><td>manifest/tests/core dirty/untracked</td><td>HEAD不可重建</td><td>commit或source/patch bundle</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R08</td><td><span class="badge p1">P1</span></td><td>runner仍讀mutable manifest</td><td>長跑輸入漂移</td><td>copy後只讀run-root manifest</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R09</td><td><span class="badge p1">P1</span></td><td>runner/env/full BAM/integration未鎖</td><td>精確環境不可重建</td><td>expanded provenance package</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R10</td><td><span class="badge p1">P1</span></td><td>supplementary QNAME後寫</td><td>molecule state模糊</td><td>explicit molecule policy</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R11</td><td><span class="badge p1">P1</span></td><td>pooled retained可0 family unit</td><td>funnel retained不等於tree-covered</td><td>new branch/invariant</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R12</td><td><span class="badge p1">P1</span></td><td>full vector混入partial</td><td>n_partial/UI語意錯</td><td>含X才是partial</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R13</td><td><span class="badge p1">P1</span></td><td>CN coordinate/overlap/midpoint未定</td><td>recurrence verdict可翻轉</td><td>source-specific tests</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R14</td><td><span class="badge p1">P1</span></td><td>基本threshold無sensitivity</td><td>topology可能是參數產物</td><td>preregistered grid</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R15</td><td><span class="badge p1">P1</span></td><td>legacy first32 + CCF命名</td><td>舊比例/ranking不可信</td><td>all-candidate + read-AF rename</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R16</td><td><span class="badge p1">P1</span></td><td>13,785/18,931/primary分母混合</td><td>百分比不可解</td><td>population_id + n_total</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R17</td><td><span class="badge p1">P1</span></td><td>7 datasets當7 samples</td><td>pseudo-replication</td><td>固定寫7/6</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R18</td><td><span class="badge p1">P1</span></td><td>V1–V7同源self-consistency</td><td>不可升truth</td><td>三層verdict分開</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R19</td><td><span class="badge p1">P1</span></td><td>raw join silent failure</td><td>UI缺evidence仍顯tree</td><td>fail-fast + join invariant</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R20</td><td><span class="badge p1">P1</span></td><td>tree order未canonical</td><td>digest/prefix漂移</td><td>canonical sort + seed regression</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R21</td><td><span class="badge p1">P1</span></td><td>upstream直接刪檔</td><td>治理/retention衝突</td><td>archive policy</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R22</td><td><span class="badge p1">P1</span></td><td>無orthogonal biological truth</td><td>不可clone confirmation</td><td>維持regional claim</td></tr>
+            <tr class="risk-row" data-level="p2"><td>R23</td><td><span class="badge p2">P2</span></td><td>unclosed file warnings</td><td>fd/flush風險</td><td>with open + warnings-as-errors</td></tr>
+            <tr class="risk-row" data-level="p2"><td>R24</td><td><span class="badge p2">P2</span></td><td>PROFILE未用、integration未hash</td><td>runtime/metric不可追</td><td>profile.tsv + hash</td></tr>
+            <tr class="risk-row" data-level="p2"><td>R25</td><td><span class="badge p2">P2</span></td><td>C++三套default</td><td>使用者抄錯設定</td><td>single source defaults</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R26</td><td><span class="badge p0">P0</span></td><td>recurrence label隱藏capped family</td><td>incomplete enumeration低估</td><td>multi-axis flags</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R27</td><td><span class="badge p0">P0</span></td><td>workstation用display32做ranking/forced-edge</td><td>UI變科學分析cap</td><td>UI不計算，只讀verified result</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R28</td><td><span class="badge p0">P0</span></td><td>workstation legacy paths/schema/claims</td><td>core修好仍顯舊結論</td><td>run-root-only builder</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R29</td><td><span class="badge p1">P1</span></td><td>capped root-full n_hidden不一致</td><td>U6/trace錯</td><td>set-difference formula</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R30</td><td><span class="badge p1">P1</span></td><td>positive analysis cap仍full_pass</td><td>structural/exhaustive混淆</td><td>two-axis status</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R31</td><td><span class="badge p1">P1</span></td><td>未鎖canonical completeness artifacts</td><td>partial upstream可進v2</td><td>bundle completeness gate</td></tr>
+            <tr class="risk-row" data-level="p0"><td>R32</td><td><span class="badge p0">P0</span></td><td>final verifier相信producer自報</td><td>同源錯誤仍PASS</td><td>independent recomputation + faults</td></tr>
+            <tr class="risk-row" data-level="p1"><td>R33</td><td><span class="badge p1">P1</span></td><td>runner未串auxiliary/HTML</td><td>user artifact不可單命令重建</td><td>verified run-root report builder</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="tests">
+        <p class="section-kicker">Executed evidence</p>
+        <h2>本次真的跑了什麼，PASS 到哪裡為止</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Layer</th><th>Input</th><th>Result</th><th>Supports</th><th>Does not support</th></tr></thead>
+          <tbody>
+            <tr><td>Shell syntax</td><td>v2 runner</td><td>exit0</td><td>shell parse</td><td>real I/O/runtime</td></tr>
+            <tr><td>Python compile</td><td>8 active modules</td><td>exit0</td><td>syntax/import basics</td><td>branch correctness</td></tr>
+            <tr><td>Input preflight</td><td>7 BAM/VCF/CN</td><td>7/7 PASS</td><td>path/index/header</td><td>truth-BED/CN semantics</td></tr>
+            <tr><td>v2 unittest</td><td>synthetic</td><td>7/7 PASS +2 warnings</td><td>roles/missing/all-vs-display</td><td>full BAM/scale</td></tr>
+            <tr><td>Solver golden</td><td>8 hand cases</td><td>8/8 PASS</td><td>small expected classes</td><td>large independent oracle</td></tr>
+            <tr><td>V5 adversarial</td><td>fixed case</td><td>counterexample reproduced</td><td>V5 overclaim</td><td>replacement oracle</td></tr>
+            <tr><td>C++ build</td><td>current build</td><td>exit0</td><td>incremental build</td><td>clean warning-free rebuild</td></tr>
+            <tr><td>C++ ctest</td><td>234 tests</td><td>234/234, 8.06s</td><td>registered C++ suite</td><td>Python layered chain</td></tr>
+            <tr><td>HTML browser QA</td><td>desktop + mobile</td><td>18 sections、10 details、33 risks、0 console errors</td><td>render/interaction/accessibility basics</td><td>underlying scientific validation</td></tr>
+            <tr><td>Number provenance</td><td>HTML + 6 sources</td><td>23/23 regex-detected tokens sourced</td><td>≥2-decimal/tagged/%/scientific/fold tokens</td><td>全頁所有整數、ID、source claims或biology</td></tr>
+            <tr><td>Fresh-reader closure</td><td>MD + HTML only</td><td>82/100 → 99/100；no material ambiguity</td><td>flow/gate/claim/document navigation</td><td>pipeline correctness或biological truth</td></tr>
+            <tr><td>Full v2</td><td>real BAM</td><td>0/7 complete</td><td>run was started</td><td>all final metrics</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout warn"><strong>23/23 的分母</strong><code>number_provenance.py</code>只擷取≥2位小數、tagged metrics（n=/p=/F1=）、百分比、科學記號與fold/ratio；會排除日期、小整數，也不會覆蓋大部分table counts/IDs。它不表示「全頁每個數字」的全面provenance驗證。</div>
+        <details open><summary>7-dataset input preflight command</summary><div class="details-body"><pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 \
+  docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/validate_layered_v2_inputs.py \
+  --manifest docs/methodology/_assets/20260627_subclone_4axis_teaching/data/layered_v2_input_manifest.json \
+  --output docs/reports/validated/2026/07/20260710_分層重建端到端流程程式碼判斷稽核_01/input_preflight.json</code></pre><pre><code>INPUT PREFLIGHT: 7/7 pass
+HCC1395 · HCC1395_DORADO · COLO829 · H1437 · H2009 · HCC1937 · HCC1954: PASS</code></pre></div></details>
+        <details><summary>Regression/build commands</summary><div class="details-body"><pre><code>/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 -W default .../test_layered_reconstruction_v2.py
+# Ran 7 tests ... OK
+# ResourceWarning at layered_tree_reconstruction.py:238 and :348
+
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 .../tree_enumeration_solver.py
+# GOLDEN: 8/8 ALL PASS
+
+cmake --build build -j2
+ctest --test-dir build --output-on-failure
+# 100% tests passed, 0 failed out of 234</code></pre></div></details>
+      </section>
+
+      <section id="runbook">
+        <p class="section-kicker">How-to</p>
+        <h2>安全 runbook：現在能跑什麼，修完後怎麼跑 full</h2>
+        <div class="callout ok"><strong>現在可安全做</strong>重跑preflight、synthetic/golden tests、C++ build/ctest；這些不啟動全BAM長計算。</div>
+        <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+
+# Input contracts
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 \
+  docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/validate_layered_v2_inputs.py \
+  --manifest docs/methodology/_assets/20260627_subclone_4axis_teaching/data/layered_v2_input_manifest.json \
+  --output /tmp/layered_v2_input_preflight.json
+
+# Bounded tests
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 -W default \
+  docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/test_layered_reconstruction_v2.py
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 \
+  docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/tree_enumeration_solver.py
+cmake --build build -j2
+ctest --test-dir build --output-on-failure</code></pre>
+        <div class="callout danger"><strong>Current full-run command不是發布建議</strong>在truth-BED-restricted BAM修正以前，下面命令即使跑完也不能解除cross-sample blocker。</div>
+        <pre><code>SM_INPUT_MANIFEST="$PWD/docs/methodology/_assets/20260627_subclone_4axis_teaching/data/layered_v2_input_manifest.json" \
+SM_RUN_ID="YYYYMMDD_HHMMSS_layered_reconstruction_v2" \
+SM_RUN_ROOT="/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/YYYYMMDD_HHMMSS_layered_reconstruction_v2" \
+SM_PARALLEL_SAMPLES=2 \
+SM_VERIFY_EVERY=1 \
+SM_ANALYSIS_TREE_CAP=0 \
+SM_DISPLAY_TREE_CAP=32 \
+bash docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/run_layered_7samples_newbb.sh</code></pre>
+        <h3>Launch → engineering → publication gate</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Gate</th><th>放行條件</th><th>Current</th><th>通過後只能說</th></tr></thead>
+          <tbody>
+            <tr><td>Gate-0 bounded audit</td><td>preflight + bounded tests + source snapshot</td><td><span class="badge l1">PASS partial</span></td><td>輸入可讀、局部實作受限範圍通過</td></tr>
+            <tr><td>Gate-1 production launch</td><td>clean tagging；fail-closed validator；frozen input/source/env</td><td><span class="badge p0">NO-GO</span></td><td>可啟動新full run</td></tr>
+            <tr><td>Gate-2 artifact complete</td><td>7 complete；hash readback；zero eligible skip/fail；capped=N/A</td><td><span class="badge l5">0/7</span></td><td>檔案齊全，不是engineering validated</td></tr>
+            <tr><td>Gate-3 engineering release</td><td>Gate-2 + 8 P0全關；independent set/readback/fault tests；HTML不重算science</td><td><span class="badge p0">NO-GO</span></td><td>鎖定snapshot的engineering/method validation</td></tr>
+            <tr><td>Gate-4 publication claim</td><td>Gate-3 + same-run HTML regression + denominators/sensitivity + claim evidence</td><td><span class="badge p0">NO-GO</span></td><td>無orthogonal truth時仍只regional Model-A inference</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout danger"><strong>不可跳級</strong>Gate-2 verifier PASS不等於Gate-3 engineering correctness；Gate-3也不會自動變成biological/publication validation。</div>
+        <h3>Artifact-complete run（Gate-2）必備檔案</h3>
+        <div class="grid-2">
+          <article class="card"><h4>Per sample</h4><ul class="mini-list"><li>5× mlhp JSON + logs</li><li>layered JSON + log</li><li>region-view JSON + log</li><li>input/output hashes</li><li><code>complete PASS</code></li></ul></article>
+          <article class="card"><h4>Run root</h4><ul class="mini-list"><li>frozen manifest + params</li><li>source/env hashes or bundle</li><li>verification JSON/TSV</li><li>verification hashes</li><li>7/7 pass, 0 fail</li></ul></article>
+        </div>
+        <h3>Manual readback verifier</h3>
+        <pre><code>RUN_ROOT=/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/&lt;RUN_ID&gt;
+/bip7_disk/liaoyoyo2001/miniconda3/bin/python3 \
+  docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/verify_layered_v2.py \
+  --run-root "$RUN_ROOT" \
+  --input-manifest "$RUN_ROOT/input_manifest.json" \
+  --output "$RUN_ROOT/verification_summary.readback.json"
+sha256sum -c "$RUN_ROOT/code.sha256"</code></pre>
+        <details><summary>Troubleshooting quick table</summary><div class="details-body"><div class="table-wrap"><table>
+          <thead><tr><th>Symptom</th><th>Likely cause</th><th>Safe action</th></tr></thead>
+          <tbody><tr><td>part JSON empty</td><td>tabix/chrom error swallowed</td><td>fail loud；不可用空part繼續</td></tr><tr><td>funnel pass but regions low</td><td>pooled retained→0 family unit</td><td>add no-family branch/invariant</td></tr><tr><td>HP3/none跨sample差很大</td><td>truth BED/HP4/supplementary</td><td>clean tagging before biology</td></tr><tr><td>many capped</td><td>dense component/budget</td><td>report n/a，不稱pass</td></tr><tr><td>raw observations null</td><td>silent mlhp parse/join failure</td><td>fail run</td></tr><tr><td>status停START</td><td>kill/crash/remote execution</td><td>find root cause；new run ID</td></tr><tr><td>HTML與JSON不同</td><td>manual/cross-schema source</td><td>single-run generation + regression</td></tr></tbody>
+        </table></div></div></details>
+      </section>
+
+      <section id="tutorial">
+        <p class="section-kicker">Tutorial</p>
+        <h2>兩個 SNV 的最小例子</h2>
+        <div class="grid-2">
+          <article class="card confirmed"><h3>唯一最小樹</h3><pre><code>HP1 family
+AR × 5
+AA × 4
+
+RR → AR → AA
+hidden=0 · trees=1
+class=determined</code></pre><p>「determined」只在這個Model A與observations下成立。</p></article>
+          <article class="card major"><h3>Recurrence-required</h3><pre><code>HP1 family
+AR × 5
+RA × 4
+AA × 4
+
+AA may attach to AR or RA
+same bit acquired on branches
+class=recurrence_required</code></pre><p>到這時才查CN；neutral也只叫candidate_keep。</p></article>
+        </div>
+        <div class="callout warn"><strong>MINREAD會改topology</strong>如果AA只有2 reads，它不進constraint，結果可能變成siblings。這就是threshold sensitivity必須預註冊的原因。</div>
+      </section>
+
+      <section id="claims">
+        <p class="section-kicker">Scientific language</p>
+        <h2>可以怎麼說，不能怎麼說</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Safe wording</th><th>Unsafe / withdrawn wording</th></tr></thead>
+          <tbody><tr><td>7 datasets / 6 biological samples</td><td>7 independent samples</td></tr><tr><td>ClairS paired PASS operational backbone</td><td>complete somatic truth</td></tr><tr><td>regional mutation-state candidate tree</td><td>confirmed clone tree</td></tr><tr><td>implementation invariant suite</td><td>independent formal oracle</td></tr><tr><td>98 checked pass, 2 capped skipped</td><td>100/100 all pass</td></tr><tr><td>L1 does not consume CN; robustness pending</td><td>CN-robust topology</td></tr><tr><td>read-AF ordering heuristic</td><td>CCF confirmation</td></tr><tr><td>neutral recurrence candidate</td><td>true convergence / candidate=0</td></tr><tr><td>dynamic validation pending</td><td>7/7 full validation complete</td></tr></tbody>
+        </table></div>
+        <div class="callout danger"><strong>三種validation分開</strong>Code correctness、internal numeric consistency、biological validation不能合成單一「validated」。本輪是前兩層的部分/稽核，第三層未完成。</div>
+      </section>
+
+      <section id="sources">
+        <p class="section-kicker">Provenance</p>
+        <h2>Source mapping 與可追溯證據</h2>
+        <div class="grid-2">
+          <article class="card"><h3>Audit notes</h3><ul class="mini-list"><li><code>research/20260710_layered_reconstruction_v2/audit_notes/01_upstream_core_audit.md</code></li><li><code>.../02_layered_chain_audit.md</code></li><li><code>.../03_verification_risk_audit.md</code></li></ul></article>
+          <article class="card"><h3>Evidence package</h3><ul class="mini-list"><li><code>input_preflight.json</code></li><li><code>source_inventory.tsv</code></li><li>本頁的 Markdown source-of-truth</li><li>dynamic snapshot: 2026-07-11 00:19:04 +0800 @ bip7</li></ul></article>
+        </div>
+        <details open><summary>Key code locations</summary><div class="details-body"><div class="table-wrap"><table>
+          <thead><tr><th>Concern</th><th>Source</th></tr></thead>
+          <tbody><tr><td>Runner/defaults/stages</td><td><code>run_layered_7samples_newbb.sh:5–180</code></td></tr><tr><td>VCF/cap/support/family/CN</td><td><code>sm_multilocus_combinations.py:16–222</code></td></tr><tr><td>Pileup/grouping</td><td><code>sm_linkage_genomewide.py:23–156</code></td></tr><tr><td>Solver/V1–V7</td><td><code>tree_enumeration_solver.py:25–429</code></td></tr><tr><td>L0–L3</td><td><code>layered_tree_reconstruction.py:22–348</code></td></tr><tr><td>Region/funnel</td><td><code>build_region_view.py:20–175</code></td></tr><tr><td>Final checks</td><td><code>verify_layered_v2.py:28–158</code></td></tr><tr><td>LongPhase wrapper</td><td><code>scripts/pipeline/steps/01_longphase_s.sh:124–291</code></td></tr><tr><td>C++ defaults</td><td><code>Config.hpp:17–80; ArgParser.hpp:29–199</code></td></tr></tbody>
+        </table></div></div></details>
+        <details><summary>Legacy conflict 的精確 artifact</summary><div class="details-body"><ul><li><code>d2fd4be:docs/methodology/20260710_reconstruction_full_pipeline_narrative_HCC1395.standalone.html</code></li><li><code>11452e5:docs/methodology/20260710_full_pipeline_quantitative_table_HCC1395.standalone.html</code></li><li><code>docs/methodology/_assets/20260627_subclone_4axis_teaching/data/ccf_and_cn_multisample.json</code> · SHA-256 <code>335d37601cb318ec9562a3c755cddad114b05f62951f1c79bcd3426a0a91f813</code></li></ul><p>前兩個Git HTML objects寫20/7/0，共同標示的JSON實為10/13/4；「舊HTML」不是本standalone companion。</p></div></details>
+        <details><summary>KB cross-check</summary><div class="details-body"><ul><li><code>/big8_disk/liaoyoyo2001/knowledge/05_tools/longphase-s.md</code>：HP 9-state、truth-BED、supplementary。</li><li><code>/big8_disk/liaoyoyo2001/knowledge/05_tools/variant-callers.md</code>：ClairS 0.4.0/0.4.1與paired口徑。</li><li><code>/big8_disk/liaoyoyo2001/knowledge/03_file_formats/bam-format.md</code>：HP/PS/MM/ML。</li></ul></div></details>
+        <div class="callout warn"><strong>「完整 audit」的範圍</strong>是對 <code>source_inventory.tsv</code> 鎖定 hash 截面的完整靜態 engineering/method audit；核心scripts為dirty/untracked moving target，本頁不保證後續任意working-tree版本。動態run狀態另鎖在2026-07-11 00:19:04 +0800 @ bip7。</div>
+        <div class="provenance">branch=research/subclonal-reconstruction-202606 · HEAD=4fb9e742482b63a660de19a1f1bd07d49d713111 · worktree=dirty · manifest_sha256=fd1a9aec8514e602e7ae1407b6e388735488a2679e80a0ac17b41527a59415dc · status_cutoff=2026-07-11T00:19:04+08:00@bip7 · task_type=B_comprehensive_validation · framework=Diátaxis+A3/ADR</div>
+      </section>
+
+      <section id="final">
+        <p class="section-kicker">Final answer</p>
+        <h2>逐行可解釋，不代表已可發布</h2>
+        <div class="callout danger"><strong>一句結論</strong>首要工作是重產無truth-BED選擇的tagged BAM、修正驗證與provenance契約，再由fresh immutable run重算所有數字；在此之前，這是對<code>source_inventory.tsv</code>鎖定截面的完整engineering/method audit，不是成功結果報告。</div>
+        <div class="grid-2"><article class="card confirmed"><h3>保留</h3><p>input preflight、small-case solver、current role/missingness設計、L3 claim ceiling與C++測試結果。</p></article><article class="card blocker"><h3>撤回／pending</h3><p>Legacy 20/7/0、V5 complete oracle、4,000 all-checked、7 independent samples、CCF/CN-robust/clone-confirmed與7/7 full-run claims。</p></article></div>
+      </section>
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>範圍標記：Dynamic validation incomplete.</strong><br>本頁完整涵蓋程式與方法稽核；v2 clean-tagged 7-dataset execution與biological confirmation未完成。不得移除這個partial flag後單獨發布頁面。</div>
+      <div><strong>Source of truth</strong><br><code>20260710_分層重建端到端流程程式碼判斷稽核_01.md</code><br>Dynamic status cutoff: 2026-07-11 00:19:04 +0800 @ bip7.</div>
+    </div>
+  </footer>
+  <script>
+    (() => {
+      const toc = document.getElementById('toc');
+      const mobile = document.getElementById('mobileNav');
+      mobile.addEventListener('click', () => {
+        const open = toc.classList.toggle('open');
+        mobile.setAttribute('aria-expanded', String(open));
+      });
+      toc.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+        toc.classList.remove('open');
+        mobile.setAttribute('aria-expanded', 'false');
+      }));
+      document.getElementById('expandAll').addEventListener('click', () => document.querySelectorAll('details').forEach(d => d.open = true));
+      document.getElementById('collapseAll').addEventListener('click', () => document.querySelectorAll('details').forEach(d => d.open = false));
+
+      const links = new Map([...toc.querySelectorAll('a[href^="#"]')].map(a => [a.getAttribute('href').slice(1), a]));
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.get(visible.target.id);
+        if (active) active.classList.add('active');
+      }, {rootMargin: '-15% 0px -70% 0px', threshold: [0, .15, .5]});
+      document.querySelectorAll('main section[id]').forEach(section => observer.observe(section));
+
+      const riskButtons = document.querySelectorAll('[data-risk]');
+      const riskRows = document.querySelectorAll('.risk-row');
+      riskButtons.forEach(button => button.addEventListener('click', () => {
+        const level = button.dataset.risk;
+        riskButtons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+        riskRows.forEach(row => row.hidden = level !== 'all' && row.dataset.level !== level);
+      }));
+    })();
+  </script>
+</body>
+</html>

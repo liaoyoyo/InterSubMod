@@ -46,7 +46,7 @@ related:
 | 超立方體頂點 {0,1}ⁿ | n 個 somatic sSNV 的二元基因型向量（R=0/A=1，n≤8=`MAX_SNV`） | `sm_multilocus_combinations.py:70` |
 | 根 = 0ⁿ | germline all-REF（RR），parsimony 生根 | `topology_analysis.py:305` |
 | 有向邊 0→1（單調） | 突變獲得，infinite-sites 下遞增 Hamming weight | `topology_analysis.py:126`（父=maximal proper subset） |
-| four-gamete test | perfect phylogeny 相容性判準（Gusfield）：linear=nested / branched=mutual-excl / incompatible=四配子全滿 | `sm_linkage_genomewide.py:132-141` |
+| rooted three-gamete test（root-augmented four-gamete） | rooted all-zero perfect phylogeny 相容性判準：觀測 10、01、11 齊現即 incompatible；因 root=00 明示加入，等價於四配子全滿 | `sm_linkage_genomewide.py:132-141` |
 | Steiner 節點 | 未觀測的祖先 clone（`H_*` 隱藏節點，只在 perfect phylogeny 可證存在處插入） | `topology_analysis.py:152-207` |
 
 ### §1.2 三層誠實裁決（對抗驗證後）
@@ -61,7 +61,7 @@ related:
 
 ### §1.3 一句話可辯護形式化（直接進論文）
 
-> 「每個區域內，ISM 以多項式 four-gamete/pairwise-compatibility 檢定（Gusfield 1991）重建 somatic-SNV 基因型向量的**有向有根 perfect phylogeny**——布爾超立方體 {0,1}ⁿ 頂點、根在 germline all-REF 角——只在 perfect phylogeny 可證存在處插入未觀測祖先基因型作為 Steiner 點，並在 infinite-sites 被違反處拒絕或枚舉等可能樹。」
+> 「每個區域內，ISM 以多項式 **rooted three-gamete**／pairwise-compatibility 檢定（把 germline all-REF root 加入後等價於 Gusfield-style four-gamete）重建 somatic-SNV 基因型向量的**有向有根 perfect phylogeny**——布爾超立方體 {0,1}ⁿ 頂點、根在 germline all-REF 角——只在 perfect phylogeny 可證存在處插入未觀測祖先基因型作為 Steiner 點，並在 infinite-sites 被違反處拒絕或枚舉等可能樹。」
 
 **明確不宣稱**：不解 NP-hard (group-)Steiner 最佳化；只算多項式 perfect-phylogeny 特例，對 incompatible/multiplicity 不確定情形 flag/枚舉，不強擬最小成本樹。
 
@@ -73,7 +73,7 @@ related:
 
 | ISM 階段 | 數學問題 | 複雜度 | 已解? | Citation（L3） |
 |---|---|---|---|---|
-| 骨幹建構（完整 read） | directed perfect phylogeny / four-gamete | poly | ✅ SOLVED | Gusfield 1991 *Networks* 21(1):19–28, DOI 10.1002/net.3230210104 |
+| 骨幹建構（完整 read） | directed perfect phylogeny / rooted three-gamete（root-augmented four-gamete） | poly | ✅ SOLVED | Gusfield 1991 *Networks* 21(1):19–28, DOI 10.1002/net.3230210104 |
 | 🎯**partial-read 補全（X=缺失）** | **Incomplete Directed Perfect Phylogeny (IDP)** | poly→linear | ✅ **SOLVED** | **Pe'er, Pupko, Shamir, Sharan 2004** *SIAM J Comput* 33(3):590–607, DOI 10.1137/S0097539702406510；linear: SPIRE 2021 DOI 10.1007/978-3-030-83508-8_13 |
 | 有向-root vs 無向 | directed 版更易 | poly | ✅ | 同上（有向 rooted = 可解分支） |
 | incompatible 選丟哪些 loci | Min Character Removal ≡ **Vertex Cover** | NP-hard, FPT-in-k | flag/enumerate | Day & Sankoff 1986 *Syst Zool* 35:224–229, DOI 10.2307/2413304 |
@@ -102,7 +102,7 @@ related:
 
 | 限制 | 代表 | ISM 現況 | 可借? |
 |---|---|---|---|
-| ISA → perfect phylogeny | Gusfield；El-Kebir 2015（AncesTree）；Canopy | ✅ 已用（four-gamete） | 核心 |
+| ISA → perfect phylogeny | Gusfield；El-Kebir 2015（AncesTree）；Canopy | ✅ 已用（rooted three-gamete；root-augmented four-gamete） | 核心 |
 | Sum-condition / VAF pigeonhole（父 CCF≥Σ子） | AncesTree, CITUP, Pairtree | ⚠ 只用在 sibling 排序 | ✅ 可借剪枝 |
 | k-Dollo（有界丟失/復發） | SPhyR, SASC | ❌ 全 flag incompatible/recurrence | ✅ 可借處理有界 recurrence（70 recurrence_required 或救一部分） |
 | Multi-state CN / multiplicity | SPRUCE, DeCiFer | ⚠ CN 走獨立 m-channel | ⚠ 借需防 CN confound |
@@ -112,7 +112,7 @@ related:
 
 | 加速 | 代表 | ISM 現況 | 對應 |
 |---|---|---|---|
-| **Pairwise 關係/tensor 預算 O(n²)** | Pairtree pairs tensor | ✅ **已用（O2 four-gamete 普查）** | **直接對應** |
+| **Pairwise 關係/tensor 預算 O(n²)** | Pairtree pairs tensor | ✅ **已用（O2 rooted three-gamete 普查；legacy 名稱 four-gamete）** | **直接對應** |
 | 區域分解 divide-and-conquer | (ISM 特色) | ✅ 7,143 區 | ISM 原生 |
 | ILP/CSP 精確解 | PhISCS, El-Kebir | ❌ | 解 incompatible 才需 |
 | MCMC 後驗抽樣 | PhyloWGS, Canopy, Pairtree | ❌（改 enumerate） | 替代路線 |

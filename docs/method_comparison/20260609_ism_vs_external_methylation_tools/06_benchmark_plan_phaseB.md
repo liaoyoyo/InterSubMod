@@ -45,7 +45,7 @@ provenance_note: 本檔為「規劃」,不含實測數字。實機執行屬 Phas
 - **HCC1395 haplotagged BAM**（含 MM/ML + HP）：`/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam`
 - **MSA Level-1 raw methylation**（已抽）：`research/tsg_promoter_asm_reviewer/genome_survey_v2/.../level1_raw_methylation_details.tsv.gz`
 - **ISM binary**：`/big8_disk/liaoyoyo2001/InterSubMod/build/`（read-read 距離/clustering/PERMANOVA）+ MSA `build/bin/msa`
-- **位點集**：BRCA2 chr13:32,315,128（~80% copy）、**TBC1D16 chr17:79,991,120（唯一乾淨 cis）**、+ imprinting ICR 正控（如 H19/IGF2、SNRPN）、+ 10-20 control loci（TP/FP/het-NULL，manifest 已有）。
+- **位點集**：BRCA2 chr13:32,315,128（subclone/copy-confounded，HP1-1=subclone tag 非 copy、非 CN-dosage；% 不 robust）、**TBC1D16 chr17:79,991,120（唯一乾淨 cis）**、+ imprinting ICR 正控（如 H19/IGF2、SNRPN）、+ 10-20 control loci（TP/FP/het-NULL，manifest 已有）。
 
 ### B0 — 安裝 + smoke test（先做，輕）
 - 裝 modkit（binary）；試裝 ASMS / pycoMeth；確認 ISM/MSA 可跑。

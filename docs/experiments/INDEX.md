@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-03-05 10:00
-更新時間: 2026-05-30 (D4 reconcile: 補 5/21 PI V6 signoff / 5/24 HKU handoff / 5/29 ZAR1L ASM；前 header 2026-04-11 為 drift 誤值，內文實含至 5/20)
+更新時間: 2026-07-27（補多 sSNV pattern × 甲基 read 聚集圖 v06）
 目標: 實驗研究歷史主索引（精簡版），供 AI 快速掌握研究脈絡
 處理範圍: InterSubMod 專案 2025-11 至今的所有研究方向
 關聯檔案:
@@ -21,7 +21,49 @@
 
 ---
 
+## 最新（2026-07）
+
+### Exact raw-HP 多 sSNV pattern × 區域甲基關聯全面驗證 — ✅ 2026-07-27（Task B / 7 datasets × chr1–22）
+
+21,601,606 sparse rows重建為8,893,098 candidate read projections與154,132
+exact raw-HP strata；1,045 formal units中811可評估。**找到3個 robust
+regional methylation associations，全部是 k≥3較長 signature**：
+H1437 chr22 `AARR/RRAR/RRRA`、H2009 chr3 `AAA/RAA`、HCC1937 chr10
+`AAR/RRA`；formal full-four RR/RA/AR/AA=0，exact二位點RA對
+AA/AR/RR的robust皆0。最強secondary為HCC1395_DORADO chr2
+`AR/RA`（R²=0.791、BY q=0.064），不得升格。Artifact與Bernoulli parity
+均2,313/2,313 PASS；結論限於pattern-conditioned regional methylation
+association，不是clone、ancestry或lineage方向。
+最新版互動報告另為557個有合法原始matrix的單元加入label-independent
+UPGMA read聚集圖；不可畫的234/253/1個單元分別標明不可評估、
+未達detail gate與N>160。
+[正式報告](../../research/20260727_multisite_pattern_methyl_topology_validation/20260727_多sSNV_pattern與甲基關聯全面驗證_01.md) ·
+[互動HTML](../../output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/20260727_multisite_pattern_methyl_association_06.html)
+
+### L1 exact PS × HP strict read-linkage region 與 50 kb 反事實 — ✅ 2026-07-23（Task B / 7 datasets × chr1–22）
+
+正式容器固定為 dataset×chromosome×exact nonmissing PS×HP1/HP2；edge 需要兩端 fixed R/A 且至少3個distinct canonical molecules，k=1只保留audit abstain，k≥2才是W。154/154 extraction與strict receipts PASS；合計S=469,849、components=255,752、k1=170,131、W=85,621、direct edges=1,197,530。50kb不作建邊/切區硬門檻；移除16,537條>50kb direct edges會改變1,172個W partitions、228個W完全失格、961 memberships回k1。**Completion audit：L1=7/7；current production strict directed topology=0/7；clone count、exact parent→child、fusion tree均0/7。** Endpoint edge是無向linkage，不是evolutionary edge。[正式HTML與READY](../../research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/) · [方法與implementation notes](../../research/20260723_production_exact_ps_strict_read_linkage/implementation-notes.md)
+
+### Read-linked Hypercube exact＋error-aware likelihood — ⏳ PROBE 2026-07-16（Task B / 7 datasets × chr1-22）
+
+已把partial read正式定義為Boolean subcube group，不做completion-wise first-success；所有groups聯合求minimum-hidden vertex sets，完整枚舉後才用BQ/error-aware molecule-pattern likelihood比較不同vertex sets，同vertex／不同edges維持不可辨。Frozen v2第一pilot於8小時timeout而正式NO-GO。2026-07-18完成exact-preserving修補：prepared base在24-optima案例由25次build降為1（HiGHS solve仍25），新增complete-only process cache；cache on/off科學semantic outputs完全一致，exhaustive／orchestration／release tests共341/341 PASS。Scale仍是PROBE，v3雙pilot未通過前禁止full 154或引用M2比例。[索引](../../research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md) · [修補audit](../../research/20260718_hypercube_exact_preserving_solver_cache_remediation/pre-decision-audit.md) · [v3 Runbook](../../research/20260716_read_linked_hypercube_exact_likelihood_validation/20260718_M2_exact_preserving修補正式執行Runbook_03.md)
+
+### 單一 truth-FP focal-ALT 甲基多群能否代表 subclone / linear evolution — ✅ 2026-07-15（Task B / 7 datasets）
+
+最新 LongPhase-S recalibrated `FILTER=PASS` truth-FP `7,745` 全量跑完；evaluable `4,967`，primary stable `583(11.74%)`、high threshold `103(2.07%)`。Matched TP high threshold `1.265%` vs FP `1.330%`、`p=0.772`；row-circular null + tumor REF + assignment交集只剩 `10 sites / 9 readsets / 6 components`。Focal linear identifiable與orthogonal subclone confirmed皆0，故結論是epigenetic follow-up candidates，**不是**subclone callset或linear tree evidence。Legacy heatmap可作pattern sensitivity，舊率不可合併。外部Claude 15項重算與browser QA均PASS。[跨session入口](../../research/20260715_single_fp_alt_multicluster_subclone_validation/20260715_跨session研究交接與資料位置_01.md) · [完整報告](../../research/20260715_single_fp_alt_multicluster_subclone_validation/20260715_單一FP_sSNV_ALT_read甲基多群與subclone假說全量驗證_01.md) · [HTML](../../research/20260715_single_fp_alt_multicluster_subclone_validation/20260715_單一FP_sSNV_ALT_read甲基多群與subclone假說全量驗證_01.standalone.html)
+
+### Historical pre-strict candidate-tree census — ⚠️ LEGACY 2026-07-14（7 datasets / chr1-22）
+
+638,259 raw/all records 全部進 LongPhase-S ledger；同一 run recalibrated `FILTER=PASS` 582,820 records，chr1-22 biallelic 469,849。當時 census 為 W_primary 50,215、complete 42,240、incomplete 7,975、三類 11,582/10,737/19,921。**此版本使用 legacy coordinate grouping，PS只作QC，含5,623 mixed-PS regions；不可視為最新 exact-PS strict L2/L3，也不可與新版W=85,621合併或相減。** [歷史分析](../../research/20260710_layered_reconstruction_v2/20260714_LongPhaseS_PASS_sSNV共現與拓撲最新分析_01.md) · [legacy machine JSON](../../research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json)
+
+### Canonical v5 downstream clone-state identifiability — ⚠️ CONDITIONAL 2026-07-14
+
+全7-dataset cross-HP audit與HCC1395/DORADO unknown-K bounds均已改用LongPhase-S PASS canonical v5；可發布candidate census/state bounds，但fixed-catalog inference-ready=0、biological clone K仍NO-GO。入口：`InterSubMod/research/20260714_cross_hp_clone_state_inverse_audit/`、`InterSubMod/research/20260714_hcc1395_unknown_k_clone_state_consistency/`；不可把bulk HP marginal或regional topology直接寫成confirmed clone/ancestry。
+
 ## 最新（2026-06）
+
+### Wakhan haplotype-specific CN + 三方比對（Wakhan↔SAVANA↔SEQC2）— ✅ 2026-06-22（HCC1395 ⭐3）
+鏈 Severus(somatic SV 1,789)→Wakhan all(`--normal-phased-vcf germline_phased --breakpoints severus --purity-range 0.9-1.0`)。**跨工具收斂**：Wakhan rank-1 **purity 0.92/ploidy 2.77** ≈ SAVANA cna_normalhet **0.96/2.79**（兩獨立 ONT caller 自動選同一 near-triploid 解；Wakhan rank-2 1.42/0.96 near-diploid 替代支勿用）。**LOH 三方 Jaccard** Wakhan↔SEQC2 **0.819** / SAVANA↔SEQC2 0.962 / Wakhan↔SAVANA 0.832 / 三方一致 88.2%（Wakhan 略 over-call 58.5% vs 53-55%）。**total CN** Wakhan(HP1+HP2)vs SAVANA Spearman 0.699（中位 3.00≈2.86；Wakhan 封頂 9 vs SAVANA 19.6）。**定位**：SAVANA=LOH/total 最準固定參考；**Wakhan=HP1/HP2 分離 integer CN(711段)+段邊界連 Severus SV ID 的加值層**（SAVANA 無）。🔴 whatshap 缺(只 --use-sv-haplotypes 需)；單樣本⭐3。[報告](in_progress/2026/06/20260622_wakhan_hcc1395_3way_cn_comparison_01.md) · script `scripts/analysis/compare_wakhan_savana_seqc2.py` · memory `project_ont_cnv_sv_subclone_verification_feasibility`
 
 ### sSNV 間距 × ONT 讀長覆蓋（為何只用 sSNV 建 subclone 難 — 論文 motivation）— ✅ 2026-06-22（HCC1395 ⭐3 單樣本 PARTIAL）
 全新計算（Q1，論文 motivation 量化基石；S1 subagent 產、主回合 §13.7 獨立讀回 .json 驗證 verify=pass）。HCC1395 ClairS TP **30,490 sSNV**（全 autosome，2.875Gb）→ 相鄰間距 **median 51,425bp / mean 87,809（uniform 94,293）/ density 10.6 sSNV/Mb**；僅 **15.4%** 相鄰對 ≤10kb（單 ±5kb 窗可容）。tumor BAM ONT read **median 4,898bp（query_len 5,016 交叉確認非 clip 假象；mean 9,625；p99 49kb）**——比常估的 20-30kb 短很多。→ **單讀跨 ≥2 sSNV = 0.74% empirical（50k read intersect；0.99% Poisson read-weighted），94.2% read 帶 0 sSNV**。±5kb 全窗覆蓋 33.2%。**結論**：sSNV 太稀疏（51kb 間距 ≫ 5kb 讀長）→ ~99% read 無法直接連 ≥2 somatic sSNV = 量化「只用 read sSNV 建 read-level subclone linkage 難」+ 正當化甲基當互補 per-read 訊號（🔴 紅線：互補/characterize 非 driver/detection）。🔴 **PARTIAL**：單樣本 + 取樣 genome-ordered（chr1 起非均勻隨機）→ 論文版須均勻重抽 + 跨樣本一致性。[報告](in_progress/2026/06/20260622_ssnv_spacing_coverage_01.md) · script `scripts/analysis/ssnv_spacing_coverage.py` · `state/analysis_outputs/ssnv_spacing_coverage.json` · 認知文件 §4 · memory `project_subclone_snv_difficulty_methylation_framework`

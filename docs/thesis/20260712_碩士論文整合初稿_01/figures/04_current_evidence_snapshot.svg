@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850" role="img" aria-labelledby="title desc">
+  <style>text { font-family: "Noto Sans CJK TC", "Microsoft JhengHei", Arial, sans-serif !important; }</style>
+  <title id="title">2026年7月12日研究證據快照</title>
+  <desc id="desc">以四個卡片呈現 producer、legacy solver audit、技術再現性與 clean layered-v3 gate 的最新狀態。</desc>
+  <rect width="1400" height="850" fill="#f8f8f5"/>
+  <text x="70" y="70" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">研究證據快照｜2026-07-12</text>
+  <text x="70" y="110" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="18" fill="#52636b">不同卡片的分母與 estimand 不相同，刻意不畫成單一排名條形圖。</text>
+
+  <g font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif">
+    <rect x="70" y="155" width="600" height="250" rx="14" fill="#edf5ef" stroke="#4f8062" stroke-width="2"/>
+    <text x="105" y="198" font-size="22" font-weight="700" fill="#27543a">A｜Raw-all production contract　PASS</text>
+    <text x="105" y="250" font-size="48" font-weight="700" fill="#17324d">7 / 7</text>
+    <text x="270" y="248" font-size="18" fill="#314652">dataset rows completed</text>
+    <text x="105" y="295" font-size="18" fill="#314652">638,259 input records</text>
+    <text x="105" y="330" font-size="18" fill="#314652">32,184 non-PASS → PASS rescue</text>
+    <text x="105" y="365" font-size="18" fill="#314652">17,444 PASS → non-PASS removal</text>
+
+    <rect x="730" y="155" width="600" height="250" rx="14" fill="#f3efe4" stroke="#9a7b42" stroke-width="2"/>
+    <text x="765" y="198" font-size="22" font-weight="700" fill="#6d5529">B｜Legacy solver audit　CONDITIONAL</text>
+    <text x="765" y="252" font-size="38" font-weight="700" fill="#17324d">18,103</text>
+    <text x="930" y="250" font-size="18" fill="#314652">HCC-only checked；0 recorded fail</text>
+    <text x="765" y="305" font-size="34" font-weight="700" fill="#873b31">4,000</text>
+    <text x="900" y="303" font-size="17" fill="#873b31">stress generated；checked 分母未知</text>
+    <text x="765" y="362" font-size="16" font-weight="700" fill="#873b31">stress headline 撤回；不可代理 fresh 7-dataset validation。</text>
+
+    <rect x="70" y="450" width="600" height="280" rx="14" fill="#f3efe4" stroke="#9a7b42" stroke-width="2"/>
+    <text x="105" y="493" font-size="22" font-weight="700" fill="#6d5529">C｜HCC1395 技術再現性　PARTIAL</text>
+    <text x="105" y="542" font-size="17" font-weight="700" fill="#17324d">Exact-locus raw VAF</text>
+    <text x="105" y="580" font-size="18" fill="#314652">Jaccard .9276　CCC .9339　Spearman .9093</text>
+    <text x="105" y="615" font-size="18" fill="#314652">MAE .0624　binomial-compatible 93.07%</text>
+    <text x="105" y="662" font-size="17" font-weight="700" fill="#17324d">Independent PyClone-VI fits</text>
+    <text x="105" y="700" font-size="18" fill="#314652">κ .544　subclonal-set Jaccard .381　ARI .539</text>
+
+    <rect x="730" y="450" width="600" height="280" rx="14" fill="#faeeee" stroke="#aa5a4b" stroke-width="2"/>
+    <text x="765" y="493" font-size="22" font-weight="700" fill="#873b31">D｜Clean layered-v3　TERMINAL FAILED</text>
+    <text x="765" y="535" font-size="17" fill="#314652">7/7 workers exit 0；final verifier exit 7；0/7 pass</text>
+    <text x="765" y="570" font-size="17" fill="#314652">E_SCHEMA_INVALID：7/7 sample contracts</text>
+    <text x="765" y="605" font-size="17" fill="#314652">E_POST_INPUT_IDENTITY：5 datasets</text>
+    <text x="765" y="645" font-size="17" fill="#873b31">無 _SUCCESS；未 release outputs 不進正式 Results</text>
+    <text x="765" y="685" font-size="16" fill="#314652">44.7 / 34.9 / 32.6 / 56.2 / 92.86% 亦維持禁用</text>
+  </g>
+
+  <text x="70" y="790" font-family="Noto Sans CJK TC, Microsoft JhengHei, Arial, sans-serif" font-size="15" fill="#5b6870">資料來源：raw-all closeout；solver audit；20260712 VAF/PyClone；clean-v3 run_state/verification_summary（12:27 +08）。</text>
+</svg>

@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>分類桑基（D1 版）— 保留 5 類 / 移除 2 類</title>
+<!-- data_sources: /tmp/d1_sankey.json (consolidation.json SoT ← _wg_d1_unified, 5-class verified reproduced) -->
+<!-- build_branch: ism-review-infra / output/_wg_d1_unified -->
+<style>
+:root{--mono:"SF Mono",ui-monospace,Menlo,monospace;--bg:#FAF7F0;--card:#fff;--ink:#3a2418;--muted:#8a7a68;--border:#E3DACC;--pass:#2F7D5B;--dead:#9A3B3B;--gold:#8a6d10}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:15px 0;box-shadow:0 1px 3px rgba(90,60,30,.05)}
+h2{font-size:1.14rem;margin:0 0 8px;display:flex;align-items:center;gap:9px}
+h2 .n{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.82rem;flex:none}
+.lead{color:#5e4a38;font-size:.92rem;margin:0 0 12px}
+.fig{margin:10px 0;padding:12px;background:#fcfaf5;border:1px solid var(--border);border-radius:9px;overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{border:1px solid var(--border);border-radius:9px;padding:11px 13px;background:#fffdf9}
+.kpi .v{font-family:var(--mono);font-size:1.45rem;font-weight:800;line-height:1}
+.kpi .k{font-size:.76rem;color:var(--muted);margin-top:5px}
+.kpi.keep{border-left:4px solid var(--pass)} .kpi.core{border-left:4px solid #1f7a4d} .kpi.low{border-left:4px solid #d9a82e} .kpi.rem{border-left:4px solid var(--dead)}
+.legend{display:flex;flex-wrap:wrap;gap:13px;font-size:.79rem;margin:8px 0;color:#5e4a38}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.tab{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:6px}
+.tab th{background:#f3ece0;padding:8px;text-align:left;border-bottom:2px solid var(--border);font-size:.77rem;color:#5e4a38}
+.tab td{padding:8px;border-bottom:1px solid #f0e9dc;vertical-align:top}
+.tab .r{text-align:right;font-family:var(--mono)}
+.badge{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:9px}
+.bcore{background:#dcefe3;color:#1f5f43} .blow{background:#fbeccb;color:#8a6d10} .bmid{background:#eceee5;color:#5e6a4e} .bno{background:#f6d8d8;color:#9A3B3B}
+.good{background:#eef6f0;border:1px solid #cce5d6;border-left:4px solid var(--pass);border-radius:8px;padding:11px 14px;margin:10px 0;font-size:.88rem}
+.crit{background:#fcefef;border:1px solid #e9cccc;border-left:4px solid var(--dead);border-radius:8px;padding:11px 14px;margin:10px 0;font-size:.88rem;color:#5e2424}
+.note{font-size:.82rem;color:var(--muted);margin-top:8px}
+code{background:#f3ece0;border-radius:4px;padding:1px 5px;font-family:var(--mono);font-size:.82em}
+</style></head><body><div class="wrap">
+
+<h1>分類桑基（D1 版）— 保留 5 類 / 移除 2 類</h1>
+<p class="sub">HCC1395 全基因組 30,490 TP · <code>_wg_d1_unified</code>（Option-B reclassify-v2 + PERMDISP）· 數字注入自 <code>consolidation.json</code>、5 類逐項重算驗證 · 取代舊 26,121/4,369 版</p>
+
+<div class="kpis">
+  <div class="kpi keep"><div class="v">28,327</div><div class="k">🟢 保留（92.9%）</div></div>
+  <div class="kpi core"><div class="v">5,473</div><div class="k">★ Subclone a-priori（18.0%·上界）</div></div>
+  <div class="kpi low"><div class="v">8,887</div><div class="k">🟡 StructureNoMarker 低信心（31.4% of keep）</div></div>
+  <div class="kpi rem"><div class="v">2,163</div><div class="k">🔴 移除（7.1%）</div></div>
+</div>
+
+<section>
+  <h2><span class="n">1</span>桑基圖（D1）</h2>
+  <div class="legend">
+    <span><i class="sw" style="background:#1f7a4d"></i>Subclone★</span>
+    <span><i class="sw" style="background:#3B9C72"></i>SomaticResidual</span>
+    <span><i class="sw" style="background:#8d9b7e"></i>GermlineASM</span>
+    <span><i class="sw" style="background:#b0a07e"></i>CN/LOH</span>
+    <span><i class="sw" style="background:#d9a82e"></i>StructureNoMarker（低信心）</span>
+    <span><i class="sw" style="background:#9A3B3B"></i>移除</span>
+  </div>
+  <div class="fig"><svg viewBox="0 0 1000 746" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img" aria-label="D1分類桑基"><text x="500" y="26" text-anchor="middle" font-size="15" font-weight="800" fill="#3a2418">分類桑基（D1 版）— 保留 92.9% / 移除 7.1%</text><path d="M 90 46.0 C 241.0 46.0 241.0 46.0 392 46.0 L 392 566.2728763529026 C 241.0 566.2728763529026 241.0 566.2728763529026 90 566.2728763529026 Z" fill="#2F7D5B" fill-opacity="0.42"/><path d="M 90 566.2728763529026 C 241.0 566.2728763529026 241.0 588.2728763529026 392 588.2728763529026 L 392 628.0 C 241.0 628.0 241.0 606.0 90 606.0 Z" fill="#9A3B3B" fill-opacity="0.42"/><path d="M 424 46.0 C 572.0 46.0 572.0 46.0 720 46.0 L 720 146.52082650049198 C 572.0 146.52082650049198 572.0 146.52082650049198 424 146.52082650049198 Z" fill="#1f7a4d" fill-opacity="0.52"/><path d="M 424 146.52082650049198 C 572.0 146.52082650049198 572.0 154.52082650049198 720 154.52082650049198 L 720 321.1800590357494 C 572.0 321.1800590357494 572.0 313.1800590357494 424 313.1800590357494 Z" fill="#3B9C72" fill-opacity="0.38"/><path d="M 424 313.1800590357494 C 572.0 313.1800590357494 572.0 329.1800590357494 720 329.1800590357494 L 720 391.75532961626766 C 572.0 391.75532961626766 572.0 375.75532961626766 424 375.75532961626766 Z" fill="#8d9b7e" fill-opacity="0.38"/><path d="M 424 375.75532961626766 C 572.0 375.75532961626766 572.0 399.75532961626766 720 399.75532961626766 L 720 427.04821252869795 C 572.0 427.04821252869795 572.0 403.04821252869795 424 403.04821252869795 Z" fill="#b0a07e" fill-opacity="0.38"/><path d="M 424 403.04821252869795 C 572.0 403.04821252869795 572.0 435.04821252869795 720 435.04821252869795 L 720 598.2728763529026 C 572.0 598.2728763529026 572.0 566.2728763529026 424 566.2728763529026 Z" fill="#d9a82e" fill-opacity="0.52"/><path d="M 424 588.2728763529026 C 572.0 588.2728763529026 572.0 620.2728763529026 720 620.2728763529026 L 720 651.4962282715644 C 572.0 651.4962282715644 572.0 619.4962282715644 424 619.4962282715644 Z" fill="#9A3B3B" fill-opacity="0.46"/><path d="M 424 619.4962282715644 C 572.0 619.4962282715644 572.0 659.4962282715644 720 659.4962282715644 L 720 668.0 C 572.0 668.0 572.0 628.0 424 628.0 Z" fill="#7a2a2a" fill-opacity="0.46"/><rect x="58" y="46.0" width="32" height="560.0" fill="#5e4a38" rx="3"/><text x="52" y="322" text-anchor="end" font-size="12" font-weight="800" fill="#3a2418">somatic TP</text><text x="52" y="338" text-anchor="end" font-size="13" font-weight="800" fill="#3a2418">30,490</text><rect x="392" y="46.0" width="32" height="520.3" fill="#2F7D5B" rx="3"/><text x="408.0" y="303" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">保留</text><text x="408.0" y="319" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">28,327</text><rect x="392" y="588.3" width="32" height="39.7" fill="#9A3B3B" rx="3"/><text x="430" y="612" font-size="11" font-weight="800" fill="#9A3B3B">移除 2,163</text><text x="408.0" y="40" text-anchor="middle" font-size="9.5" fill="#5e4a38">高信心(a-priori 標記)19,440（68.6%）＋低信心(無標記)8,887（31.4%）</text><rect x="720" y="46.0" width="32" height="100.5" fill="#1f7a4d" rx="2"/><text x="760" y="93" font-size="11" font-weight="800" fill="#1f7a4d">Subclone★（a-priori 同單倍型）</text><text x="760" y="108" font-size="10" fill="#5e4a38">5,473（18.0%）· <tspan fill="#8a7a68">核心·高</tspan></text><rect x="720" y="154.5" width="32" height="166.7" fill="#3B9C72" rx="2"/><text x="760" y="235" font-size="11" font-weight="800" fill="#3B9C72">SomaticResidual（扣 normal）</text><text x="760" y="250" font-size="10" fill="#5e4a38">9,074（29.8%）· <tspan fill="#8a7a68">高·somatic</tspan></text><rect x="720" y="329.2" width="32" height="62.6" fill="#8d9b7e" rx="2"/><text x="760" y="357" font-size="11" font-weight="800" fill="#8d9b7e">GermlineASM（非 subclone）</text><text x="760" y="372" font-size="10" fill="#5e4a38">3,407（11.2%）· <tspan fill="#8a7a68">germline 層級</tspan></text><rect x="720" y="399.8" width="32" height="27.3" fill="#b0a07e" rx="2"/><text x="760" y="410" font-size="11" font-weight="800" fill="#b0a07e">CN / LOH</text><text x="760" y="425" font-size="10" fill="#5e4a38">1,486（4.9%）· <tspan fill="#8a7a68">CN 軸</tspan></text><rect x="720" y="435.0" width="32" height="163.2" fill="#d9a82e" rx="2"/><text x="760" y="514" font-size="11" font-weight="800" fill="#9a7a3a">StructureNoMarker（無 a-priori）</text><text x="760" y="529" font-size="10" fill="#5e4a38">8,887（29.1%）· <tspan fill="#8a7a68">低信心·epiallele</tspan></text><rect x="720" y="620.3" width="32" height="31.2" fill="#9A3B3B" rx="2"/><text x="760" y="633" font-size="11" font-weight="800" fill="#9A3B3B">Dispersion（PERMDISP 假象）</text><text x="760" y="648" font-size="10" fill="#5e4a38">1,700（5.6%）· <tspan fill="#8a7a68">移除</tspan></text><rect x="720" y="659.5" width="32" height="8.5" fill="#7a2a2a" rx="2"/><text x="760" y="666" font-size="11" font-weight="800" fill="#7a2a2a">Noise（全軸無訊號）</text><text x="760" y="681" font-size="10" fill="#5e4a38">463（1.5%）· <tspan fill="#8a7a68">移除</tspan></text></svg></div>
+  <div class="good"><b>讀法</b>：保留 28,327 依<b>a-priori 標記優先序</b>互斥分 5 類。<b>高信心（有 a-priori 標記）19,440（68.6% of keep）</b> = Subclone+SomaticResidual+GermlineASM+CN；<b>低信心 StructureNoMarker 8,887（31.4%）</b>= Significant 但無任何 a-priori Δβ 標記 = epiallele 風險、不可錨定驗證。<b>paper 核心 = Subclone★ 5,473（18.0%，上界、含 cis-ASM 待 normal-anchored cis-control）</b>。</div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>瀑布（優先級互斥分類）</h2>
+  <div class="fig"><svg viewBox="0 0 1000 444" width="100%" font-family="-apple-system,Segoe UI,sans-serif" role="img"><text x="12" y="20" font-size="14" font-weight="800" fill="#3a2418">優先級瀑布（D1，互斥分類）</text><text x="12" y="55" font-size="11" font-weight="800" fill="#3a2418">起點：somatic TP 位點</text><rect x="470" y="43" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="43" width="470.0" height="20" fill="#5e4a38" rx="3"/><text x="946" y="58" font-size="10.5" font-weight="800" fill="#5e4a38">30,490（100.0%）</text><text x="12" y="70" font-size="9" fill="#8a7a68">全部候選</text><text x="12" y="101" font-size="11" font-weight="800" fill="#3a2418">① Significant（6 valid VC）→ 保留</text><rect x="470" y="89" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="89" width="436.7" height="20" fill="#2F7D5B" rx="3"/><text x="913" y="104" font-size="10.5" font-weight="800" fill="#2F7D5B">28,327（92.9%）</text><text x="12" y="116" font-size="9" fill="#8a7a68">剩 2,163 移除</text><text x="42" y="147" font-size="11" font-weight="600" fill="#3a2418">　└ Subclone★（a-priori 同單倍型 Δβ）</text><rect x="470" y="135" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="135" width="84.4" height="20" fill="#1f7a4d" rx="3"/><text x="560" y="150" font-size="10.5" font-weight="800" fill="#1f7a4d">5,473（18.0%）</text><text x="42" y="162" font-size="9" fill="#8a7a68">paper 核心·n_carrier 脆弱·上界</text><text x="42" y="193" font-size="11" font-weight="600" fill="#3a2418">　└ SomaticResidual（扣 normal somatic）</text><rect x="470" y="181" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="181" width="139.9" height="20" fill="#3B9C72" rx="3"/><text x="616" y="196" font-size="10.5" font-weight="800" fill="#3B9C72">9,074（29.8%）</text><text x="42" y="208" font-size="9" fill="#8a7a68">tumor 特異·非 subclone-tagged</text><text x="42" y="239" font-size="11" font-weight="600" fill="#3a2418">　└ GermlineASM（normal 也有）</text><rect x="470" y="227" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="227" width="52.5" height="20" fill="#8d9b7e" rx="3"/><text x="529" y="242" font-size="10.5" font-weight="800" fill="#8d9b7e">3,407（11.2%）</text><text x="42" y="254" font-size="9" fill="#8a7a68">germline 層級</text><text x="42" y="285" font-size="11" font-weight="600" fill="#3a2418">　└ CN / LOH</text><rect x="470" y="273" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="273" width="22.9" height="20" fill="#b0a07e" rx="3"/><text x="499" y="288" font-size="10.5" font-weight="800" fill="#b0a07e">1,486（4.9%）</text><text x="42" y="300" font-size="9" fill="#8a7a68">CN 軸（非甲基）</text><text x="42" y="331" font-size="11" font-weight="600" fill="#3a2418">　└ StructureNoMarker（無 a-priori 標記）</text><rect x="470" y="319" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="319" width="137.0" height="20" fill="#d9a82e" rx="3"/><text x="613" y="334" font-size="10.5" font-weight="800" fill="#d9a82e">8,887（29.1%）</text><text x="42" y="346" font-size="9" fill="#8a7a68">🔴 低信心·epiallele 風險</text><text x="12" y="377" font-size="11" font-weight="800" fill="#3a2418">② DispersionStructure → 移除</text><rect x="470" y="365" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="365" width="26.2" height="20" fill="#9A3B3B" rx="3"/><text x="502" y="380" font-size="10.5" font-weight="800" fill="#9A3B3B">1,700（5.6%）</text><text x="12" y="392" font-size="9" fill="#8a7a68">PERMDISP 攔 PERMANOVA 假象</text><text x="12" y="423" font-size="11" font-weight="800" fill="#3a2418">③ 全軸無訊號 → 移除</text><rect x="470" y="411" width="470" height="20" fill="#f0e9dc" rx="3"/><rect x="470" y="411" width="7.1" height="20" fill="#7a2a2a" rx="3"/><text x="483" y="426" font-size="10.5" font-weight="800" fill="#7a2a2a">463（1.5%）</text><text x="12" y="438" font-size="9" fill="#8a7a68">距離/level/label/PERMANOVA 皆無</text></svg></div>
+  <p class="note">優先序（consolidate.py）：Noise/Dispersion 先移除 → KEEP 內 Subclone → SomaticResidual → GermlineASM → CN/LOH → StructureNoMarker（兜底）。前 4 類有 a-priori 標記=高信心；末類無標記=低信心。</p>
+</section>
+
+<section>
+  <h2><span class="n">3</span>5 類 + 移除 2 類細分</h2>
+  <table class="tab">
+    <thead><tr><th>類別</th><th>定義（a-priori 標記）</th><th class="r">數量</th><th class="r">%全體</th><th class="r">%保留</th><th>信心</th></tr></thead>
+    <tbody>
+    <tr><td><b>KEEP_Subclone★</b></td><td>SubcloneDbeta(同單倍型) 或 AltSubcloneDbeta(allele) 顯著</td><td class="r"><b>5,473</b></td><td class="r">18.0%</td><td class="r">19.3%</td><td><span class="badge bcore">核心·高</span></td></tr>
+    <tr><td>KEEP_SomaticResidual</td><td>SomaticResidualDbeta 或 HP_Residual 顯著（扣 normal）</td><td class="r">9,074</td><td class="r">29.8%</td><td class="r">32.0%</td><td><span class="badge bcore">高·somatic</span></td></tr>
+    <tr><td>KEEP_GermlineASM</td><td>GermlineAsmDbeta 顯著（normal 也有）</td><td class="r">3,407</td><td class="r">11.2%</td><td class="r">12.0%</td><td><span class="badge bmid">germline 層級</span></td></tr>
+    <tr><td>KEEP_CN_LOH</td><td>Potential_LOH（HP-tag 比例失衡）</td><td class="r">1,486</td><td class="r">4.9%</td><td class="r">5.2%</td><td><span class="badge bmid">CN 軸</span></td></tr>
+    <tr style="background:#fffaf0"><td><b>KEEP_StructureNoMarker</b></td><td>Significant 但<b>無任何 a-priori Δβ 標記</b>（只 unsupervised cluster/level/PERMANOVA pattern）</td><td class="r"><b>8,887</b></td><td class="r">29.1%</td><td class="r">31.4%</td><td><span class="badge blow">低信心·epiallele</span></td></tr>
+    <tr style="background:#fdf0f0"><td>REMOVE_Dispersion</td><td>PERMANOVA 顯著但 PERMDISP 判定純離散度差異（群心無位移，Anderson 2006）</td><td class="r">1,700</td><td class="r">5.6%</td><td class="r">—</td><td><span class="badge bno">移除·假象</span></td></tr>
+    <tr style="background:#fdf0f0"><td>REMOVE_Noise</td><td>距離/level/label/PERMANOVA 全軸無訊號</td><td class="r">463</td><td class="r">1.5%</td><td class="r">—</td><td><span class="badge bno">移除·噪音</span></td></tr>
+    </tbody>
+  </table>
+  <div class="crit"><b>🔴 信心 + 口徑</b>：① StructureNoMarker 8,887（31.4% of keep）只靠 unsupervised → epiallele 風險、對 reconstruction 無用（保留待 cross-sample/cis-control）。② Subclone★ 5,473 是<b>上界</b>（仍含 cis-ASM，需 normal-anchored cis-control 才分 cis vs subclone；n_carrier 小 → 脆弱）。③ a-priori 「Noise 0%」是循環（cascade 用 a-priori 定義 KEEP）；真判別率 7.6%，優勢在合法 null 非偵測力。</div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>D1 vs 舊版差異</h2>
+  <table class="tab">
+    <thead><tr><th></th><th>舊版（dbeta_wg_abc）</th><th>D1（_wg_d1_unified）★ 現行</th></tr></thead>
+    <tbody>
+    <tr><td>保留 / 移除</td><td>26,121 / 4,369</td><td><b>28,327 / 2,163</b></td></tr>
+    <tr><td>分類依據</td><td>Python pilot reclassify-v2（核心+救回）</td><td><b>C++ Option-B 落地</b>（VerificationClass + PERMDISP）</td></tr>
+    <tr><td>保留細分</td><td>核心 4 狀況 + 救回 5 類</td><td><b>a-priori 標記優先序 5 類</b></td></tr>
+    <tr><td>移除</td><td>3 噪音型</td><td><b>Dispersion（PERMDISP 假象）+ Noise</b></td></tr>
+    <tr><td>新增</td><td>—</td><td>DispersionStructure / PermanovaLocation 類 + WithinHP level 軸</td></tr>
+    </tbody>
+  </table>
+  <p class="note">D1 是 C++ 落地的當前權威版；差異主因 = Option-B 把更多結構訊號納入 KEEP（28,327 > 26,121）+ 用 PERMDISP 把離散度假象從 KEEP 移到 REMOVE。舊版頁面（classification_flow_corrected）標為 superseded。</p>
+</section>
+
+<section style="background:#f6efe2">
+  <h2><span class="n">∑</span>一句話</h2>
+  <ul style="font-size:.94rem;line-height:1.8">
+    <li><b>保留 92.9% / 移除 7.1%</b>；保留分<b>高信心 a-priori 19,440（68.6%）＋低信心 StructureNoMarker 8,887（31.4%）</b>。</li>
+    <li><b>paper 核心 = Subclone★ 5,473（18.0%）</b>（a-priori 同單倍型/allele），但為<b>上界</b>（含 cis-ASM、n_carrier 脆弱、somatic-specificity 待 G-B）。</li>
+    <li>移除拆 <b>Dispersion 1,700（PERMDISP 假象）+ Noise 463（全軸無訊號）</b>。</li>
+  </ul>
+  <p class="note">溯源：<code>consolidation.json</code> ← <code>consolidate.py</code> on <code>_wg_d1_unified/significance_summary.csv</code>；KEEP 28,327 / REMOVE 2,163 / 5 類全逐項重算驗證 = grep 可溯。</p>
+</section>
+
+</div></body></html>

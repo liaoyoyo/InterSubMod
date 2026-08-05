@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-07-07
-更新時間: 2026-07-25
+更新時間: 2026-07-27
 目標: 說明 exact-PS×HP layered reconstruction 全基因工作站的證據邊界、資料綁定與重生方式
 處理範圍: InterSubMod/docs/methodology/_assets/layered_workstation/
 關聯檔案:
@@ -69,8 +69,11 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
 
 ## 新版互動與資料模型
 
-- **GRCh38 全基因分布**：22 條染色體按 GRCh38 bp 長度縮放；全部
-  98,955 final groups 依 midpoint 落點。
+- **GRCh38 全基因分布**：chr1–22 共用 `0–248,956,422 bp` 的實體座標尺度
+  （chr1 為最大基準）。每條染色體骨架寬度為 `L_chr / L_chr1`，region
+  點位 x 座標為 `midpoint / L_chr1`；不再把每條染色體各自拉滿同一寬度。
+  全部 98,955 final groups 依 midpoint 落點，因此骨架長度與點位位置使用
+  同一尺度。
 - **圖例多選**：點 A 選 A，再點 B 為 A∪B，再點已選類別取消；沒有選擇
   時顯示全部。切換 ontology 會清空前一 ontology 的 selection。
 - **著色維度**：Determinacy、拓撲形態、HP family、判定狀態、active k、
@@ -151,7 +154,7 @@ python3 -m unittest \
 python3 \
   research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py \
   --output-dir \
-  research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09
+  research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v5_all7_10
 
 # 僅需重現舊 canonical-v5 / 50-kb 頁面時才使用。
 python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py --legacy-v5
@@ -161,14 +164,15 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 - Legacy renderer：`build_layered_workstation_v5.py`；只由 `--legacy-v5` 觸發。
 - Freshness：sample page 必須符合 `intersubmod-authority =
   20260724-exact-ps-hp-strict-read-linkage`、同一 census receipt SHA 與
-  `layered-workstation-exact-ps-v4` UI contract；`--index-only` 不接受舊頁。
+  `layered-workstation-exact-ps-v5` UI contract，並宣告
+  `intersubmod-genome-scale = shared-grch38-bp-v1`；`--index-only` 不接受舊頁。
 - Primary authority 是 2026-07-24 topology cohort receipt/all7 summary、
   per-sample MLHP/topology outputs，以及 signature `receipt.v2.json/summary.json`。
 - 改 builder 後必做 syntax、跨面板 regression、Chromium runtime、
   七個 mode 多選/再次取消、雙層 AND filter、座標搜尋、零網路請求、
   390/1440px post-detail overflow 與視覺截圖。
 - 本輪 audit receipt：
-  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/receipt.json`。
+  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v5_all7_10/receipt.json`。
 
 ## 與舊 topology_workstation/ 關係
 舊資料夾是歷史 pooled／三軸展示；本資料夾是 exact-PS × primary-HP

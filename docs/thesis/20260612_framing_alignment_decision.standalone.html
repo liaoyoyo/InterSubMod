@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>論文框架對齊與決策 — 2026-06-12</title>
+<style>
+  :root{--bg:#0f1419;--card:#1a2129;--ink:#e6edf3;--mut:#9da7b3;--line:#2d3742;
+        --g:#3fb950;--y:#d29922;--r:#f85149;--b:#58a6ff;--p:#bc8cff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.7;font-size:15px}
+  header{padding:28px 24px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,20,25,.96);backdrop-filter:blur(6px);z-index:10}
+  header h1{margin:0 0 6px;font-size:20px}
+  header .sub{color:var(--mut);font-size:13px}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:18px 0}
+  h2{font-size:17px;margin:6px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{font-size:14px;margin:16px 0 6px;color:var(--b)}
+  .bluf{background:linear-gradient(135deg,#1c2530,#161b22);border-left:4px solid var(--p)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1f2733;color:var(--ink);font-weight:600}
+  td.k{white-space:nowrap;color:var(--mut)}
+  .g{color:var(--g)} .y{color:var(--y)} .r{color:var(--r)} .b{color:var(--b)} .p{color:var(--p)} .mut{color:var(--mut)}
+  .tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid}
+  .tag.g{border-color:var(--g);color:var(--g)} .tag.y{border-color:var(--y);color:var(--y)} .tag.r{border-color:var(--r);color:var(--r)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;background:#222c38;margin:2px 4px 2px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+  .opt{border:1px solid var(--line);border-radius:10px;padding:14px}
+  .opt.aggr{border-color:#5a3a2a} .opt.cons{border-color:#2a4a3a}
+  .opt h3{margin-top:0}
+  .strike{color:var(--r)} .ok{color:var(--g)}
+  code{background:#222c38;padding:1px 5px;border-radius:4px;font-size:12px;color:#e6edf3}
+  .decide{background:#241a1a;border:1px solid #5a3030}
+  .q{background:#1f2733;border-radius:8px;padding:12px 14px;margin:10px 0}
+  .q b{color:var(--p)}
+  ul{margin:6px 0 6px 0;padding-left:20px} li{margin:3px 0}
+  .legend{font-size:12px;color:var(--mut);margin-top:6px}
+  .small{font-size:12.5px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <h1>論文框架對齊與決策 — Subclonal reconstruction 論文</h1>
+  <div class="sub">2026-06-12 · 發現既有 <code>docs/paper_focus/</code> 完整框架 → 我的 <code>docs/thesis/</code> 草稿需對齊 · 套用 06-12 對抗稽核 4 校正</div>
+</header>
+<div class="wrap">
+
+  <div class="card bluf">
+    <h2>L0 — 一眼結論（請先讀這段）</h2>
+    <ul>
+      <li><b class="p">已有一份完整正式論文架構</b>：<code>docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md</code>（v2、Slide2Thesis Nature 格式、目標 <b>Genome Biology / Bioinformatics</b>、figures P1-P6 已生成、共識台帳 606 claim / F=0）。</li>
+      <li><b class="r">我這幾小時建在「錯的那一面」</b>：我把 <b>V1-V12 甲基-phasing-assist（A 面）</b>當主 Results 寫成 ch3/ch4/摘要/緒論；但在真實論文裡，phasing-assist 是 <b>Discussion 的 future tooling</b>，<b>不是</b>主結果。真實主脊柱 = <b class="b">de-confound floor + 四道 NEGATIVE + 332,705 catalog + chr17 例外</b>。</li>
+      <li><b class="y">全篇唯一未拍板決策 = 框架/標題二選一</b>：你給的「Subclonal reconstruction」（<b>進取版</b>）vs 正式草稿用的「ASM characterization」（<b>保守版</b>）。<b class="r">進取版 headline 被紅隊 REFUTED（as-stated）</b>，需 HD-1（25-50hr C++）。</li>
+      <li>→ <b>我需要你拍兩件事</b>（本頁 §5），再對齊重寫，不浪費。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>§1 兩個框架 / 標題（master 表明列「唯一未拍板決策」）</h2>
+    <div class="two">
+      <div class="opt aggr">
+        <h3 class="y">進取版（你給的標題）</h3>
+        <p><b>Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing</b></p>
+        <ul>
+          <li>headline：somatic haplotagging（genetic 引擎）重建 LOH-constrained 子克隆；甲基 = characterization。</li>
+          <li>動詞 reconstruct / 重建。</li>
+          <li class="r">🔴 紅隊 REFUTED（as-stated）：依賴單樣本 V11c + longphase-S 自我參照循環 + HD-1 OPEN。</li>
+          <li class="y">需 HD-1（R-SELFREF ~25-50hr C++）才能把 phasing 脊柱寫成 positive headline；否則 phasing 降為 ⭐3 支撐。</li>
+          <li class="ok">✅ 可救：整合篇章的調和立場 = 「reconstruction 歸 genetic-haplotagging 骨幹、甲基=characterization」（＝我先前提的 A-framing），這樣標題站得住。</li>
+        </ul>
+      </div>
+      <div class="opt cons">
+        <h3 class="g">保守版（正式 v2 草稿現用）</h3>
+        <p><b>Read-level characterization of allele-specific methylation… methylation tracks germline rather than somatic haplotypes, with a rare somatic co-validation exception</b></p>
+        <ul>
+          <li>headline：de-confound floor — read-level 甲基 allelic 分群跟 <b>germline</b> 非 somatic；甲基不能 filter。</li>
+          <li>動詞 characterize / map（無功能資料，較不 overclaim）。</li>
+          <li class="g">✅ 不需 HD-1，全 🟢，今天可寫；phasing 降為 §2.6 支撐 observation。</li>
+          <li class="mut">較不吸睛；亮點是「誠實負結果 + de-confound」而非「重建工具」。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="small">共同部分（~80%，兩版都要）：死四道 NEGATIVE + ASM characterization + chr17 cis + 332,705 catalog + 跨樣本 6/6 + ISM 方法 + 4 軸 method positioning。<br>
+    master 表中性建議：<b>先寫共同部分（今天防彈），HD-1 拍板後再定 §2.6 phasing 寫法</b>——無論選哪版都不浪費。</p>
+  </div>
+
+  <div class="card">
+    <h2>§2 真實論文 Results 脊柱 vs 我草稿落點</h2>
+    <table>
+      <tr><th>真實論文 Results（正式 v2）</th><th class="k">tier</th><th>我 ch4 草稿落點</th></tr>
+      <tr><td><b>2.1</b> ASM 存在且 somatic-enriched（TP 3.95% &gt; FP 1.07%）</td><td><span class="tag g">🟢</span></td><td class="r">缺（我沒寫）</td></tr>
+      <tr><td><b>2.2</b> 邊界：甲基<b>不能 filter</b> TP/FP（四道 NEGATIVE：LOSO 循環 / AUC=0.505 / ~4% sens / regression-to-extreme）</td><td><span class="tag g">🟢 最硬</span></td><td class="y">只在 4.7 寫成 {{待補}} placeholder</td></tr>
+      <tr><td><b>2.3 ⭐ RULE</b> catalog：332,705→7 TAG；reliable 12,868（3.87%）<b>全 germline-allelic</b>；乾淨 somatic cis 全基因組<b>僅 1（chr17）</b></td><td><span class="tag g">🟢 主圖</span></td><td class="r">缺（我完全沒寫 catalog）</td></tr>
+      <tr><td><b>2.4</b> copy-dosage <b>非</b> driver（MW p=0.6183, ρ=−0.0829）；cis vs copy partition</td><td><span class="tag g">🟢</span></td><td class="y">我 4.5 寫了 CN 非 confound（V5），方向一致但口徑不同</td></tr>
+      <tr><td><b>2.5 EXCEPTION</b> chr17/TBC1D16 三訊號 co-validation（唯一乾淨 cis 候選）</td><td><span class="tag y">🟡 contingent</span></td><td class="r">缺</td></tr>
+      <tr><td><b>2.6</b> LOH-constrained phasing 軸（7/7 W=28 p=0.0078）</td><td><span class="tag y">🟡 押 HD-1</span></td><td class="r">缺</td></tr>
+      <tr><td><b>2.7</b> 跨樣本復現（6/6 excess +0.101–0.241；同-locus 0/38 private）</td><td><span class="tag g">🟢</span></td><td class="y">我 4.6 寫成 {{待補}}</td></tr>
+      <tr><td class="mut"><b>Discussion §3.3（future tooling）</b>：甲基輔助 phasing「umtag」held-out 0.8852 / V10 normal 0.979≥tumor 0.866 / V6 救援 / V10/V11</td><td><span class="tag y">🟡 future</span></td><td class="r">⚠ 我把這整塊（V1-V12）當成 ch4 <b>主 Results</b> R1/R2/R3/R5 寫了 — 應移到 Discussion future</td></tr>
+    </table>
+    <p class="small">→ 我的 ch3 Methods <b class="g">大半可重用</b>（方法就是方法）；但 ch4 Results、摘要、緒論的<b class="r">敘事主軸放錯面</b>，需依真實脊柱重構。</p>
+  </div>
+
+  <div class="card">
+    <h2>§3 06-12 對抗稽核 4 處校正（已套用本頁；正文須同步）</h2>
+    <table>
+      <tr><th class="k">#</th><th>原 stale 值</th><th>✅ 校正後（權威）</th></tr>
+      <tr><td class="k">1</td><td class="strike">same-hap「3/6 ≥93%」</td><td>occupancy <b>6/6 ≥93%</b>（0.932/0.990/0.988/0.965…）；先前是把 TP-rate 誤標成占用率。親驗 <code>obs18_NG2_composition_by_sample.tsv</code></td></tr>
+      <tr><td class="k">2</td><td class="strike">乾淨 cis「1/332,705」</td><td>816 可測 loci 中僅 1（chr17, ~0.12%）；<b>332,705 未全 cis-tested → 勿當分母</b>（把未測當已驗陰性 = overclaim）</td></tr>
+      <tr><td class="k">3</td><td class="strike">chr17/TBC1D16「乾淨/唯一 cis」</td><td><b>最強 cis 候選（非「乾淨」）</b>：殘餘 allele-axis d=0.183&gt;d_within、未過 Cochran gate、單樣本 n=30 Bonferroni-marginal</td></tr>
+      <tr><td class="k">4</td><td class="strike">subclone-甲基「已 NEGATIVE / germline-allelic」</td><td><b>somatic-specificity = undetermined</b>（押 G-B within-hap null 未跑；germline-het null 是錯對照、p=0.922 是 fail-to-reject 不可當證據）。<b>勿寫成已 POSITIVE 也勿寫成已 NEGATIVE</b></td></tr>
+    </table>
+    <p class="small">🔴 我 ch4 4.4 寫「subclone 存在性窄幅支持」＋摘要「provides only an existence signal」<b>偏正、需改 undetermined</b>。</p>
+  </div>
+
+  <div class="card">
+    <h2>§4 我 <code>docs/thesis/</code> 草稿現況</h2>
+    <table>
+      <tr><th>檔案</th><th>狀態</th><th>處理</th></tr>
+      <tr><td>架構 spec <code>20260612_thesis_architecture_spec_01.md</code></td><td class="y">建在 A 面</td><td>需對齊正式 v2 + 共識台帳</td></tr>
+      <tr><td><code>chapters/00_abstract.md</code></td><td class="r">主軸放錯面 + subclone 偏正</td><td>重寫（依保守/進取拍板）</td></tr>
+      <tr><td><code>chapters/ch1_introduction.md</code></td><td class="r">gap 敘事放錯面</td><td>重寫 hook（de-confound vs 共驗證）</td></tr>
+      <tr><td><code>chapters/ch3_methods.md</code></td><td class="g">大半可重用</td><td>併入正式 Methods（補 catalog 7-TAG / 驗證機制 9 / FDR #24）</td></tr>
+      <tr><td><code>chapters/ch4_results.md</code></td><td class="r">phasing-assist 當主 Results</td><td>重構為 de-confound floor 脊柱；phasing-assist 移 Discussion future</td></tr>
+    </table>
+  </div>
+
+  <div class="card decide">
+    <h2>§5 🔴 要你拍的兩件事</h2>
+    <div class="q"><b>決策 1（框架/標題）</b>：你給的「Subclonal reconstruction」是 <b>進取版</b>，但正式草稿與紅隊建議走 <b>保守版</b>。三條路：
+      <ul>
+        <li><b>(a) 進取版</b> + 整合篇章調和（reconstruction 歸骨幹、甲基 characterize）→ 但需接受 HD-1 依賴 / 紅隊 as-stated 風險。</li>
+        <li><b>(b) 保守版</b>（正式 v2 標題）→ 全 🟢 今天可寫、Genome Biology tier、最防 overclaim。</li>
+        <li><b>(c) 先寫共同 80%</b>（de-confound floor 防彈段），HD-1 拍板後再定 phasing 脊柱寫法（master 表中性建議）。</li>
+      </ul>
+    </div>
+    <div class="q"><b>決策 2（工作位置）</b>：要我
+      <ul>
+        <li><b>(a)</b> 把工作移進既有 <code>docs/paper_focus/</code>（更完整：正式 v2 草稿 + figures + 共識台帳）— 直接精修既有正式 v2，不另起爐灶；或</li>
+        <li><b>(b)</b> 在 <code>docs/thesis/</code> 依真實脊柱 + 共識重寫一套乾淨碩論版（中文）；或</li>
+        <li><b>(c)</b> 先不寫，我先把既有正式 v2 + 整合篇章 + 共識台帳全讀通，做一份「對齊後的單一章節對應表 + 待補」再開寫。</li>
+      </ul>
+    </div>
+    <p class="small">我的建議：<b>決策1=(c) 先寫共同 80%</b>（無論標題都不浪費、且共同段全 🟢）；<b>決策2=(a) 或 (c)</b>（既有 paper_focus 已是更成熟底座，避免我再造平行輪子撞 <code>feedback_check_parallel_work_before_building</code>）。但這是你的論文，請你定。</p>
+  </div>
+
+  <p class="legend">🟢 已 T-PROV 對賬 · 🟡 contingent / 待對賬 · 🔴 待修正/決策。數字來源：正式學術版 v2 / master 對應表 §0 / 共識台帳 / VERIFIED_RESULTS（本 session 讀回）；已套用 06-12 稽核 4 校正。本頁不產新數字。</p>
+
+</div>
+</body>
+</html>

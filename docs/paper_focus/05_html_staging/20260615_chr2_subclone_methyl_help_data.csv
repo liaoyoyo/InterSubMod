@@ -1,0 +1,17 @@
+# chr2:18M subclone 甲基判別 + ASM-control 數據 (verified)
+# 來源: 20260615_chr2_18M_subclone_independent_verdict_02.md §四(甲基判別) + §六(ASM-control)
+#       = independent_audit.json 機器輸出; ALT/REF=5mC mean; q=Mann-Whitney BH-FDR; normal_hp=matched-normal HP mean
+# class: clean=normal HP 無 ASM + 兩 basecaller 複製(真 tumor-acquired); confound=normal HP1-vs-HP2 已顯著(既存 germline ASM)
+anchor,cpg,hku_alt,hku_ref,hku_q,dor_alt,dor_ref,dor_q,dor_pass,normal_hp1,normal_hp2,normal_fdr,class
+(2)G>C,2.1,0.141,0.719,7.2e-4,0.012,0.858,1.5e-5,yes,,,,clean
+(2)G>C,2.2,0.112,0.843,2.3e-4,0.241,1.000,1.4e-3,yes,,,,clean
+(3)G>A,3.1,0.222,0.917,3.3e-4,0.074,0.998,2.4e-5,yes,,,,clean
+(3)G>A,3.2,0.970,0.144,4.1e-5,1.000,0.006,2.4e-5,yes,,,,clean
+(3)G>A,3.3,0.416,0.844,0.025,0.257,0.993,6.1e-3,yes,0.814,0.046,0.0070,confound
+(3)G>A,3.4,0.045,0.874,4.1e-5,0.256,0.858,0.060,no,0.033,0.850,0.0070,confound
+(3)G>A,3.5,0.010,0.865,1.7e-3,0.380,0.835,0.084,no,0.583,0.012,0.0496,confound
+(4)non-ref,4.1,0.177,0.975,2.2e-6,0.516,0.991,8.7e-5,yes,0.887,0.078,0.0070,confound
+(5)G>C,5.1,0.116,0.749,3.7e-3,0.005,0.649,2.0e-3,yes,,,,clean
+(5)G>C,5.2,0.030,0.698,1.2e-3,0.010,0.506,2.0e-3,yes,,,,clean
+(6)C>G,5.1,0.939,0.189,1.5e-3,1.000,0.096,6.8e-3,yes,,,,clean
+(6)C>G,5.2,0.885,0.031,5.5e-3,1.000,0.010,5.4e-3,yes,,,,clean
