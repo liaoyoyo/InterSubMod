@@ -44,7 +44,13 @@ hypotheses:
       - "errata content drift (5/9 paired audit added new errata candidate E5)"
     positive_criterion: "Git tag v6-prod-* exists + 5 errata + V6 sign-off email delivered"
     negative_criterion: "PI requests new audit before sign-off (T4.3 workload expands)"
-    verdict: null
+    verdict: "supported"  # 2026-05-20 Day 4: commit 8a90532 + tag v6-prod-20260520 created; 5 errata + PI email draft ready
+    completion:
+      git_commit_sha: "8a90532"
+      git_tag: "v6-prod-20260520"
+      tag_date: "2026-05-20"
+      pi_email_draft: "InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md"
+      remote_push: "pending (user explicit authorization needed)"
 
 datasets:
   - path: "research/v6_bam_tpfp_hp_loh_cn/step1_master_three_way.tsv"
@@ -71,8 +77,8 @@ datasets:
     description: "HCC1937 V6 ISM (2026-05-15)"
     rows: null
     columns_used: []
-  - path: "(待補) InterSubMod/output/canonical/COLO829/V6/"
-    description: "COLO829 V6 ISM (pending Archive TO rerun)"
+  - path: "DEFERRED: InterSubMod/output/canonical/COLO829/V6/"
+    description: "COLO829 V6 ISM — 2026-05-18 user decision to skip this round (NYGC truth-set permission 0600 + ONT_R10 no methylation). Phase 2 follow-up to use ONT_PAO subset."
     rows: null
     columns_used: []
   - path: "InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md"
@@ -85,36 +91,66 @@ datasets:
     columns_used: []
 
 artifacts:
-  scripts: []
-  figures: []
-  data: []
+  scripts:
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/baseline_vs_v6_analysis.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/plot_baseline_vs_v6.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/baseline_vs_v6_counterexample.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/baseline_vs_v6_f1_analysis.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/plot_f1_analysis.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/apply_lr_to_baseline.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/lr_ablation_methylation.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/per_cpg_hp_alt_4bam.py"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/hpfine_cross_sample_consistency.py"
+  figures:
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F1-F13_*.png (13 figures)"
+  data:
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_master_four_way.tsv (35,332 × 112)"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_baseline_vs_v6_{summary,per_chr,per_zone}.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_counterexample_*.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_f1_analysis_*.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_lr_ablation_methylation.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_per_cpg_hp_alt_summary.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_hpfine_cross_sample_summary.tsv"
+    - "InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/apply_lr_baseline_results.json"
 
 dependencies:
-  git_commit: ""  # V6 final tag commit, to fill at Tier 1.2 finalize
+  git_commit: "8a90532"  # V6 patch commit (longphase-to-mod fix/pon-only-phasing branch, 2026-05-20)
   python_packages:
     - "pandas"
     - "numpy"
     - "matplotlib"
+    - "scipy"
+    - "scikit-learn"
     - "pyyaml"
   cpp_binary_chain:
-    - "8b8c1fd (V3F baseline)"
-    - "41ff147"
-    - "380e8d2"
-    - "d0bcd8c (ploidy bug fix)"
-    - "938f0df (HEAD - V5 threshold 0.95→0.9)"
-    - "v6-patch-TBD (V6 Layer 1.5 + V3F-style hp=33)"
+    - "8b8c1fd 2026-04-09 feat: --pon-only-phasing flag"
+    - "41ff147 2026-04-10 fix(haplotag): two-layer getVote (V3F)"
+    - "380e8d2 2026-04-25 fix(haplotag): countINDELHaplotype UNDEFINED guard"
+    - "d0bcd8c 2026-04-30 fix(purity): collect ploidyRatio + bundled Layer 1.5 (V5)"
+    - "938f0df 2026-04-30 Update purity threshold 0.95→0.9 (V5 HEAD)"
+    - "8a90532 2026-05-20 fix(haplotag): V6 revert Layer 1.5 in germline-absent region (V6, tag v6-prod-20260520)"
 
 reproducibility:
   python_version: "3.x"
   key_parameters:
-    v6_binary_commit: "TBD (Tier 1.2)"
+    v6_binary_commit: "8a90532"
+    v6_git_tag: "v6-prod-20260520"
     v5_baseline_commit: "938f0df"
     v3f_baseline_commit: "8b8c1fd"
+    v6_patch_diff_stats: "+31 / -19 (HaplotagProcess.cpp +18/-16 logic + .gitignore +13/0 housekeeping)"
     inner_loh_ng2_v3f_count: 5064
     inner_loh_ng2_v5_count: 8136
     inner_loh_ng2_v6_count: 5353
     v5_over_promote_ratio: 1.60
     v5_v3f_top_cell_ratio: 5.95
+    # 5/19-20 Day 2-3 5-Goal validation key results
+    v6_marker_count_vs_baseline_pct: 52.4
+    v6_marker_rate_off: 0.9093
+    v6_loh_pos_marker_rate: 0.9801
+    v6_lr_delta_f1: 0.02236
+    baseline_lr_delta_f1: 0.02302
+    methylation_lr_contribution: 0.00066
+    cross_sample_hpfine_spearman_avg: 0.8448
 
 report:
   path: "InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md"

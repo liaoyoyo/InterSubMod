@@ -1,0 +1,1897 @@
+<!doctype html>
+<!--
+建立時間: 2026-07-18
+目標: 以可離線閱讀的互動 HTML 解釋 Boolean hypercube 中 k 個 sSNV 的節點、subcube、hidden states、parent-tree 與搜尋組合公式
+處理範圍: k=1–12 教學 DEMO；方法數字核對 current M2 source 與 bounded engineering probe；不作全量驗證或生物演化證據
+關聯檔案:
+  - InterSubMod/docs/methodology/20260704_formal_problem_statement_topology_from_cooccurrence_01.md
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/build_m2_patterns_and_rank.py
+  - InterSubMod/research/20260718_hypercube_exact_preserving_solver_cache_remediation/20260718_Hypercube_exact_preserving修補與驗證結果_01.md
+  - InterSubMod/research/20260718_solver_methyl_edge_probe/20260718_solver與甲基edge小步驗證報告_01.md
+-->
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>布爾超立方體：k 個 sSNV 的組合公式</title>
+  <style>
+    :root {
+      --ink: #f5f0df;
+      --muted: #aab8b9;
+      --paper: #111d22;
+      --paper-2: #16282d;
+      --deep: #071014;
+      --grid: rgba(112, 216, 207, 0.085);
+      --cyan: #70d8cf;
+      --cyan-soft: rgba(112, 216, 207, 0.16);
+      --orange: #ff9e63;
+      --orange-soft: rgba(255, 158, 99, 0.16);
+      --yellow: #f3d16f;
+      --red: #ff786f;
+      --line: rgba(245, 240, 223, 0.15);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+      --display: "Bodoni 72", Didot, "Baskerville", "Times New Roman", serif;
+      --body: "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
+      --math: "STIX Two Math", "Cambria Math", "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--deep);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.72;
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        radial-gradient(circle at 8% 10%, rgba(112, 216, 207, 0.14), transparent 28rem),
+        radial-gradient(circle at 92% 16%, rgba(255, 158, 99, 0.11), transparent 26rem),
+        var(--deep);
+      background-size: 32px 32px, 32px 32px, auto, auto, auto;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-color: rgba(112, 216, 207, 0.6);
+      text-underline-offset: 0.25em;
+    }
+
+    button, input { font: inherit; }
+
+    .skip-link {
+      position: fixed;
+      left: 1rem;
+      top: -4rem;
+      z-index: 99;
+      padding: 0.7rem 1rem;
+      color: var(--deep);
+      background: var(--cyan);
+      border-radius: 999px;
+      transition: top 160ms ease;
+    }
+
+    .skip-link:focus { top: 1rem; }
+
+    .demo-ribbon {
+      position: fixed;
+      z-index: 30;
+      top: 1rem;
+      right: -3.3rem;
+      width: 13rem;
+      padding: 0.45rem 0;
+      color: var(--deep);
+      background: var(--yellow);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.13em;
+      transform: rotate(39deg);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 82vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 34rem;
+      height: 34rem;
+      right: -10rem;
+      bottom: -12rem;
+      border: 1px solid rgba(112, 216, 207, 0.25);
+      border-radius: 42% 58% 63% 37%;
+      transform: rotate(18deg);
+      box-shadow:
+        0 0 0 3rem rgba(112, 216, 207, 0.025),
+        0 0 0 7rem rgba(112, 216, 207, 0.018);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      width: min(1180px, calc(100% - 3rem));
+      margin: 0 auto;
+      padding: 8.5rem 0 5rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.65fr);
+      gap: 4rem;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 0.65rem;
+      align-items: center;
+      margin: 0 0 1.2rem;
+      color: var(--cyan);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 2.5rem;
+      height: 2px;
+      background: var(--cyan);
+    }
+
+    h1, h2, h3 {
+      font-family: var(--display);
+      font-weight: 500;
+      line-height: 1.05;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 13ch;
+      margin: 0;
+      font-size: clamp(3.4rem, 8vw, 7.7rem);
+      letter-spacing: -0.055em;
+    }
+
+    h1 .accent { color: var(--orange); }
+
+    .lede {
+      max-width: 45rem;
+      margin: 2rem 0 0;
+      color: #d9dfd6;
+      font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+    }
+
+    .hero-note {
+      position: relative;
+      padding: 1.5rem 1.5rem 1.35rem;
+      background: rgba(17, 29, 34, 0.84);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--orange);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--orange);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero-note p { margin: 0; color: var(--muted); }
+
+    .layout {
+      width: min(1240px, calc(100% - 3rem));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: 3.5rem;
+      padding: 4rem 0 8rem;
+    }
+
+    .toc {
+      align-self: start;
+      position: sticky;
+      top: 1.3rem;
+      padding: 1.15rem;
+      background: rgba(7, 16, 20, 0.78);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(14px);
+    }
+
+    .toc-title {
+      margin: 0 0 0.9rem;
+      color: var(--orange);
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .toc a {
+      display: block;
+      padding: 0.52rem 0.6rem;
+      color: var(--muted);
+      border-left: 2px solid transparent;
+      text-decoration: none;
+      font-size: 0.87rem;
+      transition: 150ms ease;
+    }
+
+    .toc a:hover,
+    .toc a:focus-visible {
+      color: var(--ink);
+      background: var(--cyan-soft);
+      border-left-color: var(--cyan);
+      outline: none;
+    }
+
+    main { min-width: 0; }
+
+    section {
+      scroll-margin-top: 2rem;
+      margin-bottom: 5.5rem;
+    }
+
+    .section-kicker {
+      margin: 0 0 0.5rem;
+      color: var(--cyan);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0 0 1.4rem;
+      font-size: clamp(2.35rem, 5vw, 4.25rem);
+      letter-spacing: -0.035em;
+    }
+
+    h3 {
+      margin: 0 0 0.7rem;
+      font-size: clamp(1.45rem, 2.8vw, 2rem);
+      letter-spacing: -0.015em;
+    }
+
+    .section-intro {
+      max-width: 52rem;
+      margin: 0 0 2rem;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .formula-card,
+    .panel,
+    details {
+      background: linear-gradient(145deg, rgba(22, 40, 45, 0.96), rgba(14, 27, 31, 0.94));
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+    }
+
+    .formula-card {
+      position: relative;
+      min-height: 15rem;
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .formula-card::after {
+      content: attr(data-index);
+      position: absolute;
+      right: -0.05em;
+      bottom: -0.22em;
+      color: rgba(245, 240, 223, 0.045);
+      font-family: var(--display);
+      font-size: 9rem;
+      line-height: 1;
+    }
+
+    .formula-card .label {
+      position: relative;
+      z-index: 1;
+      color: var(--orange);
+      font-size: 0.73rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .formula-card p {
+      position: relative;
+      z-index: 1;
+      margin: 0.8rem 0 0;
+      color: var(--muted);
+    }
+
+    math {
+      position: relative;
+      z-index: 1;
+      display: block;
+      overflow-x: auto;
+      padding: 1.2rem 0 0.7rem;
+      color: var(--ink);
+      font-family: var(--math);
+      font-size: clamp(1.55rem, 4vw, 2.45rem);
+    }
+
+    .formula-text {
+      position: relative;
+      z-index: 1;
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+      font-family: var(--math);
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .explorer {
+      display: grid;
+      grid-template-columns: minmax(16rem, 0.75fr) minmax(0, 1.25fr);
+      gap: 1rem;
+    }
+
+    .panel { padding: 1.5rem; }
+
+    .control-panel {
+      border-top: 4px solid var(--cyan);
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .slider-label strong {
+      color: var(--cyan);
+      font-family: var(--display);
+      font-size: 3rem;
+      font-weight: 500;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--orange);
+      cursor: pointer;
+    }
+
+    .range-scale {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin-top: 1.4rem;
+    }
+
+    .stat {
+      padding: 0.85rem;
+      background: rgba(7, 16, 20, 0.52);
+      border-left: 2px solid var(--line);
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .stat output {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--ink);
+      font-family: var(--math);
+      font-size: 1.35rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .pascal-panel {
+      display: flex;
+      min-height: 22rem;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top: 4px solid var(--orange);
+    }
+
+    .level-bars {
+      display: flex;
+      align-items: end;
+      gap: 0.45rem;
+      height: 12rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .level-col {
+      flex: 1 1 0;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 0.35rem;
+      background: linear-gradient(180deg, var(--orange), rgba(255, 158, 99, 0.3));
+      border-radius: 4px 4px 0 0;
+      transform-origin: bottom;
+      animation: rise 480ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .level-col strong,
+    .level-col span {
+      display: block;
+      font-size: 0.72rem;
+    }
+
+    .level-col strong { margin-top: 0.4rem; color: var(--ink); }
+    .level-col span { color: var(--muted); }
+
+    .exact-count {
+      margin: 1rem 0 0;
+      padding: 0.9rem 1rem;
+      color: var(--cyan);
+      background: rgba(7, 16, 20, 0.58);
+      border: 1px solid rgba(112, 216, 207, 0.22);
+      font-family: var(--math);
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: rgba(7, 16, 20, 0.48);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th, td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th:first-child, td:first-child { text-align: center; }
+
+    th {
+      position: sticky;
+      top: 0;
+      color: var(--cyan);
+      background: #101e23;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:hover { background: var(--cyan-soft); }
+
+    .big-number {
+      display: inline-block;
+      max-width: 17rem;
+      overflow: hidden;
+      color: var(--yellow);
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
+
+    details {
+      margin: 1rem 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    summary {
+      position: relative;
+      padding: 1.15rem 3rem 1.15rem 1.3rem;
+      cursor: pointer;
+      color: var(--ink);
+      font-weight: 800;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "+";
+      position: absolute;
+      top: 50%;
+      right: 1.25rem;
+      color: var(--orange);
+      font-family: var(--display);
+      font-size: 1.7rem;
+      transform: translateY(-50%);
+    }
+
+    details[open] summary {
+      color: var(--cyan);
+      border-bottom: 1px solid var(--line);
+    }
+
+    details[open] summary::after { content: "−"; }
+
+    .details-body { padding: 1.3rem; }
+    .details-body > :first-child { margin-top: 0; }
+    .details-body > :last-child { margin-bottom: 0; }
+
+    .callout {
+      margin: 1.4rem 0;
+      padding: 1.2rem 1.3rem;
+      color: #f7eadc;
+      background: var(--orange-soft);
+      border-left: 4px solid var(--orange);
+    }
+
+    .callout.cyan {
+      color: #dffaf7;
+      background: var(--cyan-soft);
+      border-left-color: var(--cyan);
+    }
+
+    .callout strong { color: var(--ink); }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    code {
+      color: var(--yellow);
+      background: rgba(7, 16, 20, 0.58);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.12em 0.35em;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 1.2rem;
+      color: #e8efe8;
+      background: #071014;
+      border: 1px solid var(--line);
+      line-height: 1.55;
+    }
+
+    .svg-panel {
+      padding: 1rem;
+      background: rgba(7, 16, 20, 0.52);
+      border: 1px solid var(--line);
+    }
+
+    .svg-panel svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .edge {
+      fill: none;
+      stroke: rgba(112, 216, 207, 0.5);
+      stroke-width: 2;
+      marker-end: url(#arrow);
+    }
+
+    .node circle {
+      fill: #13262b;
+      stroke: var(--cyan);
+      stroke-width: 2;
+    }
+
+    .node.level-2 circle { stroke: var(--orange); }
+    .node.level-3 circle { stroke: var(--yellow); }
+
+    .node text {
+      fill: var(--ink);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 14px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .tree-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .tree-card {
+      padding: 1.2rem;
+      background: rgba(7, 16, 20, 0.52);
+      border: 1px solid var(--line);
+    }
+
+    .tree-card strong { color: var(--orange); }
+
+    .method-flow,
+    .status-grid,
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .method-step,
+    .status-card,
+    .metric-card {
+      position: relative;
+      padding: 1.15rem 1.2rem;
+      background: rgba(7, 16, 20, 0.52);
+      border: 1px solid var(--line);
+    }
+
+    .method-step {
+      padding-left: 4rem;
+    }
+
+    .method-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 1.1rem;
+      top: 1.05rem;
+      color: var(--deep);
+      background: var(--cyan);
+      width: 2rem;
+      height: 2rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      font-family: var(--math);
+      font-weight: 900;
+    }
+
+    .method-step strong,
+    .status-card strong,
+    .metric-card strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: var(--ink);
+    }
+
+    .method-step p,
+    .status-card p,
+    .metric-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .status-card {
+      border-top: 4px solid var(--cyan);
+    }
+
+    .status-card.pending {
+      border-top-color: var(--yellow);
+    }
+
+    .status-card.no {
+      border-top-color: var(--red);
+    }
+
+    .status-label {
+      display: inline-block;
+      margin-bottom: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      color: var(--deep);
+      background: var(--cyan);
+      border-radius: 999px;
+      font-size: 0.67rem;
+      font-weight: 900;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .pending .status-label { background: var(--yellow); }
+    .no .status-label { color: var(--ink); background: var(--red); }
+
+    .metric-card {
+      border-left: 3px solid var(--orange);
+    }
+
+    .metric-card .metric {
+      display: block;
+      margin: 0.2rem 0 0.5rem;
+      color: var(--yellow);
+      font-family: var(--math);
+      font-size: clamp(1.35rem, 3vw, 2.2rem);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .formula-banner {
+      margin: 1.2rem 0;
+      padding: 1.3rem;
+      background:
+        linear-gradient(135deg, rgba(112, 216, 207, 0.12), transparent 55%),
+        rgba(7, 16, 20, 0.58);
+      border: 1px solid rgba(112, 216, 207, 0.3);
+    }
+
+    .formula-banner .formula-text + .formula-text {
+      margin-top: 0.65rem;
+    }
+
+    .formula-banner p:last-child { margin-bottom: 0; }
+
+    .source-note {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .source-note code {
+      overflow-wrap: anywhere;
+    }
+
+    .term-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .term {
+      padding: 1rem;
+      background: var(--paper);
+    }
+
+    .term dt {
+      color: var(--cyan);
+      font-family: var(--math);
+      font-weight: 800;
+    }
+
+    .term dd {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+    }
+
+    .footer {
+      padding: 2.5rem 1.5rem 3rem;
+      color: var(--muted);
+      background: #050c0f;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      font-size: 0.84rem;
+    }
+
+    .footer strong { color: var(--yellow); }
+
+    @keyframes rise {
+      from { transform: scaleY(0); opacity: 0.3; }
+      to { transform: scaleY(1); opacity: 1; }
+    }
+
+    @media (max-width: 920px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 2.2rem;
+      }
+
+      .hero-note { max-width: 34rem; }
+
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .toc {
+        position: relative;
+        top: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toc-title { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 680px) {
+      .hero-inner,
+      .layout {
+        width: min(100% - 1.5rem, 1240px);
+      }
+
+      .hero-inner { padding-top: 6.5rem; }
+
+      h1 { font-size: clamp(3rem, 16vw, 5.1rem); }
+
+      .formula-grid,
+      .explorer,
+      .tree-pair,
+      .method-flow,
+      .status-grid,
+      .metric-grid,
+      .term-list {
+        grid-template-columns: 1fr;
+      }
+
+      .formula-card { min-height: 13rem; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .toc { grid-template-columns: 1fr; }
+      .level-bars { height: 10rem; gap: 0.25rem; }
+      th, td { padding: 0.75rem 0.8rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media print {
+      :root {
+        --ink: #172326;
+        --muted: #42565a;
+        --paper: #fff;
+        --paper-2: #fff;
+        --deep: #fff;
+        --line: #bac7c8;
+      }
+
+      body {
+        color: #172326;
+        background: #fff;
+      }
+
+      .demo-ribbon, .toc, input[type="range"], .range-scale { display: none; }
+      .hero { min-height: auto; }
+      .hero-inner, .layout { width: 100%; }
+      .hero-inner { padding: 2rem 0; }
+      .layout { display: block; padding: 1rem 0; }
+      section { break-inside: avoid; margin-bottom: 2rem; }
+      details { break-inside: avoid; }
+      details > .details-body { display: block !important; }
+      .formula-card, .panel, details, .table-wrap { box-shadow: none; }
+      .footer { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="demo-ribbon" aria-label="教學示意，非驗證證據">DEMO · 非驗證</div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow">Boolean lattice field guide</p>
+        <h1><span class="accent">k</span> 個 sSNV 的組合宇宙</h1>
+        <p class="lede">
+          從 <strong>2<sup>k</sup> 個 mutation states</strong>，走到
+          symbolic subcube、hidden-state enumeration 與 parent assignments。
+          公式、實作限制與 <em>k = 1–12</em> 即時計算放在同一張教學地圖。
+        </p>
+      </div>
+      <aside class="hero-note">
+        <strong>Current M2 讀圖規則</strong>
+        <p>
+          <code>R=0</code>、<code>A=1</code>、<code>X=?</code>。
+          O/D/S/L、明示 X 與未覆蓋位置會轉成 X；exact gate 使用
+          observed-ALT effective <code>k≤12</code>。
+        </p>
+      </aside>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="頁面章節">
+      <p class="toc-title">公式導航</p>
+      <a href="#formula-map">核心公式</a>
+      <a href="#explorer">k 即時探索器</a>
+      <a href="#lattice">節點與分層</a>
+      <a href="#edges">邊與父節點</a>
+      <a href="#trees">樹形組合</a>
+      <a href="#search">Hidden-node 搜尋</a>
+      <a href="#partial">Subcube 定義</a>
+      <a href="#implementation">實際處理流程</a>
+      <a href="#limits">硬限制與爆炸點</a>
+      <a href="#acceleration">已實作加速</a>
+      <a href="#glossary">術語與邊界</a>
+    </nav>
+
+    <main id="main">
+      <section id="formula-map">
+        <p class="section-kicker">01 · Formula map</p>
+        <h2>先記住這六式</h2>
+        <p class="section-intro">
+          前四式描述超立方體本身；後兩式直接對應目前 solver 的候選數量與主要計算瓶頸。
+        </p>
+
+        <div class="formula-grid">
+          <article class="formula-card" data-index="1">
+            <span class="label">所有狀態節點</span>
+            <math display="block" aria-label="V 的大小等於二的 k 次方">
+              <mrow><mo>|</mo><mi>V</mi><mo>|</mo><mo>=</mo><msup><mn>2</mn><mi>k</mi></msup></mrow>
+            </math>
+            <p>每個 sSNV 只有 R/A 兩態，k 個位置形成長度 k 的二元字串。</p>
+          </article>
+
+          <article class="formula-card" data-index="2">
+            <span class="label">第 r 層節點</span>
+            <math display="block" aria-label="第 r 層節點數為 k choose r">
+              <mrow>
+                <mo>|</mo><msub><mi>V</mi><mi>r</mi></msub><mo>|</mo><mo>=</mo>
+                <mrow><mo>(</mo><mfrac><mrow><mi>k</mi><mo>!</mo></mrow><mrow><mi>r</mi><mo>!</mo><mo>(</mo><mi>k</mi><mo>−</mo><mi>r</mi><mo>)</mo><mo>!</mo></mrow></mfrac><mo>)</mo></mrow>
+              </mrow>
+            </math>
+            <p>第 r 層代表恰有 r 個 ALT mutations；整列就是 Pascal triangle。</p>
+          </article>
+
+          <article class="formula-card" data-index="3">
+            <span class="label">所有合法 unit-flip edges</span>
+            <math display="block" aria-label="E 的大小等於 k 乘二的 k 減一次方">
+              <mrow><mo>|</mo><mi>E</mi><mo>|</mo><mo>=</mo><mi>k</mi><mo>·</mo><msup><mn>2</mn><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow>
+            </math>
+            <p>每個維度有 2<sup>k−1</sup> 條由 0 指向 1 的邊，共 k 個維度。</p>
+          </article>
+
+          <article class="formula-card" data-index="4">
+            <span class="label">固定 N 的 parent trees</span>
+            <span class="formula-text" role="math" aria-label="T of N equals product of in-degrees over non-root vertices">
+              T(N) = ∏<sub>x∈N∖{0}</sub> d<sup>−</sup><sub>N</sub>(x)
+            </span>
+            <p>每個非根節點從 N 內合法前驅選一個 parent；各節點選擇數相乘。</p>
+          </article>
+
+          <article class="formula-card" data-index="5">
+            <span class="label">選 h 個 hidden nodes</span>
+            <math display="block" aria-label="P choose h">
+              <mrow>
+                <mo>(</mo><mfrac><mrow><mi>P</mi><mo>!</mo></mrow><mrow><mi>h</mi><mo>!</mo><mo>(</mo><mi>P</mi><mo>−</mo><mi>h</mi><mo>)</mo><mo>!</mo></mrow></mfrac><mo>)</mo>
+              </mrow>
+            </math>
+            <p>若 extra pool 有 P 個候選，測試恰好 h 個 hidden nodes 就有 C(P,h) 種。</p>
+          </article>
+
+          <article class="formula-card" data-index="6">
+            <span class="label">一筆 partial pattern 的 completions</span>
+            <math display="block" aria-label="有 x 個未知位置時，相容完整狀態數為二的 x 次方">
+              <mrow><mo>|</mo><mi>C</mi><mo>(</mo><mi>p</mi><mo>)</mo><mo>|</mo><mo>=</mo><msup><mn>2</mn><mi>x</mi></msup></mrow>
+            </math>
+            <p>一筆 read 有 x 個 X，就形成含 2<sup>x</sup> 個 compatible states 的 subcube group。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="explorer">
+        <p class="section-kicker">02 · Interactive calculator</p>
+        <h2>拖動 k，看組合膨脹</h2>
+        <p class="section-intro">
+          下方所有數值由頁面內建 BigInt 即時計算；不依賴網路或外部數學套件。
+        </p>
+
+        <div class="explorer">
+          <article class="panel control-panel">
+            <div class="slider-label">
+              <label for="k-slider">sSNV 數量</label>
+              <strong>k = <output id="k-value" for="k-slider">4</output></strong>
+            </div>
+            <input id="k-slider" type="range" min="1" max="12" step="1" value="4" aria-describedby="k-help">
+            <div class="range-scale" aria-hidden="true"><span>1</span><span>12</span></div>
+            <p id="k-help" class="section-intro">
+              新 M2 以 observed-ALT effective k≤12 走 exact MILP；歷史 layered
+              pipeline 的 densest-8／k≤8 是另一套口徑。
+            </p>
+
+            <div class="stat-grid" aria-live="polite">
+              <div class="stat">
+                <span>States · 2^k</span>
+                <output id="stat-states">16</output>
+              </div>
+              <div class="stat">
+                <span>Edges · k2^(k−1)</span>
+                <output id="stat-edges">32</output>
+              </div>
+              <div class="stat">
+                <span>最寬層</span>
+                <output id="stat-widest">6</output>
+              </div>
+              <div class="stat">
+                <span>Root 固定的 node subsets</span>
+                <output id="stat-subsets">32,768</output>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel pascal-panel">
+            <div>
+              <h3>第 r 層：C(k,r)</h3>
+              <p class="section-intro">柱高代表含 r 個 ALT 的 mutation states 數量。</p>
+            </div>
+            <div id="level-bars" class="level-bars" aria-label="各 mutation 層的節點數"></div>
+            <p class="exact-count">
+              完整 lattice parent trees：
+              <strong id="full-tree-exact">20,736</strong>
+            </p>
+          </article>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 1rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>k</th>
+                <th>States 2<sup>k</sup></th>
+                <th>最寬層</th>
+                <th>Edges</th>
+                <th>Full-lattice parent trees</th>
+              </tr>
+            </thead>
+            <tbody id="k-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="lattice">
+        <p class="section-kicker">03 · Nodes & levels</p>
+        <h2>節點不是 clone，是 mutation state</h2>
+        <p class="section-intro">
+          每個節點是一個區域內 k 個 sSNV 的 R/A 組合。層級由 A 的個數決定，方向永遠由少 mutation 指向多 mutation。
+        </p>
+
+        <div class="svg-panel">
+          <svg viewBox="0 0 840 500" role="img" aria-labelledby="lattice-title lattice-desc">
+            <title id="lattice-title">k 等於 3 的 Boolean lattice</title>
+            <desc id="lattice-desc">八個狀態依 ALT mutation 數分成四層，每條箭頭增加一個 ALT。</desc>
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(112,216,207,.65)"></path>
+              </marker>
+            </defs>
+
+            <path class="edge" d="M420 67 L180 137"></path>
+            <path class="edge" d="M420 67 L420 137"></path>
+            <path class="edge" d="M420 67 L660 137"></path>
+
+            <path class="edge" d="M180 183 L180 277"></path>
+            <path class="edge" d="M180 183 L420 277"></path>
+            <path class="edge" d="M420 183 L180 277"></path>
+            <path class="edge" d="M420 183 L660 277"></path>
+            <path class="edge" d="M660 183 L420 277"></path>
+            <path class="edge" d="M660 183 L660 277"></path>
+
+            <path class="edge" d="M180 323 L420 417"></path>
+            <path class="edge" d="M420 323 L420 417"></path>
+            <path class="edge" d="M660 323 L420 417"></path>
+
+            <g class="node level-0" transform="translate(420 45)">
+              <circle r="25"></circle><text>RRR</text>
+            </g>
+            <g class="node level-1" transform="translate(180 160)">
+              <circle r="25"></circle><text>ARR</text>
+            </g>
+            <g class="node level-1" transform="translate(420 160)">
+              <circle r="25"></circle><text>RAR</text>
+            </g>
+            <g class="node level-1" transform="translate(660 160)">
+              <circle r="25"></circle><text>RRA</text>
+            </g>
+            <g class="node level-2" transform="translate(180 300)">
+              <circle r="25"></circle><text>AAR</text>
+            </g>
+            <g class="node level-2" transform="translate(420 300)">
+              <circle r="25"></circle><text>ARA</text>
+            </g>
+            <g class="node level-2" transform="translate(660 300)">
+              <circle r="25"></circle><text>RAA</text>
+            </g>
+            <g class="node level-3" transform="translate(420 440)">
+              <circle r="25"></circle><text>AAA</text>
+            </g>
+
+            <text x="25" y="50" fill="#aab8b9" font-size="13">r=0 · C(3,0)=1</text>
+            <text x="25" y="165" fill="#aab8b9" font-size="13">r=1 · C(3,1)=3</text>
+            <text x="25" y="305" fill="#aab8b9" font-size="13">r=2 · C(3,2)=3</text>
+            <text x="25" y="445" fill="#aab8b9" font-size="13">r=3 · C(3,3)=1</text>
+          </svg>
+        </div>
+
+        <div class="callout cyan">
+          <strong>總和檢查：</strong>
+          C(3,0)+C(3,1)+C(3,2)+C(3,3)=1+3+3+1=8=2<sup>3</sup>。
+        </div>
+
+        <details>
+          <summary>如果只問「所有節點子集合」，數量是多少？</summary>
+          <div class="details-body">
+            <p>從 2<sup>k</sup> 個節點任選一部分，理論子集合數為：</p>
+            <p class="formula-text">2<sup>(2<sup>k</sup>)</sup></p>
+            <p>若 ROOT 必須存在，剩下 2<sup>k</sup>−1 個節點可自由選：</p>
+            <p class="formula-text">2<sup>(2<sup>k</sup>−1)</sup></p>
+            <p>
+              k=8 時即為 2<sup>255</sup>，約 5.79×10<sup>76</sup>。
+              但多數子集合不滿足 read coverage、root-connectivity 或最小 hidden-node 條件。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="edges">
+        <p class="section-kicker">04 · Edges & parents</p>
+        <h2>合法父節點都只差一個 A</h2>
+        <p class="section-intro">
+          若 child 含 r 個 ALT，完整 lattice 中理論上有 r 個父節點；在選定集合 N 中，只保留真正存在於 N 的前驅。
+        </p>
+
+        <div class="formula-grid">
+          <article class="formula-card" data-index="P">
+            <span class="label">合法 parent set</span>
+            <span class="formula-text" role="math">
+              Pred<sub>N</sub>(x) = {x∖{j} ∈ N : j∈x}
+            </span>
+            <p>移除 child 的任一 ALT bit，且所得狀態必須已選入 N。</p>
+          </article>
+          <article class="formula-card" data-index="d">
+            <span class="label">實際 parent choices</span>
+            <span class="formula-text" role="math">
+              d<sup>−</sup><sub>N</sub>(x) = |Pred<sub>N</sub>(x)|
+            </span>
+            <p>d<sup>−</sup>=1 表示 edge structurally determined；大於 1 則必須保留多個 parent assignments。</p>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>關鍵：</strong>
+          「選突變狀態最接近的 parent」不能消除歧義，因所有合法 parent 本來就與 child 的 Hamming distance = 1。
+        </div>
+      </section>
+
+      <section id="trees">
+        <p class="section-kicker">05 · Parent-tree count</p>
+        <h2>節點集合相同，邊仍可能不同</h2>
+        <p class="section-intro">
+          對固定 N，每個非根節點獨立選一個合法 parent，因此樹數是每個節點 parent choices 的乘積。
+        </p>
+
+        <div class="tree-pair">
+          <article class="tree-card">
+            <strong>候選 1 · 11 接在 10</strong>
+            <pre aria-label="候選一樹形">   00
+  /  \
+10    01
+ |
+11</pre>
+          </article>
+          <article class="tree-card">
+            <strong>候選 2 · 11 接在 01</strong>
+            <pre aria-label="候選二樹形">   00
+  /  \
+10    01
+       |
+      11</pre>
+          </article>
+        </div>
+
+        <div class="callout cyan">
+          N={00,10,01,11}：
+          d<sup>−</sup>(10)=1、d<sup>−</sup>(01)=1、d<sup>−</sup>(11)=2，
+          因此 T(N)=1×1×2=<strong>2</strong>。
+        </div>
+
+        <details open>
+          <summary>完整 Boolean lattice 全部節點都選入時</summary>
+          <div class="details-body">
+            <p>第 r 層共有 C(k,r) 個節點，每個節點有 r 個父節點，因此：</p>
+            <p class="formula-text">
+              T<sub>full</sub>(k) = ∏<sub>r=1…k</sub> r<sup>C(k,r)</sup>
+            </p>
+            <p>
+              k=8 時約 7.70×10<sup>145</sup> 種 parent trees。
+              這不是實際資料的候選數，而是完整 lattice 的理論規模。
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>所有 edge subsets 為何不是有效的 tree 計數？</summary>
+          <div class="details-body">
+            <p>
+              完整 lattice 有 k2<sup>k−1</sup> 條邊，所以任意 edge subset 有
+              2<sup>k2<sup>k−1</sup></sup> 種。但絕大多數不是 rooted tree：
+              可能斷裂、讓 child 有多個 parents，或包含無用途 edges。
+            </p>
+            <p>
+              目前程式直接用 ∏d<sup>−</sup><sub>N</sub>(x) 計數合法 parent assignments，
+              避免枚舉所有 edge subsets。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="search">
+        <p class="section-kicker">06 · Search explosion</p>
+        <h2>真正慢的是選哪些 hidden nodes</h2>
+        <p class="section-intro">
+          目前目標是先找 hidden nodes 最少的可行 vertex sets。若 extra pool 有 P 個節點，逐層測試 h=0、1、2…。
+        </p>
+
+        <div class="formula-grid">
+          <article class="formula-card" data-index="C">
+            <span class="label">恰選 h 個</span>
+            <span class="formula-text" role="math">C(P,h) = P! / [h!(P−h)!]</span>
+            <p>單一 hidden-node 層級的候選 vertex-set 數。</p>
+          </article>
+          <article class="formula-card" data-index="Σ">
+            <span class="label">搜尋到 hmax</span>
+            <span class="formula-text" role="math">Σ<sub>h=0…hmax</sub> C(P,h)</span>
+            <p>若較小 h 都無解，solver 必須累積掃過前面所有層級。</p>
+          </article>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 1rem;">
+          <table>
+            <thead>
+              <tr><th>Pool P</th><th>h=0</th><th>h=1</th><th>h=2</th><th>h=3</th><th>h=4</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>20</td><td>1</td><td>20</td><td>190</td><td>1,140</td><td>4,845</td></tr>
+              <tr><td>30</td><td>1</td><td>30</td><td>435</td><td>4,060</td><td>27,405</td></tr>
+              <tr><td>40</td><td>1</td><td>40</td><td>780</td><td>9,880</td><td>91,390</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>計算量的乘法來源：</strong>
+          hidden-node combinations × optimal vertex sets × parent assignments。
+          因此「只有 2<sup>k</sup> 個節點」不代表整體搜尋只有 O(2<sup>k</sup>)。
+        </div>
+      </section>
+
+      <section id="partial">
+        <p class="section-kicker">07 · Actual subcube contract</p>
+        <h2>X 不是補值，而是一個待命中的狀態集合</h2>
+        <p class="section-intro">
+          實際程式先把一條 molecule 投影成精確的 R/A/X 字串；R/A 是固定觀察，
+          其他不能安全判成 R 或 A 的狀況全部保留為未知。solver 不替 X 猜一個答案。
+        </p>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <span class="status-label">Fixed</span>
+            <strong>R／A：固定 allele call</strong>
+            <p>保留該位點的 Phred BQ；在結構限制中固定為 0 或 1，在 likelihood 中使用 match／flip probability。</p>
+          </article>
+          <article class="status-card pending">
+            <span class="status-label">Marginalized</span>
+            <strong>O／D／S／L／X／未覆蓋 → X</strong>
+            <p>other base、deletion、refskip、低 BQ、明示未知與 component 內未覆蓋，都不能偷當 REF；它們在 likelihood 中作 missing marginalization。</p>
+          </article>
+        </div>
+
+        <div class="formula-banner">
+          <p>
+            對 pattern <em>p</em>，令 <em>f</em><sub>p</sub> 是 R/A 固定位置、
+            <em>a</em><sub>p</sub> 是其中 A 的位置、<em>x</em><sub>p</sub> 是 X；
+            <em>M</em> 是 structural observed-ALT active mask：
+          </p>
+          <span class="formula-text" role="math">
+            G<sub>M</sub>(p) = {v ⊆ M : ((v ⊕ a<sub>p</sub>) ∧ f<sub>p</sub> ∧ M) = 0}
+          </span>
+          <span class="formula-text" role="math">
+            |G<sub>M</sub>(p)| = 2<sup>popcount(x<sub>p</sub> ∧ M)</sup>
+          </span>
+          <span class="formula-text" role="math">
+            N ∩ G<sub>M</sub>(p) ≠ ∅
+            &nbsp;⇔&nbsp;
+            Σ<sub>v∈G<sub>M</sub>(p)</sub> z<sub>v</sub> ≥ 1
+          </span>
+          <p>
+            也就是：候選 vertex set <em>N</em> 至少包含一個與這筆 partial pattern 相容的完整 state。
+          </p>
+        </div>
+
+        <div class="tree-pair">
+          <article class="tree-card">
+            <strong>AXR：conceptual full cube</strong>
+            <pre>AXR
+├─ ARR
+└─ AAR</pre>
+            <p>
+              第 1 位 A、第 2 位未知、第 3 位 R。若第 2 位屬於 active mask，
+              一個 X 對應 2 個 compatible states。
+            </p>
+          </article>
+          <article class="tree-card">
+            <strong>AXR：observed-ALT effective cube</strong>
+            <pre>M 包含第 1 位
+M 不含第 2、3 位
+
+AXR → ARR only</pre>
+            <p>
+              若 structural patterns 從未在第 2 位明示 A，該維度不進 active universe；
+              effective free bits 由 1 降為 0，completions 由 2 降為 1。
+            </p>
+          </article>
+        </div>
+
+        <details open>
+          <summary>結構門檻與 scoring 門檻不是同一件事</summary>
+          <div class="details-body">
+            <p>
+              程式先把完全相同的 R/A/X pattern 聚合計數。Current M2 primary
+              <code>structural_exact_pattern_minread=3</code>：同一 exact pattern
+              至少 3 molecules 才形成 full／subcube 硬限制；敏感度 grid 是 1、2、3、5。
+            </p>
+            <p>
+              低於 3 的 informative molecules 沒有被丟掉，仍全部進 BQ-aware likelihood；
+              all-X pattern 因對所有候選機率都相同，只保留在 funnel 守恆、不參與排名。
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>為什麼 symbolic subcube 比逐一補 X 小很多？</summary>
+          <div class="details-body">
+            <p>
+              若有 g 個 partial groups，第 j 群有 u<sub>j</sub> 個 effective X，
+              把每群 completion 做 Cartesian product 會產生：
+            </p>
+            <p class="formula-text">
+              逐補值 worlds = ∏<sub>j=1…g</sub> 2<sup>u<sub>j</sub></sup>
+              = 2<sup>Σu<sub>j</sub></sup>
+            </p>
+            <p>
+              Current solver 保留 g 條聯合 group-hit rows；縮減前 row nonzeros 約為：
+            </p>
+            <p class="formula-text">
+              rows = g，group-row NNZ = Σ<sub>j=1…g</sub> 2<sup>u<sub>j,eff</sub></sup>
+            </p>
+            <p>
+              例：10 群、每群 4 個 X，逐補值是
+              <strong>2<sup>40</sup>=1,099,511,627,776</strong> 個 joint worlds；
+              current representation 是 <strong>10 rows、最多 160 個 group-row coefficients</strong>。
+            </p>
+            <p>
+              但這不代表整個 solver 只有 160 的成本：它仍有
+              <strong>2<sup>m</sup> 個 active vertex variables</strong>，
+              每條 group row 仍會 materialize 最多 2<sup>u<sub>eff</sub></sup> 個相容 indices。
+            </p>
+          </div>
+        </details>
+
+        <div class="callout cyan">
+          <strong>確認後的精確說法：</strong>
+          我們避免的是「completion-wise tree worlds」與「跨 reads 的 Cartesian product」；
+          並非完全不展開 subcube。每個 reduced group 的 sparse MILP row 仍列出 active universe
+          內的 compatible vertex indices。
+        </div>
+      </section>
+
+      <section id="implementation">
+        <p class="section-kicker">08 · Current implementation</p>
+        <h2>實際流程：先滿足義務，再找最少 extra states</h2>
+        <p class="section-intro">
+          這是 current M2 source 的真實順序。所謂 hidden node 在 objective
+          裡其實是「非 ROOT、非完整 read mandatory state 的額外 mutation state」。
+        </p>
+
+        <div class="method-flow">
+          <article class="method-step" data-step="1">
+            <strong>隔離 reconstruction unit</strong>
+            <p>HP family × exact known PS × read-linked component × bridge threshold；不同 HP／PS 不混池。</p>
+          </article>
+          <article class="method-step" data-step="2">
+            <strong>建立 exact R/A/X groups</strong>
+            <p>完全相同 pattern 聚合；count≥3 形成硬限制，全部 informative molecules 留給 likelihood。</p>
+          </article>
+          <article class="method-step" data-step="3">
+            <strong>壓縮 active bits</strong>
+            <p>只保留 structural patterns 曾明示 A 的 loci，total k 投影成 effective m，variables 由 2<sup>k</sup> 變 2<sup>m</sup>。</p>
+          </article>
+          <article class="method-step" data-step="4">
+            <strong>Exact group reductions</strong>
+            <p>移除 duplicate、已被 mandatory 命中的 group、被更窄 group 支配的 group；singleton 直接 forced。</p>
+          </article>
+          <article class="method-step" data-step="5">
+            <strong>求 minimum-extra h*</strong>
+            <p>ROOT／full states 固定選入；每個 partial group 被命中，每個非根 selected state 至少有一個 selected predecessor。</p>
+          </article>
+          <article class="method-step" data-step="6">
+            <strong>列完同分 V，再做 likelihood</strong>
+            <p>固定 h* 加 no-good cuts；只有最後證明無更多解才 complete=true。同一 V 的 parent assignments 不重算 read-AF。</p>
+          </article>
+        </div>
+
+        <details open>
+          <summary>只檢查新增 hidden state 的現有父節點，是否足以維持樹？</summary>
+          <div class="details-body">
+            <p><strong>對 final selected set 的 current recurrence-allowed monotone model：是，對「root connectivity」足夠。</strong></p>
+            <p class="formula-text">
+              z<sub>v</sub> ≤ Σ<sub>p∈Pred(v)</sub> z<sub>p</sub>
+              &nbsp;，&nbsp;
+              Pred(v)={v 移除任一個 A}
+            </p>
+            <p>
+              Boolean lattice 的 parent 每次少一個 A，popcount 嚴格下降，不可能成環。
+              因此只要對每個 selected non-root state 都確認至少一個 selected Hamming-1 predecessor，
+              沿 parent 反覆回溯必定到 ROOT。最後再替每點選一個 parent，就得到 rooted arborescence。
+            </p>
+            <p>
+              <strong>不需要要求新增點已有 child</strong>：leaf 本來就可以沒有 child。
+              搜尋過程若保證從 ROOT 依 popcount 向外、完整探索所有 frontier choices，
+              可以要求每個新點立刻有 parent；但 current obligation B&amp;B 會先放入 mandatory
+              full states，因此允許暫時 orphan，再把「必須補一個 predecessor」留成 obligation。
+            </p>
+            <p>
+              <strong>局部條件只保證合法，不保證最少：</strong>
+              full states <code>AAR</code> 與 <code>ARA</code> 可共享 parent
+              <code>ARR</code>，所以 h*=1；若貪婪分別選 <code>RAR</code> 與
+              <code>RRA</code>，得到的 h=2 仍是合法 rooted tree，卻不是 minimum。
+              因此不能只保留一個「最近 parent」。
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>可以如何把「只看目前父子義務」變成 exact 加速？</summary>
+          <div class="details-body">
+            <p>
+              Exploratory exact B&amp;B 不掃所有 C(P,h) 子集合，而維護
+              <code>(I,E)</code>：已選 vertices I 與已排除 vertices E。
+              尚未完成的義務是：
+            </p>
+            <p class="formula-text">
+              Q(I)=未命中的 subcube groups
+              ∪ 尚無 selected parent 的 selected vertices
+            </p>
+            <p>
+              每次挑 domain 最小的義務，對其中所有可能 vertex 完整分枝；
+              singleton 直接傳播，無 root path 的 branch 剪掉，再以
+              disjoint packing、coverage 與 connection cost 的<strong>最大值</strong>
+              作安全 lower bound。只有「所有分枝都探索或被可證 lower bound 剪除」
+              才保持 exact。
+            </p>
+            <p>
+              所以正確版本不是「只找一個局部 parent」；而是
+              <strong>以父子／group obligations 限定下一步可選範圍，仍完整探索必要分枝</strong>。
+            </p>
+          </div>
+        </details>
+
+        <div class="callout">
+          <strong>小例實算：</strong>
+          k=2 的 <code>AX + XA</code>，兩群各有2個completions。Current exact solver得到
+          h*=2、V=3：{RR,AR,AA}、{RR,AR,RA}、{RR,RA,AA}。
+          若只貪婪挑第一個completion，會漏掉另外兩個同分node sets。
+        </div>
+      </section>
+
+      <section id="limits">
+        <p class="section-kicker">09 · Limits & explosion</p>
+        <h2>上限控制資源，不會把未知變成唯一答案</h2>
+        <p class="section-intro">
+          Current M2 的 exact gate 已從歷史 k≤8 擴到 observed-ALT effective m≤12；
+          但「變數可建」不等於「全部同分候選可列完」。
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>限制</th><th>Current value</th><th>超過時的正確處理</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Primary structural exact-pattern count</td><td>≥3 molecules</td><td>低於門檻只退出硬限制，仍進 likelihood</td></tr>
+              <tr><td>Observed-ALT effective m</td><td>≤12</td><td>m&gt;12：LOCAL_ONLY／ABSTAIN，不稱 global optimum</td></tr>
+              <tr><td>Binary vertex variables</td><td>≤2<sup>12</sup>=4,096</td><td>不是候選樹數上限</td></tr>
+              <tr><td>Optimal vertex-set cap</td><td>256</td><td>達 cap：complete=false，整個 unit ranking abstain</td></tr>
+              <tr><td>Solver time</td><td>30 s／每次 MILP</td><td>不是 per-unit 總 deadline</td></tr>
+              <tr><td>Ranking child task timeout</td><td>8 h＋300 s grace</td><td>task fail-closed；截斷 TSV 不作科學結果</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details open>
+          <summary>一個全 A terminal 就足以產生多少同分 chains？</summary>
+          <div class="details-body">
+            <p>
+              只有 ROOT 與 <code>A…A</code> 一個完整 terminal 時，
+              minimum extra states 是 h*=k−1；每個 mutation addition order
+              對應一條不同 minimum chain，因此 V=k!。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>k</th><th>Variables</th><th>h*</th><th>Minimum chains k!</th><th>256 cap</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>4</td><td>16</td><td>3</td><td>24</td><td>可列完</td></tr>
+                  <tr><td>5</td><td>32</td><td>4</td><td>120</td><td>可列完</td></tr>
+                  <tr><td>6</td><td>64</td><td>5</td><td>720</td><td>必達 cap</td></tr>
+                  <tr><td>8</td><td>256</td><td>7</td><td>40,320</td><td>必達 cap</td></tr>
+                  <tr><td>12</td><td>4,096</td><td>11</td><td>479,001,600</td><td>必達 cap</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              這只是能清楚計算的 adversarial example，不表示每個 k≥6 真實 unit 都 incomplete；
+              強 partial constraints 可能大幅縮小候選。
+            </p>
+          </div>
+        </details>
+
+        <div class="formula-banner">
+          <span class="formula-text">
+            h*=0：1 solve 即可 early-complete
+          </span>
+          <span class="formula-text">
+            有 V&lt;256 個最佳 sets：通常 V+1 solves（最後一次 INFEASIBLE 證明完整）
+          </span>
+          <span class="formula-text">
+            達 256 cap：最多 256 solves，理論 solver budget 可到 256×30 s = 7,680 s = 128 min／unit
+          </span>
+          <p>以上尚未含 Python 建模、likelihood 與 I/O，因此少數 unit 仍可能形成長尾。</p>
+        </div>
+
+        <details>
+          <summary>局部 parent 條件與 strict perfect phylogeny 不可混為一談</summary>
+          <div class="details-body">
+            <p>
+              Current model 只保證每條 path 單調增加 A；它允許同一 mutation
+              在不同分枝各取得一次。若要求 classical strict perfect phylogeny，
+              還需全域 three-gamete 限制：任一 mutation pair 不能同時含
+              <code>10、01、11</code>。
+            </p>
+            <pre>current monotone：00 → 10 → 11，且 00 → 01   ✓ local rooted
+strict perfect：mutation 2 在 00→01 與 10→11 取得兩次   ✗ global</pre>
+            <p>
+              因此新增 state 時只查現有 parent，對 current rooted-tree contract 足夠，
+              對 strict perfect-tree contract 不足。Strict pilot 在8個真實 capped units
+              中沒有證明 h* 下降，兩個全列舉案例15秒後仍 incomplete，不能把 strict
+              constraint 當成已證實的主要加速。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="acceleration">
+        <p class="section-kicker">10 · Exact-preserving acceleration</p>
+        <h2>可以大幅縮，但目前只有 B&amp;B 小型 real pilot 很亮眼</h2>
+        <p class="section-intro">
+          要分清楚三件事：production 已實作、exploratory prototype 已驗證，
+          以及尚未實作。只有第一類能當 current pipeline 行為。
+        </p>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <span class="status-label">Implemented</span>
+            <strong>Current production-source exact reductions</strong>
+            <p>active-bit projection、duplicate/dominance/mandatory-hit/singleton、O(2<sup>u</sup>) sparse row generation、sparse no-good、prepared base、complete-only process cache。</p>
+          </article>
+          <article class="status-card pending">
+            <span class="status-label">Exploratory</span>
+            <strong>Obligation-driven exact B&amp;B</strong>
+            <p>兩個 M=31 real units 與 synthetic oracle 的完整解集合均吻合；尚未接入 current ranker，也尚未重播正式33個長尾units。</p>
+          </article>
+          <article class="status-card pending">
+            <span class="status-label">Pilot pending</span>
+            <strong>v3 real scaling</strong>
+            <p>HCC1395_DORADO chr6＋H2009 chr2雙pilot尚未完成；正式目標為各stage wall≤4 h、incomplete≤1%、exact-limit coverage≥90%。</p>
+          </article>
+          <article class="status-card no">
+            <span class="status-label">Not implemented</span>
+            <strong>尚不能列為現有能力</strong>
+            <p>Production B&amp;B router、per-unit deadline、BDD/ZDD、branch-and-price、disk/global cache與likelihood cache均未實作；persistent HiGHS prototype也未顯示穩定加速。</p>
+          </article>
+        </div>
+
+        <h3 style="margin-top: 2.2rem;">已核對的「從多少縮到多少」</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>機制／案例</th><th>原始</th><th>限制後</th><th>能宣稱什麼</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Exact scope</td><td>歷史 k≤8：256 variables</td><td>M2 effective m≤12：4,096 variables</td><td>exact範圍擴16×；不是加速</td></tr>
+              <tr><td>COLO829 real active-bit</td><td>k=7：128 vertices</td><td>m=5：32 vertices</td><td>observed-ALT universe減75%</td></tr>
+              <tr><td>k=8 synthetic groups</td><td>50 groups／305 constraints</td><td>2 active groups／257 constraints</td><td>45 duplicate＋3 dominated；constraints減15.74%</td></tr>
+              <tr><td>k=4 sparse no-good</td><td>16 nonzeros／row</td><td>h*=3 nonzeros／row</td><td>matrix row減81.25%</td></tr>
+              <tr><td>24-optima prepared base</td><td>25 base builds／25 solves</td><td>1 build／25 solves</td><td>build減96%，solve數未變</td></tr>
+              <tr><td>Complete-only cache probe</td><td>3 structural lookups</td><td>1 miss＋2 hits；1 solver invocation</td><td>只重用complete結果；likelihood每unit重算</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top: 2.2rem;">「只處理未完成父子／group義務」的 exact B&amp;B 實測</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Real unit</th><th>naïve layer count（衍生）</th><th>B&amp;B visited</th><th>完整 sets</th><th>solver-probe SciPy baseline → B&amp;B</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>H2009 chr1 HP2，P=31、h*=5</td>
+                <td>Σ<sub>e=0…5</sub>C(31,e)=206,368</td>
+                <td>814</td>
+                <td>242，digest一致</td>
+                <td>16.809 s → 0.232 s（72.5×）</td>
+              </tr>
+              <tr>
+                <td>COLO829 chr1 HP2，P=31、h*=5</td>
+                <td>Σ<sub>e=0…5</sub>C(31,e)=206,368</td>
+                <td>531</td>
+                <td>216，digest一致</td>
+                <td>8.949 s → 0.143 s（62.5×）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="metric-grid" style="margin-top: 1rem;">
+          <article class="metric-card">
+            <strong>H2009 搜尋狀態縮減</strong>
+            <span class="metric">206,368 → 814</span>
+            <p>相對逐層組合數少 99.606%；另有 singleton propagation 460、infeasible prune 145、bound prune 453。</p>
+          </article>
+          <article class="metric-card">
+            <strong>COLO829 搜尋狀態縮減</strong>
+            <span class="metric">206,368 → 531</span>
+            <p>相對逐層組合數少 99.743%；另有 singleton propagation 226、infeasible prune 60、bound prune 204。</p>
+          </article>
+        </div>
+
+        <div class="callout cyan">
+          <strong>回答「是否可以非常好地限制爆炸量」：</strong>
+          對 hidden nodes少、partial constraints強的這兩個 M=31 real units，答案是
+          <strong>可以，而且同時保持完整解集合</strong>；但這只是 deterministic exploratory pilot。
+          B&amp;B 最壞 memo states 仍可到 O(3<sup>2<sup>m</sup></sup>)，
+          且若最佳解本身有 Z 組，輸出至少需要 Ω(Z)。33個正式長尾units、
+          peak RSS與全154-task scaling尚未驗證。
+        </div>
+
+        <div class="callout">
+          <strong>版本界線：</strong>
+          上表的 16.809／8.949 秒是 solver-probe 綁定舊
+          <code>hypercube_exact.py SHA 9dbaf8…</code> 的單次 SciPy baseline；
+          current source 已更新為 prepared-base <code>SHA 1def0d…</code>。
+          Current source 保持相同 objective、242／216 sets 與完整 digest，
+          但不能把舊比值當成 current production 的穩定 speedup。
+        </div>
+
+        <details>
+          <summary>為什麼現在還不能直接替換 production solver？</summary>
+          <div class="details-body">
+            <ul>
+              <li>兩個 real fixtures 都只有 P=31、h*=5，刻意符合 B&amp;B 優勢情境；不是全樣本隨機 benchmark。</li>
+              <li>舊 HCC1395_DORADO chr6 在8小時停止：28,232規劃unit-evaluations只留下19,270列（68.26%）。</li>
+              <li>minread=1 的33個長尾units占全部 candidate-generation時間96.1537%，但尚未逐一用B&amp;B重播。</li>
+              <li>B&amp;B的peak RSS尚未獨立量測；max-sets與deadline仍必須保留fail-closed。</li>
+              <li>需 dual-run：B&amp;B 與 current MILP 對 objective、complete flag、全部vertex-set digest 逐案一致後，才能升級。</li>
+            </ul>
+          </div>
+        </details>
+
+        <p class="source-note">
+          Source：
+          <a href="../../20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py"><code>hypercube_exact.py</code></a>、
+          <a href="../../20260716_read_linked_hypercube_exact_likelihood_validation/scripts/build_m2_patterns_and_rank.py"><code>build_m2_patterns_and_rank.py</code></a>、
+          <a href="../20260718_solver與甲基edge小步驗證報告_01.md"><code>solver與甲基edge小步驗證報告</code></a>、
+          <a href="../../20260718_hypercube_exact_preserving_solver_cache_remediation/20260718_Hypercube_exact_preserving修補與驗證結果_01.md"><code>exact-preserving修補結果</code></a>。
+        </p>
+      </section>
+
+      <section id="glossary">
+        <p class="section-kicker">11 · Glossary & boundary</p>
+        <h2>公式正確，不等於生物已證實</h2>
+
+        <dl class="term-list">
+          <div class="term">
+            <dt>k</dt>
+            <dd>component 的總 sSNV 數；current exact gate 另使用 observed-ALT effective m。</dd>
+          </div>
+          <div class="term">
+            <dt>m</dt>
+            <dd>structural patterns 曾明示 A 的 active loci 數；current M2 exact gate 為 m≤12。</dd>
+          </div>
+          <div class="term">
+            <dt>V</dt>
+            <dd>候選 mutation-state 節點集合，不是已確認的 cellular clones。</dd>
+          </div>
+          <div class="term">
+            <dt>N</dt>
+            <dd>一個已選定、滿足覆蓋與 root-connectivity 的 vertex set。</dd>
+          </div>
+          <div class="term">
+            <dt>H_ node</dt>
+            <dd>objective 中的 extra state：可為 partial representative 或 root connector；不是 hidden clone count。</dd>
+          </div>
+          <div class="term">
+            <dt>complete</dt>
+            <dd>已證明不存在其他同樣 minimum-extra 的 vertex set；不是「已找到256組」。</dd>
+          </div>
+          <div class="term">
+            <dt>d<sup>−</sup><sub>N</sub>(x)</dt>
+            <dd>x 在 N 內的合法 unit-flip parent 數量。</dd>
+          </div>
+          <div class="term">
+            <dt>T(N)</dt>
+            <dd>固定 N 可產生的 rooted parent assignments 數。</dd>
+          </div>
+        </dl>
+
+        <div class="callout">
+          <strong>Claim ceiling：</strong>
+          本頁只解釋 Boolean-lattice mutation-state candidate 的組合數。
+          它不證明 clone 數、subclone、真實祖先方向或唯一癌症演化樹。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <strong>DEMO / Illustration</strong> · InterSubMod Boolean Hypercube Formula Guide ·
+    current M2 source-aligned、bounded pilot numbers、非全量驗證 · 2026-07-18
+  </footer>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const slider = document.getElementById("k-slider");
+      const kValue = document.getElementById("k-value");
+      const statStates = document.getElementById("stat-states");
+      const statEdges = document.getElementById("stat-edges");
+      const statWidest = document.getElementById("stat-widest");
+      const statSubsets = document.getElementById("stat-subsets");
+      const levelBars = document.getElementById("level-bars");
+      const fullTreeExact = document.getElementById("full-tree-exact");
+      const tableBody = document.getElementById("k-table-body");
+
+      function choose(n, r) {
+        const m = Math.min(r, n - r);
+        let value = 1;
+        for (let i = 1; i <= m; i += 1) {
+          value = (value * (n - m + i)) / i;
+        }
+        return Math.round(value);
+      }
+
+      function fullTreeCount(k) {
+        let value = 1n;
+        for (let r = 1; r <= k; r += 1) {
+          value *= BigInt(r) ** BigInt(choose(k, r));
+        }
+        return value;
+      }
+
+      function formatInteger(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function compactBigInt(value) {
+        const raw = value.toString();
+        if (raw.length <= 15) return formatInteger(value);
+        const mantissa = `${raw[0]}.${raw.slice(1, 4)}`;
+        return `${mantissa} × 10^${raw.length - 1}`;
+      }
+
+      function renderBars(k) {
+        const levels = Array.from({ length: k + 1 }, (_, r) => choose(k, r));
+        const max = Math.max(...levels);
+        levelBars.replaceChildren();
+
+        levels.forEach((count, r) => {
+          const col = document.createElement("div");
+          col.className = "level-col";
+
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.height = `${Math.max(4, (count / max) * 125)}px`;
+          bar.style.animationDelay = `${r * 35}ms`;
+
+          const countLabel = document.createElement("strong");
+          countLabel.textContent = count.toString();
+
+          const levelLabel = document.createElement("span");
+          levelLabel.textContent = `r=${r}`;
+
+          col.append(bar, countLabel, levelLabel);
+          levelBars.appendChild(col);
+        });
+      }
+
+      function renderExplorer(k) {
+        const states = 2 ** k;
+        const edges = k * (2 ** (k - 1));
+        const widest = choose(k, Math.floor(k / 2));
+        const rootFixedSubsets = 2n ** BigInt(states - 1);
+        const trees = fullTreeCount(k);
+
+        kValue.textContent = k.toString();
+        statStates.textContent = formatInteger(BigInt(states));
+        statEdges.textContent = formatInteger(BigInt(edges));
+        statWidest.textContent = formatInteger(BigInt(widest));
+        statSubsets.textContent = compactBigInt(rootFixedSubsets);
+        statSubsets.title = formatInteger(rootFixedSubsets);
+        fullTreeExact.textContent = formatInteger(trees);
+        renderBars(k);
+      }
+
+      function renderTable() {
+        const fragment = document.createDocumentFragment();
+        for (let k = 1; k <= 12; k += 1) {
+          const states = 2 ** k;
+          const widest = choose(k, Math.floor(k / 2));
+          const edges = k * (2 ** (k - 1));
+          const trees = fullTreeCount(k);
+
+          const row = document.createElement("tr");
+          const values = [
+            k.toString(),
+            formatInteger(BigInt(states)),
+            formatInteger(BigInt(widest)),
+            formatInteger(BigInt(edges))
+          ];
+
+          values.forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+
+          const treeCell = document.createElement("td");
+          const treeValue = document.createElement("span");
+          treeValue.className = "big-number";
+          treeValue.textContent = compactBigInt(trees);
+          treeValue.title = formatInteger(trees);
+          treeCell.appendChild(treeValue);
+          row.appendChild(treeCell);
+          fragment.appendChild(row);
+        }
+        tableBody.appendChild(fragment);
+      }
+
+      slider.addEventListener("input", (event) => {
+        renderExplorer(Number(event.target.value));
+      });
+
+      renderTable();
+      renderExplorer(Number(slider.value));
+    })();
+  </script>
+</body>
+</html>

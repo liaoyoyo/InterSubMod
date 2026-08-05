@@ -1,0 +1,1383 @@
+<!doctype html>
+<!--
+建立時間: 2026-07-24
+目標: 以教授可理解的逐步教學，解釋 R/A/X + BQ read-pattern mixture likelihood、候選完整性、max_sets 資源上限、edge 不可辨識，以及 July raw-all 到 C++ production topology 的實際完成度
+處理範圍: 方法定義 + 現行程式/receipt 能力稽核；不是全 7 樣本 directed-topology 結果，也不把 latent mixture weight 稱為真實 clone fraction
+關聯檔案:
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/build_m2_patterns_and_rank.py
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py
+  - InterSubMod/research/20260718_solver_methyl_edge_probe/results/solver_stress_panel_v1/perfect_family_count_v3/receipt.json
+  - InterSubMod/research/20260723_production_exact_ps_strict_read_linkage/
+  - /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395/producer_capture_receipt_v2.json
+-->
+<html lang="zh-Hant" data-theme="paper">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="InterSubMod read-pattern likelihood、max_sets、July raw-all 與 C++ production readiness 的逐步教學與證據稽核。">
+  <title>Likelihood 與 C++ 後續流程｜一步步教學與 production readiness</title>
+  <style>
+    :root {
+      --paper: #f4efe3;
+      --paper-hi: #fffdf6;
+      --paper-low: #e8dfce;
+      --ink: #14252c;
+      --muted: #596970;
+      --navy: #123e50;
+      --navy-deep: #0b2732;
+      --teal: #087d76;
+      --teal-soft: #d9ede7;
+      --rust: #c65335;
+      --rust-soft: #f6dfd5;
+      --amber: #d79a2e;
+      --amber-soft: #f6e9c4;
+      --green: #3f745a;
+      --green-soft: #dfeadf;
+      --violet: #675783;
+      --violet-soft: #e8e1ef;
+      --line: #bdb29f;
+      --line-dark: #78858a;
+      --shadow: rgba(20, 37, 44, .14);
+      --display: "Bodoni 72", Didot, "Iowan Old Style", "Noto Serif TC", Georgia, serif;
+      --body: "Avenir Next", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --mono: "IBM Plex Mono", "SFMono-Regular", "Cascadia Code", "Noto Sans Mono", monospace;
+      --max: 1260px;
+    }
+
+    html[data-theme="night"] {
+      --paper: #101a1f;
+      --paper-hi: #17262c;
+      --paper-low: #1d3037;
+      --ink: #f2ecdd;
+      --muted: #aebbbb;
+      --navy: #79becb;
+      --navy-deep: #d3eef0;
+      --teal: #79d8cb;
+      --teal-soft: #173b3a;
+      --rust: #f28d6c;
+      --rust-soft: #432820;
+      --amber: #f0c165;
+      --amber-soft: #41351f;
+      --green: #95c7a8;
+      --green-soft: #203a2d;
+      --violet: #c2aee2;
+      --violet-soft: #332a42;
+      --line: #42565c;
+      --line-dark: #72858a;
+      --shadow: rgba(0, 0, 0, .36);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--paper); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.72;
+      background:
+        linear-gradient(90deg, transparent 0 57px, rgba(198, 83, 53, .14) 58px 59px, transparent 60px),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(18, 62, 80, .045) 32px 33px),
+        radial-gradient(circle at 8% 4%, rgba(8, 125, 118, .12), transparent 28rem),
+        var(--paper);
+      overflow-wrap: anywhere;
+    }
+
+    a { color: var(--navy); text-underline-offset: .25em; }
+    button, input, summary { font: inherit; }
+    button { color: inherit; }
+    code, pre, .mono { font-family: var(--mono); }
+    code { overflow-wrap: anywhere; }
+    img, svg { max-width: 100%; }
+
+    a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 3px;
+    }
+
+    .skip {
+      position: fixed;
+      z-index: 100;
+      top: -5rem;
+      left: 1rem;
+      padding: .65rem 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      transition: top 160ms ease;
+    }
+    .skip:focus { top: 1rem; }
+
+    .scope-bar {
+      position: sticky;
+      z-index: 50;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      min-height: 40px;
+      padding: .55rem clamp(1rem, 4vw, 4rem);
+      color: #fffaf0;
+      background: var(--rust);
+      box-shadow: 0 5px 22px var(--shadow);
+      font: 800 .72rem/1.35 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .scope-bar button {
+      flex: 0 0 auto;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: .28rem .7rem;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 78vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, .68fr);
+      align-items: end;
+      gap: clamp(2rem, 7vw, 7rem);
+      padding: clamp(5rem, 9vw, 9rem) clamp(1.5rem, 7vw, 8rem) 4.5rem;
+      border-bottom: 2px solid var(--ink);
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "LL";
+      position: absolute;
+      z-index: 0;
+      top: -.22em;
+      right: -.05em;
+      color: var(--navy);
+      font: 900 clamp(14rem, 41vw, 40rem)/1 var(--display);
+      letter-spacing: -.1em;
+      opacity: .045;
+      pointer-events: none;
+    }
+
+    .hero > * { position: relative; z-index: 1; }
+    .eyebrow {
+      margin: 0 0 1rem;
+      color: var(--rust);
+      font: 800 .76rem/1.3 var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, .display { font-family: var(--display); text-wrap: balance; }
+    h1 {
+      max-width: 12ch;
+      margin: 0;
+      font-size: clamp(3.7rem, 8.6vw, 8.8rem);
+      font-weight: 500;
+      line-height: .88;
+      letter-spacing: -.06em;
+    }
+    h1 em { color: var(--rust); font-style: italic; }
+    .lede {
+      max-width: 50rem;
+      margin: 2rem 0 0;
+      font: 500 clamp(1.08rem, 2vw, 1.42rem)/1.62 var(--display);
+    }
+
+    .verdict {
+      padding: 1.5rem;
+      border: 2px solid var(--ink);
+      background: var(--paper-hi);
+      box-shadow: 13px 13px 0 var(--navy);
+    }
+    .verdict .stamp {
+      display: inline-block;
+      padding: .25rem .62rem;
+      border: 3px double var(--green);
+      color: var(--green);
+      font: 800 .7rem var(--mono);
+      letter-spacing: .07em;
+      transform: rotate(-1.5deg);
+    }
+    .verdict strong {
+      display: block;
+      margin: 1.25rem 0 .65rem;
+      font: 700 2rem/1.05 var(--display);
+    }
+    .verdict p { margin: .6rem 0; }
+
+    .layout {
+      width: min(1540px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+
+    .toc {
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(100vh - 40px);
+      padding: 2.5rem 1.4rem 2rem 1.7rem;
+      border-right: 1px solid var(--line);
+      overflow: auto;
+    }
+    .toc-title {
+      color: var(--rust);
+      font: 800 .7rem var(--mono);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .toc ol { padding: 0; list-style: none; counter-reset: nav; }
+    .toc li { counter-increment: nav; }
+    .toc a {
+      display: block;
+      margin: .12rem 0;
+      padding: .5rem .55rem;
+      border-left: 3px solid transparent;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .86rem;
+    }
+    .toc a::before {
+      content: counter(nav, decimal-leading-zero) " / ";
+      color: var(--line-dark);
+      font-family: var(--mono);
+    }
+    .toc a:hover, .toc a.active {
+      border-left-color: var(--rust);
+      color: var(--ink);
+      background: var(--paper-low);
+    }
+    .toc-tools { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.2rem; }
+    .toc-tools button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .35rem .6rem;
+      background: var(--paper-hi);
+      cursor: pointer;
+      font: 700 .68rem var(--mono);
+    }
+
+    main { min-width: 0; padding: 0 clamp(1.25rem, 5vw, 6rem) 7rem; }
+    section {
+      padding: 5.3rem 0;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 4rem;
+    }
+    .kicker {
+      margin: 0 0 .5rem;
+      color: var(--rust);
+      font: 800 .72rem var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h2 {
+      max-width: 17ch;
+      margin: .25rem 0 1.8rem;
+      font-size: clamp(2.4rem, 5vw, 5.4rem);
+      font-weight: 500;
+      line-height: .98;
+      letter-spacing: -.04em;
+    }
+    h3 { margin: .2rem 0 .65rem; font-size: 1.55rem; line-height: 1.17; }
+    p { max-width: 78ch; }
+    .section-lede { font: 500 1.18rem/1.7 var(--display); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      border-radius: 999px;
+      padding: .26rem .62rem;
+      font: 800 .65rem/1.3 var(--mono);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .math { background: var(--violet-soft); color: var(--violet); }
+    .implemented { background: var(--green-soft); color: var(--green); }
+    .observed { background: var(--teal-soft); color: var(--teal); }
+    .proposed { background: var(--amber-soft); color: #845c0e; }
+    .abstain { background: var(--rust-soft); color: var(--rust); }
+
+    .answer {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(230px, .62fr);
+      gap: 2rem;
+      margin: 2rem 0;
+      padding: 2rem;
+      border: 2px solid var(--ink);
+      background: var(--paper-hi);
+      box-shadow: 9px 9px 0 var(--amber);
+    }
+    .answer .big { margin: 0; font: 700 clamp(1.45rem, 2.7vw, 2.25rem)/1.25 var(--display); }
+    .answer aside { border-left: 1px solid var(--line); padding-left: 1.4rem; }
+    .answer aside p { margin-top: 0; }
+
+    .step-grid, .status-grid, .metric-grid, .cards {
+      display: grid;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .step-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .status-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .step, .status-card, .metric, .card {
+      position: relative;
+      min-width: 0;
+      padding: 1.2rem;
+      border: 1px solid var(--line);
+      background: var(--paper-hi);
+    }
+    .step { min-height: 210px; border-top: 5px solid var(--navy); }
+    .step::before {
+      content: attr(data-step);
+      display: block;
+      margin-bottom: .7rem;
+      color: var(--rust);
+      font: 900 2.8rem/1 var(--display);
+      opacity: .5;
+    }
+    .step h3 { font-size: 1.22rem; }
+    .step p, .card p, .status-card p { margin: .45rem 0; font-size: .91rem; }
+    .status-card { border-top: 5px solid var(--line-dark); }
+    .status-card.pass { border-top-color: var(--green); }
+    .status-card.partial { border-top-color: var(--amber); }
+    .status-card.stop { border-top-color: var(--rust); }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font: 800 .67rem var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .metric strong {
+      display: block;
+      margin: .55rem 0;
+      color: var(--rust);
+      font: 800 clamp(2rem, 4vw, 3.8rem)/1 var(--display);
+    }
+
+    .callout {
+      margin: 1.5rem 0;
+      padding: 1.15rem 1.3rem;
+      border-left: 6px solid var(--amber);
+      background: var(--paper-hi);
+    }
+    .callout.stop { border-left-color: var(--rust); }
+    .callout.pass { border-left-color: var(--green); }
+    .callout p:first-child { margin-top: 0; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .formula {
+      display: block;
+      margin: 1.5rem 0;
+      padding: 1.2rem 1.4rem;
+      border-left: 5px solid var(--navy);
+      background: var(--paper-low);
+      font: 600 clamp(.9rem, 1.7vw, 1.05rem)/1.7 var(--mono);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .formula small {
+      display: block;
+      color: var(--muted);
+      font-family: var(--body);
+      white-space: normal;
+    }
+
+    .read-table, .data-table, .decision-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--paper-hi);
+      font-size: .88rem;
+    }
+    caption {
+      padding: .65rem 0;
+      color: var(--muted);
+      text-align: left;
+      font: 700 .78rem var(--mono);
+    }
+    th, td { padding: .72rem .78rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    thead th { color: var(--paper); background: var(--navy-deep); font: 700 .72rem var(--mono); }
+    html[data-theme="night"] thead th { color: #101a1f; }
+    tbody th { font-weight: 800; }
+    .table-wrap { overflow-x: auto; }
+
+    .state {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: .25rem;
+      vertical-align: middle;
+    }
+    .allele {
+      display: inline-grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      font: 900 .8rem var(--mono);
+    }
+    .allele.r { background: var(--teal-soft); color: var(--teal); }
+    .allele.a { background: var(--rust-soft); color: var(--rust); }
+    .allele.x { background: var(--paper-low); color: var(--muted); border-style: dashed; }
+
+    .interactive {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border: 2px solid var(--ink);
+      background: var(--paper-hi);
+      box-shadow: 8px 8px 0 var(--teal);
+    }
+    .interactive-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .interactive h3 { margin: 0; }
+    .range-row {
+      display: grid;
+      grid-template-columns: 8rem minmax(0, 1fr) 5rem;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--rust); }
+    output { font: 900 1.2rem var(--mono); color: var(--rust); }
+    .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .prob {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      background: var(--paper-low);
+    }
+    .prob span { color: var(--muted); font: 800 .68rem var(--mono); }
+    .prob strong { display: block; margin-top: .35rem; font: 800 1.7rem var(--mono); }
+
+    .candidate-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+    .candidate-tabs button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .5rem .85rem;
+      background: var(--paper-low);
+      cursor: pointer;
+      font: 800 .75rem var(--mono);
+    }
+    .candidate-tabs button[aria-selected="true"] {
+      border-color: var(--rust);
+      color: #fffaf0;
+      background: var(--rust);
+    }
+    .candidate-result {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 1.2rem;
+      border: 1px solid var(--line);
+      background: var(--paper-low);
+    }
+    .candidate-result strong { font: 800 1.6rem var(--mono); color: var(--rust); }
+
+    .cap-meter {
+      position: relative;
+      height: 1.2rem;
+      margin: 1.2rem 0 .45rem;
+      border: 1px solid var(--line);
+      background: var(--paper-low);
+      overflow: hidden;
+    }
+    .cap-meter span {
+      display: block;
+      width: max(3px, var(--cap-fraction));
+      height: 100%;
+      background: var(--rust);
+    }
+    .cap-result {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+    }
+    .cap-result div { padding: .8rem; border: 1px solid var(--line); background: var(--paper-low); }
+    .cap-result span { display: block; color: var(--muted); font: 700 .66rem var(--mono); }
+    .cap-result strong { font: 800 1.05rem var(--mono); }
+
+    .svg-frame {
+      margin: 2rem 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      background: var(--paper-hi);
+      overflow-x: auto;
+    }
+    .svg-frame svg { display: block; min-width: 720px; margin: auto; }
+    .svg-label { font-family: var(--body); fill: var(--ink); }
+    .svg-small { font-family: var(--mono); fill: var(--muted); }
+    .svg-node { fill: var(--paper-hi); stroke: var(--ink); stroke-width: 2; }
+    .svg-edge { stroke: var(--line-dark); stroke-width: 3; fill: none; }
+    .svg-edge-accent { stroke: var(--rust); stroke-width: 4; fill: none; }
+    .svg-box { fill: var(--paper-low); stroke: var(--line); }
+
+    details {
+      margin: .8rem 0;
+      border: 1px solid var(--line);
+      background: var(--paper-hi);
+    }
+    summary { padding: 1rem 1.15rem; cursor: pointer; font-weight: 800; }
+    details > div { padding: 0 1.15rem 1.15rem; }
+    details[open] summary { color: var(--rust); }
+
+    .path {
+      display: block;
+      margin: .5rem 0;
+      padding: .65rem .75rem;
+      background: var(--paper-low);
+      font: 700 .72rem/1.55 var(--mono);
+    }
+
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 1px;
+      margin: 2rem 0;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+    .roadmap article { min-height: 190px; padding: 1rem; background: var(--paper-hi); }
+    .roadmap .done { border-top: 6px solid var(--green); }
+    .roadmap .bridge { border-top: 6px solid var(--amber); }
+    .roadmap .missing { border-top: 6px solid var(--rust); }
+    .roadmap .n { color: var(--muted); font: 900 2.2rem/1 var(--display); }
+    .roadmap h3 { margin: .6rem 0; font-size: 1.12rem; }
+    .roadmap p { font-size: .84rem; }
+
+    .source-list { padding-left: 1.3rem; }
+    .source-list li { margin: .8rem 0; }
+    .source-list small { display: block; color: var(--muted); }
+
+    footer {
+      padding: 3rem clamp(1.5rem, 7vw, 8rem);
+      color: #edf3ed;
+      background: #0b2732;
+    }
+    footer a { color: #bfe0d8; }
+    footer p { max-width: 90ch; }
+
+    @media (max-width: 1180px) {
+      .step-grid { grid-template-columns: repeat(3, 1fr); }
+      .roadmap { grid-template-columns: repeat(3, 1fr); }
+      .status-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 960px) {
+      .hero { min-height: auto; grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: relative; top: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .toc ol { columns: 2; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 680px) {
+      body { background: var(--paper); }
+      .scope-bar { align-items: flex-start; }
+      .hero { padding: 4rem 1.2rem 2.8rem; }
+      h1 { font-size: 3.5rem; }
+      main { padding: 0 1rem 4rem; }
+      section { padding: 4rem 0; }
+      .toc ol { columns: 1; }
+      .answer, .cards, .candidate-result { grid-template-columns: 1fr; }
+      .answer aside { border-left: 0; border-top: 1px solid var(--line); padding: 1rem 0 0; }
+      .step-grid, .status-grid, .metric-grid, .roadmap { grid-template-columns: 1fr; }
+      .range-row { grid-template-columns: 1fr; }
+      .prob-grid, .cap-result { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    @media print {
+      .scope-bar, .toc, .interactive-controls, .toc-tools { display: none !important; }
+      .hero { min-height: auto; padding: 1cm; }
+      .layout { display: block; }
+      main { padding: 0; }
+      section { padding: .8cm 0; break-inside: avoid; }
+      details > div { display: block !important; }
+      body { color: #111; background: #fff; font-size: 9.5pt; }
+      .step-grid, .roadmap { grid-template-columns: repeat(3, 1fr); }
+      .verdict, .interactive, .answer { box-shadow: none; }
+      a { color: #111; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要內容</a>
+  <div class="scope-bar">
+    <span>METHOD TEACHING + CURRENT CODE AUDIT · NOT A FULL TOPOLOGY RESULT · production directed topology 0/7</span>
+    <button id="themeToggle" type="button" aria-label="切換明暗主題">切換主題</button>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">InterSubMod / Read-pattern likelihood / 2026-07-24</p>
+      <h1>哪棵樹最能<em>解釋 reads？</em></h1>
+      <p class="lede">從 R/A/X、base quality、mixture weight 到 log-likelihood；再回答 256 上限到底代表什麼，以及 July raw-all 能否直接交給 C++ 產生正式 directed topology。</p>
+    </div>
+    <aside class="verdict" aria-label="總判定">
+      <span class="stamp">METHOD VALID · PRODUCTION BACKEND INCOMPLETE</span>
+      <strong>原始輸入證據齊備；production authority 與端到端 C++ 尚未完成</strong>
+      <p><code>max_sets=256</code> 只限制可materialize的候選數，不是數學或生物界限，也不能單獨保證整批準時終止。仍需per-unit／global wall-time、memory cap、checkpoint及fail-closed receipt；超限或逾時只能標 <code>ABSTAIN</code>。</p>
+      <p><span class="badge observed">Observed</span> July raw-all、BQ calls、strict W 與 HCC1395 partition 都存在；缺的是big8↔big7 authority contract、正式adapter、可擴充exact family solver、C++ likelihood與topology classifier。</p>
+    </aside>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="頁面目錄">
+      <span class="toc-title">Reasoning ledger</span>
+      <ol>
+        <li><a href="#overview">先看完整流程</a></li>
+        <li><a href="#encoding">R／A／X 編碼</a></li>
+        <li><a href="#emission">BQ 如何變成機率</a></li>
+        <li><a href="#mixture">π mixture 是什麼</a></li>
+        <li><a href="#ranking">候選怎麼排名</a></li>
+        <li><a href="#edge">為何 edge 仍不唯一</a></li>
+        <li><a href="#cap">256 上限的真義</a></li>
+        <li><a href="#hardcase">1.22億候選案例</a></li>
+        <li><a href="#july">July raw-all 資料</a></li>
+        <li><a href="#cpp">C++ 能力與缺口</a></li>
+        <li><a href="#decision">最後怎麼做</a></li>
+        <li><a href="#sources">來源與驗證</a></li>
+      </ol>
+      <div class="toc-tools">
+        <button id="expandAll" type="button">展開說明</button>
+        <button id="collapseAll" type="button">收合說明</button>
+        <button type="button" onclick="window.print()">列印</button>
+      </div>
+    </nav>
+
+    <main id="main">
+      <section id="overview">
+        <p class="kicker">00 / map first</p>
+        <h2>Likelihood 不是直接「看 VAF 選一棵樹」</h2>
+        <div class="answer">
+          <div>
+            <p class="big">它問的是：在一份候選狀態清單下，能否用合理的狀態比例與讀序錯誤率，解釋實際看到的全部 molecule patterns？</p>
+          </div>
+          <aside>
+            <span class="badge math">Mathematically defined</span>
+            <p>結構先限定候選；likelihood 再比較候選。兩者不可混成任意加權總分。</p>
+          </aside>
+        </div>
+
+        <div class="step-grid" aria-label="Likelihood 五步驟">
+          <article class="step" data-step="01">
+            <h3>Read 編碼</h3>
+            <p>每條 molecule 在 k 個 sSNV 上變成 <code>R/A/X</code> pattern。</p>
+          </article>
+          <article class="step" data-step="02">
+            <h3>候選狀態</h3>
+            <p>minimum-extra solver 提供完整候選 vertex sets。</p>
+          </article>
+          <article class="step" data-step="03">
+            <h3>Emission</h3>
+            <p>用每個固定 R/A call 的 BQ 算 match／flip 機率。</p>
+          </article>
+          <article class="step" data-step="04">
+            <h3>Fit π</h3>
+            <p>在每個候選內估計最能解釋 reads 的 state mixture。</p>
+          </article>
+          <article class="step" data-step="05">
+            <h3>比較 LL</h3>
+            <p>全部候選完成且 optimizer certified 後，才判唯一或並列。</p>
+          </article>
+        </div>
+
+        <div class="svg-frame">
+          <svg viewBox="0 0 1120 280" role="img" aria-labelledby="flowTitle flowDesc">
+            <title id="flowTitle">從 reads 到 likelihood 與 topology status 的處理流程</title>
+            <desc id="flowDesc">RAX reads先形成完整候選狀態集合，再使用BQ emission與mixture likelihood排名，最後只對完整且認證的候選報告唯一、並列或edge不可辨識。</desc>
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#c65335"></path>
+              </marker>
+            </defs>
+            <g>
+              <rect class="svg-box" x="20" y="70" width="175" height="120" rx="8"></rect>
+              <text class="svg-label" x="108" y="108" text-anchor="middle" font-size="20" font-weight="700">R/A/X reads</text>
+              <text class="svg-small" x="108" y="140" text-anchor="middle" font-size="15">pattern + count + BQ</text>
+              <text class="svg-small" x="108" y="166" text-anchor="middle" font-size="15">X = missing</text>
+
+              <path class="svg-edge-accent" marker-end="url(#arrow)" d="M195 130 H245"></path>
+              <rect class="svg-box" x="245" y="70" width="175" height="120" rx="8"></rect>
+              <text class="svg-label" x="333" y="108" text-anchor="middle" font-size="20" font-weight="700">完整候選</text>
+              <text class="svg-small" x="333" y="140" text-anchor="middle" font-size="15">minimum h*</text>
+              <text class="svg-small" x="333" y="166" text-anchor="middle" font-size="15">family complete?</text>
+
+              <path class="svg-edge-accent" marker-end="url(#arrow)" d="M420 130 H470"></path>
+              <rect class="svg-box" x="470" y="70" width="175" height="120" rx="8"></rect>
+              <text class="svg-label" x="558" y="108" text-anchor="middle" font-size="20" font-weight="700">BQ emission</text>
+              <text class="svg-small" x="558" y="140" text-anchor="middle" font-size="15">P(read | state)</text>
+              <text class="svg-small" x="558" y="166" text-anchor="middle" font-size="15">X marginalized</text>
+
+              <path class="svg-edge-accent" marker-end="url(#arrow)" d="M645 130 H695"></path>
+              <rect class="svg-box" x="695" y="70" width="175" height="120" rx="8"></rect>
+              <text class="svg-label" x="783" y="108" text-anchor="middle" font-size="20" font-weight="700">Fit π + LL</text>
+              <text class="svg-small" x="783" y="140" text-anchor="middle" font-size="15">concave mixture</text>
+              <text class="svg-small" x="783" y="166" text-anchor="middle" font-size="15">KKT certificate</text>
+
+              <path class="svg-edge-accent" marker-end="url(#arrow)" d="M870 130 H920"></path>
+              <rect class="svg-box" x="920" y="55" width="180" height="150" rx="8"></rect>
+              <text class="svg-label" x="1010" y="96" text-anchor="middle" font-size="20" font-weight="700">結果狀態</text>
+              <text class="svg-small" x="1010" y="128" text-anchor="middle" font-size="15">unique / tied</text>
+              <text class="svg-small" x="1010" y="154" text-anchor="middle" font-size="15">edge unresolved</text>
+              <text class="svg-small" x="1010" y="180" text-anchor="middle" font-size="15">or ABSTAIN</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section id="encoding">
+        <p class="kicker">01 / observation language</p>
+        <h2>先把每條 read 寫成同一種語言</h2>
+        <p class="section-lede">假設區域內有三個 sSNV。每一列不是一個 clone，而是一條 molecule read 對三個位置所提供的觀察。</p>
+
+        <div class="table-wrap">
+          <table class="read-table">
+            <caption>三個位置上的 read-pattern 教學例子</caption>
+            <thead>
+              <tr><th scope="col">Pattern</th><th scope="col">視覺</th><th scope="col">能確定什麼</th><th scope="col">不能確定什麼</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><code>RRA</code></th>
+                <td><span class="state"><span class="allele r">R</span><span class="allele r">R</span><span class="allele a">A</span></span></td>
+                <td>三個位置都有固定 R/A call。</td>
+                <td>仍只是這條 molecule 的狀態，不是整個腫瘤 clone。</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>AAA</code></th>
+                <td><span class="state"><span class="allele a">A</span><span class="allele a">A</span><span class="allele a">A</span></span></td>
+                <td>同一條 molecule 同時帶三個 ALT。</td>
+                <td>不直接告訴我們三個突變的先後順序。</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>RAX</code></th>
+                <td><span class="state"><span class="allele r">R</span><span class="allele a">A</span><span class="allele x">X</span></span></td>
+                <td>前兩點固定；第三點沒有資訊。</td>
+                <td>不能把 X 當 REF，也不能任意補成 ALT。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout pass">
+          <p><span class="badge implemented">Implemented</span> <strong>Partial read 不會展開成多個獨立世界。</strong></p>
+          <p><code>RAX</code> 的概念補值是 <code>RAR</code> 或 <code>RAA</code>；solver只建立「候選至少要包含一個相容狀態」的聯合 group constraint。Likelihood 中，X 的 emission 乘數為1。</p>
+        </div>
+
+        <details>
+          <summary>為什麼不把所有 X 補完後逐一建樹？</summary>
+          <div>
+            <p>若一條 pattern 有 u 個 X，概念補值數是 <code>2^u</code>；多條 reads 若做笛卡兒積會變成 <code>2^(Σuᵢ)</code>。那會同時造成計算爆炸與重複計數。正確做法是保留每條 symbolic group，聯合求一個可同時覆蓋所有 groups 的候選。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="emission">
+        <p class="kicker">02 / error-aware emission</p>
+        <h2>BQ 決定「不一致」要罰多重</h2>
+        <p class="section-lede">高品質 call 若與候選狀態相反，比低品質 call 更難被解釋為測序錯誤。</p>
+
+        <span class="formula" role="math" aria-label="base quality轉換為錯誤率與條件式REF ALT match flip機率">
+          e = 10<sup>−BQ/10</sup>　·　match = (1−e)/(1−2e/3)　·　flip = (e/3)/(1−2e/3)
+          <small>現行實作使用對稱 substitution model，並條件化在觀察鹼基屬於 REF／ALT；因此 flip 不是直接等於 e。</small>
+        </span>
+
+        <div class="interactive" aria-labelledby="bqHeading">
+          <div class="interactive-head">
+            <div>
+              <h3 id="bqHeading">拖動 BQ，看 match／flip 如何改變</h3>
+              <p>這只是單一固定 R/A call 的 emission；一條 read 的機率會把所有已觀察位置相乘。</p>
+            </div>
+            <span class="badge math">Live formula</span>
+          </div>
+          <div class="range-row interactive-controls">
+            <label for="bqRange"><strong>Phred BQ</strong></label>
+            <input id="bqRange" type="range" min="10" max="40" value="30" step="1">
+            <output id="bqValue" for="bqRange">30</output>
+          </div>
+          <div class="prob-grid">
+            <div class="prob"><span>候選與read一致 · match</span><strong id="matchProb">0.999666</strong></div>
+            <div class="prob"><span>候選與read相反 · flip</span><strong id="flipProb">0.000334</strong></div>
+          </div>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <span class="badge implemented">Implemented</span>
+            <h3>X 的處理</h3>
+            <p>X 沒有固定 call，也沒有 BQ；在現行「以observed mask為條件」的模型中，emission乘1。這隱含missingness可忽略；若缺值機制與state相關，不能當作一般性的無偏邊際化。</p>
+          </article>
+          <article class="card">
+            <span class="badge abstain">Not claimed</span>
+            <h3>BQ 不是生物方向證據</h3>
+            <p>BQ只校正「這個R/A call是否可能錯」。它不直接證明哪個突變是祖先、哪個是後代。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="mixture">
+        <p class="kicker">03 / latent proportions</p>
+        <h2>π 是讓候選最好解釋資料的狀態比例</h2>
+        <p class="section-lede">一個候選狀態集合 V 可能包含多個 mutation states。程式在所有非負、總和為1的 π 中，尋找讓 reads 整體機率最大的組合。</p>
+
+        <span class="formula" role="math" aria-label="候選mutation state vertex set的profile log likelihood公式">
+          LL(V) = max<sub>π</sub> Σ<sub>r</sub> n<sub>r</sub> log [ Σ<sub>v∈V</sub> π<sub>v</sub> P(r | v, BQ<sub>r</sub>) ]
+          <small>r 是一種 read-pattern＋BQ group；nᵣ 是它出現的 molecule 數；v 是候選內的一個 mutation state。</small>
+        </span>
+
+        <div class="callout">
+          <p><strong>名稱要精確：</strong>首頁用「哪棵樹」方便理解，但這一步實際評分的是候選 <em>mutation-state vertex set</em> V；相同 V 的不同 parent edges 得到完全相同的 likelihood。</p>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card pass">
+            <span class="badge math">Constraint</span>
+            <h3>πᵥ ≥ 0</h3>
+            <p>任何狀態的權重都不能是負值。</p>
+          </article>
+          <article class="status-card pass">
+            <span class="badge math">Constraint</span>
+            <h3>Σπᵥ = 1</h3>
+            <p>所有狀態權重總和必須等於1。</p>
+          </article>
+          <article class="status-card partial">
+            <span class="badge implemented">Interpretation</span>
+            <h3>latent mixture</h3>
+            <p>是固定候選下maximum-likelihood latent-state weight估計，不是硬分配每條read，也不是EM responsibility的條件期望。</p>
+          </article>
+          <article class="status-card stop">
+            <span class="badge abstain">Not clone fraction</span>
+            <h3>不可直接叫 clone 比例</h3>
+            <p>CN、purity、sampling與狀態不可辨識都可能使π偏離cellular clone fraction。</p>
+          </article>
+        </div>
+
+        <div class="callout">
+          <p><strong>為什麼不再加一次 VAF？</strong></p>
+          <p>同一批 reads 的 ALT／REF 次數已經進入 nᵣ 與 likelihood。再把 VAF 加成另一個 score，會把同一份 allele-count evidence 算兩次。</p>
+        </div>
+      </section>
+
+      <section id="ranking">
+        <p class="kicker">04 / verified toy calculation</p>
+        <h2>用100條 molecules 看候選如何被分開</h2>
+        <p class="section-lede">以下不是假想手算分數，而是用現行 <code>fit_quality_aware_mixture</code>、BQ=30 實際重算的教學案例。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption>教學資料：兩個位置、100條 molecules</caption>
+            <thead><tr><th scope="col">Pattern</th><th scope="col">數量</th><th scope="col">直觀意義</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>RR</code></th><td>20</td><td>兩點皆REF</td></tr>
+              <tr><th scope="row"><code>AR</code></th><td>48</td><td>第一點ALT、第二點REF</td></tr>
+              <tr><th scope="row"><code>AA</code></th><td>30</td><td>兩點皆ALT</td></tr>
+              <tr><th scope="row"><code>RA</code></th><td>2</td><td>少量相反pattern</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="interactive" aria-labelledby="candidateHeading">
+          <div class="interactive-head">
+            <div>
+              <h3 id="candidateHeading">切換兩個候選</h3>
+              <p>T₁含主要pattern AR；T₂不含AR，只能把48條AR多數解釋成錯誤。</p>
+            </div>
+            <span class="badge observed">Verified toy run</span>
+          </div>
+          <div class="candidate-tabs interactive-controls" role="tablist" aria-label="候選狀態集合切換">
+            <button id="candidateT1" type="button" role="tab" aria-selected="true" aria-controls="candidatePanel">候選 V₁ · RR→AR→AA</button>
+            <button id="candidateT2" type="button" role="tab" aria-selected="false" aria-controls="candidatePanel">候選 V₂ · RR→RA→AA</button>
+          </div>
+          <div id="candidatePanel" class="candidate-result" role="tabpanel" aria-live="polite">
+            <div>
+              <span class="mono">候選 states</span>
+              <p id="candidateStates"><code>{RR, AR, AA}</code></p>
+              <span class="mono">最佳 π</span>
+              <p id="candidateWeights"><code>RR 0.207912 · AR 0.480141 · AA 0.311948</code></p>
+            </div>
+            <div>
+              <span class="mono">profile log-likelihood</span>
+              <p><strong id="candidateLL">−118.913973</strong></p>
+              <p id="candidateMeaning">較高（較不負）→ V₁ 能直接解釋48條 AR molecules。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout pass">
+          <p><strong>結果：</strong>V₁ LL = −118.913973；V₂ LL = −427.745135；差值為 308.831162，因此這個教學資料能清楚區分兩個候選狀態集合。</p>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <span class="badge implemented">Optimizer certificate</span>
+            <h3>KKT gap</h3>
+            <p>現行 tolerance 是 global LL gap ≤ <code>1e−8</code>；同時檢查 simplex residual。不是只看 optimizer 說 success。</p>
+          </article>
+          <article class="card">
+            <span class="badge implemented">Tie rule</span>
+            <h3>並列第一</h3>
+            <p>最佳LL差在 <code>1e−6</code> tolerance內即列為並列。前提仍是完整候選family已被證明列完。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="edge">
+        <p class="kicker">05 / identifiability boundary</p>
+        <h2>狀態清單唯一，不代表 parent edge 唯一</h2>
+        <p class="section-lede">Snapshot reads決定一個 state 出現時，通常不會記錄它是從哪個 parent state 演化而來。相同 vertex set 的不同 parent choices具有完全相同的 emission與likelihood。</p>
+
+        <div class="svg-frame">
+          <svg viewBox="0 0 1120 430" role="img" aria-labelledby="edgeTitle edgeDesc">
+            <title id="edgeTitle">相同vertex set對應兩種parent edge拓撲</title>
+            <desc id="edgeDesc">左右兩棵樹都包含RRR、ARR、AAR、ARA、AAA五個狀態，但左圖AAA的parent是AAR，右圖AAA的parent是ARA，因此read-state likelihood相同而edge不同。</desc>
+            <text class="svg-label" x="275" y="38" text-anchor="middle" font-size="24" font-weight="700">Parent choice A</text>
+            <text class="svg-label" x="845" y="38" text-anchor="middle" font-size="24" font-weight="700">Parent choice B</text>
+            <line x1="560" y1="20" x2="560" y2="410" stroke="#bdb29f" stroke-dasharray="8 8"></line>
+
+            <g aria-label="左側拓撲">
+              <path class="svg-edge" d="M275 98 L275 158"></path>
+              <path class="svg-edge" d="M275 218 L170 278"></path>
+              <path class="svg-edge" d="M275 218 L380 278"></path>
+              <path class="svg-edge-accent" d="M170 338 L275 382"></path>
+              <circle class="svg-node" cx="275" cy="78" r="32"></circle><text class="svg-small" x="275" y="84" text-anchor="middle" font-size="15">RRR</text>
+              <circle class="svg-node" cx="275" cy="188" r="32"></circle><text class="svg-small" x="275" y="194" text-anchor="middle" font-size="15">ARR</text>
+              <circle class="svg-node" cx="170" cy="308" r="32"></circle><text class="svg-small" x="170" y="314" text-anchor="middle" font-size="15">AAR</text>
+              <circle class="svg-node" cx="380" cy="308" r="32"></circle><text class="svg-small" x="380" y="314" text-anchor="middle" font-size="15">ARA</text>
+              <circle class="svg-node" cx="275" cy="392" r="32"></circle><text class="svg-small" x="275" y="398" text-anchor="middle" font-size="15">AAA</text>
+            </g>
+
+            <g aria-label="右側拓撲">
+              <path class="svg-edge" d="M845 98 L845 158"></path>
+              <path class="svg-edge" d="M845 218 L740 278"></path>
+              <path class="svg-edge" d="M845 218 L950 278"></path>
+              <path class="svg-edge-accent" d="M950 338 L845 382"></path>
+              <circle class="svg-node" cx="845" cy="78" r="32"></circle><text class="svg-small" x="845" y="84" text-anchor="middle" font-size="15">RRR</text>
+              <circle class="svg-node" cx="845" cy="188" r="32"></circle><text class="svg-small" x="845" y="194" text-anchor="middle" font-size="15">ARR</text>
+              <circle class="svg-node" cx="740" cy="308" r="32"></circle><text class="svg-small" x="740" y="314" text-anchor="middle" font-size="15">AAR</text>
+              <circle class="svg-node" cx="950" cy="308" r="32"></circle><text class="svg-small" x="950" y="314" text-anchor="middle" font-size="15">ARA</text>
+              <circle class="svg-node" cx="845" cy="392" r="32"></circle><text class="svg-small" x="845" y="398" text-anchor="middle" font-size="15">AAA</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="callout stop">
+          <p><span class="badge abstain">Edge non-identifiable</span> <strong>兩圖的 states完全相同，所以read likelihood完全相同。</strong></p>
+          <p>可以報告「winning vertex set唯一，但parent edge不唯一」；不能硬選紅色edge。要再縮小edge，需CN/CCF、跨區一致性、時間序列或其他獨立方向證據。</p>
+        </div>
+      </section>
+
+      <section id="cap">
+        <p class="kicker">06 / resource guard ≠ scientific bound</p>
+        <h2><code>max_sets=256</code> 沒有「最多256棵樹」的數學保證</h2>
+
+        <div class="answer">
+          <div>
+            <p class="big">256 是materialized candidate數的工程上限。它不是由 k、統計顯著性、clone biology或候選family大小推導，也不能取代總wall-time與memory限制。</p>
+          </div>
+          <aside>
+            <span class="badge abstain">Critical distinction</span>
+            <p><strong>cap單獨不保證程式準時結束；搭配deadline等控制後，才可保證回報成功或ABSTAIN。</strong></p>
+          </aside>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <span class="badge math">State space</span>
+            <h3>k=8 → 2⁸=256 states</h3>
+            <p>這是超立方體「節點」上限，不是候選vertex sets或directed trees的上限。</p>
+          </article>
+          <article class="card">
+            <span class="badge math">Candidate family</span>
+            <h3>候選可遠大於256</h3>
+            <p>候選是節點組合與順序。單一terminal含6個未定序突變時，就有 <code>6! = 720</code> 個同樣最短的順序。</p>
+          </article>
+        </div>
+
+        <div class="table-wrap">
+          <table class="decision-table">
+            <caption>達到 cap 後的正確處理</caption>
+            <thead><tr><th scope="col">情況</th><th scope="col">程式能否結束</th><th scope="col">能否進 likelihood</th><th scope="col">可報告結果</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">F&lt;cap且下一解證明INFEASIBLE；或有外部完成證書</th><td>可以</td><td>可以</td><td><code>candidate_generation_complete=true</code></td></tr>
+              <tr><th scope="row">找到256個後仍有候選</th><td>可以</td><td><strong>不可以</strong></td><td><code>MAX_SETS_REACHED / ABSTAIN</code></td></tr>
+              <tr><th scope="row">per-unit deadline</th><td>可以</td><td><strong>不可以</strong></td><td><code>TIMEOUT / ABSTAIN</code></td></tr>
+              <tr><th scope="row">壓縮exact search有完整winner/tie證書</th><td>可以</td><td>可以</td><td>不必逐一materialize全部候選</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="interactive" aria-labelledby="capHeading">
+          <div class="interactive-head">
+            <div>
+              <h3 id="capHeading">假設性 Cap 比例：最多允許materialize多少？</h3>
+              <p>這是資源設定與diagnostic fast-path family的數量比，不是實際已列舉量、代表性抽樣或likelihood覆蓋率。</p>
+            </div>
+            <span class="badge proposed">Engineering control</span>
+          </div>
+          <div class="range-row interactive-controls">
+            <label for="capRange"><strong>max_sets</strong></label>
+            <input id="capRange" type="range" min="1" max="8192" value="256" step="1">
+            <output id="capValue" for="capRange">256</output>
+          </div>
+          <div class="cap-meter" aria-hidden="true"><span id="capBar"></span></div>
+          <div class="cap-result">
+            <div><span>Diagnostic family F</span><strong>122,281,152</strong></div>
+            <div><span>cap最多允許</span><strong id="capCount">256</strong></div>
+            <div><span>假設數量比</span><strong id="capPercent">0.000209%</strong></div>
+          </div>
+          <div class="callout stop">
+            <p id="capVerdict"><strong>若命中cap：</strong><code>candidate_generation_complete=false → selection=ABSTAIN</code>；仍須deadline等資源控制確保receipt能產生。</p>
+          </div>
+        </div>
+
+        <details>
+          <summary>那256應該改成多少才「合理」？</summary>
+          <div>
+            <p>沒有一個固定數字能由數學保證適合所有區域。合理做法是把 cap 明確定義為硬體／時間預算，例如「每unit最多N個materialized sets、M GiB、D秒」；先做family count或lower bound。現行enumerator只有在 <code>F&lt;cap</code> 且下一解已證明INFEASIBLE時才自然完成；若剛好 <code>F=cap</code>，仍需外部completion certificate，否則保守標incomplete。</p>
+            <p>因此256可以暫時保留為保守預設，但必須與per-unit總deadline、memory cap、checkpoint及ABSTAIN一起出現。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="hardcase">
+        <p class="kicker">07 / exact diagnostic, not production enumeration</p>
+        <h2>為什麼 k=11 的 recurrence-free fast path 得到 122,281,152？</h2>
+
+        <div class="metric-grid">
+          <article class="metric"><span>raw／effective dimension</span><strong>k=m=11</strong><p>HCC1395_DORADO chr6 · PS_HP2</p></article>
+          <article class="metric"><span>full patterns</span><strong>0</strong><p>沒有完整R/A pattern直接固定全狀態。</p></article>
+          <article class="metric"><span>partial patterns</span><strong>70</strong><p>縮減後真正有約束力的groups只有5。</p></article>
+          <article class="metric"><span>ALT comparable pairs</span><strong>29</strong><p>提供部分共現資訊。</p></article>
+          <article class="metric"><span>forbidden ancestor pairs</span><strong>0</strong><p>幾乎沒有排除誰不能在誰之前。</p></article>
+          <article class="metric"><span>diagnostic perfect families</span><strong>122,281,152</strong><p>在明示fast-path模型下精確；不是production列舉結果。</p></article>
+        </div>
+
+        <div class="callout stop">
+          <p><span class="badge abstain">Scope locked</span> <strong><code>ISOLATED_PERFECT_EVENT_H_EQ_M_MINUS_D_FAST_PATH_NOT_PRODUCTION</code></strong></p>
+          <p>此計數證明recurrence-free perfect-family的組合規模，且receipt明示<code>ranking_allowed=false</code>；不能說production M2已完整列出或排名1.22億個候選。</p>
+        </div>
+
+        <div class="callout">
+          <p><strong>白話：</strong>reads告訴我們「哪些突變可能一起出現在某條路徑」，卻很少告訴我們「誰先、誰後」。很多順序與分枝都用相同最少節點，因此在minimum-extra objective下完全同分。</p>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <span class="badge observed">Exact diagnostic</span>
+            <h3>特殊模型計數可以很快</h3>
+            <p>fast-path counter約0.0447秒得到family=122,281,152；這只證明該模型的組合數，不等於production已materialize候選或找到likelihood winner。</p>
+          </article>
+          <article class="card">
+            <span class="badge abstain">Ranking unavailable</span>
+            <h3>逐候選fit不可行</h3>
+            <p>即使每個候選只花1毫秒，仍約需34小時；還未計算parent choices與I/O。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="july">
+        <p class="kicker">08 / data readiness</p>
+        <h2>July raw-all 的資料足夠嗎？</h2>
+        <div class="answer">
+          <div>
+            <p class="big">建立候選與BQ likelihood所需的資料種類齊備；但正式production仍要先解決BAM authority，再完成schema composite adapter。</p>
+          </div>
+          <aside>
+            <span class="badge observed">Data yes</span>
+            <span class="badge abstain">Authority + code no</span>
+            <p>July資料夾單獨沒有read sequence／BQ；producer綁big8 BAM，現有22份compact extraction則綁big7 copy。</p>
+          </aside>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption>July raw-all → topology 所需資料與目前狀態</caption>
+            <thead><tr><th scope="col">資料／產物</th><th scope="col">用途</th><th scope="col">現況</th><th scope="col">判定</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">normalized ClairS raw-all VCF</th><td>LongPhase-S輸入全集</td><td>134,122 records</td><td><span class="badge observed">Available</span></td></tr>
+              <tr><th scope="row">LongPhase-S recalibrated PASS VCF</th><td>正式tree sSNV catalog</td><td>113,061 PASS</td><td><span class="badge observed">Available</span></td></tr>
+              <tr><th scope="row">read_tags.tsv.gz＋index</th><td>每個alignment的HP／PS</td><td>40,859,727 mapped rows；conflict=0</td><td><span class="badge observed">Available</span></td></tr>
+              <tr><th scope="row">raw tumor BAM＋BAI</th><td>序列、CIGAR、MAPQ、base quality</td><td>July producer綁big8 canonical；compact extraction綁big7 copy</td><td><span class="badge abstain">Split authority</span></td></tr>
+              <tr><th scope="row">molecule_sparse_calls＋site_catalog</th><td>R/A/X、BQ與sSNV索引</td><td>HCC1395 chr1–22 extraction schema 1.3已存在</td><td><span class="badge implemented">Built</span></td></tr>
+              <tr><th scope="row">strict components＋membership</th><td>exact PS×HP strict W</td><td>HCC1395與all-7 L1已完成</td><td><span class="badge implemented">Built</span></td></tr>
+              <tr><th scope="row">k≤12 blocks＋constraints</th><td>將大W分成可運算區塊</td><td>HCC1395 chr1–22 Python／C++ parity已完成</td><td><span class="badge implemented">Built</span></td></tr>
+              <tr><th scope="row">Gate A · bounded content equivalence</th><td>檢查搬移後資料與compact產物是否漂移</td><td>22/22 × 6 compact artifacts語意相同；BAM僅size＋3固定chunks＋完整BAI相符，非full hash</td><td><span class="badge implemented">Bounded PASS</span></td></tr>
+              <tr><th scope="row">Gate B · production authority</th><td>判定compact calls能否作正式validation evidence</td><td>big7 manifest仍為PARTIAL、<code>validation_evidence_eligible=false</code></td><td><span class="badge abstain">Not granted</span></td></tr>
+              <tr><th scope="row">schema 1.3＋strict W composite adapter</th><td>把最新版資料送入M2 ranker</td><td>現行M2仍要求同目錄schema 1.2四檔</td><td><span class="badge abstain">Missing</span></td></tr>
+              <tr><th scope="row">scalable exact family solver</th><td>處理大candidate family</td><td>research prototype；production gate未過</td><td><span class="badge abstain">Not ready</span></td></tr>
+              <tr><th scope="row">C++ BQ likelihood／topology</th><td>正式ranking與結果分類</td><td>尚未實作</td><td><span class="badge abstain">Missing</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout stop">
+          <p><strong>三層判定不可合併：</strong></p>
+          <ol>
+            <li><strong>Gate A · content equivalence：Bounded PASS。</strong>22/22 × 6 compact artifacts語意相同，且size＋3固定chunks＋完整BAI相符；這不是full-BAM identity。</li>
+            <li><strong>Gate B · production authority：NOT GRANTED。</strong>manifest仍是PARTIAL且validation-ineligible；須用big8 canonical BAM重抽，或另建正式authority contract。Gate A通過不能推導Gate B通過。</li>
+            <li><strong>Gate C · adapter/software readiness：MISSING。</strong>仍須建立schema 1.3 calls＋strict W membership＋k≤12 partition的composite adapter與passing receipt。</li>
+          </ol>
+        </div>
+
+        <details>
+          <summary>HCC1395 chr6 已驗證的 compact extraction 有哪些數字？</summary>
+          <div>
+            <ul>
+              <li><code>n_sSNV=27,099</code></li>
+              <li><code>canonical eligible molecules=416,944</code></li>
+              <li><code>fixed R/A calls=2,099,726</code></li>
+              <li><code>known PS × HP1/HP2 molecules=80,247</code></li>
+              <li><code>sidecar exact matches=496,928；missing=0</code></li>
+              <li>strict chr6 primary multisite units=421；partition blocks=491；block k≤12檢查PASS</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="cpp">
+        <p class="kicker">09 / implementation readiness</p>
+        <h2>C++ 可以做完，但目前不是「已經可以直接跑」</h2>
+        <p class="section-lede">語言本身不是限制。正確的C++ backend在工程上可行；關鍵是保留exactness、likelihood與fail-closed證書，而不是把Python逐行翻譯。</p>
+
+        <div class="roadmap" aria-label="C++端到端能力路線">
+          <article class="done"><span class="n">01</span><h3>Strict W</h3><p>C++ verifier已完成；HCC1395 22/22與Python parity。</p></article>
+          <article class="done"><span class="n">02</span><h3>k≤12 partition</h3><p>C++已完成，blocks／membership與Python逐染色體一致。</p></article>
+          <article class="bridge"><span class="n">03</span><h3>Authority＋adapter</h3><p>先big8重抽或升格big7 authority，再原生讀schema 1.3、strict W與partition。</p></article>
+          <article class="missing"><span class="n">04</span><h3>Exact family solver</h3><p>需壓縮representation、certified pruning、deadline與checkpoint。</p></article>
+          <article class="missing"><span class="n">05</span><h3>BQ likelihood</h3><p>需C++ mixture optimizer、KKT gap與Python oracle parity。</p></article>
+          <article class="missing"><span class="n">06</span><h3>Topology status</h3><p>列出parent choices；相同states不同edge必須保留unresolved。</p></article>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric"><span>HCC1395 C++ strict parity</span><strong>22/22</strong><p>117,760 edge rows、39,846 components、mismatch=0。</p></article>
+          <article class="metric"><span>Python focused tests</span><strong>61/61</strong><p>exact、partial、BQ、KKT、tie與edge invariance。</p></article>
+          <article class="metric"><span>Production directed topology</span><strong>0/7</strong><p>目前不可發布全樣本T／Topo比例。</p></article>
+        </div>
+
+        <div class="callout pass">
+          <p><strong>最快且風險較低的工程路線：</strong>先讓C++負責最慢的結構搜尋與壓縮family，保留已通過61項focused tests的Python likelihood作oracle／第一版ranker。minread=1 pilot中，candidate generation累積15,304.385秒；已啟動的likelihood fitting累積338.985秒，而且33個未完成長尾尚未進likelihood。這33個長尾已占candidate time的96.154%；先只移植likelihood不會解決8小時timeout。</p>
+        </div>
+
+        <details>
+          <summary>C++ exact solver 必須輸出哪些證書？</summary>
+          <div>
+            <ul>
+              <li><code>objective_certified</code>：minimum-extra h*已證明。</li>
+              <li><code>logical_family_count_exact</code>：候選family數是否精確。</li>
+              <li><code>family_representation_complete</code>：壓縮表示是否覆蓋完整family。</li>
+              <li><code>likelihood_search_complete</code>：未展開分枝均有certified upper bound。</li>
+              <li><code>tie_class_complete</code>：並列winner沒有被cap／deadline截斷。</li>
+              <li>任何一項失敗：<code>selection=ABSTAIN</code>，receipt仍必須正常產生。</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="decision">
+        <p class="kicker">10 / direct answers</p>
+        <h2>三個問題的直接答案</h2>
+        <div class="status-grid">
+          <article class="status-card partial">
+            <span class="badge proposed">Question 1</span>
+            <h3>限制上限後能跑完嗎？</h3>
+            <p><strong>cap單獨不能保證。</strong>還需per-unit／global wall-time、memory cap、checkpoint及fail-closed receipt；這些齊備後，才能保證整批回報成功或ABSTAIN。</p>
+          </article>
+          <article class="status-card stop">
+            <span class="badge abstain">Question 2</span>
+            <h3>256有數學推論嗎？</h3>
+            <p><strong>沒有候選數≤256的數學保證。</strong>256是可調資源預算；<code>2^8=256 states</code>不能推成256 trees。</p>
+          </article>
+          <article class="status-card pass">
+            <span class="badge observed">Question 3</span>
+            <h3>July資料夠嗎？</h3>
+            <p><strong>資料種類足夠，production contract尚不足。</strong>需big8重抽或正式big7↔big8 authority，再補adapter與solver。</p>
+          </article>
+          <article class="status-card stop">
+            <span class="badge abstain">Question 4</span>
+            <h3>C++現在能出正式結果嗎？</h3>
+            <p><strong>尚不能。</strong>現在可快算W／partition；candidate、likelihood、directed topology仍待實作與parity gate。</p>
+          </article>
+        </div>
+
+        <div class="answer">
+          <div>
+            <p class="big">建議先完成「可安全跑完全資料、硬區域明確ABSTAIN」的C++ hybrid backend，再追求提高可解coverage；不要用提高max_sets掩蓋family爆炸。</p>
+          </div>
+          <aside>
+            <span class="badge proposed">Next gate</span>
+            <p>先通過HCC1395_DORADO chr6 hard family與H2009 chr2 pilot，再推廣7 datasets。</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="sources">
+        <p class="kicker">11 / provenance</p>
+        <h2>來源、命令與 claim ceiling</h2>
+        <ol class="source-list">
+          <li>
+            <a href="../20260716_read_linked_hypercube_exact_likelihood_validation/scripts/build_m2_patterns_and_rank.py">BQ-aware pattern mixture ranker</a>
+            <small>R/A/X、conditional BQ emission、π mixture、tie tolerance、KKT與edge-invariant contract。</small>
+          </li>
+          <li>
+            <a href="../20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py">Exact candidate enumerator與mixture certificate</a>
+            <small><code>max_sets=256</code>、complete／MAX_SETS_REACHED、parent-choice count及global LL gap。</small>
+          </li>
+          <li>
+            <a href="../20260718_solver_methyl_edge_probe/results/solver_stress_panel_v1/perfect_family_count_v3/receipt.json">Perfect-family exact count receipt</a>
+            <small>包含122,281,152 hard family及ranking_allowed=false。</small>
+          </li>
+          <li>
+            <a href="../20260723_production_exact_ps_strict_read_linkage/">Strict exact-PS read-linkage與C++ parity</a>
+            <small>HCC1395 22/22 strict graph與partition；全7 L1完成、directed topology 0/7。</small>
+          </li>
+        </ol>
+
+        <details>
+          <summary>July HCC1395 權威檔案位置</summary>
+          <div>
+            <span class="path">/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395/HCC1395.longphase_s.recalibrated.pass.vcf.gz</span>
+            <span class="path">/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395/HCC1395.read_tags.tsv.gz</span>
+            <span class="path">/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395/producer_capture_receipt_v2.json</span>
+          </div>
+        </details>
+
+        <details>
+          <summary>本頁教學 likelihood 數字的重算命令</summary>
+          <div>
+            <pre><code>PYTHONPATH=InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts \
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 - &lt;&lt;'PY'
+from build_m2_patterns_and_rank import fit_quality_aware_mixture
+patterns=[('RR',(30,30),20),('AR',(30,30),48),
+          ('AA',(30,30),30),('RA',(30,30),2)]
+for vertices in [(0,1,3),(0,2,3)]:
+    fit=fit_quality_aware_mixture(patterns,vertices)
+    print(fit.vertices, fit.weights, fit.log_likelihood,
+          fit.global_log_likelihood_gap_bound)
+PY</code></pre>
+          </div>
+        </details>
+
+        <div class="callout stop">
+          <p><strong>Claim ceiling：</strong>本頁證明方法公式、現行局部實作、資料可用性與production缺口；不提供全7樣本T／Topo結果，不宣稱unique clone tree，也不把π升格為cell clone fraction。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p><strong>InterSubMod · 2026-07-24</strong></p>
+    <p>任務類型：B Comprehensive validation。研究gate：Thread D＝是；Thread B撤回範圍＝否；KDE＝不適用；不另加caller AF／VAF score；觸及C++與組合長計算，因此使用fail-closed、receipt與ABSTAIN契約。服務G3／G4／G5。</p>
+    <p>本頁為單檔離線HTML；無外部字型、script或網路依賴。</p>
+  </footer>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const root = document.documentElement;
+      const themeToggle = document.getElementById("themeToggle");
+      themeToggle.addEventListener("click", () => {
+        root.dataset.theme = root.dataset.theme === "night" ? "paper" : "night";
+      });
+
+      const details = [...document.querySelectorAll("details")];
+      document.getElementById("expandAll").addEventListener("click", () => details.forEach(item => { item.open = true; }));
+      document.getElementById("collapseAll").addEventListener("click", () => details.forEach(item => { item.open = false; }));
+
+      const bqRange = document.getElementById("bqRange");
+      const bqValue = document.getElementById("bqValue");
+      const matchProb = document.getElementById("matchProb");
+      const flipProb = document.getElementById("flipProb");
+      const updateBQ = () => {
+        const bq = Number(bqRange.value);
+        const e = Math.pow(10, -bq / 10);
+        const denominator = 1 - (2 * e / 3);
+        const match = (1 - e) / denominator;
+        const flip = (e / 3) / denominator;
+        bqValue.value = String(bq);
+        matchProb.textContent = match.toFixed(6);
+        flipProb.textContent = flip.toFixed(6);
+      };
+      bqRange.addEventListener("input", updateBQ);
+      updateBQ();
+
+      const candidateData = {
+        t1: {
+          states: "{RR, AR, AA}",
+          weights: "RR 0.207912 · AR 0.480141 · AA 0.311948",
+          ll: "−118.913973",
+          meaning: "較高（較不負）→ V₁ 能直接解釋48條 AR molecules。"
+        },
+        t2: {
+          states: "{RR, RA, AA}",
+          weights: "RR 0.392125 · RA 0.019683 · AA 0.588192",
+          ll: "−427.745135",
+          meaning: "較低 → V₂缺少AR state，只能把48條AR多數視為BQ錯誤。"
+        }
+      };
+      const t1 = document.getElementById("candidateT1");
+      const t2 = document.getElementById("candidateT2");
+      const showCandidate = key => {
+        const data = candidateData[key];
+        t1.setAttribute("aria-selected", String(key === "t1"));
+        t2.setAttribute("aria-selected", String(key === "t2"));
+        document.getElementById("candidateStates").innerHTML = `<code>${data.states}</code>`;
+        document.getElementById("candidateWeights").innerHTML = `<code>${data.weights}</code>`;
+        document.getElementById("candidateLL").textContent = data.ll;
+        document.getElementById("candidateMeaning").textContent = data.meaning;
+      };
+      t1.addEventListener("click", () => showCandidate("t1"));
+      t2.addEventListener("click", () => showCandidate("t2"));
+
+      const family = 122281152;
+      const capRange = document.getElementById("capRange");
+      const capValue = document.getElementById("capValue");
+      const capCount = document.getElementById("capCount");
+      const capPercent = document.getElementById("capPercent");
+      const capBar = document.getElementById("capBar");
+      const updateCap = () => {
+        const cap = Number(capRange.value);
+        const materialized = Math.min(cap, family);
+        const percent = materialized / family * 100;
+        capValue.value = cap.toLocaleString("en-US");
+        capCount.textContent = materialized.toLocaleString("en-US");
+        capPercent.textContent = `${percent.toFixed(6)}%`;
+        capBar.style.setProperty("--cap-fraction", `${Math.max(percent, .03)}%`);
+      };
+      capRange.addEventListener("input", updateCap);
+      updateCap();
+
+      const navLinks = [...document.querySelectorAll(".toc a")];
+      const sections = navLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          const visible = entries.filter(entry => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+          navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === `#${visible.target.id}`));
+        }, { rootMargin: "-15% 0px -70% 0px", threshold: [0, .1, .35] });
+        sections.forEach(section => observer.observe(section));
+      }
+
+      window.addEventListener("beforeprint", () => details.forEach(item => { item.dataset.wasOpen = String(item.open); item.open = true; }));
+      window.addEventListener("afterprint", () => details.forEach(item => { item.open = item.dataset.wasOpen === "true"; }));
+    })();
+  </script>
+</body>
+</html>

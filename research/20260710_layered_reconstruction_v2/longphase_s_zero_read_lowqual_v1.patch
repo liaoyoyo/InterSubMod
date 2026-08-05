@@ -1,0 +1,17 @@
+diff --git a/src/somatic_haplotag/SomaticVarCaller.cpp b/src/somatic_haplotag/SomaticVarCaller.cpp
+--- a/src/somatic_haplotag/SomaticVarCaller.cpp
++++ b/src/somatic_haplotag/SomaticVarCaller.cpp
+@@ -1396,8 +1396,11 @@ void SomaticVarCaller::calibrateReadHP(const std::string &chr, std::map<int, Som
+                     }
+                 }
+             }else{
+-                std::cerr << "[ERROR](calibrate read HP) => can't find pos in tumorPosReadCorrBaseHP : chr: "<< chr << " pos: " << pos+1 <<std::endl;
+-                exit(1);
++                // No read HP can be calibrated when every tumor alignment at this
++                // low-confidence site was filtered. Preserve the LowQual site and
++                // continue instead of aborting the complete caller VCF.
++                std::cerr << "[WARNING](calibrate read HP) => no eligible tumor read at low-confidence site; "
++                          << "keeping site untagged: chr: " << chr << " pos: " << pos+1 << std::endl;
+             }
+         }
+         somaticVarIter++;

@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="跨 HP clone-state 反推可行性、7-dataset 候選觀察與驗證紀錄">
+<title>跨 HP clone-state 反推｜可行性與觀察紀錄</title><style>:root {
+  --ink: #162636;
+  --soft: #40566a;
+  --paper: #f3f0e7;
+  --card: #fffdf7;
+  --navy: #102b44;
+  --cyan: #0a7280;
+  --cyan-soft: #d8edef;
+  --orange: #d95f3b;
+  --gold: #b88a2c;
+  --line: #c9c4b8;
+  --ok: #276749;
+  --warn: #9a5b12;
+  --no: #9b2c2c;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  --serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", serif;
+  --sans: "Noto Sans TC", "Source Han Sans TC", "PingFang TC", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.75;
+  background-image:
+    linear-gradient(rgba(16, 43, 68, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 43, 68, .035) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+a { color: var(--cyan); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.skip { position: absolute; left: -999px; top: 0; }
+.skip:focus { left: 12px; top: 12px; background: white; padding: 10px; z-index: 99; }
+#progress { position: fixed; z-index: 80; top: 0; left: 0; height: 4px; background: var(--orange); width: 0; }
+.hero {
+  min-height: 78vh;
+  background: var(--navy);
+  color: #f7f2e7;
+  position: relative;
+  overflow: hidden;
+  padding: 8rem max(5vw, 28px) 5rem;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 620px;
+  height: 620px;
+  border: 1px solid rgba(216, 237, 239, .2);
+  border-radius: 50%;
+  right: -160px;
+  top: -180px;
+  box-shadow: 0 0 0 80px rgba(216, 237, 239, .04), 0 0 0 160px rgba(216, 237, 239, .03);
+}
+.hero-grid {
+  max-width: 1320px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 70px;
+  position: relative;
+}
+.stamp { font: 700 .76rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #86ced3; }
+h1 {
+  font: 700 clamp(3rem, 7vw, 6.4rem)/1.03 var(--serif);
+  letter-spacing: -.04em;
+  margin: .7rem 0 1.5rem;
+  max-width: 900px;
+}
+.hero p { font-size: 1.2rem; max-width: 800px; color: #d7e1e5; }
+.hero-aside { align-self: end; border-left: 1px solid #59758a; padding-left: 32px; }
+.hero-aside strong { display: block; font: 700 4rem/1 var(--serif); color: white; }
+.hero-aside small { display: block; color: #a9c2ce; margin: .4rem 0 1.5rem; }
+.hero-note { border-top: 1px solid #59758a; padding-top: 20px; font: 500 .88rem/1.6 var(--mono); }
+.layout {
+  max-width: 1480px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 64px;
+  padding: 0 32px 100px;
+}
+nav { position: sticky; top: 24px; align-self: start; padding: 50px 0; }
+nav .nav-title { font: 700 .72rem var(--mono); letter-spacing: .14em; color: var(--orange); }
+nav ol { list-style: none; padding: 0; margin: 18px 0; border-left: 1px solid var(--line); }
+nav a { display: block; padding: 7px 0 7px 18px; text-decoration: none; color: var(--soft); font-size: .9rem; }
+nav a:hover { color: var(--orange); }
+main { min-width: 0; }
+section { padding: 82px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 20px; }
+.section-head { display: grid; grid-template-columns: 90px 1fr; gap: 22px; margin-bottom: 38px; }
+.section-no { font: 700 .78rem var(--mono); letter-spacing: .12em; color: var(--orange); padding-top: 12px; }
+h2 { font: 700 clamp(2rem, 4vw, 3.7rem)/1.15 var(--serif); letter-spacing: -.035em; margin: 0; }
+h3 { font: 700 1.45rem/1.3 var(--serif); margin: 2rem 0 1rem; }
+h4 { font: 700 1.15rem var(--serif); margin: 10px 0; }
+.lead { font: 500 1.18rem/1.8 var(--serif); max-width: 900px; }
+.verdict-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.verdict { background: var(--card); border: 1px solid var(--line); border-top: 5px solid; padding: 24px; min-height: 190px; }
+.verdict.go { border-top-color: var(--ok); }
+.verdict.probe { border-top-color: var(--gold); }
+.verdict.no { border-top-color: var(--no); }
+.tag { font: 800 .7rem var(--mono); letter-spacing: .12em; }
+.verdict strong { display: block; font: 700 1.6rem var(--serif); margin: 14px 0; }
+.verdict p { margin: 0; color: var(--soft); }
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 40px 0;
+}
+.kpi { background: var(--card); padding: 26px; }
+.kpi strong { display: block; font: 700 2.35rem/1 var(--serif); }
+.kpi span { font-size: .83rem; color: var(--soft); }
+.kpi em { display: block; font: 500 .7rem var(--mono); color: var(--orange); margin-top: 9px; }
+.callout { margin: 34px 0; padding: 22px 26px; border-left: 5px solid var(--orange); background: #fff7e9; }
+.callout strong { font-family: var(--serif); }
+.flow-wrap { background: var(--navy); padding: 28px; margin: 30px 0; overflow: auto; }
+.flow-svg { min-width: 860px; width: 100%; height: auto; }
+.flow-root { fill: #173e5d; stroke: #6b8799; }
+.flow-a { fill: #173d43; stroke: #5aa8aa; }
+.flow-b { fill: #4d3425; stroke: #d49b68; }
+.flow-intersection { fill: #f3f0e7; stroke: #d95f3b; stroke-width: 2; }
+.flow-line { fill: none; stroke: #88a2b2; stroke-width: 2; }
+.flow-line.a { stroke: #6fc1c3; }
+.flow-line.b { stroke: #e4aa76; }
+.arrow-head { fill: #88a2b2; }
+.svg-kicker { fill: #8ccdd1; font: 700 13px var(--mono); letter-spacing: 1.4px; }
+.flow-label { fill: #f5f0e5; font: 700 16px var(--sans); }
+.flow-number { fill: white; font: 700 38px var(--serif); }
+.flow-number.small { font-size: 30px; }
+.flow-note { fill: #b8cad4; font: 500 13px var(--mono); }
+.flow-intersection .flow-label, .flow-intersection .flow-note { fill: #162636; }
+.strong { font-weight: 900; fill: #d95f3b; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.definition { background: var(--card); padding: 25px; border: 1px solid var(--line); }
+details { background: var(--card); border: 1px solid var(--line); margin: 12px 0; }
+summary { cursor: pointer; padding: 16px 20px; font-weight: 700; }
+details > div, details > p, details > pre { margin: 0; padding: 0 20px 20px; }
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 500 .82rem/1.65 var(--mono);
+  background: var(--navy);
+  color: #e8f1f1;
+  padding: 18px !important;
+}
+code { font-family: var(--mono); }
+.table-wrap { overflow: auto; background: var(--card); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+caption { text-align: left; padding: 18px; font: 700 1rem var(--serif); }
+th, td { padding: 13px 14px; border-bottom: 1px solid #ddd8cc; text-align: right; vertical-align: top; }
+thead th { background: #e7e3d9; font: 700 .72rem var(--mono); letter-spacing: .03em; }
+tbody th { text-align: left; }
+th small, td small { display: block; color: var(--soft); font-weight: 400; }
+.muted { color: #7a8790; }
+.sample-bars { width: 100%; background: var(--card); border: 1px solid var(--line); padding: 18px; }
+.bar-total { fill: #c9dadd; }
+.bar-dual { fill: #0a7280; }
+.svg-label { font: 600 12px var(--mono); fill: #162636; }
+.svg-value, .svg-legend { font: 500 11px var(--mono); fill: #40566a; }
+.candidate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.candidate-card { background: var(--card); border: 1px solid var(--line); padding: 22px; display: flex; flex-direction: column; }
+.candidate-head { font: 700 .7rem var(--mono); color: var(--orange); }
+.candidate-head code { display: block; color: var(--ink); margin-top: 6px; }
+dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 18px 0; }
+dl div { border-top: 1px solid var(--line); padding-top: 8px; }
+dt { font: .68rem var(--mono); color: var(--soft); }
+dd { margin: 2px 0; font-weight: 700; }
+.verdict-line { margin-top: auto; background: #f2ead7; padding: 12px; font-size: .84rem; }
+.formula { background: var(--navy); color: #eef4f1; padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.formula pre { margin: 0; background: transparent; padding: 0 !important; }
+.formula .assumption { border-left: 1px solid #5e788b; padding-left: 24px; color: #c5d5dc; }
+.matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.matrix > div { background: var(--card); padding: 22px; }
+.matrix strong { display: block; font-family: var(--serif); font-size: 1.1rem; }
+.matrix .yes { border-top: 4px solid var(--ok); }
+.matrix .conditional { border-top: 4px solid var(--gold); }
+.matrix .nope { border-top: 4px solid var(--no); }
+.sensitivity { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.sensitivity article { background: var(--card); border: 1px solid var(--line); padding: 22px; }
+.sensitivity strong { font: 700 2rem var(--serif); }
+.pair { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.steps { counter-reset: step; list-style: none; padding: 0; max-width: 900px; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 54px 1fr; gap: 18px; padding: 18px 0; border-top: 1px solid var(--line); }
+.steps li::before { content: counter(step, decimal-leading-zero); font: 700 1rem var(--mono); color: var(--orange); }
+.claim { font: 700 clamp(1.5rem, 3vw, 2.6rem)/1.5 var(--serif); border-left: 8px solid var(--orange); padding-left: 28px; max-width: 1000px; }
+.evidence-list { font: .82rem/1.7 var(--mono); overflow-wrap: anywhere; }
+footer { background: var(--navy); color: #c9d7dd; padding: 50px max(5vw, 30px); }
+footer div { max-width: 1200px; margin: auto; }
+footer strong { color: white; }
+@media (max-width: 1050px) {
+  .hero-grid, .layout { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .verdict-grid, .candidate-grid { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .two-col, .formula { grid-template-columns: 1fr; }
+  .layout { padding: 0 24px 70px; }
+}
+@media (max-width: 620px) {
+  .hero { padding: 6rem 22px 3rem; }
+  .hero-aside { border-left: 0; padding-left: 0; }
+  .kpis, .matrix, .sensitivity { grid-template-columns: 1fr; }
+  section { padding: 58px 0; }
+  .section-head { grid-template-columns: 1fr; gap: 4px; }
+  h1 { font-size: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  #progress, nav { display: none; }
+  .hero { min-height: 0; padding: 40px; background: white; color: black; }
+  .hero p, .hero-note { color: #333; }
+  .layout { display: block; padding: 0; }
+  section { padding: 35px 0; }
+  details { break-inside: avoid; }
+  details > * { display: block; }
+  .flow-wrap { background: white; }
+  body { background: white; }
+}
+</style></head>
+<body><a class="skip" href="#main">跳到主要內容</a><div id="progress" aria-hidden="true"></div>
+<header class="hero"><div class="hero-grid"><div><div class="stamp">InterSubMod · Comprehensive validation · 2026-07-14</div>
+<h1>跨 HP clone-state<br>能反推到哪裡？</h1>
+<p>以最新 7-dataset canonical，分開檢查 read-state、solver 拓撲、跨 HP 同位點與固定 clone catalog；把能觀察與已確認切開。</p></div>
+<aside class="hero-aside"><strong>0</strong><small>符合完整五成分反推門檻的真實 regions</small>
+<div class="hero-note">不是沒有 subclone。<br>是目前沒有一個區域同時通過所有可識別性、CN、PS 與 read-state gates。</div></aside></div></header>
+<div class="layout"><nav aria-label="報告目錄"><div class="nav-title">Observation ledger</div><ol>
+<li><a href="#answer">01 直答結論</a></li><li><a href="#scope">02 範圍與單位</a></li>
+<li><a href="#funnel">03 平行證據鏈</a></li><li><a href="#definitions">04 定義</a></li>
+<li><a href="#samples">05 樣本數據</a></li><li><a href="#inverse">06 反推模型</a></li>
+<li><a href="#cases">07 候選個案</a></li><li><a href="#sensitivity">08 敏感度</a></li>
+<li><a href="#limits">09 限制與下一步</a></li><li><a href="#claim">10 報告句子</a></li>
+<li><a href="#evidence">11 證據鏈</a></li></ol></nav><main id="main">
+
+<section id="answer"><div class="section-head"><div class="section-no">01 / ANSWER</div><h2>可以篩候選；<br>還不能確認四個 clones。</h2></div>
+<p class="lead">現有資料已足以做 region × HP mutation-state census、找出 direct/sister 拓撲與同位點跨 HP ALT；但 bulk reads 沒有 cell pairing，未截斷 state table與逐區域 methyl 驗證也尚未成為 canonical，因此 biological clone tree 仍是 PROBE。</p>
+<div class="verdict-grid"><article class="verdict go"><span class="tag">GO · VERIFIED</span><strong>候選篩選</strong><p>7/7 canonical 完成；MINREAD≥3 的 thresholded R/A/X states、counts、trees 可重跑；低支持 raw states 由 bounded BAM re-extraction 補查。</p></article>
+<article class="verdict probe"><span class="tag">PROBE · CONDITIONAL</span><strong>比例反推</strong><p>固定五成分 catalog 時可識別；真實資料需 constrained likelihood 與替代模型比較。</p></article>
+<article class="verdict no"><span class="tag">NO-GO · CURRENT CLAIM</span><strong>clone 確認</strong><p>不能把兩個 HP marginals 宣稱為同一細胞的 homolog pairing 或唯一 joint clone tree。</p></article></div>
+<div class="kpis"><div class="kpi"><strong>51,815</strong><span>全部 regions</span><em>chr1–22 · 7 datasets</em></div>
+<div class="kpi"><strong>22,779</strong><span>雙 primary HP</span><em>43.96% / total</em></div>
+<div class="kpi"><strong>54</strong><span>目前 shape-invariant</span><em>45 analysis-complete</em></div>
+<div class="kpi"><strong>17</strong><span>目前各側單樹</span><em>13 analysis-complete</em></div></div>
+<div class="callout"><strong>最容易誤解：</strong> 54 是 solver 拓撲集合；86 是 all-site cross-HP ALT 集合。兩者為平行證據，不是 86 再篩成 54。</div></section>
+
+<section id="scope"><div class="section-head"><div class="section-no">02 / SCOPE</div><h2>先固定母集合，<br>每個數字才有意義。</h2></div>
+<div class="two-col"><article class="definition"><h3>資料範圍</h3><p><b>Canonical</b>：LongPhase-S recalibrated FILTER=PASS，chr1–22，run v5，SUCCEEDED。</p>
+<p>638,259 raw/all → 582,820 LPS PASS → 469,849 autosomal biallelic sSNVs → 194,149 retained → 51,815 regions。</p></article>
+<article class="definition"><h3>7 不等於 7 個病人</h3><p><b>7 datasets / 6 biological samples</b>。HCC1395 與 HCC1395_DORADO 是同一細胞系兩套資料，不可在 biological denominator 重複計數。</p></article></div>
+<details><summary>為何玩具例是 k=2，而不是 k=3？</summary><div><p>G1 是 germline SNP，用來決定 HP family；樹的 state vector 只放 somatic sSNVs。因此 G1-S1-S2 的正式 query 是 k=2。</p></div></details>
+<details><summary>Region、state tree、clone 的差別</summary><div><p>Region 是 sSNV connected component；HP lineage 是依 germline HP family 分層的 evidence；state 是 R/A/X；tree 是符合 constraints 的 mutation-state topology；clone 是 cell population。前四者可算，第五者不能直接觀察。</p></div></details></section>
+
+<section id="funnel"><div class="section-head"><div class="section-no">03 / EVIDENCE</div><h2>兩條證據鏈，<br>最後才取交集。</h2></div>
+<div class="flow-wrap"><svg class="flow-svg" viewBox="0 0 1100 610" role="img" aria-labelledby="flow-title flow-desc">
+<title id="flow-title">跨 HP 候選平行篩選</title><desc id="flow-desc">拓撲與同位點支持為兩條平行證據鏈，最後取交集。</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" class="arrow-head"/></marker></defs>
+<text x="50" y="42" class="svg-kicker">共同母集合</text>
+<rect x="50" y="62" width="250" height="105" rx="10" class="flow-root"/><text x="75" y="94" class="flow-label">全部 regions</text><text x="75" y="135" class="flow-number">51,815</text>
+<path d="M300 114 H380" class="flow-line" marker-end="url(#arrow)"/>
+<rect x="390" y="62" width="270" height="105" rx="10" class="flow-root"/><text x="415" y="94" class="flow-label">雙 primary HP</text><text x="415" y="135" class="flow-number">22,779</text><text x="415" y="155" class="flow-note">43.96% / 全部</text>
+<rect x="780" y="55" width="270" height="115" rx="10" class="flow-intersection"/><text x="805" y="83" class="flow-label">A ∩ B（非線性漏斗）</text><text x="805" y="112" class="flow-note">complete Topo + any：<tspan class="strong">7</tspan></text><text x="805" y="137" class="flow-note">complete unique + any：<tspan class="strong">2</tspan></text><text x="805" y="160" class="flow-note">complete Topo + all：<tspan class="strong">0</tspan></text>
+<text x="50" y="230" class="svg-kicker">A · SOLVER TOPOLOGY</text>
+<rect x="50" y="250" width="250" height="92" rx="10" class="flow-a"/><text x="75" y="282" class="flow-label">兩側 candidate complete</text><text x="75" y="320" class="flow-number small">18,588</text><text x="185" y="320" class="flow-note">81.60% / 雙 HP</text>
+<path d="M300 296 H370" class="flow-line a" marker-end="url(#arrow)"/>
+<rect x="380" y="250" width="250" height="92" rx="10" class="flow-a"/><text x="405" y="282" class="flow-label">complete direct+sister</text><text x="405" y="320" class="flow-number small">45</text>
+<path d="M630 296 H700" class="flow-line a" marker-end="url(#arrow)"/>
+<rect x="710" y="250" width="250" height="92" rx="10" class="flow-a"/><text x="735" y="282" class="flow-label">complete tree-unique</text><text x="735" y="320" class="flow-number small">13</text><text x="815" y="320" class="flow-note">28.89% / Topo</text>
+<text x="50" y="400" class="svg-kicker">B · SAME-SITE ALT</text>
+<rect x="50" y="420" width="250" height="92" rx="10" class="flow-b"/><text x="75" y="452" class="flow-label">至少一位點雙 HP ALT</text><text x="75" y="490" class="flow-number small">2,287</text><text x="170" y="490" class="flow-note">10.04% / 雙 HP</text>
+<path d="M300 466 H370" class="flow-line b" marker-end="url(#arrow)"/>
+<rect x="380" y="420" width="250" height="92" rx="10" class="flow-b"/><text x="405" y="452" class="flow-label">全部位點雙 HP ALT</text><text x="405" y="490" class="flow-number small">86</text><text x="485" y="490" class="flow-note">3.76% / any</text>
+<path d="M630 466 H700" class="flow-line b" marker-end="url(#arrow)"/>
+<rect x="710" y="420" width="250" height="92" rx="10" class="flow-b"/><text x="735" y="452" class="flow-label">其中 k=2</text><text x="735" y="490" class="flow-number small">60</text><text x="815" y="490" class="flow-note">69.77% / all-site</text>
+</svg></div><p class="lead">Topology 描述候選演化幾何；same-site collision 描述同一 genomic sSNV 在兩個 HP 都有 ALT evidence。只有交集才接近固定跨 HP clone catalog。</p></section>
+
+<section id="definitions"><div class="section-head"><div class="section-no">04 / DEFINITIONS</div><h2>同一句 direct+sister，<br>其實有兩個 estimator。</h2></div>
+<div class="two-col"><article class="definition"><h3>A · Solver topology</h3><p>目前枚舉結果中，一側全為 direct-only、另一側全為 sister-only，稱 shape-invariant。只有兩側 candidate set complete 時才可作 exhaustive 解讀。</p><strong>54 enumerated / 45 complete · 17 stored-single / 13 complete-unique</strong></article>
+<article class="definition"><h3>B · Observed full-state geometry</h3><p>只看 thresholded full reads。mutation sets 有 proper subset 稱 direct；互不包含稱 sister。</p><strong>14 broad · 7 strict</strong></article></div>
+<div class="callout">兩個 estimator 不能混稱 clone 數。Solver 納入 partial subcube constraints；observed geometry 只看完整且 count≥3 的 states。</div>
+<details><summary>Cross-HP same-site collision</summary><div><p>同一 sSNV position 在 HP1 與 HP2 的 ALT count 都 ≥3。它是候選旗標，仍可能來自 LOH/gain、HP switch、mapping artifact 或 caller error。</p></div></details>
+<details><summary>single-PS 的精確意思</summary><div><p>只表示非缺值 PS 的 distinct count=1，不表示每條 alignment 都帶 PS，也不證明跨區域 phase continuity。H2009 HP1 為 64/75、HP2 為 77/77；HP1 缺 PS 的 11 條全是 XXA，移除後 major-PS sensitivity 不翻轉。</p></div></details>
+<details><summary>為何 populations 與 subreads 不能相加？</summary><div><p>每條 read 先進 subread_groups，完整覆蓋時又進 populations；full key 會重複呈現。反推時 full counts 只能取 obs_populations。</p></div></details></section>
+
+<section id="samples"><div class="section-head"><div class="section-no">05 / DATASETS</div><h2>每個 dataset 都有數，<br>但 CN 能力不相同。</h2></div>
+<svg class="sample-bars" viewBox="0 0 940 412" role="img" aria-label="各 dataset 全部與雙 primary HP regions"><rect x="108" y="8" width="14" height="10" rx="2" class="bar-total"/><text x="132" y="18" class="svg-legend">全部 regions</text><rect x="276" y="8" width="14" height="10" rx="2" class="bar-dual"/><text x="300" y="18" class="svg-legend">雙 primary HP</text><text x="0" y="55" class="svg-label">COLO829</text><rect x="132" y="38" width="595.93" height="22" rx="3" class="bar-total"/><rect x="132" y="45" width="318.10" height="8" rx="2" class="bar-dual"/><text x="735.93" y="54" class="svg-value">8,007</text><text x="0" y="103" class="svg-label">H1437</text><rect x="132" y="86" width="687.55" height="22" rx="3" class="bar-total"/><rect x="132" y="93" width="327.18" height="8" rx="2" class="bar-dual"/><text x="827.55" y="102" class="svg-value">9,238</text><text x="0" y="151" class="svg-label">H2009</text><rect x="132" y="134" width="720.00" height="22" rx="3" class="bar-total"/><rect x="132" y="141" width="358.73" height="8" rx="2" class="bar-dual"/><text x="860.00" y="150" class="svg-value">9,674</text><text x="0" y="199" class="svg-label">HCC1395</text><rect x="132" y="182" width="611.93" height="22" rx="3" class="bar-total"/><rect x="132" y="189" width="221.19" height="8" rx="2" class="bar-dual"/><text x="751.93" y="198" class="svg-value">8,222</text><text x="0" y="247" class="svg-label">HCC1395_DORADO</text><rect x="132" y="230" width="624.06" height="22" rx="3" class="bar-total"/><rect x="132" y="237" width="220.90" height="8" rx="2" class="bar-dual"/><text x="764.06" y="246" class="svg-value">8,385</text><text x="0" y="295" class="svg-label">HCC1937</text><rect x="132" y="278" width="268.83" height="22" rx="3" class="bar-total"/><rect x="132" y="285" width="72.86" height="8" rx="2" class="bar-dual"/><text x="408.83" y="294" class="svg-value">3,612</text><text x="0" y="343" class="svg-label">HCC1954</text><rect x="132" y="326" width="348.09" height="22" rx="3" class="bar-total"/><rect x="132" y="333" width="176.39" height="8" rx="2" class="bar-dual"/><text x="488.09" y="342" class="svg-value">4,677</text></svg>
+<div class="table-wrap"><table><caption>7 datasets 同口徑 census；Topo 與單樹欄為目前枚舉值，small text 為 analysis-complete</caption><thead><tr><th>Dataset / biological ID</th><th>Regions</th><th>雙 HP</th><th>Topo enumerated</th><th>單樹 stored</th><th>Observed strict</th><th>Canonical CN</th></tr></thead><tbody><tr>
+<th scope="row">COLO829<small>COLO829</small></th>
+<td>8,007</td>
+<td>4,274<small>53.38% / total</small></td>
+<td>2<small>2 complete</small></td>
+<td>0<small>0 complete</small></td>
+<td>0</td>
+<td><span class='muted'>unavailable</span></td>
+</tr><tr>
+<th scope="row">H1437<small>H1437</small></th>
+<td>9,238</td>
+<td>4,396<small>47.59% / total</small></td>
+<td>3<small>3 complete</small></td>
+<td>0<small>0 complete</small></td>
+<td>0</td>
+<td>SAVANA<small>coarse；非正式 1+1</small></td>
+</tr><tr>
+<th scope="row">H2009<small>H2009</small></th>
+<td>9,674</td>
+<td>4,820<small>49.82% / total</small></td>
+<td>14<small>10 complete</small></td>
+<td>5<small>1 complete</small></td>
+<td>4</td>
+<td>SAVANA<small>coarse；非正式 1+1</small></td>
+</tr><tr>
+<th scope="row">HCC1395<small>HCC1395</small></th>
+<td>8,222</td>
+<td>2,972<small>36.15% / total</small></td>
+<td>12<small>11 complete</small></td>
+<td>3<small>3 complete</small></td>
+<td>0</td>
+<td>SEQC2<small>coarse；非正式 1+1</small></td>
+</tr><tr>
+<th scope="row">HCC1395_DORADO<small>HCC1395</small></th>
+<td>8,385</td>
+<td>2,968<small>35.40% / total</small></td>
+<td>3<small>1 complete</small></td>
+<td>0<small>0 complete</small></td>
+<td>0</td>
+<td>SEQC2_same_cell_line<small>coarse；非正式 1+1</small></td>
+</tr><tr>
+<th scope="row">HCC1937<small>HCC1937</small></th>
+<td>3,612</td>
+<td>979<small>27.10% / total</small></td>
+<td>5<small>5 complete</small></td>
+<td>3<small>3 complete</small></td>
+<td>1</td>
+<td><span class='muted'>unavailable</span></td>
+</tr><tr>
+<th scope="row">HCC1954<small>HCC1954</small></th>
+<td>4,677</td>
+<td>2,370<small>50.67% / total</small></td>
+<td>15<small>13 complete</small></td>
+<td>6<small>6 complete</small></td>
+<td>2</td>
+<td>SAVANA<small>coarse；非正式 1+1</small></td>
+</tr></tbody></table></div>
+<p class="callout"><strong>Canonical neutral 不等於 allele-specific 1+1。</strong> External SAVANA 可做 magnitude screen，但 major/minor 沒有 orient 到 HP1/HP2，也不能排除 subclonal CNA。</p></section>
+
+<section id="inverse"><div class="section-head"><div class="section-no">06 / INVERSE</div><h2>固定 catalog 時可解；<br>放開 catalog 就不唯一。</h2></div>
+<div class="formula"><pre>direct HP      sister HP
+Background RR  RR
+C1      I      RR
+C2      AA     RR
+C3      RR     U
+C4      I      V
+
+π₂ = pᴅ(AA)
+π₃ = pₛ(U)
+π₄ = pₛ(V)
+π₀ = pᴅ(RR) − pₛ(U)
+π₁ = pᴅ(I)  − pₛ(V)</pre>
+<div class="assumption"><h3>成立前提</h3><p>固定五種 components、CN=1+1、無 HP error、無 state-specific bias、使用未截斷 per-molecule counts。</p><p>合成測試 design rank 5/5；π=(.10,.20,.25,.15,.30) 精確回復。π₀ 是 RR|RR background；無外部 purity prior 時不能直接叫 normal fraction。</p></div></div>
+<div class="matrix"><div class="yes"><strong>數學模型</strong><p>固定 catalog 可條件式識別。</p></div><div class="conditional"><strong>真實估計</strong><p>需 MLE/EM、bootstrap與 alternative catalog comparison。</p></div><div class="nope"><strong>Cell pairing</strong><p>HP marginals 無法產生同一細胞的 homolog 配對。</p></div></div>
+<h3>為何真實資料是 0？</h3><p>45 個 analysis-complete direct+sister invariant regions 的 k 從 3 起；60 個 k=2 all-site collision regions 多是 direct+direct 或 sister+sister。兩條證據鏈尚未在固定玩具 catalog 交會。</p></section>
+
+<section id="cases"><div class="section-head"><div class="section-no">07 / CASES</div><h2>三個最接近的區域，<br>各自卡在不同 gate。</h2></div>
+<div class="candidate-grid">
+<article class="candidate-card">
+<div class="candidate-head">HCC1937<code>chr20:58489593-58518912</code></div>
+<h4>結構最穩健</h4><dl>
+<div><dt>k</dt><dd>4</dd></div><div><dt>CN</dt><dd>unavailable</dd></div>
+<div><dt>PS</dt><dd>1</dd></div><div><dt>collision</dt><dd>0/4</dd></div>
+<div><dt>HP1</dt><dd>direct_only</dd></div><div><dt>HP2</dt><dd>sister_only</dd></div>
+<div><dt>Observed HP1</dt><dd>direct_only</dd></div><div><dt>Observed HP2</dt><dd>sister_only</dd></div>
+</dl><p class="verdict-line"><strong>PROBE</strong> — Raw re-extraction與四種 sensitivity不翻轉；但 CN unavailable。</p>
+<details><summary>thresholded full-read states</summary><pre>HP1 {&quot;AARR&quot;: 5, &quot;ARRR&quot;: 6}
+HP2 {&quot;RRAR&quot;: 5, &quot;RRRA&quot;: 9, &quot;RRRR&quot;: 7}</pre></details></article>
+<article class="candidate-card">
+<div class="candidate-head">H2009<code>chr1:120007237-120040749</code></div>
+<h4>唯一 asCN 交集</h4><dl>
+<div><dt>k</dt><dd>3</dd></div><div><dt>CN</dt><dd>neutral</dd></div>
+<div><dt>PS</dt><dd>1</dd></div><div><dt>collision</dt><dd>2/3</dd></div>
+<div><dt>HP1</dt><dd>direct_only</dd></div><div><dt>HP2</dt><dd>sister_only</dd></div>
+<div><dt>Observed HP1</dt><dd>single_only</dd></div><div><dt>Observed HP2</dt><dd>single_only</dd></div>
+</dl><p class="verdict-line"><strong>PROBE</strong> — Solver HP1 direct-only同形兩樹、HP2 sister-only一樹；observed full-state兩側皆single-only。</p>
+<details><summary>thresholded full-read states</summary><pre>HP1 {&quot;RAA&quot;: 10}
+HP2 {&quot;ARR&quot;: 5}</pre></details></article>
+<article class="candidate-card">
+<div class="candidate-head">HCC1395<code>chr17:21303695-21320366</code></div>
+<h4>Solver 單樹 + collision</h4><dl>
+<div><dt>k</dt><dd>3</dd></div><div><dt>CN</dt><dd>loh</dd></div>
+<div><dt>PS</dt><dd>1</dd></div><div><dt>collision</dt><dd>1/3</dd></div>
+<div><dt>HP1</dt><dd>direct_only</dd></div><div><dt>HP2</dt><dd>sister_only</dd></div>
+<div><dt>Observed HP1</dt><dd>direct_only</dd></div><div><dt>Observed HP2</dt><dd>single_only</dd></div>
+</dl><p class="verdict-line"><strong>NO-GO for fraction</strong> — Solver HP2為sister-only，但displayed full-state geometry為single-only；且CN=LOH。</p>
+<details><summary>thresholded full-read states</summary><pre>HP1 {&quot;ARA&quot;: 3, &quot;ARR&quot;: 7}
+HP2 {&quot;RAR&quot;: 8, &quot;RRR&quot;: 17}</pre></details></article>
+</div>
+<p class="callout"><strong>分母不可混用：</strong> H2009 的 183 是至少一個候選 sSNV 可判讀的 alignment exposures（182 primary + 1 supplementary）；251 是 methyl BAM 的 primary、MAPQ≥20、interval-overlap alignment identities，不要求 sSNV 可判讀。</p>
+<h3>External allele-specific CN screen</h3>
+<p>22,779 個 dataset-regions 中，1,951（8.56%）通過宣告的 1+1 magnitude gate；加入目前 heuristic stability 後為 1,889（8.29%）。H2009 為 1,779 / 1,779。HCC1395/DORADO 共用 CN，這不是獨立 biological prevalence。與候選交集後：45 complete topology 僅 1 個；13 complete unique 為 0；7 observed strict 為 0。</p>
+<details><summary>H2009 唯一交集的 CN 數據</summary><div><p>chr1_seg20：108,270,001–121,500,000；total 2.0329、minor 0.8958、major 1.1371；13.23 Mb、1,323 bins、6,901 het SNPs。ranked output 只報一列（0.95 / 2.22），因此通過本次 heuristic；不是全 solution-space uniqueness 或 orthogonal purity validation。這仍是 magnitude screen，不提供 HP orientation，也不能排除 subclonal CNA。</p></div></details></section>
+
+<section id="sensitivity"><div class="section-head"><div class="section-no">08 / SENSITIVITY</div><h2>結論 0 穩健，<br>個案 membership 仍會變。</h2></div>
+<div class="sensitivity"><article><h3>Complete topology</h3><div class="pair"><span>Canonical</span><strong>45</strong></div><div class="pair"><span>ClairS PASS</span><strong>41</strong></div><p>overlap 31 · Jaccard 0.564<br>discovery metric 54 / 47</p></article>
+<article><h3>Complete tree-unique</h3><div class="pair"><span>Canonical</span><strong>13</strong></div><div class="pair"><span>ClairS PASS</span><strong>10</strong></div><p>overlap 8 · Jaccard 0.533<br>stored metric 17 / 14</p></article>
+<article><h3>k=2 all-site</h3><div class="pair"><span>Canonical</span><strong>60</strong></div><div class="pair"><span>ClairS PASS</span><strong>69</strong></div><p>overlap 48 · Jaccard 0.593</p></article></div>
+<p class="callout"><strong>解讀：</strong> 固定 catalog inference-ready 在兩個 backbones 都是 0；analysis-complete exact Jaccard 約 0.53–0.56，單一 region 仍需 raw-read 複核。</p></section>
+
+<section id="limits"><div class="section-head"><div class="section-no">09 / LIMITS</div><h2>缺的不是更多圖，<br>是四個資料契約。</h2></div>
+<ol class="steps"><li><div><strong>未截斷 read-state table</strong><p>保留 count&lt;3、alignment identity、QNAME、HP、PS、state、callable mask與品質。</p></div></li>
+<li><div><strong>Molecule denominator sensitivity</strong><p>同時報 alignment-identity 與 primary-QNAME，full/partial 分開。</p></div></li>
+<li><div><strong>CN 與 HP error</strong><p>整合 1+1 magnitude、purity、LOH、switch/confusion；否則只報 molecule fractions。</p></div></li>
+<li><div><strong>Model comparison + orthogonal evidence</strong><p>固定與替代 catalogs 做 likelihood/bootstrapping；methyl只作 anchored auxiliary；最終需 single-cell或多區域 evidence。</p></div></li></ol>
+<details><summary>VAF 放在哪裡？</summary><div><p>VAF 是 joint read-state model 的 marginal。候選模型應同時預測 per-site VAF並校準；不要把同一批 reads導出的 VAF再當獨立分數重複加權。VAF/read fraction 是 molecule fraction，不是 cancer cell fraction；轉成 CCF 需 purity、allele-specific CN、mutant multiplicity 與 normal contamination 校正。Canonical目前沒有 per-tree VAF ranking。</p></div></details>
+<details><summary>Methyl 目前能做到哪裡？</summary><div><p>54/54 topology candidates 均可 bounded exact join；49/54 兩個 HP 的 MM/ML rate ≥95%，29/54 兩側都有 full-span methyl reads。H2009 指定區域 251/251 exact join，HP1 94/94、HP2 96/96 有 MM+ML；full-span 15/15 有區域內 modification entries，以 <code>alignment.modified_bases_forward</code> 解碼 3,155 entries（HP1 2,086 + HP2 1,069）。這只證明資料可對齊；layered L3 仍是 not_evaluated。穩定 methyl K=2 也只能叫 candidate epigenetic subpopulation，不能單獨確認 clone。</p></div></details></section>
+
+<section id="claim"><div class="section-head"><div class="section-no">10 / CLAIM</div><h2>可直接用於教授報告的句子。</h2></div>
+<p class="claim">在最新 LongPhase-S PASS canonical 的 7 個 datasets（6 個 biological samples）中，我們可以利用 ONT read-level sSNV 共現與 HP 分層，篩出跨 homolog 的 regional mutation-state candidates。51,815 個 regions 中有 22,779 個同時具有 HP1/HP2 mutation-bearing lineages；目前枚舉結果有 54 個呈現一側 direct、另一側 sister，其中 45 個 candidate-set complete；17 個目前各側只儲存一棵樹，其中 13 個才是 analysis-complete tree-unique。然而，沒有任何區域同時符合固定兩-sSNV五成分模型的完整反推條件，因此目前結果支持 regional mutation-state architecture candidates 的定點驗證，不支持已確認四個 cellular clones 或唯一 joint clone tree。</p></section>
+
+<section id="evidence"><div class="section-head"><div class="section-no">11 / PROVENANCE</div><h2>每個數字有來源，<br>每個限制有出口。</h2></div>
+<div class="evidence-list"><p><strong>Primary input</strong><br>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5</p>
+<p><strong>Sensitivity input</strong><br>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_clairs_pass_sensitivity_v6</p>
+<p><strong>Machine-readable outputs</strong><br>../results/cross_hp_candidate_audit.json<br>../results/candidate_regions.tsv<br>../results/backbone_sensitivity_comparison.json<br>../results/ascn_candidate_overlap.json<br>../results/bounded_read_methyl_validation_receipt.json<br>../results/independent_review_receipt.json</p>
+<p><strong>Verification</strong><br>3/3 synthetic tests PASS · 7/7 region conservation PASS · two bounded raw-read candidate sensitivities不翻轉 · canonical/sensitivity SUCCEEDED · 3/3 independent regression reviewers PASS</p></div>
+<p>產生時間：2026-07-14 03:59 CST。這是 observation record，不改寫 canonical pipeline。</p></section>
+</main></div><footer><div><strong>Claim ceiling</strong><p>Candidate cross-HP regional mutation-state pattern；not confirmed cell-level HP pairing, clone identity, or biological lineage.</p></div></footer>
+<script>const bar=document.getElementById("progress");const update=()=>{const h=document.documentElement;const d=h.scrollHeight-h.clientHeight;bar.style.width=(d?100*h.scrollTop/d:0)+"%"};addEventListener("scroll",update,{passive:true});update();</script>
+</body></html>

@@ -1,0 +1,1952 @@
+<!doctype html>
+<!--
+建立時間: 2026-07-18
+更新時間: 2026-07-19
+目標: 核對並澄清「有向布林超立方體上的 subcube-group Steiner」問題定義、現行程式實作、最少節點/邊等價、infinite-sites 邊界，以及高效 exact 找點方法與正確性
+處理範圍: Task Type B 方法學完整核對 + Task Type F 教學展示；不重跑全基因組、不宣稱真實 clone/parent edge/癌症演化史
+關聯檔案:
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py
+  - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/scripts/build_m2_patterns_and_rank.py
+  - InterSubMod/research/20260718_solver_methyl_edge_probe/scripts/optimized_hypercube_backend.py
+  - InterSubMod/research/20260718_solver_methyl_edge_probe/results/optimized_backend_benchmark_v1/benchmark_receipt.json
+  - InterSubMod/research/20260718_solver_methyl_edge_probe/results/optimized_backend_benchmark_v1/oracle_receipt.json
+  - InterSubMod/research/20260718_hypercube_exact_preserving_solver_cache_remediation/results/verification_summary.json
+-->
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="InterSubMod 有向布林超立方體 Subcube Group Steiner 方法、exact vertex-set search、正確性證明、複雜度與推論邊界">
+  <meta name="color-scheme" content="light">
+  <title>Subcube Group Steiner on a Directed Boolean Hypercube｜定義、實作與優化推論</title>
+  <style>
+    :root {
+      --paper: #f4efe3;
+      --paper-deep: #e8dfcd;
+      --card: #fffdf7;
+      --ink: #16272e;
+      --muted: #5c696d;
+      --navy: #16465a;
+      --navy-deep: #0d2c39;
+      --rust: #bb4b2f;
+      --amber: #d99c34;
+      --green: #3f745f;
+      --red: #a93c31;
+      --blue-wash: #deebec;
+      --green-wash: #e4eee7;
+      --amber-wash: #f6ebcf;
+      --red-wash: #f3dfda;
+      --line: #b7ab94;
+      --line-soft: rgba(22, 39, 46, 0.16);
+      --shadow: 0 18px 55px rgba(22, 39, 46, 0.12);
+      --serif: "Iowan Old Style", "Noto Serif TC", "Songti TC", "PMingLiU", Georgia, serif;
+      --sans: "Avenir Next", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --mono: "IBM Plex Mono", "SFMono-Regular", "Cascadia Code", "Noto Sans Mono", monospace;
+      --math: "STIX Two Math", "Cambria Math", "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--paper); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.72;
+      background:
+        linear-gradient(90deg, transparent 0 51px, rgba(187, 75, 47, 0.19) 52px 53px, transparent 54px),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(22, 70, 90, 0.055) 32px 33px),
+        radial-gradient(circle at 87% 6%, rgba(217, 156, 52, 0.12), transparent 26rem),
+        var(--paper);
+    }
+
+    a {
+      color: var(--navy);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.22em;
+    }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 3px;
+    }
+    code, pre, .mono { font-family: var(--mono); }
+    code { overflow-wrap: anywhere; }
+    strong { color: var(--ink); }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      left: 1rem;
+      top: -6rem;
+      padding: 0.7rem 1rem;
+      color: var(--card);
+      background: var(--navy-deep);
+      transition: top 150ms ease;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    .scope-bar {
+      position: sticky;
+      z-index: 50;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.55rem clamp(1rem, 5vw, 5rem);
+      color: #fff9ea;
+      background: var(--rust);
+      box-shadow: 0 5px 20px rgba(22, 39, 46, 0.2);
+      font: 800 0.75rem/1.35 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .scope-bar span:last-child { text-align: right; }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(270px, 0.72fr);
+      gap: clamp(2.5rem, 7vw, 8rem);
+      align-items: end;
+      min-height: 78vh;
+      padding: clamp(5rem, 10vw, 10rem) clamp(1.5rem, 8vw, 9rem) 4.5rem;
+      overflow: hidden;
+      border-bottom: 2px solid var(--ink);
+    }
+    .hero::after {
+      content: "Qₘ";
+      position: absolute;
+      z-index: 0;
+      right: -0.06em;
+      top: -0.24em;
+      color: var(--navy);
+      opacity: 0.048;
+      font: 900 clamp(15rem, 38vw, 38rem)/1 var(--serif);
+      pointer-events: none;
+    }
+    .hero-copy, .verdict-sheet { position: relative; z-index: 1; }
+    .eyebrow, .section-kicker {
+      color: var(--rust);
+      font: 850 0.76rem/1.4 var(--mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, .display {
+      font-family: var(--serif);
+      text-wrap: balance;
+    }
+    h1 {
+      max-width: 12ch;
+      margin: 0.5rem 0 1.6rem;
+      font-size: clamp(3.2rem, 7.5vw, 7.7rem);
+      line-height: 0.91;
+      letter-spacing: -0.055em;
+    }
+    h1 em { color: var(--rust); font-style: italic; }
+    .lede {
+      max-width: 57rem;
+      margin: 0;
+      font: 500 clamp(1.08rem, 1.75vw, 1.42rem)/1.62 var(--serif);
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin: 1.7rem 0 0;
+      color: var(--muted);
+      font: 0.76rem/1.5 var(--mono);
+    }
+
+    .verdict-sheet {
+      padding: 1.5rem;
+      background: var(--card);
+      border: 2px solid var(--ink);
+      box-shadow: 13px 13px 0 var(--navy);
+    }
+    .stamp {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      color: var(--green);
+      border: 3px double var(--green);
+      transform: rotate(-1.5deg);
+      font: 850 0.74rem var(--mono);
+      letter-spacing: 0.08em;
+    }
+    .verdict-sheet h2 {
+      margin: 1rem 0 0.7rem;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1;
+    }
+    .verdict-sheet p { margin: 0.55rem 0; }
+    .verdict-sheet .limit {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      color: var(--red);
+      border-top: 1px solid var(--line);
+      font-weight: 750;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 265px minmax(0, 1fr);
+      max-width: 1580px;
+      margin: 0 auto;
+    }
+    nav {
+      position: sticky;
+      top: 2.5rem;
+      align-self: start;
+      height: calc(100vh - 2.5rem);
+      padding: 3rem 1.5rem 2rem 2rem;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: rgba(244, 239, 227, 0.78);
+      backdrop-filter: blur(10px);
+    }
+    nav strong {
+      color: var(--rust);
+      font: 850 0.7rem var(--mono);
+      letter-spacing: 0.14em;
+    }
+    nav ol { margin: 1rem 0 1.5rem; padding: 0; list-style: none; counter-reset: toc; }
+    nav li { counter-increment: toc; }
+    nav a {
+      display: block;
+      padding: 0.46rem 0.5rem;
+      color: var(--muted);
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      font-size: 0.86rem;
+    }
+    nav a::before {
+      content: counter(toc, decimal-leading-zero) " / ";
+      color: var(--line);
+      font-family: var(--mono);
+    }
+    nav a:hover { color: var(--ink); border-left-color: var(--rust); background: var(--paper-deep); }
+    .legend-mini { display: grid; gap: 0.45rem; font-size: 0.72rem; color: var(--muted); }
+
+    main { min-width: 0; padding: 0 clamp(1.3rem, 5vw, 6rem) 8rem; }
+    section {
+      padding: 5.5rem 0;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 4rem;
+    }
+    h2 {
+      max-width: 17ch;
+      margin: 0.5rem 0 2rem;
+      font-size: clamp(2.35rem, 4.8vw, 5rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+    h3 { margin: 0 0 0.7rem; font-size: 1.5rem; line-height: 1.2; }
+    p { max-width: 78ch; }
+
+    .answer {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(230px, 0.68fr);
+      gap: 2rem;
+      margin: 2rem 0;
+      padding: 2rem;
+      background: var(--card);
+      border: 2px solid var(--ink);
+      box-shadow: 9px 9px 0 var(--amber);
+    }
+    .answer .big {
+      margin: 0;
+      font: 700 clamp(1.35rem, 2.5vw, 2.15rem)/1.28 var(--serif);
+    }
+    .answer aside { padding-left: 1.5rem; border-left: 1px solid var(--line); }
+    .answer aside p { margin-top: 0; color: var(--muted); }
+
+    .status-grid, .metric-grid, .three-grid, .two-grid {
+      display: grid;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .status-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .three-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .two-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card, .metric {
+      min-width: 0;
+      padding: 1.35rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 25px rgba(22, 39, 46, 0.05);
+    }
+    .card > :last-child, .metric > :last-child { margin-bottom: 0; }
+    .card .label, .metric .label {
+      color: var(--muted);
+      font: 800 0.67rem var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .card.ok { border-top: 5px solid var(--green); }
+    .card.warn { border-top: 5px solid var(--amber); }
+    .card.stop { border-top: 5px solid var(--red); }
+    .card.info { border-top: 5px solid var(--navy); }
+    .metric strong {
+      display: block;
+      margin: 0.55rem 0;
+      color: var(--rust);
+      font: 850 clamp(2rem, 4vw, 3.5rem)/1 var(--serif);
+    }
+    .metric p { margin: 0; color: var(--muted); font-size: 0.84rem; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.32rem;
+      padding: 0.2rem 0.54rem;
+      border-radius: 999px;
+      font: 850 0.66rem var(--mono);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .badge.proof { color: var(--green); background: var(--green-wash); }
+    .badge.lit { color: var(--navy); background: var(--blue-wash); }
+    .badge.probe { color: #7f5613; background: var(--amber-wash); }
+    .badge.stop { color: var(--red); background: var(--red-wash); }
+
+    .formula {
+      display: block;
+      margin: 1.25rem 0;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      color: var(--navy-deep);
+      background: var(--paper-deep);
+      border-left: 5px solid var(--navy);
+      font: 600 clamp(0.92rem, 1.6vw, 1.08rem)/1.7 var(--math);
+      white-space: nowrap;
+    }
+    .formula .where {
+      display: block;
+      color: var(--muted);
+      font: 0.76rem/1.55 var(--sans);
+      white-space: normal;
+    }
+
+    .callout {
+      margin: 1.5rem 0;
+      padding: 1rem 1.25rem;
+      background: var(--card);
+      border-left: 6px solid var(--amber);
+    }
+    .callout.stop { background: var(--red-wash); border-left-color: var(--red); }
+    .callout.ok { background: var(--green-wash); border-left-color: var(--green); }
+    .callout.info { background: var(--blue-wash); border-left-color: var(--navy); }
+    .callout p { margin: 0.35rem 0; }
+
+    .table-wrap { width: 100%; overflow-x: auto; margin: 1.5rem 0; }
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      background: var(--card);
+      font-size: 0.87rem;
+    }
+    th, td {
+      padding: 0.75rem 0.82rem;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    thead th {
+      color: #f8f3e8;
+      background: var(--navy-deep);
+      font: 750 0.72rem/1.4 var(--mono);
+      letter-spacing: 0.04em;
+    }
+    tbody th { color: var(--navy); background: var(--paper-deep); }
+    td.good { background: var(--green-wash); }
+    td.caution { background: var(--amber-wash); }
+    td.no { background: var(--red-wash); }
+    .num { color: var(--rust); font: 800 1rem var(--mono); white-space: nowrap; }
+
+    .figure {
+      margin: 2rem 0;
+      padding: 1.2rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .figure svg { display: block; width: 100%; height: auto; }
+    .figure figcaption {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .svg-edge { stroke: #8d9a9c; stroke-width: 2.4; fill: none; }
+    .svg-edge.accent { stroke: var(--rust); stroke-width: 4; }
+    .svg-edge.good { stroke: var(--green); stroke-width: 4; }
+    .svg-edge.dashed { stroke-dasharray: 7 6; }
+    .svg-node { fill: var(--card); stroke: var(--ink); stroke-width: 2.5; }
+    .svg-node.hit { fill: var(--amber-wash); stroke: var(--rust); stroke-width: 3.5; }
+    .svg-node.latent { fill: var(--blue-wash); stroke: var(--navy); stroke-width: 3.5; }
+    .svg-node.reject { fill: var(--red-wash); stroke: var(--red); stroke-width: 3.5; }
+    .svg-text { fill: var(--ink); font: 750 18px var(--mono); text-anchor: middle; }
+    .svg-small { fill: var(--muted); font: 14px var(--sans); }
+    .svg-title { fill: var(--ink); font: 700 24px var(--serif); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1px;
+      margin: 2rem 0;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .flow article {
+      position: relative;
+      min-height: 210px;
+      padding: 1.2rem;
+      background: var(--card);
+    }
+    .flow article::before {
+      content: attr(data-step);
+      color: var(--rust);
+      opacity: 0.42;
+      font: 900 2.8rem/1 var(--serif);
+    }
+    .flow h3 { margin: 0.5rem 0; font-size: 1.25rem; }
+    .flow p { margin: 0; color: var(--muted); font-size: 0.84rem; }
+
+    details {
+      margin: 0.8rem 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    summary {
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    details > .details-body { padding: 0 1.2rem 1.2rem; }
+    details[open] summary { color: var(--navy); border-bottom: 1px solid var(--line-soft); }
+
+    .proof-box {
+      position: relative;
+      padding: 1.5rem 1.5rem 1.5rem 4.3rem;
+      background: var(--card);
+      border: 2px solid var(--green);
+    }
+    .proof-box::before {
+      content: "∎";
+      position: absolute;
+      left: 1.4rem;
+      top: 1.1rem;
+      color: var(--green);
+      font: 900 2rem var(--serif);
+    }
+    .proof-box p { margin: 0.5rem 0; }
+
+    .copy-block {
+      margin: 1.5rem 0;
+      padding: 1.4rem;
+      color: #eff5f2;
+      background: var(--navy-deep);
+      border-left: 7px solid var(--amber);
+      font: 0.9rem/1.72 var(--mono);
+    }
+    .checklist { padding: 0; list-style: none; }
+    .checklist li {
+      position: relative;
+      padding: 0.55rem 0 0.55rem 2rem;
+      border-bottom: 1px dotted var(--line);
+    }
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0.3rem;
+      color: var(--green);
+      font-weight: 900;
+    }
+    .checklist.stop li::before { content: "×"; color: var(--red); }
+
+    .source-list {
+      display: grid;
+      gap: 0.75rem;
+      padding: 0;
+      list-style: none;
+    }
+    .source-list li {
+      padding: 1rem 1.15rem;
+      background: var(--card);
+      border-left: 4px solid var(--navy);
+    }
+    .source-list small { display: block; color: var(--muted); margin-top: 0.25rem; }
+    .hash { overflow-wrap: anywhere; color: var(--muted); font: 0.7rem/1.55 var(--mono); }
+
+    footer {
+      padding: 3.5rem clamp(1.5rem, 8vw, 9rem);
+      color: #e7ece8;
+      background: var(--navy-deep);
+    }
+    footer p { color: #c9d4d1; }
+    footer a { color: #f0d18e; }
+
+    @media (max-width: 1150px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .page { grid-template-columns: 1fr; }
+      nav {
+        position: relative;
+        top: auto;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 1.5rem;
+      }
+      nav ol { columns: 2; }
+      .status-grid, .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      body { background: var(--paper); }
+      .scope-bar { position: relative; flex-direction: column; }
+      .scope-bar span:last-child { text-align: left; }
+      .hero { padding: 4rem 1.2rem 2.8rem; }
+      h1 { font-size: clamp(3rem, 15vw, 4.6rem); }
+      nav ol { columns: 1; }
+      main { padding: 0 1.05rem 5rem; }
+      section { padding: 4rem 0; }
+      .answer, .two-grid, .three-grid { grid-template-columns: 1fr; }
+      .answer aside { padding: 1rem 0 0; border-left: 0; border-top: 1px solid var(--line); }
+      .status-grid, .metric-grid, .flow { grid-template-columns: 1fr; }
+      .formula { font-size: 0.85rem; }
+      .proof-box { padding-left: 1.4rem; }
+      .proof-box::before { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+    @media print {
+      @page { size: A4; margin: 1.4cm; }
+      body { color: #000; background: #fff; font-size: 9.5pt; }
+      .scope-bar, nav, .skip-link { display: none !important; }
+      .hero { display: block; min-height: auto; padding: 0 0 1cm; }
+      .hero::after { display: none; }
+      .verdict-sheet { margin-top: 1cm; box-shadow: none; }
+      .page { display: block; }
+      main { padding: 0; }
+      section { padding: 0.7cm 0; break-inside: auto; }
+      .card, .metric, .figure, .answer, details, .proof-box { box-shadow: none; break-inside: avoid; }
+      details > .details-body { display: block !important; }
+      details:not([open]) > .details-body { display: block !important; }
+      a { color: #000; text-decoration: none; }
+      footer { color: #000; background: #fff; padding: 1cm 0 0; }
+      footer p { color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="scope-bar">
+    <span>Task B audit + Task F explainer · updated 2026-07-19</span>
+    <span>模型正確性 ≠ 生物真值 · bounded probe ≠ production</span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">Assertion–Evidence · Definition → Code → Claim ceiling</div>
+      <h1>Subcube <em>Group Steiner</em> on Q<sub>m</sub></h1>
+      <p class="lede">
+        名稱與核心數學直覺合理；真正需要修正的是把「一般化 edge-cost arborescence」
+        與「目前 minimum-extra-state vertex-set solver」混為一談。現行程式先求完整的最低
+        vertex-set family，再解析計數 parent trees；read likelihood 能排序不同 vertex sets，
+        尚不能確認同一 vertex set 內的 parent edge。
+      </p>
+      <div class="hero-meta">
+        <span>服務 G3 / G4 / G5</span>
+        <span>研究單位：HP × PS-aware regional molecule states</span>
+        <span>證據層：source + frozen receipts + primary literature</span>
+      </div>
+    </div>
+    <aside class="verdict-sheet" aria-label="總判定">
+      <span class="stamp">REASONABLE · WITH CORRECTIONS</span>
+      <h2>可用，但要分兩層命名</h2>
+      <p><strong>理論層：</strong>可自行定義為 structured directed Group-Steiner variant。</p>
+      <p><strong>實作層：</strong>是 node-weighted、minimum-extra-state、root-connected vertex-set selection。</p>
+      <p class="limit">不能因為 exact 或更快，就升格為「已證明真實 clone、subclone 或唯一祖先邊」。</p>
+    </aside>
+  </header>
+
+  <div class="page">
+    <nav aria-label="頁面目錄">
+      <strong>READING MAP</strong>
+      <ol>
+        <li><a href="#verdict">先看結論</a></li>
+        <li><a href="#naming">名稱與定位</a></li>
+        <li><a href="#formal">正式定義</a></li>
+        <li><a href="#example">三位點例子</a></li>
+        <li><a href="#implementation">目前程式實作</a></li>
+        <li><a href="#vertex-search">高效找最低點</a></li>
+        <li><a href="#vertex-edge-proof">最少點與邊證明</a></li>
+        <li><a href="#evolution-model">M0 / M1 / M2</a></li>
+        <li><a href="#optimization">優化與複雜度</a></li>
+        <li><a href="#evidence">驗證數據</a></li>
+        <li><a href="#inference">能與不能推論</a></li>
+        <li><a href="#wording">論文安全表述</a></li>
+        <li><a href="#sources">來源與稽核</a></li>
+      </ol>
+      <div class="legend-mini" aria-label="證據標籤">
+        <span><span class="badge proof">PROOF</span> 圖論／代數可證</span>
+        <span><span class="badge lit">LITERATURE</span> 原始文獻</span>
+        <span><span class="badge probe">PROBE</span> bounded 實測</span>
+        <span><span class="badge stop">NOT CLAIMED</span> 不可推論</span>
+      </div>
+    </nav>
+
+    <main id="main">
+      <section id="verdict">
+        <div class="section-kicker">01 · Executive verdict</div>
+        <h2>原稿七成合理，三成需要降階或改名</h2>
+        <div class="answer">
+          <div>
+            <p class="big">
+              最穩妥的總結是：你們在「partial-read subcubes 中聯合選擇代表狀態，
+              並找最少額外狀態的 root-connected Boolean-state family」。
+            </p>
+          </div>
+          <aside>
+            <p>之後才從每個固定 node set 的合法 predecessor 中選 parent，形成具體 arborescence。</p>
+          </aside>
+        </div>
+
+        <div class="status-grid">
+          <article class="card ok">
+            <span class="label">名稱</span>
+            <h3>合理</h3>
+            <p>可用 SGSA-DH 作為<strong>本研究自行定義</strong>的 working name，不應暗示是文獻既定標準縮寫。</p>
+          </article>
+          <article class="card warn">
+            <span class="label">Solver</span>
+            <h3>需改寫</h3>
+            <p>現行 MILP 沒有 edge variables；它直接最佳化 vertex set，而不是一次輸出完整 parent tree。</p>
+          </article>
+          <article class="card ok">
+            <span class="label">Exactness</span>
+            <h3>模型內可證</h3>
+            <p>在 <code>family_complete=true</code> 時，可說已列完所有最低額外狀態集合。</p>
+          </article>
+          <article class="card stop">
+            <span class="label">Biology</span>
+            <h3>不可直譯</h3>
+            <p>vertex、branch、Steiner state 仍是 regional molecule-state geometry，不是已證實的 cell clone。</p>
+          </article>
+        </div>
+
+        <div class="callout stop">
+          <p><strong>刪除時間誤讀：</strong>原稿中的「12m 2s、5m 49s、3m 54s」是對話處理時間，不是 solver benchmark；本頁不把它們當效能證據。</p>
+        </div>
+      </section>
+
+      <section id="naming">
+        <div class="section-kicker">02 · Naming</div>
+        <h2>建議名稱：保留 SGSA-DH，但明示是 structured variant</h2>
+
+        <div class="two-grid">
+          <article class="card info">
+            <span class="badge lit">GENERAL THEORY</span>
+            <h3>Minimum-Cost Rooted Subcube-Group Steiner Arborescence on a Directed Boolean Hypercube</h3>
+            <p>中文：<strong>有向布林超立方體上的最小成本根式子立方體群組 Steiner 分枝樹問題</strong>。</p>
+            <p>短稱可自訂為 <code>SGSA-DH</code>，但首次出現必須給完整定義。</p>
+          </article>
+          <article class="card ok">
+            <span class="badge proof">CURRENT IMPLEMENTATION</span>
+            <h3>Minimum-extra-state rooted connected vertex-set selection with subcube-group constraints</h3>
+            <p>中文：<strong>具有子立方體群組限制的最少額外狀態根連通節點集合選擇</strong>。</p>
+            <p>選定節點集合後，再做 parent-factorized arborescence expansion。</p>
+          </article>
+        </div>
+
+        <div class="callout info">
+          <p><strong>不要稱「根節點群」：</strong>目前 root 固定為 <code>0<sup>m</sup></code>；成群的是 terminal/read groups。較精確是「固定根＋多個 terminal subcube groups」。</p>
+        </div>
+
+        <details>
+          <summary>與文獻問題的包含關係</summary>
+          <div class="details-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>問題</th><th>底層圖</th><th>Terminal 條件</th><th>與本研究關係</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>Directed Group Steiner Tree</th>
+                    <td>一般有向圖</td>
+                    <td>每組至少命中一個節點</td>
+                    <td>本研究是它在 restricted Boolean DAG 上的 structured instance。</td>
+                  </tr>
+                  <tr>
+                    <th>MSA-DH</th>
+                    <td>有向布林超立方體</td>
+                    <td>固定 singleton terminals</td>
+                    <td>當所有 groups 都退化成 singleton 時，才回到此類。</td>
+                  </tr>
+                  <tr>
+                    <th>SGSA-DH（本研究定義）</th>
+                    <td>有向布林超立方體／active subcube</td>
+                    <td>partial assignment 誘導的重疊 subcubes</td>
+                    <td>同時選 representative state 與 root-connected structure。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              一般 DGST 可對每組加入 auxiliary sink，將 group-members 以零成本邊連到 sink，轉成 Directed Steiner Tree；
+              但 augmented graph 不再是純 hypercube，且若逐一展開 group membership，成本會隨
+              <span class="mono">Σ|G<sub>i</sub>|</span> 增加。因此不能直接把 singleton-terminal MSA-DH 的定理原封不動套用。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="formal">
+        <div class="section-kicker">03 · Formal definition</div>
+        <h2>先定義完整理論，再標出 current objective</h2>
+
+        <h3>3.1 有向布林超立方體</h3>
+        <p>令 <em>m</em> 為此分析單位內的 sSNV 維度。完整狀態是二元向量：</p>
+        <div class="formula" role="math" aria-label="v belongs to the m-dimensional Boolean cube">
+          v = (v<sub>1</sub>, …, v<sub>m</sub>) ∈ {0,1}<sup>m</sup>
+          <span class="where">v<sub>j</sub>=1 表示此 molecule/haplotype-state 在第 j 個位點帶 ALT；不是直接表示整個 cell clone。</span>
+        </div>
+        <p>有向邊只允許一個 bit 由 0 變 1：</p>
+        <div class="formula" role="math" aria-label="Directed Boolean hypercube edge definition">
+          (u,v) ∈ E ⇔ d<sub>H</sub>(u,v)=1 ∧ u<sub>j</sub>≤v<sub>j</sub> for all j
+          <span class="where">因此每條路徑的 Hamming weight 嚴格增加；圖是 DAG，根為 r=0<sup>m</sup>。</span>
+        </div>
+
+        <h3>3.2 Partial read 誘導 subcube group</h3>
+        <p>一個 pattern <code>p<sub>i</sub>∈{0,1,?}<sup>m</sup></code> 的相容完成集合為：</p>
+        <div class="formula" role="math" aria-label="Subcube terminal group definition">
+          G<sub>i</sub> = { v∈{0,1}<sup>m</sup> : p<sub>ij</sub>≠? ⇒ v<sub>j</sub>=p<sub>ij</sub> }
+          <span class="where">若有 x 個未知位點，完整 cube 中最多有 2<sup>x</sup> 個 completions。程式用 R/A/X：R=read 在已覆蓋位點觀察到 REF、A=ALT、X=未覆蓋／未知。</span>
+        </div>
+        <div class="callout warn">
+          <p><strong>R 不等於「整個細胞永遠沒有此 mutation」：</strong>它只表示這條 molecule/read 在該已覆蓋位點支持 reference allele。把 read observation 提升成 cell-wide absence 需要額外 copy-state 與細胞模型。</p>
+        </div>
+
+        <h3>3.3 一般化 arborescence 目標</h3>
+        <div class="formula" role="math" aria-label="Minimum cost arborescence formulation">
+          minimize<sub>T</sub> &nbsp; Σ<sub>e∈E(T)</sub> c<sub>e</sub>
+          &nbsp;&nbsp; subject to &nbsp; r∈V(T), &nbsp; V(T)∩G<sub>i</sub>≠∅ ∀i
+          <span class="where">T 是以 r 為根的 out-arborescence。這是可用於論文「問題類別」的定義。</span>
+        </div>
+
+        <h3>3.4 現行程式的真正目標</h3>
+        <p>令 <code>M</code> 為固定 mandatory set：root 加上通過結構門檻的 full read states。現行 objective 是：</p>
+        <div class="formula" role="math" aria-label="Current minimum extra state objective">
+          h(N) = |N \ M|, &nbsp;&nbsp; h* = min<sub>N feasible</sub> h(N)
+          <span class="where">額外狀態可能是 partial-group representative、連通 bridge 或兩者兼具；不應一律叫 hidden clone。</span>
+        </div>
+        <div class="callout ok">
+          <p><strong>精確修正：</strong>不是「所有 full reads 都 mandatory」。只有通過結構 support threshold 的 full patterns 進入 M；較低支持的 reads 仍可進後續 likelihood，而不成為硬式 terminal。</p>
+        </div>
+      </section>
+
+      <section id="example">
+        <div class="section-kicker">04 · Worked example</div>
+        <h2>三個 sSNV：已命中的 subcube 與共享 latent connector</h2>
+
+        <figure class="figure">
+          <svg viewBox="0 0 980 480" role="img" aria-labelledby="cube-title cube-desc">
+            <title id="cube-title">三維布林超立方體與 11? terminal group</title>
+            <desc id="cube-desc">八個三位元狀態構成立方體，110 與 111 被框選為 11? 的兩個相容完成狀態。</desc>
+            <text x="40" y="48" class="svg-title">11? = {110, 111}</text>
+            <text x="40" y="78" class="svg-small">未知第 3 位 → 一條 cube edge 上的 1-D subcube</text>
+
+            <path d="M165 345 L375 345 L505 255 L295 255 Z" class="svg-edge"/>
+            <path d="M165 345 L165 155 L375 155 L375 345" class="svg-edge"/>
+            <path d="M295 255 L295 65 L505 65 L505 255" class="svg-edge"/>
+            <path d="M165 155 L295 65 M375 155 L505 65" class="svg-edge"/>
+            <path d="M295 65 L505 65" class="svg-edge accent"/>
+
+            <circle cx="165" cy="345" r="30" class="svg-node"/><text x="165" y="351" class="svg-text">000</text>
+            <circle cx="375" cy="345" r="30" class="svg-node"/><text x="375" y="351" class="svg-text">001</text>
+            <circle cx="295" cy="255" r="30" class="svg-node"/><text x="295" y="261" class="svg-text">010</text>
+            <circle cx="505" cy="255" r="30" class="svg-node"/><text x="505" y="261" class="svg-text">011</text>
+            <circle cx="165" cy="155" r="30" class="svg-node"/><text x="165" y="161" class="svg-text">100</text>
+            <circle cx="375" cy="155" r="30" class="svg-node"/><text x="375" y="161" class="svg-text">101</text>
+            <circle cx="295" cy="65" r="31" class="svg-node hit"/><text x="295" y="71" class="svg-text">110</text>
+            <circle cx="505" cy="65" r="31" class="svg-node hit"/><text x="505" y="71" class="svg-text">111</text>
+
+            <rect x="660" y="115" width="260" height="190" rx="8" fill="#f6ebcf" stroke="#bb4b2f" stroke-width="3"/>
+            <text x="790" y="160" class="svg-text">Pattern 11?</text>
+            <text x="685" y="205" class="svg-small">bit 1 = 1（ALT）</text>
+            <text x="685" y="235" class="svg-small">bit 2 = 1（ALT）</text>
+            <text x="685" y="265" class="svg-small">bit 3 = ?（未知）</text>
+          </svg>
+          <figcaption>
+            教學符號採 0/1/?；程式符號對應 R/A/X。圖中 bit 顯示順序只作示意，實際整數 bit ordering 以 source 為準。
+          </figcaption>
+        </figure>
+
+        <p>
+          若硬式觀察包含 <code>110</code>、<code>101</code>，以及 partial group
+          <code>11?={110,111}</code>，該 group 已由 mandatory <code>110</code> 命中；
+          此例中的 <code>100</code> 是為了連接兩個 full states，而不是由 partial group 選擇產生。一個最低連通解是：
+        </p>
+
+        <figure class="figure">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="tree-title tree-desc">
+            <title id="tree-title">以 100 為 latent connector 的最小 rooted tree</title>
+            <desc id="tree-desc">000 連到未直接觀察的 100，100 再分支到 110 與 101。</desc>
+            <text x="40" y="48" class="svg-title">一個最小解：3 edges / 4 vertices</text>
+            <path d="M200 200 L440 200" class="svg-edge good"/>
+            <path d="M440 200 C560 200 580 105 700 105" class="svg-edge good"/>
+            <path d="M440 200 C560 200 580 300 700 300" class="svg-edge good"/>
+            <polygon points="433,194 447,200 433,206" fill="#3f745f"/>
+            <polygon points="692,99 706,105 692,111" fill="#3f745f"/>
+            <polygon points="692,294 706,300 692,306" fill="#3f745f"/>
+
+            <circle cx="180" cy="200" r="42" class="svg-node"/>
+            <text x="180" y="207" class="svg-text">000</text>
+            <circle cx="440" cy="200" r="43" class="svg-node latent"/>
+            <text x="440" y="207" class="svg-text">100</text>
+            <circle cx="720" cy="105" r="43" class="svg-node hit"/>
+            <text x="720" y="112" class="svg-text">110</text>
+            <circle cx="720" cy="300" r="43" class="svg-node hit"/>
+            <text x="720" y="307" class="svg-text">101</text>
+
+            <text x="440" y="270" class="svg-small" text-anchor="middle">latent connector state</text>
+            <text x="720" y="172" class="svg-small" text-anchor="middle">命中 G₁ 與 11?</text>
+            <text x="720" y="366" class="svg-small" text-anchor="middle">命中 G₂</text>
+          </svg>
+          <figcaption>
+            <code>100</code> 是模型為了 root-connectivity 推入的 latent mutation state。它可以被解讀為「未直接觀察的祖先狀態假說」，
+            但沒有獨立細胞／copy-state 證據時，不能直接宣稱存在一群真實 100 clone。
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="implementation">
+        <div class="section-kicker">05 · Code reality</div>
+        <h2>目前是「先點、後邊、再排序」的兩階段 exact pipeline</h2>
+
+        <div class="flow" aria-label="現行流程">
+          <article data-step="01">
+            <h3>HP × PS read states</h3>
+            <p>full R/A states 與 partial R/A/X groups；相同 patterns 合併並保留 count。</p>
+          </article>
+          <article data-step="02">
+            <h3>Vertex-set selection</h3>
+            <p>最小化 <code>h(N)=|N\M|</code>；每個 partial group 至少被一點命中。</p>
+          </article>
+          <article data-step="03">
+            <h3>Exact family</h3>
+            <p>固定 <code>h*</code> 後列出所有最低 vertex sets；不完整即 abstain。</p>
+          </article>
+          <article data-step="04">
+            <h3>Parent factorization</h3>
+            <p>每個 child 從 selected Hamming-1 predecessors 選一 parent，不展開 Cartesian product。</p>
+          </article>
+          <article data-step="05">
+            <h3>Read likelihood</h3>
+            <p>每個 distinct vertex set fit 一次；same-N parent edges 保持不可辨識。</p>
+          </article>
+        </div>
+
+        <figure class="figure">
+          <svg viewBox="0 0 1120 510" role="img" aria-labelledby="pipeline-title pipeline-desc">
+            <title id="pipeline-title">節點集合與 parent tree 的兩階段流程</title>
+            <desc id="pipeline-desc">第一階段選 rooted connected vertex set，第二階段從每個 child 的候選前驅中選一個 parent。</desc>
+            <text x="45" y="50" class="svg-title">Stage A · selected sub-DAG</text>
+            <text x="615" y="50" class="svg-title">Stage B · one parent per child</text>
+
+            <path d="M120 350 L260 250 M120 350 L260 390 M260 250 L430 160 M260 390 L430 160" class="svg-edge"/>
+            <circle cx="120" cy="350" r="34" class="svg-node"/><text x="120" y="356" class="svg-text">00</text>
+            <circle cx="260" cy="250" r="34" class="svg-node latent"/><text x="260" y="256" class="svg-text">10</text>
+            <circle cx="260" cy="390" r="34" class="svg-node latent"/><text x="260" y="396" class="svg-text">01</text>
+            <circle cx="430" cy="160" r="34" class="svg-node hit"/><text x="430" y="166" class="svg-text">11</text>
+            <text x="110" y="455" class="svg-small">MILP/B&amp;B 選 N；沒有直接選 edge</text>
+
+            <path d="M690 350 L820 250 M820 250 L980 160 M690 350 L820 390" class="svg-edge good"/>
+            <path d="M820 390 L980 160" class="svg-edge dashed"/>
+            <circle cx="690" cy="350" r="34" class="svg-node"/><text x="690" y="356" class="svg-text">00</text>
+            <circle cx="820" cy="250" r="34" class="svg-node latent"/><text x="820" y="256" class="svg-text">10</text>
+            <circle cx="820" cy="390" r="34" class="svg-node latent"/><text x="820" y="396" class="svg-text">01</text>
+            <circle cx="980" cy="160" r="34" class="svg-node hit"/><text x="980" y="166" class="svg-text">11</text>
+            <text x="970" y="245" class="svg-small" text-anchor="middle">11 的另一個合法 parent</text>
+            <text x="690" y="455" class="svg-small">固定 N 後，才形成具體 arborescence</text>
+          </svg>
+          <figcaption>
+            Stage A 的同一個 <code>11</code> 有兩條 selected predecessor arcs；vertex-set solver 尚未選 parent。
+            Stage B 才替每個 child 挑一條入邊，形成具體 arborescence。
+          </figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>原稿敘述</th><th>判定</th><th>目前程式的精確說法</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>solver 直接求最小 arborescence</th>
+                <td class="caution"><span class="badge probe">需修正</span></td>
+                <td>先求最低 root-connected vertex sets；parent edges 在後段解析。</td>
+              </tr>
+              <tr>
+                <th>Steiner node 是未觀察祖先 clone</th>
+                <td class="caution"><span class="badge stop">過度解讀</span></td>
+                <td>是 latent connector mutation state；可作祖先假說，不是已確認細胞群。</td>
+              </tr>
+              <tr>
+                <th>列出並逐一評分所有 parent trees</th>
+                <td class="caution"><span class="badge probe">需修正</span></td>
+                <td>tree 數以乘積解析計數；likelihood 只對 distinct N fit 一次。</td>
+              </tr>
+              <tr>
+                <th>VAF/read-AF 可決定同一 N 的 parent edge</th>
+                <td class="no"><span class="badge stop">目前不成立</span></td>
+                <td>snapshot likelihood 只依 N；same-N edge variants 標為 <code>EDGE_NONIDENTIFIABLE</code>。</td>
+              </tr>
+              <tr>
+                <th>outlier slack / weighted edge 已在 solver</th>
+                <td class="no"><span class="badge stop">未實作</span></td>
+                <td>目前達門檻的 groups 是硬限制；additive edge scorer 僅是隔離 prototype。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary>現行 vertex-set constraints 的代數形式</summary>
+          <div class="details-body">
+            <p>令 <code>y<sub>v</sub>∈{0,1}</code> 表示是否選 v。現行核心約束可寫為：</p>
+            <div class="formula">
+              y<sub>r</sub>=1; &nbsp;
+              y<sub>v</sub> ≤ Σ<sub>u∈Pred(v)</sub> y<sub>u</sub> &nbsp; ∀v≠r; &nbsp;
+              Σ<sub>v∈G<sub>i</sub></sub> y<sub>v</sub> ≥ 1 &nbsp; ∀i
+              <span class="where">因每個 predecessor 的 popcount 少 1，連續回溯不可能循環，最後只能到 0<sup>m</sup>；所以 local predecessor condition 足以推出 root-connectivity。</span>
+            </div>
+            <p>這與原稿的 edge-variable ILP 是等價問題類別的一種不同 formulation，但不是同一份程式模型。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="vertex-search">
+        <div class="section-kicker">05B · Exact vertex-set search</div>
+        <h2>高效找點：先證最低成本，再只追尚未滿足的義務</h2>
+
+        <div class="answer">
+          <div>
+            <p class="big">
+              核心不是「把所有節點子集合都試一次」，而是把問題改寫成：
+              現在還有哪些 read groups 沒被命中？哪些已選節點還缺 parent？
+              每次只對最緊的未滿足義務分枝。
+            </p>
+          </div>
+          <aside>
+            <p>
+              <strong>最重要的分工：</strong>subset-DP 只證明最低額外節點數 <code>h*</code>；
+              obligation B&amp;B 才負責列完所有達到 <code>h*</code> 的 vertex sets。
+            </p>
+          </aside>
+        </div>
+
+        <div class="two-grid">
+          <article class="card info">
+            <span class="badge proof">CURRENT CANONICAL SOURCE</span>
+            <h3>Prepared-base MILP＋no-good cuts</h3>
+            <p>
+              第一次 MILP 求 <code>h*</code>；固定 cardinality 後，每找到一組就追加 no-good cut，
+              直到下一次求解回傳 infeasible，才證明 family 已列完。
+            </p>
+            <p>
+              修補後固定矩陣只建一次，但仍約需 <code>F+1</code> 次 MILP calls；
+              <code>F</code> 是最低 vertex sets 數量。
+            </p>
+          </article>
+          <article class="card warn">
+            <span class="badge probe">BOUNDED RESEARCH BACKEND</span>
+            <h3>Small-q DP＋bitset obligation B&amp;B</h3>
+            <p>
+              DP 先給 objective certificate；B&amp;B 在一次 traversal 中用 bitsets、
+              logical propagation、admissible lower bounds 與 memo 列完整 family。
+            </p>
+            <p>
+              已通過 bounded oracle，但程式仍明示
+              <code>BOUNDED_RESEARCH_BACKEND_NOT_PRODUCTION</code>，尚未取代 canonical route。
+            </p>
+          </article>
+        </div>
+
+        <div class="callout info">
+          <p>
+            <strong>兩條路徑求的是同一 estimand：</strong>
+            在相同 root、mandatory states、partial groups 與 gain-one predecessor 規則下，
+            最小化 <code>h(N)=|N\M|</code>。優化改變搜尋方式，不改變生物模型。
+          </p>
+        </div>
+
+        <h3>實作流程：從原始 pattern 到完整最低 family</h3>
+        <div class="flow" aria-label="高效 exact 找點五階段">
+          <article data-step="01">
+            <h3>壓縮維度</h3>
+            <p>raw k loci → 通過 structural gate 的 observed-ALT effective m；只建立模型允許的 active subcube。</p>
+          </article>
+          <article data-step="02">
+            <h3>縮減 constraints</h3>
+            <p>刪 duplicate、required-hit、被較小 domain 蘊含的 groups；singleton 強制選入。</p>
+          </article>
+          <article data-step="03">
+            <h3>祖先 closure</h3>
+            <p>只保留 required／group candidates 的所有 bitwise submasks與 root。</p>
+          </article>
+          <article data-step="04">
+            <h3>DP 證 h*</h3>
+            <p>小 q 時用 terminal-subset recurrence 證最低額外節點成本，但不宣稱 family 完整。</p>
+          </article>
+          <article data-step="05">
+            <h3>B&amp;B 列 family</h3>
+            <p>只對未命中 group 與缺 parent 節點建立 obligations；完整 traversal 才允許排名。</p>
+          </article>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>步驟</th>
+                <th>程式概念</th>
+                <th>為何不漏掉最低解</th>
+                <th>輸出／certificate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>0. 建立輸入契約</th>
+                <td><code>M={0}∪full states</code>；每個 partial pattern 成為 compatible group <code>Gᵢ</code>。</td>
+                <td>先固定 estimand；read count 不偷偷改變硬式 feasibility。</td>
+                <td>root、mandatory、groups、predecessor relation。</td>
+              </tr>
+              <tr>
+                <th>1. Active-bit compression</th>
+                <td>只保留通過結構門檻之 patterns 在 observed-ALT universe 中可為 1 的 <code>m</code> 個 dimensions；低支持 reads 仍可留在後續 likelihood。</td>
+                <td>在目前模型契約內，其餘 dimensions 固定為 0；投影與回嵌一一對應。</td>
+                <td><code>P=2ᵐ</code> states，而非 <code>2ᵏ</code>。</td>
+              </tr>
+              <tr>
+                <th>2. Group presolve</th>
+                <td>duplicate、mandatory-hit、singleton forcing、inclusion-minimal antichain。</td>
+                <td><code>A⊆B</code> 時命中 A 必然命中 B；singleton 是所有可行解的必選點。</td>
+                <td>required mask＋較少的 active groups。</td>
+              </tr>
+              <tr>
+                <th>3. Downward closure</th>
+                <td>對每個 seed state 列出全部 submasks，只保留其 union。</td>
+                <td>monotone root→seed 路徑只能經過 seed 的 submasks；最低解不需要無 terminal descendant 的枝。</td>
+                <td><code>n≤P</code> 個 closure vertices、<code>e</code> 條 induced gain-one arcs；非最低但可行的多餘枝可能被移除。</td>
+              </tr>
+              <tr>
+                <th>4. Bitset preparation</th>
+                <td>vertex、group、predecessor、children 全轉成 integer masks。</td>
+                <td>只是相同集合關係的無損編碼；AND／OR／popcount 取代 Python set 掃描。</td>
+                <td>固定的 <code>PreparedBitsetProblem</code>。</td>
+              </tr>
+              <tr>
+                <th>5. Subset-DP</th>
+                <td><code>dp[A][v]</code> 合併 terminal subsets，並沿 DAG 由 child 向 parent 放鬆。</td>
+                <td>任何可行樹可拆成「同一分枝點合併＋逐邊連接」；每個 recurrence 也能還原合法結構。</td>
+                <td><code>OPTIMAL_VALUE_CERTIFIED</code>，只證 <code>h*</code>。</td>
+              </tr>
+              <tr>
+                <th>6. Obligation B&amp;B</th>
+                <td>search state 是 <code>(selected I, excluded X)</code>；對最小 domain 分枝。</td>
+                <td>branches 依「ordered domain 中第一個被選點」不重疊地 partition 所有 feasible extensions。</td>
+                <td>完整時為 <code>CANDIDATE_SET_COMPLETE</code>。</td>
+              </tr>
+              <tr>
+                <th>7. Parent factorization</th>
+                <td>固定 N 後，每個非根節點從 <code>Pred<sub>N</sub>(v)</code> 選一 parent。</td>
+                <td>每次 parent 都少一個 ALT；不可能成環，反覆回溯必到 root。</td>
+                <td><code>|E|=|N|−1</code>；tree count 用乘積解析計算。</td>
+              </tr>
+              <tr>
+                <th>8. Ranking gate</th>
+                <td>只有 <code>family_complete=true</code> 才對 distinct N 做 read likelihood。</td>
+                <td>避免把尚未列完的 candidate prefix 當全集，漏掉真正高分候選。</td>
+                <td>complete → rank；deadline/cap → abstain。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>三位點例子：一個 100 同時解除兩個 parent obligations</h3>
+        <p>
+          假設 full-read mandatory states 是 <code>110</code> 與 <code>101</code>，root 是
+          <code>000</code>。一開始兩個已選 state 都還沒有 selected predecessor：
+        </p>
+        <div class="formula">
+          I₀={000,110,101}; &nbsp;
+          Q₁=Pred(110)={100,010}; &nbsp;
+          Q₂=Pred(101)={100,001}
+          <span class="where">100 同時出現在 Q₁ 與 Q₂，因此選一次就能讓 110、101 都接回同一共享 connector。</span>
+        </div>
+
+        <figure class="figure">
+          <svg viewBox="0 0 1160 600" role="img" aria-labelledby="search-title search-desc">
+            <title id="search-title">Obligation branch-and-bound 找出最低額外節點集合</title>
+            <desc id="search-desc">從 mandatory states 000、110、101 開始，兩個 parent obligations 共享 100。選 100 得到成本一的完整解；排除 100 後需要同時選 010 與 001，成本二而被剪枝。</desc>
+
+            <text x="55" y="48" class="svg-title">Start · selected I₀</text>
+            <rect x="45" y="80" width="310" height="170" rx="10" fill="#deebec" stroke="#16465a" stroke-width="3"/>
+            <text x="200" y="130" class="svg-text">000 · 110 · 101</text>
+            <text x="75" y="178" class="svg-small">Q₁ = {100, 010}</text>
+            <text x="75" y="213" class="svg-small">Q₂ = {100, 001}</text>
+            <text x="200" y="282" class="svg-small" text-anchor="middle">LB = 1；先選最小義務的候選</text>
+
+            <path d="M355 165 C455 165 455 110 535 110" class="svg-edge good"/>
+            <path d="M355 190 C455 235 455 360 535 360" class="svg-edge accent"/>
+            <text x="440" y="100" class="svg-small" text-anchor="middle">select 100</text>
+            <text x="445" y="348" class="svg-small" text-anchor="middle">exclude 100；select 010</text>
+
+            <rect x="535" y="55" width="565" height="175" rx="10" fill="#e4eee7" stroke="#3f745f" stroke-width="4"/>
+            <text x="817" y="103" class="svg-title" text-anchor="middle">Feasible leaf · cost 1</text>
+            <circle cx="630" cy="168" r="29" class="svg-node"/><text x="630" y="174" class="svg-text">000</text>
+            <circle cx="770" cy="168" r="29" class="svg-node latent"/><text x="770" y="174" class="svg-text">100</text>
+            <circle cx="940" cy="125" r="29" class="svg-node hit"/><text x="940" y="131" class="svg-text">110</text>
+            <circle cx="940" cy="195" r="29" class="svg-node hit"/><text x="940" y="201" class="svg-text">101</text>
+            <path d="M659 168 L741 168 M799 158 L911 132 M799 178 L911 188" class="svg-edge good"/>
+            <text x="817" y="260" class="svg-small" text-anchor="middle">N*={000,100,110,101}；h*=1</text>
+
+            <rect x="535" y="315" width="565" height="205" rx="10" fill="#f3dfda" stroke="#a93c31" stroke-width="4"/>
+            <text x="817" y="365" class="svg-title" text-anchor="middle">另一 branch · 至少 cost 2</text>
+            <text x="585" y="418" class="svg-small">100 已排除</text>
+            <text x="585" y="455" class="svg-small">選 010 後，Q₂ 只剩 singleton {001}</text>
+            <text x="585" y="492" class="svg-small">必須再選 001 → current cost=2 &gt; best=1</text>
+            <line x1="930" y1="385" x2="1035" y2="490" stroke="#a93c31" stroke-width="13"/>
+            <line x1="1035" y1="385" x2="930" y2="490" stroke="#a93c31" stroke-width="13"/>
+            <text x="817" y="560" class="svg-small" text-anchor="middle">安全 prune：不是猜測，而是已有 h*=1 certificate</text>
+          </svg>
+          <figcaption>
+            這個 teaching case 已由 canonical MILP 與 research DP＋B&amp;B 交叉重算：
+            兩者都回傳唯一最低集合 <code>{000,100,101,110}</code>、<code>h*=1</code>。
+            Research route 的 DP table 為 24 cells，B&amp;B 只 visited 2 states；此數字只用來說明機制，不是全資料效能證據。
+          </figcaption>
+        </figure>
+
+        <details>
+          <summary>真正包含 partial-group representative choice 的二位點例子：AX＋XA</summary>
+          <div class="details-body">
+            <p>
+              以 pattern 顯示順序表示：
+              <code>G₁=AX={AR,AA}</code>、<code>G₂=XA={RA,AA}</code>，root 為 <code>RR</code>。
+              此時 solver 必須同時決定「每個 group 由哪個完成狀態命中」與「如何接回 root」。
+            </p>
+            <div class="formula">
+              h*=2; &nbsp;
+              N₁={RR,AR,RA}; &nbsp;
+              N₂={RR,AR,AA}; &nbsp;
+              N₃={RR,RA,AA}
+              <span class="where">三組都是最低 vertex sets：第一組分別命中兩個 groups；後兩組由 AA 命中兩組，但仍需 AR 或 RA 作為 AA 的 predecessor。</span>
+            </div>
+            <p>
+              Canonical MILP 與 research DP＋B&amp;B 都回傳相同三組 family。
+              這才是 terminal-group representative selection；前一個 <code>110／101</code> 例子主要示範共享 parent connector。
+            </p>
+          </div>
+        </details>
+
+        <div class="proof-box">
+          <span class="badge proof">CORRECTNESS CHAIN</span>
+          <h3>為何可以確保模型內正確？</h3>
+          <ol>
+            <li><strong>可行性：</strong>沒有 obligation 時，每個 group 已命中、每個非根 selected state 已有 selected predecessor。</li>
+            <li><strong>根連通：</strong>沿 predecessor 每次 popcount 減 1；有限步後只能到唯一 weight-0 state <code>0ᵐ</code>。</li>
+            <li><strong>下界安全：</strong>packing、coverage、connection 都不高估仍需新增的成本，而且只取最大值、不相加。</li>
+            <li><strong>分枝完備：</strong>每個 feasible extension 在 chosen domain 中都有唯一的第一個 selected candidate。</li>
+            <li><strong>最優性：</strong>DP 證 <code>h*</code>，或由未中止的完整 B&amp;B traversal 證明 best。</li>
+            <li><strong>完整 family：</strong>只有 traversal 未逾時、未達 cap，且所有 leaves／pruned branches 都有證明時，才設 <code>family_complete=true</code>。</li>
+          </ol>
+        </div>
+
+        <details open>
+          <summary>Subset-DP recurrence：如何只證 h*？</summary>
+          <div class="details-body">
+            <p>
+              令 <code>q</code> 是「required non-root singleton terminals＋剩餘 partial groups」的 terminal-domain 數，
+              <code>dp[A][v]</code> 是從 state v 連到 terminal subset A 的最低額外 node cost，且不重複計算 v 自身。
+            </p>
+            <div class="formula">
+              dp[{i}][v]=0 &nbsp; if v∈Dᵢ
+              <br>
+              dp[A][v]=min<sub>∅≠B⊂A</sub>{dp[B][v]+dp[A\B][v]}
+              <br>
+              dp[A][v]=min{dp[A][v], c(u)+dp[A][u]} &nbsp; for each v→u
+              <span class="where">第一式命中 terminal domain；第二式在 v 合併兩個子問題；第三式沿一條 gain-one edge 向 child 延伸並支付 child cost。</span>
+            </div>
+            <p>
+              超立方體是 DAG；按 Hamming rank 由高到低處理，child 的值會先完成，再回傳 predecessor。
+              最後 <code>dp[all][0]</code> 就是 <code>h*</code>。DP 不保存所有最佳 vertex sets，因此
+              <code>objective_certified=true</code> 不等於 <code>family_complete=true</code>。
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Obligation B&amp;B：哪些剪枝是安全的？</summary>
+          <div class="details-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>機制</th><th>計算</th><th>安全理由</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <th>Infeasible domain</th>
+                    <td>某個未滿足 obligation 在排除點後 domain 為空。</td>
+                    <td>任何 extension 都無法再命中它，整枝必不可行。</td>
+                  </tr>
+                  <tr>
+                    <th>Singleton propagation</th>
+                    <td><code>|Q|=1</code> 時強制加入唯一候選。</td>
+                    <td>所有可行 extensions 都必須含它，不是 greedy 猜測。</td>
+                  </tr>
+                  <tr>
+                    <th>Dynamic antichain</th>
+                    <td><code>A⊆B</code> 時只保留 A。</td>
+                    <td>命中較強的 A 必然同時命中 B。</td>
+                  </tr>
+                  <tr>
+                    <th>Disjoint packing</th>
+                    <td>r 個互斥 domains 至少需要 r 個新點。</td>
+                    <td>同一點不可能同時命中兩個互斥集合。</td>
+                  </tr>
+                  <tr>
+                    <th>Coverage bound</th>
+                    <td><code>ceil(#obligations / max coverage per vertex)</code>。</td>
+                    <td>即使每次都選覆蓋最多者，也至少需要這麼多點。</td>
+                  </tr>
+                  <tr>
+                    <th>Root-connection bound</th>
+                    <td>估計 selected orphan／group candidate 回到 root 的最低新點成本。</td>
+                    <td>取各需求的最大值，不錯誤重複加總共用 connectors。</td>
+                  </tr>
+                  <tr>
+                    <th>Potential reachability</th>
+                    <td>只保留在目前 excluded mask 下仍存在 root path 的候選。</td>
+                    <td>找不到任何未排除路徑才刪；「可達」不代表沿路祖先已 selected，後續仍會產生 parent obligations。</td>
+                  </tr>
+                  <tr>
+                    <th>Memo</th>
+                    <td>完整 key 是 <code>(selected,excluded)</code>。</td>
+                    <td>相同 key 的剩餘 subproblem 完全相同；只消除重複路徑。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="formula">
+              LB(I,X)=cost(I)+max{LB<sub>packing</sub>, LB<sub>coverage</sub>,
+              LB<sub>selected-connect</sub>, LB<sub>group-connect</sub>}
+              <span class="where">只有 LB &gt; best 才剪枝；LB = best 仍必須保留，才能列出其他同分最低 sets。</span>
+            </div>
+          </div>
+        </details>
+
+        <h3>時間與空間複雜度：快很多，但最壞情況仍是指數</h3>
+        <p>
+          令 <code>k</code> 為 raw positions、<code>m</code> 為 active dimensions、<code>P=2ᵐ</code>、<code>n</code> 為 downward-closure 後 vertices、
+          <code>e</code> 為 closure 內 gain-one arcs、<code>q</code> 為 terminal domains、
+          <code>F</code> 為最低 vertex-set family 大小、<code>I=Σ|Dᵢ|</code> 為 terminal-domain incidences。
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>階段</th><th>時間複雜度</th><th>空間複雜度</th><th>真正的限制</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Active universe</th>
+                <td><code>Θ(P)=Θ(2ᵐ)</code> states；完整 gain-one edges 為 <code>m2ᵐ⁻¹</code>。</td>
+                <td><code>Θ(P)</code> 起跳。</td>
+                <td>m 才是主要 exponent；raw k 很大但 active m 小時仍可能可解。</td>
+              </tr>
+              <tr>
+                <th>Group＋closure prepare</th>
+                <td>
+                  約 <code>O(Γ + r·g²·B + Σ<sub>s∈Seeds</sub>2<sup>|s|</sup> + kn)</code>；
+                  <code>g</code> 為 groups、<code>r</code> 為 singleton fixed-point rounds、
+                  <code>Γ=Σ|Gᵢ|</code>、B 為 bitset word 成本。
+                </td>
+                <td><code>O(n+e+gB)</code>。</td>
+                <td>
+                  現行 closure 對每個 seed 列 submasks；strict worst case
+                  <code>Σ<sub>s∈{0,1}ᵐ</sub>2<sup>|s|</sup>=3ᵐ</code>。
+                </td>
+              </tr>
+              <tr>
+                <th>Canonical MILP enumeration</th>
+                <td><code>F+1</code> 次左右 MILP calls；每次最壞仍為整數規劃指數時間。</td>
+                <td>base sparse matrix＋累積 no-good rows＋solver memory。</td>
+                <td>prepared-base 只移除重複建模，不消除重複 solve。</td>
+              </tr>
+              <tr>
+                <th>Subset-DP</th>
+                <td><code>O(3<sup>q</sup>n + 2<sup>q</sup>e + I)</code>。</td>
+                <td><code>O(2<sup>q</sup>n)</code>。</td>
+                <td>q 大時 table 先爆；目前有 q、cells、memory、proxy-ops gates。</td>
+              </tr>
+              <tr>
+                <th>Obligation B&amp;B</th>
+                <td>
+                  最壞 <code>O(3ⁿ·poly(n+e+q))</code>；
+                  另有不可消除的輸出成本 <code>Ω(Σ|Nᵢ|)</code>。
+                </td>
+                <td><code>O(3ⁿ + Σ|Nᵢ|)</code> 最壞。</td>
+                <td>每點可能 selected／excluded／undecided；剪枝改善典型案例，不改 NP-hard 最壞界。</td>
+              </tr>
+              <tr>
+                <th>Parent factorization</th>
+                <td><code>O(E<sub>N</sub>)</code> 掃一次 legal parent arcs。</td>
+                <td><code>O(E<sub>N</sub>+|N|)</code>；可串流再降低額外空間。</td>
+                <td>若逐棵 materialize，數量是 <code>∏|Pred<sub>N</sub>(v)|</code>，可能極大。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout stop">
+          <p>
+            <strong>複雜度的重點：</strong>DP 把 exponent 放在較小的 q；B&amp;B 希望靠 obligations 讓實際 visited states
+            遠少於 <code>3ⁿ</code>。但若使用者要求輸出 F 個不同最低 sets，任何 exact 方法至少要付出
+            <code>Ω(F)</code>，不能靠「更聰明的搜尋」讓答案本身消失。
+          </p>
+        </div>
+
+        <div class="callout info">
+          <p>
+            <strong>Exactness 契約：</strong>active-bit projection 與 downward closure 是本專案在
+            monotone gain-only、pure existential group hits、所有 optional nodes 為正成本的條件下推導。
+            若加入 mutation loss、zero/negative node reward、edge reward 或全域 tree constraints，必須重新證明；
+            small-k oracle 的 0 mismatch 是實作佐證，不取代一般證明。
+          </p>
+        </div>
+
+        <details>
+          <summary>固定 N 後，為何 parent choices 可以 O(Eₙ) 處理？</summary>
+          <div class="details-body">
+            <p>對每個非根節點：</p>
+            <div class="formula">
+              Pred<sub>N</sub>(v)={u∈N : d<sub>H</sub>(u,v)=1, |u|₁=|v|₁−1}
+              <br>
+              #Trees(N)=∏<sub>v∈N\{0}</sub>|Pred<sub>N</sub>(v)|
+            </div>
+            <p>
+              在目前 M0 recurrence-allowed model 中，每個 child 的 parent 可獨立選：
+              所有 parent arcs 都嚴格降低 rank，所以任何組合都不會成環，且每個 child 恰有一條入邊。
+              若 edge score 可加總，最佳分數就是每個 child 的最佳 parent score 相加，只需掃每條 legal edge 一次。
+            </p>
+            <p>
+              <strong>例外：</strong>strict infinite-sites 會加入「同一 mutation 全樹最多 gain 一次」的跨 child coupling，
+              此時 parent choices 不再完全獨立，不能直接沿用乘積式作 strict-feasible tree 計數。
+            </p>
+          </div>
+        </details>
+
+        <h3>正確推論層級</h3>
+        <div class="three-grid">
+          <article class="card ok">
+            <span class="badge proof">MODEL-INTERNAL</span>
+            <h3>可以確認</h3>
+            <p>
+              <code>family_complete=true</code> 時，已找完目前硬限制與 objective 下的全部最低 vertex sets；
+              固定 N 後可精確計算合法 parent mappings 數。
+            </p>
+          </article>
+          <article class="card warn">
+            <span class="badge probe">DATA RANKING</span>
+            <h3>可以再排序</h3>
+            <p>
+              對不同 N 用 read likelihood／read-AF 排相容程度；同一 N 的 parent edges
+              若 likelihood 不讀 edge，仍是不可辨識。
+            </p>
+          </article>
+          <article class="card stop">
+            <span class="badge stop">BIOLOGICAL TRUTH</span>
+            <h3>不能直接確認</h3>
+            <p>
+              selected state 是否是真實 cell clone、parent edge 是否是真祖先、CNA／LOH 是否造成 copy-state 混淆，
+              都需要模型外的正交證據。
+            </p>
+          </article>
+        </div>
+
+        <div class="copy-block">
+          建議表述：我們以 exact-preserving reductions、small-q objective certification 與
+          obligation-driven complete-family enumeration，加速同一 minimum-extra-state 問題。
+          完整性 certificate 支持「模型內所有最低候選均已列出」；它不把 regional
+          molecule-state geometry 升格為已證實的細胞 clone 或唯一演化祖先關係。
+        </div>
+      </section>
+
+      <section id="vertex-edge-proof">
+        <div class="section-kicker">06 · Proposition</div>
+        <h2>最少總節點 ⇔ 最少邊：可以證明，但條件要寫完整</h2>
+
+        <div class="proof-box">
+          <span class="badge proof">PROOF</span>
+          <h3>命題</h3>
+          <p>對任一固定根的有限 out-arborescence <code>T=(V(T),E(T))</code>：</p>
+          <div class="formula">|E(T)| = |V(T)| − 1</div>
+          <p>
+            根的入度是 0；每個非根節點恰有一個 parent，因此所有入度相加就是
+            <code>|V(T)|−1</code>，也等於邊數。故兩棵可行 arborescences 的節點數排序與邊數排序完全一致。
+          </p>
+        </div>
+
+        <h3>套到現行 objective</h3>
+        <p>在同一分析單位中 mandatory set <code>M</code> 固定，且 <code>M⊆N</code>：</p>
+        <div class="formula">
+          |N| = |M| + |N\M| = |M| + h(N)
+          &nbsp; ⇒ &nbsp;
+          argmin h(N) = argmin |N| = argmin |E(T)|
+          <span class="where">最後一個等號限 unit edge cost，且 T 是涵蓋 N 的單一 rooted arborescence。</span>
+        </div>
+        <div class="formula">
+          h(N)=|N\M|=|E(T)|+1−|M|
+          <span class="where">這表示三個目標的 argmin／候選排序相同，不表示三個數值彼此相等；只有 |M|=1 時 h(N)=|E(T)|。</span>
+        </div>
+
+        <div class="callout ok">
+          <p><strong>因此答案是「是」：</strong>在目前固定根、固定 mandatory set、單一 arborescence、unit edge cost 下，最少額外狀態的解一定也有最少總節點與最少邊。</p>
+        </div>
+
+        <details open>
+          <summary>五個不應漏寫的例外</summary>
+          <div class="details-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>情況</th><th>為何等價可能失效</th><th>安全說法</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <th>加權 edges</th>
+                    <td>3 條昂貴邊可能比 4 條便宜邊成本高。</td>
+                    <td>只在所有 edge cost 相同時，把最少邊等同最小成本。</td>
+                  </tr>
+                  <tr>
+                    <th>一般 DAG subgraph</th>
+                    <td>若保留 redundant incoming edges，可能有 |E|≥|V|。</td>
+                    <td>先抽出一棵 arborescence，或明確限制每個非根一個 parent。</td>
+                  </tr>
+                  <tr>
+                    <th>Forest／多根</th>
+                    <td>有 c 個 components 時 |E|=|V|−c。</td>
+                    <td>要求固定單根、所有節點 root-reachable。</td>
+                  </tr>
+                  <tr>
+                    <th>只數 Steiner nodes</th>
+                    <td>group representatives 可共用、可為 internal node，分類數不固定。</td>
+                    <td>直接比較 total selected states 或 h(N)，不要依人工角色標籤計數。</td>
+                  </tr>
+                  <tr>
+                    <th>投影後 multi-mutation edge</th>
+                    <td>摺疊 unary chain 後一條顯示邊可代表多次 mutation acquisition。</td>
+                    <td>保留原始 objective；投影只作顯示，不宣稱跨候選等價壓縮。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section id="evolution-model">
+        <div class="section-kicker">07 · Evolutionary assumptions</div>
+        <h2>Directed hypercube 只保證不可逆，不自動等於 infinite-sites</h2>
+
+        <figure class="figure">
+          <svg viewBox="0 0 1120 520" role="img" aria-labelledby="m0-title m0-desc">
+            <title id="m0-title">M0 recurrence-allowed 與 M1 strict infinite-sites 的差異</title>
+            <desc id="m0-desc">同時選取 00、10、01、11 時，無論 11 接到哪個 parent，都有一個 mutation 在兩個 branch 重複取得。</desc>
+            <text x="45" y="50" class="svg-title">M0：每條 edge 都 0→1，但可 parallel gain</text>
+            <path d="M145 390 L300 265 L475 120" class="svg-edge accent"/>
+            <path d="M145 390 L300 390" class="svg-edge accent"/>
+            <path d="M300 390 L475 120" class="svg-edge dashed"/>
+            <circle cx="145" cy="390" r="38" class="svg-node"/><text x="145" y="397" class="svg-text">00</text>
+            <circle cx="300" cy="265" r="38" class="svg-node latent"/><text x="300" y="272" class="svg-text">10</text>
+            <circle cx="300" cy="390" r="38" class="svg-node latent"/><text x="300" y="397" class="svg-text">01</text>
+            <circle cx="475" cy="120" r="38" class="svg-node hit"/><text x="475" y="127" class="svg-text">11</text>
+            <text x="65" y="470" class="svg-small">實線是一個 parent tree；虛線是另一個合法選項。</text>
+
+            <text x="650" y="50" class="svg-title">M1：gain-once gate</text>
+            <rect x="650" y="85" width="410" height="320" rx="10" fill="#f3dfda" stroke="#a93c31" stroke-width="3"/>
+            <text x="855" y="145" class="svg-text">Observed states</text>
+            <text x="855" y="205" class="svg-text">10 + 01 + 11</text>
+            <text x="855" y="270" class="svg-text" fill="#a93c31">three-gamete conflict</text>
+            <line x1="725" y1="320" x2="985" y2="320" stroke="#a93c31" stroke-width="12"/>
+            <line x1="725" y1="320" x2="985" y2="320" stroke="#fffdf7" stroke-width="4"/>
+            <text x="855" y="375" class="svg-small" text-anchor="middle">無 strict perfect tree 可同時容納</text>
+          </svg>
+          <figcaption>
+            若將 11 接在 10 下，mutation 2 在 <code>00→01</code> 與 <code>10→11</code> 各 gain 一次；
+            接在 01 下則 mutation 1 重複。兩者都符合 monotone hypercube，卻不符合全樹 gain-once。
+          </figcaption>
+        </figure>
+
+        <div class="three-grid">
+          <article class="card ok">
+            <span class="badge proof">M0 · CURRENT BASELINE</span>
+            <h3>Recurrence allowed</h3>
+            <p>每條祖先路徑只做 0→1，不允許 back mutation；不同 branches 可重複取得同一 mutation。</p>
+          </article>
+          <article class="card warn">
+            <span class="badge probe">M1 · PROTOTYPE GATE</span>
+            <h3>Strict infinite-sites</h3>
+            <p>post-hoc three-gamete compatibility evaluator 已有，但尚未在 strict constraints 下重新求所有最優解。</p>
+          </article>
+          <article class="card stop">
+            <span class="badge stop">M2 · NOT IMPLEMENTED</span>
+            <h3>Loss-supported / Dollo</h3>
+            <p>尚無明確 copy/loss state model；在 CNA/LOH 區域固定回傳 unresolved，不應硬判。</p>
+          </article>
+        </div>
+
+        <div class="callout stop">
+          <p>
+            <strong>M1 必須 fail closed：</strong>只有 allele-specific CN 已知且為 2/1/1、雙 homolog retained，
+            並排除 clonal/subclonal LOH、deletion、amplification、WGD boundary、mutation loss 與 phasing/mapping QC 問題，才可把 molecule-state topology 標為 strict-perfect-compatible。
+          </p>
+        </div>
+
+        <details>
+          <summary>partial unknown 是否讓 perfect phylogeny 一定變成 NP-hard？</summary>
+          <div class="details-body">
+            <p>
+              不一定。Incomplete Directed Perfect Phylogeny 的「可行性＋建一解」已有多項式方法；
+              但<strong>列出或計數全部相容樹</strong>仍可能爆炸，計數版可達 #P-complete。
+              所以 strict gate 可以很快，卻不能推出「全部 ambiguity family 可多項式列完」。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="optimization">
+        <div class="section-kicker">08 · Exact-preserving optimization</div>
+        <h2>可以推論的優化：縮小表示、保留同一解集、完整才排名</h2>
+
+        <div class="callout info">
+          <p>
+            <strong>核心判準：</strong>「更快」不是證明；每一個縮減都要有解集映射或 objective-preservation 證明，
+            並以 oracle digest 對照。以下只有標為 <span class="badge proof">PROOF</span> 的步驟可稱 exact-preserving。
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>優化</th><th>為何可保留 exactness</th><th>成本／效果</th><th>現況</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Active-bit compression</th>
+                <td>未在通過 structural gate 的 patterns 出現 ALT 的維度，在 observed-ALT universe 固定為 0；低支持 observations 仍可進 likelihood。此等價只針對目前 monotone minimum-extra estimand。</td>
+                <td>raw k → effective m；P=2<sup>m</sup>、E=m2<sup>m−1</sup>。</td>
+                <td class="good"><span class="badge proof">PROOF + CODE</span></td>
+              </tr>
+              <tr>
+                <th>Subcube antichain reduction</th>
+                <td>移除 duplicate；已被 mandatory 命中的 group；singleton 強制；若 G₁⊆G₂，只保留較小 G₁ 即可同時滿足 G₂。</td>
+                <td>HCC1395_DORADO chr6 MINREAD1 diagnostic：12,561→1,173 groups（−90.66%）。</td>
+                <td class="good"><span class="badge proof">PROOF</span> <span class="badge probe">DIAGNOSTIC</span></td>
+              </tr>
+              <tr>
+                <th>Ancestor/downward closure</th>
+                <td>任何從 root 到 seed state 的 monotone path 都只會使用 seed 的 submasks；closure 外點不可能是最低解的必要祖先。</td>
+                <td>現行 submask enumeration 項為 Σ<sub>s∈Seeds</sub>2<sup>|s|</sup>；strict worst case 可達 3<sup>m</sup>，distinct 儲存仍≤2<sup>m</sup>。</td>
+                <td class="good"><span class="badge proof">PROOF + ORACLE</span></td>
+              </tr>
+              <tr>
+                <th>Prepared-base MILP</th>
+                <td>固定 universe/bounds/predecessor/group rows 只建一次；enumeration 只追加 objective equality 與 no-good rows。</td>
+                <td><code>AAAA,k=4</code>：base builds 25→1；solves 仍 25。</td>
+                <td class="good"><span class="badge probe">IMPLEMENTED</span></td>
+              </tr>
+              <tr>
+                <th>Complete-only cache</th>
+                <td>只重用完整且通過 mandatory/objective/connectivity/group/digest 驗證的 family；incomplete 一律拒存。</td>
+                <td>相同 exact structural key 可 O(1) lookup；memory 隨完整 family 大小成長。</td>
+                <td class="good"><span class="badge probe">IMPLEMENTED</span></td>
+              </tr>
+              <tr>
+                <th>Small-q subset DP</th>
+                <td>node-weighted directed-Steiner recurrence只證 h*；不假裝已列完 family。</td>
+                <td>Time O(3<sup>q</sup>P + 2<sup>q</sup>E)；space O(2<sup>q</sup>P)。</td>
+                <td class="caution"><span class="badge probe">RESEARCH BACKEND</span></td>
+              </tr>
+              <tr>
+                <th>Obligation bitset B&amp;B</th>
+                <td>選最小未滿足 group／parent domain 分枝；singleton propagation、safe lower bound 與 memo 只剪除不可能優於 h* 的 state。</td>
+                <td>最壞仍可達 O(3<sup>P</sup>) search states，且輸出下界 Ω(F)。</td>
+                <td class="caution"><span class="badge probe">BOUNDED VALIDATED</span></td>
+              </tr>
+              <tr>
+                <th>Parent factorization</th>
+                <td>rank 每次增加，任何 child 的 parent choice 不會形成 cycle；各 child 選擇可獨立相乘。</td>
+                <td>T(N)=∏<sub>v≠0</sub>|Pred<sub>N</sub>(v)|；計數／additive score O(E<sub>N</sub>)。</td>
+                <td class="good"><span class="badge proof">PROOF + ORACLE</span></td>
+              </tr>
+              <tr>
+                <th>Same-N likelihood dedup</th>
+                <td>現行 emission likelihood 只依 selected states N，不讀 parent edge。</td>
+                <td>從 raw trees T 次 fit 降為 distinct sets F 次 fit。</td>
+                <td class="good"><span class="badge proof">CURRENT CONTRACT</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>為何仍會爆炸？</h3>
+        <div class="three-grid">
+          <article class="card stop">
+            <span class="label">State universe</span>
+            <h3>2<sup>m</sup></h3>
+            <p>即使不列完整 Q<sub>k</sub>，effective m 上升仍會指數增加 vertices。</p>
+          </article>
+          <article class="card stop">
+            <span class="label">Ambiguity family</span>
+            <h3>F 個同分最優 sets</h3>
+            <p>若使用者要求全部 exact candidates，任何演算法至少要花 Ω(F) 輸出。</p>
+          </article>
+          <article class="card stop">
+            <span class="label">Parent mappings</span>
+            <h3>∏ |Pred<sub>N</sub>(v)|</h3>
+            <p>不能逐棵物化；只能解析計數、分解 additive score 或保留等價類。</p>
+          </article>
+        </div>
+
+        <details open>
+          <summary>Subset-DP 的 q 與 Mahapatra 文獻的 q 不是同一個量</summary>
+          <div class="details-body">
+            <p>
+              本專案 DP 的 <code>q</code> 是 reduced terminal domains／obligations 數。
+              Mahapatra 等人的 penalty <code>q</code> 是經 invariant-character preprocessing 後的
+              <code>cost(T)−m</code>。兩者不可互換，因此文獻的
+              <span class="mono">Õ(36<sup>q</sup>)</span> 不能直接替本專案 group 版本背書。
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>為什麼不能靠設定 max_sets 宣稱「最可能」？</summary>
+          <div class="details-body">
+            <p>
+              <code>max_sets</code> 是資源上限，不是科學限制。到達上限只能標記
+              <code>CANDIDATE_SET_INCOMPLETE_MAX_SETS</code>；即使 h* 已由 DP 證明，也不知道未列出的同分 sets
+              是否會得到更高 likelihood。正確策略是 checkpoint/resume、等價類壓縮，或明確 abstain，不是對 prefix 排名。
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section id="evidence">
+        <div class="section-kicker">09 · Evidence</div>
+        <h2>目前可以支持「bounded exact-equivalence」，尚不能 production promotion</h2>
+
+        <div class="metric-grid">
+          <article class="metric">
+            <span class="label">Structural oracle</span>
+            <strong>27,355</strong>
+            <p>exhaustive k≤3 + seeded k=4 cases</p>
+          </article>
+          <article class="metric">
+            <span class="label">Mismatch</span>
+            <strong>0</strong>
+            <p>objective / optimal family 對照</p>
+          </article>
+          <article class="metric">
+            <span class="label">Downward closure</span>
+            <strong>11,432</strong>
+            <p>optimal sets across 6,243 oracle cases</p>
+          </article>
+          <article class="metric">
+            <span class="label">Regression</span>
+            <strong>341/341</strong>
+            <p>prepared-base/cache remediation tests PASS</p>
+          </article>
+        </div>
+
+        <h3>最新 frozen v1：五次重跑中位數</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Case</th><th>Current solver</th><th>Optimized</th><th>Solver speedup</th><th>RSS ratio</th><th>完整 optimal family</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>AAAA, k=4</th>
+                <td>0.29148 s</td><td>0.01059 s</td><td class="num">27.54×</td><td>0.2846</td><td>24 sets</td>
+              </tr>
+              <tr>
+                <th>H2009 M31</th>
+                <td>22.68691 s</td><td>0.27678 s</td><td class="num">81.97×</td><td>0.2514</td><td>242 sets</td>
+              </tr>
+              <tr>
+                <th>COLO829 M31</th>
+                <td>12.28039 s</td><td>0.15701 s</td><td class="num">78.21×</td><td>0.2544</td><td>216 sets</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <p><strong>效能 claim ceiling：</strong>只有 3 個 deterministic cases；兩個 real fixtures 都是 m=5、h*=5 的 stress examples。Current 與 optimized 依序測量、非 interleaved，deadline 語意亦不同。結論僅為 <code>PASS_FOR_BOUNDED_DUAL_PILOT</code>。</p>
+        </div>
+
+        <div class="two-grid">
+          <article class="card ok">
+            <span class="badge proof">PARENT ORACLE</span>
+            <h3>91 個 rooted sets</h3>
+            <p>k≤3 的 explicit parent enumeration 與解析 factorization 最佳結果一致。</p>
+          </article>
+          <article class="card stop">
+            <span class="badge stop">PROMOTION GATE</span>
+            <h3>production=false</h3>
+            <p>尚未通過 33-tail、H2009/H1437 stress panel 與 full canonical replacement gate。</p>
+          </article>
+        </div>
+
+        <details>
+          <summary>Fail-closed 狀態如何讀</summary>
+          <div class="details-body">
+            <div class="copy-block">
+OPTIMAL_VALUE_CERTIFIED
+  → 只證 h*；尚未證 family 已列完
+
+CANDIDATE_SET_COMPLETE
+  → h* 與全部 optimal vertex sets 均完整；可進 ranking
+
+CANDIDATE_SET_INCOMPLETE_DEADLINE / _MAX_SETS
+  → 可能保留 h*，但 family_complete=false；禁止 winner
+
+FEASIBLE_UNPROVEN_* / NO_FEASIBLE_CERTIFICATE_* / OBJECTIVE_INCOMPLETE_*
+  → 不可宣稱 objective 或最可能 topology
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section id="inference">
+        <div class="section-kicker">10 · Inference boundary</div>
+        <h2>Exact solver 能證明模型內最小；不能把 molecule geometry 變成 cell lineage truth</h2>
+
+        <div class="two-grid">
+          <article class="card ok">
+            <span class="badge proof">family_complete=true 時可說</span>
+            <ul class="checklist">
+              <li>在目前 M0、rooted、gain-one-edge model 下，已找到全部 minimum-extra vertex sets。</li>
+              <li>每個硬式 partial group 至少被一個相容 selected state 命中。</li>
+              <li>h* 是此數學模型與輸入門檻下的最小額外狀態數。</li>
+              <li>固定 N 後，可精確計算合法 parent mapping 數。</li>
+              <li>read likelihood 可排序不同 N 對觀察 patterns 的相容程度。</li>
+            </ul>
+          </article>
+          <article class="card stop">
+            <span class="badge stop">即使 complete 也不能說</span>
+            <ul class="checklist stop">
+              <li>每個 selected state 必然是一群真實 cell clone。</li>
+              <li>Sister／Direct geometry 已證明多 clone／subclone。</li>
+              <li>同一 N 內某條 parent edge 是唯一真祖先。</li>
+              <li>同 HP 的多個 states 必然來自不同細胞。</li>
+              <li>CNA、LOH、mutation loss、purity 已被 M0 自動處理。</li>
+            </ul>
+          </article>
+        </div>
+
+        <h3>read likelihood 與 molecule fraction 的正確位置</h3>
+        <p>選定 N 後，可對 clone-state mixture weights <code>π</code> 做 pattern likelihood：</p>
+        <div class="formula" role="math" aria-label="Read pattern mixture likelihood">
+          ℓ(N) = max<sub>π∈Δ</sub> Σ<sub>i</sub> c<sub>i</sub>
+          log [ Σ<sub>v∈N</sub> π<sub>v</sub> P(p<sub>i</sub> | v) ]
+          <span class="where">c<sub>i</sub> 是 pattern support count；unknown bits 在 emission/compatibility 中邊際化。相同 group constraint 只留一次，count 不會在結構層重複加權。</span>
+        </div>
+        <p>由 fitted mixture 可得到第 j 個 mutation 的 molecule fraction：</p>
+        <div class="formula" role="math" aria-label="Mutation molecule fraction">
+          f̂<sub>j</sub> = Σ<sub>v∈N</sub> π̂<sub>v</sub> v<sub>j</sub>
+          <span class="where">這是 molecule-state fraction，不等於未校正的 cell fraction；CNA、allelic multiplicity、LOH 與 purity 會破壞直接換算。</span>
+        </div>
+
+        <div class="callout stop">
+          <p>
+            <strong>目前 edge 不由此 likelihood 決定：</strong>若兩棵樹有相同 N，只改 parent mapping，
+            <code>ℓ(N)</code> 完全相同。未來若有獨立且校準的 methylation/longitudinal edge evidence，
+            可在固定 N 後加入 additive local edge score；但那是第三層 tie-break，不是現行 canonical read-AF 結論。
+          </p>
+        </div>
+
+        <h3>最重要的生物反例</h3>
+        <div class="three-grid">
+          <article class="card stop">
+            <span class="label">Allele-specific amplification</span>
+            <h3>一個 cell，多個 HP-derived copies</h3>
+            <p>同一細胞內可同時有 HP1-derived copy <code>10</code> 與 <code>11</code>；不同 molecule states 不必然是兩群細胞。</p>
+          </article>
+          <article class="card stop">
+            <span class="label">LOH / deletion</span>
+            <h3>Mutation 可以「看似消失」</h3>
+            <p>copy-neutral LOH、deletion 或 subclonal loss 會讓 1→0 的觀察出現，違反 M0 的單調假設。</p>
+          </article>
+          <article class="card stop">
+            <span class="label">Sampling / error</span>
+            <h3>未觀察 ≠ 不存在</h3>
+            <p>coverage、mapping、basecall、phasing 與 read dependence 都會改變 group evidence；absence 需要統計 negative evidence。</p>
+          </article>
+        </div>
+
+        <div class="callout info">
+          <p>
+            <strong>root 的安全解讀：</strong><code>0<sup>m</sup></code> 是所選 regional loci 的 model baseline，
+            不一定是一條真正觀察到的 normal cell，也不必然等於整個腫瘤的真實 MRCA。
+          </p>
+        </div>
+      </section>
+
+      <section id="wording">
+        <div class="section-kicker">11 · Paper-ready wording</div>
+        <h2>可直接使用的安全敘述</h2>
+
+        <h3>中文方法定位</h3>
+        <div class="copy-block">
+本研究將每個 partial read pattern 表示為有向布林超立方體中的一個相容子立方體群組，
+並在固定根 0^m 與通過 support threshold 的 mandatory full states 下，
+聯合選擇每個群組的至少一個代表狀態及使所有 selected states 根連通所需的額外狀態。
+現行 exact solver 最小化額外 selected mutation states 的數量，而非直接最佳化 parent edges。
+對每個最低 vertex set，合法 parent assignments 由 selected Hamming-1 predecessors 解析計數；
+read-pattern likelihood 僅排序不同 vertex sets，因此相同 vertex set 內的 parent edges 保持不可辨識。
+        </div>
+
+        <h3>英文問題定義</h3>
+        <div class="copy-block">
+We define a structured directed Group-Steiner variant, termed the Subcube Group Steiner
+Arborescence on a Directed Boolean Hypercube (SGSA-DH). Each partial read induces a
+possibly overlapping terminal subcube, and a feasible solution must select at least one
+compatible state from every subcube while remaining reachable from the fixed root 0^m.
+Our current exact implementation optimizes a node-weighted minimum-extra-state formulation;
+it first enumerates the complete family of optimal rooted-connected vertex sets and then
+factorizes their legal parent assignments. Read-pattern likelihood ranks distinct vertex sets,
+not parent-edge variants within the same set.
+        </div>
+
+        <h3>一行結論</h3>
+        <div class="answer">
+          <div>
+            <p class="big">你們不是在固定 terminals 上直接找一棵唯一 Steiner tree；而是在 partial-read subcubes 中選代表狀態，找出所有最低 root-connected state families，再保留 parent-edge ambiguity。</p>
+          </div>
+          <aside>
+            <p>這句同時符合目前 source、exact receipts 與生物 claim ceiling。</p>
+          </aside>
+        </div>
+
+        <details>
+          <summary>審稿時應主動避免的詞</summary>
+          <div class="details-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>避免直接寫</th><th>改寫為</th></tr></thead>
+                <tbody>
+                  <tr><th>true clone</th><td>regional molecule/haplotype mutation-state candidate</td></tr>
+                  <tr><th>confirmed ancestor</th><td>model-compatible ancestral-state hypothesis</td></tr>
+                  <tr><th>VAF-corrected true topology</th><td>read-likelihood-ranked candidate vertex set</td></tr>
+                  <tr><th>perfect phylogeny solver</th><td>M0 recurrence-allowed monotone solver；M1 compatibility gate 另列</td></tr>
+                  <tr><th>Steiner algorithm is polynomial</th><td>specific fixed-terminal or strict-feasibility special case is polynomial；full ambiguity enumeration remains exponential</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section id="sources">
+        <div class="section-kicker">12 · Sources & provenance</div>
+        <h2>程式、receipts 與原始文獻分開綁定</h2>
+
+        <h3>本專案 source / evidence</h3>
+        <ul class="source-list">
+          <li>
+            <a href="../../20260716_read_linked_hypercube_exact_likelihood_validation/scripts/hypercube_exact.py">Current exact structural solver</a>
+            <small><code>hypercube_exact.py:208–282, 341–435, 569–654</code>：subcube reduction、minimum-extra objective、complete-family enumeration、parent count。</small>
+          </li>
+          <li>
+            <a href="../scripts/optimized_hypercube_backend.py">Optimized research backend</a>
+            <small><code>optimized_hypercube_backend.py:133–288, 333–709, 744–1008, 1011–1114, 1223–1367</code>。</small>
+          </li>
+          <li>
+            <a href="../results/optimized_backend_benchmark_v1/benchmark_receipt.json">Five-repeat benchmark receipt</a>
+            <small>三案例 exact family、median time、RSS、promotion gate。</small>
+          </li>
+          <li>
+            <a href="../results/optimized_backend_benchmark_v1/oracle_receipt.json">Structural oracle and fail-closed receipt</a>
+            <small>27,355 cases、0 mismatch、incomplete_ranked_count=0。</small>
+          </li>
+          <li>
+            <a href="../results/parent_mapping_subcube_plan_oracle_receipt.json">Downward-closure / parent-factorization oracle</a>
+            <small>6,243 closure cases、11,432 optimal sets；91 rooted parent sets。</small>
+          </li>
+          <li>
+            <a href="../../20260718_hypercube_exact_preserving_solver_cache_remediation/results/verification_summary.json">Prepared-base / complete-only cache verification</a>
+            <small>341/341 tests、AAAA builds 25→1、incomplete never cached。</small>
+          </li>
+        </ul>
+
+        <h3>Primary literature</h3>
+        <ul class="source-list">
+          <li>
+            <a href="https://doi.org/10.1007/s00236-024-00474-8">Mahapatra, Narayanan &amp; Narayanaswamy — Parameterized algorithms for the Steiner arborescence problem on a hypercube</a>
+            <small>Acta Informatica 62 (2025). 支持 singleton-terminal MSA-DH、NP-hardness 與 Õ(3<sup>|R|</sup>) 等 fixed-parameter results；不直接涵蓋 overlapping subcube groups。</small>
+          </li>
+          <li>
+            <a href="https://doi.org/10.1016/j.dam.2005.07.010">Chekuri, Even &amp; Kortsarz — A greedy approximation algorithm for the group Steiner problem</a>
+            <small>Discrete Applied Mathematics 154 (2006). 支持 Group Steiner 與 directed group variant 的定義及其與 Directed Steiner Tree 的關係。</small>
+          </li>
+          <li>
+            <a href="https://doi.org/10.1016/0025-5564(86)90161-6">Day, Johnson &amp; Sankoff — The computational complexity of inferring rooted phylogenies by parsimony</a>
+            <small>Mathematical Biosciences 81 (1986). 支持 Camin–Sokal / Dollo decision variants 的 NP-completeness 背景。</small>
+          </li>
+          <li>
+            <a href="https://doi.org/10.1002/net.3230210104">Gusfield — Efficient algorithms for inferring evolutionary trees</a>
+            <small>Networks 21 (1991). 支持 binary perfect-phylogeny compatibility 的快速特殊情況。</small>
+          </li>
+          <li>
+            <a href="https://doi.org/10.1137/S0097539702406510">Pe’er et al. — Incomplete Directed Perfect Phylogeny</a>
+            <small>SIAM Journal on Computing 33 (2004). 支持 missing states 下 strict perfect-phylogeny feasibility 的多項式特殊情況。</small>
+          </li>
+          <li>
+            <a href="https://arxiv.org/abs/1203.3284">Kiyomi, Okamoto &amp; Saitoh — Efficient Enumeration of Directed Binary Perfect Phylogenies from Incomplete Data</a>
+            <small>SEA 2012. 支持 complete ambiguity enumeration／counting 仍可能困難；counting 為 #P-complete。</small>
+          </li>
+        </ul>
+
+        <h3>Evidence identity</h3>
+        <p class="hash">
+          benchmark_receipt SHA-256:
+          09b80734619c1dc02e9c9b08b8b167979845ba09ab49b2e419e4eb5b8d0bc7cb<br>
+          oracle_receipt SHA-256:
+          52fb731797e6c0ab5fe327d7316f3c7352050110b35beb5713fb6120a8688a25
+        </p>
+
+        <div class="callout stop">
+          <p><strong>Scope：</strong>本頁是方法學與 bounded evidence 整理，不是 chr1–22 × 全樣本重跑結果；不寫入正式 biological evidence ledger，也不取代尚未完成的 full M2 receipts。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <h2>最後帶走三句話</h2>
+    <p>
+      ① 名稱可以用，但要說是你們自行定義的 structured DGST variant。
+      ② 現行 solver 最小化額外 states；在 rooted unit-cost arborescence 下，最少點與最少邊可嚴格等價。
+      ③ 優化能證明的是 exact problem preservation 與 bounded speedup，不是 clone、subclone 或唯一 parent edge 的生物真值。
+    </p>
+    <p>
+      Companion teaching page：
+      <a href="20260718_布爾超立方體k與組合數量公式教學_01.standalone.html">布爾超立方體 k 與組合數量公式教學</a>
+    </p>
+  </footer>
+</body>
+</html>

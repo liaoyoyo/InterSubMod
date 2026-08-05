@@ -1,0 +1,2133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intersubmod.local/schemas/exact-ps-observation-report-data-1.0.0.schema.json",
+  "title": "InterSubMod Exact-PS Observation Report Data",
+  "description": "Strict data contract for the all-7-dataset exact-PS x HP derived observation report. The schema validates structure and fail-closed scientific status; it does not make the report a new source of truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "created_at_utc",
+    "as_of_date",
+    "title",
+    "subtitle",
+    "headline",
+    "scope",
+    "report_status",
+    "claim_boundary",
+    "model_contract",
+    "cohort_funnel",
+    "per_sample",
+    "tree_decision",
+    "topology",
+    "active_k",
+    "runtime",
+    "cn_loh_readiness",
+    "methyl_auxiliary",
+    "conservation_checks",
+    "provenance",
+    "forbidden_claims"
+  ],
+  "properties": {
+    "schema_name": {
+      "const": "intersubmod.exact_ps_observation_report.data"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "$ref": "#/definitions/nonEmptyString"
+    },
+    "subtitle": {
+      "$ref": "#/definitions/nonEmptyString"
+    },
+    "headline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "final_groups",
+        "mutation_bearing",
+        "resource_abstain",
+        "ranked",
+        "unique_best_tree",
+        "tied_cross_topology",
+        "one_rooted_unlabeled_topology",
+        "methyl_robust_associations"
+      ],
+      "properties": {
+        "final_groups": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "mutation_bearing": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "resource_abstain": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "ranked": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "unique_best_tree": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "tied_cross_topology": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "one_rooted_unlabeled_topology": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "methyl_robust_associations": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_type",
+        "chromosome_scope",
+        "chromosomes",
+        "technical_dataset_count",
+        "biological_id_count",
+        "technical_datasets",
+        "technical_pair_note",
+        "primary_grain",
+        "linkage_min_distinct_molecules",
+        "maximum_original_block_k",
+        "maximum_active_k"
+      ],
+      "properties": {
+        "task_type": {
+          "const": "B_comprehensive_validation"
+        },
+        "chromosome_scope": {
+          "const": "chr1–22"
+        },
+        "chromosomes": {
+          "const": [
+            "chr1",
+            "chr2",
+            "chr3",
+            "chr4",
+            "chr5",
+            "chr6",
+            "chr7",
+            "chr8",
+            "chr9",
+            "chr10",
+            "chr11",
+            "chr12",
+            "chr13",
+            "chr14",
+            "chr15",
+            "chr16",
+            "chr17",
+            "chr18",
+            "chr19",
+            "chr20",
+            "chr21",
+            "chr22"
+          ]
+        },
+        "technical_dataset_count": {
+          "const": 7
+        },
+        "biological_id_count": {
+          "const": 6
+        },
+        "technical_datasets": {
+          "const": [
+            "HCC1395",
+            "HCC1395_DORADO",
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1937",
+            "HCC1954"
+          ]
+        },
+        "technical_pair_note": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "primary_grain": {
+          "const": [
+            "dataset",
+            "chromosome",
+            "exact_nonmissing_phase_set",
+            "primary_hp",
+            "strict_read_linked_component",
+            "bounded_local_block"
+          ]
+        },
+        "linkage_min_distinct_molecules": {
+          "const": 3
+        },
+        "maximum_original_block_k": {
+          "const": 12
+        },
+        "maximum_active_k": {
+          "const": 12
+        }
+      }
+    },
+    "report_status": {
+      "const": "validated-derived-observation"
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_sentence",
+        "permitted",
+        "forbidden"
+      ],
+      "properties": {
+        "canonical_sentence": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "permitted": {
+          "$ref": "#/definitions/nonEmptyUniqueStringArray"
+        },
+        "forbidden": {
+          "$ref": "#/definitions/nonEmptyUniqueStringArray"
+        }
+      }
+    },
+    "model_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_name",
+        "mutation_model",
+        "root",
+        "edge_cost",
+        "primary_objective",
+        "full_pattern_role",
+        "partial_pattern_role",
+        "parent_mapping",
+        "strict_perfect_phylogeny",
+        "persistent_or_dollo_loss_model",
+        "read_af_method",
+        "read_af_role",
+        "methyl_role"
+      ],
+      "properties": {
+        "model_name": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "mutation_model": {
+          "const": "recurrence_allowed_camin_sokal_like_upward_hamming_1"
+        },
+        "root": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "edge_cost": {
+          "const": "unit"
+        },
+        "primary_objective": {
+          "const": "minimum additional non-mandatory vertices"
+        },
+        "full_pattern_role": {
+          "const": "mandatory_vertex"
+        },
+        "partial_pattern_role": {
+          "const": "subcube_terminal_group"
+        },
+        "parent_mapping": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "strict_perfect_phylogeny": {
+          "const": false
+        },
+        "persistent_or_dollo_loss_model": {
+          "const": false
+        },
+        "read_af_method": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "read_af_role": {
+          "const": "deterministic model-conditional ordering heuristic"
+        },
+        "methyl_role": {
+          "const": "pattern-conditioned association-only sidecar"
+        }
+      }
+    },
+    "cohort_funnel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grain_rules",
+        "stages",
+        "records"
+      ],
+      "properties": {
+        "grain_rules": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to",
+              "relation",
+              "warning"
+            ],
+            "properties": {
+              "from": {
+                "$ref": "#/definitions/nonEmptyString"
+              },
+              "to": {
+                "$ref": "#/definitions/nonEmptyString"
+              },
+              "relation": {
+                "enum": [
+                  "grain_change",
+                  "one_to_many_partition"
+                ]
+              },
+              "warning": {
+                "$ref": "#/definitions/nonEmptyString"
+              }
+            }
+          }
+        },
+        "stages": {
+          "type": "array",
+          "minItems": 19,
+          "maxItems": 19,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/funnelStage"
+          }
+        },
+        "records": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ssnv_dataset_records",
+            "strict_components",
+            "k1_linkage_abstain",
+            "strict_read_linked_w",
+            "final_groups",
+            "no_active_alt",
+            "mutation_bearing_units",
+            "family_complete",
+            "resource_abstain",
+            "ranked_complete",
+            "zero_denominator",
+            "af_recurrence_screen_abstain",
+            "unique_best_tree",
+            "tied_same_rooted_unlabeled_topology",
+            "tied_cross_topology",
+            "one_rooted_unlabeled_topology",
+            "methyl_formal_units",
+            "methyl_evaluable_units",
+            "methyl_robust_associations"
+          ],
+          "properties": {
+            "ssnv_dataset_records": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "strict_components": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "k1_linkage_abstain": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "strict_read_linked_w": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "final_groups": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "no_active_alt": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "mutation_bearing_units": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "family_complete": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "resource_abstain": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "ranked_complete": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "zero_denominator": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "af_recurrence_screen_abstain": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "unique_best_tree": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "tied_same_rooted_unlabeled_topology": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "tied_cross_topology": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "one_rooted_unlabeled_topology": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "methyl_formal_units": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "methyl_evaluable_units": {
+              "$ref": "#/definitions/funnelRecord"
+            },
+            "methyl_robust_associations": {
+              "$ref": "#/definitions/funnelRecord"
+            }
+          }
+        }
+      }
+    },
+    "per_sample": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "$ref": "#/definitions/sampleObservation"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "HCC1395"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "HCC1395_DORADO"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "COLO829"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "H1437"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "H2009"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "HCC1937"
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "sample"
+            ],
+            "properties": {
+              "sample": {
+                "const": "HCC1954"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "tree_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "materialization_status",
+        "policy",
+        "safe_empirical_buckets",
+        "warning"
+      ],
+      "properties": {
+        "materialization_status": {
+          "const": "POLICY_ONLY_NOT_MATERIALIZED"
+        },
+        "policy": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "$ref": "#/definitions/treeDecisionPolicy"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "NO_MUTATION_TREE_INFERENCE"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "ABSTAIN_INCOMPLETE"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "AF_ABSTAIN_RECURRENCE_SCREEN"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "ABSTAIN_MODEL_MISMATCH"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "EXACT_SINGLE_CANDIDATE_TREE"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "TOPOLOGY_ONLY"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "CANDIDATE_SET_ONLY"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "TOPOLOGY_REPRESENTATIVE_ONLY"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "CONSENSUS_BACKBONE_ONLY"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "RAW_AF_UNIQUE_REPRESENTATIVE"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "AF_CONDITIONAL_SINGLE_CANDIDATE_TREE"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          ]
+        },
+        "safe_empirical_buckets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "no_mutation_tree_inference",
+            "abstain_incomplete",
+            "af_abstain_zero_denominator",
+            "af_abstain_recurrence_screen",
+            "raw_af_unique_representative",
+            "topology_representative_only",
+            "candidate_set_only_cross_topology"
+          ],
+          "properties": {
+            "no_mutation_tree_inference": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "abstain_incomplete": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "af_abstain_zero_denominator": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "af_abstain_recurrence_screen": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "raw_af_unique_representative": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "topology_representative_only": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "candidate_set_only_cross_topology": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            }
+          }
+        },
+        "warning": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "topology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ranked_units",
+        "resolution",
+        "one_exact_topology",
+        "one_exact_topology_pct_ranked",
+        "cross_exact_but_same_coarse_class",
+        "maximum_best_tree_tie_count",
+        "resolved_coarse_class",
+        "classification_definitions",
+        "interpretation_ceiling",
+        "candidate_counts"
+      ],
+      "properties": {
+        "ranked_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "resolution": {
+          "$ref": "#/definitions/topologyResolution"
+        },
+        "one_exact_topology": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "one_exact_topology_pct_ranked": {
+          "$ref": "#/definitions/percentage"
+        },
+        "cross_exact_but_same_coarse_class": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "maximum_best_tree_tie_count": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "resolved_coarse_class": {
+          "$ref": "#/definitions/coarseTopologyCounts"
+        },
+        "classification_definitions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "Single-only",
+            "Sister-only",
+            "Direct-only",
+            "Sister+direct"
+          ],
+          "properties": {
+            "Single-only": {
+              "$ref": "#/definitions/nonEmptyString"
+            },
+            "Sister-only": {
+              "$ref": "#/definitions/nonEmptyString"
+            },
+            "Direct-only": {
+              "$ref": "#/definitions/nonEmptyString"
+            },
+            "Sister+direct": {
+              "$ref": "#/definitions/nonEmptyString"
+            }
+          }
+        },
+        "interpretation_ceiling": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "candidate_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum_vertex_sets",
+            "minimum_trees",
+            "global_af_best_trees"
+          ],
+          "properties": {
+            "minimum_vertex_sets": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "minimum_trees": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "global_af_best_trees": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            }
+          }
+        }
+      }
+    },
+    "active_k": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "all_groups",
+        "ranked",
+        "guard"
+      ],
+      "properties": {
+        "all_groups": {
+          "$ref": "#/definitions/activeKAllGroups"
+        },
+        "ranked": {
+          "$ref": "#/definitions/activeKRanked"
+        },
+        "guard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maximum_active_k",
+            "maximum_family_size",
+            "maximum_search_nodes",
+            "resource_abstain_is_nonrandom",
+            "note"
+          ],
+          "properties": {
+            "maximum_active_k": {
+              "const": 12
+            },
+            "maximum_family_size": {
+              "const": 100000
+            },
+            "maximum_search_nodes": {
+              "const": 1000
+            },
+            "resource_abstain_is_nonrandom": {
+              "const": true
+            },
+            "note": {
+              "$ref": "#/definitions/nonEmptyString"
+            }
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cohort_runner_wall_seconds",
+        "sample_stage_sum_seconds",
+        "solver_internal_seconds",
+        "clock_warning",
+        "parameters"
+      ],
+      "properties": {
+        "cohort_runner_wall_seconds": {
+          "$ref": "#/definitions/nonNegativeNumber"
+        },
+        "sample_stage_sum_seconds": {
+          "$ref": "#/definitions/nonNegativeNumber"
+        },
+        "solver_internal_seconds": {
+          "$ref": "#/definitions/nonNegativeNumber"
+        },
+        "clock_warning": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "threshold",
+            "chromosome_workers",
+            "max_active_bits",
+            "max_family_size",
+            "max_search_nodes",
+            "resume"
+          ],
+          "properties": {
+            "threshold": {
+              "const": 3
+            },
+            "chromosome_workers": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_active_bits": {
+              "const": 12
+            },
+            "max_family_size": {
+              "const": 100000
+            },
+            "max_search_nodes": {
+              "const": 1000
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "cn_loh_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "availability",
+        "required_before_biological_single_tree",
+        "consequence"
+      ],
+      "properties": {
+        "status": {
+          "const": "NOT_INTEGRATED"
+        },
+        "availability": {
+          "type": "null"
+        },
+        "required_before_biological_single_tree": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/nonEmptyString"
+          }
+        },
+        "consequence": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "methyl_auxiliary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "formal_units",
+        "evaluable_units",
+        "not_evaluable_units",
+        "robust_associations",
+        "evaluable_no_robust",
+        "confounded",
+        "assessment_counts",
+        "claim_ceiling",
+        "topology_rescoring",
+        "node_clustering_materialized"
+      ],
+      "properties": {
+        "status": {
+          "const": "association-only"
+        },
+        "formal_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "evaluable_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "not_evaluable_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "robust_associations": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "evaluable_no_robust": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "confounded": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "assessment_counts": {
+          "$ref": "#/definitions/methylAssessmentCounts"
+        },
+        "claim_ceiling": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "topology_rescoring": {
+          "const": false
+        },
+        "node_clustering_materialized": {
+          "const": false
+        }
+      }
+    },
+    "conservation_checks": {
+      "type": "array",
+      "minItems": 23,
+      "maxItems": 23,
+      "items": {
+        "$ref": "#/definitions/conservationCheck"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCandidateLociSumSamples"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkStrictComponentsPartition"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkStrictK1SumSamples"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkStrictWSumSamples"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkStrictComponentsK1PlusW"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkFinalGroupsSumSamples"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkFinalGroupsNoAltPlusMutation"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkMutationFamilyCompletePlusAbstain"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCompleteFamilyAfOutcomes"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkRankedResolution"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkOneTopologyResolution"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCoarseResolution"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCrossExactSameCoarseGap"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkActiveKAllGroups"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkActiveKRanked"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCohortBestTreeTotal"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkMinimumTreeCount"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkMethylAssessmentPartition"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkMethylFormalPartition"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkMethylEvaluablePartition"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkAuthorityHashes"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkStrictNestedBundleHashes"
+          }
+        },
+        {
+          "contains": {
+            "$ref": "#/definitions/checkCohortTechnicalStatus"
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_manifest",
+        "denominator_registry",
+        "authority_artifact_count",
+        "verified_authority_artifacts",
+        "strict_nested_data",
+        "strict_nested_bundle_count",
+        "strict_nested_bundle_identities"
+      ],
+      "properties": {
+        "authority_manifest": {
+          "$ref": "#/definitions/fileIdentity"
+        },
+        "denominator_registry": {
+          "$ref": "#/definitions/fileIdentity"
+        },
+        "authority_artifact_count": {
+          "const": 13
+        },
+        "verified_authority_artifacts": {
+          "type": "array",
+          "minItems": 13,
+          "maxItems": 13,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/authorityArtifactIdentity"
+          }
+        },
+        "strict_nested_data": {
+          "$ref": "#/definitions/fileIdentity"
+        },
+        "strict_nested_bundle_count": {
+          "const": 9
+        },
+        "strict_nested_bundle_identities": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/bundleIdentity"
+          }
+        }
+      }
+    },
+    "forbidden_claims": {
+      "$ref": "#/definitions/nonEmptyUniqueStringArray"
+    }
+  },
+  "definitions": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonEmptyUniqueStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/nonEmptyString"
+      }
+    },
+    "nonNegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nonNegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "percentage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "fileIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "size_bytes": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "authorityArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "role",
+        "status",
+        "path",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "artifact_id": {
+          "enum": [
+            "strict_linkage_ready",
+            "all7_cohort_receipt",
+            "all7_summary",
+            "all7_cpp_reader_report",
+            "topology_receipt",
+            "topology_summary",
+            "topology_reader_report",
+            "candidate_factorization_receipt",
+            "read_af_decision_report",
+            "methyl_manifest",
+            "methyl_sidecar_receipt",
+            "methyl_report_data",
+            "methyl_reader_report"
+          ]
+        },
+        "role": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "status": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "path": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "size_bytes": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "bundleIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_name",
+        "path",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "bundle_name": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "path": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "size_bytes": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "funnelRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "denominator",
+        "percent",
+        "interpretation"
+      ],
+      "properties": {
+        "count": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "percent": {
+          "$ref": "#/definitions/percentage"
+        },
+        "interpretation": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "funnelStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric",
+        "count",
+        "unit",
+        "parent_metric",
+        "relationship_type",
+        "denominator",
+        "authority_artifact_id"
+      ],
+      "properties": {
+        "metric": {
+          "enum": [
+            "ssnv_dataset_records",
+            "strict_components",
+            "k1_linkage_abstain",
+            "strict_read_linked_w",
+            "final_groups",
+            "no_active_alt",
+            "mutation_bearing_units",
+            "family_complete",
+            "resource_abstain",
+            "ranked_complete",
+            "zero_denominator",
+            "af_recurrence_screen_abstain",
+            "unique_best_tree",
+            "tied_same_rooted_unlabeled_topology",
+            "tied_cross_topology",
+            "one_rooted_unlabeled_topology",
+            "methyl_formal_units",
+            "methyl_evaluable_units",
+            "methyl_robust_associations"
+          ]
+        },
+        "count": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "unit": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "parent_metric": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/nonEmptyString"
+            }
+          ]
+        },
+        "relationship_type": {
+          "enum": [
+            "SOURCE_GRAIN",
+            "GRAIN_CHANGE",
+            "SAME_GRAIN_PARTITION",
+            "ONE_TO_MANY_FAN_OUT",
+            "DERIVED_UNION",
+            "INDEPENDENT_SIDECAR_GRAIN",
+            "SAME_GRAIN_SUBSET"
+          ]
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authority_artifact_id": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "activeKAllGroups": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(?:[0-9]|1[0-2])$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/nonNegativeInteger"
+      }
+    },
+    "activeKRanked": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(?:[1-9]|1[0-2])$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/nonNegativeInteger"
+      }
+    },
+    "topologyResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "UNIQUE_TREE",
+        "TIED_SAME_TOPOLOGY",
+        "TIED_CROSS_TOPOLOGY"
+      ],
+      "properties": {
+        "UNIQUE_TREE": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "TIED_SAME_TOPOLOGY": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "TIED_CROSS_TOPOLOGY": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "coarseTopologyCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Single-only",
+        "Sister-only",
+        "Direct-only",
+        "Sister+direct"
+      ],
+      "properties": {
+        "Single-only": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "Sister-only": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "Direct-only": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "Sister+direct": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "methylCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formal_units",
+        "evaluable_units",
+        "not_evaluable_units",
+        "robust_associations",
+        "evaluable_no_robust",
+        "confounded"
+      ],
+      "properties": {
+        "formal_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "evaluable_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "not_evaluable_units": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "robust_associations": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "evaluable_no_robust": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "confounded": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "methylAssessmentCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "NOT_EVALUABLE",
+        "ROBUST_ASSOCIATION",
+        "EVALUABLE_NO_ROBUST_ASSOCIATION",
+        "CONFOUNDED",
+        "TAG_DEPENDENT",
+        "LOCAL_CIS_COMPATIBLE"
+      ],
+      "properties": {
+        "NOT_EVALUABLE": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "ROBUST_ASSOCIATION": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "EVALUABLE_NO_ROBUST_ASSOCIATION": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "CONFOUNDED": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "TAG_DEPENDENT": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        },
+        "LOCAL_CIS_COMPATIBLE": {
+          "$ref": "#/definitions/nonNegativeInteger"
+        }
+      }
+    },
+    "sampleObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample",
+        "biological_id",
+        "technical_replicate",
+        "input",
+        "solver",
+        "topology",
+        "active_k",
+        "methyl",
+        "runtime_seconds"
+      ],
+      "properties": {
+        "sample": {
+          "enum": [
+            "HCC1395",
+            "HCC1395_DORADO",
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1937",
+            "HCC1954"
+          ]
+        },
+        "biological_id": {
+          "enum": [
+            "HCC1395",
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1937",
+            "HCC1954"
+          ]
+        },
+        "technical_replicate": {
+          "type": "boolean"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_loci_s",
+            "strict_components",
+            "k1_components",
+            "strict_read_linked_w",
+            "hp1_w",
+            "hp2_w"
+          ],
+          "properties": {
+            "candidate_loci_s": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "strict_components": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "k1_components": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "strict_read_linked_w": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "hp1_w": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "hp2_w": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            }
+          }
+        },
+        "solver": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "final_groups",
+            "no_active_alt",
+            "mutation_bearing",
+            "family_complete",
+            "resource_abstain",
+            "ranked",
+            "zero_denominator",
+            "recurrence_af_abstain"
+          ],
+          "properties": {
+            "final_groups": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "no_active_alt": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "mutation_bearing": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "family_complete": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "resource_abstain": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "ranked": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "zero_denominator": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "recurrence_af_abstain": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            }
+          }
+        },
+        "topology": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "best_tree_total",
+            "resolution",
+            "one_exact_topology",
+            "one_exact_topology_pct_ranked",
+            "resolved_coarse_class"
+          ],
+          "properties": {
+            "best_tree_total": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "resolution": {
+              "$ref": "#/definitions/topologyResolution"
+            },
+            "one_exact_topology": {
+              "$ref": "#/definitions/nonNegativeInteger"
+            },
+            "one_exact_topology_pct_ranked": {
+              "$ref": "#/definitions/percentage"
+            },
+            "resolved_coarse_class": {
+              "$ref": "#/definitions/coarseTopologyCounts"
+            }
+          }
+        },
+        "active_k": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all_groups",
+            "ranked"
+          ],
+          "properties": {
+            "all_groups": {
+              "$ref": "#/definitions/activeKAllGroups"
+            },
+            "ranked": {
+              "$ref": "#/definitions/activeKRanked"
+            }
+          }
+        },
+        "methyl": {
+          "$ref": "#/definitions/methylCounts"
+        },
+        "runtime_seconds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "adapter",
+            "cpp_topology",
+            "stage_sum"
+          ],
+          "properties": {
+            "adapter": {
+              "$ref": "#/definitions/nonNegativeNumber"
+            },
+            "cpp_topology": {
+              "$ref": "#/definitions/nonNegativeNumber"
+            },
+            "stage_sum": {
+              "$ref": "#/definitions/nonNegativeNumber"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "HCC1395"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "HCC1395"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "HCC1395_DORADO"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "HCC1395"
+              },
+              "technical_replicate": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "COLO829"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "COLO829"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "H1437"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "H1437"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "H2009"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "H2009"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "HCC1937"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "HCC1937"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sample": {
+                "const": "HCC1954"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "biological_id": {
+                "const": "HCC1954"
+              },
+              "technical_replicate": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "treeDecisionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "condition",
+        "allowed_output",
+        "forbidden_claim"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NO_MUTATION_TREE_INFERENCE",
+            "ABSTAIN_INCOMPLETE",
+            "AF_ABSTAIN_RECURRENCE_SCREEN",
+            "ABSTAIN_MODEL_MISMATCH",
+            "EXACT_SINGLE_CANDIDATE_TREE",
+            "TOPOLOGY_ONLY",
+            "CANDIDATE_SET_ONLY",
+            "TOPOLOGY_REPRESENTATIVE_ONLY",
+            "CONSENSUS_BACKBONE_ONLY",
+            "RAW_AF_UNIQUE_REPRESENTATIVE",
+            "AF_CONDITIONAL_SINGLE_CANDIDATE_TREE"
+          ]
+        },
+        "condition": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "allowed_output": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "forbidden_claim": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "conservationValue": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "conservationCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "expected",
+        "observed",
+        "status"
+      ],
+      "properties": {
+        "check_id": {
+          "enum": [
+            "candidate_loci_sum_samples",
+            "strict_components_partition",
+            "strict_k1_sum_samples",
+            "strict_w_sum_samples",
+            "strict_components_k1_plus_w",
+            "final_groups_sum_samples",
+            "final_groups_no_alt_plus_mutation",
+            "mutation_family_complete_plus_abstain",
+            "complete_family_af_outcomes",
+            "ranked_resolution",
+            "one_topology_resolution",
+            "coarse_resolution",
+            "cross_exact_same_coarse_gap",
+            "active_k_all_groups",
+            "active_k_ranked",
+            "cohort_best_tree_total",
+            "minimum_tree_count",
+            "methyl_assessment_partition",
+            "methyl_formal_partition",
+            "methyl_evaluable_partition",
+            "authority_hashes",
+            "strict_nested_bundle_hashes",
+            "cohort_technical_status"
+          ]
+        },
+        "expected": {
+          "$ref": "#/definitions/conservationValue"
+        },
+        "observed": {
+          "$ref": "#/definitions/conservationValue"
+        },
+        "status": {
+          "const": "PASS"
+        }
+      }
+    },
+    "checkCandidateLociSumSamples": {
+      "properties": {
+        "check_id": {
+          "const": "candidate_loci_sum_samples"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkStrictComponentsPartition": {
+      "properties": {
+        "check_id": {
+          "const": "strict_components_partition"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkStrictK1SumSamples": {
+      "properties": {
+        "check_id": {
+          "const": "strict_k1_sum_samples"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkStrictWSumSamples": {
+      "properties": {
+        "check_id": {
+          "const": "strict_w_sum_samples"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkStrictComponentsK1PlusW": {
+      "properties": {
+        "check_id": {
+          "const": "strict_components_k1_plus_w"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkFinalGroupsSumSamples": {
+      "properties": {
+        "check_id": {
+          "const": "final_groups_sum_samples"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkFinalGroupsNoAltPlusMutation": {
+      "properties": {
+        "check_id": {
+          "const": "final_groups_no_alt_plus_mutation"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkMutationFamilyCompletePlusAbstain": {
+      "properties": {
+        "check_id": {
+          "const": "mutation_family_complete_plus_abstain"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkCompleteFamilyAfOutcomes": {
+      "properties": {
+        "check_id": {
+          "const": "complete_family_af_outcomes"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkRankedResolution": {
+      "properties": {
+        "check_id": {
+          "const": "ranked_resolution"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkOneTopologyResolution": {
+      "properties": {
+        "check_id": {
+          "const": "one_topology_resolution"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkCoarseResolution": {
+      "properties": {
+        "check_id": {
+          "const": "coarse_resolution"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkCrossExactSameCoarseGap": {
+      "properties": {
+        "check_id": {
+          "const": "cross_exact_same_coarse_gap"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkActiveKAllGroups": {
+      "properties": {
+        "check_id": {
+          "const": "active_k_all_groups"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkActiveKRanked": {
+      "properties": {
+        "check_id": {
+          "const": "active_k_ranked"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkCohortBestTreeTotal": {
+      "properties": {
+        "check_id": {
+          "const": "cohort_best_tree_total"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkMinimumTreeCount": {
+      "properties": {
+        "check_id": {
+          "const": "minimum_tree_count"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkMethylAssessmentPartition": {
+      "properties": {
+        "check_id": {
+          "const": "methyl_assessment_partition"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkMethylFormalPartition": {
+      "properties": {
+        "check_id": {
+          "const": "methyl_formal_partition"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkMethylEvaluablePartition": {
+      "properties": {
+        "check_id": {
+          "const": "methyl_evaluable_partition"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkAuthorityHashes": {
+      "properties": {
+        "check_id": {
+          "const": "authority_hashes"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkStrictNestedBundleHashes": {
+      "properties": {
+        "check_id": {
+          "const": "strict_nested_bundle_hashes"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    },
+    "checkCohortTechnicalStatus": {
+      "properties": {
+        "check_id": {
+          "const": "cohort_technical_status"
+        }
+      },
+      "required": [
+        "check_id"
+      ]
+    }
+  }
+}

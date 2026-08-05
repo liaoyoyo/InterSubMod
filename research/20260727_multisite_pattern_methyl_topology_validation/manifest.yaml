@@ -1,0 +1,61 @@
+project_id: 20260727_multisite_pattern_methyl_topology_validation
+title: exact-PS x exact-raw-HP multi-sSNV pattern methylation association
+created: 2026-07-27
+completed: 2026-07-27
+status: validated
+task_type: B_comprehensive_validation
+goals:
+  - G3
+  - G4
+  - G5
+scope:
+  technical_datasets:
+    - COLO829
+    - H1437
+    - H2009
+    - HCC1395
+    - HCC1395_DORADO
+    - HCC1937
+    - HCC1954
+  biological_samples: 6
+  chromosomes: chr1-chr22
+  primary_unit: dataset_x_chrom_x_exact_phase_set_x_exact_raw_hp_x_region
+  technical_replicate_rule: HCC1395_and_HCC1395_DORADO_count_as_one_biological_sample
+claim_contract:
+  allowed: pattern_conditioned_regional_methylation_association
+  forbidden:
+    - cellular_subclone
+    - mutation_ancestry
+    - causal_direction
+    - methylation_rescored_topology
+output_root: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1
+report_root: research/20260727_multisite_pattern_methyl_topology_validation
+verdict:
+  formal_units: 1045
+  evaluable_units: 811
+  robust_associations: 3
+  full4_units: 0
+  exact_two_bit_ra_robust: 0
+  cross_sample_same_locus_replication: false
+  read_cluster_available_units: 557
+  read_cluster_non_evaluable_units: 234
+  read_cluster_evaluable_no_detail_units: 253
+  read_cluster_source_n_gt_160_units: 1
+validated_outputs:
+  markdown_report: research/20260727_multisite_pattern_methyl_topology_validation/20260727_多sSNV_pattern與甲基關聯全面驗證_01.md
+  html_report: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/20260727_multisite_pattern_methyl_association_06.html
+  report_data: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/20260727_multisite_pattern_methyl_association_data_06.json
+  sidecar_receipt: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/sidecar/pattern_methyl_sidecar.v1.receipt.json
+  browser_qa: /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/qa_v06/browser_qa.json
+verification:
+  research_python_tests: 88
+  merge_tests: 21
+  cpp_tests: 258
+  report_tests: 18
+  artifact_markers_pass: 2313
+  artifact_markers_total: 2313
+  bernoulli_markers_pass: 2313
+  bernoulli_markers_total: 2313
+  html_sha256: cdc2e55165f05c430177d02993ee52535919ba4bda99a7036c23e31961361b1d
+  report_data_sha256: 98a980c9fa28ed9859fe9656f3ab089ccfddd7eb907bd3580947ae375d56e3fc
+  sidecar_sha256: 45488a5fd2bdbbe5155a38aeaea3faa19ed02fa49a15be3fdb6139b85bf243f1

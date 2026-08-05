@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>單位點 sSNV 甲基多群：代表位點定義、圖解與停止判定</title>
+  <style>
+    :root {
+      --c-accent: #D97757;
+      --c-accent-deep: #B85A3F;
+      --c-text: #141413;
+      --c-text-soft: #5F6461;
+      --c-bg: #F3F6F4;
+      --c-surface: #FFFFFF;
+      --c-border: #D9DEDA;
+      --c-code-bg: #F0F3F1;
+      --c-critical: #A83B20;
+      --c-warning: #8A5A00;
+      --c-success: #176B45;
+      --c-info: #315B78;
+      --c-teal: #006D77;
+      --c-blue: #38598B;
+      --c-orange: #C45D28;
+      --c-na: #D5DADE;
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 24px;
+      --sp-6: 32px;
+      --sp-7: 48px;
+      --sp-8: 64px;
+      --sp-9: 96px;
+      --ff-body: "Noto Sans CJK TC", "Source Han Sans TW", "PingFang TC",
+                 "Microsoft JhengHei", system-ui, sans-serif;
+      --ff-display: "Iowan Old Style", "Noto Serif CJK TC", "Source Han Serif TC",
+                    "PMingLiU", serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+      --fs-xs: 12px;
+      --fs-sm: 14px;
+      --fs-md: 16px;
+      --fs-lg: 18px;
+      --fs-xl: 22px;
+      --fs-2xl: 28px;
+      --fs-3xl: 36px;
+      --fs-4xl: 44px;
+      --lh-tight: 1.25;
+      --lh-base: 1.68;
+      --lh-loose: 1.8;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20, 20, 19, 0.05);
+      --shadow-md: 0 2px 8px rgba(20, 20, 19, 0.08);
+      --shadow-lg: 0 4px 16px rgba(20, 20, 19, 0.10);
+      --w-prose: 72ch;
+      --w-canvas: 1360px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--c-text);
+      background: var(--c-bg);
+      font-family: var(--ff-body);
+      font-size: var(--fs-md);
+      line-height: var(--lh-base);
+      letter-spacing: 0;
+    }
+    a {
+      color: var(--c-info);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+    a:hover { color: var(--c-accent-deep); }
+    code {
+      padding: 0.12em 0.34em;
+      border-radius: var(--radius-sm);
+      background: var(--c-code-bg);
+      font-family: var(--ff-mono);
+      font-size: 0.9em;
+      overflow-wrap: anywhere;
+    }
+    .layout {
+      width: min(100%, var(--w-canvas));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: var(--sp-6);
+      padding: var(--sp-5);
+    }
+    .toc {
+      position: sticky;
+      top: var(--sp-4);
+      align-self: start;
+      max-height: calc(100vh - var(--sp-6));
+      overflow-y: auto;
+      padding: var(--sp-4);
+      border-left: 3px solid var(--c-teal);
+      background: rgba(255, 255, 255, 0.74);
+    }
+    .toc .kicker {
+      margin: 0 0 var(--sp-3);
+      color: var(--c-teal);
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+    .toc ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .toc li + li { margin-top: var(--sp-2); }
+    .toc a {
+      display: block;
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+      line-height: 1.35;
+      text-decoration: none;
+    }
+    .toc a:hover,
+    .toc a:focus-visible {
+      color: var(--c-text);
+      text-decoration: underline;
+    }
+    .toc a.core {
+      color: var(--c-text);
+      font-weight: 750;
+    }
+    main {
+      min-width: 0;
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      box-shadow: var(--shadow-md);
+    }
+    article { padding: clamp(24px, 5vw, 64px); }
+    .scope-ribbon {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-4);
+      padding: 6px 10px;
+      border: 1px solid #D4A33F;
+      border-radius: var(--radius-sm);
+      color: #674500;
+      background: #FFF7DF;
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .scope-ribbon::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #D4A33F;
+      content: "";
+    }
+    .pretitle {
+      color: var(--c-teal);
+      font-size: var(--fs-sm);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 {
+      max-width: 32ch;
+      margin-top: 0;
+      color: var(--c-text);
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: var(--lh-tight);
+      overflow-wrap: anywhere;
+    }
+    h1 {
+      margin-bottom: var(--sp-4);
+      font-family: var(--ff-display);
+      font-size: clamp(31px, 4.3vw, 52px);
+    }
+    h2 {
+      margin-bottom: var(--sp-4);
+      font-family: var(--ff-display);
+      font-size: clamp(25px, 3vw, 34px);
+    }
+    h3 {
+      margin-bottom: var(--sp-3);
+      font-size: var(--fs-xl);
+    }
+    p { max-width: var(--w-prose); }
+    .dek {
+      max-width: 66ch;
+      margin: 0;
+      color: var(--c-text-soft);
+      font-size: var(--fs-lg);
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 5px var(--sp-4);
+      margin: var(--sp-5) 0 0;
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+    }
+    .meta dt { font-weight: 750; }
+    .meta dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .verdict-banner {
+      margin-top: var(--sp-6);
+      padding: var(--sp-4) var(--sp-5);
+      border-left: 5px solid var(--c-success);
+      background: #EDF8F2;
+      color: #124E35;
+      font-size: var(--fs-lg);
+      font-weight: 750;
+    }
+    .verdict-banner strong { color: var(--c-text); }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--sp-3);
+      margin-top: var(--sp-5);
+    }
+    .stat-box {
+      min-width: 0;
+      min-height: 124px;
+      padding: var(--sp-4);
+      border: 1px solid var(--c-border);
+      border-top: 3px solid var(--c-teal);
+      border-radius: var(--radius-md);
+      background: var(--c-surface);
+    }
+    .stat-box:nth-child(2) { border-top-color: var(--c-blue); }
+    .stat-box:nth-child(3) { border-top-color: var(--c-orange); }
+    .stat-box:nth-child(4) { border-top-color: var(--c-warning); }
+    .stat-box .number {
+      color: var(--c-text);
+      font-family: var(--ff-display);
+      font-size: clamp(26px, 3vw, 36px);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+    }
+    .stat-box .label {
+      margin-top: var(--sp-2);
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+      line-height: 1.4;
+    }
+    section {
+      margin-top: var(--sp-8);
+      padding-top: var(--sp-6);
+      border-top: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-5);
+    }
+    .assertion {
+      max-width: 65ch;
+      color: var(--c-text-soft);
+      font-size: var(--fs-lg);
+    }
+    .status-line {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr);
+      gap: var(--sp-4);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .status-line .state {
+      font-weight: 800;
+    }
+    .state.pass { color: var(--c-success); }
+    .state.stop { color: var(--c-warning); }
+    .state.limit { color: var(--c-critical); }
+    .callout {
+      margin: var(--sp-5) 0;
+      padding: var(--sp-4) var(--sp-5);
+      border-left: 4px solid var(--c-info);
+      background: #F1F6FA;
+    }
+    .callout.warning {
+      border-left-color: var(--c-warning);
+      background: #FFF8E8;
+    }
+    .callout strong { display: block; margin-bottom: var(--sp-1); }
+    .table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      border-top: 2px solid var(--c-text);
+      border-bottom: 1px solid var(--c-border);
+    }
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      font-size: var(--fs-sm);
+      line-height: 1.48;
+    }
+    caption {
+      padding: 0 0 var(--sp-3);
+      text-align: left;
+      font-weight: 750;
+    }
+    th, td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--c-border);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #F5F7F6;
+      font-weight: 800;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    .row-safe td:first-child { border-left: 4px solid var(--c-success); }
+    .row-warn td:first-child { border-left: 4px solid var(--c-warning); }
+    .row-limit td:first-child { border-left: 4px solid var(--c-critical); }
+    .flow {
+      width: 100%;
+      height: auto;
+      margin: var(--sp-5) 0;
+      border: 1px solid var(--c-border);
+      background: #FBFCFB;
+    }
+    .locus-index {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-3);
+      margin-top: var(--sp-5);
+    }
+    .locus-card {
+      min-width: 0;
+      padding: var(--sp-4);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-md);
+      background: #FBFCFB;
+    }
+    .locus-card.core { border-left: 4px solid var(--c-success); }
+    .locus-card.extreme { border-left: 4px solid var(--c-teal); }
+    .locus-card.boundary { border-left: 4px solid var(--c-warning); }
+    .locus-card .role {
+      color: var(--c-text-soft);
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .locus-card h3 {
+      margin: 4px 0 var(--sp-2);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-lg);
+    }
+    .locus-card p {
+      margin: 0;
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+    }
+    .badge {
+      display: inline-block;
+      margin-right: var(--sp-1);
+      padding: 2px 7px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+    .badge.pass { color: var(--c-success); }
+    .badge.info { color: var(--c-info); }
+    .badge.warn { color: var(--c-warning); }
+    .figure-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-4);
+      margin-top: var(--sp-5);
+      align-items: start;
+    }
+    figure {
+      min-width: 0;
+      margin: 0;
+    }
+    .figure-frame {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+    }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    figcaption {
+      padding: var(--sp-3) 2px 0;
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+      line-height: 1.55;
+    }
+    .figure-wide {
+      max-width: 1040px;
+      margin-top: var(--sp-5);
+    }
+    .reading-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-3) var(--sp-6);
+      max-width: 980px;
+      padding: 0;
+      list-style: none;
+    }
+    .reading-list li {
+      position: relative;
+      padding-left: var(--sp-5);
+    }
+    .reading-list li::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: var(--c-teal);
+      font-weight: 900;
+      content: "→";
+    }
+    .evidence-ladder {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--sp-2);
+      margin-top: var(--sp-5);
+    }
+    .evidence-step {
+      min-width: 0;
+      padding: var(--sp-4);
+      border-top: 4px solid var(--c-teal);
+      background: #F2F8F7;
+    }
+    .evidence-step:nth-child(2) {
+      border-top-color: var(--c-blue);
+      background: #F2F5F9;
+    }
+    .evidence-step:nth-child(3) {
+      border-top-color: var(--c-warning);
+      background: #FFF8E8;
+    }
+    .evidence-step:nth-child(4) {
+      border-top-color: var(--c-critical);
+      background: #FFF3F0;
+    }
+    .evidence-step .tier {
+      color: var(--c-text-soft);
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .evidence-step strong {
+      display: block;
+      margin: var(--sp-1) 0;
+    }
+    .evidence-step p {
+      margin: 0;
+      font-size: var(--fs-sm);
+    }
+    details {
+      margin-top: var(--sp-3);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-md);
+      background: #FBFCFB;
+    }
+    summary {
+      padding: var(--sp-4);
+      cursor: pointer;
+      font-weight: 800;
+    }
+    summary:hover { background: #F2F5F3; }
+    details > div { padding: 0 var(--sp-4) var(--sp-4); }
+    .source-list {
+      padding-left: 1.2em;
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+    }
+    .source-list li + li { margin-top: var(--sp-2); }
+    .source-list code { color: var(--c-text); }
+    .report-footer {
+      margin-top: var(--sp-8);
+      padding-top: var(--sp-5);
+      border-top: 2px solid var(--c-text);
+      color: var(--c-text-soft);
+      font-size: var(--fs-xs);
+    }
+    .report-footer p { max-width: none; }
+
+    @media (max-width: 1080px) {
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .evidence-ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+        gap: var(--sp-3);
+        padding: var(--sp-3);
+      }
+      .toc {
+        position: static;
+        max-height: none;
+        display: flex;
+        align-items: center;
+        gap: var(--sp-4);
+        overflow-x: auto;
+        padding: var(--sp-3) var(--sp-4);
+      }
+      .toc .kicker {
+        flex: 0 0 auto;
+        margin: 0;
+        white-space: nowrap;
+      }
+      .toc ol {
+        display: flex;
+        flex: 0 0 auto;
+        gap: var(--sp-3);
+      }
+      .toc li + li { margin-top: 0; }
+      .toc a { white-space: nowrap; }
+      article { padding: var(--sp-5); }
+      .figure-grid,
+      .locus-index,
+      .reading-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      body { font-size: 15px; }
+      .layout { padding: 0; }
+      main { border-right: 0; border-left: 0; }
+      article { padding: var(--sp-4); }
+      .toc {
+        border-right: 0;
+        border-left-width: 4px;
+      }
+      .meta,
+      .status-line { grid-template-columns: 1fr; gap: 2px; }
+      .stat-grid,
+      .evidence-ladder { grid-template-columns: 1fr; }
+      .stat-box { min-height: 104px; }
+      section { margin-top: var(--sp-7); }
+      h1 { font-size: 34px; }
+      h2 { font-size: 27px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    @media print {
+      :root {
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+      }
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      .toc { display: none; }
+      main { border: 0; box-shadow: none; }
+      article { padding: 0; }
+      section { page-break-before: auto; }
+      figure, table, .stat-box, .locus-card, .evidence-step, svg {
+        page-break-inside: avoid;
+      }
+      details > * { display: block !important; }
+      summary { list-style: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      a[href^="http"]::after {
+        color: #666;
+        font-size: 0.85em;
+        content: " (" attr(href) ")";
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="toc" aria-label="章節導航">
+      <p class="kicker">閱讀導航</p>
+      <ol>
+        <li><a class="core" href="#tldr">停止判定</a></li>
+        <li><a href="#denominators">四個分母</a></li>
+        <li><a href="#definitions">重點定義</a></li>
+        <li><a href="#data-chain">資料鏈與 tag</a></li>
+        <li><a class="core" href="#representatives">代表位點</a></li>
+        <li><a class="core" href="#chr14">chr14 強區塊正例</a></li>
+        <li><a class="core" href="#chr22">chr22 pattern 正例</a></li>
+        <li><a href="#claim-ceiling">證據上限</a></li>
+        <li><a href="#stop-matrix">停止矩陣</a></li>
+        <li><a href="#sources">來源與追溯</a></li>
+      </ol>
+    </aside>
+
+    <main>
+      <article>
+        <header id="tldr">
+          <div class="scope-ribbon">Partial visual subset · F illustration</div>
+          <div class="pretitle">InterSubMod · G3 read-level epigenetic evidence</div>
+          <h1>單位點 sSNV 甲基多群：代表位點定義、圖解與停止判定</h1>
+          <div class="verdict-banner">
+            <strong>研究主計算可以停止。</strong>
+            位點、read tag、M1/M2 與代表矩陣都已存在且可追溯；現有結果支持
+            shared ancestral ALT reads 內的 latent molecular substructure candidates，
+            不支持 confirmed cellular subclone 或 linear ancestry。
+          </div>
+          <p class="dek">
+            用 7 datasets、469,849 個最新 LongPhase-S PASS sSNV 的固定統計，
+            搭配既有 HCC1395 read-distance 與 read×CpG 原圖，解釋哪些訊號已成立、
+            哪些只能列為 subclone 候選，以及為何現在可以停止主計算。
+          </p>
+          <dl class="meta">
+            <dt>建立日期</dt><dd>2026-07-24</dd>
+            <dt>任務類型</dt><dd>F · Illustration；全量數字 + purposive representative figures</dd>
+            <dt>科學狀態</dt><dd>validated computation · fixed question answered</dd>
+            <dt>發布狀態</dt><dd>signed Task-B release stopped · no authority/receipt/signature</dd>
+            <dt>文字 SoT</dt>
+            <dd><code>InterSubMod/research/20260724_all_ssnv_representative_locus_explanation/20260724_單位點sSNV甲基多群代表位點定義與停止判定_01.md</code></dd>
+          </dl>
+          <div class="stat-grid" aria-label="四個焦點數字">
+            <div class="stat-box">
+              <div class="number">469,849</div>
+              <div class="label">最新同次 LongPhase-S recalibrated PASS sSNV</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">102,842</div>
+              <div class="label">全體 M1 穩定多群，21.8883%</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">5,961</div>
+              <div class="label">50,432 個 singleton 中的 M1 穩定多群</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">30</div>
+              <div class="label">singleton M2 PASS；全部 focal truth=TP</div>
+            </div>
+          </div>
+        </header>
+
+        <section aria-labelledby="stop-now-title">
+          <h2 id="stop-now-title">固定研究問題已回答，停止不等於否定甲基價值</h2>
+          <p class="assertion">
+            要停止的是重複計算與無限背景追查；應保留的是已驗證位點、正確分母、代表圖與 claim ceiling。
+          </p>
+          <div class="status-line">
+            <div class="state pass">✓ 科學完成</div>
+            <div>全量 M1、singleton M1/M2、latest tag join、共現與控制軸已有 frozen 結果。</div>
+          </div>
+          <div class="status-line">
+            <div class="state pass">✓ 位點存在</div>
+            <div>30 個 singleton M2 PASS 有逐位點表；HCC1395 兩個正例有完整 read-level 圖資。</div>
+          </div>
+          <div class="status-line">
+            <div class="state stop">■ 發布停止</div>
+            <div>signed release 因 nested finalizer schema blocker 停止，不能宣稱正式簽章發布完成。</div>
+          </div>
+          <div class="status-line">
+            <div class="state limit">✕ 不可升級</div>
+            <div>現有證據不能直接升級為 confirmed clone、clone 數、parent→child 或唯一演化樹。</div>
+          </div>
+        </section>
+
+        <section id="denominators" aria-labelledby="denominators-title">
+          <h2 id="denominators-title">四個分母必須分開，30/48 不能當成盛行率</h2>
+          <p class="assertion">
+            同一批結果可產生不同問題的比例；只有先說清楚分母，才不會把高度選擇後的 M2 子集外推到全體。
+          </p>
+          <svg class="flow" viewBox="0 0 860 260" role="img"
+               aria-labelledby="flow-title flow-desc">
+            <title id="flow-title">全 sSNV 到 singleton M2 PASS 的分母流程</title>
+            <desc id="flow-desc">
+              469849 個全 sSNV 中有 50432 個 positional singleton，48347 個 M1 可評估，
+              5961 個 M1 穩定多群，最後 30 個 M2 PASS。另有 48 個被選入且可完成 M2，
+              其 30 比 48 不可外推。
+            </desc>
+            <rect x="28" y="34" width="178" height="78" rx="6" fill="#E7F3F1" stroke="#006D77" stroke-width="2"/>
+            <text x="117" y="66" text-anchor="middle" font-family="var(--ff-body)" font-size="24" font-weight="700">469,849</text>
+            <text x="117" y="91" text-anchor="middle" font-family="var(--ff-body)" font-size="14">全部 PASS sSNV</text>
+            <path d="M207 73 H245" stroke="#555B58" stroke-width="2"/>
+            <path d="M245 73 l-9 -6 v12 z" fill="#555B58"/>
+            <rect x="252" y="34" width="178" height="78" rx="6" fill="#EDF1F6" stroke="#38598B" stroke-width="2"/>
+            <text x="341" y="66" text-anchor="middle" font-family="var(--ff-body)" font-size="24" font-weight="700">50,432</text>
+            <text x="341" y="91" text-anchor="middle" font-family="var(--ff-body)" font-size="14">positional singleton</text>
+            <path d="M431 73 H469" stroke="#555B58" stroke-width="2"/>
+            <path d="M469 73 l-9 -6 v12 z" fill="#555B58"/>
+            <rect x="476" y="34" width="178" height="78" rx="6" fill="#FFF3E9" stroke="#C45D28" stroke-width="2"/>
+            <text x="565" y="66" text-anchor="middle" font-family="var(--ff-body)" font-size="24" font-weight="700">5,961</text>
+            <text x="565" y="91" text-anchor="middle" font-family="var(--ff-body)" font-size="14">singleton M1 多群</text>
+            <path d="M655 73 H693" stroke="#555B58" stroke-width="2"/>
+            <path d="M693 73 l-9 -6 v12 z" fill="#555B58"/>
+            <rect x="700" y="34" width="132" height="78" rx="6" fill="#EDF8F2" stroke="#176B45" stroke-width="2"/>
+            <text x="766" y="66" text-anchor="middle" font-family="var(--ff-body)" font-size="24" font-weight="700">30</text>
+            <text x="766" y="91" text-anchor="middle" font-family="var(--ff-body)" font-size="14">M2 PASS</text>
+            <rect x="476" y="153" width="356" height="76" rx="6" fill="#FFF8E8" stroke="#8A5A00" stroke-width="2"/>
+            <text x="654" y="181" text-anchor="middle" font-family="var(--ff-body)" font-size="18" font-weight="700">30 / 48 = 62.5%</text>
+            <text x="654" y="205" text-anchor="middle" font-family="var(--ff-body)" font-size="14">selected M2-evaluable subset；不可外推</text>
+            <path d="M766 112 V143 H654 V153" fill="none" stroke="#8A5A00" stroke-width="2" stroke-dasharray="6 4"/>
+          </svg>
+          <div class="table-wrap">
+            <table>
+              <caption>每個比例回答不同問題</caption>
+              <thead>
+                <tr>
+                  <th>問題</th>
+                  <th>分子 / 分母</th>
+                  <th>比例</th>
+                  <th>解讀</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>全 sSNV M1</td>
+                  <td>102,842 / 469,849</td>
+                  <td>21.8883%</td>
+                  <td>全位點 operational screen yield</td>
+                </tr>
+                <tr>
+                  <td>singleton M1</td>
+                  <td>5,961 / 50,432</td>
+                  <td>11.8199%</td>
+                  <td>沒有本地 50 kb partner 時仍可見的甲基多群</td>
+                </tr>
+                <tr class="row-safe">
+                  <td>✓ singleton M2 PASS</td>
+                  <td>30 / 50,432</td>
+                  <td>0.05949%</td>
+                  <td>對全部 singleton 的保守 operational yield</td>
+                </tr>
+                <tr class="row-warn">
+                  <td>△ selected conditional</td>
+                  <td>30 / 48</td>
+                  <td>62.5%</td>
+                  <td>高度選擇後條件比例，不是 prevalence</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="definitions" aria-labelledby="definitions-title">
+          <h2 id="definitions-title">M1 找穩定結構，M2 排除已量測對齊軸，兩者都不是 clone 身分證</h2>
+          <p class="assertion">
+            方法的價值在於把「看到分群」拆成可重現性與常見 confound 兩層，而不是直接把任何 clustering 命名成 subclone。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <caption>本報告中的關鍵術語</caption>
+              <thead>
+                <tr>
+                  <th>名詞</th>
+                  <th>精確定義</th>
+                  <th>能回答</th>
+                  <th>不能回答</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>focal ALT reads</strong></td>
+                  <td>在指定 sSNV 支持 ALT allele 的 reads</td>
+                  <td>同一 ALT carrier 群內是否異質</td>
+                  <td>reads 必然屬於同一細胞 clone</td>
+                </tr>
+                <tr>
+                  <td><strong>positional singleton</strong></td>
+                  <td>50 kb transitive component size=1</td>
+                  <td>沒有本地 partner 可做正式共現</td>
+                  <td>全基因組 read-sharing degree=0</td>
+                </tr>
+                <tr>
+                  <td><strong>M1 stable multigroup</strong></td>
+                  <td>跨 seeds 穩定且通過 shuffle null 與最小群門檻</td>
+                  <td>read-level 甲基多群可重現</td>
+                  <td>技術／生物 confound 已全排除</td>
+                </tr>
+                <tr>
+                  <td><strong>M2 PASS</strong></td>
+                  <td>八個已測軸可判定且無軸與群組對齊</td>
+                  <td>常見已測技術軸未解釋分群</td>
+                  <td>未量測 confound、CN/purity、細胞身分已排除</td>
+                </tr>
+                <tr>
+                  <td><strong>Bernoulli distance</strong></td>
+                  <td>reads 在共同 CpG 上的甲基狀態差異</td>
+                  <td>哪些 read pattern 較相似</td>
+                  <td>突變時間或方向</td>
+                </tr>
+                <tr>
+                  <td><strong>UPGMA</strong></td>
+                  <td>甲基距離的 average-linkage hierarchy</td>
+                  <td>距離分群階層</td>
+                  <td>cellular phylogeny / mutation tree</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warning">
+            <strong>M2 NOT_EVALUABLE 不等於 M2 FAIL。</strong>
+            它表示至少一個必要控制軸資訊不足或不可判定，不能把「沒完成排除」寫成「已證明沒有結構」。
+          </div>
+        </section>
+
+        <section id="data-chain" aria-labelledby="data-chain-title">
+          <h2 id="data-chain-title">位點與 read tag 已用同次 LongPhase-S 鎖定，BAM 沒有被覆蓋</h2>
+          <p class="assertion">
+            這次分析不是拿舊 BAM 的 HP 猜測：所有 site-read observations 都先 exact join 最新 sidecar，再做 focal-ALT 選擇。
+          </p>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="number">38,345,639</div>
+              <div class="label">site-read observations 全部 exact join</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">33,693,248</div>
+              <div class="label">source HP 被 latest tag replacement</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">0</div>
+              <div class="label">projection multimatch</div>
+            </div>
+            <div class="stat-box">
+              <div class="number">7/7 false</div>
+              <div class="label"><code>persisted_bam</code>；無新 BAM 覆寫</div>
+            </div>
+          </div>
+          <details>
+            <summary>資料鏈的五個固定契約</summary>
+            <div>
+              <ol>
+                <li>母體是 469,849 個 latest LongPhase-S PASS sSNV，不是 raw ClairS 全候選。</li>
+                <li>latest HP/PS join 發生在 focal-ALT selection 之前。</li>
+                <li>embedded BAM/reads.tsv HP 不作正式分析來源。</li>
+                <li>HCC1395 與 HCC1395_DORADO 是同一 biological sample，不算獨立重現。</li>
+                <li>沒有輸出或覆寫 LongPhase-S tagged BAM。</li>
+              </ol>
+            </div>
+          </details>
+        </section>
+
+        <section id="representatives" aria-labelledby="representatives-title">
+          <h2 id="representatives-title">代表位點同時涵蓋強正例、pattern 正例、三群極端與 M2 邊界</h2>
+          <p class="assertion">
+            只展示最漂亮位點會隱藏判定邊界；因此主圖選兩個 M2 PASS，候選表另保留 K=3/4/5 的 NOT_EVALUABLE 例子。
+          </p>
+          <div class="locus-index">
+            <article class="locus-card core">
+              <div class="role">強區塊正例</div>
+              <h3>HCC1395 · chr14:86,272,476 A&gt;T</h3>
+              <p>
+                <span class="badge pass">✓ M2 PASS</span>
+                108 core reads · 86/22 · 42 CpGs。群內近、群間遠，最適合入門。
+              </p>
+            </article>
+            <article class="locus-card core">
+              <div class="role">Pattern 正例</div>
+              <h3>HCC1395 · chr22:47,466,517 A&gt;G</h3>
+              <p>
+                <span class="badge pass">✓ M2 PASS</span>
+                109 core reads · 88/21 · 93 CpGs。示範多 CpG pattern，不只看平均值。
+              </p>
+            </article>
+            <article class="locus-card extreme">
+              <div class="role">三群極端例</div>
+              <h3>H2009 · chr6:52,060,111 C&gt;A</h3>
+              <p>
+                <span class="badge info">✓ M2 PASS</span>
+                108 core reads · K=3 · min group=5；30 個 PASS 中唯一三群。
+              </p>
+            </article>
+            <article class="locus-card boundary">
+              <div class="role">M1 邊界例</div>
+              <h3>HCC1395 · chr14:95,851,393 C&gt;G</h3>
+              <p>
+                <span class="badge warn">△ M2 NOT_EVALUABLE</span>
+                K=3 · 43/12/37；多群存在，但控制軸證據不足。
+              </p>
+            </article>
+            <article class="locus-card boundary">
+              <div class="role">高 K 邊界例</div>
+              <h3>HCC1395 · chr9:26,274,295 G&gt;T</h3>
+              <p>
+                <span class="badge warn">△ M2 NOT_EVALUABLE</span>
+                K=4 · 19/5/3/26 + 3 other。
+              </p>
+            </article>
+            <article class="locus-card boundary">
+              <div class="role">唯一 K=5 例</div>
+              <h3>HCC1395 · chr12:240,507 A&gt;T</h3>
+              <p>
+                <span class="badge warn">△ M2 NOT_EVALUABLE</span>
+                K=5 · 20/6/3/20/30 + 2 outlier。
+              </p>
+            </article>
+          </div>
+          <div class="callout">
+            <strong>圖解範圍固定。</strong>
+            本報告只重用已驗證的 HCC1395 六張原圖；H2009 三群位點雖有凍結 artifact，
+            但不在「停止新計算」後另畫新圖。
+          </div>
+        </section>
+
+        <section id="chr14" aria-labelledby="chr14-title">
+          <h2 id="chr14-title">chr14 強正例把「群內近、群間遠」直接畫成區塊</h2>
+          <p class="assertion">
+            `chr14:86,272,476 A&gt;T` 的距離矩陣、CpG pattern 與 UPGMA 三張圖指向同一件事：
+            focal-ALT reads 可依甲基狀態穩定分成兩個分子群。
+          </p>
+          <div class="figure-grid">
+            <figure>
+              <div class="figure-frame">
+                <img
+                  src="../20260718_singleton_alt_methyl_substructure_validation/results/heatmap_qa/01_locus_1_distance_heatmap.png"
+                  alt="HCC1395 chr14 focal-ALT 代表 read 的 Bernoulli 甲基距離矩陣"
+                  width="768" height="580" decoding="async">
+              </div>
+              <figcaption>
+                <strong>read×read distance。</strong>
+                對角線為 0；A/A、B/B 群內區塊較淺，A/B 跨群區塊較深。
+                A/B 是 methyl-group aliases，不是 HP。顯示 8 個代表 reads，正式判定使用 108 core reads。
+              </figcaption>
+            </figure>
+            <figure>
+              <div class="figure-frame">
+                <img
+                  src="../20260723_hcc1395_singleton_alt_methyl_multigroup_visual_report/figures/01_chr14_86272476_A_T_representative_UPGMA.png"
+                  alt="HCC1395 chr14 focal-ALT 代表 read 的 average-linkage UPGMA 距離階層"
+                  width="2250" height="1890" loading="lazy" decoding="async">
+              </div>
+              <figcaption>
+                <strong>UPGMA hierarchy。</strong>
+                橫軸是 average-linkage merge height；分枝較晚合併表示甲基距離較大。
+                枝條沒有時間與 parent→child 方向。
+              </figcaption>
+            </figure>
+          </div>
+          <figure class="figure-wide">
+            <div class="figure-frame">
+              <img
+                src="../20260718_singleton_alt_methyl_substructure_validation/results/derivative_validation_v4/figures/chr14_86272476_A_T.read_by_cpg_methylation.png"
+                alt="HCC1395 chr14 focal-ALT read 乘 CpG 甲基機率熱圖"
+                width="1722" height="1392" loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <strong>read×CpG methylation probability。</strong>
+              黃色接近 methylated、深藍接近 unmethylated、灰色是未 call，不能把灰色當成 0。
+              黑線分隔 M1 Group A/B；多個 CpG 區段形成一致差異。
+            </figcaption>
+          </figure>
+          <ul class="reading-list" aria-label="chr14 圖解重點">
+            <li>支持：共享 focal ALT reads 內有穩定甲基 pattern 分層。</li>
+            <li>支持：已量測八個技術軸沒有與群組對齊。</li>
+            <li>不支持：Group A/B 必然是兩個細胞 clone。</li>
+            <li>不支持：UPGMA merge height 是突變時間。</li>
+          </ul>
+        </section>
+
+        <section id="chr22" aria-labelledby="chr22-title">
+          <h2 id="chr22-title">chr22 正例顯示 pattern 分群不等於單一平均甲基值二分</h2>
+          <p class="assertion">
+            `chr22:47,466,517 A&gt;G` 的跨群距離仍高於群內，但 CpG 圖更像局部 pattern 組合；
+            這說明方法需要 read×CpG 結構，而不是只用一個平均甲基值。
+          </p>
+          <div class="figure-grid">
+            <figure>
+              <div class="figure-frame">
+                <img
+                  src="../20260718_singleton_alt_methyl_substructure_validation/results/heatmap_qa/04_locus_2_distance_heatmap.png"
+                  alt="HCC1395 chr22 focal-ALT 代表 read 的 Bernoulli 甲基距離矩陣"
+                  width="768" height="580" loading="lazy" decoding="async">
+              </div>
+              <figcaption>
+                <strong>read×read distance。</strong>
+                同群距離整體較低，跨群距離較高；正式判定使用 109 core reads，
+                此 8×8 matrix 是可讀的 deterministic representative view。
+              </figcaption>
+            </figure>
+            <figure>
+              <div class="figure-frame">
+                <img
+                  src="../20260723_hcc1395_singleton_alt_methyl_multigroup_visual_report/figures/02_chr22_47466517_A_G_representative_UPGMA.png"
+                  alt="HCC1395 chr22 focal-ALT 代表 read 的 average-linkage UPGMA 距離階層"
+                  width="2250" height="1890" loading="lazy" decoding="async">
+              </div>
+              <figcaption>
+                <strong>UPGMA hierarchy。</strong>
+                leaf colors 對應 methyl Group A/B；中性枝條刻意不編碼 clone、HP 或演化方向。
+              </figcaption>
+            </figure>
+          </div>
+          <figure class="figure-wide">
+            <div class="figure-frame">
+              <img
+                src="../20260718_singleton_alt_methyl_substructure_validation/results/derivative_validation_v4/figures/chr22_47466517_A_G.read_by_cpg_methylation.png"
+                alt="HCC1395 chr22 focal-ALT read 乘 CpG 甲基機率熱圖"
+                width="2610" height="1392" loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <strong>read×CpG pattern。</strong>
+              Group A/B 的差異分散在多個局部 CpG 區段；灰色仍是缺 call。
+              這是 pattern-defined molecular grouping，不是先假定 clone label 再畫圖。
+            </figcaption>
+          </figure>
+        </section>
+
+        <section id="claim-ceiling" aria-labelledby="claim-title">
+          <h2 id="claim-title">甲基能提出 ancestral ALT 下的分層，但證據鏈在 cellular clone 前停止</h2>
+          <p class="assertion">
+            最精確的敘述不是「找到 subclone」，而是「找到可重現、未被已測技術軸解釋的
+            read-level latent molecular substructure candidate」。
+          </p>
+          <div class="evidence-ladder">
+            <div class="evidence-step">
+              <div class="tier">[F] L1 · 計算事實</div>
+              <strong>結構可重現</strong>
+              <p>M1/M2、assignment、matrix 與 tag join 可 exact 回查。</p>
+            </div>
+            <div class="evidence-step">
+              <div class="tier">[O] L2 · 分子觀察</div>
+              <strong>latent substructure</strong>
+              <p>shared focal ALT reads 內有穩定甲基分層候選。</p>
+            </div>
+            <div class="evidence-step">
+              <div class="tier">[I] L3 · 生物推論</div>
+              <strong>可能對應 subclone</strong>
+              <p>合理但待第二 marker、CN/CCF 與正交驗證。</p>
+            </div>
+            <div class="evidence-step">
+              <div class="tier">[U] 未成立</div>
+              <strong>cellular lineage</strong>
+              <p>confirmed clone、clone count、linear ancestry 都是 0。</p>
+            </div>
+          </div>
+          <div class="callout warning">
+            <strong>共現沒有把這個缺口補完。</strong>
+            正式 G1 只有 7 個 focal candidates，G2=0；現行 production strict directed topology=0/7。
+            因此 methyl group 與 sSNV cooccurrence 可互相支持候選，但沒有足夠資訊建立唯一 linear tree。
+          </div>
+          <details>
+            <summary>要升級為 cellular subclone 還需要什麼？</summary>
+            <div>
+              <ul>
+                <li>第二個獨立 sSNV marker 的 read-level cooccurrence。</li>
+                <li>tumor-REF 與 matched-normal control。</li>
+                <li>exact-locus CN、purity、multiplicity 與 CCF。</li>
+                <li>跨技術重現，或 single-cell / colony / spatial 正交驗證。</li>
+                <li>預先註冊的 lineage identifiability 與 falsifier。</li>
+              </ul>
+            </div>
+          </details>
+        </section>
+
+        <section id="stop-matrix" aria-labelledby="stop-matrix-title">
+          <h2 id="stop-matrix-title">現在應保存與解釋；若要升級 clone claim，必須開新驗證週期</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>停止決策矩陣</caption>
+              <thead>
+                <tr>
+                  <th>項目</th>
+                  <th>判定</th>
+                  <th>本次是否繼續</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-safe">
+                  <td>✓ 469,849 位點全量 M1</td>
+                  <td>完成、可重現</td>
+                  <td>否</td>
+                </tr>
+                <tr class="row-safe">
+                  <td>✓ singleton M1/M2 與 30 PASS</td>
+                  <td>完成、有逐位點表</td>
+                  <td>否</td>
+                </tr>
+                <tr class="row-safe">
+                  <td>✓ latest HP/PS 與 BAM 不覆寫</td>
+                  <td>完成稽核</td>
+                  <td>否</td>
+                </tr>
+                <tr class="row-safe">
+                  <td>✓ 代表位點矩陣與 HTML</td>
+                  <td>既有 artifact + 本 companion</td>
+                  <td>否</td>
+                </tr>
+                <tr class="row-limit">
+                  <td>✕ confirmed subclone / lineage</td>
+                  <td>現有資料不可辨識</td>
+                  <td>不能靠補跑同流程完成</td>
+                </tr>
+                <tr class="row-warn">
+                  <td>■ signed Task-B release</td>
+                  <td>schema blocker；bounded policy stopped</td>
+                  <td>不在本輪重開</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="verdict-banner">
+            <strong>最終停止句：</strong>
+            這個問題已足以結案為「甲基可在共同 ancestral ALT reads 內提出可重現的分子子結構候選」；
+            不能把候選改名為 confirmed subclone。未來若要跨過這條界線，必須新增獨立生物證據，而不是重畫同一批矩陣。
+          </div>
+        </section>
+
+        <section id="sources" aria-labelledby="sources-title">
+          <h2 id="sources-title">所有數字與圖片都能回到 frozen artifact</h2>
+          <ul class="source-list">
+            <li>
+              全 sSNV M1：
+              <code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/all_ssnv_focal_alt_multigroup_v10_source_locked_thread_pinned_recovered_full/all_ssnv_summary.json</code>
+            </li>
+            <li>
+              singleton audit：
+              <code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/positional_singleton_methyl_multigroup_audit_v2_source_authority_v7/positional_singleton_audit_summary.json</code>
+            </li>
+            <li>
+              30 個 M2 PASS loci：
+              <code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/positional_singleton_methyl_multigroup_audit_v2_source_authority_v7/positional_singleton_m2_pass_cases.tsv</code>
+            </li>
+            <li>
+              HCC1395 圖資盤點：
+              <code>InterSubMod/research/20260723_hcc1395_singleton_alt_methyl_multigroup_visual_report/results/20260723_read_level圖資盤點_01.md</code>
+            </li>
+            <li>
+              原完整報告：
+              <a href="../20260723_hcc1395_singleton_alt_methyl_multigroup_visual_report/20260723_HCC1395_734穩定甲基多群統計與視覺報告_01.standalone.html">
+                HCC1395 734 個穩定 focal-ALT 甲基多群位點
+              </a>
+            </li>
+            <li>
+              signed release 停止證據：
+              <code>InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/rejected_pre_authority_reviews/20260724_v30_round3_transitive_report_builder_finalizer_split_brain/SUMMARY.md</code>
+            </li>
+          </ul>
+        </section>
+
+        <footer class="report-footer">
+          <p>
+            <strong>Provenance：</strong>
+            source commit <code>0ee2fa1b31fcf6af670efd301251b5b3a24c1a99</code>；
+            build date 2026-07-24；scope=F illustration。
+          </p>
+          <p>
+            全量數字來自 comprehensive validation；六張圖是 purposive HCC1395 representative subset，
+            不能估計跨樣本 prevalence。HTML 無外部 request，圖片保留原比例並以 repo-relative path 載入。
+          </p>
+        </footer>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

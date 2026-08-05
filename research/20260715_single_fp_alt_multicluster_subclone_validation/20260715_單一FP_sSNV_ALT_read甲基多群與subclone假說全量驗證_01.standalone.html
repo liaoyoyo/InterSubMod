@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>單一 FP sSNV ALT-read 甲基多群與 subclone 假說全量驗證</title>
+  <style>
+    :root {
+      --ink: #202724;
+      --muted: #5f6965;
+      --paper: #ffffff;
+      --canvas: #f4f6f2;
+      --line: #d8ded9;
+      --line-strong: #aeb9b2;
+      --teal: #087d78;
+      --teal-soft: #e8f4f2;
+      --coral: #ce5b47;
+      --coral-soft: #faece8;
+      --amber: #a97800;
+      --amber-soft: #f8f0d8;
+      --violet: #725d91;
+      --violet-soft: #f0ebf6;
+      --green: #2f7d58;
+      --green-soft: #e8f2ec;
+      --sidebar: #1f2a26;
+      --sidebar-muted: #b8c3be;
+      --content: 1160px;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.68;
+      letter-spacing: 0;
+    }
+    a { color: var(--teal); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #045b58; }
+    code {
+      padding: 0.08em 0.3em;
+      overflow-wrap: anywhere;
+      color: #394440;
+      background: #edf0ed;
+      border: 1px solid #dde2de;
+      border-radius: 3px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.88em;
+    }
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      color: #e9efec;
+      background: #202824;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; border: 0; }
+
+    .layout { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 30px 22px;
+      color: #f6f9f7;
+      background: var(--sidebar);
+      border-right: 1px solid #111814;
+    }
+    .sidebar .project {
+      margin: 0 0 4px;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 750;
+    }
+    .sidebar .scope {
+      margin: 0 0 24px;
+      color: var(--sidebar-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 7px 0;
+      color: #d9e1dd;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      text-decoration: none;
+    }
+    .sidebar nav a:hover,
+    .sidebar nav a:focus { color: #ffffff; }
+    .sidebar .status {
+      margin-top: 24px;
+      padding-top: 18px;
+      color: var(--sidebar-muted);
+      border-top: 1px solid rgba(255,255,255,0.16);
+      font-size: 12px;
+    }
+    .status strong { color: #ffffff; }
+
+    main { min-width: 0; background: var(--paper); }
+    .mobile-nav { display: none; }
+    .masthead {
+      padding: 38px clamp(24px, 5vw, 76px) 30px;
+      background: #f8faf7;
+      border-bottom: 1px solid var(--line);
+    }
+    .masthead-inner, article { width: min(100%, var(--content)); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 { line-height: 1.28; letter-spacing: 0; text-wrap: balance; }
+    h1 { max-width: 980px; margin: 0; font-size: 38px; font-weight: 780; }
+    .subtitle { max-width: 900px; margin: 16px 0 0; color: var(--muted); font-size: 18px; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    .badge.l2 { color: var(--teal); background: var(--teal-soft); }
+    .badge.l3 { color: var(--coral); background: var(--coral-soft); }
+    .badge.l4 { color: var(--violet); background: var(--violet-soft); }
+    .badge.l5 { color: #5f6461; background: #eef0ee; }
+    .badge.done { color: var(--green); background: var(--green-soft); }
+
+    article { padding: 28px clamp(24px, 5vw, 76px) 90px; }
+    section {
+      padding: 40px 0 34px;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 18px;
+    }
+    section:last-child { border-bottom: 0; }
+    h2 { margin: 0 0 14px; font-size: 28px; font-weight: 770; }
+    h3 { margin: 28px 0 10px; font-size: 19px; font-weight: 760; }
+    p { margin: 10px 0; }
+    .lede { max-width: 960px; color: #35403c; font-size: 18px; }
+    .section-kicker {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .verdict {
+      padding: 20px 22px;
+      border-left: 5px solid var(--coral);
+      background: var(--coral-soft);
+    }
+    .verdict strong { color: #913e2f; }
+    .supported {
+      padding: 18px 20px;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+    }
+    .guardrail {
+      padding: 16px 18px;
+      border-left: 4px solid var(--amber);
+      background: var(--amber-soft);
+      color: #554410;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 22px 0;
+    }
+    .metric {
+      min-width: 0;
+      padding: 16px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--teal);
+      border-radius: 6px;
+    }
+    .metric:nth-child(2) { border-top-color: var(--amber); }
+    .metric:nth-child(3) { border-top-color: var(--coral); }
+    .metric:nth-child(4) { border-top-color: var(--violet); }
+    .metric:nth-child(5) { border-top-color: var(--green); }
+    .metric .value { display: block; font-size: 27px; font-weight: 800; line-height: 1.1; }
+    .metric .label { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .claim-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .claim {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+    .claim h3 { margin: 8px 0 6px; font-size: 16px; }
+    .claim p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .table-wrap { width: 100%; margin: 18px 0; overflow-x: auto; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #37423e; background: #edf1ed; font-weight: 780; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) td { background: #fafbf9; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .nowrap { white-space: nowrap; }
+    .critical-row td { background: #fff4f1 !important; }
+
+    figure { margin: 28px 0 12px; }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      background: #ffffff;
+    }
+    figcaption { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .figure-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    .figure-pair figure { margin-top: 18px; }
+
+    .steps { counter-reset: step; margin: 18px 0 0; padding: 0; list-style: none; }
+    .steps li {
+      position: relative;
+      min-height: 50px;
+      padding: 0 0 18px 50px;
+      border-left: 2px solid var(--line);
+      margin-left: 17px;
+    }
+    .steps li:last-child { border-left-color: transparent; }
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: -18px;
+      top: -2px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--teal);
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .steps strong { display: block; }
+    .steps span { color: var(--muted); font-size: 14px; }
+
+    .case-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .case {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+    .case .site { display: block; overflow-wrap: anywhere; font-weight: 780; }
+    .case .role { display: block; margin: 5px 0 8px; color: var(--coral); font-size: 12px; font-weight: 750; }
+    .case p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+
+    details {
+      margin: 14px 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+    summary { padding: 13px 16px; cursor: pointer; font-weight: 750; }
+    details > div { padding: 0 16px 16px; }
+    .source-list { margin: 14px 0; padding-left: 22px; }
+    .source-list li { margin: 6px 0; }
+    .footnote { color: var(--muted); font-size: 12px; }
+    .provenance {
+      padding: 22px;
+      color: #dfe8e3;
+      background: #25302b;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .provenance a { color: #8bd7d1; }
+    .provenance code { color: #ecf3ef; background: #36433d; border-color: #4b5b54; }
+
+    @media (max-width: 1120px) {
+      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .case-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      .layout { display: block; }
+      .sidebar { display: none; }
+      .mobile-nav {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        display: flex;
+        gap: 18px;
+        padding: 10px 16px;
+        overflow-x: auto;
+        color: #fff;
+        background: var(--sidebar);
+        white-space: nowrap;
+      }
+      .mobile-nav a { color: #f3f7f5; font-size: 12px; text-decoration: none; }
+      .masthead { padding: 28px 20px 24px; }
+      h1 { font-size: 30px; }
+      article { padding: 18px 20px 70px; }
+      section { padding: 34px 0 28px; scroll-margin-top: 45px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .claim-grid, .figure-pair { grid-template-columns: 1fr; }
+      .case-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      body { font-size: 15px; }
+      h1 { font-size: 27px; }
+      h2 { font-size: 23px; }
+      .subtitle, .lede { font-size: 16px; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric { padding: 13px; }
+      .metric .value { font-size: 23px; }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      @page { margin: 15mm; }
+      body { background: #fff; font-size: 10pt; }
+      .layout { display: block; }
+      .sidebar, .mobile-nav { display: none; }
+      .masthead, article { padding-left: 0; padding-right: 0; }
+      section { break-inside: auto; }
+      figure, .claim, .case, .metric, table { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="報告目錄">
+      <p class="project">InterSubMod</p>
+      <p class="scope">2026-07-15<br>全基因組 · 7 datasets · 6 biological samples</p>
+      <nav>
+        <a href="#verdict">結論與 claim boundary</a>
+        <a href="#provenance">最新 LongPhase-S 輸入</a>
+        <a href="#workflow">完整分析流程</a>
+        <a href="#prevalence">全量比例與 coverage</a>
+        <a href="#matched-tp">Matched TP 反證</a>
+        <a href="#strict">Strict sensitivity</a>
+        <a href="#hp">LongPhase-S HP tags</a>
+        <a href="#topology">Topology 可識別性</a>
+        <a href="#cases">實際個案與反例</a>
+        <a href="#legacy">歷史輸出相容性</a>
+        <a href="#ladder">驗證階梯與樹輸入</a>
+        <a href="#audit">多 agent 與外部稽核</a>
+      </nav>
+      <p class="status"><strong>VALIDATED</strong><br>External Claude Code: VALID WITH CORRECTIONS<br>14/14 local tests pass</p>
+    </aside>
+
+    <main>
+      <nav class="mobile-nav" aria-label="行動版目錄">
+        <a href="#verdict">結論</a><a href="#provenance">輸入</a><a href="#matched-tp">TP 對照</a>
+        <a href="#strict">Strict</a><a href="#cases">個案</a><a href="#audit">稽核</a>
+      </nav>
+
+      <header class="masthead">
+        <div class="masthead-inner">
+          <p class="eyebrow">Comprehensive validation · G3 / G4 / G5</p>
+          <h1>單一 truth-FP sSNV 的 ALT reads 出現甲基多群，能否視為 subclone？</h1>
+          <p class="subtitle">用 SCQA + hypothesis falsification：從最新 LongPhase-S PASS 的 7,745 個 FP 位點，檢查 focal-ALT read methylation multigroup、matched TP specificity、HP tag、區域拓撲、技術重複與歷史 InterSubMod 圖像。</p>
+          <div class="meta">
+            <span class="badge done">VALIDATED 2026-07-15</span>
+            <span>Scope: chr1-22 biallelic sSNV</span>
+            <span>7 datasets / 6 biological samples</span>
+            <span>外部審查完成</span>
+          </div>
+        </div>
+      </header>
+
+      <article>
+        <section id="verdict">
+          <span class="section-kicker">Answer first</span>
+          <h2>不能直接判定為 subclone，也不能由單一 sSNV 推定 linear evolution</h2>
+          <div class="verdict">
+            <strong>不支持原命題。</strong>「單一 truth-labeled FP sSNV 的 focal-ALT reads 被 InterSubMod 無監督分成多群」只證明同一 readset 內存在候選甲基異質性，不等於不同細胞 clone；一個 mutation state 也沒有足夠結構資訊判斷 linear 或 branching ancestry。
+          </div>
+          <div class="metrics" aria-label="核心指標">
+            <div class="metric"><span class="value">7,745</span><span class="label">最新 LongPhase-S PASS truth-FP sites</span></div>
+            <div class="metric"><span class="value">4,967</span><span class="label">可評估 focal ALT readsets，64.13%</span></div>
+            <div class="metric"><span class="value">583</span><span class="label">primary stable multigroup，11.74% evaluable</span></div>
+            <div class="metric"><span class="value">103</span><span class="label">HP-tag-covered high threshold，2.07%</span></div>
+            <div class="metric"><span class="value">10 / 9 / 6</span><span class="label">strict sites / readsets / regional components</span></div>
+          </div>
+          <div class="supported">
+            <strong>可支持的縮限命題：</strong>少數 focal-ALT readsets 呈 null-gated、跨 seed 穩定的 read-level methylation heterogeneity；其中 10 sites / 9 ALT readsets / 6 layered components 值得 targeted orthogonal follow-up。它們不是 subclone callset，也不是 evolution tree nodes。
+          </div>
+          <div class="claim-grid">
+            <div class="claim"><span class="badge l2">L2 SUPPORTED</span><h3>ALT reads 可形成穩定甲基多群</h3><p>583/4,967 evaluable；同 pipeline 直接量測，加上 null 與 assignment sensitivity。</p></div>
+            <div class="claim"><span class="badge l3">L3 COUNTEREVIDENCE</span><h3>高門檻 endpoint 不具 FP specificity</h3><p>FP 1.330% vs matched TP 1.265%；paired p=0.772。</p></div>
+            <div class="claim"><span class="badge l4">L4 HYPOTHESIS ONLY</span><h3>多群不等於 subclone</h3><p>orthogonal cellular-subclone confirmation 為 0；matched-normal methylation 尚未測。</p></div>
+            <div class="claim"><span class="badge l5">L5 UNIDENTIFIABLE</span><h3>單一 sSNV 無法識別 linear topology</h3><p>focal linear-topology identifiable 0/7,745；至少需要第二個 mutation state。</p></div>
+          </div>
+          <figure>
+            <img src="figures/01_evidence_chain.png" alt="由 7745 個 FP 位點逐步縮小至 10 個 strict follow-up 位點的證據鏈">
+            <figcaption>證據收斂是 sensitivity chain，不是 PPV/FDR 校準，也不是 clone 數量。</figcaption>
+          </figure>
+        </section>
+
+        <section id="provenance">
+          <span class="section-kicker">Input contract</span>
+          <h2>主分析只使用同一次最新 LongPhase-S recalibrated FILTER=PASS sSNV</h2>
+          <p class="lede">Canonical manifest 鎖定 2026-07-13 layered v5；sSNV 與 HP/PS sidecar 來自 2026-07-11 同一次 LongPhase-S producer。Truth label 只在 producer 完成後做 post hoc split，不回饋 caller 或 InterSubMod。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>契約項目</th><th>實際來源或數量</th><th>驗證</th></tr></thead>
+              <tbody>
+                <tr><td>Canonical manifest</td><td><code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5/input_manifest.snapshot.json</code></td><td>SHA-256 <code>16f2ef...c1a45</code></td></tr>
+                <tr><td>LongPhase-S producer</td><td><code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/</code></td><td>同 run recalibrated VCF + exact HP/PS sidecar</td></tr>
+                <tr><td>Analysis scope</td><td>chr1-22, biallelic, recalibrated <code>FILTER=PASS</code></td><td>FP 7,745；TP 335,296</td></tr>
+                <tr><td>Truth split</td><td>下游 post hoc label</td><td>無 caller / clustering leakage</td></tr>
+                <tr><td>Latest vs legacy</td><td>共同 3,302；latest-only / previously unmaterialized 4,443</td><td>版本分母不混用</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Focal ALT、HP tag 與 methyl group 是三個不同物件</h3>
+          <ul>
+            <li><strong>Focal ALT read</strong> 只由 region <code>reads/reads.tsv: alt_support=ALT</code> 定義，HP tag 不能替代。</li>
+            <li><strong>LongPhase-S HP</strong> 由最新 sidecar materialize，僅作 haplotype annotation。</li>
+            <li><strong>Methyl group</strong> 是 null-gated clustering 的統計群；internal label 即使長得像 <code>1-1</code>，也不是 LongPhase-S HP。</li>
+          </ul>
+          <h3>Tagged BAM 有輸出，但沒有覆寫原始或 canonical BAM</h3>
+          <p>7 個 bounded tagged BAM 全部落在 <code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_single_fp_alt_multicluster_subclone_validation/latest_tagged_subset/</code>。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Materialization check</th><th class="num">實際值</th></tr></thead>
+              <tbody>
+                <tr><td>Unique alignments</td><td class="num">885,047</td></tr>
+                <tr><td>MM+ML complete</td><td class="num">885,047 / 885,047</td></tr>
+                <tr><td>Sidecar missing</td><td class="num">0</td></tr>
+                <tr><td>Pre-registered duplicate identities collapsed</td><td class="num">86,291</td></tr>
+                <tr><td>Canonical/original BAM overwrite</td><td class="num"><strong>0</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="workflow">
+          <span class="section-kicker">Step → Verify</span>
+          <h2>每一步都有可觀察輸出，不依賴 summary 補猜</h2>
+          <ol class="steps">
+            <li><strong>鎖定最新 sSNV</strong><span>同一次 LongPhase-S recalibrated PASS，之後才 truth split；FP 7,745、TP 335,296。</span></li>
+            <li><strong>Materialize 最新 HP/PS 與 MM/ML</strong><span>7 BAM pass；MM/ML 100%；sidecar missing 0；沒有覆寫。</span></li>
+            <li><strong>執行 InterSubMod 全量 region</strong><span>7,745/7,745 per-site reads、methylation、distance 完整；C++ exit 0。</span></li>
+            <li><strong>只選 focal ALT reads</strong><span>outlier peel 後至少 6 reads；4,967/7,745 evaluable。</span></li>
+            <li><strong>Primary null-gated multigroup</strong><span>column permutation null95、10 seeds、modal K；stable 583。</span></li>
+            <li><strong>排除量到的技術軸</strong><span>HP、strand、read geometry、MAPQ、called CpG；residual 453、高門檻 103。</span></li>
+            <li><strong>同 dataset 1:1 matched TP</strong><span>以 logit AF / log DP / log GQ 配對；7,745 pairs。</span></li>
+            <li><strong>更嚴格 null 與 REF background</strong><span>row-circular null、199 replicates、10 seeds、ARI；strict 10 sites。</span></li>
+            <li><strong>加入 regional topology context</strong><span>focal linear identifiable 0；subclone confirmed 0。</span></li>
+            <li><strong>技術與歷史 sensitivity</strong><span>HCC/Dorado exact-site、legacy/common-site、distance/null contract 分開檢查。</span></li>
+          </ol>
+          <div class="guardrail"><strong>Coverage audit：</strong><code>significance_summary</code> 少 119 sites，其中 46 evaluable、6 stable、5 residual；主分析直接讀 per-site files，因此 7,745 分母沒有遺失。</div>
+        </section>
+
+        <section id="prevalence">
+          <span class="section-kicker">Observed prevalence</span>
+          <h2>11.74% 有 primary multigroup；0.201% 通過所有 strict gates</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Endpoint</th><th class="num">N</th><th class="num">/ evaluable</th><th class="num">/ all FP</th><th>正確解讀</th></tr></thead>
+              <tbody>
+                <tr><td>Evaluable</td><td class="num">4,967</td><td class="num">100%</td><td class="num">64.13%</td><td>有足夠 ALT reads 與完整 distance</td></tr>
+                <tr><td>Forced silhouette</td><td class="num">891</td><td class="num">17.94%</td><td class="num">11.50%</td><td>歷史 sensitivity；與 primary 非巢狀</td></tr>
+                <tr><td>Stable null multigroup</td><td class="num">583</td><td class="num">11.74%</td><td class="num">7.53%</td><td>Primary epigenetic endpoint</td></tr>
+                <tr><td>Residual multigroup</td><td class="num">453</td><td class="num">9.12%</td><td class="num">5.85%</td><td>未被已量測技術軸解釋</td></tr>
+                <tr><td>HP-tag-covered high threshold</td><td class="num">103</td><td class="num">2.07%</td><td class="num">1.33%</td><td>高門檻；不是 phase-confirmed clone</td></tr>
+                <tr class="critical-row"><td>Strict follow-up</td><td class="num">10</td><td class="num">0.201%</td><td class="num">0.129%</td><td>保守 sensitivity 交集；不是 FDR / PPV</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Forced 與 stable 的交集為 364、forced-only 527、stable-only 219，Jaccard 0.328；因此不能畫成 891 → 583 的順序淘汰。583 stable sites 的 14,619 次 assignment 只有 10,577 個 unique dataset-read，連圖後為 380 components，site-level CI 不能視為完全獨立生物重複。</p>
+          <h3>各 dataset 差異與 coverage power</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Dataset</th><th class="num">FP</th><th class="num">Evaluable</th><th class="num">Stable / eval.</th><th class="num">High / eval.</th><th class="num">Strict</th></tr></thead>
+              <tbody>
+                <tr><td>COLO829</td><td class="num">3,224</td><td class="num">2,466</td><td class="num">230 / 9.33%</td><td class="num">32 / 1.30%</td><td class="num">4</td></tr>
+                <tr><td>H1437</td><td class="num">460</td><td class="num">150</td><td class="num">12 / 8.00%</td><td class="num">1 / 0.67%</td><td class="num">1</td></tr>
+                <tr><td>H2009</td><td class="num">735</td><td class="num">328</td><td class="num">60 / 18.29%</td><td class="num">7 / 2.13%</td><td class="num">0</td></tr>
+                <tr><td>HCC1395</td><td class="num">1,603</td><td class="num">921</td><td class="num">119 / 12.92%</td><td class="num">19 / 2.06%</td><td class="num">4</td></tr>
+                <tr><td>HCC1395 Dorado</td><td class="num">904</td><td class="num">540</td><td class="num">92 / 17.04%</td><td class="num">28 / 5.19%</td><td class="num">1</td></tr>
+                <tr><td>HCC1937</td><td class="num">620</td><td class="num">435</td><td class="num">43 / 9.89%</td><td class="num">10 / 2.30%</td><td class="num">0</td></tr>
+                <tr><td>HCC1954</td><td class="num">199</td><td class="num">127</td><td class="num">27 / 21.26%</td><td class="num">6 / 4.72%</td><td class="num">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="figure-pair">
+            <figure><img src="figures/03_per_sample_risk_difference.png" alt="各資料集 FP 與 TP 配對後 risk difference"><figcaption>FP-TP 效應方向跨 dataset 不一致；HCC1395 是 pooled stable 差異的主要來源。</figcaption></figure>
+            <figure><img src="figures/07_coverage_dependence.png" alt="ALT read depth 與各 endpoint 發現率"><figcaption>Stable 率由 6-9 reads 的 6.02% 升至 ≥40 reads 的 19.23%，顯示強烈 power effect。</figcaption></figure>
+          </div>
+          <p class="footnote">HCC1395 與 Dorado 是同一 biological sample；COLO829 無 confident-region BED，不能不加 caveat 地當獨立 biological replication 或同等 truth confidence。</p>
+        </section>
+
+        <section id="matched-tp">
+          <span class="section-kicker">Negative control</span>
+          <h2>Matched TP 反證：高門檻多群沒有 truth-FP specificity</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Endpoint</th><th class="num">Truth FP</th><th class="num">Matched TP</th><th class="num">Paired RD</th><th class="num">McNemar p</th></tr></thead>
+              <tbody>
+                <tr><td>Evaluable</td><td class="num">64.13%</td><td class="num">75.07%</td><td class="num">-10.94 pp</td><td class="num">1.83e-131</td></tr>
+                <tr><td>Stable</td><td class="num">7.53%</td><td class="num">6.48%</td><td class="num">+1.05 pp</td><td class="num">0.00864</td></tr>
+                <tr><td>Residual</td><td class="num">5.85%</td><td class="num">5.28%</td><td class="num">+0.57 pp</td><td class="num">0.119</td></tr>
+                <tr class="critical-row"><td>High threshold</td><td class="num">1.330%</td><td class="num">1.265%</td><td class="num">+0.065 pp</td><td class="num"><strong>0.772</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure>
+            <img src="figures/02_matched_tp_specificity.png" alt="Truth FP 與 matched TP 的 endpoint 比較">
+            <figcaption>高門檻 endpoint 幾乎相同；不支持 FP specificity 或高 PPV subclone 解讀。</figcaption>
+          </figure>
+          <h3>名義顯著的 stable 差異為何仍不足</h3>
+          <ul>
+            <li>6 biological samples 等權 stable RD 僅 +0.113 pp；移除 HCC1395 與 Dorado 後為 -0.153 pp，p=0.780。</li>
+            <li>雙方都 evaluable 的 4,738 pairs：stable FP 12.07% vs TP 9.90%，p=0.000599；此結果已完整揭露。</li>
+            <li>同一 both-evaluable estimand 的 6-sample 等權 RD 降為 +0.419 pp；移除 HCC1395 後 +0.120 pp，p=0.902。</li>
+            <li>同一 4,738 pairs 的 high-threshold 仍為 FP 2.132% vs TP 2.026%，p=0.770。</li>
+          </ul>
+          <div class="guardrail">Primary stable signal受 sample weighting、coverage 與 matching imbalance影響；更接近 subclone claim 的 high-threshold endpoint 沒有 specificity。</div>
+        </section>
+
+        <section id="strict">
+          <span class="section-kicker">Sensitivity intersection</span>
+          <h2>Row-circular null 與 REF background 將候選縮到 10 sites，但仍不是 clone call</h2>
+          <p>Column permutation 會破壞 read 內 CpG correlation；本輪另以每條 read 獨立 cyclic shift 保留 values、missingness 與 row covariance，使用 199 null replicates、empirical p≤0.05、≥80% valid null、10 seeds 與 pairwise ARI≥0.8。</p>
+          <figure>
+            <img src="figures/04_strict_sensitivity.png" alt="嚴格 null、assignment 與 REF background gates 的候選數">
+            <figcaption>583 primary → 542 column empirical-p → 245 row-circular → 103 high threshold；不同 gate 交集後 strict 10。</figcaption>
+          </figure>
+          <h3>Allele background 反證</h3>
+          <ul>
+            <li>583 ALT-stable sites 中，tumor REF 可評估 450；其中 112/450 = 24.89% 也形成 stable multigroup。</li>
+            <li>103 high-threshold 中，REF 21/76 = 27.63% stable；ALT+REF joint clustering 64/78 stable。</li>
+            <li>43/103 在 normal 有 ALT read且 AF≥1%；31/103 AF≥5%；29/103 tumor caller AF≥0.8。</li>
+            <li><strong>Matched-normal methylation matrix 未跑，狀態是 NOT_TESTED。</strong></li>
+          </ul>
+          <h3>10 個 strict epigenetic follow-up candidates</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Dataset</th><th>Site</th><th class="num">ALT reads</th><th>Groups</th><th class="num">Tumor AF</th><th>LongPhase-S</th><th>Regional context</th></tr></thead>
+              <tbody>
+                <tr><td>COLO829</td><td class="nowrap">chr4:92,183,865 C&gt;T</td><td class="num">12</td><td>7 / 5</td><td class="num">0.500</td><td>PASS→PASS</td><td>linear regional</td></tr>
+                <tr><td>COLO829</td><td class="nowrap">chr13:54,250,213 C&gt;T</td><td class="num">15</td><td>9 / 5</td><td class="num">0.484</td><td>PASS→PASS</td><td>incomplete</td></tr>
+                <tr><td>COLO829</td><td class="nowrap">chr20:52,761,564 C&gt;T</td><td class="num">21</td><td>12 / 8</td><td class="num">0.512</td><td>PASS→PASS</td><td>linear regional</td></tr>
+                <tr><td>COLO829</td><td class="nowrap">chr20:52,761,565 C&gt;T</td><td class="num">21</td><td>12 / 8</td><td class="num">0.512</td><td>PASS→PASS</td><td>linear regional</td></tr>
+                <tr class="critical-row"><td>H1437</td><td class="nowrap">chr1:85,105,364 A&gt;C</td><td class="num">35</td><td>21 / 14</td><td class="num">0.468</td><td>LowQual→PASS</td><td><strong>branching / recurrence</strong></td></tr>
+                <tr><td>HCC1395</td><td class="nowrap">chr8:82,037,650 A&gt;G</td><td class="num">14</td><td>6 / 5</td><td class="num">0.149</td><td>PASS→PASS</td><td>incomplete</td></tr>
+                <tr><td>HCC1395</td><td class="nowrap">chr8:82,044,380 A&gt;T</td><td class="num">12</td><td>7 / 5</td><td class="num">0.180</td><td>PASS→PASS</td><td>no regional tree</td></tr>
+                <tr><td>HCC1395</td><td class="nowrap">chr8:82,160,837 T&gt;C</td><td class="num">16</td><td>9 / 7</td><td class="num">0.185</td><td>PASS→PASS</td><td>no regional tree</td></tr>
+                <tr><td>HCC1395</td><td class="nowrap">chr8:82,170,588 G&gt;A</td><td class="num">17</td><td>12 / 5</td><td class="num">0.212</td><td>PASS→PASS</td><td>no regional tree</td></tr>
+                <tr><td>HCC1395 Dorado</td><td class="nowrap">chr5:750,311 A&gt;G</td><td class="num">19</td><td>8 / 5 / 5</td><td class="num">0.196</td><td>LowQual→PASS</td><td>incomplete</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="verdict"><strong>非獨立性：</strong>chr20 兩個相鄰 sites 使用同一 ALT readset；HCC1395 四個 chr8 sites 同屬一個 layered component。10 sites 實際只有 9 unique readsets、6 regional components，不能報成 10 個獨立事件。</div>
+        </section>
+
+        <section id="hp">
+          <span class="section-kicker">Read tags</span>
+          <h2>LongPhase-S tags 完整讀取，但沒有第二 somatic haplotype 證據</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Scope</th><th class="num">ALT reads</th><th class="num">HP 1-1</th><th class="num">HP 2-1</th><th class="num">HP3</th><th class="num">Untagged</th><th class="num">HP 1-2 / 2-2</th></tr></thead>
+              <tbody>
+                <tr><td>All FP</td><td class="num">113,845</td><td class="num">53,552</td><td class="num">53,444</td><td class="num">6,560</td><td class="num">289</td><td class="num"><strong>0</strong></td></tr>
+                <tr><td>Stable</td><td class="num">15,412</td><td class="num">6,897</td><td class="num">7,857</td><td class="num">620</td><td class="num">38</td><td class="num"><strong>0</strong></td></tr>
+                <tr><td>High threshold</td><td class="num">3,276</td><td class="num">1,616</td><td class="num">1,655</td><td class="num">4</td><td class="num">1</td><td class="num"><strong>0</strong></td></tr>
+                <tr><td>Strict</td><td class="num">182</td><td class="num">147</td><td class="num">34</td><td class="num">1</td><td class="num">0</td><td class="num"><strong>0</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure>
+            <img src="figures/06_longphase_hp_tags.png" alt="Focal ALT reads 的 LongPhase-S HP tag 分布">
+            <figcaption><code>1-1/2-1</code> 是第一 somatic haplotype family；明確第二 somatic haplotype <code>1-2/2-2</code> 全部為 0。</figcaption>
+          </figure>
+          <p>High-threshold 103/103 assignment ARI 穩定，只能說 methyl groups 的 statistical membership 穩定；不能把它們改名為 HP-defined clones。</p>
+        </section>
+
+        <section id="topology">
+          <span class="section-kicker">Structural identifiability</span>
+          <h2>同一 methylation endpoint 同時出現在 linear 與 branching regional context</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>High-threshold regional context</th><th class="num">N</th></tr></thead>
+              <tbody>
+                <tr><td>No regional tree</td><td class="num">28</td></tr>
+                <tr><td>Branching / recurrence</td><td class="num">25</td></tr>
+                <tr><td>Candidate set incomplete</td><td class="num">22</td></tr>
+                <tr><td>All stored regional trees linear</td><td class="num">22</td></tr>
+                <tr><td>Trivial one-edge only</td><td class="num">6</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ul>
+            <li>High-threshold 相對其他 FP 沒有 linear regional-context enrichment：Fisher OR 1.217，p=0.441。</li>
+            <li>Focal single-site linear topology identifiable：0/7,745。</li>
+            <li>Layered tree orthogonal subclone confirmation：0/7,745。</li>
+            <li>Strict 10 仍包含 linear 3、branching 1、incomplete 3、no tree 3。</li>
+          </ul>
+          <div class="figure-pair">
+            <figure><img src="figures/05_topology_context.png" alt="各 endpoint 在區域拓撲 context 的分布"><figcaption>Methylation endpoint 不指定 regional topology。</figcaption></figure>
+            <figure><img src="figures/10_topology_contrast_heatmaps.png" alt="HCC1937 的 linear 與 branching context 甲基熱圖對照"><figcaption>HCC1937 chr9 與 chr14 都有清楚兩群，但 regional context 相反。</figcaption></figure>
+          </div>
+          <div class="guardrail"><strong>結構性限制：</strong>一個 focal sSNV 最多形成 ROOT→ALT trivial edge。要識別 linear / branching，至少需要第二個 mutation state，以及同 reads/cells 的共現、互斥與 cellular prevalence constraints。</div>
+        </section>
+
+        <section id="cases">
+          <span class="section-kicker">Actual cases</span>
+          <h2>清楚的 heatmap 可以重現，也仍可能是 HP、技術軸或 branching context</h2>
+          <div class="case-list">
+            <div class="case"><span class="site">HCC1395 / Dorado chr1:175,089,892 C&gt;T</span><span class="role">TECHNICAL REPLICATION</span><p>兩邊皆 2 groups；ALT HP orientation 由全 HP1-1 變成全 HP2-1。</p></div>
+            <div class="case"><span class="site">HCC1395 / Dorado chr9:39,585,394 G&gt;C</span><span class="role">CLUSTER COUNT CHANGES</span><p>2 groups / linear context 對 3 groups / trivial context；same biological sample。</p></div>
+            <div class="case"><span class="site">HCC1937 chr2:143,925,487 G&gt;A</span><span class="role">HP-AXIS CONFOUND</span><p>89 ALT reads，86/3；normal AF 0.143；stable 但非 residual。</p></div>
+            <div class="case"><span class="site">H2009 chr1:244,024,747 T&gt;C</span><span class="role">TECHNICAL-AXIS CONFOUND</span><p>59 reads，4 groups；tumor AF 1.0、normal AF 0.143。</p></div>
+            <div class="case"><span class="site">H1437 chr1:85,105,364 A&gt;C</span><span class="role">STRICT + BRANCHING</span><p>35 reads，21/14；strict gates pass，但 regional context 是 branching/recurrence。</p></div>
+            <div class="case"><span class="site">H2009 chr18:60,839,476 T&gt;C</span><span class="role">FORCED-ONLY COUNTEREXAMPLE</span><p>Silhouette 會分群，但 primary null 拒絕；顯示 forced clustering 不能當生物證據。</p></div>
+          </div>
+          <figure>
+            <img src="figures/09_technical_replication_heatmaps.png" alt="HCC1395 與 Dorado exact-site read-level methylation heatmaps">
+            <figcaption>局部 pattern 可以跨 basecaller 技術資料重現，但 cluster 數、HP orientation 與 topology context 不完全固定。</figcaption>
+          </figure>
+          <figure>
+            <img src="figures/11_confounder_heatmaps.png" alt="HP 軸、技術軸與 branching strict candidate 反例熱圖">
+            <figcaption>視覺上乾淨的群仍需與 HP、read geometry、normal/REF background 與 topology 一起解讀。</figcaption>
+          </figure>
+        </section>
+
+        <section id="legacy">
+          <span class="section-kicker">Historical sensitivity</span>
+          <h2>先前 InterSubMod 數據與圖片可以參考，但舊比例不能直接沿用</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>共同 3,302 FP sites 的相容層</th><th class="num">相同</th><th>解讀</th></tr></thead>
+              <tbody>
+                <tr><td>Focal ALT read member set</td><td class="num">3,302 / 3,302</td><td>成員集合完全一致</td></tr>
+                <tr><td><code>reads.tsv</code> byte identity</td><td class="num">3,016 / 3,302 = 91.34%</td><td>286 檔有 HP/tag metadata 差異</td></tr>
+                <tr><td>Methylation matrix</td><td class="num">3,302 / 3,302</td><td>歷史 heatmap 可驗證同一 read-level pattern</td></tr>
+                <tr><td>Bernoulli distance matrix</td><td class="num">2,081 / 3,302 = 63.02%</td><td>distance/missingness contract 已改變</td></tr>
+                <tr><td>Stable endpoint Jaccard</td><td class="num">0.548</td><td>endpoint 不能視為同版本</td></tr>
+                <tr><td>High-threshold Jaccard</td><td class="num">0.331</td><td>更不能合併 candidate list</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure>
+            <img src="figures/08_legacy_compatibility.png" alt="Legacy 與 latest InterSubMod common-site compatibility">
+            <figcaption>舊圖可作 pattern-level historical evidence；legacy stable 687/3,188 = 21.55% 不可與 current 583/4,967 = 11.74% 合併。</figcaption>
+          </figure>
+          <p>Legacy stable 687 sites 中，374 至少有一個 passed node 的 <code>n_valid_null=0</code>，存在 fail-open 風險；新版改為 fail-closed 並明示 missing-distance contract。</p>
+        </section>
+
+        <section id="ladder">
+          <span class="section-kicker">Decision ladder</span>
+          <h2>Candidate 要升級成 subclone-supported，還缺 genetic co-membership 與 cellular identity</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Gate</th><th>必要證據</th><th>目前狀態</th></tr></thead>
+              <tbody>
+                <tr><td>A. Read-level pattern</td><td>Stable null + assignment ARI + depth sensitivity</td><td><span class="badge done">已完成</span></td></tr>
+                <tr><td>B. Allele specificity</td><td>Tumor REF + matched-normal methylation</td><td>Tumor REF 已做；normal methylation 未做</td></tr>
+                <tr><td>C. Genetic co-membership</td><td>至少 2 個獨立 sSNV/CN markers 在同一 read group 共現</td><td>未做</td></tr>
+                <tr><td>D. CCF consistency</td><td>Purity/CN-adjusted CCF 與 group fraction 相容</td><td>未做</td></tr>
+                <tr><td>E. Technical replication</td><td>Independent library/basecaller/platform 重現 membership</td><td>HCC 部分完成，非 biological replicate</td></tr>
+                <tr><td>F. Cellular identity</td><td>Single-cell、colony、spatial 或 lineage barcode</td><td>未做</td></tr>
+                <tr><td>G. Topology</td><td>多 mutation states 的 ancestry constraints</td><td>Focal site 0 identifiable</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>合理的 evolution-tree 輸入</h3>
+          <p>仍應使用<strong>同一次最新 LongPhase-S 輸出的 recalibrated FILTER=PASS sSNV</strong>作 genetic input，再整合 multi-locus read co-occurrence、CN/LOH、purity-adjusted CCF 與不確定性。單一 sSNV 的 methyl group 只能作 annotation 或 targeted linkage anchor，不能取代 sSNV callset、不能直接當 tree node。</p>
+          <h3>下一個最高資訊量實驗</h3>
+          <ol>
+            <li>以 10 strict sites 為 anchors，抽取同 reads 跨越的其他 latest PASS sSNVs、germline phase markers 與 CN/LOH segment。</li>
+            <li>比較 methyl group A/B 的 multi-locus somatic co-occurrence，預註冊至少 2 個獨立 genetic markers。</li>
+            <li>加入 matched-normal 同 region methylation matrix，使用相同 row-circular null。</li>
+            <li>把 HCC1395 chr8 四 sites 當一個 regional component 檢驗，避免把 epigenetic domain 當四個 clones。</li>
+            <li>只有通過 genetic co-membership + CCF consistency 的 candidates 才送入 topology inference。</li>
+          </ol>
+        </section>
+
+        <section id="audit">
+          <span class="section-kicker">Independent review</span>
+          <h2>四個獨立審查面向與外部 Claude Code 都拒絕 overclaim</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Reviewer</th><th>責任邊界</th><th>獨立結論</th></tr></thead>
+              <tbody>
+                <tr><td>Kant</td><td>Provenance / LongPhase-S tags</td><td>最新 PASS、sidecar、MM/ML、no-overwrite 成立；HP 不等於 clone label。</td></tr>
+                <tr><td>Bernoulli</td><td>Statistics / null / controls</td><td>Assignment 可穩定；high threshold 不具 FP specificity；strict 不是 FDR/PPV。</td></tr>
+                <tr><td>Linnaeus</td><td>Topology / biological claim</td><td>單一 sSNV 不可識別 linear/branching；same-pipeline tree 非正交。</td></tr>
+                <tr><td>Copernicus</td><td>Legacy compatibility</td><td>舊圖可驗證 pattern；舊 distance/null 口徑使 prevalence 不可比較。</td></tr>
+                <tr class="critical-row"><td>External Claude Code 2.1.202 / Opus high</td><td>Read-only adversarial audit</td><td><strong>VALID WITH CORRECTIONS</strong>；15 項重算通過，沒有會翻轉 verdict 的錯誤。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>外部審查要求的三項修正</h3>
+          <ol>
+            <li>Both-evaluable stable endpoint 必須與 high-threshold 對稱揭露。</li>
+            <li>Legacy 21.55% 必須寫出 687/3,188 與來源。</li>
+            <li>ALT readset 成員 100% 相同，不得誤寫為 <code>reads.tsv</code> 100% byte-identical；實際為 91.34%。</li>
+          </ol>
+          <details>
+            <summary>可重現命令與實際驗證摘要</summary>
+            <div>
+              <pre><code>python3 research/20260715_single_fp_alt_multicluster_subclone_validation/scripts/build_report_dataset.py \
+  --output-dir research/20260715_single_fp_alt_multicluster_subclone_validation/results/report_dataset_v1
+
+python3 research/20260715_single_fp_alt_multicluster_subclone_validation/scripts/generate_report_figures.py \
+  --report-dataset research/20260715_single_fp_alt_multicluster_subclone_validation/results/report_dataset_v1/report_dataset.json \
+  --assignments research/20260715_single_fp_alt_multicluster_subclone_validation/results/focal_alt_multicluster/latest_full_v3_frozen/latest_stable_multigroup_read_assignments.jsonl \
+  --output-dir research/20260715_single_fp_alt_multicluster_subclone_validation/figures
+
+python3 -m unittest discover \
+  -s research/20260715_single_fp_alt_multicluster_subclone_validation/tests \
+  -p 'test_*.py' -v</code></pre>
+              <p>實際輸出：report dataset <code>pass=true</code>；11 PNG manifest <code>pass=true</code>；14/14 tests pass；全部本輪 Python scripts <code>py_compile</code> exit 0。</p>
+            </div>
+          </details>
+          <details>
+            <summary>Machine-readable evidence 與完整審查文件</summary>
+            <div>
+              <ul class="source-list">
+                <li><a href="results/report_dataset_v1/report_dataset.json">Report dataset SoT (JSON)</a></li>
+                <li><a href="results/report_dataset_v1/per_sample_metrics.tsv">Per-sample metrics (TSV)</a></li>
+                <li><a href="results/report_dataset_v1/strict_followup_candidates.tsv">Strict candidate table (TSV)</a></li>
+                <li><a href="results/report_dataset_v1/case_catalog.tsv">Actual case catalog (TSV)</a></li>
+                <li><a href="reviews/20260715_multiagent_consensus.md">Multi-agent consensus</a></li>
+                <li><a href="reviews/20260715_external_claude_code_review.md">External Claude Code full retained review</a></li>
+                <li><a href="20260715_單一FP_sSNV_ALT_read甲基多群與subclone假說全量驗證_01.md">完整 Markdown 報告</a></li>
+              </ul>
+            </div>
+          </details>
+          <h3>文獻與工具語義</h3>
+          <ul class="source-list">
+            <li><a href="https://link.springer.com/article/10.1186/s13059-015-0602-8">PhyloWGS</a>：以多 somatic mutations、VAF、CN 與 population frequency 定義 subclonal composition。</li>
+            <li><a href="https://genome.cshlp.org/content/30/4/602">RETrace</a>：lineage marker 與 methylation 分工，不把 methylation cluster 當 lineage marker。</li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/27322744/">Li et al. 2016</a>：genetic 與 epigenetic heterogeneity 可有不同 dynamics。</li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/42231478/">Costabile et al. 2026</a>：單一 clone expansion 後仍可重建多樣 epialleles。</li>
+            <li><a href="https://github.com/twolinin/longphase">LongPhase official repository</a>；tag semantics 另以本地 KB 核對。</li>
+          </ul>
+          <div class="provenance">
+            <strong>Provenance</strong><br>
+            Report generated: 2026-07-15 Asia/Taipei · repository commit at analysis start: <code>2bec873</code> · worktree dirty and unrelated user changes preserved.<br>
+            Frozen analysis library SHA-256: <code>da2aa...</code> · frozen analysis script SHA-256: <code>c243ee...</code> · manifest SHA-256: <code>16f2ef66634e8592e32e5088d8383d94dead0ae2b0d32847f4d8843f8bdc1a45</code>.<br>
+            Final claim: stable focal-ALT methylation multigroup is a read-level epigenetic heterogeneity candidate, not a confirmed subclone and not evidence of linear evolution by itself.
+          </div>
+        </section>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

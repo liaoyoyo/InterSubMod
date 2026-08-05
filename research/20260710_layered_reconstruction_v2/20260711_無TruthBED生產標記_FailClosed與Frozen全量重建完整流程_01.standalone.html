@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="無 Truth BED production tagging、fail-closed validator、frozen provenance 與全量 layered run 的工程流程與判斷說明書。">
+  <meta name="source-sha256" content="be17987c337403dad1f877b64e1c930ccba79444741182a954094f5375e6bcb5">
+  <title>無 Truth BED Production Tagging｜工程流程與說明書</title>
+  <style>
+    :root {
+      --c-accent: #D97757;
+      --c-accent-deep: #B85A3F;
+      --c-text: #141413;
+      --c-text-soft: #5D5D58;
+      --c-bg: #F2EEE6;
+      --c-surface: #FFFDF8;
+      --c-surface-2: #F7F2E9;
+      --c-border: #D9CFBF;
+      --c-border-strong: #A99B88;
+      --c-code-bg: #ECE5D9;
+      --c-critical: #A83416;
+      --c-critical-bg: #FCE9E3;
+      --c-warning: #8A5A05;
+      --c-warning-bg: #FAEFCB;
+      --c-success: #176B3A;
+      --c-success-bg: #E4F3E9;
+      --c-info: #214E6B;
+      --c-info-bg: #E4EEF3;
+      --c-ink: #242624;
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 24px;
+      --sp-6: 32px;
+      --sp-7: 48px;
+      --sp-8: 64px;
+      --sp-9: 96px;
+      --ff-body: "IBM Plex Sans TC", "Noto Sans CJK TC", "Source Han Sans TW", "PingFang TC", sans-serif;
+      --ff-display: "DIN Alternate", "Bahnschrift", "IBM Plex Sans TC", "Noto Sans CJK TC", sans-serif;
+      --ff-mono: "IBM Plex Mono", "JetBrains Mono", "Noto Sans Mono CJK TC", monospace;
+      --fs-xs: 12px;
+      --fs-sm: 14px;
+      --fs-md: 16px;
+      --fs-lg: 18px;
+      --fs-xl: 22px;
+      --fs-2xl: 29px;
+      --fs-3xl: clamp(32px, 4.2vw, 50px);
+      --lh-tight: 1.22;
+      --lh-base: 1.68;
+      --radius-sm: 3px;
+      --radius-md: 7px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 2px 5px rgba(36, 38, 36, 0.08);
+      --shadow-md: 0 9px 24px rgba(36, 38, 36, 0.10);
+      --w-canvas: 1460px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--c-text);
+      background: var(--c-bg);
+      font-family: var(--ff-body);
+      font-size: var(--fs-md);
+      line-height: var(--lh-base);
+      overflow-wrap: anywhere;
+    }
+    a {
+      color: var(--c-info);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    a:hover { color: var(--c-accent-deep); }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--c-accent);
+      outline-offset: 3px;
+    }
+    code, pre, kbd { font-family: var(--ff-mono); }
+    code {
+      background: var(--c-code-bg);
+      border: 1px solid #DED4C5;
+      border-radius: var(--radius-sm);
+      padding: 1px 5px;
+      font-size: 0.88em;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      margin: var(--sp-4) 0;
+      padding: var(--sp-4);
+      color: #EAE8DF;
+      background: var(--c-ink);
+      border-left: 5px solid var(--c-accent);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-sm);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      overflow-wrap: normal;
+    }
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      overflow-wrap: normal;
+    }
+
+    .status-ribbon {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-3);
+      min-height: 46px;
+      padding: var(--sp-2) var(--sp-4);
+      color: #FFFDF8;
+      background: linear-gradient(90deg, #A83416 0%, #8A5A05 100%);
+      border-bottom: 3px solid #5E3106;
+      font-family: var(--ff-display);
+      font-size: var(--fs-sm);
+      font-weight: 750;
+      letter-spacing: 0.035em;
+      text-align: center;
+    }
+    .status-ribbon .lamp {
+      width: 11px;
+      height: 11px;
+      flex-grow: 0;
+      flex-shrink: 0;
+      flex-basis: 11px;
+      background: #FFF2A8;
+      border: 2px solid #5E3106;
+      border-radius: 50%;
+    }
+    .status-ribbon strong { letter-spacing: 0.12em; }
+
+    .layout {
+      width: min(100%, var(--w-canvas));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: var(--sp-5);
+      padding: var(--sp-5);
+      align-items: start;
+    }
+    .toc {
+      position: sticky;
+      top: var(--sp-4);
+      max-height: calc(100vh - var(--sp-6));
+      overflow-y: auto;
+      min-width: 0;
+      background: #262825;
+      color: #F3EEE5;
+      border: 1px solid #11130F;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .toc-head {
+      padding: var(--sp-4);
+      border-bottom: 1px solid #4E504A;
+    }
+    .toc .eyebrow {
+      display: block;
+      margin-bottom: 2px;
+      color: #ECA087;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .toc h2 {
+      margin: 0;
+      color: #FFFDF8;
+      border: 0;
+      padding: 0;
+      font-family: var(--ff-display);
+      font-size: var(--fs-lg);
+    }
+    .toc nav { padding: var(--sp-3) var(--sp-2) var(--sp-4); }
+    .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+    .toc li { counter-increment: toc; }
+    .toc a {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: var(--sp-1);
+      padding: 7px var(--sp-2);
+      color: #DCD9D0;
+      border-left: 3px solid transparent;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .toc a::before {
+      content: counter(toc, decimal-leading-zero);
+      color: #9FA39A;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      padding-top: 2px;
+    }
+    .toc a:hover {
+      color: #FFFDF8;
+      background: #353832;
+      border-left-color: var(--c-accent);
+    }
+    .toc a.core {
+      color: #FFF1C2;
+      font-weight: 700;
+    }
+    .toc-foot {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      color: #C5C6BF;
+      background: #1D1F1C;
+      border-top: 1px solid #4E504A;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+    }
+
+    main.report {
+      min-width: 0;
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    article { min-width: 0; }
+    .report-header {
+      position: relative;
+      padding: var(--sp-7) clamp(24px, 5vw, 64px) var(--sp-6);
+      color: #F9F5EC;
+      background: #252724;
+      border-bottom: 7px solid var(--c-accent);
+      overflow: hidden;
+    }
+    .report-header::after {
+      content: "FR-07 / METHOD CONTROL";
+      position: absolute;
+      right: var(--sp-5);
+      top: var(--sp-4);
+      color: #8F938A;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+    }
+    .pretitle {
+      margin: 0 0 var(--sp-3);
+      color: #ECA087;
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 920px;
+      margin: 0;
+      font-family: var(--ff-display);
+      font-size: var(--fs-3xl);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: var(--lh-tight);
+    }
+    .deck {
+      max-width: 830px;
+      margin: var(--sp-4) 0 0;
+      color: #D9D7CF;
+      font-size: var(--fs-lg);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      margin: var(--sp-6) 0 0;
+      background: #4D504A;
+      border: 1px solid #4D504A;
+    }
+    .meta-item {
+      min-width: 0;
+      padding: var(--sp-3);
+      background: #30332E;
+    }
+    .meta-item dt {
+      margin: 0;
+      margin-bottom: 2px;
+      color: #AEB1A9;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+    .meta-item dd {
+      margin: 0;
+      color: #FFFDF8;
+      font-size: 13px;
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .meta-item code {
+      color: #FFFDF8;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      font-size: 11px;
+    }
+
+    .content { padding: var(--sp-6) clamp(20px, 5vw, 64px) var(--sp-8); }
+    .section {
+      position: relative;
+      margin: var(--sp-8) 0 0;
+      scroll-margin-top: var(--sp-4);
+    }
+    .section:first-child { margin-top: 0; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-2);
+      color: var(--c-accent-deep);
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .section-label::before {
+      content: "";
+      width: 26px;
+      height: 3px;
+      background: var(--c-accent);
+    }
+    h2.section-title {
+      max-width: 900px;
+      margin: 0 0 var(--sp-4);
+      padding: 0 0 var(--sp-3);
+      color: var(--c-text);
+      border-bottom: 1px solid var(--c-border);
+      font-family: var(--ff-display);
+      font-size: var(--fs-2xl);
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+    }
+    h3 {
+      margin: var(--sp-6) 0 var(--sp-2);
+      font-family: var(--ff-display);
+      font-size: var(--fs-xl);
+      line-height: 1.35;
+    }
+    h4 {
+      margin: var(--sp-5) 0 var(--sp-2);
+      font-family: var(--ff-display);
+      font-size: var(--fs-lg);
+    }
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    li + li { margin-top: var(--sp-1); }
+    .lede {
+      max-width: 850px;
+      font-size: var(--fs-lg);
+      line-height: 1.65;
+    }
+    .source-tag {
+      display: inline-block;
+      margin-top: var(--sp-3);
+      color: var(--c-text-soft);
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.035em;
+    }
+
+    .verdict-panel {
+      display: grid;
+      grid-template-columns: 8px minmax(0, 1fr);
+      margin: var(--sp-5) 0;
+      background: var(--c-warning-bg);
+      border: 1px solid #D6B85C;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .verdict-panel::before { content: ""; background: var(--c-warning); }
+    .verdict-body { padding: var(--sp-4) var(--sp-5); }
+    .verdict-kicker {
+      display: block;
+      color: var(--c-warning);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+    .verdict-body strong {
+      display: block;
+      margin: var(--sp-1) 0 var(--sp-2);
+      font-family: var(--ff-display);
+      font-size: var(--fs-xl);
+      line-height: 1.35;
+    }
+    .verdict-body p { margin: 0; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--sp-3);
+      margin: var(--sp-5) 0;
+    }
+    .stat-box {
+      min-width: 0;
+      padding: var(--sp-4);
+      background: var(--c-surface-2);
+      border: 1px solid var(--c-border);
+      border-top: 4px solid var(--c-accent);
+      border-radius: var(--radius-md);
+    }
+    .stat-box.critical { border-top-color: var(--c-critical); }
+    .stat-box.warning { border-top-color: var(--c-warning); }
+    .stat-box.success { border-top-color: var(--c-success); }
+    .stat-value {
+      display: block;
+      color: var(--c-ink);
+      font-family: var(--ff-display);
+      font-size: clamp(25px, 3vw, 35px);
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .stat-label {
+      display: block;
+      margin-top: var(--sp-2);
+      color: var(--c-text-soft);
+      font-size: var(--fs-xs);
+      line-height: 1.45;
+    }
+
+    .tier {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      padding: 3px 8px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.025em;
+    }
+    .tier-l1 { color: var(--c-success); background: var(--c-success-bg); }
+    .tier-l2 { color: var(--c-info); background: var(--c-info-bg); }
+    .tier-l4 { color: var(--c-warning); background: var(--c-warning-bg); }
+    .tier-none { color: var(--c-critical); background: var(--c-critical-bg); }
+
+    .claim-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-3);
+      margin: var(--sp-4) 0;
+    }
+    .claim-card {
+      min-width: 0;
+      padding: var(--sp-4);
+      background: var(--c-surface-2);
+      border: 1px solid var(--c-border);
+      border-left: 5px solid var(--c-info);
+      border-radius: var(--radius-md);
+    }
+    .claim-card.pending { border-left-color: var(--c-warning); }
+    .claim-card.blocked { border-left-color: var(--c-critical); }
+    .claim-card.verified { border-left-color: var(--c-success); }
+    .claim-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-2);
+    }
+    .claim-head strong {
+      font-family: var(--ff-display);
+      font-size: var(--fs-lg);
+      line-height: 1.35;
+    }
+    .claim-card p { margin: 0; font-size: var(--fs-sm); }
+
+    details.evidence-card {
+      margin: var(--sp-3) 0;
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    details.evidence-card[open] { box-shadow: var(--shadow-sm); }
+    details.evidence-card.core { border-left: 5px solid var(--c-warning); }
+    details.evidence-card.critical { border-left: 5px solid var(--c-critical); }
+    details.evidence-card.verified { border-left: 5px solid var(--c-success); }
+    details.evidence-card > summary {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--c-surface-2);
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+    }
+    details.evidence-card > summary::-webkit-details-marker { display: none; }
+    details.evidence-card > summary::before {
+      content: "▸";
+      color: var(--c-accent-deep);
+      font-family: var(--ff-mono);
+      transition: transform 160ms ease;
+    }
+    details.evidence-card[open] > summary::before { transform: rotate(90deg); }
+    .details-body { padding: var(--sp-4); border-top: 1px solid var(--c-border); }
+    .details-body > :first-child { margin-top: 0; }
+    .details-body > :last-child { margin-bottom: 0; }
+
+    .callout {
+      margin: var(--sp-4) 0;
+      padding: var(--sp-3) var(--sp-4);
+      border-left: 5px solid;
+      border-radius: var(--radius-md);
+    }
+    .callout strong { font-family: var(--ff-display); }
+    .callout-warning {
+      color: #5F3E05;
+      background: var(--c-warning-bg);
+      border-color: var(--c-warning);
+    }
+    .callout-critical {
+      color: #70210E;
+      background: var(--c-critical-bg);
+      border-color: var(--c-critical);
+    }
+    .callout-success {
+      color: #114F2B;
+      background: var(--c-success-bg);
+      border-color: var(--c-success);
+    }
+    .callout-info {
+      color: #16394E;
+      background: var(--c-info-bg);
+      border-color: var(--c-info);
+    }
+
+    .table-wrap {
+      width: 100%;
+      margin: var(--sp-4) 0;
+      overflow-x: auto;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-md);
+    }
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      font-size: var(--fs-sm);
+      background: var(--c-surface);
+    }
+    caption {
+      padding: var(--sp-3) var(--sp-4);
+      color: var(--c-text-soft);
+      background: var(--c-surface-2);
+      border-bottom: 1px solid var(--c-border);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-align: left;
+    }
+    th, td {
+      padding: 10px var(--sp-3);
+      border-bottom: 1px solid var(--c-border);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: #3F403C;
+      background: #ECE5D9;
+      font-family: var(--ff-display);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    tr.row-safe td { background: var(--c-success-bg); }
+    tr.row-warn td { background: var(--c-warning-bg); }
+    tr.row-bug td { background: var(--c-critical-bg); }
+    td.nowrap { white-space: nowrap; }
+    td code { font-size: 11px; }
+
+    .decision-code {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 0;
+      margin: var(--sp-4) 0;
+      background: var(--c-ink);
+      color: #EAE8DF;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      font-family: var(--ff-mono);
+      font-size: var(--fs-sm);
+    }
+    .decision-code .line-no,
+    .decision-code .line {
+      padding: 5px var(--sp-3);
+      border-bottom: 1px solid #3F423D;
+    }
+    .decision-code .line-no {
+      color: #888D84;
+      background: #1B1D1A;
+      text-align: right;
+      user-select: none;
+    }
+    .decision-code .line { overflow-wrap: anywhere; }
+    .decision-code .line:last-child,
+    .decision-code .line-no:nth-last-child(2) { border-bottom: 0; }
+    .token-stop { color: #FFB49F; font-weight: 800; }
+    .token-go { color: #9DD9B2; font-weight: 800; }
+
+    .svg-figure {
+      margin: var(--sp-5) 0;
+      padding: var(--sp-4);
+      background: #F5F0E7;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius-lg);
+    }
+    .svg-figure svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      margin: 0 auto;
+      font-family: var(--ff-body);
+    }
+    .svg-figure figcaption {
+      margin-top: var(--sp-3);
+      color: var(--c-text-soft);
+      font-size: var(--fs-sm);
+    }
+
+    .step-chain {
+      margin: var(--sp-5) 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+    .step-chain li {
+      position: relative;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: var(--sp-3);
+      margin: 0;
+      padding: 0 0 var(--sp-5);
+      counter-increment: step;
+    }
+    .step-chain li::before {
+      content: counter(step, decimal-leading-zero);
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      color: #FFFDF8;
+      background: var(--c-ink);
+      border: 3px solid var(--c-accent);
+      border-radius: 50%;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .step-chain li::after {
+      content: "";
+      position: absolute;
+      left: 21px;
+      top: 44px;
+      bottom: 0;
+      width: 2px;
+      background: var(--c-border-strong);
+    }
+    .step-chain li:last-child::after { display: none; }
+    .step-card {
+      min-width: 0;
+      padding: 0 0 var(--sp-2);
+    }
+    .step-card h3 { margin: 1px 0 var(--sp-1); font-size: var(--fs-lg); }
+    .step-card p { margin: var(--sp-1) 0; }
+    .verify {
+      padding: var(--sp-2) var(--sp-3);
+      color: #16394E;
+      background: var(--c-info-bg);
+      border-left: 3px solid var(--c-info);
+      font-size: var(--fs-sm);
+    }
+
+    .path-list {
+      margin: var(--sp-4) 0;
+      padding: 0;
+      list-style: none;
+    }
+    .path-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2px;
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .path-list li:last-child { border-bottom: 0; }
+    .path-list a, .path-list code {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .path-list span { color: var(--c-text-soft); font-size: var(--fs-sm); }
+
+    .provenance-footer {
+      margin-top: var(--sp-8);
+      padding: var(--sp-5);
+      color: #D5D3CB;
+      background: #252724;
+      border-top: 7px solid var(--c-accent);
+    }
+    .provenance-footer h2 {
+      margin: 0 0 var(--sp-3);
+      color: #FFFDF8;
+      font-family: var(--ff-display);
+      font-size: var(--fs-xl);
+    }
+    .prov-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-2) var(--sp-5);
+      margin: 0;
+    }
+    .prov-grid div {
+      display: grid;
+      grid-template-columns: 115px minmax(0, 1fr);
+      gap: var(--sp-2);
+      padding: var(--sp-2) 0;
+      border-bottom: 1px solid #444740;
+    }
+    .prov-grid dt {
+      color: #AEB1A9;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+    }
+    .prov-grid dd {
+      margin: 0;
+      color: #F5F1E9;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+    .provenance-footer code {
+      color: #FFFDF8;
+      background: #333630;
+      border-color: #4A4D46;
+    }
+    .final-warning {
+      margin: var(--sp-4) 0 0;
+      padding: var(--sp-3);
+      color: #FFF1C2;
+      border: 1px solid #8C7846;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 230px minmax(0, 1fr); padding: var(--sp-3); }
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .status-ribbon { align-items: flex-start; font-size: 12px; }
+      .layout { display: block; padding: var(--sp-2); }
+      .toc { position: static; max-height: none; margin-bottom: var(--sp-3); }
+      .toc nav { columns: 2; column-gap: var(--sp-2); }
+      .toc li { break-inside: avoid; }
+      .report-header { padding: var(--sp-6) var(--sp-4) var(--sp-5); }
+      .report-header::after { display: none; }
+      .meta-grid, .claim-grid, .prov-grid { grid-template-columns: 1fr; }
+      .content { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
+      .section { margin-top: var(--sp-7); }
+      details.evidence-card > summary { grid-template-columns: 18px minmax(0, 1fr); }
+      details.evidence-card > summary .tier { grid-column: 2; justify-self: start; }
+    }
+    @media (max-width: 520px) {
+      .status-ribbon {
+        display: grid;
+        grid-template-columns: 12px minmax(0, 1fr);
+        grid-template-areas:
+          "lamp title"
+          "desc desc";
+        justify-content: stretch;
+        text-align: left;
+      }
+      .status-ribbon .lamp { grid-area: lamp; }
+      .status-ribbon strong { grid-area: title; }
+      .status-ribbon > span:last-child { grid-area: desc; }
+      .toc nav { columns: 1; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .report-header { padding-top: var(--sp-5); }
+      .meta-grid { grid-template-columns: 1fr; }
+      .content { padding-left: var(--sp-3); padding-right: var(--sp-3); }
+      h2.section-title { font-size: 25px; }
+      .step-chain li { grid-template-columns: 46px minmax(0, 1fr); }
+      .step-chain li::before { width: 38px; height: 38px; }
+      .step-chain li::after { left: 18px; top: 38px; }
+      .prov-grid div { grid-template-columns: 1fr; gap: 0; }
+    }
+
+    @media print {
+      @page { margin: 14mm; }
+      body { background: #FFFFFF; color: #000000; font-size: 10pt; }
+      .status-ribbon { color: #000000; background: #FFFFFF; border: 2px solid #000000; }
+      .status-ribbon .lamp { background: #FFFFFF; border-color: #000000; }
+      .layout { display: block; width: 100%; padding: 0; }
+      .toc { display: none; }
+      main.report { border: 0; box-shadow: none; }
+      .report-header {
+        color: #000000;
+        background: #FFFFFF;
+        border: 2px solid #000000;
+        padding: 12mm;
+      }
+      .report-header::after, .pretitle, .deck, .meta-item dt, .meta-item dd { color: #000000; }
+      .meta-grid { background: #000000; border-color: #000000; }
+      .meta-item { background: #FFFFFF; }
+      .meta-item code { color: #000000; }
+      .content { padding: 8mm 0; }
+      .section { margin-top: 12mm; }
+      details.evidence-card, .claim-card, .table-wrap, .svg-figure, pre {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      details.evidence-card > * { display: block !important; }
+      details.evidence-card > summary { list-style: none; }
+      details.evidence-card > summary::before { display: none; }
+      .provenance-footer {
+        color: #000000;
+        background: #FFFFFF;
+        border: 2px solid #000000;
+      }
+      .provenance-footer h2, .prov-grid dd, .provenance-footer code, .final-warning { color: #000000; }
+      .prov-grid dt { color: #333333; }
+      .provenance-footer code { background: #FFFFFF; border-color: #777777; }
+      .final-warning { border-color: #000000; }
+      h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+      table, svg { break-inside: avoid; page-break-inside: avoid; }
+      a[href]:not([href^="#"])::after {
+        content: " [" attr(href) "]";
+        color: #555555;
+        font-family: var(--ff-mono);
+        font-size: 8pt;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      details.evidence-card > summary::before { transition: none; }
+    }
+  </style>
+</head>
+<body id="top">
+  <div class="status-ribbon" role="status" aria-label="目前執行狀態">
+    <span class="lamp" aria-hidden="true"></span>
+    <strong>PARTIAL EXECUTION / NO-LAUNCH</strong>
+    <span>production sidecar 仍為 0/7 complete；新的 layered full run 尚未啟動</span>
+  </div>
+
+  <div class="layout">
+    <aside class="toc" aria-label="章節導航">
+      <div class="toc-head">
+        <span class="eyebrow">Flight recorder index</span>
+        <h2>工程流程導航</h2>
+      </div>
+      <nav>
+        <ol>
+          <li><a class="core" href="#tldr">先讀結論與禁行線</a></li>
+          <li><a class="core" href="#status">目前為何只能等待</a></li>
+          <li><a href="#scope">全量 scope 與任務類型</a></li>
+          <li><a class="core" href="#roles">VCF / BAM 角色分離</a></li>
+          <li><a href="#navigation">大型 workspace 查詢法</a></li>
+          <li><a href="#historical">歷史 BAM 為何不可用</a></li>
+          <li><a class="core" href="#producer">Production 命令與參數</a></li>
+          <li><a class="core" href="#sidecar">FIFO sidecar 與 join 契約</a></li>
+          <li><a class="core" href="#fail-closed">Fail-closed 拒絕條件</a></li>
+          <li><a class="core" href="#provenance">Frozen provenance trust chain</a></li>
+          <li><a href="#inventory">程式與 schema authority</a></li>
+          <li><a href="#parameters">全量設定與 partition</a></li>
+          <li><a class="core" href="#launch-gate">Launch gate 判斷</a></li>
+          <li><a class="core" href="#handoff-supervisor">Reviewed handoff supervisor</a></li>
+          <li><a href="#step-verify">Step → Verify 執行鏈</a></li>
+          <li><a href="#recovery">失敗與復原規則</a></li>
+          <li><a class="core" href="#evidence">證據矩陣與 pre-reg 對照</a></li>
+          <li><a href="#sources">證據索引</a></li>
+          <li><a class="core" href="#limits">限制與 provenance</a></li>
+        </ol>
+      </nav>
+      <div class="toc-foot">
+        <span>MODE</span><span>B Comprehensive validation</span>
+        <span>SCOPE</span><span>7 datasets / 6 biological</span>
+        <span>PRIMARY</span><span>chr1–22</span>
+      </div>
+    </aside>
+
+    <main class="report">
+      <article>
+        <header class="report-header">
+          <p class="pretitle">Engineering process manual · fail-closed evidence console</p>
+          <h1>無 Truth BED Production Tagging、Fail-Closed 與 Frozen 全量重建</h1>
+          <p class="deck">從 LongPhase-S producer、HP/PS sidecar、嚴格輸入契約，到 atomic lifecycle 與全量 launch gate 的完整角色、判斷、設定、驗證與限制。</p>
+          <dl class="meta-grid">
+            <div class="meta-item">
+              <dt>Task type</dt>
+              <dd>B Comprehensive validation</dd>
+            </div>
+            <div class="meta-item">
+              <dt>Current status</dt>
+              <dd>in_progress / NO-LAUNCH layered full run</dd>
+            </div>
+            <div class="meta-item">
+              <dt>Evidence tier</dt>
+              <dd>L2 ★★★★（production 7/7 pending）</dd>
+            </div>
+            <div class="meta-item">
+              <dt>Cycle</dt>
+              <dd><code>20260710-2244-layered-reconstruction-v2</code></dd>
+            </div>
+            <div class="meta-item">
+              <dt>Commit</dt>
+              <dd><code>4fb9e742482b63a660de19a1f1bd07d49d713111</code></dd>
+            </div>
+            <div class="meta-item">
+              <dt>Source generated</dt>
+              <dd>2026-07-11 05:04 +08:00</dd>
+            </div>
+          </dl>
+        </header>
+
+        <div class="content">
+          <section class="section" id="tldr">
+            <div class="section-label">00 · Decision first</div>
+            <h2 class="section-title">元件已受測，但 production 未完成，因此全量 run 仍不得啟動</h2>
+            <p class="lede">目前唯一正確動作是等待既有 producer 完成並累積 exact 7/7 PASS。任何第二個相同 producer、重疊的 layered full run、或把 START / 檔案存在當完成，均違反本流程。</p>
+
+            <div class="verdict-panel">
+              <div class="verdict-body">
+                <span class="verdict-kicker">Current launch verdict</span>
+                <strong>NO-LAUNCH — 等待 production evidence，不覆寫 gate</strong>
+                <p>無 truth flags 的命令方向正確；但 0/7 completion、real inputs pending 與 I/O / 容量條件仍使 downstream launch 不成立。</p>
+              </div>
+            </div>
+
+            <div class="stat-grid" aria-label="五秒重點數字">
+              <div class="stat-box critical">
+                <span class="stat-value">0/7</span>
+                <span class="stat-label">production outputs complete；目前不是完成證據</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value">7 / 6</span>
+                <span class="stat-label">datasets / biological samples；scope 必須 exact</span>
+              </div>
+              <div class="stat-box success">
+                <span class="stat-value">35/35</span>
+                <span class="stat-label">COLO829 bounded alignment exposures exact match</span>
+              </div>
+              <div class="stat-box warning">
+                <span class="stat-value">932 GiB</span>
+                <span class="stat-label">big7 free；小於 1.674 TiB physical BAM payload</span>
+              </div>
+            </div>
+
+            <div class="claim-grid">
+              <div class="claim-card verified">
+                <div class="claim-head">
+                  <strong>方法元件有機制證據</strong>
+                  <span class="tier tier-l1">★★★★★ · L1</span>
+                </div>
+                <p>strict contract 17/17、receipt normalizer 8/8、atomic lifecycle 13/13、runner 12/12、verifier 16/16；這些是 synthetic mechanism PASS。</p>
+              </div>
+              <div class="claim-card pending">
+                <div class="claim-head">
+                  <strong>Production 仍只到 process observation</strong>
+                  <span class="tier tier-l2">★★★★☆ · L2</span>
+                </div>
+                <p>active commands 不含 truth flags，但 producer completion 為 0/7；不得把元件測試外推成 production complete。</p>
+              </div>
+              <div class="claim-card verified">
+                <div class="claim-head">
+                  <strong>Sidecar join 僅獲 bounded 支持</strong>
+                  <span class="tier tier-l2">★★★★☆ · L2</span>
+                </div>
+                <p>synthetic 3/3 與 COLO829 bounded 35/35 支持 coordinate join；real probe 的 historical tags 不證 clean production tags。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head">
+                  <strong>Physical 7 BAM 計畫容量不足</strong>
+                  <span class="tier tier-l2">★★★★☆ · L2</span>
+                </div>
+                <p>1.674 TiB payload、20% 安全餘裕需約 2.3 TB；big7 只餘 932 GiB，因此維持 HOLD。</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <strong>Effect size / CI：</strong>此處是工程 invariant、exact count、bytes 與 checksum gate，不是效果估計；Cohen ribbon 與 confidence interval 不適用。
+            </div>
+            <span class="source-tag">SOURCE MAP · Markdown §0、§13、Scope Limitation</span>
+          </section>
+
+          <section class="section" id="status">
+            <div class="section-label">01 · Active state</div>
+            <h2 class="section-title">先等既有 producer；I/O 飽和時不可重複啟動</h2>
+            <p>LongPhase-S production run 已在執行 HCC1395 與 HCC1395_DORADO。命令沒有 <code>--truth-vcf</code> 或 <code>--truth-bed</code>，保留 production default internal filtering，並輸出 recalibrated VCF。</p>
+
+            <div class="table-wrap">
+              <table>
+                <caption>目前 gate readback：process direction 與 completion 必須分開</caption>
+                <thead>
+                  <tr><th>Gate</th><th>截點狀態</th><th>Verdict</th><th>證據</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="row-safe"><td>production truth flags</td><td>active commands 0 個 truth flags</td><td>方向正確；完成度 pending</td><td><span class="tier tier-l2">★★★★☆ · L2</span></td></tr>
+                  <tr class="row-bug"><td>production completion</td><td>0/7 PASS</td><td>停止：不可 launch layered</td><td><span class="tier tier-l2">★★★★☆ · L2</span></td></tr>
+                  <tr class="row-safe"><td>sidecar join method</td><td>synthetic 3/3；COLO829 bounded 35/35</td><td>bounded PASS</td><td><span class="tier tier-l2">★★★★☆ · L2</span></td></tr>
+                  <tr class="row-safe"><td>strict v3 input contract</td><td>17/17；receipt normalizer 8/8</td><td>component PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span></td></tr>
+                  <tr class="row-safe"><td>atomic lifecycle</td><td>13/13</td><td>component PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span></td></tr>
+                  <tr class="row-warn"><td>frozen runner / verifier</td><td>runner 12/12；verifier 16/16</td><td>integrated component PASS；real inputs pending</td><td><span class="tier tier-l1">★★★★★ · L1</span></td></tr>
+                  <tr class="row-bug"><td>physical 7 BAM capacity</td><td>1.674 TiB payload vs 932 GiB free</td><td>HOLD</td><td><span class="tier tier-l2">★★★★☆ · L2</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-critical"><strong>最基本判斷：</strong><code>START</code>、檔案存在、單一 <code>pass:true</code> 都不是 completion。只有每個 sample 的 status、artifact、index、validation 與 hash 全部成立，才可累積 PASS。</div>
+            <span class="source-tag">SOURCE MAP · Markdown §0</span>
+          </section>
+
+          <section class="section" id="scope">
+            <div class="section-label">02 · Scope lock</div>
+            <h2 class="section-title">全量 scope 被固定為 7 datasets、6 biological samples 與 chr1–22</h2>
+            <div class="claim-grid">
+              <div class="claim-card">
+                <div class="claim-head"><strong>Datasets</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>HCC1395、HCC1395_DORADO、COLO829、H1437、H2009、HCC1937、HCC1954。</p>
+              </div>
+              <div class="claim-card">
+                <div class="claim-head"><strong>Biological identity</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>共 6 個 biological samples；HCC1395 與 HCC1395_DORADO 是同一細胞株的兩個資料處理版本。</p>
+              </div>
+              <div class="claim-card">
+                <div class="claim-head"><strong>Genome scope</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>Primary 為 chr1–22；chrX / chrY 只可列 out-of-scope census。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>Subset prohibition</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>Task type B Comprehensive validation；subset 不能冒充 final evidence。</p>
+              </div>
+            </div>
+            <p>研究目標為 G4 reproducibility、G5 external auditability；HP / read-level evidence 次要服務 G1 / G3。</p>
+            <span class="source-tag">SOURCE MAP · Markdown §1</span>
+          </section>
+
+          <section class="section" id="roles">
+            <div class="section-label">ROLE MAP · Semantic roles</div>
+            <h2 class="section-title">四種 VCF 與兩種 BAM authority 必須分名，tree 只吃 recalibrated PASS</h2>
+
+            <details class="evidence-card core" open>
+              <summary>
+                <span>角色對照表：不要以檔名相似推定語意</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <div class="table-wrap">
+                  <table>
+                    <caption>每個 role 的唯一用途與禁止混用點</caption>
+                    <thead><tr><th>Role</th><th>定義</th><th>是否進 tree</th><th>不可混淆點</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>caller_raw_vcf</code></td><td>raw ClairS 全 records</td><td>否；進 lossless site ledger</td><td>可能含 non-PASS</td></tr>
+                      <tr><td><code>longphase_input_vcf</code></td><td>ClairS FILTER=PASS，供 LongPhase-S</td><td>否；是 producer input</td><td>不等於 recalibrated PASS</td></tr>
+                      <tr><td><code>longphase_recalibrated_all_vcf</code></td><td>LongPhase-S <code>_sc.vcf</code> 全 keys，含 PASS / LowQual</td><td>否；完整 recalibration ledger</td><td>key-preserving 不等於 tag-all</td></tr>
+                      <tr class="row-safe"><td><code>longphase_recalibrated_pass_vcf</code></td><td><code>_sc.vcf</code> FILTER=PASS</td><td>是；canonical primary sSNV universe</td><td>2026-07-11 04:50 最新決策</td></tr>
+                      <tr><td>raw tumor BAM</td><td>base / quality / coordinates authority</td><td>是</td><td>embedded historical HP/PS 必須 ignore</td></tr>
+                      <tr><td>production tag sidecar</td><td>HP/PS authority</td><td>是</td><td>不是 persistent BAM，不含 base / quality</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>Production policy：名稱必須反映 internal filtering</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <p>目前沒有 <code>--disableFilter</code>，policy 固定稱 <code>production_default_filter</code>：</p>
+                <ol>
+                  <li>ClairS PASS 交給 LongPhase-S parser。</li>
+                  <li>LongPhase-S 仍執行內部 somatic filtering；高信心位點參與 tagging。</li>
+                  <li><code>--output-somatic-vcf</code> 保存 input record keys 並標 recalibrated FILTER。</li>
+                  <li>只有 recalibrated FILTER=PASS 進 canonical tree backbone。</li>
+                </ol>
+                <div class="callout callout-warning"><strong>另一個研究角色：</strong>若要讓所有 ClairS PASS 都作 tagging seed，必須另建 <code>caller_pass_tag_all</code> role、加入 <code>--disableFilter</code> 並另跑；不可事後替現有 artifact 改名。</div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §2、§2.1</span>
+          </section>
+
+          <section class="section" id="navigation">
+            <div class="section-label">04 · Search discipline</div>
+            <h2 class="section-title">大型 workspace 應沿索引、manifest 與關聯路徑查，不做 broad recursive search</h2>
+            <ol class="step-chain">
+              <li>
+                <div class="step-card"><h3>先讀 live focus 與研究索引</h3><p><code>InterSubMod/docs/CURRENT_FOCUS.md</code> 與研究 <code>00_INDEX.md</code>。</p><div class="verify">驗證：定位 active cycle、scope、阻塞與 current authority。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>沿 run metadata 導航</h3><p>active manifest、<code>run_context.json</code>、<code>upstream_dependency.tsv</code>、run-root status / hash ledger。</p><div class="verify">驗證：避免把 archive 或其他 run 當 current。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>依 manifest 精確開檔</h3><p>只開啟被 manifest 指向的 producer、consumer 與 validator。</p><div class="verify">驗證：程式、資料與 receipt 可形成關聯鏈。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>單檔 bounded 查詢</h3><p>只在精確檔案使用 <code>rg pattern file</code>、<code>stat</code>、<code>sha256sum</code> 或 <code>jq</code>。</p><div class="verify">驗證：不觸發 NFS metadata storm，亦不混用同名歷史檔。</div></div>
+              </li>
+            </ol>
+            <span class="source-tag">SOURCE MAP · Markdown §3</span>
+          </section>
+
+          <section class="section" id="historical">
+            <div class="section-label">05 · Contamination boundary</div>
+            <h2 class="section-title">Historical tagged BAM 受 truth BED / VCF 影響，不能充當 clean production authority</h2>
+            <p class="lede">歷史 7 個 tagged BAM 中，6/7 的 LongPhase-S <code>@PG</code> 含 <code>--truth-bed</code>，7/7 含 historical truth VCF。Source audit 顯示 benchmark BED 會在 <code>tagRead</code> 前移除 BED 外 somatic variants。</p>
+
+            <pre><code>truth BED/VCF flags
+  → 可參與 somatic tagging 的 variant universe 改變
+  → read HP/PS assignment 改變
+  → per-read R/A/X 與 germline-family evidence 改變
+  → regional tree candidate/support 改變</code></pre>
+
+            <div class="callout callout-critical"><strong>結論：</strong>historical embedded HP/PS 只適合作 engineering baseline，不能證明 genome-wide clean tagging。</div>
+            <p>主要 confounders：LongPhase internal filter policy、raw BAM identity、sidecar join collision、mutable manifest / source、I/O overlap。Mediator 是 HP/PS evidence；本報告不把 run completion status 當 biological outcome，也不對 collider 作因果調整。</p>
+            <span class="source-tag">SOURCE MAP · Markdown §4</span>
+          </section>
+
+          <section class="section" id="producer">
+            <div class="section-label">06 · Producer contract</div>
+            <h2 class="section-title">Production LongPhase-S 命令不帶 truth flags，且每一個 default 都必須明示來源</h2>
+
+            <pre><code>longphase-s somatic_haplotag \
+  -s &lt;germline_phased.vcf.gz&gt; \
+  -b &lt;normal.bam&gt; \
+  --tumor-snv-file &lt;ClairS.PASS.vcf.gz&gt; \
+  --tumor-bam-file &lt;raw_tumor.bam&gt; \
+  -r &lt;GRCh38.fasta&gt; \
+  -t 12 --tagSupplementary -q 20 \
+  --output-somatic-vcf \
+  -o &lt;production_prefix&gt;</code></pre>
+
+            <details class="evidence-card core" open>
+              <summary>
+                <span>參數逐項判斷：explicit、default 與 forbidden 不可混寫</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <div class="table-wrap">
+                  <table>
+                    <caption>Canonical effective options</caption>
+                    <thead><tr><th>Option</th><th>Value / origin</th><th>基本判斷</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>-s</code></td><td>explicit</td><td>phased germline scaffold；需 VCF index 與 reference dictionary 一致</td></tr>
+                      <tr><td><code>-b</code></td><td>explicit</td><td>matched normal alignment</td></tr>
+                      <tr><td><code>--tumor-snv-file</code></td><td>explicit</td><td>ClairS paired FILTER=PASS；不是 truth</td></tr>
+                      <tr><td><code>--tumor-bam-file</code></td><td>explicit</td><td>raw tumor alignment payload</td></tr>
+                      <tr><td><code>-r</code></td><td>explicit</td><td>GRCh38 no-alt reference</td></tr>
+                      <tr><td><code>-t</code></td><td>12 explicit</td><td>每 sample threads；外層最多 2 samples 並行</td></tr>
+                      <tr><td><code>--tagSupplementary</code></td><td>true explicit</td><td>supplementary alignment 也輸出 HP/PS</td></tr>
+                      <tr><td><code>-q</code></td><td>20 explicit</td><td>MAPQ 基本門檻</td></tr>
+                      <tr><td><code>-p</code></td><td>0.6 default</td><td>read assignment threshold；effective-options 必鎖定 default origin</td></tr>
+                      <tr><td><code>--output-somatic-vcf</code></td><td>true explicit</td><td>產 recalibrated <code>_sc.vcf</code></td></tr>
+                      <tr class="row-bug"><td><code>--truth-vcf / --truth-bed</code></td><td>forbidden / absent</td><td>任一 token 存在即 fail</td></tr>
+                      <tr class="row-warn"><td><code>--disableFilter</code></td><td>absent</td><td>internal filtering enabled；policy=<code>production_default_filter</code></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §5</span>
+          </section>
+
+          <section class="section" id="sidecar">
+            <div class="section-label">07 · Read-tag transport</div>
+            <h2 class="section-title">FIFO sidecar 是容量受限的 HP/PS authority，不是實體 tagged BAM</h2>
+            <p>7 個 historical tagged BAM 合計約 1.674 TiB（1.841 TB decimal）；以 20% 安全餘裕，physical plan 需約 2.3 TB。big7 只餘 932 GiB，因此不能安全保留 7 份新 BAM / BAI。</p>
+
+            <div class="claim-grid">
+              <div class="claim-card verified">
+                <div class="claim-head"><strong>保存的資料</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p><code>CHROM START0 END0 QNAME FLAG MAPQ CIGAR_B2 HP PS</code>；raw TSV、bgzip TSV 與 tabix index。</p>
+              </div>
+              <div class="claim-card pending">
+                <div class="claim-head"><strong>刻意不保存的資料</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>LongPhase 輸出 BAM payload 經 named pipe 被 capture 後不落地；raw tumor BAM 保持 base / quality authority。</p>
+              </div>
+              <div class="claim-card">
+                <div class="claim-head"><strong>規劃容量</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>全 7 datasets 預估約 20–40 GiB；60 GiB 為 hard planning cap。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>Assurance 限制</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p><code>coordinate_join_v1</code> 不含 SEQ / QUAL digest；不得稱 full payload identity。</p>
+              </div>
+            </div>
+
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>coordinate_join_v1 只有六項條件全成立時才可用</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <p>Alignment key：<code>QNAME + RNAME + START0 + END0 + FLAG + BLAKE2b8(CIGAR)</code>。</p>
+                <ol>
+                  <li>Producer raw tumor BAM 以 <code>storage_identity_v1</code> 綁定，不能換版。</li>
+                  <li>Sidecar 與 index 做 full SHA-256。</li>
+                  <li>全域 duplicate rows=0、conflict=0、malformed=0、unknown HP=0。</li>
+                  <li>Runtime 每 split exact matches=alignment exposures，missing / conflict=0。</li>
+                  <li>Embedded BAM HP/PS fallback 明確 forbidden。</li>
+                  <li>報告標示 lower assurance，不稱 <code>alignment_identity_v2</code> 或 full payload identity。</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="evidence-card verified" open>
+              <summary>
+                <span>等價證據：synthetic edge cases 加 bounded real probe</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <ul>
+                  <li>Synthetic 3/3：同 QNAME primary / supplementary 分離、缺列檢出、衝突列檢出。</li>
+                  <li>COLO829 bounded real probe：chr1 兩個 sSNV、35 alignment exposures；direct 與 sidecar calls / HP / PS / family digest 完全相同。</li>
+                  <li>Combined payload SHA-256：<code>b466e584ab820448769bd1aede31434021f3c6ce1762788afc7363c0fe2d71d7</code>（兩路相同）。</li>
+                </ul>
+                <div class="callout callout-warning"><strong>限制：</strong>real probe 使用 historical tags，只證 join 方法，不證 production clean tags；真實 supplementary 由 synthetic fixture 補，不是 full-scope evidence。</div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §6、§6.1、§6.2</span>
+          </section>
+
+          <section class="section" id="fail-closed">
+            <div class="section-label">08 · Refusal matrix</div>
+            <h2 class="section-title">Fail-closed 的基本定義是「任何未知都停止」，不是「看不到錯誤就通過」</h2>
+
+            <div class="decision-code" aria-label="Fail-closed 決策邏輯">
+              <span class="line-no">01</span><span class="line">if dataset cardinality != exact 7 / 6 → <span class="token-stop">FAIL</span></span>
+              <span class="line-no">02</span><span class="line">if truth token present or effective options drift → <span class="token-stop">FAIL</span></span>
+              <span class="line-no">03</span><span class="line">if identity / hash / subject binding unknown → <span class="token-stop">FAIL</span></span>
+              <span class="line-no">04</span><span class="line">if lifecycle / heartbeat / worker / invariants unknown → <span class="token-stop">FAIL</span></span>
+              <span class="line-no">05</span><span class="line">only when every explicit condition holds → <span class="token-go">EXIT 0</span></span>
+            </div>
+
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>輸入與 schema 必須拒絕的狀況</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <ul>
+                  <li>0 datasets 造成 <code>all([])=true</code>。</li>
+                  <li>不是 exact 7 datasets / 6 biological IDs、duplicate sample、extra sample dir。</li>
+                  <li>schema 2.0 / 2.1 mixed mode 或任一 sidecar 欄缺失。</li>
+                  <li>truth option token、producer argv / input / hash 不符。</li>
+                </ul>
+              </div>
+            </details>
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>Identity 與 provenance 必須拒絕的狀況</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <ul>
+                  <li>sidecar / index / validation hash 漂移，或 validation subject 不綁 BAM。</li>
+                  <li>specified tabix index 未實際使用。</li>
+                  <li>source / env / manifest 在 preflight 後改變。</li>
+                </ul>
+              </div>
+            </details>
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>Runtime 與 scientific invariants 必須拒絕的狀況</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <ul>
+                  <li>worker 任一 non-zero、heartbeat stale、PID reuse、非法 state transition。</li>
+                  <li>output manifest、五 parts、funnel、site ledger、region / layered invariant 任一不守恆。</li>
+                </ul>
+              </div>
+            </details>
+            <div class="callout callout-critical"><strong>退出碼語意：</strong>Exit 0 只能在所有明確條件成立時出現；「看不到錯誤」不是 PASS。</div>
+            <span class="source-tag">SOURCE MAP · Markdown §7</span>
+          </section>
+
+          <section class="section" id="provenance">
+            <div class="section-label">09 · Frozen trust chain</div>
+            <h2 class="section-title">Frozen provenance 將 reviewed intent、observed identity、execution 與 success 分成九個不可跳步的節點</h2>
+
+            <figure class="svg-figure">
+              <svg viewBox="0 0 800 330" role="img" aria-labelledby="trust-title trust-desc" xmlns="http://www.w3.org/2000/svg">
+                <title id="trust-title">Frozen provenance 九節點 trust chain</title>
+                <desc id="trust-desc">由 reviewed source manifest v3 經 strict validator、atomic frozen lock、source bytes 與 environment lock、launch receipt、frozen workers、independent verifier、SUCCEEDED state，最後才原子建立 _SUCCESS。</desc>
+                <defs>
+                  <marker id="arrow-trust" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0 0 L10 5 L0 10 Z" fill="#5D5D58"></path>
+                  </marker>
+                </defs>
+                <g fill="none" stroke="#5D5D58" stroke-width="2" marker-end="url(#arrow-trust)">
+                  <line x1="148" y1="82" x2="166" y2="82"></line>
+                  <line x1="302" y1="82" x2="320" y2="82"></line>
+                  <line x1="456" y1="82" x2="474" y2="82"></line>
+                  <line x1="610" y1="82" x2="628" y2="82"></line>
+                  <line x1="696" y1="112" x2="696" y2="202"></line>
+                  <line x1="628" y1="232" x2="610" y2="232"></line>
+                  <line x1="474" y1="232" x2="456" y2="232"></line>
+                  <line x1="320" y1="232" x2="302" y2="232"></line>
+                </g>
+                <g font-family="var(--ff-body)" text-anchor="middle">
+                  <g>
+                    <rect x="12" y="52" width="136" height="60" rx="7" fill="#E4EEF3" stroke="#214E6B" stroke-width="2"></rect>
+                    <text x="28" y="72" text-anchor="start" fill="#214E6B" font-family="var(--ff-mono)" font-size="10" font-weight="800">01</text>
+                    <text x="80" y="81" fill="#16394E" font-size="12" font-weight="700">reviewed source</text>
+                    <text x="80" y="99" fill="#16394E" font-size="11">manifest v3</text>
+                  </g>
+                  <g>
+                    <rect x="166" y="52" width="136" height="60" rx="7" fill="#E4EEF3" stroke="#214E6B" stroke-width="2"></rect>
+                    <text x="182" y="72" text-anchor="start" fill="#214E6B" font-family="var(--ff-mono)" font-size="10" font-weight="800">02</text>
+                    <text x="234" y="81" fill="#16394E" font-size="12" font-weight="700">strict validator</text>
+                    <text x="234" y="99" fill="#16394E" font-size="11">recompute identity</text>
+                  </g>
+                  <g>
+                    <rect x="320" y="52" width="136" height="60" rx="7" fill="#FAEFCB" stroke="#8A5A05" stroke-width="2"></rect>
+                    <text x="336" y="72" text-anchor="start" fill="#8A5A05" font-family="var(--ff-mono)" font-size="10" font-weight="800">03</text>
+                    <text x="388" y="81" fill="#5F3E05" font-size="12" font-weight="700">atomic frozen</text>
+                    <text x="388" y="99" fill="#5F3E05" font-size="11">input lock</text>
+                  </g>
+                  <g>
+                    <rect x="474" y="52" width="136" height="60" rx="7" fill="#FAEFCB" stroke="#8A5A05" stroke-width="2"></rect>
+                    <text x="490" y="72" text-anchor="start" fill="#8A5A05" font-family="var(--ff-mono)" font-size="10" font-weight="800">04</text>
+                    <text x="542" y="81" fill="#5F3E05" font-size="12" font-weight="700">source bytes</text>
+                    <text x="542" y="99" fill="#5F3E05" font-size="11">+ environment lock</text>
+                  </g>
+                  <g>
+                    <rect x="628" y="52" width="136" height="60" rx="7" fill="#FCE9E3" stroke="#A83416" stroke-width="2"></rect>
+                    <text x="644" y="72" text-anchor="start" fill="#A83416" font-family="var(--ff-mono)" font-size="10" font-weight="800">05</text>
+                    <text x="696" y="81" fill="#70210E" font-size="12" font-weight="700">launch receipt</text>
+                    <text x="696" y="99" fill="#70210E" font-size="11">bind all digests</text>
+                  </g>
+                  <g>
+                    <rect x="628" y="202" width="136" height="60" rx="7" fill="#FAEFCB" stroke="#8A5A05" stroke-width="2"></rect>
+                    <text x="644" y="222" text-anchor="start" fill="#8A5A05" font-family="var(--ff-mono)" font-size="10" font-weight="800">06</text>
+                    <text x="696" y="231" fill="#5F3E05" font-size="12" font-weight="700">frozen workers</text>
+                    <text x="696" y="249" fill="#5F3E05" font-size="11">read lock + bundle</text>
+                  </g>
+                  <g>
+                    <rect x="474" y="202" width="136" height="60" rx="7" fill="#E4F3E9" stroke="#176B3A" stroke-width="2"></rect>
+                    <text x="490" y="222" text-anchor="start" fill="#176B3A" font-family="var(--ff-mono)" font-size="10" font-weight="800">07</text>
+                    <text x="542" y="231" fill="#114F2B" font-size="12" font-weight="700">independent</text>
+                    <text x="542" y="249" fill="#114F2B" font-size="11">verifier recompute</text>
+                  </g>
+                  <g>
+                    <rect x="320" y="202" width="136" height="60" rx="7" fill="#E4F3E9" stroke="#176B3A" stroke-width="2"></rect>
+                    <text x="336" y="222" text-anchor="start" fill="#176B3A" font-family="var(--ff-mono)" font-size="10" font-weight="800">08</text>
+                    <text x="388" y="231" fill="#114F2B" font-size="12" font-weight="700">SUCCEEDED</text>
+                    <text x="388" y="249" fill="#114F2B" font-size="11">state first</text>
+                  </g>
+                  <g>
+                    <rect x="166" y="202" width="136" height="60" rx="7" fill="#E4F3E9" stroke="#176B3A" stroke-width="3"></rect>
+                    <text x="182" y="222" text-anchor="start" fill="#176B3A" font-family="var(--ff-mono)" font-size="10" font-weight="800">09</text>
+                    <text x="234" y="231" fill="#114F2B" font-size="12" font-weight="800">_SUCCESS</text>
+                    <text x="234" y="249" fill="#114F2B" font-size="11">atomic + last</text>
+                  </g>
+                </g>
+                <text x="16" y="310" fill="#5D5D58" font-family="var(--ff-mono)" font-size="10">Unknown / mutation / premature success at any node → fail closed</text>
+              </svg>
+              <figcaption>圖 1：九節點 trust chain。顏色與文字共同編碼階段；任何 digest、identity、state 或 output invariant 不成立，都不能越過下一節點。</figcaption>
+            </figure>
+
+            <details class="evidence-card core" open>
+              <summary>
+                <span>storage_identity_v1 是 lower assurance，不是 full BAM hash</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <p>大型 BAM 若未做 full SHA，必明示：realpath、device / inode、size、mtime / ctime、first / middle / last fixed chunks、header / ref dictionary、BAI full SHA 與 quickcheck。</p>
+                <div class="callout callout-warning"><strong>無法排除的風險：</strong>刻意維持 metadata 與 sampled chunks 的中段 mutation，因此不可寫成 full content hash。</div>
+              </div>
+            </details>
+
+            <details class="evidence-card verified" open>
+              <summary>
+                <span>Lifecycle component 的 mechanism tests</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <p><code>InterSubMod/scripts/layered_v3_lifecycle.py</code> 的 13/13 tests 涵蓋 parent flock、preflight no-publish、source byte tamper、unknown <code>SM_*</code>、heartbeat stale / PID reuse、child fail-fast、真實 SIGTERM 與 <code>_SUCCESS</code> last。</p>
+                <p>Strict manifest / lock contract 為 17/17；post-run producer receipt normalizer 為 8/8。Active producer 未完成時的 readback 為 exit 3 <code>E_INDEX_MISMATCH</code>，只寫 <code>valid_lock_written:false</code> failure report，未建立 manifest。</p>
+                <p>Normalizer 的 symlink regression 依 GNU <code>stat -c</code> 比 logical-path <code>lstat</code>，並由 <code>storage_identity_v1</code> 另鎖 target realpath / metadata / chunks 與 BAI；避免 HCC1395_DORADO 的 80/79-byte symlink 被拿去和 91.36/250.15 GB target size 誤比。</p>
+              </div>
+            </details>
+
+            <details class="evidence-card verified" open>
+              <summary>
+                <span>Runner / verifier 已 cross-component 整合；real 7-dataset artifacts 仍未具備</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <p><code>InterSubMod/scripts/verify_layered_v3.py</code> 的 16/16 tests 涵蓋 empty / duplicate / extra、source / env / input / output mutation、five-part 與 read-unsupported 守恆、layered / region / site-ledger recomputation、tree / input role 防交換、false payload-v2 claim 與 premature <code>_SUCCESS</code>。</p>
+                <p><code>run_layered_v3.py</code> 的 12/12 tests 另涵蓋跨 run-ID global flock、production resource-policy freeze、LongPhase 衝突、NFS mountstats、baseline 期間新 process TOCTOU 與 pre-bundle failure。</p>
+                <div class="callout callout-critical"><strong>不可外推：</strong>Cross-component adapter 已整合，但 real 7-dataset artifacts 仍未具備；component-ready 不等於 launch-ready。</div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §8、§8.1、§8.2、§8.3</span>
+          </section>
+
+          <section class="section" id="inventory">
+            <div class="section-label">10 · Code authority</div>
+            <h2 class="section-title">每支程式與 schema 只有一個 authority；active producer 的 run-start bytes 不可中途改寫</h2>
+            <details class="evidence-card core" open>
+              <summary>
+                <span>Producer、contract、lifecycle 與 verifier inventory</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <div class="table-wrap">
+                  <table>
+                    <caption>表中方法腳本前綴均為 InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</caption>
+                    <thead><tr><th>程式 / schema</th><th>角色</th><th>Authority / status</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>run_longphase_production_sidecars.sh</code></td><td>7-dataset LongPhase producer / FIFO orchestration</td><td>active run-start hash authority；執行中不可修改</td></tr>
+                      <tr><td><code>capture_longphase_tagged_bam_sidecar.py</code></td><td>BAM stream → 9-column HP/PS sidecar</td><td>active producer source；coordinate_join_v1</td></tr>
+                      <tr><td><code>validate_streamed_longphase_sidecar.py</code></td><td>native capture / log / VCF validation</td><td>原始 evidence；不可被 post-run normalizer 覆寫</td></tr>
+                      <tr><td><code>prepare_clean_layered_manifest_v3.py</code></td><td>completed producer → reviewed source manifest v3</td><td>16-case contract suite 的一部分</td></tr>
+                      <tr><td><code>validate_layered_v3_inputs.py</code></td><td>strict validation → frozen lock</td><td>fail-closed authority；valid / failure outputs 分離</td></tr>
+                      <tr><td><code>schemas/layered_input_manifest_v3.schema.json</code></td><td>source intent schema</td><td>exact 7/6、roles、producer / read-tag / CN contract</td></tr>
+                      <tr><td><code>schemas/layered_input_lock_v1.schema.json</code></td><td>observed frozen input schema</td><td>worker / verifier 唯一 input authority</td></tr>
+                      <tr><td><code>schemas/longphase_production_capture_receipt_v1.schema.json</code></td><td>post-run producer evidence schema</td><td>schema frozen；normalizer 8/8 PASS</td></tr>
+                      <tr><td><code>InterSubMod/scripts/layered_v3_lifecycle.py</code></td><td>flock / staging / source / env / state / heartbeat / trap / _SUCCESS</td><td>13/13 component PASS</td></tr>
+                      <tr class="row-warn"><td><code>InterSubMod/scripts/run_layered_v3.py</code></td><td>lifecycle + validator + scientific worker + verifier adapter</td><td>12/12 integrated component PASS；real launch gated</td></tr>
+                      <tr><td><code>InterSubMod/scripts/verify_layered_v3.py</code></td><td>post-input / output independent verifier</td><td>16/16 integrated component PASS</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details class="evidence-card" open>
+              <summary>
+                <span>Scientific consumers 與輸出建構器</span>
+                <span class="tier tier-l1">★★★★★ · L1</span>
+              </summary>
+              <div class="details-body">
+                <div class="table-wrap">
+                  <table>
+                    <caption>Frozen source bundle 必保存實際 bytes 與 full path mapping</caption>
+                    <thead><tr><th>程式</th><th>角色</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>sm_linkage_genomewide.py</code></td><td>pileup、exact sidecar join、HP/PS diagnostics</td></tr>
+                      <tr><td><code>sm_multilocus_combinations.py</code></td><td>multi-locus R/A/X / family groups 與 five-part outputs</td></tr>
+                      <tr><td><code>layered_tree_reconstruction.py</code></td><td>V1–V7 candidate tree / solver</td></tr>
+                      <tr><td><code>build_region_view.py</code></td><td>region-level determinacy / funnel</td></tr>
+                      <tr><td><code>build_ssnv_site_ledger.py</code></td><td>raw / input / recal / tree four-role lossless ledger</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="callout callout-info"><strong>Frozen bundle rule：</strong>人讀 inventory 不能取代 source bytes。正式 bundle 必保存實際 bytes 與完整 path mapping。</div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §8.4</span>
+          </section>
+
+          <section class="section" id="parameters">
+            <div class="section-label">11 · Parameter lock</div>
+            <h2 class="section-title">Layered full run 的 genome、分割與 tree 設定不可依隱含預設漂移</h2>
+            <div class="table-wrap">
+              <table>
+                <caption>Frozen scientific and operational parameters</caption>
+                <thead><tr><th>Parameter</th><th>Locked value</th><th>方法意義</th></tr></thead>
+                <tbody>
+                  <tr><td>genome</td><td>chr1–22</td><td>comprehensive autosomal scope</td></tr>
+                  <tr><td>datasets / biological</td><td>7 / 6</td><td>exact cardinality；non-empty / unique</td></tr>
+                  <tr><td>parallel samples</td><td>≤2</td><td>避免 NFS 疊加</td></tr>
+                  <tr><td>chromosome parts</td><td>5</td><td>22 autosomes 固定 partition，無漏無重</td></tr>
+                  <tr><td><code>MINREAD</code></td><td>3</td><td>multi-locus 基本 read 支持門檻</td></tr>
+                  <tr><td><code>MAX_SNV</code></td><td>8</td><td>每 group 分析上限</td></tr>
+                  <tr><td><code>TIER_R</code></td><td>50,000 bp</td><td>相鄰 sSNV group 距離</td></tr>
+                  <tr><td><code>MAPQ_MIN</code></td><td>20</td><td>consumer alignment gate，與 sidecar 綁定</td></tr>
+                  <tr><td><code>BASEQ_MIN</code></td><td>0</td><td>pileup base gate；明示而非 library default</td></tr>
+                  <tr><td><code>VERIFY_EVERY</code></td><td>1</td><td>每個 eligible unit 跑 V1–V7</td></tr>
+                  <tr><td><code>ANALYSIS_TREE_CAP</code></td><td>0</td><td>不截斷 scientific candidate set</td></tr>
+                  <tr><td><code>DISPLAY_TREE_CAP</code></td><td>32</td><td>只限制展示，不得反饋分析</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <details class="evidence-card" open>
+              <summary>
+                <span>五個 chromosome parts 的固定分配</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <ol>
+                  <li>chr1, 6, 11, 16, 21</li>
+                  <li>chr2, 7, 12, 17, 22</li>
+                  <li>chr3, 8, 13, 18</li>
+                  <li>chr4, 9, 14, 19</li>
+                  <li>chr5, 10, 15, 20</li>
+                </ol>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown §9</span>
+          </section>
+
+          <section class="section" id="launch-gate">
+            <div class="section-label">12 · Launch authorization</div>
+            <h2 class="section-title">只有方法、資料、資源與排他性同時 PASS，Conditional GO 才成立</h2>
+
+            <div class="decision-code" aria-label="Launch gate 決策">
+              <span class="line-no">01</span><span class="line">producer verification exact 7/7 PASS + truth flags absent</span>
+              <span class="line-no">02</span><span class="line">sidecar identity / hash / subject / recalibrated VCF flow PASS</span>
+              <span class="line-no">03</span><span class="line">v3 manifest / lock / source / env / receipt integration PASS</span>
+              <span class="line-no">04</span><span class="line">bounded join + synthetic edge cases PASS</span>
+              <span class="line-no">05</span><span class="line">exclusive process + parent flock PASS</span>
+              <span class="line-no">06</span><span class="line">resource thresholds PASS + parallel samples ≤2</span>
+              <span class="line-no">07</span><span class="line">all true → <span class="token-go">CONDITIONAL GO</span>; otherwise → <span class="token-stop">NO-LAUNCH</span></span>
+            </div>
+
+            <details class="evidence-card critical" open>
+              <summary>
+                <span>七項不可人工 override 的 launch gate</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <ol>
+                  <li>Producer <code>verification_summary.json</code> exact 7/7 pass；所有 truth flags absent。</li>
+                  <li>每 sample sidecar unique、hash、BAM / producer input binding 與 recalibrated VCF flow 全 PASS。</li>
+                  <li>v3 manifest / lock / source / env / receipt cross-component tests PASS。</li>
+                  <li>COLO829 bounded join 方法與 synthetic edge cases PASS。</li>
+                  <li>無另一 LongPhase / layered 同類 process；parent flock 取得。</li>
+                  <li>launch 前 300-second baseline：iowait &lt;20%、big8 NFS READ &lt;80 decimal MB/s、big7 free ≥500 GiB、RAM available ≥128 GiB、load / logical CPU ≤1.25。</li>
+                  <li><code>SM_PARALLEL_SAMPLES≤2</code>，且 production 與 layered 不得重疊。</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="evidence-card core" id="handoff-supervisor" open>
+              <summary>
+                <span>Reviewed one-shot supervisor 正在等待；active wait 不等於 full run 已啟動</span>
+                <span class="tier tier-l1">★★★★★ · L1 + L2 process</span>
+              </summary>
+              <div class="details-body">
+                <p><code>InterSubMod/scripts/continue_layered_v3_after_producer.py</code> 的 28/28 synthetic tests 涵蓋 exact 30 秒 polling、status append / order / regression、雙 supervisor flock、source / tool / PATH drift、partial closeout / receipts、no-overwrite 與 foreground runner failure。</p>
+                <p>Reviewed plan：<code>InterSubMod/research/20260710_layered_reconstruction_v2/launch_plans/20260711_layered_v3_handoff_launch_plan_reviewed_v1.json</code>；byte SHA-256 為 <code>7e0ab871ee2fa15e772d17da75ebe0e836cc7dcc6c2726e7b136a3b305e3da6a</code>、permissions 為 <code>0444</code>。5 inputs 與 25 executable / source / schema / tool pins 均由主代理重算 PASS。</p>
+                <p>PID <code>929656</code> 於 <code>2026-07-11 06:16:43 +0800</code> 以 JSON authorization、CLI execute flag 與 out-of-band SHA 三重 gate 啟動，並持有唯一 handoff flock。</p>
+                <div class="callout callout-critical"><strong>當前仍是 active wait / NO-LAUNCH：</strong>handoff workspace 與 <code>20260711_layered_reconstruction_v3_full_no_truth_v1</code> run root 皆不存在。只有 7/7 + ALL PASS、producer / LongPhase / capture quiescent、closeout 與 7 receipts 逐一 readback 後，才會建立 v3 manifest 並以前景方式呼叫 frozen runner。</div>
+                <p>第二個 supervisor 會以 <code>E_HANDOFF_LOCKED</code> 拒絕。等待期 stdout / stderr 仍連到 parent Codex pipe，尚無 persistent monitor log；正式 stage 開始後才在 handoff workspace 保存 command / log / PID / exit receipts。</p>
+              </div>
+            </details>
+
+            <div class="callout callout-critical"><strong>NO-LAUNCH 規則：</strong>任一條不成立，就不能用「快完成」或人工目測 override。</div>
+            <span class="source-tag">SOURCE MAP · Markdown §10、§10.1</span>
+          </section>
+
+          <section class="section" id="step-verify">
+            <div class="section-label">13 · Execution sequence</div>
+            <h2 class="section-title">八步執行鏈每一步都要有可觀察的 Verify，不能跨 gate</h2>
+            <ol class="step-chain">
+              <li>
+                <div class="step-card"><h3>等待既有 production producer 完成</h3><p>不重啟、不與 layered 重疊。</p><div class="verify">驗證：7/7 sample 各有 PASS status、sidecar / VCF / index / validation / hash，無 START-only。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>Freeze producer provenance</h3><p>固定 run-start code、binary、argv、inputs 與 outputs。</p><div class="verify">驗證：run-start code 4/4 readback、LongPhase binary SHA、command argv 與完整 inputs / outputs 綁定。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>建立 source manifest v3 與 strict frozen lock</h3><p>由 reviewed intent 進 observed identity。</p><div class="verify">驗證：exact 7/6、roles 正確、sidecar / BAM / producer subjects 重算相等；failure 不產 valid lock。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>建立 source bundle、environment lock 與 launch receipt</h3><p>執行 bytes 與環境皆需凍結。</p><div class="verify">驗證：一 byte mutation、unknown <code>SM_*</code>、missing import 均 non-zero；正式 run root 尚不存在。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>通過 resource / exclusivity gate 後 publish run root</h3><p>先 preflight，後 publish。</p><div class="verify">驗證：parent flock、state <code>READY→RUNNING</code>、heartbeat 與 child registry 可讀。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>執行 7 datasets × 5 parts</h3><p>外層 parallel samples 維持 ≤2。</p><div class="verify">驗證：35/35 split exact=exposure、missing / conflict=0；任何 child fail 取消並 wait siblings。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>建立 layered / region / site ledger 並跑 v3 verifier</h3><p>post-input 與 outputs 由 verifier 獨立重算。</p><div class="verify">驗證：五 part / funnel / V1–V7 / site rows / hash / post-input identity 全部重算 PASS。</div></div>
+              </li>
+              <li>
+                <div class="step-card"><h3>Finalize</h3><p>成功標記只能最後出現。</p><div class="verify">驗證：state 先 SUCCEEDED，<code>_SUCCESS</code> 最後建立；evidence ledger 與本報告 / HTML 同步。</div></div>
+              </li>
+            </ol>
+            <span class="source-tag">SOURCE MAP · Markdown §11</span>
+          </section>
+
+          <section class="section" id="recovery">
+            <div class="section-label">14 · Failure semantics</div>
+            <h2 class="section-title">Partial output 必須保留作 forensic evidence；沒有 _SUCCESS 就不是成功</h2>
+            <div class="claim-grid">
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>不刪 partial</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>保留 staging / FAILED 作 forensic evidence；禁止 resume-by-file-existence。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>Run ID 不覆寫</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>同 run ID 已存在即 fail；retry 使用新 <code>_retryNN</code> run ID。</p>
+              </div>
+              <div class="claim-card pending">
+                <div class="claim-head"><strong>Checkpoint 必須可靠</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>producer 或 worker 無可靠 checkpoint 時，不把 partial BAM / TSV 當可續跑點。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>Sidecar 失敗時回退</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>equivalence 或 global uniqueness 失敗即停止 sidecar；回退需 ≥2.3 TB physical BAM 容量，或另設可審核分段策略。</p>
+              </div>
+            </div>
+            <div class="callout callout-warning"><strong>Role 變更：</strong>若 <code>production_default_filter</code> 不符合研究問題，應建立新 role / manifest 重跑，不覆寫現有 artifact 語意。</div>
+            <span class="source-tag">SOURCE MAP · Markdown §12</span>
+          </section>
+
+          <section class="section" id="evidence">
+            <div class="section-label">15 · Evidence ledger view</div>
+            <h2 class="section-title">目前證據足以審查方法，但不足以宣告 production 或 full run 完成</h2>
+
+            <div class="table-wrap">
+              <table>
+                <caption>來源報告的 evidence matrix；absence 必區分 pending 與 true negative</caption>
+                <thead><tr><th>Evidence item</th><th>Status</th><th>Claim tier</th></tr></thead>
+                <tbody>
+                  <tr class="row-safe"><td>KB / source control-flow audit</td><td>PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span> code fact</td></tr>
+                  <tr class="row-safe"><td>7 input quickcheck / index / dictionary</td><td>PASS</td><td><span class="tier tier-l2">★★★★☆ · L2</span> observed inputs</td></tr>
+                  <tr class="row-warn"><td>production command truth flags</td><td>active two commands absent</td><td><span class="tier tier-l2">★★★★☆ · L2</span> process observation</td></tr>
+                  <tr class="row-safe"><td>coordinate_join synthetic</td><td>3/3 PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span> mechanism fixture</td></tr>
+                  <tr class="row-safe"><td>COLO829 bounded join</td><td>35/35 PASS</td><td><span class="tier tier-l2">★★★★☆ · L2</span> bounded real data</td></tr>
+                  <tr class="row-safe"><td>v2 external fail-closed runner</td><td>4/4 PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span> synthetic mechanism</td></tr>
+                  <tr class="row-safe"><td>v3 strict input contract</td><td>17/17 PASS；normalizer 8/8；active incomplete root exit 3、無 valid lock</td><td><span class="tier tier-l1">★★★★★ · L1</span> mechanism + L2 state observation</td></tr>
+                  <tr class="row-safe"><td>v3 lifecycle</td><td>13/13 PASS</td><td><span class="tier tier-l1">★★★★★ · L1</span> synthetic mechanism</td></tr>
+                  <tr class="row-safe"><td>v3 runner / verifier</td><td>runner 12/12；verifier 16/16；cross-component integrated</td><td><span class="tier tier-l1">★★★★★ · L1</span> synthetic mechanism</td></tr>
+                  <tr class="row-warn"><td>handoff supervisor</td><td>28/28 PASS；reviewed plan 30/30 pins；PID 929656 active wait</td><td><span class="tier tier-l1">★★★★★ · L1</span> mechanism + L2 process observation</td></tr>
+                  <tr class="row-bug"><td>production outputs</td><td>0/7 complete at initial cutoff</td><td><span class="tier tier-none">NO EVIDENCE</span> not yet evidence</td></tr>
+                  <tr class="row-bug"><td>new layered full run</td><td>not launched</td><td><span class="tier tier-none">NO EVIDENCE</span> not yet evidence</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <details class="evidence-card core" open>
+              <summary>
+                <span>Pre-registration 對照：門檻沒有因 pending 結果而改寫</span>
+                <span class="tier tier-l2">★★★★☆ · L2</span>
+              </summary>
+              <div class="details-body">
+                <div class="table-wrap">
+                  <table>
+                    <caption>確認性 gate 與本版 readback</caption>
+                    <thead><tr><th>事前要求 / falsifier</th><th>本版觀察</th><th>判斷</th></tr></thead>
+                    <tbody>
+                      <tr class="row-bug"><td>producer exact 7/7 後才可 freeze / launch</td><td>0/7 complete</td><td>門檻未達；NO-LAUNCH</td></tr>
+                      <tr class="row-safe"><td>sidecar join 需 synthetic edge cases + bounded real evidence</td><td>3/3 與 35/35 PASS</td><td>bounded method evidence 成立</td></tr>
+                      <tr class="row-warn"><td>v3 cross-component adapter 必整合</td><td>runner 12/12；verifier 16/16；cross-component integrated</td><td>component-ready；real artifacts 仍 gated</td></tr>
+                      <tr class="row-bug"><td>35/35 real splits 與 final receipt / _SUCCESS</td><td>full run not launched</td><td>未測，不是假陰性也不是完成</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+            <span class="source-tag">SOURCE MAP · Markdown metadata、§13、Scope Limitation</span>
+          </section>
+
+          <section class="section" id="sources">
+            <div class="section-label">16 · Traceable evidence</div>
+            <h2 class="section-title">所有判斷都可沿 source Markdown、索引、audit 與 probe receipt 回查</h2>
+            <ul class="path-list">
+              <li><a href="20260711_無TruthBED生產標記_FailClosed與Frozen全量重建完整流程_01.md">InterSubMod/research/20260710_layered_reconstruction_v2/20260711_無TruthBED生產標記_FailClosed與Frozen全量重建完整流程_01.md</a><span>本 HTML 的唯一內容 SoT。</span></li>
+              <li><a href="00_INDEX.md">InterSubMod/research/20260710_layered_reconstruction_v2/00_INDEX.md</a><span>scope 與 remediation gates。</span></li>
+              <li><a href="pre-decision-audit.md">InterSubMod/research/20260710_layered_reconstruction_v2/pre-decision-audit.md</a><span>PROBE verdict 與 falsifier。</span></li>
+              <li><a href="implementation-notes.md">InterSubMod/research/20260710_layered_reconstruction_v2/implementation-notes.md</a><span>live decisions / deviations 與 narrative pre-registration。</span></li>
+              <li><a href="audit_notes/04_clean_tagging_launch_audit.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/04_clean_tagging_launch_audit.md</a><span>producer / source / capacity。</span></li>
+              <li><a href="audit_notes/05_fail_closed_wiring_audit.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/05_fail_closed_wiring_audit.md</a><span>strict schema 與 adversarial matrix。</span></li>
+              <li><a href="audit_notes/06_launch_resource_redteam.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/06_launch_resource_redteam.md</a><span>host / resource / exclusivity。</span></li>
+              <li><a href="audit_notes/07_layered_v3_lifecycle_contract.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/07_layered_v3_lifecycle_contract.md</a><span>lifecycle component。</span></li>
+              <li><a href="audit_notes/08_layered_v3_runner_integration.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/08_layered_v3_runner_integration.md</a><span>frozen runner、resource / NFS / process gate 與 cross-component 整合。</span></li>
+              <li><a href="audit_notes/09_layered_v3_handoff_supervisor.md">InterSubMod/research/20260710_layered_reconstruction_v2/audit_notes/09_layered_v3_handoff_supervisor.md</a><span>reviewed plan、30 pins、wait / handoff lifecycle 與 28-case tests。</span></li>
+              <li><a href="probes/20260711_COLO829_chr1_4386684_4388348_coordinate_join_v1/equivalence_probe.json">InterSubMod/research/20260710_layered_reconstruction_v2/probes/20260711_COLO829_chr1_4386684_4388348_coordinate_join_v1/equivalence_probe.json</a><span>bounded real receipt。</span></li>
+              <li><code>/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_production_sidecars_v1/</code><span>active producer output root；不是本版的 completed evidence。</span></li>
+            </ul>
+            <span class="source-tag">SOURCE MAP · Markdown §14</span>
+          </section>
+
+          <section class="section" id="limits">
+            <div class="section-label">17 · Scope limitation</div>
+            <h2 class="section-title">這是一份 partial engineering manual；production 7/7、35/35 real splits 與 final _SUCCESS 仍待補證</h2>
+            <div class="claim-grid">
+              <div class="claim-card verified">
+                <div class="claim-head"><strong>已驗證</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>方法 control flow、角色、capacity、bounded join、synthetic fail-closed / lifecycle / verifier components。</p>
+              </div>
+              <div class="claim-card pending">
+                <div class="claim-head"><strong>未驗證</strong><span class="tier tier-l4">★★☆☆☆ · L4 pending</span></div>
+                <p>active producer 7/7 final artifacts、production global sidecar-to-BAM binding、300 秒實機 resource baseline、35/35 real splits 與 final outputs。</p>
+              </div>
+              <div class="claim-card blocked">
+                <div class="claim-head"><strong>禁止推論</strong><span class="tier tier-none">NO OVERCLAIM</span></div>
+                <p>不得寫成 production validation complete；不得把 coordinate_join_v1 稱 payload-v2；不得把 historical truth-tagged BAM 當 clean authority。</p>
+              </div>
+              <div class="claim-card pending">
+                <div class="claim-head"><strong>補強順序</strong><span class="tier tier-l2">★★★★☆ · L2</span></div>
+                <p>producer 7/7 → v3 frozen lock → resource gate → 7-dataset full run → verifier / evidence ledger → 更新報告與 HTML。</p>
+              </div>
+            </div>
+            <div class="callout callout-critical"><strong>讀者退出條件：</strong>如果你只記得一件事：本版記錄的是「方法與 gate 已審查、producer 尚未完成」，不是「full run 已啟動」。</div>
+            <span class="source-tag">SOURCE MAP · Markdown Scope Limitation、Provenance</span>
+          </section>
+        </div>
+
+        <footer class="provenance-footer">
+          <h2>Frozen document provenance</h2>
+          <dl class="prov-grid">
+            <div><dt>Cycle</dt><dd><code>20260710-2244-layered-reconstruction-v2</code></dd></div>
+            <div><dt>Commit</dt><dd><code>4fb9e742482b63a660de19a1f1bd07d49d713111</code></dd></div>
+            <div><dt>Branch</dt><dd><code>research/subclonal-reconstruction-202606</code>（11 worktrees 並行；current 只相對本 worktree）</dd></div>
+            <div><dt>Data version</dt><dd><code>20260711_longphase_s_production_sidecars_v1</code></dd></div>
+            <div><dt>Source generated</dt><dd>2026-07-11 05:04 +08:00</dd></div>
+            <div><dt>Source SHA-256</dt><dd><code>be17987c337403dad1f877b64e1c930ccba79444741182a954094f5375e6bcb5</code></dd></div>
+            <div><dt>Narrative pre-reg</dt><dd><code>InterSubMod/research/20260710_layered_reconstruction_v2/implementation-notes.md</code> 2026-07-11 04:57 條目</dd></div>
+          </dl>
+          <div class="final-warning">PARTIAL EXECUTION / NO-LAUNCH · handoff supervisor active wait · production sidecar 0/7 complete at source cutoff · new layered full run not launched</div>
+        </footer>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
