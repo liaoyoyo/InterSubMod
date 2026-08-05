@@ -18,6 +18,10 @@ heatmap_generation.log
 
 # Build artifacts
 build/
+# build 目錄變體（added 2026-08-06）— 實例：build_handoff_verify/（交接驗收用的
+# from-scratch build）、build_all_ssnv_verification_fix/。原規則只擋 build/ 而漏了這些。
+# 只匹配目錄（結尾斜線），不影響 scripts/build_*.py 等檔案。
+build_*/
 *.o
 *.a
 *.so
@@ -325,6 +329,43 @@ docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/per_chr/
 docs/methodology/_assets/**/*.json
 docs/methodology/_assets/**/*.tsv
 
+# === research 分析輸出資料（added 2026-08-06）===
+# 決策（2026-08-06 用戶）：research/ 的分析輸出視為「可重生」不進版本控制，
+#   重生路徑＝同目錄下已進 git 的 *.py 腳本。
+# 實測待決量：JSON 1,073 檔 215.3 MB（其中 163 檔 >100KB）、HTML 167 檔（最大 3.5 MB）、
+#            sql 72 / xml 70 / stdout 60 / sig 42 / jsonl 39。
+# 例外（仍進 git，見下方 negation）：
+#   - 契約與 provenance：manifest.json / *receipt*.json / schemas/*.json
+#     （*.sha256 不在此規則範圍，本來就進 git）
+#   - *.standalone.html：依 2026-05-19 用戶決策，PI 終版報告含 provenance footer，屬交付物
+# ⚠ 這組取代了本檔上方第 54-56 行註解「manifests (*.json) 屬於 git」的過寬表述 —
+#    實測顯示絕大多數 research JSON 是分析輸出而非 manifest。
+research/**/*.json
+research/**/*.jsonl
+research/**/*.html
+research/**/*.sql
+research/**/*.xml
+research/**/*.stdout
+research/**/*.stderr
+research/**/*.out
+research/**/*.sig
+research/**/*.csi
+research/**/*.tbi
+research/**/*.sqlite
+research/**/*.sqlite3
+# debug trace 以 PID 當副檔名（實例：audit_notes/diagnostic_staging/20260723_v18_c_child_failure/
+# v18_c_write_trace.2906527 等 153 個）。用檔案級 pattern 而非擋整個 diagnostic_staging/ 目錄，
+# 因為該目錄內的 README.md 是有價值的失敗判定文件。
+research/**/*_trace.[0-9]*
+!research/**/manifest.json
+!research/**/schemas/*.json
+!research/**/*.standalone.html
+# ⚠ receipt*.json 刻意「不」放行（2026-08-06 用戶決策）：
+#   實測 research/ 下 308 個 receipt 共 106.8 MB、86 個 >200KB，
+#   分類後幾乎全是 QA/審查/測試失敗輸出（audit_notes/ 136、*.failed.*/ 83、
+#   最大者為 qa/full/validation_receipt.json 1.5 MB），屬可重跑產生的執行輸出。
+#   正式 release receipt 位於 output/（big7_disk_output），本來就不在 git，不受影響。
+
 # === research audit_notes 版本迭代殘骸（added 2026-08-06）===
 # 背景：20260715 的 signed-release 嘗試留下大量版本迭代腳本 —
 #       同一支測試腳本最多 91 個版本，audit_notes/ 下 1,071 個 .py 共 1,205,150 行。
@@ -337,6 +378,14 @@ docs/methodology/_assets/**/*.tsv
 #    新增 audit 腳本時請只 commit 最終版（舊版留在磁碟即可，隨時可查閱）。
 research/**/audit_notes/failed_formal_runs/**/*.py
 research/**/audit_notes/rejected_pre_authority_reviews/**/*.py
+# 帶版號的 audit 腳本一律不進 git（added 2026-08-06）。
+# 這條之所以安全：61 個「最終版」已於 commit 6583ae1 進入版本控制，成為 tracked 檔案，
+# 而 .gitignore 對 tracked 檔案無效 — 因此它們的後續修改仍會被正常追蹤，
+# 只有「尚未進 git 的中間版本」（實測 220 個）會被這條擋住。
+research/**/audit_notes/**/*_v[0-9]*.py
+# 診斷 write-trace 目錄（實例：failed_formal_runs/.../diagnostic_write_traces/
+# intersubmod_v17_c_child_write_trace_20260723T0945Z.2877413 等 49 個，以 PID 結尾）
+research/**/diagnostic_write_traces/**
 
 # === 根目錄一次性執行輸出（added 2026-08-05）===
 # gb_poc.* 為 2026-07-05 的 HP-oriented matched-normal cis-control PoC 輸出，
