@@ -1,0 +1,26 @@
+{
+  "cycle_id": "20260712-1000-hcc1395-pair-coarse-topology-validation",
+  "topic": "hcc1395_pair_coarse_topology_gene_drug_validation",
+  "status": "verdict_GO_engineering_report_only",
+  "score": 70,
+  "dimensions": {
+    "theory": 20,
+    "observation": 20,
+    "mechanism": 10,
+    "counter_risk": 10,
+    "resource": 10
+  },
+  "falsifier_observable": "Region-matched five-class agreement does not exceed chromosome-preserving permutation null, or conservation fails.",
+  "scored_at": "2026-07-12T00:54:00+08:00",
+  "claim_ceiling": "GO for qualified historical-v2 engineering reproducibility report only; biological validity and efficacy proof remain NO-GO",
+  "evidence": {
+    "exact_complete_pairs": 5720,
+    "raw_agreement": 0.6938811188811189,
+    "cohen_kappa": 0.49732888277618736,
+    "null_agreement_mean": 0.3951152797202797,
+    "null_kappa_q975": 0.023078348422253182,
+    "null_p": 0.0001999600079984003,
+    "validation_checks": "64/64 PASS",
+    "clean_v3": "6/7 producer; canonical/sensitivity/verification absent"
+  }
+}

@@ -6,7 +6,7 @@ status: active
 last_verified: 2026-06-08
 content_nature: paper-derived
 doc_type: explanation
-verified_scope: "external papers via WebFetch wf_37b2cc97-663 (2026-06-05); BRCA2 cis口徑 reconciled to 06-07 fast_cnv_validation.json (BRCA2=copy-artifact, chr17/TBC1D16 lone clean cis) per convergence audit wf_9e169112-573 (2026-06-08)"
+verified_scope: "external papers via WebFetch wf_37b2cc97-663 (2026-06-05); BRCA2 cis口徑 reconciled to 06-07 fast_cnv_validation.json (BRCA2=subclone/copy-confounded〔HP1-1=somatic subclone tag 非 copy；非 CN-dosage〕, chr17/TBC1D16 lone clean cis) per convergence audit wf_9e169112-573 (2026-06-08) + 06-09 capstone reconcile (% split not-robust; ledger 94)"
 decision_refs: []
 related_ids:
   - ism-kb-11-external-literature-cross-question-correlation
@@ -20,10 +20,10 @@ alias_paths: []
 # Q7 ASM / cis allele-specific methylation 與癌症影響
 
 > 🔴 **2026-06-08 新鮮度修正（本檔 06-05 建立時用 06-03 tsg 快照；06-07 cis 分析已收緊，下文 BRCA2 cis 敘述部分過時）**：
-> - **BRCA2 (chr13:32,315,128) 不再是乾淨 cis 錨點** —— 06-07 `fast_cnv_validation.json` 決策表把它列為 **predominantly copy-artifact**（HP-axis Δβ=−0.122 ≈ d_copy −0.11 + d_within −0.023，**~80% copy**）；純 within-somatic 殘餘 **d_within=−0.023（perm p=0.022, 邊際·未確立 n=197）**。誠實口徑 = 「**~80% copy + 邊際 ~20% 真 cis**」，**勿**寫「BRCA2 真 cis-driven」亦勿改成「純 copy-artifact」（兩種都是 overclaim）。
+> - **BRCA2 (chr13:32,315,128) 不再是乾淨 cis 錨點** —— 06-07 重分析列為 **predominantly subclone/copy-confounded**（**HP1-1 是 longphase-S 的 somatic SUBCLONE tag〔germline-H1 + 帶 somatic ALT, HaplotagStrategy.cpp:505-516〕，非 copy；非 CN-dosage——dosage 已決定性 REFUTED**）。HP-axis Δβ=−0.122 ≈ d_copy −0.11〔subclone vs germline 同 REF〕+ d_within −0.023〔focal allele 真 cis 殘餘, perm p=0.024, n=19/19 邊際·未確立〕。誠實口徑 = 「**subclone/copy 主導；焦點突變 cis 在單樣本與 subclone 背景不可乾淨分離（CAMDAC 同此限制）**」——**勿寫精確 %（split 不 robust，分解跨位點不閉合：BRCA2 殘差 9%、chr17 達 40%）**，勿寫「copy number」，勿寫「BRCA2 真 cis-driven」，亦勿寫「純 copy-artifact」（allelic 甲基差是真的）。
 > - **唯一乾淨 cis exemplar = chr17:79991120 (TBC1D16)**（within d_within=0.142 > HP-axis 0.122，perm p=0.001, CGI；單 locus 單樣本 n=16/14, nominal p → 「稀有但真實 exemplar」）。
 > - 下文「**60 T3 + 4 survivor**」是 screening intermediate，06-07 Bonferroni+copy-test 後**塌成 1 個乾淨 cis**（816→10 Bonferroni）。
-> - **Martin-Trujillo (CN 解釋 82-92%) 現在反而 corroborate copy-artifact reclassification**（「吃掉 BRCA2 的 confond」），比 ASM×CN ρ=−0.055 pilot 更直接。
+> - ⚠ **Martin-Trujillo (CN-DOSAGE 解釋 82-92%) 不 corroborate BRCA2 reclassification** —— 06-07 FAST 分析**決定性 REFUTED copy-DOSAGE**（MW neutral-vs-gain p=0.6183；signed ρ(\|Δβ\|,CN)=−0.083 反向）；BRCA2 的 confound 是 **subclone（細胞群差異）非 CN-dosage**。引 CN-dosage 文獻當 corroborate 是 **category error**。Martin-Trujillo 的正確角色 = 我們**控掉**的 confound 警告（dosage falsification back-stop 它），**非** BRCA2 reclassification 的佐證。正確對照 = **subclone-specific methylation**（pubmed 25066126/24356097）+ **CAMDAC**（單樣本 focal-cis vs subclone 不可分離, biorxiv 2020.11.03.366252）。
 > - 完整收斂與 paper-readiness → [10_paper_readiness_convergence.md](10_paper_readiness_convergence.md)（HD-3）。本檔保留原 06-05 敘述供 audit trail，引用時以本 banner 為準。
 
 - **一句裁決**：方法 **CONFIRM**、方向 **部分 confirm，兩個誠實 caveat**。CN-confound 是最強外部對齊（Martin-Trujillo：CN 解釋 82–92% 腫瘤 imprinted allelic 甲基 = 我們 HP-axis 設計 held-constant 的確切 artifact；ASM×CN ρ=−0.055 確認我們非 CN-driven）。cis-driven + BRCA2 hypo 與 Do2020(hypo-dominant, SNP-cis) 對齊；private/非復發 被 Sakamoto 直接確認。**caveat 1**：Do2020「ASM +5x」是 cross-individual SNP-anchored bisulfite-DMR 率，我們「稀有 0.34%」是 within-sample somatic-controlled read-率——**不同分母，口徑差非矛盾**。**caveat 2**：BRCA2 方向 **hypo**，與 canonical TSG **hyper**-silencing 相反——我們 HP-axis Δβ 是等位結構差(含 allele+copy)非 promoter-mean silencing，**不可當 TSG-silencing 證據**。recurrence 是決定性內部限制：POG(189) 偵 RET/CDKN2A 復發 aDMR，我們單 pipeline 6 樣本(主 HCC1395 ⭐3) 偵不到，private 0/38 誠實但 underpowered。
@@ -32,7 +32,7 @@ alias_paths: []
 
 文獻對癌症 ASM 頻率/方向(Do2020 +5×/hypo)、CN-confound(Martin-Trujillo CN 主導)、TSG silencing(BRCA2/VHL)、cis-ASM、功能/表現後果的說法；我們更乾淨的 somatic-controlled HP-axis 結果(稀有、非方向)在哪確認/矛盾/口徑差。
 
-**內部錨點（L1-L2，tsg snapshot @06-03）**：ZAR1L/BRCA2 ASM 真實但非方向/非判別/coverage-modulated；BRCA2 promoter chr13:32,315,128 **HP-axis Δβ=−0.122**(n=197, 含 allele+copy)/純 **within-somatic d_within=−0.023**(perm p=0.022, 小但真, **hypo**)；ALLELE −0.099；**d_copy=−0.11**；normal-anchored cis-test d_cis=−0.142 vs d_drift≈−0.022(真 cis-driven)；genome cis-scan **816 → 60 T3 cis-candidate + 4 perm-survivor**；cross-sample **6/6 excess-over-null**(mean 0.168, 3 癌種)、somatic **private 0/38**；ASM×CN HP-axis partial **ρ=−0.055**(非 CN-driven)；5mC-driven，5hmC marginal 0.03–0.07。
+**內部錨點（L1-L2，tsg snapshot @06-03）**：ZAR1L/BRCA2 ASM 真實但非方向/非判別/coverage-modulated；BRCA2 promoter chr13:32,315,128 **HP-axis Δβ=−0.122**(n=197, 含 allele+copy)/純 **within-somatic d_within=−0.023**(perm p=0.022, 小但真, **hypo**)；ALLELE −0.099；**d_copy=−0.11**；normal-anchored cis-test 初判 d_cis=−0.142 vs d_drift≈−0.022(表面值；06-07 copy-partition 後 = subclone/copy 主導，真 cis = within-somatic −0.023，乾淨 cis 改 chr17)；genome cis-scan **816 → 60 T3 cis-candidate + 4 perm-survivor**；cross-sample **6/6 excess-over-null**(mean 0.168, 3 癌種)、somatic **private 0/38**；ASM×CN HP-axis partial **ρ=−0.055**(非 CN-driven)；5mC-driven，5hmC marginal 0.03–0.07。
 
 ## 外部文獻（WebFetch 實證）
 
@@ -55,7 +55,7 @@ alias_paths: []
 | ASM 真實但**稀有**(strong-ASM 0.34%) — 單樣本 ⭐3 | Do2020 ASM **+5×**；Schalkwyk >35k(normal)；Hesson TSG 甲基稀有 | 🟡 **caliber-only**（分母不同：within-sample somatic-controlled read-率 vs cross-individual SNP-anchored bisulfite DMR-率）| 非真矛盾。Do2020「increase」測根本不同軸；我們稀有在更嚴 somatic-controlled 軸。**明標；勿稱 Do2020 矛盾我們** |
 | **非方向**(strong-ASM hypo 44%/hyper 56% 無偏) ⭐3 | Do2020: hypo-**dominant**(49–76%)+focal hyper gain；Herman canonical TSG: hyper | 🔴 **direction(部分)** | genome-wide aggregate 平衡，但 **BRCA2 within-somatic hypo**(−0.023, p=0.022) 與 Do2020 hypo-dominance 一致非 canonical TSG-hyper。誠實：整體平衡，唯一檢的 TSG(BRCA2) locus-level hypo |
 | **CN 非驅動**(ASM×CN HP-axis ρ=−0.055；設計 held CN)⭐3 pilot | Martin-Trujillo: CN 解釋 82–92% imprinted allelic 甲基 | 🟢 none(互撐)| **最強外部佐證。** 他們警告正是我們 HP-axis 設計擊敗的 confound。**直接 CONFIRM** |
-| **cis-driven ASM** 真(BRCA2 d_cis=−0.142 vs drift≈−0.022；60 T3+4 survivor)⭐3 | Do2020+Do2017+Schalkwyk: ASM cis-driven by SNP/haplotype | 🟢 none | 機制被文獻確認。caliber：我們 within-individual，文獻 population。niche 成立 tier-capped |
+| **cis-driven ASM** 真但乾淨案稀少(copy-control 後唯一乾淨 = **chr17/TBC1D16**；BRCA2 表面 d_cis=−0.142 但 copy-partition 後僅 within-somatic −0.023 邊際；60 T3 cis-candidate→copy-control 後 chr17/18 survive)⭐3 | Do2020+Do2017+Schalkwyk: ASM cis-driven by SNP/haplotype | 🟢 none | 機制被文獻確認；乾淨 cis 在單樣本+subclone 背景稀少(CAMDAC 同限制)。caliber：我們 within-individual，文獻 population |
 | somatic ASM **private**(0/38；6/6 excess，3 癌種)⭐3 單 pipeline | Sakamoto22: patient-specific hap-DMR(~32/案)；O'Neill24: **復發** RET/CDKN2A | 🔴 caliber+direction-of-recurrence | Sakamoto CONFIRM private；O'Neill 在 cohort REFUTE(189 偵復發)。**我們 6 樣本單 pipeline 偵不到 O'Neill 的復發**——關鍵誠實限制。現象-replicate(6/6 excess) 對齊所有長讀同儕 |
 | **5mC-driven，5hmC marginal**(0.03–0.07)⭐3 | 文獻大多 silent(Do2020/Sakamoto/O'Neill 測 5mC；5hmC 分軌少報)| 🟡 unaddressed | 真 gap/niche——長讀 5mC/5hmC 分軌做 ASM 未探。新但單樣本低 tier |
 | BRCA2 HP-axis Δβ=−0.122 / within-somatic −0.023 ⭐3 | Herman canonical: TSG silencing hyper；Hesson: BRCA1 甲基稀有 | 🔴 direction(vs canonical)+caliber | 我們 hypo **矛盾 canonical TSG-hyper-silencing**。須標：我們軸是 HP-linked allelic Δ(含 allele+copy)非 promoter-mean hyper-silencing，**非同量測**。**勿把 BRCA2 當 TSG-silencing 證據** |

@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "cycle_id": "cycle_20260719-longlineage-cpp-rebuild",
+  "topic": "longlineage_cpp_rebuild",
+  "task_type": "B_comprehensive_validation",
+  "score": 60,
+  "dimensions": {
+    "theory": 20,
+    "observation": 10,
+    "mechanism": 20,
+    "counter_risk": 10,
+    "resource": 0
+  },
+  "cynefin_domain": "complex",
+  "verdict": "GO",
+  "phase_locks": [
+    "P3_M1_PARITY",
+    "P4_M2_COOCCURRENCE_PARITY",
+    "P5_TOPOLOGY_PARITY",
+    "P6_INDEPENDENT_VALIDATOR",
+    "P7_FULL_7_DATASET_24_40_WORKER_DETERMINISM",
+    "P8_VALIDATED_ONLY_PRESENTATION"
+  ],
+  "falsifier_observable": "Any nonzero frozen-vector mismatch in read set, partition, permutation exceedance, status, topology objective, complete family digest, legal parents, or tree count blocks the corresponding phase.",
+  "red_team": {
+    "performed": true,
+    "passed": true,
+    "failure_modes": [
+      "Hidden RNG, tie-break, or floating-order drift in a large Python-to-C++ port",
+      "Repository scaffolding being mistaken for scientific completion",
+      "Full-scope resource exhaustion repeating the frozen-v2 timeout"
+    ]
+  },
+  "claim_ceiling": "long-read sSNV co-occurrence and lineage-compatible mutation-state families",
+  "truth_isolation_required": true,
+  "scored_at": "2026-07-19T05:38:30+08:00"
+}

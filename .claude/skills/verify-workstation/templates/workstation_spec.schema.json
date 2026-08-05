@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "verify-workstation spec",
+  "description": "Declarative input for tools/build_workstation.py. Every metric must be injected here (§13-A). required_metrics that are missing -> build refuses (exit 3).",
+  "type": "object",
+  "required": ["meta", "items"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {"type": "string"},
+        "subtitle": {"type": "string"},
+        "lskey": {"type": "string", "description": "localStorage key for verdicts; unique per workstation"},
+        "tier": {"type": "string"},
+        "scope": {"type": "string", "description": "PARTIAL/全基因組 etc."},
+        "build_commit": {"type": "string", "description": "git rev-parse --short HEAD"},
+        "build_branch": {"type": "string"}
+      }
+    },
+    "banner": {"type": "object", "properties": {"text": {"type": "string"}, "level": {"type": "string"}},
+      "description": "optional top warning; auto-derived from changelog.data_status if omitted"},
+    "changelog": {
+      "type": "object",
+      "description": "修正過程紀錄 / authoritative-vs-draft. Each correction src must be verified (commit ancestor-of-HEAD / doc exists).",
+      "properties": {
+        "data_status": {"type": ["object", "string"]},
+        "binary_status": {"type": ["object", "string"]},
+        "phase": {"type": ["object", "string"]},
+        "corrections": {"type": "array", "items": {
+          "type": "object",
+          "required": ["id", "what", "status", "src"],
+          "properties": {
+            "id": {"type": "string"},
+            "what": {"type": "string"},
+            "status": {"enum": ["in-HEAD", "planned-phase2", "not-done", "authoritative", "superseded"]},
+            "effect": {"type": "string"},
+            "src": {"type": "string", "description": "verified provenance: commit hash / file:line / doc path"}
+          }
+        }},
+        "audit_conclusion": {"type": "object", "properties": {"summary": {"type": "string"}, "src": {"type": "string"}}}
+      }
+    },
+    "sections": {"type": "array", "description": "escape-hatch custom HTML blocks (rulings tables, charts, funnels)",
+      "items": {"type": "object", "required": ["title", "html"], "properties": {
+        "id": {"type": "string"}, "title": {"type": "string"}, "html": {"type": "string"}}}},
+    "item_config": {
+      "type": "object",
+      "properties": {
+        "verdict_states": {"type": "array", "items": {"type": "object", "required": ["key", "label"]}},
+        "reason_options": {"type": "array", "items": {"type": "object", "required": ["key", "label"]}},
+        "required_metrics": {"type": "array", "items": {"type": "string"},
+          "description": "metric keys that MUST be present per item; missing -> refuse (§13-A)"},
+        "per_page": {"type": "integer", "default": 24}
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "subtitle": {"type": "string"},
+          "badges": {"type": "array", "items": {"type": "object", "required": ["label"],
+            "properties": {"label": {"type": "string"}, "kind": {"enum": ["ok", "warn", "no", "info", "mut", "gold"]}, "title": {"type": "string"}}}},
+          "metrics": {"type": "array", "items": {"type": "object", "required": ["k", "v"],
+            "properties": {"k": {"type": "string"}, "v": {"type": ["string", "number"]}, "src": {"type": "string"}, "show": {"type": "boolean"}}}},
+          "meta_metrics": {"type": "array", "items": {"type": "string"}, "description": "which metric keys to show on the card header line"},
+          "modal_stats": {"type": "array", "description": "full stat grid for the modal (defaults to metrics)"},
+          "figures": {"oneOf": [
+            {"type": "object", "required": ["mode", "svg"], "properties": {"mode": {"const": "svg"}, "svg": {"type": "string"}}},
+            {"type": "object", "required": ["mode", "imgs"], "properties": {"mode": {"const": "png"},
+              "imgs": {"type": "array", "items": {"type": "object", "required": ["path"], "properties": {"path": {"type": "string"}, "caption": {"type": "string"}}}}}}
+          ]},
+          "reading_guide": {"type": "string"}
+        }
+      }
+    },
+    "provenance": {"type": "object", "properties": {"sources": {"type": "array", "items": {"type": "string"}}, "note": {"type": "string"}}}
+  }
+}

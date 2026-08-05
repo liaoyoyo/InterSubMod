@@ -3,6 +3,19 @@ import os
 import argparse
 import glob
 import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    select_legacy_view,
+)
+
+
+LEGACY_SELECTION_COLUMN = "_VerificationClass_Legacy_Selected"
 
 def setup_args():
     parser = argparse.ArgumentParser(description="Find verification candidates from significance summary.")
@@ -28,15 +41,24 @@ def find_heatmap(base_site_path):
         
     return None
 
+
+def prepare_legacy_candidates(df):
+    """Validate and attach the explicit four-state legacy taxonomy."""
+    view = select_legacy_view(df, allow_unversioned_v1=False)
+    selected = df.copy()
+    selected[LEGACY_SELECTION_COLUMN] = view.values
+    return selected, view
+
 def analyze_candidates(df, args):
     categories = {
-        "Weak": {"filter": df["VerificationClass"] == "Weak", "sort": [("LabelP", True), ("LabelDelta", False)]},
-        "Subclone": {"filter": df["VerificationClass"] == "Subclone", "sort": [("GlobalP", True), ("LabelP", False)]},
-        "Strong": {"filter": df["VerificationClass"] == "Strong", "sort": [("GlobalP", True)]},
-        "Noise": {"filter": df["VerificationClass"] == "Noise", "sort": [("GlobalP", False)]} 
+        "Weak": {"filter": df[LEGACY_SELECTION_COLUMN] == "Weak", "sort": [("LabelP", True), ("LabelDelta", False)]},
+        "Subclone": {"filter": df[LEGACY_SELECTION_COLUMN] == "Subclone", "sort": [("GlobalP", True), ("LabelP", False)]},
+        "Strong": {"filter": df[LEGACY_SELECTION_COLUMN] == "Strong", "sort": [("GlobalP", True)]},
+        "Noise": {"filter": df[LEGACY_SELECTION_COLUMN] == "Noise", "sort": [("GlobalP", False)]}
     }
 
-    print(f"# Verification Candidates Report")
+    print("# Legacy verification candidates")
+    print("Selection field: `VerificationClass_Legacy`")
     print(f"Input Directory: {args.output_dir}\n")
 
     for cat_name, logic in categories.items():
@@ -92,7 +114,7 @@ def analyze_candidates(df, args):
                     gen_cmd = "" # Found, no need to gen
             
             print(f"- **Site**: {site_id}")
-            print(f"  - Stats: GlobalP={row['GlobalP']:.3e}, LabelP={row['LabelP']:.3e}, LabelDelta={row['LabelDelta']:.3f}, Class={row['VerificationClass']}")
+            print(f"  - Stats: GlobalP={row['GlobalP']:.3e}, LabelP={row['LabelP']:.3e}, LabelDelta={row['LabelDelta']:.3f}, LegacyClass={row[LEGACY_SELECTION_COLUMN]}")
             if heatmap_path != "File not found":
                 print(f"  - Heatmap: `{heatmap_path}`")
             else:
@@ -114,13 +136,19 @@ def main():
         sys.exit(1)
         
     # Ensure columns exist
-    required_cols = ["Chr", "Pos", "VerificationClass", "GlobalP", "LabelP", "LabelDelta"]
+    required_cols = ["Chr", "Pos", "VerificationClass_Legacy", "GlobalP", "LabelP", "LabelDelta"]
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
         print(f"Error: Missing columns in CSV: {missing}")
         sys.exit(1)
         
-    analyze_candidates(df, args)
+    try:
+        selected, _ = prepare_legacy_candidates(df)
+    except SchemaContractError as exc:
+        print(f"Error: legacy verification schema contract failed: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    analyze_candidates(selected, args)
 
 if __name__ == "__main__":
     main()

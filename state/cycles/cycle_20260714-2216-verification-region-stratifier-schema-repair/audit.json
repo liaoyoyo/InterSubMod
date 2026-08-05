@@ -1,0 +1,33 @@
+{
+  "cycle_id": "cycle_20260714-2216-verification-region-stratifier-schema-repair",
+  "topic": "verification-region-stratifier-schema-repair",
+  "score": 70,
+  "dimensions": {
+    "theory": 20,
+    "observation": 20,
+    "mechanism": 20,
+    "counter_risk": 10,
+    "resource": 0
+  },
+  "falsifier_observable": "Any per-stable-key Significant change, predicate/threshold change required to pass, frozen mapping other than 59910/6931/0, or partial write-back after identity mismatch falsifies safe semantic-only repair.",
+  "verdict": "GO_WITH_FAIL_CLOSED",
+  "red_team_status": "COMPLETE_PROBES_PASSED",
+  "red_team_failure_modes": [
+    "Sparse enum IDs combined with deprecated occupied-count mirror may break ID-index consumers.",
+    "Per-file atomic rename alone does not prevent mixed-generation artifacts after a crash.",
+    "Offline class remapping is not an independent recomputation of upstream legacy semantics.",
+    "Executable consumer surface is much larger than the four named consumers.",
+    "Region strata or cluster-first evidence may be overclaimed as cellular clones."
+  ],
+  "probe_status": "PASS",
+  "probe_results": {
+    "sparse_id_compatibility": "PASS",
+    "status_commit_marker": "PASS_CONDITIONAL_ON_IMPLEMENTATION",
+    "canonical_enum_authority": "PASS",
+    "bounded_golden_falsifier": "PASS",
+    "consumer_inventory": "PASS_IMPLEMENTATION_REQUIRED"
+  },
+  "scored_at": "2026-07-14T22:16:50+08:00",
+  "red_teamed_at": "2026-07-14T22:22:39+08:00",
+  "verdict_at": "2026-07-14T22:28:31+08:00"
+}

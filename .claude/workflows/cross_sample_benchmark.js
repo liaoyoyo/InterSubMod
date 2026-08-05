@@ -8,6 +8,8 @@
 //   ✅ ≥3 樣本、同一 benchmark、無資料依賴、終態明確（一致性匯總表）
 //   ❌ 含 Hard Gate（C++ commit/刪檔/NO-GO）→ 不可用 workflow（subagent acceptEdits 繞過 exit-2 hook）
 //   ❌ 需中間結果決定下一步 → 用 parallel-benchmark agent 或主回合
+//   ❌ 長 compute（ISM C++/BAM/run_*.sh）→ 絕不放 agent() step；主回合背景跑落檔→Read 驗→才 workflow 匯總
+//       （長 job × workflow 鐵則見 CLAUDE.md §8；step 只讀「已落檔結果」不重跑 compute）
 //
 // 用法：
 //   Workflow({ scriptPath: ".../.claude/workflows/cross_sample_benchmark.js",

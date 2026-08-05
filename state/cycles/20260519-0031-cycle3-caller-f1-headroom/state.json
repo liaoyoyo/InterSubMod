@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260519-0031-cycle3-caller-f1-headroom",
+  "title": "Phase 2 Cycle 3 Caller-F1-headroom-aware filter redesign",
+  "hypothesis_id": "H016",
+  "phase": "P6_COMMIT",
+  "tier": "⭐⭐ L4",
+  "verdict": "NEGATIVE_filter_direction_failed_no_sample_level_signal",
+  "priority": 88,
+  "started_at": "2026-05-19T00:31:00Z",
+  "last_advanced_at": "2026-05-30T07:40:00Z",
+  "concluded_at": "2026-05-30T07:40:00Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "v6_5sample_extension + phaseC_genome_three_way_with_significance_4sample",
+    "upstream_reports": [
+      "InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md",
+      "InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_track_a_filter.json",
+      "InterSubMod/docs/experiments/in_progress/2026/05/20260518_Phase2_Cycle1_Global_FP_Filter_01.md"
+    ]
+  },
+  "open_gates": [],
+  "artifacts": {
+    "plan": "ledger:20260520_cycle3_step1_5_ism_ablation_vestigial",
+    "precheck": null,
+    "pilot": "InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_findings.md",
+    "generalize": "InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_hnew_findings.md",
+    "evaluation": "ledger:20260520_loso_sample_level_circularity_revealed + 20260520_loso_hnew2_hnew4_observation_validation",
+    "conclusion": "INDEX.md '### Phase 2 LOSO Sample-Level CV — Filter Direction FAILED 2026-05-20' + ledger:20260530_cycle3_conclude_negative"
+  },
+  "history": [
+    {
+      "timestamp": "2026-05-19T00:31:00Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user",
+      "note": "/cycle-init — cycle 3 caller-F1-headroom-aware redesign post H_C1_5 NEGATIVE. Primary H016, companions H017/H018."
+    },
+    {
+      "timestamp": "2026-05-20T01:15:00Z",
+      "from_phase": "P0_REGISTER",
+      "to_phase": "P3_PILOT",
+      "actor": "ai",
+      "note": "Step1-5 ISM ablation: methylation vestigial (5th rank, drop all 5 methyl = +0.00065 = 3% uplift). caller_af dominant (coef +3.44). Ledger 20260520_cycle3_step1_5_ism_ablation_vestigial. [BACKFILL 5/30]"
+    },
+    {
+      "timestamp": "2026-05-20T20:50:00Z",
+      "from_phase": "P3_PILOT",
+      "to_phase": "P5_EVALUATE",
+      "actor": "ai",
+      "note": "LOSO sample-level circularity: HCC1395 in-dist +0.02236 -> LOSO held-out -0.00012 (100% circularity). 5-sample mean -0.00004, Wilcoxon p=0.125 DIRECTION_NEGATIVE, all best tau=0.10. HCC1954 transfer -0.377. Filter direction FAILED. Ledger 20260520_loso_sample_level_circularity_revealed. [BACKFILL 5/30]"
+    },
+    {
+      "timestamp": "2026-05-20T23:15:00Z",
+      "from_phase": "P5_EVALUATE",
+      "to_phase": "P5_EVALUATE",
+      "actor": "ai",
+      "note": "H_NEW_2 FAIL (0/5 above +0.002). H_NEW_4 drop-caller_af HCC1395 +0.00699 SANITY VIOLATED (single-sample post-hoc, other 4 = 0). Ledger 20260520_loso_hnew2_hnew4_observation_validation. [BACKFILL 5/30]"
+    },
+    {
+      "timestamp": "2026-05-30T07:40:00Z",
+      "from_phase": "P5_EVALUATE",
+      "to_phase": "P6_COMMIT",
+      "actor": "ai",
+      "note": "/conclude-research NEGATIVE (user 2026-05-30 authorized). DECLARE 7/7 pass. Production LR filter direction WITHDRAWN; ISM characterization (mechanistic, v0.3 cycle ⭐3) RETAINED unchanged. Propagation: INDEX 5/20 LOSO entry + MEMORY.md (Phase2 ⭐3->⭐2 L4 downgrade D1) + ledger (5/20 x3 + 20260530_cycle3_conclude_negative) + CURRENT_FOCUS 5/30 D5. No conflict with V6 ⭐4 PI signoff (signoff explicitly excludes LR-F1 over-claim)."
+    }
+  ]
+}

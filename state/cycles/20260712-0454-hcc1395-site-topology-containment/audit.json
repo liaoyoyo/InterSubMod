@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260712-0454-hcc1395-site-topology-containment",
+  "topic": "hcc1395_pair_site_topology_containment_validation",
+  "status": "verdict_GO_engineering_probe_scientific_no_go",
+  "score": 70,
+  "dimensions": {
+    "theory": 20,
+    "observation": 20,
+    "mechanism": 15,
+    "counter_risk": 5,
+    "resource": 10
+  },
+  "falsifier_observable": "After conditioning on chromosome, shared-site k, HP composition and candidate-set size, site-aware topology compatibility does not exceed the matched null; the signal is confined to k=2 or large candidate sets; read-full and VAF-top directions reverse; or HP split/merge dominates compatible calls.",
+  "red_team_pass": true,
+  "red_team_failure_modes": [
+    "Direct-heavy and k=2 algorithm priors create high agreement without site-specific reproducibility.",
+    "Existential candidate matching approaches one as the Cartesian candidate count grows.",
+    "HP-count mismatch or component-wise best swaps misclassify split/merge as a subtree.",
+    "VAF and candidate trees reuse the same reads and therefore are not independent evidence."
+  ],
+  "claim_ceiling": "GO for full historical-v2 engineering comparison of same-cell-line cross-source technical reproducibility; biological tree accuracy and method efficacy remain NO-GO.",
+  "scored_at": "2026-07-12T04:54:04+08:00",
+  "source_commit": "6067568637088838a9f518955e41d222f057e4f1"
+}

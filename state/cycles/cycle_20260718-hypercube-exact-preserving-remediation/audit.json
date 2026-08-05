@@ -1,0 +1,39 @@
+{
+  "cycle_id": "cycle_20260718-hypercube-exact-preserving-remediation",
+  "status": "implementation_complete_scale_probe_pending",
+  "task_type": "E_HOTFIX_PERFORMANCE_REMEDIATION_PROBE",
+  "goals": [
+    "G3",
+    "G4",
+    "G5"
+  ],
+  "pre_decision_verdict": "PROBE",
+  "implementation_verdict": "PASS_FOR_PROBE",
+  "evidence": {
+    "report": "InterSubMod/research/20260718_hypercube_exact_preserving_solver_cache_remediation/20260718_Hypercube_exact_preserving修補與驗證結果_01.md",
+    "verification_summary": "InterSubMod/research/20260718_hypercube_exact_preserving_solver_cache_remediation/results/verification_summary.json",
+    "full_tests": {
+      "passed": 341,
+      "failed": 0,
+      "wall_seconds": 136.479
+    },
+    "prepared_base": {
+      "builds_before": 25,
+      "builds_after": 1,
+      "milp_solves_after": 25,
+      "ordered_digest_equal": true
+    },
+    "cache": {
+      "complete_only": true,
+      "likelihood_cached": false,
+      "on_off_scientific_semantic_sha_equal": true
+    }
+  },
+  "next_gate": "freeze v3 source and run HCC1395_DORADO chr6 plus H2009 chr2 pilots",
+  "prohibited": [
+    "resume or mutate frozen v2 failure root",
+    "claim persistent HiGHS model reuse",
+    "start full 154 before both v3 pilots pass",
+    "rank incomplete candidate catalogs"
+  ]
+}

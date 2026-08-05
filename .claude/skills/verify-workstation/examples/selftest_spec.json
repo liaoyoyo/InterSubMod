@@ -1,0 +1,22 @@
+{
+  "meta": {"title":"測試判讀工作站","subtitle":"generator self-test","lskey":"vw_selftest_v1","tier":"DEMO","scope":"2 items","build_commit":"testabc","build_branch":"test"},
+  "changelog": {
+    "data_status":{"summary":"測試資料（非真實）"},
+    "corrections":[{"id":"X1","what":"範例修正","status":"in-HEAD","effect":"無","src":"commit testabc"}],
+    "audit_conclusion":{"summary":"僅供 generator 自測。"}
+  },
+  "sections":[{"id":"intro","title":"① 自訂敘述區塊","html":"<p class='sub'>這是 escape-hatch 自訂 HTML 區塊（放 rulings/charts 等）。</p>"}],
+  "item_config":{"verdict_states":[{"key":"in","label":"同意"},{"key":"doubt","label":"存疑"},{"key":"ex","label":"否定"}],"required_metrics":["CV"],"per_page":24},
+  "items":[
+    {"id":"chr1_100","title":"chr1:100","badges":[{"label":"PASS","kind":"ok"},{"label":"TierA","kind":"info"}],
+     "meta_metrics":["CV","Δβ"],
+     "metrics":[{"k":"CV","v":"0.82","src":"audit.json:12"},{"k":"Δβ","v":"+0.41","src":"audit.json:13"},{"k":"reads","v":"54"}],
+     "figures":{"mode":"svg","svg":"<svg viewBox='0 0 200 60'><rect width='200' height='60' fill='#16a34a'/><text x='100' y='35' fill='#fff' text-anchor='middle'>inline SVG fig</text></svg>"},
+     "reading_guide":"對角塊對齊 HP = 真分群。"},
+    {"id":"chr2_200","title":"chr2:200","badges":[{"label":"可能漏掉","kind":"warn"},{"label":"FP","kind":"no"}],
+     "meta_metrics":["CV"],
+     "metrics":[{"k":"CV","v":"0.05","src":"audit.json:30"},{"k":"reads","v":"21"}],
+     "figures":{"mode":"png","imgs":[{"caption":"甲基 read×CpG","path":"figs/chr2_200_meth.png"},{"caption":"距離矩陣","path":"figs/chr2_200_dist.png"}]}}
+  ],
+  "provenance":{"sources":["test/audit.json"],"note":"generator self-test"}
+}

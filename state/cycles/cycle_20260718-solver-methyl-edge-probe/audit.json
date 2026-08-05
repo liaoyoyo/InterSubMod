@@ -1,0 +1,72 @@
+{
+  "cycle_id": "cycle_20260718-solver-methyl-edge-probe",
+  "topic": "solver_methyl_edge_probe",
+  "task_type": "A_EXPLORATORY_PILOT",
+  "scope": "PARTIAL_SYNTHETIC_PLUS_AT_MOST_TWO_REAL_UNITS",
+  "status": "verdict_PROBE",
+  "audit_version": "1.1",
+  "current_verdict": "PROBE",
+  "score": 50,
+  "dimensions": {
+    "theory": 20,
+    "observation": 10,
+    "mechanism": 10,
+    "counter_risk": 0,
+    "resource": 10
+  },
+  "falsifier_observable": "Any complete optimal-set mismatch across persistent/B&B/oracle, read-AF calls exceeding distinct vertex sets, edge-dependent sSNV likelihood for the same vertex set, or failure of directional/tie methylation synthetic controls falsifies the corresponding implementation claim.",
+  "claim_ceiling": "solver-certified regional mutation-state candidate vertex sets; methylation-similarity regularized candidate-edge preference only, not true parent edge, ancestry, clone count, or subclone truth",
+  "inputs": {
+    "current_solver_sha256": "9dbaf8ec813d709ba55e1c45ca08bcb4220fc15070c764aa2949ab27608bcd95",
+    "current_ranker_sha256": "c82210f25870d1405cc070c18096fb7d1c2b908fb4d8a7858aece7ac4b151d28",
+    "git_commit": "0ee2fa1b31fcf6af670efd301251b5b3a24c1a99"
+  },
+  "gates": {
+    "persistent_complete_set_digest": "PASS_SYNTHETIC_AND_TWO_M31_REAL_UNITS",
+    "bnb_k_le_5_oracle_match": "PASS_DECLARED_CASES_AND_80_SEEDED_CASES",
+    "read_af_once_per_vertex_set": "PASS_PRIMARY_FIT_CALLS_EQUAL_DISTINCT_V",
+    "methyl_synthetic_controls": "PASS_7_OF_7_RECOVERY_TIE_AND_ABSTAIN",
+    "hcc1395_chr6_real_edge_unit": "FAIL_NO_COMPONENT_HP_WITH_10_01_11_AT_MINREAD_1_2_3_5"
+  },
+  "probe_results": {
+    "aaaa_k4": {
+      "objective": 3,
+      "optimal_vertex_sets": 24,
+      "current_model_builds": 25,
+      "persistent_model_builds": 1
+    },
+    "H2009_M31": {
+      "objective": 5,
+      "optimal_vertex_sets": 242,
+      "bnb_seconds": 0.2318939189426601,
+      "current_scipy_seconds": 16.809136388124898,
+      "persistent_highs_seconds": 15.985451261047274
+    },
+    "COLO829_M31": {
+      "objective": 5,
+      "optimal_vertex_sets": 216,
+      "bnb_seconds": 0.1431282078847289,
+      "current_scipy_seconds": 8.948952479986474,
+      "persistent_highs_seconds": 11.545195963932201
+    },
+    "methyl_real_feasibility": {
+      "sample": "HCC1395_DORADO",
+      "chrom": "chr6",
+      "primary_k2_components_by_threshold": {
+        "1": 229,
+        "2": 204,
+        "3": 191,
+        "5": 168
+      },
+      "eligible_AR_RA_AA_ge_1": 0
+    }
+  },
+  "post_probe_decision": {
+    "exact_bnb": "PROMOTE_TO_BOUNDED_DUAL_SOLVER_VALIDATION",
+    "persistent_highs": "KEEP_AS_OPTIONAL_BACKEND_NOT_YET_FASTER",
+    "read_af_cache": "ALREADY_IMPLEMENTED_NO_CHANGE_REQUIRED",
+    "methyl_edge": "SYNTHETIC_PASS_REAL_DATA_ABSTAIN"
+  },
+  "verdict_at": "2026-07-18T02:24:43+08:00",
+  "probe_completed_at": "2026-07-18T02:57:35+08:00"
+}

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260710-2244-layered-reconstruction-v2",
+  "topic": "20260710_layered_reconstruction_v2",
+  "status": "verdict_GO",
+  "score": 70,
+  "dimensions": {
+    "theory": 20,
+    "observation": 20,
+    "mechanism": 20,
+    "counter_risk": 10,
+    "resource": 0
+  },
+  "falsifier_observable": "Any reference-only or HP3 unit enters the primary denominator; missing CN yields a candidate verdict; V4/V5 are skipped while all_V1V7_pass is true; a sample funnel fails exact conservation; or an analysis uses fewer candidate trees than n_trees.",
+  "red_team_pass": true,
+  "scored_at": "2026-07-10T22:44:11+08:00",
+  "source_commit": "4fb9e742482b63a660de19a1f1bd07d49d713111",
+  "gate1_addendum": {
+    "topic": "clean_production_tagging_and_full_run_launch",
+    "status": "verdict_PROBE",
+    "score": 60,
+    "dimensions": {
+      "theory": 20,
+      "observation": 20,
+      "mechanism": 10,
+      "counter_risk": 10,
+      "resource": 0
+    },
+    "falsifier_observable": "A bounded direct clean-tagged BAM and original-BAM-plus-sidecar join differ in eligible pileup observations, R/A/X vectors, HP-family counts, or output digest.",
+    "red_team_pass": false,
+    "next_action": "Complete streamed sidecar probe, implement exact consumer join, and pass equivalence plus adversarial fail-closed tests before Gate-1 GO.",
+    "scored_at": "2026-07-11T04:02:10+08:00"
+  },
+  "gate2_prelaunch": {
+    "topic": "frozen_v3_handoff_and_full_run_launch",
+    "status": "verdict_SUPERSEDED",
+    "score": 80,
+    "dimensions": {
+      "theory": 20,
+      "observation": 20,
+      "mechanism": 20,
+      "counter_risk": 20,
+      "resource": 0
+    },
+    "component_evidence": {
+      "coordinate_join_bounded_real": "35/35 exact; missing=0; conflict=0",
+      "strict_contract_tests": "17/17 PASS",
+      "producer_receipt_normalizer_tests": "8/8 PASS",
+      "atomic_lifecycle_tests": "13/13 PASS",
+      "runner_integration_tests": "12/12 PASS",
+      "independent_verifier_tests": "16/16 PASS"
+    },
+    "handoff_supervisor": {
+      "status": "stopped_before_launch_method_scope_superseded",
+      "pid": 929656,
+      "started_at": "2026-07-11T06:16:43+08:00",
+      "stopped_at": "2026-07-11T06:30:50+08:00",
+      "exit_code": 70,
+      "reviewed_plan_sha256": "7e0ab871ee2fa15e772d17da75ebe0e836cc7dcc6c2726e7b136a3b305e3da6a",
+      "plan_permissions": "0444",
+      "pin_readback": "5 inputs + 25 executables PASS",
+      "full_run_root_exists": false
+    },
+    "current_blocker": "The PASS-only producer cannot exercise LongPhase-S non-PASS-to-PASS rescue and therefore cannot answer the all-ClairS-sites question; it was aborted at 0/7 terminal PASS with no formal layered run root.",
+    "falsifier_observable": "Exact 7/7 producer PASS plus per-sample v3 receipts and frozen manifest are present; no LongPhase/layered conflict exists; and the frozen 300-second resource policy passes (RAM>=128 GiB, disk>=500 GiB, iowait<=20%, NFS READ<80 decimal MB/s, load/CPU<=1.25).",
+    "red_team_pass": false,
+    "next_action": "Do not reuse this reviewed plan. Complete the Gate-3 raw-all bounded probes, then create new producer and handoff contracts only if they pass.",
+    "scored_at": "2026-07-11T05:54:12+08:00"
+  },
+  "gate3_raw_all_input": {
+    "topic": "normalized_raw_clairs_all_site_longphase_input",
+    "status": "verdict_GO_WITH_FAIL_CLOSED",
+    "score": 60,
+    "dimensions": {
+      "theory": 20,
+      "observation": 10,
+      "mechanism": 20,
+      "counter_risk": 10,
+      "resource": 0
+    },
+    "component_evidence": {
+      "raw_non_pass_records": 70179,
+      "longphase_rescue_source": "HaplotagVcfParser.cpp:589-598",
+      "known_crash_record": "HCC1395 chrX:72880028 G>C QUAL=0 FILTER=LowQual",
+      "pass_only_producer_status": "aborted_0_of_7_no_success",
+      "hcc1954_chr22_raw_all": "426/426; rescue=53; remove=14; sidecar_rows=217023",
+      "original_known_crash_probe": "exit=1 at tumorPosReadCorrBaseHP missing",
+      "patched_known_crash_probe": "1/1 LowQual retained; 64 untagged rows; exit=0",
+      "patched_regression": "HCC1954 sidecar bytes and 426 VCF record lines exact to original",
+      "hcc1395_whole_chrx": "35823/35823; rescue=959; remove=1616; zero_read_warnings=2; sidecar_rows=1090570"
+    },
+    "falsifier_observable": "A normalized raw-all bounded input crashes or exits non-zero; input keys do not exactly equal recalibrated-all keys; FILTER transitions are not uniquely auditable; exact sidecar counts fail; or the known chrX crash locus remains fatal.",
+    "red_team_pass": true,
+    "next_action": "Implement strict raw-all producer/receipt/closeout/ledger contracts, then launch seven datasets with fail-closed lifecycle and the pinned patched binary.",
+    "scored_at": "2026-07-11T07:00:00+08:00"
+  }
+}

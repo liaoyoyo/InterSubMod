@@ -1,20 +1,22 @@
 ---
 id: ism-kb-11-external-literature-index
 name: "External Literature Landscape — 7 角度交叉驗證索引"
-description: "ISM 癌症長讀甲基化研究 7 大問題的外部文獻地景：每問題的內部發現(L1-L2) × 外部佐證(L3) × 衝突度，加跨問題依賴鏈(dead/live/open dreams)。經 workflow wf_37b2cc97-663 實際 WebFetch 查證。"
+description: "2026-07-12 full method/process external validation + claim/search/memory router；保留下方 2026-06 癌症長讀甲基化 7 大問題地景作歷史證據。"
 status: active
-last_verified: 2026-06-05
+last_verified: 2026-07-12
 content_nature: paper-derived
 doc_type: explanation
-verified_scope: "external papers verified via WebFetch in workflow wf_37b2cc97-663 (2026-06-05); internal claims cross-referenced against research story §7 + master_draft (validated SoT)"
+verified_scope: "20260712 7/7 raw-all producer closeout + fresh downstream partial audit + full external method/process validation; final layered results and biological clone truth remain pending"
 decision_refs: []
-related_ids: []
+related_ids: [ism-kb-11-layered-reconstruction-external-bridge-20260710, ism-kb-11-paper-claim-search-memory-router-20260711, ism-kb-11-full-method-process-external-validation-20260712]
 tags: [literature, external-corroboration, asm, methylation, long-read, subclone, phasing, tp-fp, cancer, landscape, index]
 canonical_paths: [11_external_literature/00_index.md]
 alias_paths: []
 ---
 
 # External Literature Landscape — 7 角度交叉驗證索引
+
+> 🟠 **2026-07-12 CURRENT OVERRIDE**：先讀 [14 full method/process external validation](14_20260712_full_method_process_external_validation.md)，再用[12 search/memory router](12_20260711_paper_claim_search_and_memory_router.md)查claim/source。raw-all producer/receipt已7/7 PASS；fresh downstream仍未7/7/無root `_SUCCESS`。region tree ≠ biological clone、HP family ≠ clone、read AF ≠ CCF；determined tree可由overlapping partial reads約束，不保證full-span molecule直接觀測。
 
 - **一句結論**：ISM 的整體方向（read-level haplotype-linked 甲基 characterization + tooling、誠實負結果）在文獻中**大方向被證實、無真正反駁**；4 個「夢」已死、3 個 LIVE（最強 = LOH 下甲基輔助 phasing 的白地）、3 個 OPEN/未證；所有 ASM 結論受**單樣本 HCC1395 ⭐3 / 單一 pipeline** 天花板限制。
 - **適用對象**：論文 Intro/Discussion 骨架、PI/協作者全景說明、reviewer 防守。

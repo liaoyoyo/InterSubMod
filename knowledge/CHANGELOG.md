@@ -4,6 +4,31 @@
 
 ---
 
+## [v0.8] — 2026-07-12（全方法／流程外部驗證與 producer closeout）
+
+### Added / changed
+
+- 新增`11_external_literature/14_20260712_full_method_process_external_validation.md`：整理raw-all→LongPhase-S→partial-read regional tree全流程、外部一致/差異/衝突、方法空白與P0–P2驗證路線。
+- raw-all producer/receipt現況由pending更新為7/7 PASS；638,259 records、582,820 `_sc PASS`、32,184 rescue、17,444 remove、164,253,537 sidecar rows。
+- 明確新增`partial-read-constrained, model-determined regional mutation-state tree`口徑：model-determined不保證full-span read，也不等於observed clone或唯一biological history。
+- 補TreeClone、PhyClone、CNAqc、Nomura 2026、Lee 2026等最新/直接prior art；ASMS升2026 VOR，Blood review升fulltext-verified。
+- fresh canonical downstream仍未7/7；sensitivity/comparison/final verifier/immutable receipt與biological truth均pending，scientific release維持NO-GO。
+
+## [v0.7] — 2026-07-11（claim/search memory、最新文獻與 raw-all anti-regression）
+
+### Added / changed
+
+- 新增 `11_external_literature/12_20260711_paper_claim_search_and_memory_router.md`：以 stable `ISM-*` claim ID、section、evidence role、relation 與 citation readiness 路由外部 evidence。
+- 新增 `11_external_literature/13_20260711_latest_research_theory_contract_delta.md`：收錄 Rosenski/McAuley/PCDH/Blood/Foltz 最新查證、rooted three-gamete 術語與 raw-all LongPhase-S contract。
+- 現行 input contract 更新為 normalized paired ClairS raw-all → LongPhase-S `_sc.vcf` PASS；新增 `ISM-X04` 防止 PASS-only producer 回流。
+- PCDH 由 abstract-only 升 fulltext-verified；Blood legal OA、environment retrieval、read depth 分開記錄；新增 Rosenski 2026 fulltext+source card。
+- 外部 evidence semantic mapping 已全部逐卡 curated：97 cards / 20 claims / 201 links / 118 artifacts，strict audit 0 errors/0 warnings；禁止以外部來源直接 `supports` 內部 quantitative/engineering result。
+- 修正 11–13 三份新 KB 文件的 frontmatter enum，統一為既有 `active` / `reference-summary` schema；補 `related_ids` 對稱連結，三個 KB validators 全數可重跑。
+
+### Current gate
+
+- HCC1954 chr22 與 patched HCC1395 whole-chrX raw-all probes通過；7/7 fail-closed producer/closeout、U0–U7 與 fresh downstream run未完成，`ISM-M03/R03`保持 pending。
+
 ## [v0.6] — 2026-06-05（新頂層群組：外部文獻地景）
 
 ### Added — `11_external_literature/`（10 份 .md + 1 standalone HTML companion）

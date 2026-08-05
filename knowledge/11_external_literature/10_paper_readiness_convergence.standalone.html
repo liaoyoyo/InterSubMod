@@ -112,7 +112,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
 <section id="contradict">
 <h2>2 個真·數據對數據矛盾（投稿前必改）</h2>
 <div class="crit">
-<strong>矛盾 #1 — BRCA2 cis vs copy-artifact（HD-3）</strong>：<code>master_draft</code> line 122 + <code>07_asm_cis...md</code> 仍寫「BRCA2 真 cis-driven / 60 T3+4 survivor」，但 06-07 <code>fast_cnv_validation.json</code> 把 BRCA2 列為 <strong>copy-artifact</strong>（~80% copy），「60 T3」塌成 <strong>1 個乾淨 cis = chr17/TBC1D16</strong>。<br>✅ <strong>已加 06-08 amendment</strong>（兩檔保留 audit trail + 指向收斂報告）。誠實口徑 = 「~80% copy + 邊際 ~20% 真 cis (d_within −0.023, p=0.022)」，勿從一個 overclaim 換成相反 overclaim。Martin-Trujillo 現在反而 corroborate copy-artifact。
+<strong>矛盾 #1 — BRCA2 cis vs subclone/copy-confounded（HD-3）</strong>：<code>master_draft</code> line 122 + <code>07_asm_cis...md</code> 仍寫「BRCA2 真 cis-driven / 60 T3+4 survivor」，但 06-07 <code>fast_cnv_validation.json</code> 把 BRCA2 列為 <strong>subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）</strong>，「60 T3」塌成 <strong>1 個乾淨 cis = chr17/TBC1D16</strong>。<br>✅ <strong>已加 06-08 amendment</strong>（兩檔保留 audit trail + 指向收斂報告）。誠實口徑 = 「subclone/copy 主導（焦點 cis d_within=−0.023 邊際；% split 不 robust）」，勿從一個 overclaim 換成相反 overclaim。Martin-Trujillo (CN-DOSAGE 82-92%) 不 corroborate BRCA2 reclassification（copy-DOSAGE 已 REFUTED MW p=0.6183；confound 是 subclone 非 CN-dosage = category error；其正確角色是我們控掉的 confound 警告）。
 </div>
 <div class="crit">
 <strong>矛盾 #2 — Grade A vs Grade B+（HD-2）</strong>：active-cycle title / master §0 寫「Grade A」，但同文件 body + Grade A doc §4/§17 寫 <strong>Grade B+（req #2 = R-SELFREF 未達）</strong>。收斂裁決：<strong>B+ 非 A</strong>。投稿前統一。
@@ -140,7 +140,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
 <tr><th>線</th><th>角色</th><th>USABLE 現在可寫</th><th>FAILED / 反例</th><th>就緒度</th></tr>
 <tr><td><strong>T1 LOH-phasing</strong></td><td>脊柱(主+)</td><td>NG=2 7/7 (p=0.0078)；≥93% same-hap 6/6；C++ 機制；paired 負控</td><td>filter DEAD；HPFineNGroups ⭐4→⭐3</td><td class="mid">NEEDS-WORK (B+ 非 A)</td></tr>
 <tr><td><strong>T2 ASM 存在</strong></td><td>支撐</td><td>ASM 真非 filter；copy-dosage REFUTED；high-Δβ→FP 機制；6/6 excess</td><td>B2 clustering NEG；628/15391 當 filter 矛盾(TP/FP=1.0)</td><td class="no">READY-AS-NEG</td></tr>
-<tr><td><strong>T3 cis/copy-partition</strong></td><td>支撐</td><td>copy-dosage falsified；cis-test 方法；chr17/TBC1D16 唯一乾淨 cis</td><td>BRCA2+chr5 = copy-artifact；「60 T3」塌成 1</td><td class="no">READY-AS-NEG</td></tr>
+<tr><td><strong>T3 cis/copy-partition</strong></td><td>支撐</td><td>copy-dosage falsified；cis-test 方法；chr17/TBC1D16 唯一乾淨 cis</td><td>BRCA2+chr5 = subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）；「60 T3」塌成 1</td><td class="no">READY-AS-NEG</td></tr>
 <tr><td><strong>T4 methyl→TP/FP</strong></td><td>methods</td><td>LOSO 100% circularity；AUC=0.505 null；ISM vestigial(+0.00065)</td><td>整個 filter DEAD；「FP |Δβ| 較大」RETRACTED(p=0.137)</td><td class="no">READY-AS-NEG(強)</td></tr>
 <tr><td><strong>T5 跨樣本 ASM</strong></td><td>支撐</td><td>6/6 excess +0.101–0.241 (3 癌種)；方法 transfers 6/6</td><td>同-locus 0/38；gene 0/94 (underpowered)</td><td class="no">READY-AS-NEG</td></tr>
 <tr><td><strong>T6 subclone</strong></td><td>支撐</td><td>AF→NGroups 7/7 (Δng +0.637–0.910)，survives NumReads；dosage refuted</td><td>B2 clustering NEG；cis 1/816 clean</td><td class="mid">READY-AS-NEG (+1 IF 歸因解)</td></tr>
@@ -170,7 +170,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
 <p><strong>USABLE</strong>：ASM 真非 filter（TP 0.0395>FP 0.0107, subhap 0.0377 vs 0.0109, sens ~4%, COLO829 TP≈FP）；copy-dosage REFUTED；high-Δβ→FP 機制（no-clust OR=8.6/LOH OR=4.1, 9×）；6/6 excess。<strong>OVERCLAIM 防</strong>：628/15391 是單樣本 method-agreement characterization tally，15391 TP/FP=1.0 → 絕不寫 filter。</p>
 </div></details>
 <details><summary>T3 cis / copy-partition — 支撐（BRCA2 退役，chr17 改錨）</summary><div class="det-body">
-<p><strong>USABLE</strong>：copy-DOSAGE 乾淨 falsified（MW p=0.6183, ρ=−0.083 反向）；normal-anchored cis-test 方法；copy-partition 分解；<strong>chr17:79991120 (TBC1D16)</strong> within 0.142 > HP 0.122, perm p=0.001（稀有 exemplar）。<strong>FAILED</strong>：BRCA2+chr5 copy-artifact；chr18 mechanical CpG-create；chr19 destroy；「60 T3」→ 1 clean。<strong>NEEDS</strong>：6 強訊號 untestable（pureALT CGI-desert，copy-test 只能算 7/60）。</p>
+<p><strong>USABLE</strong>：copy-DOSAGE 乾淨 falsified（MW p=0.6183, ρ=−0.083 反向）；normal-anchored cis-test 方法；copy-partition 分解；<strong>chr17:79991120 (TBC1D16)</strong> within 0.142 > HP 0.122, perm p=0.001（稀有 exemplar）。<strong>FAILED</strong>：BRCA2+chr5 subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）；chr18 mechanical CpG-create；chr19 destroy；「60 T3」→ 1 clean。<strong>NEEDS</strong>：6 強訊號 untestable（pureALT CGI-desert，copy-test 只能算 7/60）。</p>
 </div></details>
 <details><summary>T4 methyl→TP/FP filter — methods（最強 NEGATIVE）</summary><div class="det-body">
 <p><strong>USABLE</strong>：LOSO in-dist +0.02236 → held-out −0.00012（100% circularity）；|Δβ| AUC=0.505（2000× shuffle null）；ISM vestigial（drop-5-methyl ΔF1 +0.00065）；high-Δβ→FP combo TP 0.86% vs FP 7.97%。<strong>provenance 修</strong>：narrative「0.5049」→ source 真值 0.505。<strong>FAILED</strong>：「FP |Δβ| 較大」RETRACTED (p=0.137 NS)；strong-ASM 5× = anti-discriminative (OR=0.194, 61% 來自 chr8 hotspot)。</p>
@@ -192,7 +192,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
 <strong>最高頻陷阱 FT-1 — characterization-set 當 filter</strong>：628 / 15391 / strong-ASM 是 characterization tally；一旦用 filter 動詞就矛盾自身來源（15391 TP/FP=1.0；strong-ASM anti-discriminative OR=0.194）。每條線內部已撤回，但會悄悄爬回 summary slide。
 </div>
 <ul>
-<li><strong>FT-2 cis-anchor vs copy-artifact</strong>：BRCA2 ~80% copy；且 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
+<li><strong>FT-2 cis-anchor vs subclone/copy-confounded</strong>：BRCA2 subclone/copy 主導（焦點 cis d_within=−0.023 邊際；% split 不 robust）；且 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
 <li><strong>FT-3 private vs underpowered</strong>：0/38 是 underpowered（E[overlap]=0.16），非「private」。</li>
 <li><strong>FT-4 phenomenon vs cis recurrence</strong>：6/6 是 allelic-meth-diff 復現，非 cis-ASM 復現。</li>
 <li><strong>FT-5 held-out simulation vs 真救援</strong>：umtag 0.8852 是 held-out 模擬，非真-unphase 救援。</li>

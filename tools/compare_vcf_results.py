@@ -19,6 +19,7 @@ import os
 import sys
 import argparse
 import logging
+from pathlib import Path
 import pandas as pd
 import numpy as np
 from sklearn import metrics as sk_metrics
@@ -26,6 +27,19 @@ from datetime import datetime
 
 # Add tools directory to path for font_config import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Import the repository-wide schema contract even when this file is executed
+# directly as ``python tools/compare_vcf_results.py``.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lib.verification_schema_contract import (  # noqa: E402
+    SchemaContractError,
+    ordered_class_crosstab,
+    select_current_view,
+    select_legacy_view,
+)
 
 # Configure matplotlib with CJK font support (must be before importing pyplot)
 try:
@@ -51,7 +65,29 @@ def parse_args():
     parser.add_argument("--output-dir", required=True, help="Directory to save analysis results")
     parser.add_argument("--labels", nargs='+', required=True, help="List of labels for the inputs (e.g., TP FP)")
     parser.add_argument("--paths", nargs='+', required=True, help="List of paths to the output directories corresponding to labels")
+    parser.add_argument(
+        "--verification-view",
+        choices=("current", "legacy"),
+        default="current",
+        help="Verification taxonomy to report (default: schema-aware current taxonomy)",
+    )
+    parser.add_argument(
+        "--allow-unversioned-v1",
+        action="store_true",
+        help="Allow an explicitly requested legacy view to read an unversioned four-state VerificationClass column",
+    )
     return parser.parse_args()
+
+
+def resolve_verification_view(df, requested_view="current", allow_unversioned_v1=False):
+    """Resolve one explicit taxonomy for every table and plot in this report."""
+    if requested_view == "current":
+        # The compare tool is the one contract-approved consumer that may render
+        # unversioned inputs as raw values, provided it labels them UNVERSIONED.
+        return select_current_view(df, allow_unversioned_raw=True)
+    if requested_view == "legacy":
+        return select_legacy_view(df, allow_unversioned_v1=allow_unversioned_v1)
+    raise ValueError(f"Unsupported verification view: {requested_view}")
 
 
 def load_data(labels, paths):
@@ -140,17 +176,18 @@ def generate_summary_stats(df, dirs):
     return stats
 
 
-def generate_verification_class_stats(df, dirs):
-    """Generate VerificationClass breakdown statistics."""
-    logger.info("Generating VerificationClass breakdown...")
-    
-    if 'VerificationClass' not in df.columns:
-        logger.warning("VerificationClass column not found, skipping.")
-        return None
-    
-    # Cross-tabulation with proportions
-    crosstab = pd.crosstab(df['Label'], df['VerificationClass'], margins=True)
-    crosstab_pct = pd.crosstab(df['Label'], df['VerificationClass'], normalize='index') * 100
+def generate_verification_class_stats(df, dirs, verification_view):
+    """Generate a schema-explicit VerificationClass breakdown."""
+    logger.info(
+        "Generating VerificationClass breakdown from %s (%s)...",
+        verification_view.field,
+        verification_view.schema_status,
+    )
+
+    # The helper reindexes all canonical classes so a zero-frequency class is
+    # still visible and schema drift cannot silently change the table shape.
+    crosstab = ordered_class_crosstab(df['Label'], verification_view, margins=True)
+    crosstab_pct = ordered_class_crosstab(df['Label'], verification_view, normalize=True) * 100
     
     save_path = os.path.join(dirs['tables'], "verification_class_breakdown.csv")
     crosstab.to_csv(save_path)
@@ -241,28 +278,21 @@ def plot_distributions(df, dirs):
         plt.close()
 
 
-def plot_verification_class(df, dirs):
-    """Plot VerificationClass distribution as stacked bar chart."""
+def plot_verification_class(df, dirs, verification_view):
+    """Plot the selected verification taxonomy as a stacked bar chart."""
     logger.info("Plotting VerificationClass distribution...")
-    
-    if 'VerificationClass' not in df.columns:
-        logger.warning("VerificationClass column not found, skipping plot.")
-        return
-    
+
     plot_dir = dirs['distribution']
-    
-    # Order for consistent plotting
-    class_order = ['Strong', 'Subclone', 'Weak', 'Noise']
-    available_classes = [c for c in class_order if c in df['VerificationClass'].unique()]
-    
-    # Calculate proportions
-    crosstab_pct = pd.crosstab(df['Label'], df['VerificationClass'], normalize='index') * 100
-    crosstab_pct = crosstab_pct.reindex(columns=available_classes, fill_value=0)
+
+    crosstab_pct = ordered_class_crosstab(df['Label'], verification_view, normalize=True) * 100
     
     # Stacked bar plot
     fig, ax = plt.subplots(figsize=(10, 6))
     crosstab_pct.plot(kind='bar', stacked=True, ax=ax, colormap='RdYlGn_r', edgecolor='white')
-    plt.title("VerificationClass Distribution by Label")
+    plt.title(
+        "VerificationClass Distribution by Label\n"
+        f"{verification_view.field} [{verification_view.schema_status}]"
+    )
     plt.xlabel("Label (TP/FP)")
     plt.ylabel("Percentage (%)")
     plt.legend(title="Class", bbox_to_anchor=(1.05, 1), loc='upper left')
@@ -270,6 +300,7 @@ def plot_verification_class(df, dirs):
     plt.tight_layout()
     plt.savefig(os.path.join(plot_dir, "dist_verification_class.png"), dpi=150)
     plt.close()
+    return crosstab_pct
 
 
 def plot_dominant_label_dist(df, dirs):
@@ -337,23 +368,28 @@ def plot_correlations(df, dirs):
         plt.close()
 
 
-def plot_cross_heatmap(df, dirs):
-    """Plot cross-analysis heatmap of VerificationClass vs DominantLabel."""
+def plot_cross_heatmap(df, dirs, verification_view):
+    """Plot the selected verification taxonomy against DominantLabel."""
     logger.info("Plotting cross-analysis heatmap...")
-    
-    if 'VerificationClass' not in df.columns or 'DominantLabel' not in df.columns:
+
+    if 'DominantLabel' not in df.columns:
         logger.warning("Required columns not found, skipping heatmap.")
         return
-    
+
     plot_dir = dirs['heatmaps']
-    
+
+    selected = df.assign(_VerificationClass_Selected=verification_view.values)
     for label in df['Label'].unique():
-        df_sub = df[df['Label'] == label]
-        crosstab = pd.crosstab(df_sub['VerificationClass'], df_sub['DominantLabel'])
-        
+        df_sub = selected[selected['Label'] == label]
+        crosstab = pd.crosstab(df_sub['_VerificationClass_Selected'], df_sub['DominantLabel'])
+        crosstab = crosstab.reindex(index=list(verification_view.categories), fill_value=0)
+
         plt.figure(figsize=(8, 6))
         sns.heatmap(crosstab, annot=True, fmt='d', cmap='Blues', cbar_kws={'label': 'Count'})
-        plt.title(f"VerificationClass vs DominantLabel ({label})")
+        plt.title(
+            f"VerificationClass vs DominantLabel ({label})\n"
+            f"{verification_view.field} [{verification_view.schema_status}]"
+        )
         plt.tight_layout()
         plt.savefig(os.path.join(plot_dir, f"heatmap_class_vs_label_{label}.png"), dpi=150)
         plt.close()
@@ -524,7 +560,7 @@ def df_to_md_table(df, index=True):
     return "\n".join([header, separator] + rows)
 
 
-def generate_report(df, stats, dirs, output_dir, roc_metrics):
+def generate_report(df, stats, dirs, output_dir, roc_metrics, verification_view):
     """Generate a markdown report summarizing the analysis."""
     logger.info("Generating analysis report...")
     
@@ -540,11 +576,13 @@ def generate_report(df, stats, dirs, output_dir, roc_metrics):
         f.write("\n\n")
         
         # VerificationClass breakdown
-        if 'VerificationClass' in df.columns:
-            f.write("## 2. VerificationClass 分布 (%)\n\n")
-            crosstab_pct = pd.crosstab(df['Label'], df['VerificationClass'], normalize='index') * 100
-            f.write(df_to_md_table(crosstab_pct, index=True))
-            f.write("\n\n")
+        f.write("## 2. VerificationClass 分布 (%)\n\n")
+        f.write(f"- Selection field: `{verification_view.field}`\n")
+        f.write(f"- Schema status: `{verification_view.schema_status}`\n")
+        f.write(f"- Unknown counts: `{verification_view.unknown_counts}`\n\n")
+        crosstab_pct = ordered_class_crosstab(df['Label'], verification_view, normalize=True) * 100
+        f.write(df_to_md_table(crosstab_pct, index=True))
+        f.write("\n\n")
         
         # DominantLabel breakdown
         if 'DominantLabel' in df.columns:
@@ -582,10 +620,7 @@ def generate_report(df, stats, dirs, output_dir, roc_metrics):
 
 def main():
     args = parse_args()
-    
-    # Setup directories
-    dirs = setup_output_dirs(args.output_dir)
-    
+
     if len(args.labels) != len(args.paths):
         logger.error("Error: Number of labels must match number of paths.")
         sys.exit(1)
@@ -597,25 +632,49 @@ def main():
     if df.empty:
         logger.error("No data collected. Please check input directories and ensure significance_summary.csv exists.")
         sys.exit(1)
-    
+
     logger.info(f"Total records loaded: {len(df)}")
-    
+
+    try:
+        verification_view = resolve_verification_view(
+            df,
+            requested_view=args.verification_view,
+            allow_unversioned_v1=args.allow_unversioned_v1,
+        )
+    except SchemaContractError as exc:
+        logger.error("Verification schema contract failed: %s", exc)
+        sys.exit(2)
+
+    logger.info(
+        "Verification selection: field=%s schema_status=%s unknown_counts=%s",
+        verification_view.field,
+        verification_view.schema_status,
+        verification_view.unknown_counts,
+    )
+    for message in verification_view.warning_messages:
+        logger.warning(message)
+    if verification_view.unknown_counts:
+        logger.warning("Unknown current class values were retained in UnknownCurrentClass")
+
+    # Only create report artifacts after the requested taxonomy is validated.
+    dirs = setup_output_dirs(args.output_dir)
+
     # Run analyses
     stats = generate_summary_stats(df, dirs)
-    generate_verification_class_stats(df, dirs)
+    generate_verification_class_stats(df, dirs, verification_view)
     generate_dominant_label_stats(df, dirs)
     
     # Plotting
     plot_distributions(df, dirs)
-    plot_verification_class(df, dirs)
+    plot_verification_class(df, dirs, verification_view)
     plot_dominant_label_dist(df, dirs)
     plot_correlations(df, dirs)
-    plot_cross_heatmap(df, dirs)
+    plot_cross_heatmap(df, dirs, verification_view)
     roc_metrics = plot_roc_curves(df, dirs)
     plot_precision_recall(df, dirs)
     
     # Generate report
-    generate_report(df, stats, dirs, args.output_dir, roc_metrics)
+    generate_report(df, stats, dirs, args.output_dir, roc_metrics, verification_view)
     
     logger.info("Analysis complete.")
 
