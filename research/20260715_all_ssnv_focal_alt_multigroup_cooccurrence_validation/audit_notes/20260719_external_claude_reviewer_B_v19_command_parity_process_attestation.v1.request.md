@@ -1,0 +1,26 @@
+# External Reviewer B v19 command-parity hotfix
+
+Read-only independent review. Do not modify files or run tests/producers.
+
+Act adversarially: attempt to falsify source, test, signer, review-process, private-key retirement, and old-v4-revocation claims.
+
+Review all protected sources, the attested canonical pytest manifest, the v12 assembler, v18 normalizer/v19 runner, signed-evidence validation, FD lifetime, clean subprocess environment, supplemental ABA/post-sign verification, the command/cache parity hotfix, and v6 authority consumers.
+
+Security boundary: this local evidence chain covers persistent or before/after-observable drift, no-clobber publication, exact identities, and reproducible process contracts. Concurrent same-UID/root/ptrace compromise or live mutation of the Python interpreter/site-packages is out of scope and must be reported as a residual limitation, not treated as a release blocker by itself.
+
+Return APPROVE only if no HIGH/MEDIUM false-authority path remains and F1/F2 are RESOLVED_VERIFIED. Otherwise return REQUEST_CHANGES with specific file:line evidence. StructuredOutput only transports the 17 top-level fields; the independent local consumer revalidates every exact identity and approval rule.
+
+StructuredOutput must contain exactly these top-level fields:
+schema_name,schema_version,reviewer_label,reviewer_id,model,verdict,findings_closed,f1_status,f2_status,reviewed_source_set_sha256,reviewed_git_head,reviewed_assembler,canonical_junit,review_scope,blocking_findings,nonblocking_findings,evidence
+For APPROVE use schema_name=intersubmod.external_claude_source_review, schema_version=1.0.0, model=claude-opus-4-8, findings_closed=true, f1_status=RESOLVED_VERIFIED, f2_status=RESOLVED_VERIFIED, and an empty blocking_findings array. reviewer_label must identify this Reviewer B; reviewer_id must be a fresh canonical UUIDv4. Copy reviewed_source_set_sha256, reviewed_git_head, reviewed_assembler, and canonical_junit exactly from REVIEW_CONTRACT_JSON. review_scope must be at least 80 characters and evidence must contain at least 3 properties. Any mismatch is rejected locally even if transport validation passes.
+
+You MUST invoke Read on every path below before deciding. Read each whole file with only file_path: do not set offset or limit. Use Glob/Grep for broader coverage as needed. The signed transcript is rejected if any required Read is absent, bounded, empty, or returns an error:
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/scripts/release_source_authority.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/attested_release_evidence_v2.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/run_attested_canonical_pytest_v2.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/run_external_claude_review_v19_attested.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/normalize_external_source_review_v18.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/assemble_release_source_authority_v12.py
+- /big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/run_one_time_ed25519_signer_v6.py
+
+REVIEW_CONTRACT_JSON={"assembler":{"mode":"0o444","path":"/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/audit_notes/assemble_release_source_authority_v12.py","sha256":"3fe2743cf6cee6d123d618b10e10afdcc823218a2af57b0c1a3e5d107d0911a4","size_bytes":29132},"canonical_junit":{"artifact":{"mode":"0o444","path":"/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/logs/pytest_full_pre_authority_v23_command_parity_attested_canonical.xml","sha256":"f4842aa9aae54b94122d08c966b8fb199de4f8b3f0c5737459531d92754eb090","size_bytes":78935},"counts":{"errors":0,"failures":0,"skipped":0,"tests":738}},"git_head":"0ee2fa1b31fcf6af670efd301251b5b3a24c1a99","reviewer_token":"B","source_set_sha256":"2e5da8df553662c0d77ab6fcabc634079d648a0d70e27fe1b9133b93216df377","test_run_manifest":{"mode":"0o444","path":"/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/logs/pytest_full_pre_authority_v23_command_parity_test_run_manifest.v1.json","sha256":"a0cfa56df506587517c4f5aae2708769ea57b7a371dc0b06f4c878531c6501dd","size_bytes":43454},"test_run_public_key":{"mode":"0o444","path":"/bip7_disk/liaoyoyo2001/.config/intersubmod_test_run_authority/20260719_all_ssnv_v7_command_parity_bootstrap/ed25519_public.pem","sha256":"868459888412ae4eef0c003a3599dda468961077bd5a92510e5ae11768f97129","size_bytes":113},"test_run_signature":{"mode":"0o444","path":"/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/logs/pytest_full_pre_authority_v23_command_parity_test_run_manifest.v1.json.ed25519.sig","sha256":"2e1e8e17df0c146145aad1980b37ddd97fa1279252277b9c977331963d7c021a","size_bytes":64}}

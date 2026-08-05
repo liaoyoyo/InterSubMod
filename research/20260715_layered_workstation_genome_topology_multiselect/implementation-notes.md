@@ -235,6 +235,21 @@ advisory: on
 - **資訊層次**：index 先回答 HCC1395 technical reproducibility 與跨樣本比較，再展開方法；sample page 先顯示摘要、GRCh38、region，再放維度教學與完整分布。HCC1395 × DORADO 僅支撐 `PARTIAL TECHNICAL REPRODUCIBILITY`，不支撐相同 ancestry／真樹／clone。
 - **Claude Code 最終唯讀複審**：`VERDICT: AGREE`；`BLOCKERS: none`；`MAJOR: none`；`MINOR: none`。複審重新核對 index UI-contract、兩份 receipt、index hash、U+0009=0 與六檔 `git diff --check`，確認前一審 13 項結論仍成立。
 
+### 2026-07-23 07:15 — 完整候選邊聯集、selected-tree overlay 與 7 頁重建
+
+- **Task type／研究目標**：B（Comprehensive validation）；全基因組、7 datasets，不採 subset；服務 G4（多樣本一致性／可重現性）與 G5（可外部驗證的工程證據）。
+- **根因**：HCC1395 `chr10:87818272-87928739` HP1 有 74 個完整 exact candidates，但舊 candidate browser 只儲存／展示前 32 個；read-AF 第一順位是原 candidate `#63`，因此 `H_RRAA → H_ARAA` 雖存在於最終選擇，舊 stored union 無法顯示。
+- **Python sidecar 修正**：schema 升為 `1.1.0`；每個成功完整重枚舉的 T>1 unit 新增 compact `full_edge_census`：`candidate_total`、`top_candidate_total`、`node_total`、`edge_total` 與 `[parent, child, candidate_count, top_candidate_count]`。計數是 candidate membership，不是 posterior、機率或 read-support weight；不完整 unit 不宣稱完整 census。
+- **全量命令**：`python3 research/20260715_layered_workstation_genome_topology_multiselect/scripts/build_current_v5_read_af_topology.py --run-root /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5 --input-manifest /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5/input_manifest.snapshot.json --current-summary research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json --method-script-dir docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts --output-dir research/20260715_layered_workstation_genome_topology_multiselect/data/current_v5_read_af_topology`。
+- **Sidecar 輸出／結果**：`InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/data/current_v5_read_af_topology/`；7/7 schema `1.1.0`、`all_checks_pass=true`；38,748 個完整 multi-candidate units、372,315 個 edge rows；index SHA-256 `b8b8f0e0de4035f58fba623bd9dee08ee0ea9c1ba2e7e03b58169d45cdffc6dc`，7 個 sample hash readback 全 PASS。
+- **目標 fixture**：candidate `74/74`、top `1/1`、16 nodes、32 union edges；`H_RRAA → H_ARAA = 2/74` 且 `top = 1/1`。這證明該邊不是無來源輸出，而是舊 32/74 display cap 遺漏。
+- **Renderer 修正**：UI contract 升為 `layered-workstation-v5-grch38-topology-multiselect-4`；完整 census 畫 exhaustive edge union，forced／variable 由 `n/N` 決定，read-AF co-top 以藍色 halo 疊加；另提供可摺疊逐邊表與明示 `Stored candidate preview 32/74`。union 文案明示「不是單棵樹」，selected 也不是 truth／probability。
+- **演算法 regression**：`python3 -m unittest discover -s research/20260715_layered_workstation_genome_topology_multiselect/scripts -p 'test_current_v5_read_af_topology_contract.py' -v`；11/11 PASS，涵蓋完整／top incidence、denominator drift、selected-edge drift、missing read-AF、recurrence 與 incomplete absence。
+- **跨面板 regression**：sidecar schema／row closure → full union 32 unique edges → target base edge／selected halo → read-AF top tree → stored preview 32/74；桌面、390 px、320 px 三視窗均驗證同一 fixture。
+- **重建命令／輸出**：`python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py`；輸出 `InterSubMod/docs/methodology/_assets/layered_workstation/{COLO829,H1437,H2009,HCC1395,HCC1395_DORADO,HCC1937,HCC1954,index}.html`。`--index-only` readback 顯示 7/7 `VERIFIED hash-bound page`；HCC1395 HTML SHA-256 `6f40e3ec850953c94e319775031560e8ff32fe40c819c8a3f6ae876419f9686c`。
+- **Chromium 最終結果**：工作站 8 documents × 3 viewports = 24/24 runs、491/491 checks、27 screenshots、0 failures；receipt `InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/qa/full/validation_receipt.json`，SHA-256 `1326b4d90062220a9cb674ea61cf255820e2be6715c49f321c8fed2ca6bfd6bd`。比較頁另為 3/3 runs、66/66 checks、15 screenshots。
+- **視覺 remediation**：實際瀏覽器先抓到 locus `R`／`·` 對比 3.39／1.63 與 HCC1395 mobile SHA digest 撐寬；修正後 WCAG AA failure=0，1440／390／320 的 body overflow 都為 0。完整聯集人工截圖：`InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/qa/full/HCC1395__desktop__edge_union.png`、`InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/qa/full/HCC1395__mobile__edge_union.png`。
+
 ## 📚 Lore
 
 ### 2026-07-15 — Exact tie 與 softmax weight 不能混用

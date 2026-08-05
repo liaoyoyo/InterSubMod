@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import struct
 from datetime import datetime, timezone
@@ -59,7 +60,8 @@ VIEWPORTS = {
     "mobile": {"width": 390, "height": 844},
 }
 AUTHORITY = "20260724-exact-ps-hp-strict-read-linkage"
-UI_CONTRACT = "layered-workstation-exact-ps-v4"
+UI_CONTRACT = "layered-workstation-exact-ps-v5"
+GENOME_SCALE_CONTRACT = "shared-grch38-bp-v1"
 DISPLAY_LABELS = (
     "HCC1395_HKU",
     "HCC1395_NYGC",
@@ -498,6 +500,10 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         "() => document.getElementById('filterStatus')?.textContent.includes('regions')",
         timeout=60_000,
     )
+    page.wait_for_function(
+        "() => window.__intersubmodGenomeScale?.renderedPointCount >= 0",
+        timeout=60_000,
+    )
     info = geometry(page)
     require(info["authority"] == AUTHORITY, f"{sample} {mode}: authority mismatch")
     require(info["contract"] == UI_CONTRACT, f"{sample} {mode}: UI contract mismatch")
@@ -543,11 +549,77 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         f"{methyl_support}",
     )
 
-    page.locator("#genome").scroll_into_view_if_needed()
-    page.wait_for_timeout(250)
     total_groups = page.evaluate(
         "() => JSON.parse(document.getElementById('pageData').textContent).rows.length"
     )
+    genome_scale = page.evaluate(
+        """() => ({
+          meta: document.querySelector(
+            'meta[name="intersubmod-genome-scale"]'
+          )?.content,
+          canvas: document.querySelector(
+            '[data-testid="genome-canvas"]'
+          )?.dataset.genomeScale,
+          runtime: window.__intersubmodGenomeScale
+        })"""
+    )
+    runtime_scale = genome_scale.get("runtime") or {}
+    plot = runtime_scale.get("plot") or {}
+    track_ends = runtime_scale.get("trackEnds") or {}
+    track_ratios = runtime_scale.get("trackRatios") or {}
+    axis_ticks = runtime_scale.get("axisTicks") or []
+    expected_tracks = {f"chr{index}" for index in range(1, 23)}
+    require(
+        genome_scale.get("meta") == GENOME_SCALE_CONTRACT
+        and genome_scale.get("canvas") == GENOME_SCALE_CONTRACT
+        and runtime_scale.get("mode") == GENOME_SCALE_CONTRACT,
+        f"{sample} {mode}: genome-scale contract mismatch {genome_scale}",
+    )
+    require(
+        runtime_scale.get("maxChrom") == "chr1"
+        and runtime_scale.get("maxBp") == 248956422,
+        f"{sample} {mode}: shared GRCh38 maximum mismatch {runtime_scale}",
+    )
+    require(
+        len(track_ends) == 22
+        and len(track_ratios) == 22
+        and set(track_ends) == expected_tracks
+        and set(track_ratios) == expected_tracks
+        and "left" in plot,
+        f"{sample} {mode}: expected 22 chromosome tracks {runtime_scale}",
+    )
+    chr1_width = float(track_ends["chr1"]) - float(plot["left"])
+    chr22_width = float(track_ends["chr22"]) - float(plot["left"])
+    require(
+        chr1_width > 0
+        and math.isclose(
+            chr22_width / chr1_width,
+            50818468 / 248956422,
+            rel_tol=1e-9,
+            abs_tol=1e-9,
+        ),
+        f"{sample} {mode}: chr22/chr1 endpoint-width ratio mismatch "
+        f"{chr22_width}/{chr1_width}",
+    )
+    require(
+        runtime_scale.get("pointsWithinTracks") is True
+        and runtime_scale.get("renderedPointCount") == total_groups,
+        f"{sample} {mode}: initial genome points mismatch "
+        f"{runtime_scale.get('renderedPointCount')}/{total_groups}",
+    )
+    require(
+        axis_ticks
+        and axis_ticks[0] == 0
+        and axis_ticks[-1] == 248956422,
+        f"{sample} {mode}: shared genome axis lacks 0/max endpoints "
+        f"{axis_ticks}",
+    )
+    page.locator('[data-testid="genome-canvas"]').screenshot(
+        path=str(output / f"{sample}_{mode}_genome_canvas_all.png")
+    )
+
+    page.locator("#genome").scroll_into_view_if_needed()
+    page.wait_for_timeout(250)
     require(
         displayed_region_count(page) == total_groups,
         f"{sample} {mode}: initial unfiltered count mismatch",
@@ -997,6 +1069,7 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         "methyl_filter_counts": methyl_filter_results,
         "methyl_projection": methyl_projection,
         "legend_multiselect": legend_multiselect,
+        "genome_scale": genome_scale,
         "console_errors": console_errors,
         "external_requests": external_requests,
     }
@@ -1012,10 +1085,11 @@ def main() -> int:
     samples = tuple(args.sample) if args.sample else SAMPLES
     receipt: dict[str, Any] = {
         "schema_name": "intersubmod.exact_ps_layered_workstation.browser_audit",
-        "schema_version": "1.2.0",
+        "schema_version": "1.3.0",
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "authority": AUTHORITY,
         "ui_contract": UI_CONTRACT,
+        "genome_scale_contract": GENOME_SCALE_CONTRACT,
         "samples": list(samples),
         "viewports": VIEWPORTS,
         "checks": {},
@@ -1079,7 +1153,7 @@ def main() -> int:
             f"{sample}_{mode}_{panel}.png"
             for sample in samples
             for mode in VIEWPORTS
-            for panel in ("genome", "detail", "top")
+            for panel in ("genome", "genome_canvas_all", "detail", "top")
         )
         if "H2009" in samples:
             expected_screenshots.update(

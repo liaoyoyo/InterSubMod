@@ -13,7 +13,7 @@ tier_assignment.json, validation3.json (independent validation), fig_index.json,
 
 Output: display_v2/20260610_judgment_workstation_01.html
 """
-import csv, json, datetime, os
+import csv, json, datetime, os, subprocess
 
 DV = ("/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/"
       "genome_survey_v2/cn_confound/cross_sample/display_v2")
@@ -51,6 +51,13 @@ def main():
     figidx = json.load(open(f"{DV}/fig_index.json")) if os.path.exists(f"{DV}/fig_index.json") else {}
     seqc2 = json.load(open(f"{DV}/seqc2_cn.json")) if os.path.exists(f"{DV}/seqc2_cn.json") else {}
     sqvs = json.load(open(f"{DV}/seqc2_vs_ism.json")) if os.path.exists(f"{DV}/seqc2_vs_ism.json") else {}
+    chlog = json.load(open(f"{DV}/correction_changelog.json")) if os.path.exists(f"{DV}/correction_changelog.json") else {}
+    pilot = json.load(open(f"{DV}/pilot_compare.json")) if os.path.exists(f"{DV}/pilot_compare.json") else {}
+    try:
+        build_head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
+                                             cwd="/big7_disk/liaoyoyo2001/InterSubMod").decode().strip()
+    except Exception:
+        build_head = "UNKNOWN"
 
     chrs, chr_idx = [], {}
     rows = []
@@ -98,7 +105,9 @@ def main():
     H = TEMPLATE
     for tok, val_ in (("__DATA__", payload), ("__CHRS__", chrsj), ("__FUNNEL__", funnel),
                       ("__STAMP__", stamp), ("__NFIG__", str(nfig), ), ("__NTOTAL__", str(len(rows))),
-                      ("__SQVS__", json.dumps(sqvs, ensure_ascii=False))):
+                      ("__SQVS__", json.dumps(sqvs, ensure_ascii=False)),
+                      ("__CHLOG__", json.dumps(chlog, ensure_ascii=False)), ("__BUILD__", build_head),
+                      ("__PILOT__", json.dumps(pilot, ensure_ascii=False))):
         H = H.replace(tok, val_)
     with open(OUT, "w") as f:
         f.write(H)
@@ -152,15 +161,33 @@ button{cursor:pointer}.v{font-weight:700;color:var(--ac)}
 .chrow .lab{width:130px;color:var(--mut);text-align:right}.chrow .val{width:90px}
 code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#fcd34d}
 .kgreen{color:var(--pass)}.kred{color:var(--rd)}.kor{color:var(--miss)}
+/* ---- table styling (readability upgrade 2026-06-15) ---- */
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:11.5px}
+th,td{border:1px solid #2a3a52;padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#0b1222;color:var(--ac);font-weight:700;position:sticky;top:0}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:#19233b}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.keybox{background:#07261c;border:1px solid #15803d;border-left:4px solid #22c55e;border-radius:8px;padding:11px 15px;margin:0 0 14px;font-size:12.5px;line-height:1.7}
+.keybox b{color:#86efac}.keybox .step{display:inline-block;background:#15803d;color:#dcfce7;border-radius:5px;padding:0 7px;margin-right:5px;font-weight:700}
+.flip{color:#fca5a5;font-weight:700}.up{color:#7dd3fc;font-weight:700}.same{color:#64748b}
+h2{scroll-margin-top:80px}
 </style></head><body>
 <header>
  <h1>位點判斷與驗證工作站 — HCC1395 ASM 篩選</h1>
  <div class="sub">全 __NTOTAL__ 個 ISM 分析位點 ｜ 每個都可記錄 應包含/確認排除/無判斷 + 原因 ｜ 可匯出存檔再校正 ｜ 生成 __STAMP__ ｜ 需與同目錄 figs/ 一起開</div>
+ <div style="margin-top:8px;background:#3a1d05;border:1px solid #92400e;border-radius:7px;padding:7px 12px;font-size:12px;color:#fcd34d">
+  ⚠ <b>Phase 1 骨架 · 資料為修正前（pre-correction）</b>：本頁數據 = 凍結 ±1000bp / MAX_DIST 結果（修正後 binary 已存在但 HCC1395 ASM 尚未重跑）。修正內容與 Phase 2（±5000 重跑）計畫見下方 <b>§⓪b</b>。build <code>__BUILD__</code>
+ </div>
 </header>
 <div class="wrap">
 
 <h2>⓪ 圖例與數據說明（先看這裡）</h2>
 <div class="panel">
+ <div class="keybox">
+  <b>🔑 一眼判讀（最重要的一條規則）：</b>看<b>右圖 read×read 距離矩陣</b> —
+  <span class="step">1</span>對角線出現<b>暗色方塊</b>嗎？　<span class="step">2</span>暗塊邊界<b>對齊左側 HP 色條</b>嗎？　<span class="step">3</span>對齊 ⇒ reads 真按單倍型(HP)分群 = <b>真 ASM</b>；有塊但不對齊 HP ⇒ 按甲基高低分(非 HP，正確被篩掉)；無塊 ⇒ 無分群。<br>
+  左圖 read×CpG 看同一群 read 的甲基(<span style="color:#dc2626">紅高</span>/<span style="color:#2563eb">藍低</span>)是否成帶。<b style="color:#fcd34d">「可能漏掉」(橘)</b> = 有乾淨 HP 分群卻被閘控篩掉，<u>最該逐一檢視是否納回</u>。
+ </div>
  <div style="display:flex;gap:26px;flex-wrap:wrap">
   <div style="min-width:300px">
    <div class="sub" style="color:var(--ac);font-weight:700;margin-bottom:6px">兩張圖怎麼讀（HP / allele / 甲基 / 距離）</div>
@@ -194,6 +221,12 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
   </div>
  </div>
 </div>
+
+<h2>⓪b 資料狀態與修正過程紀錄（corrected-ISM changelog）</h2>
+<div class="panel" id="chlog"></div>
+
+<h2>⓪c 修正驗證 pilot — 修正前 vs 修正後（subset 實測）</h2>
+<div class="panel" id="pilot"></div>
 
 <h2>① 樣本、突變來源與觀察範圍（provenance）</h2>
 <div class="panel">
@@ -262,7 +295,38 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
 
 <script>
-const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__, SQVS=__SQVS__;
+const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__, SQVS=__SQVS__, CHLOG=__CHLOG__, BUILD="__BUILD__", PILOT=__PILOT__;
+function renderPilot(){const el=document.getElementById('pilot');if(!el)return;
+ if(!PILOT.loci){el.innerHTML='(pilot 未生成)';return;}
+ const L=PILOT.loci, flips=L.filter(r=>!r.err&&r.sig_old!==r.sig_new).length;
+ let h=`<div class="sub" style="margin-bottom:8px">用<b>修正後 binary</b>(2026-06-15) 重跑 ${L.length} 個代表位點：視窗 <code>±${PILOT.window_old}→±${PILOT.window_new}</code>、nan 策略 <code>${PILOT.nan_old}→${PILOT.nan_new}</code>。<b class="kor">這是 subset pilot（非全量 30,350）</b>，目的＝實測驗證修正是否真的改變輸出，不是宣稱。</div>`;
+ h+=`<table><tr><th>位點</th><th>類型</th><th class="n">CpG ±1k→±5k</th><th class="n">reads</th><th class="n">CramersV</th><th class="n">Δβ</th><th class="n">PERMANOVA F</th><th>Significant</th></tr>`;
+ for(const r of L){if(r.err){h+=`<tr><td>${r.locus}</td><td colspan="7">${r.err}</td></tr>`;continue;}
+  const fl=r.sig_old!==r.sig_new;
+  h+=`<tr><td><b>${r.locus}</b></td><td>${r.tag}</td>`+
+     `<td class="n"><span class="up">${r.cpg_old}→${r.cpg_new}</span></td>`+
+     `<td class="n">${r.reads_old}→${r.reads_new}</td>`+
+     `<td class="n">${r.cv_old}→${r.cv_new}</td>`+
+     `<td class="n">${r.db_old>=0?'+':''}${r.db_old}→${r.db_new>=0?'+':''}${r.db_new}</td>`+
+     `<td class="n">${r.permF_old}→${r.permF_new}</td>`+
+     `<td class="${fl?'flip':'same'}">${r.sig_old}→${r.sig_new}${fl?' ⚠翻轉':''}</td></tr>`;}
+ h+=`</table><div class="note" style="margin-top:10px"><b>驗證結果（${L.length} 位點 pilot，實測非宣稱）：</b>修正<b>確實改變輸出</b> — 低 CpG 位點 CpG 數 1→36~45（±1000 強制 CpG<10 不可分析的 25% 位點，±5000 補回可分析）；<b class="kred">${flips} 個位點分類翻轉</b>（PASS↔非顯著）= 修正會改變判別、非裝飾性。故凍結資料的 p 值/分類需待 <b>Phase 2 全量重跑</b>重新校準；本 pilot 僅 subset，全量效應待 Phase 2。</div>`;
+ el.innerHTML=h;}
+function renderChlog(){const el=document.getElementById('chlog');if(!el)return;
+ if(!CHLOG.corrections){el.innerHTML='(changelog 未生成)';return;}
+ const sb={'in-HEAD':['#052e16','#4ade80','✓ 已在 binary'],'planned-phase2':['#3a1d05','#fcd34d','◔ Phase 2 計畫'],'not-done':['#450a0a','#fca5a5','✗ 尚未做']};
+ let h=`<div class="sub" style="margin-bottom:10px;line-height:1.8">
+  <b style="color:var(--miss)">資料狀態：</b>${CHLOG.data_status.summary}${CHLOG.data_status.verified?` <span class="kgreen">✓已驗證</span> ${CHLOG.data_status.verified}`:''}<br>
+  <b style="color:var(--ac)">修正後 Binary：</b>${CHLOG.binary_status.summary}<br>
+  <b>階段：</b><span class="kor">${CHLOG.phase.current}</span> → <b class="kgreen">${CHLOG.phase.next}</b><br>
+  <span class="sub">決策（${CHLOG.phase.decided}）</span></div>`;
+ h+=`<table style="font-size:11.5px"><tr><th>ID</th><th>修正內容</th><th>狀態</th><th>對結果影響</th><th>來源(已驗證)</th></tr>`;
+ for(const c of CHLOG.corrections){const s=sb[c.status]||['#1e293b','#cbd5e1',c.status];
+  h+=`<tr><td><b>${c.id}</b></td><td style="text-align:left">${c.what}</td>`+
+     `<td><span class="badge" style="background:${s[0]};color:${s[1]}">${s[2]}</span></td>`+
+     `<td style="text-align:left">${c.effect}</td><td style="text-align:left"><code>${c.src}</code></td></tr>`;}
+ h+=`</table><div class="note" style="margin-top:10px"><b>方法稽核結論：</b>${CHLOG.audit_conclusion.summary}</div>`;
+ el.innerHTML=h;}
 function renderSqvs(){const el=document.getElementById('sqvs');if(!el||!SQVS.B_per_class_rates){el&&(el.innerHTML='(分析檔未生成)');return;}
  const R=SQVS.B_per_class_rates, order=['gain','loh','neutral','loss'];
  let h=`<div class="sub" style="margin-bottom:8px">關連強度 Cramér's V = <b>${SQVS.A_cramersV}</b>（弱-中度）。下表：每個 SEQC2 CN 類別中，ISM 各分類的比例與平均統計（全 ${SQVS.n.toLocaleString()} 位點）。</div>
@@ -483,7 +547,7 @@ window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReade
   saveJ();draw();prog();redesign();alert('匯入 '+n+' 筆判斷');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
 window.clearJ=()=>{J={};saveJ();draw();prog();redesign();};
 
-coverage();prog();redesign();charts();renderSqvs();live();draw();
+renderChlog();renderPilot();coverage();prog();redesign();charts();renderSqvs();live();draw();
 </script></body></html>"""
 
 

@@ -256,6 +256,10 @@ def validate_shared_provenance(
         == "intersubmod.current_v5_read_af_topology_index",
         "unexpected sidecar index schema",
     )
+    require(
+        sidecar_index.get("schema_version") == "1.1.0",
+        "unexpected sidecar index schema version",
+    )
     require(sidecar_index.get("all_checks_pass") is True, "sidecar index checks failed")
     require(
         current_summary.get("schema_name") == "intersubmod.current_layered_topology_summary",
@@ -308,6 +312,10 @@ def validate_shared_provenance(
         require(
             sidecar.get("schema_name") == "intersubmod.current_v5_read_af_topology_sample",
             f"{sample}: unexpected sidecar schema",
+        )
+        require(
+            sidecar.get("schema_version") == "1.1.0",
+            f"{sample}: unexpected sidecar schema version",
         )
         require(sidecar.get("sample") == sample, f"{sample}: sidecar sample mismatch")
         require(

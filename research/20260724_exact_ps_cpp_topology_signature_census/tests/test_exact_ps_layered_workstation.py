@@ -280,12 +280,55 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
             ),
         )
 
+    def test_shared_grch38_bp_scale_contract(self) -> None:
+        self.assertEqual(
+            BUILDER.UI_CONTRACT,
+            "layered-workstation-exact-ps-v5",
+        )
+        self.assertEqual(
+            BUILDER.GENOME_SCALE_CONTRACT,
+            "shared-grch38-bp-v1",
+        )
+        self.assertEqual(BUILDER.CHROM_LENGTHS["chr1"], 248956422)
+        self.assertEqual(
+            max(BUILDER.CHROM_LENGTHS.values()),
+            BUILDER.CHROM_LENGTHS["chr1"],
+        )
+        self.assertAlmostEqual(
+            BUILDER.CHROM_LENGTHS["chr22"] / BUILDER.CHROM_LENGTHS["chr1"],
+            50818468 / 248956422,
+        )
+        self.assertIn(
+            "const maxChromLength = Math.max(",
+            BUILDER.SAMPLE_JS,
+        )
+        self.assertIn(
+            "const trackEnd=left+plotWidth*ratio;",
+            BUILDER.SAMPLE_JS,
+        )
+        self.assertIn(
+            "row.mid/maxChromLength",
+            BUILDER.SAMPLE_JS,
+        )
+        self.assertNotIn(
+            "row.mid/data.chromLengths[row.chrom]",
+            BUILDER.SAMPLE_JS,
+        )
+
     def test_sample_html_embeds_one_authority_payload_for_all_panels(self) -> None:
         document = BUILDER.sample_page(
             self.authority, self.hcc
         )
         self.assertIn(
             f'<meta name="intersubmod-authority" content="{BUILDER.AUTHORITY_NAME}">',
+            document,
+        )
+        self.assertIn(
+            f'<meta name="intersubmod-genome-scale" content="{BUILDER.GENOME_SCALE_CONTRACT}">',
+            document,
+        )
+        self.assertIn(
+            f'data-genome-scale="{BUILDER.GENOME_SCALE_CONTRACT}"',
             document,
         )
         index = BUILDER.index_page(self.authority, self.index_samples)
@@ -358,6 +401,8 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
             prefix = page.read_text(encoding="utf-8")[:12000]
             self.assertIn(BUILDER.AUTHORITY_NAME, prefix)
             self.assertIn(BUILDER.UI_CONTRACT, prefix)
+            self.assertIn(BUILDER.GENOME_SCALE_CONTRACT, prefix)
+            self.assertIn("intersubmod-genome-scale", prefix)
             self.assertIn("intersubmod-gene-drug-sha256", prefix)
             self.assertIn(
                 "intersubmod-methyl-overlay-receipt-sha256", prefix

@@ -321,7 +321,7 @@ def load_sidecars(sidecar_dir: Path) -> tuple[dict[str, Any], dict[str, dict[str
     index_path = sidecar_dir / "current_v5_read_af_topology.index.json"
     index = load_json(index_path)
     require(index.get("schema_name") == "intersubmod.current_v5_read_af_topology_index", "sidecar index schema_name drift")
-    require(index.get("schema_version") == "1.0.0", "sidecar index schema_version drift")
+    require(index.get("schema_version") == "1.1.0", "sidecar index schema_version drift")
     require(index.get("scope") == "GRCh38 chr1-22 current canonical v5", "sidecar scope drift")
     require(index.get("dataset_count") == 7 and index.get("all_checks_pass") is True, "sidecar index is not 7/7 PASS")
     index_records = {record["sample"]: record for record in index.get("samples", [])}
@@ -337,7 +337,7 @@ def load_sidecars(sidecar_dir: Path) -> tuple[dict[str, Any], dict[str, dict[str
         require(sha256_file(source_path) == record["output_sha256"], f"{sample}: sidecar hash drift")
         payload = load_json(source_path)
         require(payload.get("schema_name") == "intersubmod.current_v5_read_af_topology_sample", f"{sample}: schema_name drift")
-        require(payload.get("schema_version") == "1.0.0", f"{sample}: schema_version drift")
+        require(payload.get("schema_version") == "1.1.0", f"{sample}: schema_version drift")
         require(payload.get("sample") == sample, f"{sample}: payload sample mismatch")
         require(payload.get("summary", {}).get("all_checks_pass") is True, f"{sample}: summary checks failed")
 

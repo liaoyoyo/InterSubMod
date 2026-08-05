@@ -129,7 +129,8 @@ DISPLAY_LABELS = {
     "H2009": "H2009",
     "COLO829": "COLO829",
 }
-UI_CONTRACT = "layered-workstation-exact-ps-v4"
+UI_CONTRACT = "layered-workstation-exact-ps-v5"
+GENOME_SCALE_CONTRACT = "shared-grch38-bp-v1"
 AUTHORITY_NAME = "20260724-exact-ps-hp-strict-read-linkage"
 CHROM_LENGTHS = {
     "chr1": 248956422,
@@ -2997,6 +2998,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
 <meta name="color-scheme" content="light">
 <meta name="intersubmod-authority" content="{AUTHORITY_NAME}">
 <meta name="intersubmod-ui-contract" content="{UI_CONTRACT}">
+<meta name="intersubmod-genome-scale" content="{GENOME_SCALE_CONTRACT}">
 <meta name="intersubmod-canonical-sample" content="{esc(sample)}">
 <meta name="intersubmod-cohort-receipt-sha256" content="{authority['cohort_receipt_sha256']}">
 <meta name="intersubmod-census-receipt-sha256" content="{authority['census_receipt_sha256']}">
@@ -3030,6 +3032,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
   </div>
 </header>
 <main>
+{solver_verification_band(sample)}
 <section class="section" id="overview"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Evidence ladder</div><h2>先看分母，再看拓撲</h2></div><p>同一頁同時保留 final groups、mutation-bearing、ranked complete 與 resource ABSTAIN；數字不跨分母混算。</p></div>
   <div class="metrics" data-testid="sample-metrics">
@@ -3037,7 +3040,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
     <div class="metric"><span class="label">mutation-bearing</span><span class="value">{summary['mutation']:,}</span><span class="note">{pct(summary['mutation'],summary['groups']):.1f}% of final groups</span></div>
     <div class="metric"><span class="label">read-AF ranked complete</span><span class="value">{summary['ranked']:,}</span><span class="note">{ranked_pct:.1f}% of mutation-bearing</span></div>
     <div class="metric"><span class="label">單一 exact topology</span><span class="value">{exact_pct:.1f}%</span><span class="note">{summary['oneExact']:,} / {summary['ranked']:,}</span></div>
-    <div class="metric"><span class="label">resource-limit ABSTAIN</span><span class="value danger">{summary['abstain']:,}</span><span class="note">不可當作 unresolved=negative</span></div>
+    <div class="metric"><span class="label">resource-limit ABSTAIN</span><span class="value danger">{summary['abstain']:,}</span><span class="note">不可當作 unresolved=negative{recovery_note(sample)}</span></div>
   </div>
   <div class="funnel" style="margin-top:1rem">
     <div class="funnel-step"><span>source read-linked W</span><b>{int(funnel['source_W']):,}</b><small>strict endpoint components k≥2</small></div>
@@ -3082,6 +3085,14 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
       <div class="annotation-filters" id="annotationFilters" data-testid="annotation-filters" role="group" aria-labelledby="annotationFiltersLabel"></div>
       <span class="denom" id="methylFiltersLabel" style="display:block;margin-top:.7rem">甲基 evidence 快速篩選（與拓撲、癌症基因、座標條件做 AND）</span>
       <div class="methyl-filters" id="methylFilters" data-testid="methyl-filters" role="group" aria-labelledby="methylFiltersLabel"></div>
+      <span class="denom" id="hpFiltersLabel" style="display:block;margin-top:.7rem">HP 組成快速篩選（每列＝一個 PS×HP unit；同一 locus 兩股會有兩列）</span>
+      <div class="methyl-filters" id="hpFilters" data-testid="hp-filters" role="group" aria-labelledby="hpFiltersLabel"></div>
+      <p class="denom" style="margin:.45rem 0 0">⚠ 單一 HP unit <b>不是 LOH 判定</b>：專案記錄顯示單 HP 區僅約 40% 為真 LOH；真正 LOH 需 CN／LOH sidecar，不可由 HP 組成推論。</p>
+      <span class="denom" id="sortLabel" style="display:block;margin-top:.7rem">排序（套用於目前篩選結果）</span>
+      <div class="sort-controls" data-testid="sort-controls" role="group" aria-labelledby="sortLabel" style="display:flex;gap:.4rem;align-items:center;margin-top:.3rem">
+        <select id="sortSelect" class="action" style="flex:1;min-width:0"></select>
+        <button id="sortDir" class="action" type="button">↑ 遞增</button>
+      </div>
     </div>
     <form class="search" id="searchForm">
       <label class="sr-only" for="regionSearch">搜尋座標</label>
@@ -3092,8 +3103,8 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
   </div>
   <div class="legend" id="legend" data-testid="legend" role="group" aria-label="目前著色維度的類別圖例；可多選聯集"></div>
   <div class="genome-wrap">
-    <canvas id="genomeCanvas" data-testid="genome-canvas" role="img" aria-label="GRCh38 chr1 到 chr22 拓撲區域分布；下方 region 清單提供鍵盤可操作的等價內容"></canvas>
-    <div class="genome-status"><span id="filterStatus" aria-live="polite"></span><span>座標按 GRCh38 chromosome bp 比例；點大小僅為可見性，不代表區域長度。</span></div>
+    <canvas id="genomeCanvas" data-testid="genome-canvas" data-genome-scale="{GENOME_SCALE_CONTRACT}" role="img" aria-label="GRCh38 chr1 到 chr22 拓撲區域分布；染色體骨架與點位共用 0 到 chr1 248,956,422 bp 尺度；下方 region 清單提供鍵盤可操作的等價內容"></canvas>
+    <div class="genome-status"><span id="filterStatus" aria-live="polite"></span><span>染色體骨架長度與點位共用 0–249 Mb GRCh38 尺度；點大小僅為可見性，不代表區域長度。</span></div>
   </div>
   <div class="browser">
     <aside>
@@ -3140,7 +3151,10 @@ SAMPLE_JS = r"""
   const data = JSON.parse(document.getElementById("pageData").textContent);
   const rows = data.rows;
   const chroms = Object.keys(data.chromLengths);
-  const state = {mode:"resolution", selected:new Set(), annotationFilter:"all", methylFilter:"all", query:null, current:null, filtered:rows, candidateIndex:0, shapeIndex:0};
+  const genomeScaleMode = "shared-grch38-bp-v1";
+  const maxChromLength = Math.max(...chroms.map(chrom=>Number(data.chromLengths[chrom])));
+  const maxChrom = chroms.find(chrom=>Number(data.chromLengths[chrom])===maxChromLength);
+  const state = {mode:"resolution", selected:new Set(), annotationFilter:"all", methylFilter:"all", hpFilter:"all", sortKey:"pos", sortDir:"asc", query:null, current:null, filtered:rows, candidateIndex:0, shapeIndex:0};
   const modes = [
     ["resolution","Determinacy"],["coarse","拓撲形態"],["hp","HP family"],
     ["status","判定狀態"],["k","active k"],["annotation","癌症基因／藥物"],
@@ -3157,9 +3171,45 @@ SAMPLE_JS = r"""
     ["aligned","focal ALT/REF aligned"],
     ["resolved","focal→partner relation resolved"]
   ];
+  // Per-locus HP composition, derived client-side from the existing rows.
+  // Each row is one PS x HP unit, so a locus carrying both haplotypes yields two rows.
+  // NOTE: a single-HP locus is NOT an LOH call — project record shows only ~40% of
+  // single-HP regions are true LOH; real LOH needs the CN / LOH sidecar.
+  (function annotateHpComposition(){
+    const byLocus=new Map();
+    for(const row of rows){
+      const key=row.chrom+":"+row.start+"-"+row.end;
+      let set=byLocus.get(key);
+      if(!set){set=new Set();byLocus.set(key,set);}
+      set.add(String(row.hp));
+    }
+    for(const row of rows){
+      const set=byLocus.get(row.chrom+":"+row.start+"-"+row.end);
+      row.hpMultiplicity=set.size;
+      row.hpComposition=set.size>1?"HP1+HP2":("HP"+row.hp+" only");
+    }
+  })();
+  const hpFilters = [
+    ["all","全部 units"],
+    ["hp1","只有 HP1 unit 的 locus"],
+    ["hp2","只有 HP2 unit 的 locus"],
+    ["single","單一 HP locus（任一股）"],
+    ["both","HP1 + HP2 皆有"]
+  ];
+  const sortOptions = [
+    ["pos","座標 chrom:start"],
+    ["activeK","active k（位點數）"],
+    ["span","區域長度 span bp"],
+    ["resolution","Determinacy 等級"],
+    ["hpMultiplicity","HP 組成（單→雙）"],
+    ["methyl","甲基 evidence 優先"],
+    ["annotation","癌症基因／藥物優先"]
+  ];
+  const RESOLUTION_RANK = {UNIQUE_TREE:0, TIED_SAME_TOPOLOGY:1, TIED_CROSS_TOPOLOGY:2, RESOURCE_ABSTAIN:3, ZERO_DENOMINATOR:4, NO_ACTIVE_ALT:5};
   const modeButtons = document.getElementById("modeButtons");
   const annotationFilterButtons = document.getElementById("annotationFilters");
   const methylFilterButtons = document.getElementById("methylFilters");
+  const hpFilterButtons = document.getElementById("hpFilters");
   const legend = document.getElementById("legend");
   const canvas = document.getElementById("genomeCanvas");
   const ctx = canvas.getContext("2d");
@@ -3206,12 +3256,14 @@ SAMPLE_JS = r"""
     return methylFilters.find(item=>item[0]===state.methylFilter)?.[1]||"全部 regions";
   }
   function refresh() {
-    state.filtered = rows.filter(row => matchesQuery(row) && matchesAnnotation(row) && matchesMethyl(row) && (!state.selected.size || state.selected.has(modeValue(row))));
+    state.filtered = sortRows(rows.filter(row => matchesQuery(row) && matchesAnnotation(row) && matchesMethyl(row) && matchesHp(row) && (!state.selected.size || state.selected.has(modeValue(row)))));
     renderCanvas(); renderList();
     status.textContent = `顯示 ${state.filtered.length.toLocaleString()} / ${rows.length.toLocaleString()} regions` +
       (state.selected.size ? ` · ${state.selected.size} 類聯集` : " · 全部類別") +
       ` · ${annotationFilterLabel()}` +
       ` · ${methylFilterLabel()}` +
+      ` · ${hpFilterLabel()}` +
+      ` · 排序 ${sortOptions.find(item=>item[0]===state.sortKey)?.[1]||state.sortKey}${state.sortDir==="asc"?"↑":"↓"}` +
       (state.query ? ` · ${state.query.chrom}:${state.query.start.toLocaleString()}–${state.query.end.toLocaleString()}` : "");
   }
   function renderModes(){
@@ -3238,6 +3290,72 @@ SAMPLE_JS = r"""
       });
       annotationFilterButtons.append(button);
     }
+  }
+  function matchesHp(row){
+    const mult=Number(row.hpMultiplicity||1);
+    if(state.hpFilter==="hp1")return mult===1&&String(row.hp)==="1";
+    if(state.hpFilter==="hp2")return mult===1&&String(row.hp)==="2";
+    if(state.hpFilter==="single")return mult===1;
+    if(state.hpFilter==="both")return mult>1;
+    return true;
+  }
+  function hpFilterLabel(){
+    return hpFilters.find(item=>item[0]===state.hpFilter)?.[1]||"全部 units";
+  }
+  function sortValue(row){
+    switch(state.sortKey){
+      case "activeK": return Number(row.activeK||0);
+      case "span": return Number(row.span||0);
+      case "resolution": return RESOLUTION_RANK[row.resolution]??99;
+      case "hpMultiplicity": return Number(row.hpMultiplicity||1);
+      case "methyl": return (row.hasMethylResolvedRelation?0:row.hasMethylSignal?1:row.hasMethylAligned?2:row.hasMethylOverlay?3:9);
+      case "annotation": return (row.hasCgcDrug?0:row.hasCgc?1:9);
+      default: return null;
+    }
+  }
+  function sortRows(list){
+    if(state.sortKey==="pos"){
+      const out=list.slice().sort((a,b)=>(chroms.indexOf(a.chrom)-chroms.indexOf(b.chrom))||(a.start-b.start)||(a.end-b.end));
+      return state.sortDir==="desc"?out.reverse():out;
+    }
+    const dir=state.sortDir==="desc"?-1:1;
+    return list.slice().sort((a,b)=>{
+      const av=sortValue(a),bv=sortValue(b);
+      if(av!==bv)return (av-bv)*dir;
+      return (chroms.indexOf(a.chrom)-chroms.indexOf(b.chrom))||(a.start-b.start);
+    });
+  }
+  function renderHpFilters(){
+    if(!hpFilterButtons)return;
+    hpFilterButtons.innerHTML="";
+    for(const [key,label] of hpFilters){
+      const button=document.createElement("button");
+      button.type="button";button.className="methyl-filter";button.textContent=label;
+      button.dataset.hpFilter=key;
+      button.setAttribute("aria-pressed",String(state.hpFilter===key));
+      button.addEventListener("click",()=>{
+        if(state.hpFilter===key)return;
+        state.hpFilter=key;renderHpFilters();renderLegend();refresh();
+      });
+      hpFilterButtons.append(button);
+    }
+  }
+  function renderSortControls(){
+    const select=document.getElementById("sortSelect");
+    const dirButton=document.getElementById("sortDir");
+    if(!select||!dirButton)return;
+    if(!select.dataset.ready){
+      select.innerHTML=sortOptions.map(([key,label])=>`<option value="${key}">${label}</option>`).join("");
+      select.value=state.sortKey;
+      select.addEventListener("change",()=>{state.sortKey=select.value;refresh();});
+      dirButton.addEventListener("click",()=>{
+        state.sortDir=state.sortDir==="asc"?"desc":"asc";
+        renderSortControls();refresh();
+      });
+      select.dataset.ready="1";
+    }
+    dirButton.textContent=state.sortDir==="asc"?"↑ 遞增":"↓ 遞減";
+    dirButton.setAttribute("aria-label",state.sortDir==="asc"?"目前遞增排序，點擊改為遞減":"目前遞減排序，點擊改為遞增");
   }
   function renderMethylFilters(){
     methylFilterButtons.innerHTML="";
@@ -3278,20 +3396,49 @@ SAMPLE_JS = r"""
   }
   function renderCanvas(){
     const {w,h}=resizeCanvas();ctx.clearRect(0,0,w,h);hitPoints=[];
-    const left=w<560?48:72,right=16,top=18,rowH=(h-top-12)/chroms.length;
+    const left=w<560?48:72,right=w<560?14:18,top=38,bottom=12;
+    const plotWidth=w-left-right,rowH=(h-top-bottom)/chroms.length;
     const rowSet=new Set(state.filtered);
+    const tickStep=w<560?125000000:50000000;
+    const axisTicks=[];
+    for(let value=0;value<=maxChromLength;value+=tickStep)axisTicks.push(value);
+    if(axisTicks[axisTicks.length-1]!==maxChromLength)axisTicks.push(maxChromLength);
+    ctx.save();
+    ctx.font=`${w<560?9:10}px ui-monospace,monospace`;
+    ctx.textBaseline="middle";
+    for(const value of axisTicks){
+      const x=left+plotWidth*(value/maxChromLength);
+      ctx.strokeStyle="#e2e1d8";ctx.lineWidth=.6;
+      ctx.beginPath();ctx.moveTo(x,25);ctx.lineTo(x,h-bottom);ctx.stroke();
+      ctx.fillStyle="#69736d";
+      ctx.textAlign=value===0?"left":value===maxChromLength?"right":"center";
+      const label=value===maxChromLength
+        ?`${w<560?Math.round(value/1000000):(value/1000000).toFixed(1)} Mb`
+        :`${Math.round(value/1000000)} Mb`;
+      ctx.fillText(label,x,13);
+    }
+    ctx.restore();
+    const trackEnds={};
+    const trackRatios={};
     ctx.font=`${w<560?10:11}px ui-monospace,monospace`;ctx.textBaseline="middle";
     chroms.forEach((chrom,index)=>{
       const y=top+index*rowH+rowH/2;
+      const ratio=Number(data.chromLengths[chrom])/maxChromLength;
+      const trackEnd=left+plotWidth*ratio;
+      trackEnds[chrom]=trackEnd;
+      trackRatios[chrom]=ratio;
       ctx.fillStyle="#425048";ctx.textAlign="right";ctx.fillText(chrom,left-8,y);
-      ctx.strokeStyle="#cfcec4";ctx.lineWidth=Math.max(5,rowH*.34);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();
-      ctx.strokeStyle="#8c918c";ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();
+      ctx.lineCap="round";
+      ctx.strokeStyle="#cfcec4";ctx.lineWidth=Math.max(5,rowH*.34);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(trackEnd,y);ctx.stroke();
+      ctx.strokeStyle="#8c918c";ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(trackEnd,y);ctx.stroke();
     });
+    let pointsWithinTracks=true;
     ctx.globalAlpha=.72;
     for(const row of state.filtered){
       const index=chroms.indexOf(row.chrom);if(index<0)continue;
       const y=top+index*rowH+rowH/2;
-      const x=left+(w-left-right)*(row.mid/data.chromLengths[row.chrom]);
+      const x=left+plotWidth*(row.mid/maxChromLength);
+      if(x<left-.5||x>trackEnds[row.chrom]+.5)pointsWithinTracks=false;
       const spec=defs()[modeValue(row)]||{color:"#444"};
       ctx.fillStyle=spec.color;ctx.beginPath();ctx.arc(x,y,w<560?1.7:2.2,0,Math.PI*2);ctx.fill();
       if(row.hasMethylSignal){
@@ -3302,9 +3449,15 @@ SAMPLE_JS = r"""
     ctx.globalAlpha=1;
     if(state.current && rowSet.has(state.current)){
       const index=chroms.indexOf(state.current.chrom);const y=top+index*rowH+rowH/2;
-      const x=left+(w-left-right)*(state.current.mid/data.chromLengths[state.current.chrom]);
+      const x=left+plotWidth*(state.current.mid/maxChromLength);
       ctx.strokeStyle="#111";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.stroke();
     }
+    window.__intersubmodGenomeScale={
+      mode:genomeScaleMode,maxChrom,maxBp:maxChromLength,
+      plot:{left,right,width:plotWidth},axisTicks,
+      trackEnds,trackRatios,pointsWithinTracks,
+      renderedPointCount:hitPoints.length
+    };
   }
   function renderList(){
     list.innerHTML="";
@@ -3699,7 +3852,7 @@ SAMPLE_JS = r"""
   });
   document.getElementById("clearSearch").addEventListener("click",()=>{state.query=null;document.getElementById("regionSearch").value="";renderLegend();refresh();});
   let resizeTimer;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderCanvas,120);});
-  renderModes();renderAnnotationFilters();renderMethylFilters();renderLegend();refresh();
+  renderModes();renderAnnotationFilters();renderMethylFilters();renderHpFilters();renderSortControls();renderLegend();refresh();
   const requestedRegion=new URLSearchParams(window.location.search).get("region");
   if(requestedRegion){
     const parsed=parseQuery(requestedRegion);
@@ -3728,6 +3881,118 @@ def js_divergence_similarity(a: list[float], b: list[float]) -> float:
     return max(0.0, 1.0 - distance)
 
 
+SOLVER_VERIFICATION_STEM = "20260725_solver_verification"
+EXACTPS_RECOVERY_STEM = "20260725_exactps_recovery"
+
+
+def exactps_recovery_data():
+    """2026-07-25 ABSTAIN-recovery rerun over *this page's own* exact-PS units.
+
+    Numbers are injected from ``20260725_exactps_recovery.data.json`` - this
+    builder never hard-codes them. Returns None when the file is absent or
+    malformed so every page stays buildable on its own.
+    """
+    try:
+        data = json.loads((OUTDIR / f"{EXACTPS_RECOVERY_STEM}.data.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    required = ("units_total", "abstain_before", "recovered", "abstain_after",
+                "regression_n", "regression_match", "per_sample", "timing", "root_cause")
+    return None if any(key not in data for key in required) else data
+
+
+def recovery_note(sample: str) -> str:
+    """Per-sample one-liner appended to the resource-ABSTAIN metric note."""
+    data = exactps_recovery_data()
+    if not data:
+        return ""
+    row = data["per_sample"].get(sample)
+    if not row:
+        return ""
+    return (f"<br><b style=\"color:#0f766e\">2026-07-25 重跑：{int(row['recovered']):,} 個可救回，"
+            f"剩 {int(row['abstain_after']):,}（{row['recovery_pct']:.1f}%）</b>")
+
+
+def solver_verification_band(sample=None) -> str:
+    """ABSTAIN-recovery banner. Same denominator as the page it sits on."""
+    data = exactps_recovery_data()
+    if not data:
+        return ""
+    tim, rc = data["timing"], data["root_cause"]
+    if sample:
+        row = data["per_sample"].get(sample)
+        if not row:
+            return ""
+        scope = (f"本樣本 {int(row['units']):,} 個 topology unit 中，原本 "
+                 f"<b>{int(row['abstain_before']):,}</b> 個 resource-guard ABSTAIN")
+        result = (f"<b>{int(row['recovered']):,} 個可 certify h*（{row['recovery_pct']:.1f}%）</b>，"
+                  f"剩 <b>{int(row['abstain_after']):,}</b> 個；"
+                  f"其餘 {int(row['regression_match']):,}/{int(row['regression_n']):,} 個原已 certified 的區"
+                  f"結果<b>完全一致</b>")
+    else:
+        scope = (f"全 cohort {int(data['units_total']):,} 個 topology unit 中，原本 "
+                 f"<b>{int(data['abstain_before']):,}</b> 個 resource-guard ABSTAIN")
+        result = (f"<b>{int(data['recovered']):,} 個可 certify h*"
+                  f"（{data['recovery_pct']:.2f}%）</b>，剩 <b>{int(data['abstain_after']):,}</b> 個；"
+                  f"其餘 {int(data['regression_match']):,}/{int(data['regression_n']):,} 個原已 certified 的區"
+                  f"結果<b>完全一致（0 不一致）</b>")
+    return f"""
+<section class="section" id="solver-verification"><div class="shell">
+  <div class="claim-boundary" style="border-left-color:#0d9488;background:#f0fdfa">
+    <strong>2026-07-25 · ABSTAIN 重跑：這批不是「數學上定不出來」，是被過緊的搜尋預算擋掉</strong>
+    <span><b>同分母</b>（就是本頁這批 exact-PS unit，非其他資料線）。{scope}，
+    <b>全部</b>的 reason 都是 <code>{rc['all_reason_same']}</code>、卡在
+    <code>{rc['guard']}</code>。改用「群去重＋支配消除 → 鏈式閉合式 → terminal-subset DP」重跑後：
+    {result}。全 {int(data['units_total']):,} 區重跑共 {tim['total_min']} 分鐘。<br>
+    <b>尚未變更本頁既有數字</b>：上方 funnel／比例仍是原 guard1000 產出；本區塊是
+    <b>可回收性證據</b>，正式取代需重跑 canonical pipeline 並重新簽章。
+    <a href="{SOLVER_VERIFICATION_STEM}.html">→ 完整驗證報告</a></span>
+  </div>
+</div></section>
+"""
+
+
+
+SINGLETON_SUMMARY = (
+    REPO_ROOT
+    / "research"
+    / "20260718_singleton_alt_methyl_substructure_validation"
+    / "results"
+    / "all_dataset_singleton_summary.tsv"
+)
+
+
+def load_singleton_summary() -> dict[str, Any]:
+    """Cohort singleton (k=1 source component) census, self-validating.
+
+    Singletons are excluded from the exact-PS topology universe by construction
+    (a lone site has no partner to co-read), so this is scope context, not part
+    of the topology authority. Per-dataset rows are re-summed against the file's
+    own aggregate row here, so the card cannot drift silently.
+    """
+    require(SINGLETON_SUMMARY.is_file(), f"missing singleton summary: {SINGLETON_SUMMARY}")
+    rows: dict[str, Mapping[str, str]] = {}
+    with SINGLETON_SUMMARY.open(encoding="utf-8") as handle:
+        for row in csv.DictReader(handle, delimiter="\t"):
+            rows[row["dataset"]] = row
+    aggregate = rows.pop("ALL_7_DATASET_ROWS", None)
+    require(aggregate is not None, "singleton summary missing ALL_7_DATASET_ROWS row")
+    require(len(rows) == 7, f"singleton summary expected 7 dataset rows, got {len(rows)}")
+    fields = ("sites", "m1_evaluable", "m1_flagged", "m2_pass", "m2_fail")
+    totals = {name: sum(int(float(row[name])) for row in rows.values()) for name in fields}
+    for name in fields:
+        require(
+            totals[name] == int(float(aggregate[name])),
+            f"singleton summary conservation failed for {name}",
+        )
+    return {
+        "path": str(SINGLETON_SUMMARY),
+        "sha256": sha256_file(SINGLETON_SUMMARY),
+        "per_dataset": rows,
+        "totals": totals,
+    }
+
+
 def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -> str:
     totals = authority["all7_summary"]["totals"]
     census = authority["census_summary"]["cohort"]
@@ -3735,6 +4000,21 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
     similarity = authority["similarity"]
     methyl_overlay = authority["methyl_overlay"]
     methyl_headline = methyl_overlay["headline"]
+    singleton = load_singleton_summary()
+    singleton_totals = singleton["totals"]
+    singleton_determinate = singleton_totals["m2_pass"] + singleton_totals["m2_fail"]
+    singleton_rows = "".join(
+        "<tr><td>{name}</td><td class=\"num\">{sites:,}</td><td class=\"num\">{flagged:,}</td>"
+        "<td class=\"num\">{rate:.2f}%</td><td class=\"num\">{ppass}</td><td class=\"num\">{pfail}</td></tr>".format(
+            name=html.escape(DISPLAY_LABELS.get(name, name)),
+            sites=int(float(row["sites"])),
+            flagged=int(float(row["m1_flagged"])),
+            rate=100.0 * int(float(row["m1_flagged"])) / max(1, int(float(row["sites"]))),
+            ppass=int(float(row["m2_pass"])),
+            pfail=int(float(row["m2_fail"])),
+        )
+        for name, row in sorted(singleton["per_dataset"].items())
+    )
     source_components = sum(
         int(row["source_overview"]["all_components"]) for row in funnel_samples.values()
     )
@@ -4158,9 +4438,10 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
   <h1>從 read-linkage<br>到 exact topology</h1>
   <p class="lead">新的 layered workstation 以 exact phase-set、primary HP 與嚴格 read-linkage 重建區域；舊 50 kb proximity grouping 不再是預設資料。</p>
   <div class="boundary"><strong>最重要限制</strong><span>7/7 pipeline 是 technical PASS，但全 cohort 仍有 {int(totals['mutation_family_abstain_units']):,} 個 mutation-bearing groups 因資源 guard ABSTAIN，因此不是 topology-complete。所有比例均顯示明確分母。</span></div>
-  <nav class="nav"><a href="#evidence">資料漏斗</a><a href="#topology">拓撲全貌</a><a href="#methyl">甲基 overlay</a><a href="#compare">跨樣本比較</a><a href="#samples">7 組資料</a><a href="#pair">HCC1395 技術驗證</a><a href="#provenance">證據</a></nav>
+  <nav class="nav"><a href="#evidence">資料漏斗</a><a href="#topology">拓撲全貌</a><a href="#methyl">甲基現況</a><a href="#singleton">singleton 現況</a><a href="#compare">跨樣本比較</a><a href="#samples">7 組資料</a><a href="#pair">HCC1395 技術驗證</a><a href="#provenance">證據</a></nav>
 </div></header>
 <main>
+{solver_verification_band()}
 <section class="section" id="evidence"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Authority funnel</div><h2>先分清楚「區域」與「可判定區域」</h2></div><p>source components 包含 k=1 singleton；source W 才是 k≥2 strict read-linked components。bounded block 與 final group 由證據切分，不使用 50 kb 傳遞合併。</p></div>
   <div class="metrics">
@@ -4186,7 +4467,7 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
   <div class="callout" style="margin-top:1rem"><b>精確結論：</b>單一 rooted-unlabeled topology = {int(census['one_exact_topology']['n']):,}/{int(census['ranked_units']):,} = {float(census['one_exact_topology']['pct_ranked']):.4f}%；單一四類 coarse geometry = {int(census['one_coarse_class']['n']):,}/{int(census['ranked_units']):,} = {float(census['one_coarse_class']['pct_ranked']):.4f}%。兩者不能替代 cellular clone / ancestry 驗證。</div>
 </div></section>
 <section class="section" id="methyl"><div class="shell">
-  <div class="section-head"><div><div class="eyebrow">Targeted methyl evidence overlay</div><h2>7 個 formal-positive pairs 對到 exact-PS 候選結構</h2></div><p>這是從 {int(methyl_headline['formal_source_rows_evaluated']):,} 個 evaluated rows 中預先篩出的陽性 subset，不是 7 個樣本、盛行率或方法準確率。只涵蓋 H2009（5）、HCC1395_HKU（1）與 HCC1954（1）。</p></div>
+  <div class="section-head"><div><div class="eyebrow">Targeted methyl evidence overlay</div><h2>甲基現況：{int(methyl_headline['formal_source_rows_evaluated']):,} 個 evaluated rows 只產出 7 個 formal-positive pairs</h2></div><p>頁面上甲基訊號稀少<b>不是顯示缺陷，而是真實產出量</b>：這是預先篩出的陽性 subset，不是 7 個樣本、盛行率或方法準確率。只涵蓋 H2009（5）、HCC1395_HKU（1）與 HCC1954（1）；其餘 4 組資料在本 overlay 內沒有 formal-positive pair。</p></div>
   <div class="metrics">
     <div class="metric"><span class="label">formal G1 positives</span><span class="value">{int(methyl_headline['formal_partner_G1_pairs']):,}</span><span class="note">7/7 same exact W</span></div>
     <div class="metric"><span class="label">strict PS×HP lanes</span><span class="value">{int(methyl_headline['direct_HP_lanes']):,}</span><span class="note">{int(methyl_headline['formal_signal_lanes']):,} signal / {int(methyl_headline['paired_background_lanes']):,} background</span></div>
@@ -4196,7 +4477,19 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
   </div>
   <div class="claim-boundary"><strong>唯一 focal ALT/REF aligned 訊號：</strong>H2009 chr4:2,307,521，V=0.618、permutation p=0.002；但其 signal HP2 為 <code>ABSTAIN_RESOURCE_LIMIT</code>，所以只標 locus evidence，不畫成已解 candidate branch。候選圖上的橘線僅是 formal association 的 pairwise projection。</div>
   <div class="table-wrap" style="margin-top:1rem" role="region" tabindex="0" aria-label="七個 formal methyl pair 與 current candidate 對應"><table class="methyl-cohort-table"><thead><tr><th>dataset</th><th>focal → partner</th><th>formal G1 V</th><th>focal ALT/REF control</th><th>current all7_v2 candidate</th><th>工作站</th></tr></thead><tbody>{''.join(methyl_pair_rows)}</tbody></table></div>
-  <p class="denom"><b>判讀上限：</b>formal G1 是 focal-ALT methyl-core 中的 methyl-group × linked-partner allele association；focal ALT/REF 是獨立 joint control；candidate relation 是模型條件下的 best-tree 局部關係。不可宣稱 causal methylation、MG=clone、clone identity、cellular lineage 或 HCC1395_NYGC methyl replication。未列出的 regions 只是未進 targeted overlay，不代表甲基陰性。</p>
+  <p class="denom"><b>判讀上限：</b>formal G1 是 focal-ALT methyl-core 中的 methyl-group × linked-partner allele association；focal ALT/REF 是獨立 joint control；candidate relation 是模型條件下的 best-tree 局部關係。不可宣稱 causal methylation、MG=clone、clone identity、cellular lineage 或 HCC1395_NYGC methyl replication。未列出的 regions 只是未進 targeted overlay，不代表甲基陰性。<b>另注意：</b>樣本頁每個 region 的 L3 甲基欄位為 <code>not_evaluated</code>（bounded auxiliary），因此 region 詳情不顯示逐區甲基；頁面上看得到的甲基只有本節這批 targeted overlay。</p>
+</div></section>
+<section class="section" id="singleton"><div class="shell">
+  <div class="section-head"><div><div class="eyebrow">Singleton scope context</div><h2>k=1 singleton 共 {singleton_totals['sites']:,} 個位點，依定義不進拓撲宇宙</h2></div><p>單一位點沒有可共讀的 partner，因此不可能形成 exact-PS topology unit；它們被排除不是品質過濾，而是結構上無法建樹。此節說明這批位點的甲基可評估度，作為 scope 交代。</p></div>
+  <div class="metrics">
+    <div class="metric"><span class="label">singleton 位點</span><span class="value">{singleton_totals['sites']:,}</span><span class="note">7 dataset rows 合計；k=1 source component</span></div>
+    <div class="metric"><span class="label">M1 可評估</span><span class="value">{100.0 * singleton_totals['m1_evaluable'] / max(1, singleton_totals['sites']):.2f}%</span><span class="note">{singleton_totals['m1_evaluable']:,} / {singleton_totals['sites']:,}</span></div>
+    <div class="metric"><span class="label">M1 flagged</span><span class="value">{singleton_totals['m1_flagged']:,}</span><span class="note">{100.0 * singleton_totals['m1_flagged'] / max(1, singleton_totals['sites']):.2f}% of sites · multigroup 候選</span></div>
+    <div class="metric"><span class="label">M2 PASS</span><span class="value">{singleton_totals['m2_pass']:,}</span><span class="note">{100.0 * singleton_totals['m2_pass'] / max(1, singleton_totals['sites']):.4f}% of sites（operational yield）</span></div>
+    <div class="metric"><span class="label">M2 determinate</span><span class="value">{singleton_totals['m2_pass']:,}/{singleton_determinate:,}</span><span class="note">僅 determinate 子集的條件比例，不可外推盛行率</span></div>
+  </div>
+  <div class="table-wrap" style="margin-top:1rem" role="region" tabindex="0" aria-label="逐 dataset singleton 甲基可評估度"><table class="mini-table"><thead><tr><th>dataset</th><th class="num">singleton 位點</th><th class="num">M1 flagged</th><th class="num">flag 率</th><th class="num">M2 PASS</th><th class="num">M2 FAIL</th></tr></thead><tbody>{singleton_rows}</tbody></table></div>
+  <p class="denom"><b>判讀上限：</b>M1 flagged 表示該位點的 focal-ALT reads 內出現可重現的甲基多群；M2 PASS 只是在 determinate 子集內通過的 operational 結果。<b>兩者都不等於 confirmed subclone、linear ancestry 或 clone identity</b>；單一位點的甲基多群無法單獨證明兩個 clone。分母為 singleton 位點，與上方 topology 區域分母不可混算。來源 <code>{html.escape(singleton['path'].rsplit('/', 1)[-1])}</code> · SHA-256 <code>{singleton['sha256'][:16]}</code>。</p>
 </div></section>
 <section class="section" id="compare"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Cross-dataset state atlas</div><h2>七組資料的狀態、拓撲與複雜度並排比較</h2></div><p>先看各資料集的組成輪廓，再以同一維度檢查兩兩相似度。每一列獨立正規化；ranked-only 與 all-groups 分母不混用。</p></div>

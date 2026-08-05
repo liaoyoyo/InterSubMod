@@ -50,6 +50,7 @@ MORPHOLOGY_KEYS = (
     "direct_and_sister",
     "unresolved",
 )
+SIDECAR_SCHEMA_VERSION = "1.1.0"
 
 
 def fail(message: str) -> None:
@@ -244,14 +245,150 @@ def load_groups(sample_dir: Path) -> dict[str, dict]:
     return groups
 
 
-def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
+def validate_full_edge_census(
+    census: dict,
+    expected_candidate_total: int,
+    selected_edges: list[list[str]] | list[tuple[str, str]] | None = None,
+) -> bool:
+    """Validate the compact exhaustive edge-census contract.
+
+    Counts are candidate incidence counts, so an edge contributes at most once
+    per candidate.  ``top_candidate_count`` uses the same rule restricted to
+    the exact read-AF top set.  The function raises instead of silently
+    accepting a malformed denominator or a selected edge outside the census.
+    """
+
+    expected_keys = {
+        "complete",
+        "candidate_total",
+        "top_candidate_total",
+        "node_total",
+        "edge_total",
+        "edge_rows",
+    }
+    if not isinstance(census, dict) or set(census) != expected_keys:
+        raise ValueError("full_edge_census fields do not match schema 1.1.0")
+    if census["complete"] is not True:
+        raise ValueError("full_edge_census must be explicitly complete")
+
+    candidate_total = census["candidate_total"]
+    top_candidate_total = census["top_candidate_total"]
+    node_total = census["node_total"]
+    edge_total = census["edge_total"]
+    rows = census["edge_rows"]
+    if not isinstance(candidate_total, int) or candidate_total <= 0:
+        raise ValueError("full_edge_census candidate_total must be a positive integer")
+    if candidate_total != int(expected_candidate_total):
+        raise ValueError(
+            "full_edge_census candidate denominator mismatch: "
+            f"expected={expected_candidate_total} actual={candidate_total}"
+        )
+    if not isinstance(top_candidate_total, int) or not 0 <= top_candidate_total <= candidate_total:
+        raise ValueError("full_edge_census top_candidate_total is outside its denominator")
+    if not isinstance(node_total, int) or node_total < 0:
+        raise ValueError("full_edge_census node_total must be a non-negative integer")
+    if not isinstance(edge_total, int) or edge_total < 0:
+        raise ValueError("full_edge_census edge_total must be a non-negative integer")
+    if not isinstance(rows, list) or edge_total != len(rows):
+        raise ValueError("full_edge_census edge_total does not match edge_rows")
+
+    normalized_rows: list[tuple[str, str, int, int]] = []
+    nodes: set[str] = set()
+    for row in rows:
+        if not isinstance(row, list) or len(row) != 4:
+            raise ValueError("each full_edge_census row must be [parent, child, count, top_count]")
+        parent, child, candidate_count, top_candidate_count = row
+        if not isinstance(parent, str) or not parent or not isinstance(child, str) or not child:
+            raise ValueError("full_edge_census parent and child must be non-empty strings")
+        if not isinstance(candidate_count, int) or not 1 <= candidate_count <= candidate_total:
+            raise ValueError("full_edge_census candidate_count is outside its denominator")
+        if (
+            not isinstance(top_candidate_count, int)
+            or not 0 <= top_candidate_count <= top_candidate_total
+            or top_candidate_count > candidate_count
+        ):
+            raise ValueError("full_edge_census top_candidate_count is invalid")
+        normalized_rows.append((parent, child, candidate_count, top_candidate_count))
+        nodes.update((parent, child))
+
+    if normalized_rows != sorted(normalized_rows, key=lambda row: (row[0], row[1])):
+        raise ValueError("full_edge_census edge_rows must be sorted by parent and child")
+    edge_keys = [(row[0], row[1]) for row in normalized_rows]
+    if len(edge_keys) != len(set(edge_keys)):
+        raise ValueError("full_edge_census contains duplicate edge rows")
+    if node_total != len(nodes):
+        raise ValueError("full_edge_census node_total does not match edge_rows")
+    if top_candidate_total == 0 and any(row[3] != 0 for row in normalized_rows):
+        raise ValueError("unranked full_edge_census cannot claim top-candidate edge support")
+
+    by_edge = {(row[0], row[1]): row for row in normalized_rows}
+    for edge in selected_edges or []:
+        if not isinstance(edge, (list, tuple)) or len(edge) != 2:
+            raise ValueError("selected edge must contain exactly parent and child")
+        key = (str(edge[0]), str(edge[1]))
+        if key not in by_edge:
+            raise ValueError(f"selected edge is absent from full_edge_census: {key}")
+        if by_edge[key][3] <= 0:
+            raise ValueError(f"selected edge has no exact-top support in full_edge_census: {key}")
+    return True
+
+
+def build_full_edge_census(
+    trees: list[dict], top_candidate_indices: list[int] | tuple[int, ...] | set[int] | None = None
+) -> dict:
+    """Compress a complete candidate set into exact edge-incidence counts."""
+
+    candidate_total = len(trees)
+    if candidate_total <= 0:
+        raise ValueError("cannot build full_edge_census from an empty candidate set")
+    top_indices = set(top_candidate_indices or [])
+    if any(not isinstance(index, int) or not 1 <= index <= candidate_total for index in top_indices):
+        raise ValueError("top candidate index is outside the complete candidate set")
+
+    edge_counts: Counter = Counter()
+    top_edge_counts: Counter = Counter()
+    nodes: set[str] = set()
+    for candidate_index, tree in enumerate(trees, 1):
+        candidate_edges: set[tuple[str, str]] = set()
+        raw_edges = tree.get("edges", [])
+        for edge in raw_edges:
+            if not isinstance(edge, (list, tuple)) or len(edge) != 2:
+                raise ValueError("candidate edge must contain exactly parent and child")
+            key = (str(edge[0]), str(edge[1]))
+            if key in candidate_edges:
+                raise ValueError(f"candidate {candidate_index} contains a duplicate edge: {key}")
+            candidate_edges.add(key)
+            nodes.update(key)
+        edge_counts.update(candidate_edges)
+        if candidate_index in top_indices:
+            top_edge_counts.update(candidate_edges)
+
+    edge_rows = [
+        [parent, child, edge_counts[(parent, child)], top_edge_counts[(parent, child)]]
+        for parent, child in sorted(edge_counts)
+    ]
+    census = {
+        "complete": True,
+        "candidate_total": candidate_total,
+        "top_candidate_total": len(top_indices),
+        "node_total": len(nodes),
+        "edge_total": len(edge_rows),
+        "edge_rows": edge_rows,
+    }
+    validate_full_edge_census(census, candidate_total)
+    return census
+
+
+def enumerate_complete_unit_candidates(unit: dict, group: dict | None, solver):
+    """Re-enumerate one declared-complete T>1 unit or return a fail-closed payload."""
+
     base = {
         "family": str(unit["family"]),
         "n_trees_expected": int(unit["n_trees"]),
         "n_shapes_expected": int(unit["n_distinct_shapes_exact"]),
     }
     if group is None:
-        return {**base, "status": "missing_group", "reason": "region absent from mlhp parts"}
+        return base, None, {**base, "status": "missing_group", "reason": "region absent from mlhp parts"}
     family = str(unit["family"])
     full = (group.get("populations_by_hp", {}) or {}).get(family, {}) or {}
     partial = list(((group.get("subread_groups_by_hp", {}) or {}).get(family, {}) or {}).keys())
@@ -265,7 +402,7 @@ def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
         and len(set(signatures)) == base["n_shapes_expected"]
     )
     if not enumeration_ok:
-        return {
+        return base, None, {
             **base,
             "status": "candidate_or_shape_mismatch",
             "n_trees_enumerated": int(result.get("n_trees") or 0),
@@ -273,6 +410,18 @@ def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
             "n_shapes_enumerated": len(set(signatures)),
             "solver_capped": bool(result.get("capped")),
         }
+    return base, result, None
+
+
+def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
+    base, result, error = enumerate_complete_unit_candidates(unit, group, solver)
+    if error is not None:
+        return error
+    assert result is not None
+    family = str(unit["family"])
+    assert group is not None
+    positions = [int(value) for value in group.get("positions", [])]
+    signatures = [canonical_shape(tree.get("edges", [])) for tree in result.get("trees", [])]
     col_coverage = ((group.get("col_coverage_by_hp", {}) or {}).get(family, {}) or {})
     read_af, read_af_rows, missing_reason = exact_read_af(col_coverage, positions)
     if read_af is None:
@@ -283,6 +432,7 @@ def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
             "n_trees_enumerated": int(result["n_trees"]),
             "n_shapes_enumerated": len(set(signatures)),
             "read_af_site_count_before_failure": len(read_af_rows),
+            "full_edge_census": build_full_edge_census(result["trees"]),
         }
 
     candidates: list[dict] = []
@@ -354,6 +504,18 @@ def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
         if len(exact_top_shapes) == 1
         else "tied_first_different_topology"
     )
+    full_edge_census = build_full_edge_census(
+        result["trees"],
+        [int(candidate["candidate_index"]) for candidate in exact_top],
+    )
+    selected_edges = [
+        edge for candidate in top_candidates for edge in candidate.get("edges", [])
+    ]
+    validate_full_edge_census(
+        full_edge_census,
+        base["n_trees_expected"],
+        selected_edges=selected_edges,
+    )
     return {
         **base,
         "status": "ranked",
@@ -371,6 +533,29 @@ def analyze_ambiguous_unit(unit: dict, group: dict | None, solver) -> dict:
         > 1,
         "ranked_preview": preview,
         "top_shape_representatives": top_candidates,
+        "full_edge_census": full_edge_census,
+    }
+
+
+def analyze_complete_unranked_unit(
+    unit: dict,
+    group: dict | None,
+    solver,
+    status: str,
+) -> dict:
+    """Attach exhaustive edge evidence without evaluating a read-AF top set."""
+
+    base, result, error = enumerate_complete_unit_candidates(unit, group, solver)
+    if error is not None:
+        return error
+    assert result is not None
+    signatures = [canonical_shape(tree.get("edges", [])) for tree in result.get("trees", [])]
+    return {
+        **base,
+        "status": status,
+        "n_trees_enumerated": int(result["n_trees"]),
+        "n_shapes_enumerated": len(set(signatures)),
+        "full_edge_census": build_full_edge_census(result["trees"]),
     }
 
 
@@ -447,7 +632,12 @@ def analyze_sample(
             elif int(unit["n_trees"]) == 1:
                 ranking = {"family": family, "status": "fixed_exact_unique"}
             elif str(unit.get("L1_base_class", "")).startswith("recurrence"):
-                ranking = {"family": family, "status": "recurrence_not_evaluable"}
+                ranking = analyze_complete_unranked_unit(
+                    unit,
+                    groups.get(region),
+                    solver,
+                    "recurrence_not_evaluable",
+                )
             elif unit.get("L1_base_class") == "ambiguous":
                 ranking = analyze_ambiguous_unit(unit, groups.get(region), solver)
             else:
@@ -574,6 +764,44 @@ def analyze_sample(
             }
         )
 
+    unit_ranking_pairs = [
+        (unit, ranking_by_unit[(region, str(unit["family"]))])
+        for region, units in primary_by_region.items()
+        for unit in units
+    ]
+    complete_multitree_pairs = [
+        (unit, ranking)
+        for unit, ranking in unit_ranking_pairs
+        if unit_complete(unit) and int(unit.get("n_trees") or 0) > 1
+    ]
+    incomplete_pairs = [
+        (unit, ranking)
+        for unit, ranking in unit_ranking_pairs
+        if not unit_complete(unit)
+    ]
+
+    def selected_edges(ranking: dict) -> list[list[str]]:
+        return [
+            edge
+            for candidate in ranking.get("top_shape_representatives", [])
+            for edge in candidate.get("edges", [])
+        ]
+
+    def census_contract_valid(unit: dict, ranking: dict) -> bool:
+        census = ranking.get("full_edge_census")
+        if not isinstance(census, dict):
+            return False
+        try:
+            validate_full_edge_census(
+                census,
+                int(unit["n_trees"]),
+                selected_edges=selected_edges(ranking),
+            )
+        except ValueError:
+            return False
+        expected_top = int(ranking.get("n_top_exact") or 0) if ranking.get("status") == "ranked" else 0
+        return int(census["top_candidate_total"]) == expected_top
+
     expected_structural = sample_record["topology_classes"]
     checks = {
         "region_count_matches_W_tree": len(regions_output) == int(sample_record["W_tree"]),
@@ -593,13 +821,39 @@ def analyze_sample(
             or bool(ranking.get("top_shape_representatives"))
             for ranking in ranking_by_unit.values()
         ),
+        "complete_multitree_units_have_full_edge_census": all(
+            ranking.get("full_edge_census", {}).get("complete") is True
+            for _, ranking in complete_multitree_pairs
+        ),
+        "full_edge_census_contracts_valid": all(
+            census_contract_valid(unit, ranking)
+            for unit, ranking in complete_multitree_pairs
+        ),
+        "full_edge_census_denominators_match": all(
+            int(ranking["full_edge_census"]["candidate_total"]) == int(unit["n_trees"])
+            for unit, ranking in complete_multitree_pairs
+            if isinstance(ranking.get("full_edge_census"), dict)
+        )
+        and all(isinstance(ranking.get("full_edge_census"), dict) for _, ranking in complete_multitree_pairs),
+        "selected_edges_are_in_full_edge_census": all(
+            not selected_edges(ranking) or census_contract_valid(unit, ranking)
+            for unit, ranking in complete_multitree_pairs
+        ),
+        "recurrence_not_evaluable_units_have_full_edge_census": all(
+            ranking.get("status") != "recurrence_not_evaluable"
+            or ranking.get("full_edge_census", {}).get("complete") is True
+            for _, ranking in complete_multitree_pairs
+        ),
+        "incomplete_units_do_not_claim_full_edge_census": all(
+            "full_edge_census" not in ranking for _, ranking in incomplete_pairs
+        ),
     }
     if not all(checks.values()):
         fail(f"{sample}: validation checks failed: {checks}")
 
     output = {
         "schema_name": "intersubmod.current_v5_read_af_topology_sample",
-        "schema_version": "1.0.0",
+        "schema_version": SIDECAR_SCHEMA_VERSION,
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "sample": sample,
         "scope": "GRCh38 chr1-22 current canonical v5",
@@ -610,6 +864,12 @@ def analyze_sample(
         "method": {
             "read_af": "family-specific ALT/(REF+ALT) from col_coverage_by_hp",
             "candidate_enumeration": "all candidates with tree_cap=0; fail closed on count/shape mismatch",
+            "full_edge_census": (
+                "candidate-set-complete T>1 unit edge incidence over tree_cap=0 candidates; "
+                "edge_rows are [parent, child, candidate_count, top_candidate_count], "
+                "candidate_total is the exact denominator, and top_candidate_total is 0 when "
+                "read-AF top selection is not evaluated"
+            ),
             "tie": "exact equality of Fraction-valued ordering scores",
             "morphology": (
                 "Topo=1 or read-AF co-top shape-set size=1; direct=max_depth>=2, "
@@ -712,7 +972,7 @@ def main() -> None:
 
     aggregate = {
         "schema_name": "intersubmod.current_v5_read_af_topology_index",
-        "schema_version": "1.0.0",
+        "schema_version": SIDECAR_SCHEMA_VERSION,
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "scope": "GRCh38 chr1-22 current canonical v5",
         "samples": summaries,

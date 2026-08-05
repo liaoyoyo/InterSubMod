@@ -7,15 +7,23 @@ import unittest
 from fractions import Fraction
 
 from build_current_v5_read_af_topology import (
+    SIDECAR_SCHEMA_VERSION,
+    analyze_ambiguous_unit,
+    analyze_complete_unranked_unit,
+    build_full_edge_census,
     canonical_shape,
     exact_ordering_score,
     exact_read_af,
     morphology_class,
     shape_features,
+    validate_full_edge_census,
 )
 
 
 class CurrentV5ReadAfTopologyContractTest(unittest.TestCase):
+    def test_schema_version_is_full_edge_census_contract(self) -> None:
+        self.assertEqual(SIDECAR_SCHEMA_VERSION, "1.1.0")
+
     def test_canonical_shape_is_invariant_to_sibling_and_edge_order(self) -> None:
         edges = [
             ["ROOT", "A"],
@@ -154,6 +162,153 @@ class CurrentV5ReadAfTopologyContractTest(unittest.TestCase):
             for parent, child in edges:
                 self.assertTrue(parent == "ROOT" or parent.startswith(family + ":"))
                 self.assertTrue(child.startswith(family + ":"))
+
+    def test_full_edge_census_counts_all_and_exact_top_candidates(self) -> None:
+        trees = [
+            {"edges": [["ROOT", "A"], ["A", "AB"]]},
+            {"edges": [["ROOT", "A"], ["ROOT", "B"]]},
+            {"edges": [["ROOT", "B"], ["B", "BA"]]},
+        ]
+
+        census = build_full_edge_census(trees, top_candidate_indices=[2])
+
+        self.assertEqual(
+            census,
+            {
+                "complete": True,
+                "candidate_total": 3,
+                "top_candidate_total": 1,
+                "node_total": 5,
+                "edge_total": 4,
+                "edge_rows": [
+                    ["A", "AB", 1, 0],
+                    ["B", "BA", 1, 0],
+                    ["ROOT", "A", 2, 1],
+                    ["ROOT", "B", 2, 1],
+                ],
+            },
+        )
+        self.assertTrue(
+            validate_full_edge_census(
+                census,
+                expected_candidate_total=3,
+                selected_edges=[["ROOT", "A"], ["ROOT", "B"]],
+            )
+        )
+
+    def test_full_edge_census_rejects_denominator_and_selected_edge_drift(self) -> None:
+        trees = [
+            {"edges": [["ROOT", "A"], ["A", "AB"]]},
+            {"edges": [["ROOT", "A"], ["ROOT", "B"]]},
+        ]
+        census = build_full_edge_census(trees, top_candidate_indices=[2])
+
+        with self.assertRaisesRegex(ValueError, "denominator mismatch"):
+            validate_full_edge_census(census, expected_candidate_total=3)
+        with self.assertRaisesRegex(ValueError, "no exact-top support"):
+            validate_full_edge_census(
+                census,
+                expected_candidate_total=2,
+                selected_edges=[["A", "AB"]],
+            )
+        with self.assertRaisesRegex(ValueError, "absent"):
+            validate_full_edge_census(
+                census,
+                expected_candidate_total=2,
+                selected_edges=[["B", "BA"]],
+            )
+
+    def test_unranked_complete_census_has_zero_top_counts(self) -> None:
+        trees = [
+            {"edges": [["ROOT", "A"], ["A", "AB"]]},
+            {"edges": [["ROOT", "A"], ["ROOT", "B"]]},
+        ]
+
+        census = build_full_edge_census(trees)
+
+        self.assertEqual(census["top_candidate_total"], 0)
+        self.assertTrue(all(row[3] == 0 for row in census["edge_rows"]))
+
+    def test_missing_read_af_still_gets_complete_unranked_census(self) -> None:
+        class CompleteSolver:
+            @staticmethod
+            def enumerate_min_trees(full, partial, k, tree_cap):
+                self.assertEqual(tree_cap, 0)
+                return {
+                    "capped": False,
+                    "trees_complete": True,
+                    "n_trees": 2,
+                    "trees": [
+                        {"edges": [["ROOT", "A"], ["A", "AB"]]},
+                        {"edges": [["ROOT", "A"], ["ROOT", "B"]]},
+                    ],
+                }
+
+        unit = {
+            "family": "1",
+            "n_trees": 2,
+            "n_distinct_shapes_exact": 2,
+        }
+        group = {
+            "positions": [101, 202],
+            "populations_by_hp": {"1": {}},
+            "subread_groups_by_hp": {"1": {"AX": 3, "XA": 2}},
+            "col_coverage_by_hp": {"1": {"101": [3, 1], "202": [0, 0]}},
+        }
+
+        result = analyze_ambiguous_unit(unit, group, CompleteSolver())
+
+        self.assertEqual(result["status"], "missing_read_af")
+        self.assertEqual(result["reason"], "zero denominator at 202")
+        self.assertEqual(result["full_edge_census"]["candidate_total"], 2)
+        self.assertEqual(result["full_edge_census"]["top_candidate_total"], 0)
+        self.assertTrue(all(row[3] == 0 for row in result["full_edge_census"]["edge_rows"]))
+
+    def test_recurrence_not_evaluable_still_gets_complete_census(self) -> None:
+        class CompleteSolver:
+            @staticmethod
+            def enumerate_min_trees(full, partial, k, tree_cap):
+                self.assertEqual(tree_cap, 0)
+                return {
+                    "capped": False,
+                    "trees_complete": True,
+                    "n_trees": 2,
+                    "trees": [
+                        {"edges": [["ROOT", "A"], ["A", "AB"]]},
+                        {"edges": [["ROOT", "A"], ["ROOT", "B"]]},
+                    ],
+                }
+
+        unit = {
+            "family": "1",
+            "n_trees": 2,
+            "n_distinct_shapes_exact": 2,
+        }
+        group = {
+            "positions": [101, 202],
+            "populations_by_hp": {"1": {}},
+            "subread_groups_by_hp": {"1": {"AX": 3, "XA": 2}},
+        }
+
+        result = analyze_complete_unranked_unit(
+            unit,
+            group,
+            CompleteSolver(),
+            "recurrence_not_evaluable",
+        )
+
+        self.assertEqual(result["status"], "recurrence_not_evaluable")
+        self.assertEqual(result["full_edge_census"]["candidate_total"], 2)
+        self.assertEqual(result["full_edge_census"]["top_candidate_total"], 0)
+        self.assertNotIn(
+            "full_edge_census",
+            analyze_complete_unranked_unit(
+                unit,
+                None,
+                CompleteSolver(),
+                "recurrence_not_evaluable",
+            ),
+        )
 
 
 if __name__ == "__main__":

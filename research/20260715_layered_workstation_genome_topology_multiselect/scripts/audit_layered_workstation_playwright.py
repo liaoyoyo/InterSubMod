@@ -4,8 +4,10 @@
 This is a deterministic, read-only UI audit for the cohort index and seven
 canonical sample pages.  It reconciles the rendered GRCh38 ideogram and index
 distributions with current-v5 read-AF topology sidecars, exercises category
-multi-selection, opens real ranking and zero-coverage region details, and
-captures desktop/mobile visual evidence.
+multi-selection, validates the sidecar 1.1 exhaustive edge census, opens real
+ranking and zero-coverage region details, and captures desktop/mobile visual
+evidence.  A fixed HCC1395 fixture guards full-union, selected-tree, and stored
+preview consistency across panels.
 
 Default output:
     ../qa/full/validation_receipt.json
@@ -76,8 +78,29 @@ EXPECTED_OVERVIEW_IDS: Tuple[str, ...] = (
     "hp-h3",
     "region-size",
 )
-EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-4"
+EXPECTED_SIDECAR_SCHEMA = (
+    "intersubmod.current_v5_read_af_topology_sample",
+    "1.1.0",
+)
 EXPECTED_AGGREGATE_W_PRIMARY = 50_215
+HCC1395_EDGE_CENSUS_FIXTURE: Dict[str, Any] = {
+    "region": "chr10:87818272-87928739",
+    "family": "1",
+    "candidate_total": 74,
+    "top_candidate_total": 1,
+    "node_total": 16,
+    "edge_total": 32,
+    "stored_candidate_total": 32,
+    "edge": ["H_RRAA", "H_ARAA"],
+    "candidate_count": 2,
+    "top_candidate_count": 1,
+}
+EDGE_CENSUS_ELIGIBLE_STATUSES = {
+    "ranked",
+    "missing_read_af",
+    "recurrence_not_evaluable",
+}
 INDEX_SELECTION_BINS: Tuple[Tuple[str, str], ...] = (
     ("structural_exact_unique", "結構已 exact 唯一"),
     ("read_af_unique_first", "read-AF 唯一第一順位"),
@@ -150,6 +173,297 @@ def load_json(path: Path) -> Dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"Expected a JSON object: {path}")
     return payload
+
+
+def is_plain_int(value: Any) -> bool:
+    """Return whether a JSON value is an integer rather than bool/float."""
+
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def audit_full_edge_census_contract(
+    sample: str,
+    payload: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Validate the sidecar 1.1 exhaustive edge-census contract.
+
+    A census is required only for complete, successfully re-enumerated units
+    with more than one exact candidate.  Incomplete or enumeration-mismatch
+    units must not pretend to expose a complete edge universe.  The audit also
+    proves that every durable read-AF top representative edge belongs to the
+    exhaustive census and has positive top-candidate support.
+    """
+
+    violation_count = 0
+    violations: List[Dict[str, Any]] = []
+
+    def record(code: str, location: str, actual: Any) -> None:
+        nonlocal violation_count
+        violation_count += 1
+        if len(violations) < 100:
+            violations.append(
+                {"code": code, "location": location, "actual": json_safe(actual)}
+            )
+
+    schema_actual = (payload.get("schema_name"), payload.get("schema_version"))
+    if schema_actual != EXPECTED_SIDECAR_SCHEMA:
+        record(
+            "sidecar_schema_not_1_1",
+            sample,
+            {"expected": EXPECTED_SIDECAR_SCHEMA, "actual": schema_actual},
+        )
+
+    required_units = 0
+    census_units = 0
+    census_edge_rows = 0
+    top_representative_edges = 0
+    top_representative_edges_in_census = 0
+    top_representative_edges_with_positive_top_count = 0
+
+    for region in payload.get("regions") or []:
+        region_id = str(region.get("region") or "<missing-region>")
+        units = region.get("units") or {}
+        if not isinstance(units, dict):
+            record("units_not_object", region_id, units)
+            continue
+        for family, unit in units.items():
+            location = f"{sample}/{region_id}/HP{family}"
+            if not isinstance(unit, dict):
+                record("unit_not_object", location, unit)
+                continue
+            status = unit.get("status")
+            expected_total = unit.get("n_trees_expected")
+            enumerated_total = unit.get("n_trees_enumerated")
+            claims_complete_multitree = (
+                status in EDGE_CENSUS_ELIGIBLE_STATUSES
+                and is_plain_int(expected_total)
+                and expected_total > 1
+            )
+            enumeration_matches = (
+                is_plain_int(enumerated_total)
+                and enumerated_total == expected_total
+            )
+            if claims_complete_multitree and not enumeration_matches:
+                record(
+                    "complete_status_enumeration_mismatch",
+                    location,
+                    {
+                        "status": status,
+                        "n_trees_expected": expected_total,
+                        "n_trees_enumerated": enumerated_total,
+                    },
+                )
+            eligible = claims_complete_multitree and enumeration_matches
+            census = unit.get("full_edge_census")
+            if eligible:
+                required_units += 1
+            if eligible and not isinstance(census, dict):
+                record("eligible_unit_missing_full_edge_census", location, census)
+            if census is None:
+                representatives = unit.get("top_shape_representatives") or []
+                for representative in representatives:
+                    top_representative_edges += len(
+                        {tuple(edge) for edge in representative.get("edges") or []}
+                    )
+                continue
+            if not isinstance(census, dict):
+                record("full_edge_census_not_object", location, census)
+                continue
+            census_units += 1
+            expected_census_keys = {
+                "complete",
+                "candidate_total",
+                "top_candidate_total",
+                "node_total",
+                "edge_total",
+                "edge_rows",
+            }
+            if set(census) != expected_census_keys:
+                record(
+                    "full_edge_census_field_set_mismatch",
+                    location,
+                    {
+                        "expected": sorted(expected_census_keys),
+                        "actual": sorted(census),
+                    },
+                )
+            if not eligible:
+                record(
+                    "full_edge_census_present_for_ineligible_unit",
+                    location,
+                    {
+                        "status": status,
+                        "n_trees_expected": expected_total,
+                        "n_trees_enumerated": enumerated_total,
+                    },
+                )
+
+            complete = census.get("complete")
+            candidate_total = census.get("candidate_total")
+            top_candidate_total = census.get("top_candidate_total")
+            node_total = census.get("node_total")
+            edge_total = census.get("edge_total")
+            edge_rows = census.get("edge_rows")
+            scalar_contract = {
+                "complete": complete is True,
+                "candidate_total": is_plain_int(candidate_total)
+                and candidate_total > 1,
+                "top_candidate_total": is_plain_int(top_candidate_total)
+                and top_candidate_total >= 0
+                and is_plain_int(candidate_total)
+                and top_candidate_total <= candidate_total,
+                "node_total": is_plain_int(node_total) and node_total >= 1,
+                "edge_total": is_plain_int(edge_total) and edge_total >= 1,
+                "edge_rows": isinstance(edge_rows, list),
+            }
+            if not all(scalar_contract.values()):
+                record("full_edge_census_scalar_contract", location, scalar_contract)
+                continue
+            if candidate_total != expected_total or candidate_total != enumerated_total:
+                record(
+                    "candidate_total_mismatch",
+                    location,
+                    {
+                        "census": candidate_total,
+                        "expected": expected_total,
+                        "enumerated": enumerated_total,
+                    },
+                )
+            expected_top_total = (
+                unit.get("n_top_exact") if status == "ranked" else 0
+            )
+            if top_candidate_total != expected_top_total:
+                record(
+                    "top_candidate_total_mismatch",
+                    location,
+                    {
+                        "census": top_candidate_total,
+                        "expected": expected_top_total,
+                        "status": status,
+                    },
+                )
+            if edge_total != len(edge_rows):
+                record(
+                    "edge_total_mismatch",
+                    location,
+                    {"edge_total": edge_total, "edge_rows": len(edge_rows)},
+                )
+            census_edge_rows += len(edge_rows)
+
+            row_map: Dict[Tuple[str, str], Tuple[int, int]] = {}
+            normalized_keys: List[Tuple[str, str]] = []
+            nodes = set()
+            for row_index, row in enumerate(edge_rows):
+                row_location = f"{location}/edge_rows/{row_index}"
+                if not isinstance(row, list) or len(row) != 4:
+                    record("edge_row_not_four_item_array", row_location, row)
+                    continue
+                parent, child, count, top_count = row
+                if not (
+                    isinstance(parent, str)
+                    and parent
+                    and isinstance(child, str)
+                    and child
+                    and parent != child
+                    and is_plain_int(count)
+                    and 1 <= count <= candidate_total
+                    and is_plain_int(top_count)
+                    and 0 <= top_count <= top_candidate_total
+                    and top_count <= count
+                ):
+                    record("edge_row_value_contract", row_location, row)
+                    continue
+                key = (parent, child)
+                if key in row_map:
+                    record("duplicate_edge_row", row_location, key)
+                row_map[key] = (count, top_count)
+                normalized_keys.append(key)
+                nodes.update(key)
+            if normalized_keys != sorted(normalized_keys):
+                record("edge_rows_not_lexicographically_sorted", location, normalized_keys)
+            if len(row_map) != edge_total:
+                record(
+                    "edge_rows_not_unique_or_complete",
+                    location,
+                    {"unique_rows": len(row_map), "edge_total": edge_total},
+                )
+            if len(nodes) != node_total:
+                record(
+                    "node_total_mismatch",
+                    location,
+                    {"nodes_from_edges": len(nodes), "node_total": node_total},
+                )
+
+            representative_edges = {
+                tuple(edge)
+                for representative in unit.get("top_shape_representatives") or []
+                for edge in representative.get("edges") or []
+            }
+            top_representative_edges += len(representative_edges)
+            for edge in sorted(representative_edges):
+                census_counts = row_map.get(edge)
+                if census_counts is None:
+                    record("top_representative_edge_missing_from_census", location, edge)
+                    continue
+                top_representative_edges_in_census += 1
+                if census_counts[1] < 1:
+                    record(
+                        "top_representative_edge_has_zero_top_count",
+                        location,
+                        {"edge": edge, "counts": census_counts},
+                    )
+                else:
+                    top_representative_edges_with_positive_top_count += 1
+
+    return {
+        "status": "pass" if violation_count == 0 else "fail",
+        "schema_expected": list(EXPECTED_SIDECAR_SCHEMA),
+        "schema_actual": list(schema_actual),
+        "required_units": required_units,
+        "census_units": census_units,
+        "census_edge_rows": census_edge_rows,
+        "top_representative_edges": top_representative_edges,
+        "top_representative_edges_in_census": top_representative_edges_in_census,
+        "top_representative_edges_with_positive_top_count": (
+            top_representative_edges_with_positive_top_count
+        ),
+        "violation_count": violation_count,
+        "violations_sample": violations,
+    }
+
+
+def extract_hcc1395_edge_census_fixture(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract the fixed PTEN-region HP1 census used by the UI regression."""
+
+    expected = HCC1395_EDGE_CENSUS_FIXTURE
+    region = next(
+        (
+            row
+            for row in payload.get("regions") or []
+            if row.get("region") == expected["region"]
+        ),
+        None,
+    )
+    unit = (region.get("units") or {}).get(expected["family"]) if region else None
+    census = unit.get("full_edge_census") if isinstance(unit, dict) else None
+    edge_row = None
+    if isinstance(census, dict):
+        edge_row = next(
+            (
+                row
+                for row in census.get("edge_rows") or []
+                if isinstance(row, list)
+                and len(row) == 4
+                and row[:2] == expected["edge"]
+            ),
+            None,
+        )
+    return {
+        "region_found": region is not None,
+        "family_found": isinstance(unit, dict),
+        "census": json_safe(census),
+        "edge_row": json_safe(edge_row),
+    }
 
 
 def choose_ranking_fixture(regions: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
@@ -230,6 +544,7 @@ def load_sidecar_expectations(
         if not summary.get("all_checks_pass"):
             raise ValueError(f"Sidecar builder checks are not all pass: {path}")
         fixture = choose_ranking_fixture(payload.get("regions") or [])
+        edge_census_contract = audit_full_edge_census_contract(sample, payload)
         expectations[sample] = {
             "path": str(path.resolve()),
             "sha256": digest,
@@ -245,6 +560,12 @@ def load_sidecar_expectations(
                 key: int(value) for key, value in summary["morphology_classes"].items()
             },
             "ranking_fixture": fixture,
+            "full_edge_census_contract": edge_census_contract,
+            "hcc1395_edge_census_fixture": (
+                extract_hcc1395_edge_census_fixture(payload)
+                if sample == "HCC1395"
+                else None
+            ),
             "zero_coverage_fixture": None,
         }
     selection_aggregate = {
@@ -268,6 +589,13 @@ def load_sidecar_expectations(
         "morphology_classes": morphology_aggregate,
         "selection_sum": sum(selection_aggregate.values()),
         "morphology_sum": sum(morphology_aggregate.values()),
+        "sidecar_schema_versions": sorted(
+            {item["schema_version"] for item in expectations.values()}
+        ),
+        "full_edge_census_contracts_pass": all(
+            item["full_edge_census_contract"]["status"] == "pass"
+            for item in expectations.values()
+        ),
     }
     return expectations, index_contract
 
@@ -834,6 +1162,131 @@ def ranking_detail_metrics(page: Page, region: str) -> Dict[str, Any]:
     )
 
 
+def hcc1395_edge_census_cross_panel_metrics(page: Page) -> Dict[str, Any]:
+    """Inspect the fixed full-union/stored-preview/read-AF cross-panel fixture."""
+
+    fixture = HCC1395_EDGE_CENSUS_FIXTURE
+    page.locator("#detail details").evaluate_all(
+        "elements => elements.forEach(element => { element.open = true; })"
+    )
+    page.wait_for_timeout(120)
+    return page.evaluate(
+        r"""fixture => {
+            const detail = document.getElementById('detail');
+            const edgeKey = fixture.edge.join('>');
+            const visible = element => {
+                if (!element) return false;
+                const style = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden' &&
+                    Number(style.opacity || 1) > 0 &&
+                    (rect.width > 0 || rect.height > 0);
+            };
+            const numberData = (element, key) => {
+                const value = element?.dataset?.[key];
+                return value == null || value === '' ? null : Number(value);
+            };
+            const fullNetworks = [...(detail?.querySelectorAll(
+                '.full-edge-network[data-edge-scope="complete"]'
+            ) || [])];
+            const full = fullNetworks.find(network =>
+                [...network.querySelectorAll('.network-edge[data-edge-key]')]
+                    .some(edge => edge.dataset.edgeKey === edgeKey)
+            ) || null;
+            const edges = [...(full?.querySelectorAll(
+                '.network-edge[data-edge-key]'
+            ) || [])];
+            const targetEdge = edges.find(edge => edge.dataset.edgeKey === edgeKey) || null;
+            const overlay = [...(full?.querySelectorAll(
+                '.network-edge-selected-overlay[data-edge-key]'
+            ) || [])].find(edge => edge.dataset.edgeKey === edgeKey) || null;
+            const edgeRecords = edges.map(edge => ({
+                key: edge.dataset.edgeKey || null,
+                candidate_count: numberData(edge, 'candidateCount'),
+                candidate_total: numberData(edge, 'candidateTotal'),
+                top_count: numberData(edge, 'topCount'),
+                top_total: numberData(edge, 'topTotal'),
+                status: edge.dataset.edgeStatus || null,
+                selected: edge.classList.contains('edge-selected'),
+                visible: visible(edge)
+            }));
+            const fullCard = full?.closest('.network-card') || full;
+            const fullText = (fullCard?.innerText || '').trim();
+            const tables = [...(detail?.querySelectorAll('.edge-census-table') || [])];
+            const table = tables.find(element => {
+                const text = element.innerText || '';
+                return text.includes('RRAA') && text.includes('ARAA');
+            }) || tables[0] || null;
+            const scopes = [...(detail?.querySelectorAll(
+                '.stored-preview-scope[data-stored-count][data-candidate-total]'
+            ) || [])];
+            const storedScope = scopes.find(element =>
+                numberData(element, 'storedCount') === fixture.stored_candidate_total &&
+                numberData(element, 'candidateTotal') === fixture.candidate_total
+            ) || null;
+            const topEdges = [...(detail?.querySelectorAll(
+                '.read-af-top-tree .network-edge[data-edge-key]'
+            ) || [])];
+            const topEdge = topEdges.find(edge => edge.dataset.edgeKey === edgeKey) || null;
+            return {
+                fixture,
+                detail_heading: detail?.querySelector('h3')?.innerText || null,
+                full_network_count: fullNetworks.length,
+                matching_full_network_found: !!full,
+                full_edge_count: edges.length,
+                full_unique_edge_count: new Set(edgeRecords.map(edge => edge.key)).size,
+                full_edge_records: edgeRecords,
+                all_full_edges_have_expected_totals: edgeRecords.length > 0 &&
+                    edgeRecords.every(edge =>
+                        edge.candidate_total === fixture.candidate_total &&
+                        edge.top_total === fixture.top_candidate_total
+                    ),
+                all_full_edge_statuses_match_counts: edgeRecords.length > 0 &&
+                    edgeRecords.every(edge =>
+                        edge.status === (
+                            edge.candidate_count === fixture.candidate_total
+                                ? 'forced'
+                                : 'variable'
+                        )
+                    ),
+                all_selected_classes_match_positive_top_count: edgeRecords.length > 0 &&
+                    edgeRecords.every(edge => edge.selected === (edge.top_count > 0)),
+                target_edge: targetEdge ? {
+                    key: targetEdge.dataset.edgeKey,
+                    candidate_count: numberData(targetEdge, 'candidateCount'),
+                    candidate_total: numberData(targetEdge, 'candidateTotal'),
+                    top_count: numberData(targetEdge, 'topCount'),
+                    top_total: numberData(targetEdge, 'topTotal'),
+                    status: targetEdge.dataset.edgeStatus || null,
+                    selected: targetEdge.classList.contains('edge-selected'),
+                    visible: visible(targetEdge)
+                } : null,
+                selected_overlay: overlay ? {
+                    key: overlay.dataset.edgeKey,
+                    visible: visible(overlay)
+                } : null,
+                edge_census_table_count: tables.length,
+                edge_census_table_visible: visible(table),
+                stored_preview_scope: storedScope ? {
+                    stored_count: numberData(storedScope, 'storedCount'),
+                    candidate_total: numberData(storedScope, 'candidateTotal'),
+                    text: (storedScope.innerText || '').trim(),
+                    visible: visible(storedScope)
+                } : null,
+                read_af_top_edge: topEdge ? {
+                    key: topEdge.dataset.edgeKey,
+                    visible: visible(topEdge)
+                } : null,
+                full_union_boundary_text: /聯集|union/i.test(fullText),
+                not_single_tree_boundary_text: /不是單棵|非單棵|not\s+(?:a\s+)?single/i.test(fullText),
+                non_probability_boundary_text: /非[^\n]{0,20}(?:機率|概率|probab)|不是[^\n]{0,20}(?:機率|概率)|not[^\n]{0,20}probab/i.test(fullText),
+                full_card_text: fullText
+            };
+        }""",
+        fixture,
+    )
+
+
 def zero_coverage_detail_metrics(page: Page, fixture: Dict[str, Any]) -> Dict[str, Any]:
     """Confirm that primary HP 0/0 evidence renders as N/A, never as 0%."""
 
@@ -1070,6 +1523,64 @@ def audit_sample_viewport(
             },
             actual=meta,
         )
+
+        edge_census_contract = expectation["full_edge_census_contract"]
+        add_check(
+            run,
+            "sidecar_1_1_full_edge_census_contract_and_top_edge_inclusion",
+            edge_census_contract["status"] == "pass"
+            and edge_census_contract["required_units"]
+            == edge_census_contract["census_units"]
+            and edge_census_contract["top_representative_edges"]
+            == edge_census_contract["top_representative_edges_in_census"]
+            == edge_census_contract[
+                "top_representative_edges_with_positive_top_count"
+            ],
+            expected={
+                "schema": list(EXPECTED_SIDECAR_SCHEMA),
+                "every_eligible_complete_T_gt_1_unit_has_census": True,
+                "complete": True,
+                "candidate_and_top_counts_bounded": True,
+                "edge_rows_unique_sorted_and_totals_close": True,
+                "every_top_representative_edge_in_census": True,
+                "every_top_representative_edge_has_positive_top_count": True,
+            },
+            actual=edge_census_contract,
+        )
+
+        if sample == "HCC1395":
+            fixed_data = expectation["hcc1395_edge_census_fixture"]
+            fixed_census = fixed_data.get("census") or {}
+            expected_fixed = HCC1395_EDGE_CENSUS_FIXTURE
+            expected_edge_row = [
+                *expected_fixed["edge"],
+                expected_fixed["candidate_count"],
+                expected_fixed["top_candidate_count"],
+            ]
+            add_check(
+                run,
+                "hcc1395_fixed_full_edge_census_fixture",
+                fixed_data.get("region_found") is True
+                and fixed_data.get("family_found") is True
+                and fixed_census.get("complete") is True
+                and fixed_census.get("candidate_total")
+                == expected_fixed["candidate_total"]
+                and fixed_census.get("top_candidate_total")
+                == expected_fixed["top_candidate_total"]
+                and fixed_census.get("node_total") == expected_fixed["node_total"]
+                and fixed_census.get("edge_total") == expected_fixed["edge_total"]
+                and fixed_data.get("edge_row") == expected_edge_row,
+                expected={
+                    "region": expected_fixed["region"],
+                    "family": expected_fixed["family"],
+                    "candidate_total": expected_fixed["candidate_total"],
+                    "top_candidate_total": expected_fixed["top_candidate_total"],
+                    "node_total": expected_fixed["node_total"],
+                    "edge_total": expected_fixed["edge_total"],
+                    "edge_row": expected_edge_row,
+                },
+                actual=fixed_data,
+            )
 
         overview = page_overview_metrics(page)
         expected_denominators = {
@@ -1467,6 +1978,76 @@ def audit_sample_viewport(
                 "ranked_tree_views": ranking["ranked_tree_views"],
             },
         )
+
+        if sample == "HCC1395":
+            fixed = HCC1395_EDGE_CENSUS_FIXTURE
+            select_region(page, fixed["region"], timeout_ms)
+            census_ui = hcc1395_edge_census_cross_panel_metrics(page)
+            expected_target = {
+                "key": ">".join(fixed["edge"]),
+                "candidate_count": fixed["candidate_count"],
+                "candidate_total": fixed["candidate_total"],
+                "top_count": fixed["top_candidate_count"],
+                "top_total": fixed["top_candidate_total"],
+                "status": "variable",
+                "selected": True,
+                "visible": True,
+            }
+            add_check(
+                run,
+                "hcc1395_full_edge_union_selected_overlay_and_stored_preview_regression",
+                census_ui["detail_heading"] is not None
+                and fixed["region"] in census_ui["detail_heading"]
+                and census_ui["matching_full_network_found"]
+                and census_ui["full_edge_count"] == fixed["edge_total"]
+                and census_ui["full_unique_edge_count"] == fixed["edge_total"]
+                and census_ui["all_full_edges_have_expected_totals"]
+                and census_ui["all_full_edge_statuses_match_counts"]
+                and census_ui["all_selected_classes_match_positive_top_count"]
+                and census_ui["target_edge"] == expected_target
+                and census_ui["selected_overlay"]
+                == {"key": expected_target["key"], "visible": True}
+                and census_ui["edge_census_table_count"] >= 1
+                and census_ui["edge_census_table_visible"]
+                and census_ui["stored_preview_scope"] is not None
+                and census_ui["stored_preview_scope"]["stored_count"]
+                == fixed["stored_candidate_total"]
+                and census_ui["stored_preview_scope"]["candidate_total"]
+                == fixed["candidate_total"]
+                and census_ui["stored_preview_scope"]["visible"]
+                and str(fixed["stored_candidate_total"])
+                in census_ui["stored_preview_scope"]["text"]
+                and str(fixed["candidate_total"])
+                in census_ui["stored_preview_scope"]["text"]
+                and census_ui["read_af_top_edge"]
+                == {"key": expected_target["key"], "visible": True}
+                and census_ui["full_union_boundary_text"]
+                and census_ui["not_single_tree_boundary_text"]
+                and census_ui["non_probability_boundary_text"],
+                expected={
+                    "fixture": fixed,
+                    "full_union_selector": (
+                        '.full-edge-network[data-edge-scope="complete"]'
+                    ),
+                    "full_edge_count": fixed["edge_total"],
+                    "target_edge": expected_target,
+                    "selected_overlay": {
+                        "selector": ".network-edge-selected-overlay[data-edge-key]",
+                        "visible": True,
+                    },
+                    "edge_census_table_visible": True,
+                    "stored_preview": {
+                        "stored_count": fixed["stored_candidate_total"],
+                        "candidate_total": fixed["candidate_total"],
+                        "counts_explicit_in_text": True,
+                    },
+                    "read_af_top_contains_same_edge": True,
+                    "claim_boundary": (
+                        "union is not one tree; n/N and top m/M are not probability"
+                    ),
+                },
+                actual=census_ui,
+            )
 
         detail_overflow = body_overflow_metrics(page)
         add_check(
