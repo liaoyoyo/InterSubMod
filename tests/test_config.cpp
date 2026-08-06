@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <sstream>
 
 #include "core/Config.hpp"
 #include "utils/ArgParser.hpp"
@@ -104,4 +105,108 @@ TEST(ArgParserTest, ParseArgumentsShortOptions) {
     std::remove("t.bam");
     std::remove("r.fa");
     std::remove("s.vcf");
+}
+
+// ---------------------------------------------------------------------------
+// run_params.json provenance (added 2026-08-06)
+//
+// Before this, a finished run left no machine-readable record of its own
+// parameters: Config::print() showed 13 of ~35 fields to stdout and nothing was
+// persisted. Switches that materially change results — --germline-hp-only,
+// --permute-hp-seed, --nan-distance-strategy, --expected-coverage — became
+// unknowable once the terminal scrolled away. These tests pin that behaviour.
+// ---------------------------------------------------------------------------
+
+TEST(ConfigRunParamsTest, JsonContainsPreviouslyInvisibleParameters) {
+    Config config;
+    config.germline_hp_only = true;
+    config.permute_hp_seed = 4242;
+    config.nan_distance_strategy = NanDistanceStrategy::MAX_DIST;
+    config.expected_coverage = 37.5;
+    config.min_base_quality = 25;
+    config.min_common_coverage = 7;
+
+    const std::string json = config.to_json();
+
+    EXPECT_NE(json.find("\"germline_hp_only\": true"), std::string::npos);
+    EXPECT_NE(json.find("\"permute_hp_seed\": 4242"), std::string::npos);
+    EXPECT_NE(json.find("\"permute_hp_enabled\": true"), std::string::npos);
+    EXPECT_NE(json.find("\"nan_distance_strategy\": \"MAX_DIST\""), std::string::npos);
+    EXPECT_NE(json.find("\"expected_coverage\": 37.5"), std::string::npos);
+    EXPECT_NE(json.find("\"expected_coverage_mode\": \"user_specified\""), std::string::npos);
+    EXPECT_NE(json.find("\"min_base_quality\": 25"), std::string::npos);
+    EXPECT_NE(json.find("\"min_common_coverage\": 7"), std::string::npos);
+}
+
+TEST(ConfigRunParamsTest, JsonRecordsBuildAndRunIdentity) {
+    Config config;
+    const std::string json = config.to_json();
+
+    EXPECT_NE(json.find("\"schema_name\": \"intersubmod.run_params\""), std::string::npos);
+    EXPECT_NE(json.find("\"git_commit\""), std::string::npos);
+    EXPECT_NE(json.find("\"build_type\""), std::string::npos);
+    EXPECT_NE(json.find("\"compiled_at\""), std::string::npos);
+    EXPECT_NE(json.find("\"started_at\""), std::string::npos);
+}
+
+TEST(ConfigRunParamsTest, AutoCoverageModeReportedWhenZero) {
+    Config config;
+    config.expected_coverage = 0.0;
+    EXPECT_NE(config.to_json().find("\"expected_coverage_mode\": \"auto_kde\""), std::string::npos);
+}
+
+TEST(ConfigRunParamsTest, DefaultNanStrategyIsSkip) {
+    // SKIP has been the default since 2026-06-14; a silent revert to MAX_DIST
+    // would change distance results, so pin it here.
+    Config config;
+    EXPECT_NE(config.to_json().find("\"nan_distance_strategy\": \"SKIP\""), std::string::npos);
+}
+
+TEST(ConfigRunParamsTest, JsonEscapesSpecialCharactersInPaths) {
+    Config config;
+    config.tumor_bam_path = "/tmp/we\"ird\\path/t.bam";
+
+    const std::string json = config.to_json();
+
+    // The raw quote and backslash must be escaped, not leaked through.
+    EXPECT_NE(json.find("we\\\"ird\\\\path"), std::string::npos);
+}
+
+TEST(ConfigRunParamsTest, WritesFileContainingTheParameters) {
+    Config config;
+    config.output_dir = "run_params_test_dir";
+    config.permute_hp_seed = 99;
+
+    std::string err;
+    ASSERT_TRUE(config.write_run_params_json(err)) << err;
+    EXPECT_TRUE(err.empty());
+
+    std::ifstream in("run_params_test_dir/run_params.json");
+    ASSERT_TRUE(in.good());
+    std::stringstream buf;
+    buf << in.rdbuf();
+    in.close();
+
+    EXPECT_NE(buf.str().find("\"permute_hp_seed\": 99"), std::string::npos);
+    EXPECT_NE(buf.str().find("\"schema_name\""), std::string::npos);
+    EXPECT_NE(buf.str().find("\"output_dir\": \"run_params_test_dir\""), std::string::npos);
+
+    std::remove("run_params_test_dir/run_params.json");
+    std::remove("run_params_test_dir");
+}
+
+TEST(ConfigRunParamsTest, ReportsErrorWhenOutputDirCannotBeCreated) {
+    // A regular file standing where the output directory should go: creating
+    // the directory must fail, and the failure must be reported rather than
+    // silently swallowed.
+    create_dummy_file("blocking_regular_file");
+
+    Config config;
+    config.output_dir = "blocking_regular_file";
+
+    std::string err;
+    EXPECT_FALSE(config.write_run_params_json(err));
+    EXPECT_FALSE(err.empty());
+
+    std::remove("blocking_regular_file");
 }

@@ -31,6 +31,19 @@ int main(int argc, char** argv) {
 
     config.print();
 
+    // Persist the complete parameter set before any analysis starts, so that an
+    // interrupted or long-past run can still be audited from its output dir alone.
+    // A failure here is reported but never aborts the run — provenance must not
+    // become a new way for the analysis to die.
+    {
+        std::string params_error;
+        if (config.write_run_params_json(params_error)) {
+            LOG_INFO("Run parameters written to " + config.output_dir + "/run_params.json");
+        } else {
+            LOG_WARN("Could not write run_params.json: " + params_error);
+        }
+    }
+
     // Print debug mode status
     if (config.is_debug()) {
         LOG_INFO("\n=== DEBUG MODE ENABLED ===");

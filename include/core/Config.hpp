@@ -96,6 +96,33 @@ struct Config {
     void print() const;
 
     /**
+     * @brief Serializes the full configuration to a JSON string.
+     *
+     * Unlike print(), which is a human-readable summary of selected fields,
+     * this emits EVERY runtime parameter so that a finished run can be audited
+     * or reproduced from its output directory alone. Build identity
+     * (git commit, build type, compile timestamp) and the run timestamp are
+     * included under "build" and "run".
+     *
+     * No third-party JSON library is used; the output is hand-emitted and all
+     * string values are escaped.
+     *
+     * @return JSON document as a string (2-space indented, trailing newline).
+     */
+    std::string to_json() const;
+
+    /**
+     * @brief Writes to_json() into <output_dir>/run_params.json.
+     *
+     * Called once at startup, before any analysis, so that the parameters are
+     * on disk even if the run is later interrupted.
+     *
+     * @param error_message Populated with the reason when the write fails.
+     * @return true on success.
+     */
+    bool write_run_params_json(std::string& error_message) const;
+
+    /**
      * @brief Returns the effective debug output directory.
      */
     std::string get_debug_output_dir() const {

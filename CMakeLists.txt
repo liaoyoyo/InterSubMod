@@ -16,6 +16,43 @@ else()
     add_definitions(-DNDEBUG)
 endif()
 
+# --- Build Identity (injected into run_params.json for provenance) ---
+# Lets any finished run state which binary produced it. Degrades gracefully to
+# "unknown" when git is unavailable or the source is not a git checkout.
+execute_process(
+    COMMAND git rev-parse --short=8 HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE ISM_GIT_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT ISM_GIT_COMMIT)
+    set(ISM_GIT_COMMIT "unknown")
+endif()
+
+# Mark the commit as dirty when the working tree has uncommitted changes, so a
+# run produced from an unclean tree can never be mistaken for a clean release.
+execute_process(
+    COMMAND git status --porcelain --untracked-files=no
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE ISM_GIT_DIRTY_OUTPUT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT ISM_GIT_DIRTY_OUTPUT STREQUAL "")
+    set(ISM_GIT_COMMIT "${ISM_GIT_COMMIT}-dirty")
+endif()
+
+if(CMAKE_BUILD_TYPE)
+    set(ISM_BUILD_TYPE_STRING "${CMAKE_BUILD_TYPE}")
+else()
+    set(ISM_BUILD_TYPE_STRING "unspecified")
+endif()
+
+add_definitions(-DISM_GIT_COMMIT="${ISM_GIT_COMMIT}")
+add_definitions(-DISM_BUILD_TYPE="${ISM_BUILD_TYPE_STRING}")
+message(STATUS "InterSubMod build identity: ${ISM_GIT_COMMIT} (${ISM_BUILD_TYPE_STRING})")
+
 # --- Output Directory ---
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
