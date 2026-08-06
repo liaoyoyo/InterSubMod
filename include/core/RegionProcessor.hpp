@@ -660,6 +660,24 @@ public:
      */
     void print_summary(const std::vector<RegionResult>& results) const;
 
+    /**
+     * @brief Writes a machine-readable run summary to <output_dir>/run_summary.json.
+     *
+     * print_summary() emits the same statistics to the log, which disappears once
+     * the terminal is closed. This persists them so a finished run can be audited,
+     * compared against another run, or folded into a receipt without re-parsing logs.
+     *
+     * Pairs with Config::write_run_params_json(): params answer "how was it invoked",
+     * this answers "what happened".
+     *
+     * @param results       Per-region results, as returned by process_all_regions().
+     * @param wall_clock_ms Wall-clock duration of the region-processing phase.
+     * @param error_message Populated with the reason when the write fails.
+     * @return true on success. A failure here never invalidates the analysis itself.
+     */
+    bool write_run_summary_json(const std::vector<RegionResult>& results, double wall_clock_ms,
+                                std::string& error_message) const;
+
 private:
     /**
      * @brief Write significance summary CSV and statistics report

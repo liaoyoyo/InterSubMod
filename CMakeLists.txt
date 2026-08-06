@@ -200,6 +200,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(run_tests 
     tests/main_test.cpp 
     tests/test_config.cpp
+    tests/test_run_summary_json.cpp
     tests/test_bam_reader.cpp
     tests/test_distance_matrix.cpp
     tests/test_hierarchical_clustering.cpp

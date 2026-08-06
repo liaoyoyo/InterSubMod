@@ -20,6 +20,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <system_error>
 #include <stdexcept>
 #include <tuple>
 #include <unordered_set>
@@ -2333,6 +2334,123 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     }
 
     LOG_INFO(ss.str());
+}
+
+bool RegionProcessor::write_run_summary_json(const std::vector<RegionResult>& results, double wall_clock_ms,
+                                             std::string& error_message) const {
+    error_message.clear();
+
+    // Statistics are recomputed here rather than shared with print_summary(),
+    // deliberately: print_summary() is on the hot path of every existing run and
+    // refactoring it to return a struct would risk changing long-standing log
+    // output. The accumulation below is a straight sum and cheap relative to the
+    // analysis it summarizes.
+    int success_count = 0;
+    long long total_reads = 0;
+    long long total_cpgs = 0;
+    long long total_forward = 0;
+    long long total_reverse = 0;
+    long long total_filtered = 0;
+    double total_region_ms = 0.0;
+
+    long long total_valid_pairs = 0;
+    long long total_invalid_pairs = 0;
+    double total_avg_coverage = 0.0;
+    int regions_with_distance = 0;
+
+    for (const auto& r : results) {
+        if (!r.success) {
+            continue;
+        }
+        success_count++;
+        total_reads += r.num_reads;
+        total_cpgs += r.num_cpgs;
+        total_forward += r.num_forward_reads;
+        total_reverse += r.num_reverse_reads;
+        total_filtered += r.num_filtered_reads;
+        total_region_ms += r.elapsed_ms;
+
+        if (r.num_valid_pairs > 0 || r.num_invalid_pairs > 0) {
+            total_valid_pairs += r.num_valid_pairs;
+            total_invalid_pairs += r.num_invalid_pairs;
+            total_avg_coverage += r.avg_common_coverage;
+            regions_with_distance++;
+        }
+    }
+
+    const size_t total_regions = results.size();
+    const size_t failed_count = total_regions - static_cast<size_t>(success_count);
+
+    std::error_code ec;
+    std::filesystem::create_directories(output_dir_, ec);
+    if (ec) {
+        error_message = "cannot create output directory '" + output_dir_ + "': " + ec.message();
+        return false;
+    }
+
+    const std::string path = output_dir_ + "/run_summary.json";
+    std::ofstream out(path, std::ios::out | std::ios::trunc);
+    if (!out) {
+        error_message = "cannot open '" + path + "' for writing";
+        return false;
+    }
+
+    out << "{\n";
+    out << "  \"schema_name\": \"intersubmod.run_summary\",\n";
+    out << "  \"schema_version\": \"1.0.0\",\n";
+
+    out << "  \"regions\": {\n";
+    out << "    \"total\": " << total_regions << ",\n";
+    out << "    \"succeeded\": " << success_count << ",\n";
+    out << "    \"failed\": " << failed_count << "\n";
+    out << "  },\n";
+
+    out << "  \"reads\": {\n";
+    out << "    \"total\": " << total_reads << ",\n";
+    out << "    \"forward_strand\": " << total_forward << ",\n";
+    out << "    \"reverse_strand\": " << total_reverse << ",\n";
+    out << "    \"filtered_out\": " << total_filtered << ",\n";
+    out << "    \"filtered_out_is_tracked\": " << (output_filtered_reads_ ? "true" : "false") << ",\n";
+    out << "    \"mean_per_successful_region\": "
+        << (success_count > 0 ? static_cast<double>(total_reads) / success_count : 0.0) << "\n";
+    out << "  },\n";
+
+    out << "  \"cpg_sites\": {\n";
+    out << "    \"total\": " << total_cpgs << ",\n";
+    out << "    \"mean_per_successful_region\": "
+        << (success_count > 0 ? static_cast<double>(total_cpgs) / success_count : 0.0) << "\n";
+    out << "  },\n";
+
+    out << "  \"timing_ms\": {\n";
+    out << "    \"wall_clock\": " << wall_clock_ms << ",\n";
+    out << "    \"summed_region_time\": " << total_region_ms << ",\n";
+    out << "    \"mean_per_region\": " << (total_regions > 0 ? total_region_ms / total_regions : 0.0) << ",\n";
+    out << "    \"threads\": " << num_threads_ << "\n";
+    out << "  },\n";
+
+    out << "  \"distance_matrix\": {\n";
+    out << "    \"computed\": " << (compute_distance_matrix_ ? "true" : "false") << ",\n";
+    out << "    \"regions_with_matrix\": " << regions_with_distance << ",\n";
+    out << "    \"valid_pairs\": " << total_valid_pairs << ",\n";
+    out << "    \"invalid_pairs_insufficient_overlap\": " << total_invalid_pairs << ",\n";
+    out << "    \"valid_pair_ratio\": "
+        << ((total_valid_pairs + total_invalid_pairs) > 0
+                ? static_cast<double>(total_valid_pairs) / (total_valid_pairs + total_invalid_pairs)
+                : 0.0)
+        << ",\n";
+    out << "    \"mean_common_cpg_coverage\": "
+        << (regions_with_distance > 0 ? total_avg_coverage / regions_with_distance : 0.0) << "\n";
+    out << "  }\n";
+
+    out << "}\n";
+
+    out.flush();
+    if (!out) {
+        error_message = "write failed for '" + path + "'";
+        return false;
+    }
+
+    return true;
 }
 
 MethylationMatrix RegionProcessor::build_methylation_matrix(const MatrixBuilder& matrix_builder, int region_id) {

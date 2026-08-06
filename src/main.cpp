@@ -81,6 +81,18 @@ int main(int argc, char** argv) {
         std::cout << "[3] Analysis Complete." << std::endl;
         processor.print_summary(results);
 
+        // Persist the same statistics print_summary() just logged. Pairs with
+        // run_params.json: params say how the run was invoked, summary says what
+        // happened. A failure here is reported but never fails the analysis.
+        {
+            std::string summary_error;
+            if (processor.write_run_summary_json(results, total_time, summary_error)) {
+                LOG_INFO("Run summary written to " + config.output_dir + "/run_summary.json");
+            } else {
+                LOG_WARN("Could not write run_summary.json: " + summary_error);
+            }
+        }
+
         LOG_INFO("Total Wall-clock time: " + std::to_string(total_time) + " ms");
         LOG_INFO("Output directory: " + config.output_dir);
 
