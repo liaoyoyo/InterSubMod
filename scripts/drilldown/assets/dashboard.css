@@ -290,3 +290,10 @@ details[open] > summary { border-bottom: 1px solid var(--soft); }
 .scale-title { font-size: .76rem; font-weight: 700; }
 .scale-bar { height: 10px; border-radius: 3px; border: 1px solid var(--line); margin: .15rem 0; }
 .scale-ends { display: flex; justify-content: space-between; font-size: .68rem; color: var(--muted); font-family: var(--mono); }
+
+/* Locus 排列：S 刻度與卡片可點 */
+.locus-tick { cursor: pointer; }
+.locus-tick:hover rect[fill="transparent"] { fill: rgba(23,107,88,.08); }
+a.locus-card { text-decoration: none; color: inherit; cursor: pointer; transition: border-color .12s; }
+a.locus-card:hover { border-color: var(--accent); }
+.locus-card .locus-ax { margin-top: .25rem; display: flex; flex-wrap: wrap; gap: .15rem; }

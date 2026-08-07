@@ -559,6 +559,31 @@
     window.addEventListener("resize", function () { drawGenome(); renderList(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(); });
 
+    /* 頁內 #p=chrom:pos 連結（locus 排列的 S 刻度、鄰域連結）要能真的跳過去。
+       readHash 只在啟動跑一次，所以必須監聽 hashchange —— 否則點了只有網址變、
+       畫面不動。也支援瀏覽器上一頁。 */
+    window.addEventListener("hashchange", function () {
+        var m = location.hash.match(/(?:^|[#&])p=(chr[^:&]+):(\d+)/);
+        if (!m) return;
+        var ci = CHROMS.indexOf(m[1]), want = +m[2];
+        if (ci < 0) return;
+        for (var i = 0; i < N; i++) {
+            if (chromOf[i] === ci && posOf[i] === want) {
+                if (i !== state.cur) select(i);
+                var d = document.getElementById("detail");
+                if (d) d.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                return;
+            }
+        }
+        // 找不到就講清楚，不要靜默沒反應
+        var host = document.getElementById("detail");
+        if (host) {
+            host.innerHTML = "<div class='capability-off'><b>找不到 " + esc(m[1]) + ":" +
+                fmt(want) + "。</b>這個座標不在本樣本的 sSNV 索引內 —— " +
+                "可能不是 topology 的 active position，或不在 chr1–22。</div>";
+        }
+    });
+
     // 分片載入失敗必須看得見 —— 留白畫面會讓人以為「這個樣本就是沒資料」
     DD.loadShard = function (url, onDone) {
         var s = document.createElement("script");
