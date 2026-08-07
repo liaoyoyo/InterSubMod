@@ -247,3 +247,18 @@ details > summary {
 details[open] > summary { border-bottom: 1px solid var(--soft); }
 .section > header h2 { line-height: 1.25; }
 .dim h3, .layer { font-weight: 600; }
+
+/* ── 甲基雙面板圖 ────────────────────────────────────────────────
+   PNG 是 1px = 1 資料格，放大靠 image-rendering:pixelated；
+   文字放大會糊，所以軸標走疊在上面的 SVG。 */
+.panel-fig { position: relative; background: #11161f; border-radius: 8px; overflow: hidden; padding-bottom: 16px; }
+.panel-fig img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.panel-fig .panel-ov { position: absolute; top: 0; left: 0; right: 0; bottom: 16px; width: 100%; pointer-events: none; }
+.panel-marks { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; }
+.panel-marks span {
+    position: absolute; bottom: 1px; font-size: .62rem; font-family: var(--mono);
+    color: #98a09a; white-space: nowrap; padding-left: 2px;
+    border-left: 1px solid rgba(255,253,247,.35);
+}
+.legend .bar-key { display: inline-flex; align-items: center; gap: .25rem; margin-right: .7rem; font-size: .76rem; }
+.legend { display: flex; flex-wrap: wrap; gap: .2rem .4rem; margin: .4rem 0; }

@@ -233,7 +233,14 @@
                      "<div class='capability-off'>甲基模組未載入。</div>") +
                     "</div></details>" +
                     "<details open><summary>甲基群關係 — 哪個群內有幾群、哪兩群之間有差異</summary>" +
-                    "<div class='details-body'>" + methylGraphBlock(chrom, pos) + "</div></details>";
+                    "<div class='details-body'>" + methylGraphBlock(chrom, pos) + "</div></details>" +
+                    "<details open><summary>甲基矩陣圖 — read × CpG 與 read × read 距離</summary>" +
+                    "<div class='details-body'><div id='methylFig'></div></div></details>";
+
+                if (DD.methylFigure) {
+                    var fh = host.querySelector("#methylFig");
+                    if (fh) DD.methylFigure(chrom, pos, fh);
+                }
 
                 host.querySelectorAll("button[data-j]").forEach(function (b) {
                     b.onclick = function () { idx = +b.dataset.j; paint(); };

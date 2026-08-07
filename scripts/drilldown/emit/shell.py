@@ -155,6 +155,7 @@ def render(boot: dict, caps: list, meta: dict, analysis: dict = None) -> str:
 <script>{_asset('tree.js')}</script>
 <script>{_asset('locus.js')}</script>
 <script>{_asset('methylgraph.js')}</script>
+<script>{_asset('panel.js')}</script>
 <script>{_asset('methyl.js')}</script>
 <script>{_asset('detail.js')}</script>
 <script>{_asset('analysis.js')}</script>

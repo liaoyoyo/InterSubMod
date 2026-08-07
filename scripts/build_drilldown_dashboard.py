@@ -22,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "drilldown"))
 sys.path.insert(0, str(HERE / "drilldown" / "sources"))
 sys.path.insert(0, str(HERE / "drilldown" / "emit"))
+sys.path.insert(0, str(HERE / "drilldown" / "panels"))
 
 import capability as cap_mod                                   # noqa: E402
 import topology as src_topology                                # noqa: E402
@@ -31,6 +32,7 @@ import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
 import selfcheck as mod_selfcheck                              # noqa: E402
 import cooccurrence as mod_cooccur                             # noqa: E402
+import bake as mod_bake                                        # noqa: E402
 from capability import EXIT_REFUSE, Refuse, Registry           # noqa: E402
 
 # 站點預設路徑。全部可用 CLI 覆寫；找不到就是對應能力 ABSENT，不是致命錯誤。
@@ -39,6 +41,22 @@ DEF_TOPOLOGY_ROOT = ("/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/researc
 
 
 DEF_ISM_ROOT = "/bip7_disk/liaoyoyo2001/ism_lineage_v1"
+
+
+def _loci_with_ism(l1, ism_cap):
+    """有 ISM 產物目錄的 sSNV，依 (chrom, pos) 排序。"""
+    hit = ism_cap.payload["hit_dir"]
+    chroms = l1["chroms"]
+    out, acc, prev = [], 0, -1
+    for i in range(l1["n"]):
+        if l1["chrom"][i] != prev:
+            acc = l1["dpos"][i]
+            prev = l1["chrom"][i]
+        else:
+            acc += l1["dpos"][i]
+        if i in hit:
+            out.append((chroms[l1["chrom"][i]], acc))
+    return out
 
 
 def build_registry(args) -> Registry:
@@ -79,6 +97,10 @@ def main() -> int:
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
     ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
                     help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
+    ap.add_argument("--bake-panels", default="0",
+                    help="產甲基雙面板 PNG：0（不產）/ N（前 N 個）/ all（全部）")
+    ap.add_argument("--lineage-assign", help="read_lineage_assignments.tsv.gz（側欄 lineage 軌）")
+    ap.add_argument("--lineage-paths", help="unit_lineage_paths.tsv.gz")
     ap.add_argument("--probe-only", action="store_true", help="只探測並印能力矩陣，不產頁")
     ap.add_argument("--figs-mode", choices=["copy", "link", "ref"], default="copy",
                     help="copy（預設，輸出夾自足可搬走）/ link（symlink，搬移會斷）/ ref（相對路徑）")
@@ -120,8 +142,24 @@ def main() -> int:
         "windowBp": ismc.payload["window_bp"],
         "hitDir": sorted(ismc.payload["hit_dir"]),
     } if (ismc and ismc.usable and ismc.payload) else None)
-    shards = emit_payload.write_shards(out, topo, topo.payload["l1"]["chroms"],
+    chroms = topo.payload["l1"]["chroms"]
+    shards = emit_payload.write_shards(out, topo, chroms,
                                        reg.get("ism_dirs"), reg.get("mlhp"))
+
+    # 甲基雙面板：ISM 算完後產圖，HTML 以相對路徑連結
+    panel_info = None
+    if args.bake_panels not in ("0", "", None) and ismc and ismc.usable:
+        loci = _loci_with_ism(topo.payload["l1"], ismc)
+        limit = 0 if args.bake_panels == "all" else int(args.bake_panels)
+        lm = mod_bake.load_lineage_map(args.lineage_assign, args.lineage_paths)
+        print(f"\n產甲基面板：{len(loci):,} 個候選位點"
+              f"{'（限前 ' + str(limit) + ' 個）' if limit else '（全部）'}"
+              f"　lineage map {len(lm):,} 條 read")
+        panel_info = mod_bake.bake(ismc.payload["root"], out, loci, lm, cell_h=2, limit=limit)
+        panel_info["shards"] = mod_bake.write_manifest(out, panel_info, chroms)
+        print(f"　產出 {panel_info['made']:,} 張 / 略過 {panel_info['skipped']:,}"
+              f"　共 {panel_info['bytes'] / 2**20:.1f} MB")
+        boot["panels"] = {"made": panel_info["made"], "cellH": panel_info["cellH"]}
 
     meta = {
         "regions": len(topo.payload["regions"]),
@@ -141,6 +179,8 @@ def main() -> int:
 
     receipt = {
         "sample": args.sample,
+        "panels": ({k: v for k, v in panel_info.items() if k != "panels"}
+                   if panel_info else None),
         "built_at": meta["built_at"],
         "capabilities": reg.matrix(),
         "selfcheck": analysis["selfcheck"]["summary"],
