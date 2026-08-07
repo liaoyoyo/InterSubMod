@@ -68,6 +68,14 @@ struct FullLabel {
     Strand strand = Strand::UNKNOWN;
     bool is_tumor = true;
 
+    // Lineage axes, populated from the BAM aux tags written by LongLineage's
+    // tag_bam. Empty when the input never went through that step, in which case
+    // the lineage axes are simply skipped rather than treated as one big group.
+    std::string lineage_component;  // lc:Z
+    std::string lineage_block;      // lu:Z
+    std::string lineage_path;       // lv:Z, e.g. "HP2-1-1" or "HP2-1+" (subtree)
+    char lineage_status = '\0';     // ls:A  U | M | P | A ; '\0' when absent
+
     /**
      * @brief Generate combo code
      *

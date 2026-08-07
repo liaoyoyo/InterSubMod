@@ -131,6 +131,20 @@ public:
      */
     void set_seed(uint64_t seed);
 
+    /**
+     * @brief Convert a lineage axis to multi-group labels.
+     *
+     * Reads that carry no value on the requested axis, or whose lineage confidence
+     * is below @p min_status, are excluded (-1) rather than pooled into a catch-all
+     * group — pooling them would invent a group that does not exist.
+     *
+     * @param axis        "lc" (component), "lu" (block) or "lv" (hierarchical path)
+     * @param min_status  "U" unique only, "UM" unique or tie, "any" accept all
+     * @return group index per read, or -1 for excluded reads
+     */
+    std::vector<int> lineage_to_labels(const std::vector<FullLabel>& full_labels, const std::string& axis,
+                                       const std::string& min_status);
+
     const LabelTestConfig& config() const { return config_; }
 
 private:
@@ -180,6 +194,8 @@ private:
      * ALT -> 0, REF -> 1, UNKNOWN -> -1 (excluded)
      */
     std::vector<int> allele_to_binary_labels(const std::vector<FullLabel>& full_labels);
+
+
 
     /**
      * @brief Convert Sample type to binary group labels

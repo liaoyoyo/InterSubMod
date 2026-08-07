@@ -41,6 +41,18 @@
 namespace InterSubMod {
 
 namespace {
+// NaN means "not computed", which must render as an empty CSV cell so downstream
+// cannot mistake an absent statistic for a real zero.
+std::string fmt_nan(double v) {
+    if (!std::isfinite(v)) return "";
+    std::ostringstream o;
+    o << std::fixed << std::setprecision(4) << v;
+    return o.str();
+}
+}  // namespace
+
+
+namespace {
 
 bool is_valid_verification_legacy_class(const std::string& value) {
     return value == "Strong" || value == "Subclone" || value == "Weak" || value == "Noise";
@@ -728,6 +740,8 @@ RegionProcessor::RegionProcessor(const Config& config)
       num_threads_(config.threads),
       window_size_(config.window_size_bp),
       log_level_(config.log_level),
+      group_by_tag_(config.group_by_tag),
+      require_tag_status_(config.require_tag_status),
       output_filtered_reads_(config.output_filtered_reads),
       no_filter_output_(config.no_filter_output),
       compute_distance_matrix_(config.compute_distance_matrix),
@@ -1893,6 +1907,7 @@ bool RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "HPFineD_HP1S_HP2,HPFineD_HP1S_HP2S,HPFineD_HP2_HP2S,"
                 // Stage 3: Allele
                 "AlleleDelta,AlleleP,AlleleSig,"
+                "LineageAxis,LineageNGroups,LineageNReads,LineagePermanovaF,LineagePermanovaP,LineagePermanovaValid,"
                 "LabelHPPermanovaF,LabelHPPermanovaP,LabelHPPermanovaValid,LabelHPDispersionP,LabelHPDispersionWarn,"
                 "LabelAllelePermanovaF,LabelAllelePermanovaP,LabelAllelePermanovaValid,LabelAlleleDispersionP,LabelAlleleDispersionWarn,"
                 // Stage 4: Unassigned Affinity
@@ -2067,6 +2082,10 @@ bool RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::fixed << std::setprecision(4) << r.allele_delta << ","
                  << std::scientific << std::setprecision(6) << r.allele_p << ","
                  << (r.allele_sig ? "true" : "false") << ","
+             << (r.lineage_axis.empty() ? "" : r.lineage_axis) << ","
+             << r.lineage_n_groups << "," << r.lineage_n_reads << ","
+             << fmt_nan(r.lineage_permanova_f) << "," << fmt_nan(r.lineage_permanova_p) << ","
+             << (r.lineage_permanova_valid ? "true" : "false") << ","
                  << std::fixed << std::setprecision(4) << r.label_hp_permanova_f << ","
                  << std::scientific << std::setprecision(6) << r.label_hp_permanova_p << ","
                  << (r.label_hp_permanova_valid ? "true" : "false") << ","
@@ -3363,6 +3382,11 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
             label.hp_tag = read.hp_tag;
             label.strand = read.strand;
             label.is_tumor = read.is_tumor;
+            // Lineage axes; empty when the BAM carries no tag_bam output.
+            label.lineage_component = read.lineage_component;
+            label.lineage_block = read.lineage_block;
+            label.lineage_path = read.lineage_path;
+            label.lineage_status = read.lineage_status;
             full_labels.push_back(label);
         }
 
@@ -3428,6 +3452,41 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
 
         SignificanceResult sig_result =
             analyzer.analyze(cluster_labels, full_labels, work_dist, work_meth, region_id, anchor_key);
+
+        // ── Lineage-axis test ────────────────────────────────────────────────
+        // Reuses the same PERMANOVA machinery as the HP and allele axes, so a region
+        // can report which axis explains its methylation structure. Reads without a
+        // value on the axis (or below the confidence gate) are excluded rather than
+        // pooled — pooling would fabricate a group that the data does not support.
+        for (const std::string& axis : group_by_tag_) {
+            if (axis == "HP" || axis == "ALT") continue;  // already covered above
+            LabelTest lineage_lt{LabelTestConfig{}};
+            const std::vector<int> lineage_labels =
+                lineage_lt.lineage_to_labels(full_labels, axis, require_tag_status_);
+
+            std::set<int> distinct;
+            int admitted = 0;
+            for (int g : lineage_labels) {
+                if (g >= 0) {
+                    distinct.insert(g);
+                    ++admitted;
+                }
+            }
+            result.lineage_axis = axis;
+            result.lineage_n_groups = static_cast<int>(distinct.size());
+            result.lineage_n_reads = admitted;
+            if (distinct.size() < 2) {
+                // One group (or none) cannot be tested; leave the statistics as NaN so
+                // the CSV shows blank instead of a misleading zero.
+                break;
+            }
+            StructureTest lineage_st;
+            const PermanovaResult pr = lineage_st.run_permanova(work_dist, lineage_labels);
+            result.lineage_permanova_f = pr.pseudo_f;
+            result.lineage_permanova_p = pr.p_value;
+            result.lineage_permanova_valid = pr.valid;
+            break;  // first lineage axis wins; multi-axis reporting needs a wider schema
+        }
 
         // Store results
         result.significance_computed = true;

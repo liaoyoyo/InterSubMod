@@ -304,6 +304,47 @@ std::vector<int> LabelTest::hp_to_fine_labels(const std::vector<FullLabel>& full
     return final_labels;
 }
 
+std::vector<int> LabelTest::lineage_to_labels(const std::vector<FullLabel>& full_labels, const std::string& axis,
+                                              const std::string& min_status) {
+    std::vector<int> labels(full_labels.size(), -1);  // -1 = excluded
+
+    // Confidence gate. 'P' (partial) carries a subtree-scoped path and 'A' (abstain)
+    // carries no topology at all, so admitting them changes what a "group" means.
+    const auto admits = [&min_status](char status) {
+        if (status == '\0') return false;
+        if (min_status == "any") return status != 'A';
+        if (min_status == "UM") return status == 'U' || status == 'M';
+        return status == 'U';  // default: unique only
+    };
+
+    // Assign a dense group index per distinct value, in first-seen order so the
+    // numbering is deterministic for a given read ordering.
+    std::map<std::string, int> group_of;
+    for (size_t i = 0; i < full_labels.size(); ++i) {
+        const FullLabel& fl = full_labels[i];
+        if (!admits(fl.lineage_status)) continue;
+
+        const std::string* value = nullptr;
+        if (axis == "lc") {
+            value = &fl.lineage_component;
+        } else if (axis == "lu") {
+            value = &fl.lineage_block;
+        } else if (axis == "lv") {
+            value = &fl.lineage_path;
+        } else {
+            return labels;  // unknown axis: everything excluded
+        }
+        if (value->empty() || *value == ".") continue;
+
+        auto it = group_of.find(*value);
+        if (it == group_of.end()) {
+            it = group_of.emplace(*value, static_cast<int>(group_of.size())).first;
+        }
+        labels[i] = it->second;
+    }
+    return labels;
+}
+
 std::vector<int> LabelTest::allele_to_binary_labels(const std::vector<FullLabel>& full_labels) {
     std::vector<int> binary_labels(full_labels.size(), -1);  // -1 = excluded
 

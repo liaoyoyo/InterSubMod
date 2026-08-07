@@ -173,6 +173,16 @@ struct RegionResult {
     double label_allele_dispersion_p;     ///< Label-based allele dispersion p-value
     bool label_allele_dispersion_warning; ///< Whether label-based allele dispersion warns
 
+    // Lineage-axis results. Computed only when --group-by-tag selects lc/lu/lv and
+    // the BAM carries tag_bam output; otherwise n_groups stays 0 and the rest are NaN,
+    // which the CSV renders as empty so downstream cannot mistake absence for zero.
+    int lineage_n_groups = 0;          ///< distinct lineage groups admitted by the status gate
+    int lineage_n_reads = 0;           ///< reads admitted (others excluded, not pooled)
+    double lineage_permanova_f = std::numeric_limits<double>::quiet_NaN();
+    double lineage_permanova_p = std::numeric_limits<double>::quiet_NaN();
+    bool lineage_permanova_valid = false;
+    std::string lineage_axis;          ///< which axis produced the numbers above
+
     // Multi-Stage HP Verification results (NEW)
     // Stage 1: HP Family Merged Test
     double hp_merged_delta;      ///< Delta for (HP1+HP1-1) vs (HP2+HP2-1)
@@ -854,6 +864,12 @@ private:
 
     // Configuration
     LogLevel log_level_;
+
+    // Methylation grouping axes, copied from Config so the significance stage can test
+    // lineage axes without threading the whole Config through every call.
+    // Declared right after log_level_ so declaration order matches the initialiser list.
+    std::vector<std::string> group_by_tag_{"HP"};
+    std::string require_tag_status_{"U"};
     bool output_filtered_reads_;
     bool no_filter_output_;
     ReadFilterConfig filter_config_;
@@ -866,6 +882,7 @@ private:
     bool output_distance_matrix_;
     bool output_strand_distance_matrices_;
     DistanceConfig distance_config_;
+
     std::vector<DistanceMetricType> distance_metrics_;
 
     // Hierarchical clustering configuration
