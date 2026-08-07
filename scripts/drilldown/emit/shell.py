@@ -153,6 +153,8 @@ def render(boot: dict, caps: list, meta: dict, analysis: dict = None) -> str:
 <script type="application/json" id="analysisData">__ANALYSIS__</script>
 <script>{_asset('dashboard.js')}</script>
 <script>{_asset('tree.js')}</script>
+<script>{_asset('locus.js')}</script>
+<script>{_asset('methylgraph.js')}</script>
 <script>{_asset('methyl.js')}</script>
 <script>{_asset('detail.js')}</script>
 <script>{_asset('analysis.js')}</script>

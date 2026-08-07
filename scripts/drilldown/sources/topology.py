@@ -226,4 +226,8 @@ def _build_l1(keys, pos_map, regions) -> dict:
         "chroms": CHROMS,
         "chromLen": [CHROM_LEN[c] for c in CHROMS],
         "flagBits": ["anyUnique", "allUnique", "anyRanked", "multiRegion", "recurrence"],
+        # 甲基軸碼：由 ISM 能力事後填入（見 build_drilldown_dashboard.py）。
+        # 0 = 無 ISM 資料；bit0 HP 顯著 / bit1 ALT 顯著 / bit2 lineage 顯著 /
+        # bit3 有測但都不顯著。刻意不含「甲基自身分群」—— 那個軸是循環論證。
+        "axis": [],
     }

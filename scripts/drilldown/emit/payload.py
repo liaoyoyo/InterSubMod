@@ -61,11 +61,74 @@ def build_dims(topo_cap, extra=None) -> list:
     return dims
 
 
+# 甲基軸的顏色語意。刻意不含「甲基自身分群」——那個軸是循環論證（見 C10），
+# 把它畫上去會讓幾乎每個位點都亮起來，等於沒有資訊。
+AXIS_BITS = [("hp", 1, "HP", "#285f8f"), ("allele", 2, "ALT/REF", "#a94336"),
+             ("lineage", 4, "lineage", "#6b5592")]
+AXIS_NONE = 8          # 有測但都不顯著
+
+
+def fill_axis_codes(l1: dict, ism_cap) -> None:
+    """逐 sSNV 算一個 byte：沿哪些軸顯著。放進 L1 讓全基因組圖能直接畫，
+    不必等分片載入。"""
+    n = l1["n"]
+    codes = [0] * n
+    if not (ism_cap and ism_cap.usable and ism_cap.payload):
+        l1["axis"] = codes
+        return
+    rows = ism_cap.payload["rows"]
+    chroms = l1["chroms"]
+    acc, prev = 0, -1
+    for i in range(n):
+        if l1["chrom"][i] != prev:
+            acc = l1["dpos"][i]
+            prev = l1["chrom"][i]
+        else:
+            acc += l1["dpos"][i]
+        rec = rows.get((chroms[l1["chrom"][i]], acc))
+        if rec is None:
+            continue
+        code, tested = 0, False
+        for aid, bit, _lab, _col in AXIS_BITS:
+            p = rec.get(aid + "_p")
+            v = rec.get(aid + "_valid")
+            k = rec.get(aid + "_n")
+            if v is False or (k is not None and k < 2) or p is None:
+                continue
+            tested = True
+            if p <= 0.05:
+                code |= bit
+        if tested and code == 0:
+            code = AXIS_NONE
+        codes[i] = code
+    l1["axis"] = codes
+
+
+def axis_dim(ism_cap) -> list:
+    """甲基軸做成篩選維度 —— 使用者要能「只看沿 lineage 分群的位點」。"""
+    if not (ism_cap and ism_cap.usable):
+        return [{
+            "id": "axis", "title": "甲基沿哪個軸顯著", "src": "ism", "srcLabel": "ISM",
+            "disabled": True, "disabledReason": "缺 ISM 能力",
+            "keys": [{"v": "none", "label": "（不可用）"}],
+        }]
+    keys = [{"v": "0", "label": "無 ISM 資料", "color": "#e7e5da"},
+            {"v": "8", "label": "有測但都不顯著", "color": "#c9c8bd"}]
+    keys += [{"v": str(bit), "label": lab + " 顯著", "color": col}
+             for _aid, bit, lab, col in AXIS_BITS]
+    keys.append({"v": "multi", "label": "多軸同時顯著", "color": "#17231e"})
+    return [{
+        "id": "axis", "title": "甲基沿哪個軸顯著", "src": "ism", "srcLabel": "ISM",
+        "keys": keys,
+        "note": "不含「甲基自身分群」—— 該軸是循環論證，見自檢 C10",
+    }]
+
+
 LAYERS = [
-    {"id": "density", "title": "1 Mb 密度帶", "on": True,
-     "hint": "全顯示時擁擠處看不出多寡，底下補一條分箱灰階"},
-    {"id": "ismRing", "title": "有 ISM 甲基資料的位點加圈", "on": True,
-     "hint": "需要 ISM 能力；缺時此開關停用"},
+    {"id": "density", "title": "1 Mb 密度帶", "on": False,
+     "hint": "擁擠處看不出多寡時可開；與甲基軸軌道同時開會偏擠，故預設關"},
+    {"id": "axisTrack", "title": "甲基軸軌道（顯著軸以顏色標示）", "on": True,
+     "hint": "每條染色體下方一條細軌，顏色 = 該位點的甲基沿哪個軸顯著"},
     {"id": "treeCandidates", "title": "樹：候選聯集（藍）", "on": True,
      "hint": "需要 candidates 能力"},
     {"id": "treeMethyl", "title": "樹：甲基投影（橘）", "on": True,
@@ -86,7 +149,7 @@ def build_boot(sample: str, reg, dims: list, layers: list = None) -> dict:
     }
 
 
-def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None) -> dict:
+def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None, mlhp_cap=None) -> dict:
     """L2（region + 代表樹）與 L4（ISM 逐位點統計）逐染色體分片，同一個檔。
 
     分片而非全內嵌，是因為 build_exact_ps_layered_workstation 的 H2009 單頁
@@ -98,6 +161,13 @@ def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None) -> dict:
     by_chrom = {}
     for r in regions:
         by_chrom.setdefault(r["c"], []).append(r)
+
+    mlhp = (mlhp_cap.payload or {}).get("by_region", {}) if (mlhp_cap and mlhp_cap.usable) else {}
+    if mlhp:
+        for r in regions:
+            m = mlhp.get(r["id"])
+            if m:
+                r["pat"] = m          # read pattern 分布，read state matrix 用
 
     ism_rows = (ism_cap.payload or {}).get("rows", {}) if (ism_cap and ism_cap.usable) else {}
     ism_by_chrom = {}

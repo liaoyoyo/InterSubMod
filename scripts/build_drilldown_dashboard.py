@@ -26,6 +26,7 @@ sys.path.insert(0, str(HERE / "drilldown" / "emit"))
 import capability as cap_mod                                   # noqa: E402
 import topology as src_topology                                # noqa: E402
 import ism as src_ism                                          # noqa: E402
+import mlhp as src_mlhp                                        # noqa: E402
 import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
 import selfcheck as mod_selfcheck                              # noqa: E402
@@ -45,6 +46,8 @@ def build_registry(args) -> Registry:
     topo = src_topology.load(reg, args.topology, args.topology_receipt)
     if topo.usable:
         l1 = topo.payload["l1"]
+        rids = {r["id"] for r in topo.payload["regions"]}
+        src_mlhp.load(reg, args.mlhp, rids)
         src_ism.load(reg, args.ism_root, l1, l1["chroms"])
     return reg
 
@@ -72,6 +75,7 @@ def main() -> int:
     ap.add_argument("--sample", required=True)
     ap.add_argument("--topology", help="topology.jsonl（硬核心；預設由 --sample 推導）")
     ap.add_argument("--topology-receipt")
+    ap.add_argument("--mlhp", help="MLHP json（read pattern；預設由 --sample 推導）")
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
     ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
                     help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
@@ -84,6 +88,8 @@ def main() -> int:
         args.topology = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.topology.jsonl"
     if not args.topology_receipt:
         args.topology_receipt = args.topology.replace(".jsonl", ".receipt.json")
+    if not args.mlhp:
+        args.mlhp = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.exact_ps_mlhp.json"
     if not args.probe_only and not args.out:
         ap.error("需要 --out（或加 --probe-only）")
 
@@ -104,16 +110,18 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     topo = reg.get("topology")
 
-    dims = emit_payload.build_dims(topo)
-    boot = emit_payload.build_boot(args.sample, reg, dims)
     ismc = reg.get("ism_dirs")
+    emit_payload.fill_axis_codes(topo.payload["l1"], ismc)
+    dims = emit_payload.build_dims(topo, emit_payload.axis_dim(ismc))
+    boot = emit_payload.build_boot(args.sample, reg, dims)
     boot["ism"] = ({
         "axes": ismc.payload["axes"],
         "missingAxes": ismc.payload["missing_axes"],
         "windowBp": ismc.payload["window_bp"],
         "hitDir": sorted(ismc.payload["hit_dir"]),
     } if (ismc and ismc.usable and ismc.payload) else None)
-    shards = emit_payload.write_shards(out, topo, topo.payload["l1"]["chroms"], reg.get("ism_dirs"))
+    shards = emit_payload.write_shards(out, topo, topo.payload["l1"]["chroms"],
+                                       reg.get("ism_dirs"), reg.get("mlhp"))
 
     meta = {
         "regions": len(topo.payload["regions"]),

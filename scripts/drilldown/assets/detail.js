@@ -59,6 +59,62 @@
             "<b>不是 VAF、不是 CCF</b>。</div>";
     }
 
+    /* Read state matrix：A=看到 ALT、R=看到 REF、X=該位點未被此 read 覆蓋。
+       full = 跨完整個 block 的 read；partial = 只覆蓋一部分（就是 X 的來源）。 */
+    function readStateMatrix(row) {
+        var pat = row.pat;
+        if (!pat) {
+            return "<div class='capability-off'><b>不可用。</b>" +
+                "缺 MLHP 層（<code>populations_by_hp</code> / <code>subread_groups_by_hp</code>），" +
+                "無法得知哪些 read 觀察到哪個 pattern。</div>";
+        }
+        var entries = [];
+        Object.keys(pat.full || {}).forEach(function (hp) {
+            Object.keys(pat.full[hp]).forEach(function (p) {
+                entries.push({ src: "完整覆蓋", hp: hp, pattern: p, n: pat.full[hp][p] });
+            });
+        });
+        Object.keys(pat.part || {}).forEach(function (hp) {
+            Object.keys(pat.part[hp]).forEach(function (p) {
+                entries.push({ src: "部分覆蓋", hp: hp, pattern: p, n: pat.part[hp][p] });
+            });
+        });
+        if (!entries.length) {
+            return "<div class='capability-off'>此 region 沒有通過門檻的 pattern。</div>";
+        }
+        entries.sort(function (a, b) { return b.n - a.n; });
+        var pos = (row.ap || []).slice().sort(function (a, b) { return a - b; });
+        var head = pos.map(function (p, i) {
+            return "<th title='" + DD.fmt(p) + "'>S" + (i + 1) + "</th>";
+        }).join("");
+        var body = entries.map(function (e) {
+            var cells = String(e.pattern).split("").map(function (ch) {
+                return "<td class='state-cell " + DD.esc(ch) + "'>" + DD.esc(ch) + "</td>";
+            }).join("");
+            return "<tr><td>" + DD.esc(e.src) + "</td><td>HP" + DD.esc(e.hp) + "</td>" +
+                cells + "<td class='num'>" + DD.fmt(e.n) + "</td></tr>";
+        }).join("");
+        var tot = entries.reduce(function (a, e) { return a + e.n; }, 0);
+        return "<div class='table-wrap'><table class='state-matrix'>" +
+            "<thead><tr><th>來源</th><th>HP</th>" + head + "<th>reads</th></tr></thead>" +
+            "<tbody>" + body + "</tbody></table></div>" +
+            "<div class='denom' style='margin-top:.35rem'>" +
+            "<b class='state-cell A' style='padding:0 .25rem'>A</b> 看到 ALT　" +
+            "<b class='state-cell R' style='padding:0 .25rem'>R</b> 看到 REF　" +
+            "<b class='state-cell X' style='padding:0 .25rem'>X</b> 此 read 未覆蓋該位點<br>" +
+            "共 " + DD.fmt(tot) + " 條 read×pattern；完整覆蓋 " + DD.fmt(pat.nFull || 0) + " 條。" +
+            "<b>X 是覆蓋不足，不是資料品質差</b> —— ONT read 沒跨完整個 block 就會有 X。</div>";
+    }
+
+    function methylGraphBlock(chrom, pos) {
+        var rec = (DD.L4 && DD.L4[chrom]) ? DD.L4[chrom][String(pos)] : null;
+        if (!rec) {
+            return "<div class='capability-off'>此位點沒有 ISM 資料，無法畫群關係圖。</div>";
+        }
+        return DD.methylGraph ? DD.methylGraph(rec) :
+            "<div class='capability-off'>甲基群圖模組未載入。</div>";
+    }
+
     function statusRow(row) {
         var cells = [
             ["unit_status", row.us], ["family_status", row.fs],
@@ -163,14 +219,21 @@
                     "<details open><summary>演化分支（代表樹）</summary><div class='details-body'>" +
                     treeHeader(row) + DD.drawTree(row, { edgeMode: "repOnly" }) +
                     "</div></details>" +
-                    "<details open><summary>逐位點 ALT / REF</summary><div class='details-body'>" +
-                    afTable(row, pos) + "</div></details>" +
+                    "<details open><summary>Locus 排列 — 位點間距與各自的 ALT 比例</summary>" +
+                    "<div class='details-body'>" +
+                    (DD.locusStrip ? DD.locusStrip(row, pos) : "") +
+                    "<details><summary>同一份資料的表格版</summary><div class='details-body'>" +
+                    afTable(row, pos) + "</div></details></div></details>" +
+                    "<details open><summary>Read state matrix — 哪些 read 看到哪個 R/A/X pattern</summary>" +
+                    "<div class='details-body'>" + readStateMatrix(row) + "</div></details>" +
                     "<details><summary>鄰域連結</summary><div class='details-body'>" +
                     neighbourhood(row, all) + "</div></details>" +
                     "<details open><summary>甲基分群 — 沿哪個軸？</summary><div class='details-body'>" +
                     (DD.methylPanel ? DD.methylPanel(chrom, pos) :
                      "<div class='capability-off'>甲基模組未載入。</div>") +
-                    "</div></details>";
+                    "</div></details>" +
+                    "<details open><summary>甲基群關係 — 哪個群內有幾群、哪兩群之間有差異</summary>" +
+                    "<div class='details-body'>" + methylGraphBlock(chrom, pos) + "</div></details>";
 
                 host.querySelectorAll("button[data-j]").forEach(function (b) {
                     b.onclick = function () { idx = +b.dataset.j; paint(); };

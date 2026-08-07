@@ -40,7 +40,16 @@ AXES = [
      "valid": "LineagePermanovaValid", "n": "LineageNGroups"},
 ]
 
-SUMMARY_KEEP = ["Chr", "Pos", "NumReads", "NumCpGs", "ClusterDispersionWarn"]
+SUMMARY_KEEP = [
+    "Chr", "Pos", "NumReads", "NumCpGs", "ClusterDispersionWarn",
+    # 甲基群關係圖需要的：節點（群內甲基群數）與邊（顯著 Δβ 配對）
+    # 群定義 = 樣本(N/T) × HP家族(HP1/HP2) × 等位(REF/ALT)，見 RegionProcessor.cpp:2806
+    # ⚠ HP3（unphased somatic）不在任何群內
+    "WithinHP1_NGroups", "WithinHP2_NGroups", "WithinHP_CleanMultigroup",
+    "WithinHP_SubclonePermanovaP", "WithinHP_SubcloneValid",
+    "ComboDbeta_NTested", "ComboDbeta_NSig", "ComboDbeta_SigPairs",
+    "HP1FamilyN", "HP2FamilyN", "LineageNReads",
+]
 
 
 def _f(v):

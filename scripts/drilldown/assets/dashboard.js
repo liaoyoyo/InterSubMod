@@ -25,6 +25,7 @@
     var chromOf = L1.chrom;
     var kOf = L1.k;
     var flagOf = L1.flags;
+    var AXIS = L1.axis || [];
     var posOf = new Int32Array(N);
     (function () {
         var prev = -1, acc = 0;
@@ -46,6 +47,9 @@
     function hasFlag(i, bit) { return (flagOf[i] >> bit) & 1; }
 
     /* ── 狀態 ───────────────────────────────────────────────────── */
+    // 與 payload.py 的 AXIS_BITS 一致：1 HP / 2 ALT / 4 lineage / 8 有測但不顯著
+    var AXIS_COLOR = { 1: "#285f8f", 2: "#a94336", 4: "#6b5592", 8: "#c9c8bd" };
+
     var state = {
         view: "genome",
         filters: {},          // dimId -> {mode:"include"|"exclude", on:Set}
@@ -68,7 +72,15 @@
         chrom: function (i) { return CHROMS[chromOf[i]]; },
         unique: function (i) { return hasFlag(i, 1) ? "all" : (hasFlag(i, 0) ? "some" : "none"); },
         multiRegion: function (i) { return hasFlag(i, 3) ? "yes" : "no"; },
-        ranked: function (i) { return hasFlag(i, 2) ? "yes" : "no"; }
+        ranked: function (i) { return hasFlag(i, 2) ? "yes" : "no"; },
+        axis: function (i) {
+            var c = AXIS[i] || 0;
+            if (c === 0) return "0";
+            if (c === 8) return "8";
+            // 多軸同時顯著要單獨成一類，否則會被算進每一個單軸而重複計數
+            var bits = (c & 1 ? 1 : 0) + (c & 2 ? 1 : 0) + (c & 4 ? 1 : 0);
+            return bits > 1 ? "multi" : String(c);
+        }
     };
     function valueOf(dimId, i) {
         var f = VALUE_FN[dimId];
@@ -276,7 +288,7 @@
                 for (var b = 0; b < nb; b++) {
                     if (!bins[b]) continue;
                     ctx.fillStyle = "rgba(102,112,105," + (0.10 + 0.5 * Math.sqrt(bins[b] / mx)).toFixed(3) + ")";
-                    ctx.fillRect(left + plotW * (b * BIN / scaleLen), y + 7, bw, 5);
+                    ctx.fillRect(left + plotW * (b * BIN / scaleLen), y + 7, bw, 4);
                 }
             }
 
@@ -288,9 +300,22 @@
                 var uniq = hasFlag(id, 1);
                 ctx.fillStyle = uniq ? "rgba(23,107,88,.72)" : "rgba(182,110,32,.72)";
                 ctx.fillRect(x - 0.9, y - 5, 1.8, 10);
-                if (state.layers.ismRing && DD.hasISM && DD.hasISM(id)) {
-                    ctx.strokeStyle = "rgba(40,95,143,.55)"; ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 6.284); ctx.stroke();
+            }
+
+            /* 甲基軸軌道：每條染色體下方一條細軌，顏色 = 該位點沿哪個軸顯著。
+               先前用「每個點加藍圈」的做法在 19,849 點下糊成一片，
+               而且回答不了「依據哪個指標分群」—— 顏色編碼兩者都解決。 */
+            if (state.layers.axisTrack && AXIS.length) {
+                for (var t = 0; t < xs.length; t++) {
+                    var code = AXIS[ids[t]] || 0;
+                    if (!code) continue;
+                    var col = AXIS_COLOR[code];
+                    if (!col) {
+                        var b = (code & 1 ? 1 : 0) + (code & 2 ? 1 : 0) + (code & 4 ? 1 : 0);
+                        col = b > 1 ? "#17231e" : AXIS_COLOR[8];
+                    }
+                    ctx.fillStyle = col;
+                    ctx.fillRect(left + plotW * (xs[t] / scaleLen) - 0.85, y + 11, 1.7, 6);
                 }
             }
 
@@ -307,7 +332,10 @@
         document.getElementById("genomeHint").textContent =
             (single ? CHROMS[state.zoomChrom] + " 單染色體模式（點左側染色體名可返回全景）"
                     : "全基因組 · 22 條共用 chr1 的 bp 尺度") +
-            " · 綠=唯一解 / 琥珀=非唯一 · 點擊選取，同一像素有多個時會列出候選";
+            " · 上排點：綠=唯一解 / 琥珀=非唯一" +
+            (AXIS.length ? " · 下排細軌：藍=HP 顯著 / 紅=ALT 顯著 / 紫=lineage 顯著 / " +
+             "黑=多軸 / 淺灰=有測但不顯著（不畫=無 ISM 資料）" : "") +
+            " · 點擊選取，同一像素有多個時會列出候選";
     }
 
     /* 二分搜尋 + 雙向擴張，收集全部命中而非只取最近 */
@@ -508,7 +536,18 @@
     readHash();
     renderLayers();
     refresh();
-    if (state.cur >= 0) select(state.cur);
+    // 初始選取必須延到所有模組載完 —— renderDetail 定義在 detail.js，
+    // 那支在本檔之後才載入。setTimeout(0) 也不夠：瀏覽器允許在 <script> 標籤
+    // 之間讓出，計時器可能早於 detail.js 執行就觸發（深連結因此靜默失效過）。
+    // DOMContentLoaded 保證所有 inline script 都跑完了。
+    if (state.cur >= 0) {
+        var bootSelect = function () { select(state.cur); };
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootSelect);
+        } else {
+            setTimeout(bootSelect, 0);
+        }
+    }
 
     cv.addEventListener("click", onCanvasClick);
     document.getElementById("vlist").addEventListener("scroll", renderList);

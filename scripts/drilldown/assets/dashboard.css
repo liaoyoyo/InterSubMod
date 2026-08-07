@@ -163,7 +163,7 @@ a { color: var(--accent2); }
 
 /* ── 全基因組畫布 ────────────────────────────────────────────── */
 .genome-wrap { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
-#genomeCanvas { display: block; width: 100%; height: 620px; cursor: crosshair; }
+#genomeCanvas { display: block; width: 100%; height: 700px; cursor: crosshair; }
 .genome-hint { font-size: .74rem; color: var(--muted); padding: .3rem .6rem; border-top: 1px solid var(--soft); font-family: var(--mono); }
 
 /* 消歧 popover：一個像素可能疊了好幾個 sSNV，列出全部讓使用者自己選，
@@ -210,3 +210,40 @@ code, .mono { font-family: var(--mono); font-size: .82em; }
     .vlist { height: 380px; }
     .detail { min-height: 0; }
 }
+
+/* ── Locus 排列圖（回應「三個突變位點看不出 ALT 量與比例」）──────── */
+.locus-axis { border: 1px solid var(--soft); border-radius: 8px; padding: .3rem; background: var(--panel); }
+.locus-strip { display: flex; gap: .45rem; overflow-x: auto; padding: .5rem 0; }
+.locus-card {
+    flex: 0 0 auto; min-width: 132px; border: 1px solid var(--line); border-radius: 8px;
+    padding: .4rem .5rem; background: var(--panel);
+}
+.locus-card.focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(23,107,88,.14); }
+.locus-card .site { display: flex; gap: .3rem; align-items: baseline; font-size: .78rem; }
+.locus-card .site span { font-size: .64rem; color: var(--accent); }
+.locus-card .position { font-family: var(--mono); font-size: .82rem; font-weight: 600; }
+.locus-card .af { font-family: var(--mono); font-size: 1.06rem; font-weight: 800; }
+.locus-card .reads { font-size: .68rem; color: var(--muted); font-family: var(--mono); }
+.locus-card .af-track { height: 6px; background: var(--soft); border-radius: 3px; margin-top: .25rem; overflow: hidden; }
+.locus-card .af-track > span { display: block; height: 100%; background: var(--accent2); }
+
+/* ── Read state matrix（A/R/X）──────────────────────────────────── */
+.state-matrix { border-collapse: collapse; font-family: var(--mono); font-size: .78rem; }
+.state-matrix th { padding: .22rem .4rem; border-bottom: 1px solid var(--line); font-size: .68rem;
+    color: var(--muted); position: sticky; top: 0; background: var(--panel); }
+.state-matrix td { padding: .18rem .4rem; border-bottom: 1px solid var(--soft); text-align: center; }
+.state-matrix td:first-child { text-align: left; color: var(--muted); font-size: .7rem; }
+.state-cell { font-weight: 700; }
+.state-cell.A { background: #e4efe9; color: #14503f; }
+.state-cell.R { background: #f1f0e8; color: #667069; }
+.state-cell.X { background: #f6ecd9; color: #7d4a12; }
+
+/* ── 選單標籤加強（回應「選單的標籤不夠明顯」）─────────────────── */
+details > summary {
+    font-size: .92rem; font-weight: 700; letter-spacing: .01em;
+    background: linear-gradient(to right, rgba(23,107,88,.055), transparent);
+    border-radius: 8px 8px 0 0;
+}
+details[open] > summary { border-bottom: 1px solid var(--soft); }
+.section > header h2 { line-height: 1.25; }
+.dim h3, .layer { font-weight: 600; }
