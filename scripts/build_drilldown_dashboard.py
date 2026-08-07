@@ -29,6 +29,8 @@ import topology as src_topology                                # noqa: E402
 import ism as src_ism                                          # noqa: E402
 import mlhp as src_mlhp                                        # noqa: E402
 import annotation as src_annot                                 # noqa: E402
+import lca_ab as src_lca_ab                                    # noqa: E402
+import strict_edges as src_edges                               # noqa: E402
 import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
 import selfcheck as mod_selfcheck                              # noqa: E402
@@ -69,6 +71,8 @@ def build_registry(args) -> Registry:
         src_mlhp.load(reg, args.mlhp, rids)
         src_ism.load(reg, args.ism_root, l1, l1["chroms"])
         src_annot.load(reg, args.annot_dir, l1)
+        src_lca_ab.load(reg, args.lca_pre, args.lca_post)
+        src_edges.load(reg, args.chrom_root, topo.payload["regions"], reg.get("mlhp"))
     return reg
 
 
@@ -99,6 +103,12 @@ def main() -> int:
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
     ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
                     help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
+    ap.add_argument("--chrom-root",
+                    help="partition 的 chromosomes/ 目錄（strict endpoint edges；預設由 --sample 推導）")
+    ap.add_argument("--lca-pre", default="/bip7_disk/liaoyoyo2001/lineage_out/HCC1395_v1/bam_pre_lca_receipts",
+                    help="pre-LCA receipt 目錄（量化 LCA 增益）")
+    ap.add_argument("--lca-post", default="/bip7_disk/liaoyoyo2001/lineage_out/HCC1395_v1/bam",
+                    help="post-LCA receipt 目錄")
     ap.add_argument("--annot-dir",
                     help="註釋 drop-in 資料夾：把 .bed / .tsv 丟進去就會自動變成篩選維度，"
                          "不用改程式。預設 <out>/annotations/")
@@ -117,6 +127,8 @@ def main() -> int:
         args.topology_receipt = args.topology.replace(".jsonl", ".receipt.json")
     if not args.mlhp:
         args.mlhp = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.exact_ps_mlhp.json"
+    if not args.chrom_root:
+        args.chrom_root = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/chromosomes"
     if not args.probe_only and not args.out:
         ap.error("需要 --out（或加 --probe-only）")
     if not args.annot_dir and args.out:

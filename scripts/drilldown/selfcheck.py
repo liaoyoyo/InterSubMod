@@ -168,22 +168,30 @@ def run(reg) -> dict:
             "C11", "pre-LCA 與 post-LCA receipt 是乾淨的 A/B", SKIP,
             "缺 bam_pre_lca_receipts/，無法量化 LCA 到底買到什麼", need="lca_ab"))
 
-    # ── C12 block 的 sSNV 共現圖是否連通 ──────────────────────────
-    ml = reg.get("mlhp")
-    if ml and ml.usable and ml.payload:
-        br = ml.counts.get("broken_cooccurrence", 0)
-        tot_b = len(ml.payload["by_region"])
+    # ── C12 block 的 sSNV 由通過門檻的連鎖邊連通 ──────────────────
+    #
+    # 🔴 這一條曾經用錯資料源：拿 MLHP 的 subread_groups_by_hp（投影後的
+    #    pattern 表）算連通性，得到「16.16% 的 block 斷裂」的錯誤結論。
+    #    那張表是 O/D/S/L/X→X marginalization 之後的，跨位點的 read 若在
+    #    其他位點是 O/D/S/L 就整條變 X，表上看不到那條連鎖。
+    #    權威資料源是 strict_regions/*.endpoint_edges.tsv.gz，
+    #    用它重算是 0 / 11,590 —— 全部連通，設計本來就是對的。
+    se = reg.get("strict_edges")
+    if se and se.usable and se.payload:
+        d = se.payload
         checks.append(_chk(
-            "C12", "每個 block 的 sSNV 都被 read 串成一塊（共現圖連通）",
-            PASS if br == 0 else FAIL,
-            f"斷裂的 block {br:,} / {tot_b:,}（{br / max(tot_b, 1) * 100:.2f}%）"
-            "　→ 那些 block 內有 sSNV 之間沒有任何 read 同時覆蓋，"
-            "solver 仍建出樹，但跨分量的邊<b>零 read 支持</b>，"
-            "不可當作連鎖證據"))
+            "C12", "每個 block 的 sSNV 都由通過門檻的連鎖邊連通",
+            PASS if d["broken"] == 0 else FAIL,
+            f"斷裂 {d['broken']:,} / {d['checked']:,} 個 k≥2 的 block"
+            + (f"；例：{'、'.join(d['broken_ids'][:3])}" if d["broken_ids"] else "")
+            + f"　（資料源 endpoint_edges：{d['n_pass']:,}/{d['n_edge']:,} 條邊通過主門檻）"
+            + f"　另：只看 active 子集時 {d.get('broken_active', 0):,} 個會斷 —— "
+            f"那是橋接者為非 active 位點，非資料問題"))
     else:
         checks.append(_chk(
-            "C12", "每個 block 的 sSNV 都被 read 串成一塊（共現圖連通）", SKIP,
-            "缺 MLHP 能力，無法檢查共現連通性", need="mlhp"))
+            "C12", "每個 block 的 sSNV 都由通過門檻的連鎖邊連通", SKIP,
+            "缺 strict_edges 能力。⚠ 不可改用 MLHP 的 pattern 表代替 —— "
+            "那是投影後的視圖，會誤判成斷裂", need="strict_edges"))
 
     n_pass = sum(1 for c in checks if c["status"] == PASS)
     n_fail = sum(1 for c in checks if c["status"] == FAIL)

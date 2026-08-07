@@ -256,21 +256,11 @@
                       }).join("") + "</div></div>"
                     : "";
 
-                var brk = (row.pat && row.pat.nComp > 1)
-                    ? "<div class='callout stop'><b>⚠ 這個 block 的 sSNV 沒有被 read 串成一塊。</b>" +
-                      "共現圖斷裂成 <b>" + row.pat.nComp + " 個分量</b>" +
-                      (row.pat.comps
-                       ? "（" + row.pat.comps.map(function (c) {
-                             return "{" + c.map(function (i) { return "S" + (i + 1); }).join(",") + "}";
-                         }).join(" ／ ") + "）"
-                       : "") +
-                      "：分量之間<b>沒有任何 read 同時覆蓋</b>。" +
-                      "下方那棵樹仍會畫出來，但<b>跨分量的邊是零 read 支持的推論</b>，" +
-                      "不可當作連鎖證據。" +
-                      (row.pat.nFull === 0 ? "本 block 完整覆蓋 read 數為 0。" : "") +
-                      "<div class='denom' style='margin-top:.3rem'>" +
-                      "全樣本有 16.16% 的 block 屬於此類（見自檢 C12）。</div></div>"
-                    : "";
+                /* 先前這裡有一個「共現圖斷裂」紅框，是錯的 ——
+                   它用投影後的 pattern 表判斷連通性，而跨位點的 read 在投影時
+                   會被 marginalize 成 X。用權威的 endpoint_edges 重算，
+                   11,590 個 block 全部連通（見自檢 C12）。已移除該警示。 */
+                var brk = "";
 
                 host.innerHTML =
                     "<div style='display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap'>" +
