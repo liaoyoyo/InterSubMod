@@ -86,8 +86,11 @@ def build_boot(sample: str, reg, dims: list, layers: list = None) -> dict:
     }
 
 
-def write_shards(out_dir: Path, topo_cap, chroms: list) -> dict:
-    """L2 逐染色體分片。單片最大約 0.4 MB，遠低於單頁全內嵌的 35 MB。"""
+def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None) -> dict:
+    """L2（region + 代表樹）與 L4（ISM 逐位點統計）逐染色體分片，同一個檔。
+
+    分片而非全內嵌，是因為 build_exact_ps_layered_workstation 的 H2009 單頁
+    188 MB 已證明全內嵌撐不住 genome-scale。"""
     data_dir = out_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     regions = topo_cap.payload["regions"]
@@ -96,13 +99,21 @@ def write_shards(out_dir: Path, topo_cap, chroms: list) -> dict:
     for r in regions:
         by_chrom.setdefault(r["c"], []).append(r)
 
+    ism_rows = (ism_cap.payload or {}).get("rows", {}) if (ism_cap and ism_cap.usable) else {}
+    ism_by_chrom = {}
+    for (c, pos), rec in ism_rows.items():
+        ism_by_chrom.setdefault(c, {})[str(pos)] = rec
+
     manifest = {}
     for c in chroms:
         rows = by_chrom.get(c, [])
+        l4 = ism_by_chrom.get(c, {})
         path = data_dir / f"L2.{c}.js"
-        body = "window.__DD=window.__DD||{};window.__DD.L2=window.__DD.L2||{};"
+        body = "window.__DD=window.__DD||{};"
+        body += "window.__DD.L2=window.__DD.L2||{};window.__DD.L4=window.__DD.L4||{};"
         body += f"window.__DD.L2[{json.dumps(c)}]={json_for_html(rows)};"
+        body += f"window.__DD.L4[{json.dumps(c)}]={json_for_html(l4)};"
         path.write_text(body, encoding="utf-8")
         manifest[c] = {"file": f"data/L2.{c}.js", "regions": len(rows),
-                       "bytes": path.stat().st_size}
+                       "ism_loci": len(l4), "bytes": path.stat().st_size}
     return manifest

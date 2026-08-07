@@ -47,7 +47,7 @@ def _cap_rows(caps: list) -> str:
     return "".join(out)
 
 
-def render(boot: dict, caps: list, meta: dict) -> str:
+def render(boot: dict, caps: list, meta: dict, analysis: dict = None) -> str:
     body = f"""<!DOCTYPE html>
 <html lang="zh-Hant"><head>
 <meta charset="utf-8">
@@ -150,9 +150,12 @@ def render(boot: dict, caps: list, meta: dict) -> str:
 </div>
 
 <script type="application/json" id="bootData">__BOOT__</script>
+<script type="application/json" id="analysisData">__ANALYSIS__</script>
 <script>{_asset('dashboard.js')}</script>
 <script>{_asset('tree.js')}</script>
+<script>{_asset('methyl.js')}</script>
 <script>{_asset('detail.js')}</script>
+<script>{_asset('analysis.js')}</script>
 <script>
 (function () {{
   var segs = document.querySelectorAll('.seg button[data-view]');
@@ -172,11 +175,12 @@ def render(boot: dict, caps: list, meta: dict) -> str:
 """
     # boot payload 最後才塞，避免 f-string 處理巨大 JSON
     from payload import json_for_html
-    return body.replace("__BOOT__", json_for_html(boot))
+    body = body.replace("__BOOT__", json_for_html(boot))
+    return body.replace("__ANALYSIS__", json_for_html(analysis or {}))
 
 
-def write(out_path: Path, boot: dict, caps: list, meta: dict) -> int:
-    html_text = render(boot, caps, meta)
+def write(out_path: Path, boot: dict, caps: list, meta: dict, analysis: dict = None) -> int:
+    html_text = render(boot, caps, meta, analysis)
     tmp = out_path.with_suffix(out_path.suffix + f".stage.{id(boot)}")
     tmp.write_text(html_text, encoding="utf-8")
     tmp.replace(out_path)

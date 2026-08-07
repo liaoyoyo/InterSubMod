@@ -167,9 +167,9 @@
                     afTable(row, pos) + "</div></details>" +
                     "<details><summary>鄰域連結</summary><div class='details-body'>" +
                     neighbourhood(row, all) + "</div></details>" +
-                    "<details><summary>甲基分群</summary><div class='details-body'>" +
-                    "<div class='capability-off'>待 P4/P5 實作 —— 將接上 ISM 的 methylation/distance/" +
-                    "clustering 產物，顯示甲基是否分群、沿 HP / ALT / cluster / lineage 哪個軸分群。</div>" +
+                    "<details open><summary>甲基分群 — 沿哪個軸？</summary><div class='details-body'>" +
+                    (DD.methylPanel ? DD.methylPanel(chrom, pos) :
+                     "<div class='capability-off'>甲基模組未載入。</div>") +
                     "</div></details>";
 
                 host.querySelectorAll("button[data-j]").forEach(function (b) {

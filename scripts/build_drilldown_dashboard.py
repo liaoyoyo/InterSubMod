@@ -25,8 +25,11 @@ sys.path.insert(0, str(HERE / "drilldown" / "emit"))
 
 import capability as cap_mod                                   # noqa: E402
 import topology as src_topology                                # noqa: E402
+import ism as src_ism                                          # noqa: E402
 import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
+import selfcheck as mod_selfcheck                              # noqa: E402
+import cooccurrence as mod_cooccur                             # noqa: E402
 from capability import EXIT_REFUSE, Refuse, Registry           # noqa: E402
 
 # 站點預設路徑。全部可用 CLI 覆寫；找不到就是對應能力 ABSENT，不是致命錯誤。
@@ -34,9 +37,15 @@ DEF_TOPOLOGY_ROOT = ("/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/researc
                      "20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/samples")
 
 
+DEF_ISM_ROOT = "/bip7_disk/liaoyoyo2001/ism_lineage_v1"
+
+
 def build_registry(args) -> Registry:
     reg = Registry()
-    src_topology.load(reg, args.topology, args.topology_receipt)
+    topo = src_topology.load(reg, args.topology, args.topology_receipt)
+    if topo.usable:
+        l1 = topo.payload["l1"]
+        src_ism.load(reg, args.ism_root, l1, l1["chroms"])
     return reg
 
 
@@ -64,6 +73,8 @@ def main() -> int:
     ap.add_argument("--topology", help="topology.jsonl（硬核心；預設由 --sample 推導）")
     ap.add_argument("--topology-receipt")
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
+    ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
+                    help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
     ap.add_argument("--probe-only", action="store_true", help="只探測並印能力矩陣，不產頁")
     ap.add_argument("--figs-mode", choices=["copy", "link", "ref"], default="copy",
                     help="copy（預設，輸出夾自足可搬走）/ link（symlink，搬移會斷）/ ref（相對路徑）")
@@ -95,26 +106,46 @@ def main() -> int:
 
     dims = emit_payload.build_dims(topo)
     boot = emit_payload.build_boot(args.sample, reg, dims)
-    shards = emit_payload.write_shards(out, topo, topo.payload["l1"]["chroms"])
+    ismc = reg.get("ism_dirs")
+    boot["ism"] = ({
+        "axes": ismc.payload["axes"],
+        "missingAxes": ismc.payload["missing_axes"],
+        "windowBp": ismc.payload["window_bp"],
+        "hitDir": sorted(ismc.payload["hit_dir"]),
+    } if (ismc and ismc.usable and ismc.payload) else None)
+    shards = emit_payload.write_shards(out, topo, topo.payload["l1"]["chroms"], reg.get("ism_dirs"))
 
     meta = {
         "regions": len(topo.payload["regions"]),
         "cap_summary": reg.summary_line(),
         "built_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
-    size = emit_shell.write(out / "index.html", boot, reg.matrix(), meta)
+    analysis = {
+        "cooccur": mod_cooccur.build(reg),
+        "sentinel": mod_cooccur.build_selection_sentinel(reg),
+        "selfcheck": mod_selfcheck.run(reg),
+    }
+    size = emit_shell.write(out / "index.html", boot, reg.matrix(), meta, analysis)
+
+    inputs = [r.as_dict() for r in reg.all_file_refs()]
+    (out / "SELFCHECK.md").write_text(
+        mod_selfcheck.to_markdown(analysis["selfcheck"], args.sample, inputs), encoding="utf-8")
 
     receipt = {
         "sample": args.sample,
         "built_at": meta["built_at"],
         "capabilities": reg.matrix(),
-        "inputs": [r.as_dict() for r in reg.all_file_refs()],
+        "selfcheck": analysis["selfcheck"]["summary"],
+        "inputs": inputs,
         "figs_mode": args.figs_mode,
         "shards": shards,
         "index_bytes": size,
     }
     (out / "receipt.json").write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    sc = analysis["selfcheck"]["summary"]
+    print(f"\n自檢  {sc['pass']} 通過 / {sc['fail']} 不成立 / {sc['skip']} 無法檢查（共 {sc['total']}）")
 
     shard_total = sum(v["bytes"] for v in shards.values())
     shard_max = max(shards.items(), key=lambda kv: kv[1]["bytes"]) if shards else ("-", {"bytes": 0})
