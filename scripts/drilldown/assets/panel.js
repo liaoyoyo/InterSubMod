@@ -113,8 +113,16 @@
               " 條排在最下方、無樹枝、cluster 軌塗灰</b> —— 它們不是被丟掉，是分群階段沒收進去"
             : "";
 
+        var scope = info.tumorOnly === true
+            ? "<b style='color:var(--danger)'>目前顯示：只看 tumor read（" +
+              DD.fmt(info.reads) + " / " + DD.fmt(info.readsAll || info.reads) +
+              " 條）</b> —— 排除了 normal read，germline ASM 的對照基線不在圖上。<br>"
+            : (info.readsAll || info.tumorOnly)
+                ? "<b>目前顯示：全部 read（含 normal）</b> —— " +
+                  "normal 是 germline ASM 的對照基線；若只關心腫瘤可切到「只看 tumor」。<br>"
+                : "";
         return "<div class='panel-legend'>" + keys + dend + scales + "</div>" +
-            "<div class='denom' style='line-height:1.7'>" +
+            "<div class='denom' style='line-height:1.7'>" + scope +
             "<b>read 依 UPGMA 葉序排列</b>（leaf_order.txt），不是依 HP —— " +
             "依 HP 排看不出甲基自己怎麼分。<br>" +
             (lin ? lin + "<br>" : "") + (clu ? clu + "<br>" : "") +
@@ -136,9 +144,22 @@
             /* 保持原始長寬比。先前 width:100% 把 180×296 的圖橫向拉滿容器，
                長寬比全毀 —— 甲基矩陣的「一格 = 一個 read×CpG」語意也跟著失真。
                改成預設 fit（等比縮到容器內）+ 可切換放大倍率 + 拖移。 */
-            var ar = (info.w / info.h).toFixed(4);
+            var variants = { all: info };
+            if (info.tumorOnly) variants.T = info.tumorOnly;
+            var curKey = "all";
+
+            function paint() {
+            var cur = variants[curKey];
+            var ar = (cur.w / cur.h).toFixed(4);
+            var info = cur;                       // 以下沿用既有變數名
             host.innerHTML =
                 "<div class='panel-tools'>" +
+                (variants.T
+                 ? "<button type='button' data-v='all' aria-pressed='" + (curKey === "all") +
+                   "'>全部 read</button>" +
+                   "<button type='button' data-v='T' aria-pressed='" + (curKey === "T") +
+                   "'>只看 tumor</button><span class='denom'>│</span>"
+                 : "") +
                 "<span class='denom'>" + info.w + " × " + info.h + " px（1 px = 1 格）</span>" +
                 "<button type='button' data-z='fit' aria-pressed='true'>符合寬度</button>" +
                 "<button type='button' data-z='1' aria-pressed='false'>1×</button>" +
@@ -151,6 +172,10 @@
                 "<img src='" + DD.esc(info.file) + "' alt='甲基與距離雙面板' " +
                 "width='" + info.w + "' height='" + info.h + "'>" +
                 overlay(info) + "</div></div>" + legend(info);
+
+            host.querySelectorAll("button[data-v]").forEach(function (b) {
+                b.onclick = function () { curKey = b.dataset.v; paint(); };
+            });
 
             var scroll = host.querySelector(".panel-scroll");
             var fig = host.querySelector(".panel-fig");
@@ -185,6 +210,8 @@
             window.addEventListener("mouseup", function () {
                 drag = null; scroll.style.cursor = "";
             });
+            }
+            paint();
         });
     };
 })();

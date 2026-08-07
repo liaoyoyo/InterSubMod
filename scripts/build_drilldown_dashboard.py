@@ -161,6 +161,13 @@ def main() -> int:
     boot_annot = {d["id"]: d["values"] for d in annot_dims}
     boot = emit_payload.build_boot(args.sample, reg, dims)
     boot["annotValues"] = boot_annot
+    sec = reg.get("strict_edges")
+    boot["edges"] = ({
+        "thresholds": sec.payload["thresholds"],
+        "nEdge": sec.payload["n_edge"], "nPass": sec.payload["n_pass"],
+        "brokenActive": sec.payload.get("broken_active", 0),
+        "checked": sec.payload["checked"],
+    } if (sec and sec.usable and sec.payload) else None)
     try:
         import composite as _comp
         boot["palette"] = _comp.palette_export()

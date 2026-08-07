@@ -222,7 +222,8 @@ def sidebars(ids, reads, lineage_of, clusters):
     return bars
 
 
-def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1):
+def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1,
+          tumor_only: bool = False):
     """合成一張雙面板 PNG。回傳 dict（含尺寸、read/CpG 數、lineage join 率），
     資料不足回 None。"""
     meth = locus_dir / "methylation" / "methylation.csv"
@@ -233,6 +234,20 @@ def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1):
         return None
 
     reads = read_reads_tsv(locus_dir / "reads" / "reads.tsv")
+
+    # tumor-only：本研究的對象是腫瘤，但矩陣裡實測有 41.9% 是 normal read。
+    # 不靜默排除也不靜默包含 —— 產兩個版本讓使用者切換，並在圖說標明看的是哪個。
+    n_all = len(ids)
+    if tumor_only:
+        # ⚠ H.tn_of 回傳字串 '1'/'0'，不是 boolean —— bool('0') 是 True，
+        #   直接當條件用會一條都篩不掉（實測 81/81 全留）。必須比對 == "1"。
+        keep = [i for i in ids
+                if H.tn_of(reads.get(i, {}).get("is_tumor", "")) == "1"]
+        if len(keep) < 3:
+            return None
+        keepset = set(keep)
+        rows = [rows[i] for i, rid in enumerate(ids) if rid in keepset]
+        ids = [rid for rid in ids if rid in keepset]
 
     # 距離矩陣（metric 目錄名不固定，取第一個）
     dist_ids, dist = [], {}
@@ -350,6 +365,7 @@ def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1):
         "bars": [b[0] for b in bars],
         "barW": SB, "gap": GAP, "dendW": DW, "hasDendro": bool(dsegs),
         "lineageHit": lin_hit, "lineageTotal": nrow,
+        "tumorOnly": tumor_only, "readsAll": n_all,
         "clusterK": (len({c for c in clusters if c >= 0}) if clusters else None),
         "optimalK": k,
         "clustered": n_clustered, "notClustered": nrow - n_clustered,

@@ -178,3 +178,58 @@
     renderCooccur();
     renderSelfcheck();
 })();
+
+/* 門檻 what-if：min_read 改成 T 會多／少多少連鎖邊。
+   資料來自 endpoint_edges 的 thresholds_passed 欄，**不必重跑管線**。 */
+(function () {
+    "use strict";
+    var DD = window.__DD;
+    if (!DD) return;
+    var boot = JSON.parse(document.getElementById("bootData").textContent);
+    var E = boot.edges;
+    var host = document.getElementById("view-cooccur");
+    if (!host) return;
+
+    var block;
+    if (!E) {
+        block = "<div class='capability-off'><b>門檻 what-if 不可用。</b>" +
+            "缺 strict_edges 能力（<code>strict_regions/*.endpoint_edges.tsv.gz</code>）。</div>";
+    } else {
+        var ts = Object.keys(E.thresholds).map(Number).sort(function (a, b) { return a - b; });
+        var base = E.thresholds[3] || E.nPass || 1;
+        var mx = Math.max.apply(null, ts.map(function (t) { return E.thresholds[t]; }));
+        block = "<div class='section' style='box-shadow:none;margin-bottom:.9rem'>" +
+            "<header><div><h3>連鎖門檻 what-if — min_read 改成 T 會怎樣</h3>" +
+            "<div class='denom'>分母 = " + DD.fmt(E.nEdge) + " 條 endpoint edge</div></div>" +
+            "<span class='src src-topology'>◆ endpoint_edges</span></header>" +
+            "<div class='table-wrap'><table class='data'><thead><tr>" +
+            "<th>門檻</th><th class='num'>通過的邊</th><th>分布</th>" +
+            "<th class='num'>占全部</th><th class='num'>相對現行 T=3</th></tr></thead><tbody>" +
+            ts.map(function (t) {
+                var n = E.thresholds[t];
+                var cur = (t === 3);
+                return "<tr" + (cur ? " style='background:#e4efe9'" : "") + ">" +
+                    "<td class='num'>T ≥ " + t + (cur ? " <b>（現行）</b>" : "") + "</td>" +
+                    "<td class='num'>" + DD.fmt(n) + "</td>" +
+                    "<td><span style='display:block;height:9px;background:var(--soft)'>" +
+                    "<span style='display:block;height:100%;width:" +
+                    (n / mx * 100).toFixed(1) + "%;background:" +
+                    (cur ? "var(--accent)" : "var(--accent2)") + "'></span></span></td>" +
+                    "<td class='num'>" + (n / E.nEdge * 100).toFixed(1) + "%</td>" +
+                    "<td class='num'>" + (n / base).toFixed(2) + "×</td></tr>";
+            }).join("") + "</tbody></table></div>" +
+            "<div class='callout warn'><b>降門檻買到的是什麼。</b>" +
+            "T=3→T=2 多 " + DD.fmt((E.thresholds[2] || 0) - base) + " 條邊（+" +
+            (((E.thresholds[2] || 0) / base - 1) * 100).toFixed(0) + "%）；" +
+            "T=3→T=1 多 " + DD.fmt((E.thresholds[1] || 0) - base) + " 條（+" +
+            (((E.thresholds[1] || 0) / base - 1) * 100).toFixed(0) + "%）。" +
+            "但 <b>T=1 多出來的主要是單一 read 支持的邊，與定序錯誤／錯誤比對無法區分</b>；" +
+            "T=2 至少要求兩條獨立 read 同時定住兩端。</div>" +
+            "<div class='denom'>⚠ 這是<b>邊層級</b>的 what-if。改門檻會重新切 component、" +
+            "改變 block 邊界與 k，因此<b>不能直接外推成「拓撲會多解出多少」</b> —— " +
+            "那需要重跑 build_strict_ps_hp_regions.py + exact_ps_k12_partition.py。" +
+            "另：目前有 " + DD.fmt(E.brokenActive) + " / " + DD.fmt(E.checked) +
+            " 個 block 的 active 子集不連通（橋接者是非 active 位點），非資料問題。</div></div>";
+    }
+    host.insertAdjacentHTML("beforeend", block);
+})();

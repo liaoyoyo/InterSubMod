@@ -55,6 +55,7 @@ def _one(args):
     if ld is None:
         return chrom, pos, None, "no-dir"
     png = Path(out_dir) / "panels" / chrom / f"{chrom}_{pos}.png"
+    tpng = Path(out_dir) / "panels" / chrom / f"{chrom}_{pos}.T.png"
     try:
         info = composite.build(ld, png, lineage_map=lineage_map, cell_h=cell_h)
     except Exception as exc:                          # noqa: BLE001
@@ -62,6 +63,15 @@ def _one(args):
     if not info:
         return chrom, pos, None, "insufficient"
     info["file"] = f"panels/{chrom}/{chrom}_{pos}.png"
+    # tumor-only 版本。失敗（例如 T read 不足 3 條）不影響主版本，只是沒有切換。
+    try:
+        tinfo = composite.build(ld, tpng, lineage_map=lineage_map, cell_h=cell_h,
+                                tumor_only=True)
+        if tinfo:
+            tinfo["file"] = f"panels/{chrom}/{chrom}_{pos}.T.png"
+            info["tumorOnly"] = tinfo
+    except Exception:                                  # noqa: BLE001
+        pass
     return chrom, pos, info, None
 
 
