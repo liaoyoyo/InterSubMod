@@ -149,7 +149,8 @@ def build_boot(sample: str, reg, dims: list, layers: list = None) -> dict:
     }
 
 
-def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None, mlhp_cap=None) -> dict:
+def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None, mlhp_cap=None,
+                 igv_fn=None) -> dict:
     """L2（region + 代表樹）與 L4（ISM 逐位點統計）逐染色體分片，同一個檔。
 
     分片而非全內嵌，是因為 build_exact_ps_layered_workstation 的 H2009 單頁
@@ -178,6 +179,14 @@ def write_shards(out_dir: Path, topo_cap, chroms: list, ism_cap=None, mlhp_cap=N
     for c in chroms:
         rows = by_chrom.get(c, [])
         l4 = ism_by_chrom.get(c, {})
+        # IGV 圖**不進分片** —— 每張 SVG 約 73 KB，5,410 張全內嵌會讓
+        # 分片爆到 1.4 GB（chr7 單片 138 MB），正是要避免的 H2009 失敗模式。
+        # 改成逐 region 獨立 .js，點到該 region 才載入；分片只留一個布林旗標。
+        if igv_fn:
+            for r in rows:
+                v = igv_fn(c, r)
+                if v:
+                    r["igvOk"] = 1
         path = data_dir / f"L2.{c}.js"
         body = "window.__DD=window.__DD||{};"
         body += "window.__DD.L2=window.__DD.L2||{};window.__DD.L4=window.__DD.L4||{};"

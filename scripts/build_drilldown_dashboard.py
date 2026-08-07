@@ -181,8 +181,34 @@ def main() -> int:
         "hitDir": sorted(ismc.payload["hit_dir"]),
     } if (ismc and ismc.usable and ismc.payload) else None)
     chroms = topo.payload["l1"]["chroms"]
+
+    # IGV 式 read 對齊圖（平行產；逐 region 讀多個 ISM 窗，單執行緒太慢）
+    igv_map = {}
+    if ismc and ismc.usable:
+        import igv as mod_igv
+        igv_map = mod_igv.build_many(ismc.payload["root"], topo.payload["regions"])
+
+    def igv_fn(chrom, row):
+        return igv_map.get(row["id"])
+
     shards = emit_payload.write_shards(out, topo, chroms,
-                                       reg.get("ism_dirs"), reg.get("mlhp"))
+                                       reg.get("ism_dirs"), reg.get("mlhp"), igv_fn)
+
+    # IGV 逐 region 落檔（點擊才載）
+    if igv_map:
+        import json as _json
+        igv_dir = out / "igv"
+        n_b = 0
+        for rid, v in igv_map.items():
+            safe = "".join(ch if (ch.isalnum() or ch in "._-") else "_" for ch in rid)
+            f = igv_dir / safe[:120] + ".js" if False else igv_dir / (safe[:120] + ".js")
+            f.parent.mkdir(parents=True, exist_ok=True)
+            body = ("window.__DD=window.__DD||{};window.__DD.IGV=window.__DD.IGV||{};"
+                    f"window.__DD.IGV[{_json.dumps(rid)}]="
+                    f"{emit_payload.json_for_html(v)};")
+            f.write_text(body, encoding="utf-8")
+            n_b += len(body.encode())
+        print(f"IGV 圖    {len(igv_map):,} 個檔　{n_b / 2**20:.0f} MB（點擊才載入）")
 
     # 甲基雙面板：ISM 算完後產圖，HTML 以相對路徑連結
     panel_info = None

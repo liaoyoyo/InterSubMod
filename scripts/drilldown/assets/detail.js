@@ -288,8 +288,31 @@
                     "</div></details>" +
                     "<details open><summary>甲基群關係 — 哪個群內有幾群、哪兩群之間有差異</summary>" +
                     "<div class='details-body'>" + methylGraphBlock(chrom, pos) + "</div></details>" +
+                    "<details open><summary>IGV 式 read 對齊 — 每條 read 的位置、等位、lineage、甲基</summary>" +
+                    "<div class='details-body'>" +
+                    (row.igvOk
+                     ? "<div id='igvHost'><div class='denom'>載入 IGV 圖…</div></div>"
+                     : "<div class='capability-off'><b>此 region 沒有 IGV 圖。</b>" +
+                       "只對「2–8 個 sSNV、跨度 ≤50 kb、有 ISM 窗、read 數 4–600」的 region 產生。" +
+                       "k≥7 的 region 另有一個限制：solver 對它們 abstain（family_incomplete），" +
+                       "沒有 lineage 分組可畫。</div>") +
+                    "</div></details>" +
                     "<details open><summary>甲基矩陣圖 — read × CpG 與 read × read 距離</summary>" +
                     "<div class='details-body'><div id='methylFig'></div></div></details>";
+
+                if (row.igvOk) {
+                    var rid = row.id.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 120);
+                    var put = function () {
+                        var h = host.querySelector("#igvHost");
+                        var v = DD.IGV && DD.IGV[row.id];
+                        if (!h) return;
+                        h.innerHTML = v ? (v.svg + v.legend)
+                            : "<div class='capability-off'>IGV 圖載入失敗：" +
+                              "<code>igv/" + DD.esc(rid) + ".js</code></div>";
+                    };
+                    if (DD.IGV && DD.IGV[row.id]) put();
+                    else DD.loadShard("igv/" + rid + ".js", put);
+                }
 
                 if (DD.methylFigure) {
                     var fh = host.querySelector("#methylFig");
