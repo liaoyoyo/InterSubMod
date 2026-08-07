@@ -72,6 +72,21 @@ struct Config {
     int clustering_min_reads = 10;         ///< Minimum reads required for clustering
     bool output_linkage_matrix = true;     ///< Whether to output linkage matrix CSV
 
+    // ── Methylation grouping axes ────────────────────────────────────────────
+    /// Which per-read axes to test methylation differences against. Multiple axes are
+    /// evaluated in the same run so a region can report *which* axis explains its
+    /// methylation difference, rather than forcing one axis a priori.
+    ///   HP    haplotype tag (historical behaviour, always available)
+    ///   ALT   somatic ALT/REF support (historical)
+    ///   lc    lineage component (unit_id)      — needs tag_bam output
+    ///   lu    lineage block (block_id)         — needs tag_bam output
+    ///   lv    lineage hierarchical path        — needs tag_bam output
+    std::vector<std::string> group_by_tag = {"HP"};
+    /// Minimum lineage confidence to admit a read when group_by_tag is a lineage axis.
+    /// "U" = unique only, "UM" = unique or tie, "any" = accept partial/abstain too.
+    /// 88.3% of HCC1395 reads are 'P' (partial), so this choice dominates sample size.
+    std::string require_tag_status = "U";
+
     // Logging and Debug
     LogLevel log_level = LogLevel::LOG_INFO;  ///< Logging verbosity level
     std::string debug_output_dir = "";        ///< Directory for debug outputs (filtered reads, etc.)

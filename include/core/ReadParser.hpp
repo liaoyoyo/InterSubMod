@@ -120,6 +120,18 @@ private:
     ReadFilterConfig config_;
 
     /**
+     * @brief Reads PS and the lineage aux tags (lc/lu/lv/lp/lo/ls) into @p info.
+     *
+     * These tags are written by pipeline/lineage/bin/tag_bam and are optional: a BAM that
+     * never went through that step leaves every field empty (phase_set = -1,
+     * lineage_status = '\0'). Callers must therefore treat absence as normal.
+     *
+     * Enforces the spec invariant that a lineage path is only kept when its confidence
+     * status (ls) accompanies it.
+     */
+    static void extract_lineage_tags(const bam1_t* b, ReadInfo& info);
+
+    /**
      * @brief Determines if a read supports ALT, REF, or is UNKNOWN at SNV position.
      *
      * This requires:

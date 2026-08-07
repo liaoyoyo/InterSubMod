@@ -114,6 +114,19 @@ public:
 
         app.add_flag("--no-filter", config.no_filter_output,
                      "Output all reads without filtering (for verification purposes)");
+
+        // Lineage-tag grouping (requires a BAM produced by pipeline/lineage/bin/tag_bam)
+        app.add_option("--group-by-tag", config.group_by_tag,
+                       "Methylation grouping axes to test (repeatable or comma-separated): "
+                       "HP, ALT, lc, lu, lv. Each axis is tested independently so a region can "
+                       "report which axis explains its methylation difference (Default: HP)")
+            ->check(CLI::IsMember({"HP", "ALT", "lc", "lu", "lv"}))
+            ->delimiter(',');
+
+        app.add_option("--require-tag-status", config.require_tag_status,
+                       "Minimum lineage confidence when --group-by-tag is lc/lu/lv: "
+                       "U (unique only), UM (unique or tie), any (Default: U)")
+            ->check(CLI::IsMember({"U", "UM", "any"}));
         
         // Full Read Span
         app.add_flag("--full-read", config.use_full_read_span, "Enable full read span processing (dynamic window)");

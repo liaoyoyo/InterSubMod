@@ -35,6 +35,21 @@ struct ReadInfo {
     bool is_tumor;           ///< True if from Tumor BAM, False if from Normal BAM
     AltSupport alt_support;  ///< Support for somatic variant (ALT, REF, or UNKNOWN)
     Strand strand;           ///< Strand orientation (FORWARD/+ or REVERSE/-)
+
+    // ── Lineage tags (written by pipeline/lineage/bin/tag_bam) ────────────────
+    // SAM spec reserves tags containing lowercase letters for local use.
+    // Empty string means the tag was absent on the alignment.
+    int64_t phase_set;       ///< PS:i phase set; -1 when absent
+    std::string lineage_component;  ///< lc:Z unit_id of the read-linked component
+    std::string lineage_block;      ///< lu:Z block_id
+    std::string lineage_path;       ///< lv:Z hierarchical path, e.g. "HP2-1-1"
+    std::string lineage_pattern;    ///< lp:Z observed R/A/X pattern for the block
+    std::string mutation_order;     ///< lo:Z acquired positions along the path, ">"-separated
+    char lineage_status;     ///< ls:A  'U' unique | 'M' tie | 'P' partial | 'A' abstain | '\0' absent
+
+    /// True when this read carries a topologically unique lineage assignment.
+    /// Anything else must not be treated as a single-vertex conclusion.
+    bool has_unique_lineage() const { return lineage_status == 'U' && !lineage_path.empty(); }
 };
 
 /**

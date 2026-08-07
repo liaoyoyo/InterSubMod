@@ -148,7 +148,11 @@ void RegionWriter::write_reads(const std::string& region_dir, const std::vector<
     std::ofstream ofs(region_dir + "/reads.tsv");
 
     // Header - now includes strand column
-    ofs << "read_id\tread_name\tchr\tstart\tend\tmapq\thp\talt_support\tis_tumor\tstrand\n";
+    // Lineage columns are appended last so existing consumers that index by position
+    // keep working; they hold "." when the BAM did not go through tag_bam.
+    ofs << "read_id\tread_name\tchr\tstart\tend\tmapq\thp\talt_support\tis_tumor\tstrand"
+        << "\tphase_set\tlineage_component\tlineage_block\tlineage_path\tlineage_pattern"
+        << "\tmutation_order\tlineage_status\n";
 
     // Data
     for (const auto& read : reads) {
@@ -168,7 +172,15 @@ void RegionWriter::write_reads(const std::string& region_dir, const std::vector<
                 break;
         }
 
-        ofs << "\t" << (read.is_tumor ? "1" : "0") << "\t" << strand_to_string(read.strand) << "\n";
+        auto or_dot = [](const std::string& v) -> const char* { return v.empty() ? "." : v.c_str(); };
+        ofs << "\t" << (read.is_tumor ? "1" : "0") << "\t" << strand_to_string(read.strand);
+        ofs << "\t" << (read.phase_set < 0 ? "." : std::to_string(read.phase_set))
+            << "\t" << or_dot(read.lineage_component)
+            << "\t" << or_dot(read.lineage_block)
+            << "\t" << or_dot(read.lineage_path)
+            << "\t" << or_dot(read.lineage_pattern)
+            << "\t" << or_dot(read.mutation_order)
+            << "\t" << (read.lineage_status == '\0' ? '.' : read.lineage_status) << "\n";
     }
 
     ofs.close();

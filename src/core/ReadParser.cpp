@@ -161,10 +161,57 @@ ReadInfo ReadParser::parse(const bam1_t* b, int read_id, bool is_tumor, const So
         info.hp_tag = hp_raw;
     }
 
+    // Extract PS (phase set) and lineage tags written by pipeline/lineage/bin/tag_bam.
+    // These are optional: BAMs that never went through tag_bam simply leave them empty,
+    // so every downstream consumer must tolerate absence rather than assume presence.
+    extract_lineage_tags(b, info);
+
     // Determine ALT support
     info.alt_support = determine_alt_support(b, anchor_snv, ref_seq, ref_start_pos);
 
     return info;
+}
+
+void ReadParser::extract_lineage_tags(const bam1_t* b, ReadInfo& info) {
+    info.phase_set = -1;
+    info.lineage_status = '\0';
+
+    if (uint8_t* ps_aux = bam_aux_get(b, "PS"); ps_aux != nullptr) {
+        const char type = ps_aux[0];
+        if (type == 'c' || type == 'C' || type == 's' || type == 'S' || type == 'i' || type == 'I') {
+            info.phase_set = bam_aux2i(ps_aux);
+        }
+    }
+
+    // lc / lu / lv / lp / lo are all Z-type strings
+    const std::pair<const char*, std::string*> string_tags[] = {
+        {"lc", &info.lineage_component},
+        {"lu", &info.lineage_block},
+        {"lv", &info.lineage_path},
+        {"lp", &info.lineage_pattern},
+        {"lo", &info.mutation_order},
+    };
+    for (const auto& [tag, dest] : string_tags) {
+        uint8_t* aux = bam_aux_get(b, tag);
+        if (aux != nullptr && (aux[0] == 'Z' || aux[0] == 'H')) {
+            const char* v = bam_aux2Z(aux);
+            if (v != nullptr) *dest = v;
+        }
+    }
+
+    // ls is an A-type single character
+    if (uint8_t* ls_aux = bam_aux_get(b, "ls"); ls_aux != nullptr && ls_aux[0] == 'A') {
+        info.lineage_status = bam_aux2A(ls_aux);
+    }
+
+    // Invariant from HIERARCHICAL_TAG_SPEC: a lineage path is only meaningful when its
+    // confidence status travelled with it. Drop an orphaned path rather than let a
+    // downstream axis silently treat it as a confirmed assignment.
+    if (!info.lineage_path.empty() && info.lineage_status == '\0') {
+        LOG_DEBUG("read " + info.read_name + " carries lv without ls; dropping lv");
+        info.lineage_path.clear();
+        info.mutation_order.clear();
+    }
 }
 
 AltSupport ReadParser::determine_alt_support(const bam1_t* b, const SomaticSnv& snv, const std::string& ref_seq,
