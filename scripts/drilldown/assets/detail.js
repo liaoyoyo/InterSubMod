@@ -256,6 +256,22 @@
                       }).join("") + "</div></div>"
                     : "";
 
+                var brk = (row.pat && row.pat.nComp > 1)
+                    ? "<div class='callout stop'><b>⚠ 這個 block 的 sSNV 沒有被 read 串成一塊。</b>" +
+                      "共現圖斷裂成 <b>" + row.pat.nComp + " 個分量</b>" +
+                      (row.pat.comps
+                       ? "（" + row.pat.comps.map(function (c) {
+                             return "{" + c.map(function (i) { return "S" + (i + 1); }).join(",") + "}";
+                         }).join(" ／ ") + "）"
+                       : "") +
+                      "：分量之間<b>沒有任何 read 同時覆蓋</b>。" +
+                      "下方那棵樹仍會畫出來，但<b>跨分量的邊是零 read 支持的推論</b>，" +
+                      "不可當作連鎖證據。" +
+                      (row.pat.nFull === 0 ? "本 block 完整覆蓋 read 數為 0。" : "") +
+                      "<div class='denom' style='margin-top:.3rem'>" +
+                      "全樣本有 16.16% 的 block 屬於此類（見自檢 C12）。</div></div>"
+                    : "";
+
                 host.innerHTML =
                     "<div style='display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap'>" +
                     "<h3 class='mono'>" + DD.esc(chrom) + ":" + DD.fmt(pos) + "</h3>" +
@@ -263,7 +279,7 @@
                     "<span class='tag' style='color:var(--muted)'>PS=" + DD.esc(row.ps) +
                     " HP=" + DD.esc(row.hp) + "</span></div>" +
                     "<div class='denom mono' style='word-break:break-all'>" + DD.esc(row.id) + "</div>" +
-                    multi + statusRow(row) +
+                    multi + brk + statusRow(row) +
                     "<details open><summary>演化分支（代表樹）</summary><div class='details-body'>" +
                     treeHeader(row) + DD.drawTree(row, { edgeMode: "repOnly" }) +
                     "</div></details>" +

@@ -149,6 +149,42 @@ def run(reg) -> dict:
             "C10", "沒有任何軸的顯著率逼近 100%（雙重使用偵測）", SKIP,
             "缺 ISM 能力", need="ism_dirs"))
 
+    # ── C11 LCA 增益的 A/B 一致性 ──────────────────────────────────
+    ab = reg.get("lca_ab")
+    if ab and ab.usable and ab.payload:
+        d = ab.payload
+        same = d.get("identical_fields", 0)
+        diff = d.get("differing_fields", [])
+        ok = set(diff) <= {"lv_written", "lca_resolved", "lca_candidates_sum"}
+        checks.append(_chk(
+            "C11", "pre-LCA 與 post-LCA receipt 是乾淨的 A/B（只有 LCA 相關欄位不同）",
+            PASS if ok else FAIL,
+            f"兩套各 {d.get('n_files', 0)} 檔；{same} 個欄位完全相同，"
+            f"不同的只有 {'、'.join(diff) or '無'}；"
+            f"lv 覆蓋 {d.get('pre_lv', 0):,} → {d.get('post_lv', 0):,}"
+            f"（{d.get('gain', 0):.2f}×）"))
+    else:
+        checks.append(_chk(
+            "C11", "pre-LCA 與 post-LCA receipt 是乾淨的 A/B", SKIP,
+            "缺 bam_pre_lca_receipts/，無法量化 LCA 到底買到什麼", need="lca_ab"))
+
+    # ── C12 block 的 sSNV 共現圖是否連通 ──────────────────────────
+    ml = reg.get("mlhp")
+    if ml and ml.usable and ml.payload:
+        br = ml.counts.get("broken_cooccurrence", 0)
+        tot_b = len(ml.payload["by_region"])
+        checks.append(_chk(
+            "C12", "每個 block 的 sSNV 都被 read 串成一塊（共現圖連通）",
+            PASS if br == 0 else FAIL,
+            f"斷裂的 block {br:,} / {tot_b:,}（{br / max(tot_b, 1) * 100:.2f}%）"
+            "　→ 那些 block 內有 sSNV 之間沒有任何 read 同時覆蓋，"
+            "solver 仍建出樹，但跨分量的邊<b>零 read 支持</b>，"
+            "不可當作連鎖證據"))
+    else:
+        checks.append(_chk(
+            "C12", "每個 block 的 sSNV 都被 read 串成一塊（共現圖連通）", SKIP,
+            "缺 MLHP 能力，無法檢查共現連通性", need="mlhp"))
+
     n_pass = sum(1 for c in checks if c["status"] == PASS)
     n_fail = sum(1 for c in checks if c["status"] == FAIL)
     n_skip = sum(1 for c in checks if c["status"] == SKIP)
@@ -163,13 +199,24 @@ def _coverage(reg, regions, l1) -> list:
     """覆蓋率不只給比率，要說缺的是什麼 —— 只給百分比會讓人以為缺的是隨機的。"""
     out = []
     with_tree = sum(1 for r in regions if r["v"])
+    ranked = sum(1 for r in regions if r["us"] == "ranked")
     no_tree = Counter(r["us"] for r in regions if not r["v"])
+    # 兩個分母都給。只給 78.8% 會讓人以為 lineage 層漏了兩成 —— 實際上
+    # 它覆蓋了 100% 的 ranked region，另外 2,460 個是 solver 根本沒建樹
+    # （no_active_alt / family_incomplete / zero_denominator），不是漏掉。
     out.append({
-        "title": "有代表樹的 region",
+        "title": "有代表樹的 region（分母 = 全部 region）",
         "num": with_tree, "den": len(regions),
-        "gap": "缺的 {:,} 個逐項歸因：{}".format(
+        "gap": "缺的 {:,} 個是 solver 沒建樹，不是資料漏掉：{}".format(
             len(regions) - with_tree,
             "、".join(f"{k} {v:,}" for k, v in sorted(no_tree.items()))),
+    })
+    out.append({
+        "title": "有代表樹的 region（分母 = ranked region）",
+        "num": with_tree, "den": ranked,
+        "gap": ("ranked 與有樹是同一個集合（實測集合完全相等）—— "
+                "lineage 層對「有樹的 region」是 100% 覆蓋。"
+                "上一列的 78.8% 是相對全部 region，兩者都對但意思不同。"),
     })
     for cid in ("ism_dirs", "prerender_meth", "lineage_paths", "lineage_reads"):
         c = reg.get(cid)
