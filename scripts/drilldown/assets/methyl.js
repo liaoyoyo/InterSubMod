@@ -22,6 +22,18 @@
 
     var STATE = { SIG: "顯著", NS: "不顯著", NT: "未檢定" };
 
+    /* 循環論證的軸 —— p 值不可當證據。
+       「甲基自身分群」的 cluster_labels 是從甲基距離矩陣分出來的，
+       PERMANOVA 又拿同一個距離矩陣檢定那些 cluster
+       （SignificanceAnalyzer.cpp:123 run_permanova(filtered_dist, filtered_labels)）。
+       分群本來就在最大化組間距離，所以檢定幾乎必然顯著。
+       全基因組實證：20,903 / 20,904 = 100.0% 顯著，只有 1 個例外。 */
+    var CIRCULAR = {
+        cluster: "此軸的分群標籤是從同一個甲基距離矩陣分出來的，PERMANOVA 又用該矩陣檢定它 —— " +
+                 "<b>循環論證，p 值不可當證據</b>。全基因組 20,903/20,904（100.0%）顯著即為此機制的實證。" +
+                 "它能說的只有「這個位點的甲基可以被分成幾群」，不能說「分群有意義」。"
+    };
+
     /* 三態判定。回傳 {state, why} —— why 說明為什麼未檢定，
        因為「未檢定」的原因不只一種，混在一起會失去資訊。 */
     function axisState(rec, ax) {
@@ -59,8 +71,10 @@
                 ? "background:repeating-linear-gradient(45deg,transparent,transparent 5px," +
                   "rgba(102,112,105,.07) 5px,rgba(102,112,105,.07) 10px)"
                 : (st.state === "SIG" ? "background:#e4efe9" : "");
+            var circ = CIRCULAR[ax.id];
             return "<tr style='" + bg + "'>" +
-                "<td>" + DD.esc(ax.title) + "</td>" +
+                "<td>" + DD.esc(ax.title) +
+                (circ ? " <span class='tag' style='color:var(--danger)'>循環</span>" : "") + "</td>" +
                 "<td class='num'>" + fmtP(p) + "</td>" +
                 "<td class='num'>" + (eff === null || eff === undefined ? "—" : eff.toFixed(3)) + "</td>" +
                 "<td class='num'>" + (n === null || n === undefined ? "—" : n) + "</td>" +
@@ -75,8 +89,14 @@
               "</b>。那些軸顯示為「未檢定」，<b>不等於不顯著</b>。</div>"
             : "";
 
-        var sig = ISM.axes.filter(function (ax) { return axisState(rec, ax).state === "SIG"; });
-        var tested = ISM.axes.filter(function (ax) { return axisState(rec, ax).state !== "NT"; });
+        // 結論只看非循環軸 —— 把 cluster 算進去會讓每個位點都「有訊號」
+        var usable = ISM.axes.filter(function (ax) { return !CIRCULAR[ax.id]; });
+        var sig = usable.filter(function (ax) { return axisState(rec, ax).state === "SIG"; });
+        var tested = usable.filter(function (ax) { return axisState(rec, ax).state !== "NT"; });
+        var circNote = ISM.axes.some(function (ax) { return CIRCULAR[ax.id]; })
+            ? "<div class='callout stop'><b>「甲基自身分群」已從結論中排除。</b>" +
+              CIRCULAR.cluster + "</div>"
+            : "";
         var verdict;
         if (!tested.length) {
             verdict = "<div class='callout warn'><b>此位點無任何軸可檢定。</b>" +
@@ -91,7 +111,7 @@
                 "<b>這是關聯不是因果</b> —— 甲基沒有參與拓撲推論，這裡是事後 characterize。</div>";
         }
 
-        return verdict + missing +
+        return verdict + circNote + missing +
             "<div class='table-wrap'><table class='data'><thead><tr>" +
             "<th>分組軸</th><th class='num'>p</th><th class='num'>效果量</th>" +
             "<th class='num'>群數</th><th>判定</th><th>備註</th></tr></thead>" +

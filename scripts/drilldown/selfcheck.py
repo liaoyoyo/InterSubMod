@@ -121,6 +121,34 @@ def run(reg) -> dict:
             "C9", "有 ISM 目錄 + 無 ISM 目錄 = sSNV 總數", SKIP,
             "缺 ISM 能力，無法檢查甲基層覆蓋", need="ism_dirs"))
 
+    # ── C10 循環論證偵測：某軸顯著率逼近 100% 是雙重使用的訊號 ────
+    ismc = reg.get("ism_dirs")
+    if ismc and ismc.usable and ismc.payload:
+        flagged = []
+        for ax in ismc.payload["axes"]:
+            sig = tot = 0
+            for rec in ismc.payload["rows"].values():
+                p = rec.get(ax["id"] + "_p")
+                v = rec.get(ax["id"] + "_valid")
+                n = rec.get(ax["id"] + "_n")
+                if v is False or (n is not None and n < 2) or p is None:
+                    continue
+                tot += 1
+                if p <= 0.05:
+                    sig += 1
+            if tot >= 100 and sig / tot >= 0.99:
+                flagged.append(f"{ax['title']} {sig:,}/{tot:,}={sig / tot * 100:.1f}%")
+        checks.append(_chk(
+            "C10", "沒有任何軸的顯著率逼近 100%（雙重使用偵測）",
+            PASS if not flagged else FAIL,
+            "偵測到近乎全數顯著的軸：" + "、".join(flagged) +
+            "　→ 這通常代表分組標籤與檢定用的距離矩陣同源（double-dipping），p 值不可當證據"
+            if flagged else "各軸顯著率皆 < 99%"))
+    else:
+        checks.append(_chk(
+            "C10", "沒有任何軸的顯著率逼近 100%（雙重使用偵測）", SKIP,
+            "缺 ISM 能力", need="ism_dirs"))
+
     n_pass = sum(1 for c in checks if c["status"] == PASS)
     n_fail = sum(1 for c in checks if c["status"] == FAIL)
     n_skip = sum(1 for c in checks if c["status"] == SKIP)
