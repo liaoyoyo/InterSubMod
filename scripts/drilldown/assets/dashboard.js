@@ -82,9 +82,14 @@
             return bits > 1 ? "multi" : String(c);
         }
     };
+    // drop-in 註釋的取值是 Python 端算好的逐 sSNV 陣列
+    var ANNOT = boot.annotValues || {};
+
     function valueOf(dimId, i) {
         var f = VALUE_FN[dimId];
         if (f) return f(i);
+        var a = ANNOT[dimId];
+        if (a) return a[i] || "no";
         var ext = DD.valueFns && DD.valueFns[dimId];
         return ext ? ext(i) : "";
     }

@@ -28,6 +28,7 @@ import capability as cap_mod                                   # noqa: E402
 import topology as src_topology                                # noqa: E402
 import ism as src_ism                                          # noqa: E402
 import mlhp as src_mlhp                                        # noqa: E402
+import annotation as src_annot                                 # noqa: E402
 import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
 import selfcheck as mod_selfcheck                              # noqa: E402
@@ -67,6 +68,7 @@ def build_registry(args) -> Registry:
         rids = {r["id"] for r in topo.payload["regions"]}
         src_mlhp.load(reg, args.mlhp, rids)
         src_ism.load(reg, args.ism_root, l1, l1["chroms"])
+        src_annot.load(reg, args.annot_dir, l1)
     return reg
 
 
@@ -97,6 +99,9 @@ def main() -> int:
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
     ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
                     help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
+    ap.add_argument("--annot-dir",
+                    help="註釋 drop-in 資料夾：把 .bed / .tsv 丟進去就會自動變成篩選維度，"
+                         "不用改程式。預設 <out>/annotations/")
     ap.add_argument("--bake-panels", default="0",
                     help="產甲基雙面板 PNG：0（不產）/ N（前 N 個）/ all（全部）")
     ap.add_argument("--lineage-assign", help="read_lineage_assignments.tsv.gz（側欄 lineage 軌）")
@@ -114,6 +119,8 @@ def main() -> int:
         args.mlhp = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.exact_ps_mlhp.json"
     if not args.probe_only and not args.out:
         ap.error("需要 --out（或加 --probe-only）")
+    if not args.annot_dir and args.out:
+        args.annot_dir = str(Path(args.out) / "annotations")
 
     try:
         reg = build_registry(args)
@@ -134,8 +141,14 @@ def main() -> int:
 
     ismc = reg.get("ism_dirs")
     emit_payload.fill_axis_codes(topo.payload["l1"], ismc)
-    dims = emit_payload.build_dims(topo, emit_payload.axis_dim(ismc))
+    annotc = reg.get("annotations")
+    annot_dims = (annotc.payload or {}).get("dims", []) if annotc else []
+    dims = emit_payload.build_dims(topo, emit_payload.axis_dim(ismc) + [
+        {k: v for k, v in d.items() if k != "values"} for d in annot_dims])
+    # drop-in 維度的取值是逐 sSNV 的陣列，直接給前端查表
+    boot_annot = {d["id"]: d["values"] for d in annot_dims}
     boot = emit_payload.build_boot(args.sample, reg, dims)
+    boot["annotValues"] = boot_annot
     boot["ism"] = ({
         "axes": ismc.payload["axes"],
         "missingAxes": ismc.payload["missing_axes"],

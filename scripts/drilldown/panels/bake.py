@@ -13,6 +13,7 @@ import csv
 import gzip
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import composite
@@ -46,41 +47,63 @@ def load_lineage_map(assign_path, paths_path) -> dict:
     return out
 
 
+def _one(args):
+    """單一位點的合成。給 ProcessPoolExecutor 用，所以必須是模組層函式。"""
+    ism_root, out_dir, chrom, pos, lineage_map, cell_h = args
+    import ism as src_ism
+    ld = src_ism.locus_dir(Path(ism_root), chrom, pos)
+    if ld is None:
+        return chrom, pos, None, "no-dir"
+    png = Path(out_dir) / "panels" / chrom / f"{chrom}_{pos}.png"
+    try:
+        info = composite.build(ld, png, lineage_map=lineage_map, cell_h=cell_h)
+    except Exception as exc:                          # noqa: BLE001
+        return chrom, pos, None, f"{type(exc).__name__}: {exc}"
+    if not info:
+        return chrom, pos, None, "insufficient"
+    info["file"] = f"panels/{chrom}/{chrom}_{pos}.png"
+    return chrom, pos, info, None
+
+
 def bake(ism_root, out_dir: Path, loci, lineage_map=None, cell_h: int = 2,
-         limit: int = 0, log=print) -> dict:
-    """loci: [(chrom, pos), ...]。回傳 manifest。"""
-    import ism as src_ism           # 借用它的目錄探測，避免兩套路徑推導邏輯
+         limit: int = 0, workers: int = 0, log=print) -> dict:
+    """loci: [(chrom, pos), ...]。回傳 manifest。
 
-    ism_root = Path(ism_root)
-    panels = out_dir / "panels"
+    逐位點獨立，所以用 process pool 平行 —— 單執行緒實測約 0.9 s/位點，
+    16,304 個要 4 小時；平行後降到十幾分鐘。
+    """
+    import concurrent.futures as cf
+
+    if limit:
+        loci = loci[:limit]
+    if not workers:
+        workers = max(1, min(24, (os.cpu_count() or 4) - 2))
+
+    # 各 chrom 目錄先建好，避免子行程同時 mkdir 競爭
+    for c in {c for c, _ in loci}:
+        (Path(out_dir) / "panels" / c).mkdir(parents=True, exist_ok=True)
+
     manifest, made, skipped, total_bytes = {}, 0, 0, 0
+    reasons = {}
+    tasks = [(str(ism_root), str(out_dir), c, p, lineage_map, cell_h) for c, p in loci]
 
-    for n, (chrom, pos) in enumerate(loci):
-        if limit and made >= limit:
-            break
-        ld = src_ism.locus_dir(ism_root, chrom, pos)
-        if ld is None:
-            skipped += 1
-            continue
-        png = panels / chrom / f"{chrom}_{pos}.png"
-        try:
-            info = composite.build(ld, png, lineage_map=lineage_map, cell_h=cell_h)
-        except Exception as exc:                     # noqa: BLE001
-            log(f"  [warn] {chrom}:{pos} 合成失敗 {type(exc).__name__}: {exc}")
-            skipped += 1
-            continue
-        if not info:
-            skipped += 1
-            continue
-        info["file"] = f"panels/{chrom}/{chrom}_{pos}.png"
-        manifest.setdefault(chrom, {})[str(pos)] = info
-        made += 1
-        total_bytes += info["bytes"]
-        if made % 2000 == 0:
-            log(f"  已產 {made:,} 張（{total_bytes / 2**20:.0f} MB）")
+    log(f"  平行度 {workers}，共 {len(tasks):,} 個位點")
+    with cf.ProcessPoolExecutor(max_workers=workers) as ex:
+        for chrom, pos, info, why in ex.map(_one, tasks, chunksize=32):
+            if info is None:
+                skipped += 1
+                reasons[why] = reasons.get(why, 0) + 1
+                continue
+            manifest.setdefault(chrom, {})[str(pos)] = info
+            made += 1
+            total_bytes += info["bytes"]
+            if made % 2000 == 0:
+                log(f"  已產 {made:,} 張（{total_bytes / 2**20:.0f} MB）")
 
+    if reasons:
+        log("  略過原因：" + "、".join(f"{k}×{v:,}" for k, v in sorted(reasons.items())))
     return {"panels": manifest, "made": made, "skipped": skipped,
-            "bytes": total_bytes, "cellH": cell_h}
+            "bytes": total_bytes, "cellH": cell_h, "skipReasons": reasons}
 
 
 def write_manifest(out_dir: Path, mani: dict, chroms) -> dict:
