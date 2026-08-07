@@ -83,19 +83,47 @@
             return "<div class='capability-off'>此 region 沒有通過門檻的 pattern。</div>";
         }
         entries.sort(function (a, b) { return b.n - a.n; });
-        var pos = (row.ap || []).slice().sort(function (a, b) { return a - b; });
-        var head = pos.map(function (p, i) {
-            return "<th title='" + DD.fmt(p) + "'>S" + (i + 1) + "</th>";
+
+        /* ⚠ pattern 字串的字元數對應 MLHP 的完整 positions（含非 active），
+           不是 topology 的 active_positions。例：chr1 PS=25035233 有 3 個 sSNV，
+           但 25288447 在該 HP 家族內 ALT=0/61，永遠是 R、對拓撲零資訊，
+           因此不進 active set —— active_positions 只有 2 個。
+           先前用 row.ap 當表頭會少一欄且座標對錯位。 */
+        var allPos = (pat.pos && pat.pos.length) ? pat.pos.slice()
+                                                 : (row.ap || []).slice();
+        var activeSet = {};
+        (row.ap || []).forEach(function (p) { activeSet[p] = 1; });
+        var cov = pat.cov || {};
+        var hpKeys = Object.keys(cov);
+        var covOf = hpKeys.length ? (cov[hpKeys[0]] || {}) : {};
+
+        var head = allPos.map(function (p, i) {
+            var act = activeSet[p];
+            var c = covOf[String(p)] || null;         // [REF, ALT]
+            var tip = DD.fmt(p) + (c ? "　REF " + c[0] + " / ALT " + c[1] : "") +
+                      (act ? "　active" : "　非 active（此 HP 家族內無 ALT，對拓撲零資訊）");
+            return "<th title='" + DD.esc(tip) + "' style='" +
+                (act ? "" : "opacity:.5;font-style:italic") + "'>S" + (i + 1) +
+                (act ? "" : "*") + "</th>";
         }).join("");
+
+        var nonActive = allPos.filter(function (p) { return !activeSet[p]; });
         var body = entries.map(function (e) {
-            var cells = String(e.pattern).split("").map(function (ch) {
-                return "<td class='state-cell " + DD.esc(ch) + "'>" + DD.esc(ch) + "</td>";
+            var cells = String(e.pattern).split("").map(function (ch, i) {
+                var act = activeSet[allPos[i]];
+                return "<td class='state-cell " + DD.esc(ch) + "'" +
+                    (act ? "" : " style='opacity:.45'") + ">" + DD.esc(ch) + "</td>";
             }).join("");
             return "<tr><td>" + DD.esc(e.src) + "</td><td>HP" + DD.esc(e.hp) + "</td>" +
                 cells + "<td class='num'>" + DD.fmt(e.n) + "</td></tr>";
         }).join("");
         var tot = entries.reduce(function (a, e) { return a + e.n; }, 0);
-        return "<div class='table-wrap'><table class='state-matrix'>" +
+        var mismatch = entries.length && String(entries[0].pattern).length !== allPos.length
+            ? "<div class='callout stop'>pattern 長度（" +
+              String(entries[0].pattern).length + "）與位點數（" + allPos.length +
+              "）不符 —— 這是建置錯誤，請重跑 generator。</div>"
+            : "";
+        return mismatch + "<div class='table-wrap'><table class='state-matrix'>" +
             "<thead><tr><th>來源</th><th>HP</th>" + head + "<th>reads</th></tr></thead>" +
             "<tbody>" + body + "</tbody></table></div>" +
             "<div class='denom' style='margin-top:.35rem'>" +
@@ -103,7 +131,16 @@
             "<b class='state-cell R' style='padding:0 .25rem'>R</b> 看到 REF　" +
             "<b class='state-cell X' style='padding:0 .25rem'>X</b> 此 read 未覆蓋該位點<br>" +
             "共 " + DD.fmt(tot) + " 條 read×pattern；完整覆蓋 " + DD.fmt(pat.nFull || 0) + " 條。" +
-            "<b>X 是覆蓋不足，不是資料品質差</b> —— ONT read 沒跨完整個 block 就會有 X。</div>";
+            "<b>X 是覆蓋不足，不是資料品質差</b> —— ONT read 沒跨完整個 block 就會有 X。" +
+            (nonActive.length
+             ? "<br><b>S 標星號者為非 active 位點</b>（" +
+               nonActive.map(function (p) { return DD.fmt(p); }).join("、") +
+               "）：該位點在此 HP 家族內沒有任何 read 帶 ALT，" +
+               "所以每個 pattern 在該欄永遠是 R，對拓撲零資訊，不進 active set。" +
+               "<b>這就是為什麼位點數（" + allPos.length + "）比 Locus 排列圖（" +
+               (row.ap || []).length + "）多。</b>"
+             : "") +
+            "　滑鼠移到欄名可看該位點的 REF/ALT 覆蓋。</div>";
     }
 
     function methylGraphBlock(chrom, pos) {
@@ -158,8 +195,19 @@
                 "<b style='font-size:.85rem'>" + title + "（" + list.length + "）</b>" +
                 "<div class='denom'>" + note + "</div>" +
                 list.slice(0, 8).map(function (r) {
-                    return "<div class='mono' style='font-size:.76rem'>" + DD.esc(r.id) +
-                        " · k=" + r.k + " · " + (r.tu ? "唯一解" : "多解") + "</div>";
+                    var target = (r.ap && r.ap.length) ? r.ap[0] : null;
+                    var label = DD.esc(r.id.split("|").slice(1).join("|"));
+                    return "<div style='font-size:.76rem;display:flex;gap:.4rem;align-items:baseline'>" +
+                        (target
+                         ? "<a href='#p=" + DD.esc(r.c) + ":" + target + "' class='nb-link' " +
+                           "data-c='" + DD.esc(r.c) + "' data-p='" + target + "'>" +
+                           DD.esc(r.c) + ":" + DD.fmt(target) + "</a>"
+                         : "<span class='denom'>無座標</span>") +
+                        "<span class='mono denom'>" + label + "</span>" +
+                        "<span class='tag' style='color:var(--muted)'>k" + r.k + "</span>" +
+                        "<span class='tag' style='color:" +
+                        (r.tu ? "var(--accent)" : "var(--amber)") + "'>" +
+                        (r.tu ? "唯一" : "多解") + "</span></div>";
                 }).join("") +
                 (list.length > 8 ? "<div class='denom'>另有 " + (list.length - 8) + " 筆</div>" : "") +
                 "</div>";

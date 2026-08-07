@@ -251,7 +251,20 @@ details[open] > summary { border-bottom: 1px solid var(--soft); }
 /* ── 甲基雙面板圖 ────────────────────────────────────────────────
    PNG 是 1px = 1 資料格，放大靠 image-rendering:pixelated；
    文字放大會糊，所以軸標走疊在上面的 SVG。 */
-.panel-fig { position: relative; background: #11161f; border-radius: 8px; overflow: hidden; padding-bottom: 16px; }
+.panel-tools { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin-bottom: .35rem; }
+.panel-tools button {
+    border: 1px solid var(--line); background: var(--panel); border-radius: 6px;
+    font: inherit; font-size: .74rem; padding: .18rem .55rem; cursor: pointer;
+    color: var(--muted); min-height: 28px;
+}
+.panel-tools button[aria-pressed="true"] { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+.panel-scroll { border-radius: 8px; background: #11161f; }
+.panel-scroll[data-mode="fit"] { overflow: hidden; }
+.panel-scroll[data-mode="zoom"] { overflow: auto; max-height: 620px; cursor: grab; }
+/* aspect-ratio 由 JS 依 PNG 實際長寬設定 —— 甲基矩陣的一格是一個 read×CpG，
+   長寬比失真等於語意失真。 */
+.panel-fig { position: relative; background: #11161f; border-radius: 8px; padding-bottom: 16px; }
+.panel-scroll[data-mode="fit"] .panel-fig { width: 100%; }
 .panel-fig img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .panel-fig .panel-ov { position: absolute; top: 0; left: 0; right: 0; bottom: 16px; width: 100%; pointer-events: none; }
 .panel-marks { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; }
@@ -262,3 +275,18 @@ details[open] > summary { border-bottom: 1px solid var(--soft); }
 }
 .legend .bar-key { display: inline-flex; align-items: center; gap: .25rem; margin-right: .7rem; font-size: .76rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .2rem .4rem; margin: .4rem 0; }
+
+/* 鄰域連結 */
+.nb-link { font-family: var(--mono); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.nb-link:hover { text-decoration: underline; }
+
+/* ── 甲基面板圖例：色彩與圖示說明 ─────────────────────────────── */
+.panel-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .5rem .9rem; margin: .5rem 0; }
+.track-key { font-size: .74rem; line-height: 1.9; }
+.track-key b { display: block; font-size: .76rem; margin-bottom: .1rem; }
+.track-key span { display: inline-flex; align-items: center; gap: .22rem; margin-right: .55rem; white-space: nowrap; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; border: 1px solid rgba(23,35,30,.14); }
+.scales { display: grid; gap: .5rem; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.scale-title { font-size: .76rem; font-weight: 700; }
+.scale-bar { height: 10px; border-radius: 3px; border: 1px solid var(--line); margin: .15rem 0; }
+.scale-ends { display: flex; justify-content: space-between; font-size: .68rem; color: var(--muted); font-family: var(--mono); }

@@ -9,6 +9,10 @@
     var DD = window.__DD;
     if (!DD) return;
 
+    // boot 是 dashboard.js IIFE 內的區域變數，跨檔取不到 —— 重新從 DOM 解析
+    // （曾直接寫 boot.palette 而整個詳情面板拋 "boot is not defined"）
+    var boot = JSON.parse(document.getElementById("bootData").textContent);
+
     var loadingL5 = {};
 
     function ensureL5(chrom, cb) {
@@ -54,34 +58,68 @@
         return lines.join("") + out.join("");
     }
 
+    var PAL = boot.palette;
+
+    function scaleBar(sc) {
+        var stops = sc.stops.map(function (s) {
+            return DD.esc(s.color) + " " + (s.t * 100).toFixed(0) + "%";
+        }).join(",");
+        return "<div class='scale'>" +
+            "<div class='scale-title'>" + DD.esc(sc.title) + "</div>" +
+            "<div class='scale-bar' style='background:linear-gradient(to right," + stops + ")'></div>" +
+            "<div class='scale-ends'><span>" + DD.esc(sc.lo) + "</span>" +
+            "<span>" + DD.esc(sc.hi) + "</span></div>" +
+            "<div class='denom'><i class='swatch' style='background:" + DD.esc(sc.na) +
+            "'></i>" + DD.esc(sc.naLabel) + "</div></div>";
+    }
+
+    function trackKey(t) {
+        return "<div class='track-key'><b>" + DD.esc(t.title) + "</b>" +
+            t.items.map(function (i) {
+                return "<span><i class='swatch' style='background:" + DD.esc(i.color) +
+                    "'></i>" + DD.esc(i.label) + "</span>";
+            }).join("") + "</div>";
+    }
+
     function legend(info) {
-        var BAR_SWATCH = {
-            HP: "#60a5fa", ALT: "#dc2626", "T/N": "#f97316",
-            Strand: "#334155", lineage: "#db2777", cluster: "#0d9488"
-        };
-        var swatches = info.bars.map(function (b) {
-            return "<span class='bar-key' title='" + DD.esc(BAR_COLOR[b] || "") + "'>" +
-                "<i class='swatch' style='background:" + (BAR_SWATCH[b] || "#667069") + "'></i>" +
-                DD.esc(b) + "</span>";
-        }).join("");
+        var shown = {};
+        info.bars.forEach(function (b) { shown[b] = 1; });
+
+        var keys = PAL
+            ? PAL.tracks.filter(function (t) { return shown[t.id]; }).map(trackKey).join("")
+            : "<div class='denom' style='color:var(--danger)'>色盤未匯出，圖例降級 —— " +
+              "generator 端 composite.palette_export() 失敗，請看 build log。</div>";
+        var scales = PAL
+            ? "<div class='scales'>" + PAL.scales.filter(function (s) {
+                  return s.id !== "dist" || info.hasDist;
+              }).map(scaleBar).join("") + "</div>"
+            : "";
+        var dend = (PAL && info.hasDendro)
+            ? "<div class='track-key'><b>UPGMA 樹狀圖</b>" +
+              "<span><i class='swatch' style='background:" + DD.esc(PAL.dendro.grey) +
+              "'></i>跨群分支</span>" +
+              "<span class='denom'>" + DD.esc(PAL.dendro.note) + "</span></div>"
+            : "";
+
         var lin = info.lineageTotal
             ? "lineage 軌 join 到 <b>" + DD.fmt(info.lineageHit) + " / " +
               DD.fmt(info.lineageTotal) + "</b> 條 read（其餘塗灰 —— 那些 read 不在任何 lineage block）"
             : "";
         var clu = (info.clustered !== undefined)
-            ? "分群涵蓋 <b>" + DD.fmt(info.clustered) + " / " + DD.fmt(info.reads) +
-              "</b> 條 read（未涵蓋者排在最下方、cluster 軌塗灰）；" +
-              "切成 <b>" + DD.esc(info.clusterK) + "</b> 群（ISM 的 optimal_k = " +
-              DD.esc(info.optimalK) + "）"
+            ? "UPGMA 分群涵蓋 <b>" + DD.fmt(info.clustered) + " / " + DD.fmt(info.reads) +
+              "</b> 條 read，切成 <b>" + DD.esc(info.clusterK) + "</b> 群" +
+              "（ISM 的 optimal_k = " + DD.esc(info.optimalK) + "）；" +
+              "<b>未涵蓋的 " + DD.fmt(info.reads - info.clustered) +
+              " 條排在最下方、無樹枝、cluster 軌塗灰</b> —— 它們不是被丟掉，是分群階段沒收進去"
             : "";
-        return "<div class='legend'>" + swatches + "</div>" +
+
+        return "<div class='panel-legend'>" + keys + dend + scales + "</div>" +
             "<div class='denom' style='line-height:1.7'>" +
-            "<b>read 依甲基距離的葉序排列</b>，不是依 HP —— 依 HP 排看不出甲基自己怎麼分。<br>" +
-            "左半 = read × CpG 的 β（藍 0 → 白 .5 → 紅 1，灰 = 無覆蓋）；" +
-            (info.hasDist ? "右半 = read × read 距離（暗 = 近、亮 = 遠）。<br>" : "無距離矩陣。<br>") +
+            "<b>read 依 UPGMA 葉序排列</b>（leaf_order.txt），不是依 HP —— " +
+            "依 HP 排看不出甲基自己怎麼分。<br>" +
             (lin ? lin + "<br>" : "") + (clu ? clu + "<br>" : "") +
             "側欄由左至右：" + DD.esc(info.bars.join(" │ ")) + "　" +
-            "<span class='src src-derived'>◆ cluster 軌為儀表板自算</span></div>";
+            "<span class='src src-derived'>◆ cluster 軌與樹狀圖著色為儀表板自算</span></div>";
     }
 
     DD.methylFigure = function (chrom, pos, host) {
@@ -95,11 +133,58 @@
                     "<br>重跑 generator 時加 <code>--bake-panels all</code> 可涵蓋全部。</div>";
                 return;
             }
+            /* 保持原始長寬比。先前 width:100% 把 180×296 的圖橫向拉滿容器，
+               長寬比全毀 —— 甲基矩陣的「一格 = 一個 read×CpG」語意也跟著失真。
+               改成預設 fit（等比縮到容器內）+ 可切換放大倍率 + 拖移。 */
+            var ar = (info.w / info.h).toFixed(4);
             host.innerHTML =
-                "<div class='panel-fig'>" +
+                "<div class='panel-tools'>" +
+                "<span class='denom'>" + info.w + " × " + info.h + " px（1 px = 1 格）</span>" +
+                "<button type='button' data-z='fit' aria-pressed='true'>符合寬度</button>" +
+                "<button type='button' data-z='1' aria-pressed='false'>1×</button>" +
+                "<button type='button' data-z='2' aria-pressed='false'>2×</button>" +
+                "<button type='button' data-z='4' aria-pressed='false'>4×</button>" +
+                "<button type='button' data-z='8' aria-pressed='false'>8×</button>" +
+                "<span class='denom'>放大後可拖移</span></div>" +
+                "<div class='panel-scroll' data-mode='fit'>" +
+                "<div class='panel-fig' style='aspect-ratio:" + ar + "'>" +
                 "<img src='" + DD.esc(info.file) + "' alt='甲基與距離雙面板' " +
                 "width='" + info.w + "' height='" + info.h + "'>" +
-                overlay(info) + "</div>" + legend(info);
+                overlay(info) + "</div></div>" + legend(info);
+
+            var scroll = host.querySelector(".panel-scroll");
+            var fig = host.querySelector(".panel-fig");
+            host.querySelectorAll("button[data-z]").forEach(function (b) {
+                b.onclick = function () {
+                    host.querySelectorAll("button[data-z]").forEach(function (x) {
+                        x.setAttribute("aria-pressed", String(x === b));
+                    });
+                    var z = b.dataset.z;
+                    if (z === "fit") {
+                        scroll.dataset.mode = "fit";
+                        fig.style.width = "";
+                    } else {
+                        scroll.dataset.mode = "zoom";
+                        fig.style.width = (info.w * parseInt(z, 10)) + "px";
+                    }
+                };
+            });
+            // 拖移（放大時捲動容器會超出視窗）
+            var drag = null;
+            scroll.addEventListener("mousedown", function (e) {
+                if (scroll.dataset.mode !== "zoom") return;
+                drag = { x: e.clientX, y: e.clientY, l: scroll.scrollLeft, t: scroll.scrollTop };
+                scroll.style.cursor = "grabbing";
+                e.preventDefault();
+            });
+            window.addEventListener("mousemove", function (e) {
+                if (!drag) return;
+                scroll.scrollLeft = drag.l - (e.clientX - drag.x);
+                scroll.scrollTop = drag.t - (e.clientY - drag.y);
+            });
+            window.addEventListener("mouseup", function () {
+                drag = null; scroll.style.cursor = "";
+            });
         });
     };
 })();

@@ -39,7 +39,7 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
         cap.state = "MALFORMED"
         probe(cap, "S1", False, "缺 groups[] 或為空")
         return cap
-    need = {"region_id", "populations_by_hp", "subread_groups_by_hp"}
+    need = {"region_id", "populations_by_hp", "subread_groups_by_hp", "positions"}
     missing = sorted(need - set(groups[0]))
     if missing:
         cap.state = "MALFORMED"
@@ -53,6 +53,11 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
         if not rid:
             continue
         by_region[rid] = {
+            # 完整位點清單（含非 active）。pattern 字串的字元數對應這個，
+            # 不是 topology 的 active_positions —— 兩者長度可能不同。
+            "pos": g.get("positions") or [],
+            "nSnv": g.get("n_sSNV"),
+            "cov": g.get("col_coverage_by_hp") or {},
             "full": g.get("populations_by_hp") or {},
             "part": g.get("subread_groups_by_hp") or {},
             "nFull": g.get("n_full_cov_reads"),

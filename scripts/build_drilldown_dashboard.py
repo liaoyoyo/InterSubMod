@@ -149,6 +149,12 @@ def main() -> int:
     boot_annot = {d["id"]: d["values"] for d in annot_dims}
     boot = emit_payload.build_boot(args.sample, reg, dims)
     boot["annotValues"] = boot_annot
+    try:
+        import composite as _comp
+        boot["palette"] = _comp.palette_export()
+    except Exception as exc:                    # noqa: BLE001
+        print(f"  [warn] 色盤匯出失敗，圖例將降級：{type(exc).__name__}: {exc}")
+        boot["palette"] = None
     boot["ism"] = ({
         "axes": ismc.payload["axes"],
         "missingAxes": ismc.payload["missing_axes"],

@@ -66,6 +66,69 @@ def _load_bed(path):
     return out
 
 
+# 區段型 TSV（SAVANA CNA / 一般 CN segment）的欄名。偵測到就當區間檔處理，
+# 使用者不必先跑 scripts/analysis/savana_to_smcnbed.py 轉成 BED。
+SEG_CHROM = ("chromosome", "chrom", "chr", "#chrom", "seqnames")
+SEG_START = ("start", "startPos", "begin")
+SEG_END = ("end", "endPos", "stop")
+SEG_CN = ("copyNumber", "copy_number", "cn", "CN", "total_cn")
+SEG_MINOR = ("minorAlleleCopyNumber", "minor_cn", "minorCN", "minor_allele_cn")
+
+# 與 savana_to_smcnbed.py 的預設一致，讓兩條路徑得到同樣的分類
+GAIN_CN, LOSS_CN, LOH_MINOR = 3.0, 1.0, 0.5
+
+
+def _load_segments(path):
+    """SAVANA / CN segment TSV → {chrom: (starts, ends, labels)}。
+
+    分類與 scripts/analysis/savana_to_smcnbed.py 相同：
+      copyNumber >= 3          → gain
+      copyNumber <= 1          → loss
+      minorAlleleCopyNumber < 0.5 → loh（可與 gain/loss 併存，取較特異者）
+      其餘                      → neutral
+    """
+    with _open(path) as fh:
+        head = fh.readline().rstrip("\r\n")
+    delim = "\t" if head.count("\t") >= head.count(",") else ","
+    cols = [c.strip() for c in head.split(delim)]
+    ck = next((c for c in cols if c in SEG_CHROM), None)
+    sk = next((c for c in cols if c in SEG_START), None)
+    ek = next((c for c in cols if c in SEG_END), None)
+    cn = next((c for c in cols if c in SEG_CN), None)
+    mn = next((c for c in cols if c in SEG_MINOR), None)
+    if not (ck and sk and ek and cn):
+        return None, cols
+
+    per = {}
+    with _open(path) as fh:
+        for r in csv.DictReader(fh, delimiter=delim):
+            c = _norm_chrom(r.get(ck))
+            try:
+                st, en = int(float(r[sk])), int(float(r[ek]))
+                v = float(r[cn])
+            except (TypeError, ValueError, KeyError):
+                continue
+            try:
+                m = float(r[mn]) if mn and r.get(mn) not in (None, "", "NA", "nan") else None
+            except (TypeError, ValueError):
+                m = None
+            if v >= GAIN_CN:
+                lab = "gain"
+            elif v <= LOSS_CN:
+                lab = "loss"
+            else:
+                lab = "neutral"
+            if m is not None and m < LOH_MINOR:
+                lab = "loh" if lab == "neutral" else lab + "+loh"
+            if c:
+                per.setdefault(c, []).append((st, en, lab))
+    out = {}
+    for c, ivs in per.items():
+        ivs.sort()
+        out[c] = ([i[0] for i in ivs], [i[1] for i in ivs], [i[2] for i in ivs])
+    return out, cols
+
+
 def _load_points(path):
     """回傳 ({(chrom,pos): {col: val}}, 欄名清單)。"""
     with _open(path) as fh:
@@ -182,6 +245,37 @@ def load(reg: Registry, annot_dir, l1) -> Capability:
                 notes.append(f"{f.name}：BED，{sum(len(v[0]) for v in idx.values()):,} 個區間，"
                              f"命中 {hit:,}/{l1['n']:,} 個 sSNV")
             else:
+                # 先試區段格式（SAVANA CNA / CN segment），再退回位點表
+                seg, segcols = _load_segments(f)
+                if seg:
+                    vals, labs = [], set()
+                    for i in range(l1["n"]):
+                        nm = _overlaps(seg, chroms[l1["chrom"][i]], abspos[i])
+                        if nm is None:
+                            vals.append("no")
+                        else:
+                            vals.append(nm)
+                            labs.add(nm)
+                    hit = sum(1 for v in vals if v != "no")
+                    palette = {"gain": "#a94336", "loss": "#285f8f", "loh": "#b66e20",
+                               "gain+loh": "#7d2d24", "loss+loh": "#1c4160",
+                               "neutral": "#c9c8bd"}
+                    keys = [{"v": "no", "label": "無區段覆蓋", "color": "#e7e5da"}]
+                    keys += [{"v": n, "label": n, "color": palette.get(n, "#6b5592")}
+                             for n in sorted(labs)]
+                    dims.append({"id": dim_id, "title": stem, "src": "derived",
+                                 "srcLabel": "drop-in · CN segment", "keys": keys,
+                                 "values": vals, "kind": "segment", "file": f.name,
+                                 "hit": hit})
+                    notes.append(
+                        f"{f.name}：CN segment（SAVANA 式），"
+                        f"{sum(len(v[0]) for v in seg.values()):,} 個區段，"
+                        f"命中 {hit:,}/{l1['n']:,} 個 sSNV；"
+                        f"分類 {'、'.join(sorted(labs))}"
+                        f"（門檻 gain≥{GAIN_CN} / loss≤{LOSS_CN} / loh minor<{LOH_MINOR}，"
+                        f"與 savana_to_smcnbed.py 一致）")
+                    continue
+
                 rows, cols = _load_points(f)
                 if rows is None:
                     notes.append(f"{f.name}：找不到 chrom/pos 欄（欄名 {', '.join(cols[:6])}…），略過")

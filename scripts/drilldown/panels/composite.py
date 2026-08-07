@@ -152,6 +152,52 @@ def flat_clusters(linkage_path, leaves, k: int):
     return out
 
 
+def load_linkage(path):
+    """回傳 [(i, j, dist, new_id, size), ...]，依合併順序。"""
+    out = []
+    try:
+        with open(path, newline="") as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                out.append((int(float(r["cluster_i"])), int(float(r["cluster_j"])),
+                            float(r["distance"]), int(float(r["new_cluster_id"])),
+                            int(float(r.get("size", 0) or 0))))
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+    return out
+
+
+def dendrogram_columns(merges, n_leaves, leaf_row, cluster_of_row, width):
+    """把 UPGMA 樹畫成一個 width 像素寬的欄。回傳 [(x, y0, y1, rgb), ...] 線段。
+
+    x 由合併距離決定（距離越大越靠左 = 越晚合併），y 是葉節點的列位置。
+    分支顏色：完全落在同一個平面群內的用該群色，跨群的用灰
+    —— 這樣一眼看得出平面切割切在樹的哪個高度。
+    """
+    if not merges or n_leaves < 2:
+        return []
+    maxd = max(m[2] for m in merges) or 1.0
+    ypos = {i: leaf_row.get(i) for i in range(n_leaves)}
+    cl = {i: cluster_of_row.get(i, -1) for i in range(n_leaves)}
+    segs = []
+    GREY = hex_to_rgb("#5b6470")
+    for i, j, d, nid, _sz in merges:
+        yi, yj = ypos.get(i), ypos.get(j)
+        if yi is None or yj is None:
+            continue
+        ci, cj = cl.get(i, -1), cl.get(j, -1)
+        col = GREY
+        if ci >= 0 and ci == cj:
+            col = hex_to_rgb(H.CLUSTER_COL[ci % len(H.CLUSTER_COL)])
+        # 距離越大 → 越靠左（x 小）；width-1 是葉端
+        x = int((1.0 - min(d / maxd, 1.0)) * (width - 1))
+        segs.append((x, min(yi, yj), max(yi, yj), col))          # 垂直連接線
+        segs.append((x, yi, yi, col, "h"))                        # 水平臂（往葉端）
+        segs.append((x, yj, yj, col, "h"))
+        ypos[nid] = (yi + yj) // 2
+        cl[nid] = ci if (ci >= 0 and ci == cj) else -1
+    return segs
+
+
 def sidebars(ids, reads, lineage_of, clusters):
     """回傳 [(label, [rgb per read])]。順序：HP ALT T/N Strand lineage cluster"""
     def col(fn):
@@ -246,22 +292,44 @@ def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1):
     ncol, ndist = len(cpgs), len(dist_ids)
     ch = max(1, cell_h)
 
-    w = nbar * SB + ncol + (GAP + nbar * SB + ndist if ndist else 0)
+    # UPGMA 樹狀圖欄：把分群的階層結構畫出來，不只給平面切割的顏色。
+    # 未進分群的 read 沒有樹，那段留白（並在圖說標明）。
+    merges = load_linkage(locus_dir / "clustering" / "linkage_matrix.csv")
+    DW = 28 if merges else 0
+    leaf_row = {}
+    cluster_of_row = {}
+    for r, rid in enumerate(order[:n_clustered]):
+        leaf_row[r] = r * ch + ch // 2
+        if clusters:
+            cluster_of_row[r] = clusters[r]
+    dsegs = dendrogram_columns(merges, n_clustered, leaf_row, cluster_of_row, DW) if DW else []
+
+    w = DW + nbar * SB + ncol + (GAP + nbar * SB + ndist if ndist else 0)
     h = nrow * ch
     cv = Canvas(w, h, BG)
+
+    # 先畫樹狀圖（在最左欄）
+    for seg in dsegs:
+        if len(seg) == 5:            # 水平臂
+            x, y0, _y1, col, _ = seg
+            for xx in range(x, DW):
+                cv.set(xx, y0, col)
+        else:
+            x, y0, y1, col = seg
+            cv.vline(x, y0, y1 + 1, col)
 
     for r, rid in enumerate(order):
         y = r * ch
         for b, (_lab, colors) in enumerate(bars):
-            cv.rect(b * SB, y, SB - 1, ch, colors[r])
+            cv.rect(DW + b * SB, y, SB - 1, ch, colors[r])
         src = rows[idx_of[rid]]
-        x0 = nbar * SB
+        x0 = DW + nbar * SB
         for c in range(ncol):
             v = src[c] if c < len(src) else None
             cv.rect(x0 + c, y, 1, ch, NA if v is None else _rdbu(v))
 
         if ndist:
-            x1 = nbar * SB + ncol + GAP
+            x1 = DW + nbar * SB + ncol + GAP
             for b, (_lab, colors) in enumerate(bars):
                 cv.rect(x1 + b * SB, y, SB - 1, ch, colors[r])
             drow = dist.get(rid)
@@ -280,9 +348,48 @@ def build(locus_dir: Path, out_png: Path, lineage_map=None, cell_h: int = 1):
         "bytes": nbytes, "w": w, "h": h,
         "reads": nrow, "cpgs": ncol, "hasDist": bool(ndist),
         "bars": [b[0] for b in bars],
-        "barW": SB, "gap": GAP,
+        "barW": SB, "gap": GAP, "dendW": DW, "hasDendro": bool(dsegs),
         "lineageHit": lin_hit, "lineageTotal": nrow,
         "clusterK": (len({c for c in clusters if c >= 0}) if clusters else None),
         "optimalK": k,
         "clustered": n_clustered, "notClustered": nrow - n_clustered,
+    }
+
+
+def palette_export() -> dict:
+    """把 ism_heatmap_std 的色盤匯出給前端做圖例。
+
+    JS 端**不可**自己寫一份 —— 那會變成本專案的第五套配色
+    （已有 ism_heatmap_std / tools/plot_*_heatmap / phase2 預渲染 三套）。
+    """
+    return {
+        "tracks": [
+            {"id": "HP", "title": "HP 單倍型",
+             "items": [{"v": k, "label": H.HP_NAME.get(k, k) if hasattr(H, "HP_NAME") else k,
+                        "color": v} for k, v in H.HP_COL.items()]},
+            {"id": "ALT", "title": "等位支持",
+             "items": [{"v": k, "label": k or "未知", "color": v} for k, v in H.ALT_COL.items()]},
+            {"id": "T/N", "title": "腫瘤 / 正常",
+             "items": [{"v": str(k), "label": "tumor" if k else "normal", "color": v}
+                       for k, v in H.TN_COL.items()]},
+            {"id": "Strand", "title": "股別",
+             "items": [{"v": k, "label": k or "未知", "color": v} for k, v in H.STRAND_COL.items()]},
+            {"id": "lineage", "title": "lineage 階層標籤",
+             "items": [{"v": lab, "label": lab, "color": H.cluster_tree_color(lab)}
+                       for lab in ["1", "1-1", "1-2", "2", "2-1", "2-2", ""]]},
+            {"id": "cluster", "title": "甲基自身分群",
+             "items": [{"v": str(i), "label": "群 " + str(i + 1), "color": c}
+                       for i, c in enumerate(H.CLUSTER_COL)]},
+        ],
+        "scales": [
+            {"id": "meth", "title": "甲基 β",
+             "stops": [{"t": round(i / 10, 2), "color": H.rdbu_hex(i / 10, 12)} for i in range(11)],
+             "lo": "0（未甲基）", "hi": "1（完全甲基）", "na": H.NA_GREY, "naLabel": "無覆蓋"},
+            {"id": "dist", "title": "read × read 距離",
+             "stops": [{"t": round(i / 10, 2), "color": H.magma_hex(i / 10, 16)} for i in range(11)],
+             "lo": "0（甲基型態相同）", "hi": "最大（差異最大）", "na": H.NA_GREY, "naLabel": "共同覆蓋不足"},
+        ],
+        "dendro": {"grey": "#5b6470",
+                   "note": "分支完全落在同一個平面群內就用該群色，跨群用灰 —— "
+                           "一眼看得出平面切割切在樹的哪個高度"},
     }
