@@ -12,6 +12,7 @@ LCA 相關欄位外完全相同，所以是乾淨的同輸入 A/B —— 這是�
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from capability import Capability, Registry, finalize, make, probe
@@ -51,13 +52,35 @@ def load(reg: Registry, pre_dir, post_dir) -> Capability:
         return cap
     probe(cap, "S0", True, f"pre {len(pre_f)} 檔、post {len(post_f)} 檔")
 
-    if len(pre_f) != len(post_f):
-        cap.state = "PARTIAL"
-        probe(cap, "S1", False, f"檔數不等（{len(pre_f)} vs {len(post_f)}），A/B 不對稱")
-    else:
-        probe(cap, "S1", True, "檔數相等，可做同輸入對照")
+    # 兩側檔數不必相等 —— post 端可能多跑了幾條染色體（例如 2026-08-08 補上
+    # chrX/chrY 讓輸出 BAM 成為來源的完整複本）。若直接把兩側全部加總相比，
+    # 多出來的染色體會讓 reads_total / hp_written 等非 LCA 欄位也不同，
+    # 看起來像「兩套不是同輸入」，其實只是分母不同。
+    # 正確做法是**按染色體取交集**後再比，這才是真正的同輸入 A/B。
+    def _by_chrom(files):
+        out = {}
+        for f in files:
+            m = re.search(r"\.(chr[0-9XYM]+)\.", Path(f).name)
+            if m:
+                out[m.group(1)] = f
+        return out
 
-    a, b = _agg(pre_f), _agg(post_f)
+    pre_c, post_c = _by_chrom(pre_f), _by_chrom(post_f)
+    shared = sorted(set(pre_c) & set(post_c))
+    only_post = sorted(set(post_c) - set(pre_c))
+    only_pre = sorted(set(pre_c) - set(post_c))
+    if not shared:
+        cap.state = "PARTIAL"
+        probe(cap, "S1", False, "兩側沒有共同的染色體，無法對照")
+        return cap
+    extra = ""
+    if only_post:
+        extra += f"；只有 post 有：{'、'.join(only_post)}（已排除）"
+    if only_pre:
+        extra += f"；只有 pre 有：{'、'.join(only_pre)}（已排除）"
+    probe(cap, "S1", True, f"按染色體取交集 {len(shared)} 條，可做同輸入對照{extra}")
+
+    a, b = _agg([pre_c[c] for c in shared]), _agg([post_c[c] for c in shared])
     keys = set(a) | set(b)
     diff = sorted(k for k in keys if a.get(k) != b.get(k))
     same = len(keys) - len(diff)

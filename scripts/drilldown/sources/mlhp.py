@@ -50,9 +50,20 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
     def _components(pats, k):
         """把 pattern 轉成 sSNV 共現圖，回傳 (分量數, 各分量大小)。
 
-        一個 block 理應是「被 read 串連起來的 sSNV 集合」。若共現圖斷裂，
-        代表那些位點之間沒有任何 read 同時覆蓋 —— solver 仍會建出一棵樹，
-        但跨分量的邊完全沒有 read 支持。實測 16.16% 的 block 有這個情形。
+        🔴 這裡算出的「斷裂」**不等於**「沒有 read 串連」——曾經這樣解讀，錯了。
+
+        groups 是 exact-PS 投影後的 pattern 表：read 在任一位點是 O/D/S/L 時，
+        投影會讓整條變成 X。因此一條真的橫跨兩個位點的 read，只要在別的位點
+        落在那些狀態，就不會出現在 pattern 表的共現裡。用這張表判連通性會
+        系統性低估，當初據此得出「16.16% 的 block 斷裂、跨分量的樹邊零 read
+        支持」的結論，實測是錯的。
+
+        判連通性的權威來源是 endpoint_edges（見 sources/strict_edges.py）：
+        用通過門檻的邊重算，11,590 / 11,590 全部連通，設計本來就是對的。
+
+        本函式保留下來，是因為「投影後的 pattern 表看不到多少連鎖」本身
+        是有意義的統計量（它決定 read state matrix 能顯示什麼），
+        但它**只描述投影表**，不可外推成 read 支持度的結論。
         """
         if k < 2:
             return 1, [k]
@@ -122,8 +133,9 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
     cap.counts["groups"] = len(by_region)
     cap.counts["broken_cooccurrence"] = n_broken
     probe(cap, "S2", True,
-          f"共現圖斷裂的 block：{n_broken:,} / {len(by_region):,}"
+          f"投影後 pattern 表看不到共現的 block：{n_broken:,} / {len(by_region):,}"
           f"（{n_broken / max(len(by_region), 1) * 100:.2f}%）—— "
-          f"那些 block 的 sSNV 之間沒有 read 串連，跨分量的樹邊零 read 支持")
+          f"這是 O/D/S/L→X 投影造成的視野限制，"
+          f"**不是**缺乏 read 支持（連通性以 strict endpoint edges 為準，該處 100% 連通）")
     cap.payload = {"by_region": by_region}
     return finalize(cap)

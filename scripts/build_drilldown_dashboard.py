@@ -30,6 +30,7 @@ import ism as src_ism                                          # noqa: E402
 import mlhp as src_mlhp                                        # noqa: E402
 import annotation as src_annot                                 # noqa: E402
 import lca_ab as src_lca_ab                                    # noqa: E402
+import lineage_paths as src_lineage_paths                        # noqa: E402
 import strict_edges as src_edges                               # noqa: E402
 import payload as emit_payload                                 # noqa: E402
 import shell as emit_shell                                     # noqa: E402
@@ -111,6 +112,7 @@ def build_registry(args) -> Registry:
         src_ism.load(reg, args.ism_root, l1, l1["chroms"])
         src_annot.load(reg, args.annot_dir, l1)
         src_lca_ab.load(reg, args.lca_pre, args.lca_post)
+        src_lineage_paths.load(reg, args.paths_dir, rids)
         src_edges.load(reg, args.chrom_root, topo.payload["regions"], reg.get("mlhp"))
     return reg
 
@@ -155,6 +157,7 @@ def main() -> int:
                     help="產甲基雙面板 PNG：0（不產）/ N（前 N 個）/ all（全部）")
     ap.add_argument("--lineage-assign", help="read_lineage_assignments.tsv.gz（側欄 lineage 軌）")
     ap.add_argument("--lineage-paths", help="unit_lineage_paths.tsv.gz")
+    ap.add_argument("--paths-dir", help="放 *.unit_lineage_paths.tsv.gz 的目錄（自檢 C8 用）")
     ap.add_argument("--probe-only", action="store_true", help="只探測並印能力矩陣，不產頁")
     ap.add_argument("--figs-mode", choices=["copy", "link", "ref"], default="copy",
                     help="copy（預設，輸出夾自足可搬走）/ link（symlink，搬移會斷）/ ref（相對路徑）")
@@ -172,6 +175,8 @@ def main() -> int:
                                ".all.read_lineage_assignments.tsv.gz")
     if not args.lineage_paths and lin_root:
         args.lineage_paths = f"{lin_root}/paths/{args.sample}.unit_lineage_paths.tsv.gz"
+    if not getattr(args, "paths_dir", None) and lin_root:
+        args.paths_dir = f"{lin_root}/paths"
 
     if not args.topology:
         root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
