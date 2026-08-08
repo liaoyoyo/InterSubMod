@@ -2,7 +2,7 @@
 
 **Subclonal reconstruction from single-molecule somatic mutation co-occurrence in ONT long reads.**
 
-[繁體中文版 →](README.zh-TW.md) · [Explanation Center →](https://github.com/liaoyoyo/InterSubMod/wiki) · [How to run →](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
+[繁體中文版 →](README.zh-TW.md) · [**Docs site →**](https://liaoyoyo.github.io/InterSubMod/) · [Wiki →](https://github.com/liaoyoyo/InterSubMod/wiki) · [How to run →](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 A tumour is not one cell population — it is several subpopulations carrying different
 mutation sets. Knowing *which mutation came first* and *which mutations live in the same
@@ -220,10 +220,11 @@ no external dependencies, openable offline.
 | 📊 | [Analysis & presentation](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) | Which scripts to use, refuse-on-missing HTML generator |
 | ▶️ | [How to run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run) | Six steps, each with an acceptance check |
 
-> **Note on the linked pages.** The links above point to the project **Wiki**, which
-> GitHub renders natively. The same content also exists as fully self-contained HTML pages
-> under `docs/explain/` — richer typography and interactive fold-outs, but GitHub shows
-> `.html` files as source, so open those after cloning (or enable GitHub Pages on `/docs`).
+> **Two ways to read the same material.** The table above links to the **Wiki**, which
+> GitHub renders natively and is the quickest to skim. The same content is also served as
+> fully self-contained HTML at **[liaoyoyo.github.io/InterSubMod](https://liaoyoyo.github.io/InterSubMod/)**
+> — richer typography, interactive fold-out sections, and 29 hand-drawn diagrams rendered
+> inline as SVG. Both are generated from `docs/explain/`, which is the single source.
 
 Pages 01–10 cover the scientific method itself (glossary, ISM core, methylation read/filter,
 worked case studies, statistical division of labour, capability vs. narrative).

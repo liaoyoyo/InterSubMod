@@ -2,7 +2,7 @@
 
 **用 ONT 長讀長的「單分子體細胞突變共現」重建腫瘤亞群譜系。**
 
-[English →](README.md) · [解釋中心 →](https://github.com/liaoyoyo/InterSubMod/wiki) · [怎麼跑 →](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
+[English →](README.md) · [**文件網站 →**](https://liaoyoyo.github.io/InterSubMod/) · [Wiki →](https://github.com/liaoyoyo/InterSubMod/wiki) · [怎麼跑 →](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 一顆腫瘤不是單一細胞群，而是好幾群帶著不同突變組合的細胞混在一起。
 要理解抗藥性與病程發展，就需要知道**哪個突變先發生**、**哪些突變住在同一群細胞裡**。
@@ -207,9 +207,10 @@ pip install -r requirements.txt
 | 📊 | [分析與呈現層](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) | 該用哪些腳本、拒絕渲染的 HTML 生成器 |
 | ▶️ | [怎麼跑](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run) | 六個步驟，每步附驗收條件 |
 
-> **關於上面的連結。**這些連結指向專案 **Wiki**，GitHub 會原生渲染。
-> 同樣的內容也以完全自足的 HTML 頁面存在於 `docs/explain/`——排版更豐富、有可展開的細節，
-> 但 GitHub 對 `.html` 只會顯示原始碼，所以那些請 clone 後開啟（或在 `/docs` 啟用 GitHub Pages）。
+> **同一份內容有兩種讀法。**上表連到 **Wiki**，GitHub 原生渲染、最適合快速瀏覽。
+> 同樣的內容也以完全自足的 HTML 形式發佈在 **[liaoyoyo.github.io/InterSubMod](https://liaoyoyo.github.io/InterSubMod/)**
+> ——排版更豐富、有可展開的細節區塊，以及 29 張以 SVG 內嵌的手刻圖。
+> 兩者都由 `docs/explain/` 產生，那裡是唯一真實來源。
 
 第 01–10 頁涵蓋科學方法本身（名詞地基、ISM 方法、甲基化讀取與篩選、
 真實案例逐步拆解、三統計分工、能力 vs 敘述）。
