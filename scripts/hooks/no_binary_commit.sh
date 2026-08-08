@@ -35,9 +35,18 @@ fi
 
 # Find staged binary files matching blocked patterns
 # Blocked: pptx, pdf, jpg, jpeg, png (in figures/assets), >500KB anything
+#
+# Exception (added 2026-08-06): docs/images/ holds the small, hand-made explanatory
+# figures embedded in README.md / README.zh-TW.md and the GitHub Wiki. Those MUST be
+# version-controlled or GitHub renders broken images — a raw.githubusercontent URL can
+# only resolve against a committed file. They are generated deterministically by
+# tools/extract_svg_for_github.py from docs/explain/, are kept small (all well under the
+# 500KB warn threshold), and the same carve-out exists in .gitignore. Research output
+# figures remain blocked everywhere else, which is what this policy is actually for.
 BLOCKED=$(git diff --cached --name-only --diff-filter=AM 2>/dev/null | \
   grep -iE '\.(pptx|pdf|jpg|jpeg|png)$' | \
-  grep -v '\.gitkeep$' || true)
+  grep -v '\.gitkeep$' | \
+  grep -v '^docs/images/[^/]*$' || true)
 
 if [ -n "$BLOCKED" ]; then
   echo "ERROR: Blocked binary files in staged changes:" >&2

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 上游前處理鏈與 sidecar 串流設計
+     來源: docs/explain/14_upstream-data.standalone.html (svg #1)
+     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+<svg viewBox="0 0 940 560" role="img" aria-labelledby="u1t u1d" xmlns="http://www.w3.org/2000/svg">
+      <title id="u1t">上游八步驟前處理鏈</title>
+      <desc id="u1d">從 ONT 原始訊號經 Dorado basecalling 產生帶甲基化標記的 BAM；
+      正常組織 BAM 經 Clair3 與 LongPhase 產生定相的 germline 變異；
+      腫瘤與正常配對經 ClairS 產生體細胞突變 VCF 並正規化；
+      LongPhase-S 以 germline 單倍型為骨架標記每條 read，
+      其輸出的 tagged BAM 寫入具名管道由另一程序即時抽成 sidecar TSV，BAM 本體從不寫入磁碟；
+      最後另跑 SAVANA 取得拷貝數。</desc>
+  <rect x="0" y="0" width="940" height="560" fill="#FAF9F5"/>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+        <defs><marker id="u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
+
+        <rect x="14" y="14" width="200" height="52" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
+        <text x="114" y="33" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">① Dorado basecalling</text>
+        <text x="114" y="48" text-anchor="middle" font-size="9.5" fill="#2F6690">電訊號 → 鹼基 + 甲基化機率</text>
+        <text x="114" y="60" text-anchor="middle" font-size="9" fill="#5C5A54">產出 MM / ML tag</text>
+
+        <rect x="234" y="14" width="200" height="52" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
+        <text x="334" y="33" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">② germline 定相</text>
+        <text x="334" y="48" text-anchor="middle" font-size="9.5" fill="#2F6690">Clair3 叫變異 + LongPhase 定相</text>
+        <text x="334" y="60" text-anchor="middle" font-size="9" fill="#5C5A54">在 normal BAM 上做</text>
+
+        <rect x="454" y="14" width="200" height="52" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
+        <text x="554" y="33" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">③ ClairS 體細胞突變</text>
+        <text x="554" y="48" text-anchor="middle" font-size="9.5" fill="#2F6690">腫瘤 + 正常配對比較</text>
+        <text x="554" y="60" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#5C5A54">134,122 筆</text>
+
+        <rect x="674" y="14" width="252" height="52" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
+        <text x="800" y="33" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">④ VCF 正規化</text>
+        <text x="800" y="48" text-anchor="middle" font-size="9.5" fill="#6b4310">只改一個欄位型別，不動任何 FILTER</text>
+        <text x="800" y="60" text-anchor="middle" font-size="9" fill="#6b4310">守恆稽核：進出筆數必須相同</text>
+
+        <path d="M470,70 L470,90" stroke="#8a8578" stroke-width="1.6" marker-end="url(#u)" fill="none"/>
+
+        <rect x="120" y="92" width="700" height="72" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.8"/>
+        <text x="470" y="113" text-anchor="middle" font-size="12.5" font-weight="800" fill="#5B3FA0">⑤ LongPhase-S — 這裡產生 HP / PS 標籤</text>
+        <text x="470" y="131" text-anchor="middle" font-size="10" fill="#3f2c70">以 germline 單倍型為骨架，判斷每條 read 屬於 HP1 還是 HP2</text>
+        <text x="470" y="146" text-anchor="middle" font-size="10" fill="#3f2c70">若該 read 同時帶體細胞變異，再細分成 1-1 / 2-1（germline 骨架上的體細胞支系）或 3</text>
+        <text x="470" y="159" text-anchor="middle" font-size="9.5" fill="#9A3B3B">執行參數：12 執行緒、MAPQ ≥ 20、標記補充比對、輸出體細胞 VCF</text>
+
+        <path d="M470,164 L470,184" stroke="#8a8578" stroke-width="1.6" marker-end="url(#u)" fill="none"/>
+
+        <!-- FIFO 重點 -->
+        <rect x="60" y="186" width="820" height="132" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="2"/>
+        <text x="470" y="208" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2F7D5B">⑥ 關鍵設計：tagged BAM 寫進「具名管道」，從不寫到磁碟</text>
+
+        <rect x="90" y="222" width="176" height="56" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="1.2"/>
+        <text x="178" y="242" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">LongPhase-S 寫出</text>
+        <text x="178" y="257" text-anchor="middle" font-size="9.5" fill="#1f4f3a">tagged BAM 串流</text>
+        <text x="178" y="270" text-anchor="middle" font-size="9" fill="#5C5A54">（若落地 = 每樣本上百 GB）</text>
+
+        <path d="M270,250 L318,250" stroke="#2F7D5B" stroke-width="2" marker-end="url(#u)" fill="none"/>
+        <rect x="324" y="228" width="120" height="44" rx="22" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.6"/>
+        <text x="384" y="246" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5B3FA0">具名管道</text>
+        <text x="384" y="261" text-anchor="middle" font-family="ui-monospace,monospace" font-size="8.5" fill="#3f2c70">.fifo</text>
+
+        <path d="M448,250 L496,250" stroke="#2F7D5B" stroke-width="2" marker-end="url(#u)" fill="none"/>
+        <rect x="502" y="222" width="180" height="56" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="1.2"/>
+        <text x="592" y="242" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">另一程序邊讀邊抽</text>
+        <text x="592" y="257" text-anchor="middle" font-size="9.5" fill="#1f4f3a">每條 read 抽 9 個欄位</text>
+        <text x="592" y="270" text-anchor="middle" font-size="9" fill="#5C5A54">CIGAR 只存 8 位元組摘要</text>
+
+        <path d="M686,250 L734,250" stroke="#2F7D5B" stroke-width="2" marker-end="url(#u)" fill="none"/>
+        <rect x="740" y="222" width="120" height="56" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="800" y="242" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">sidecar TSV</text>
+        <text x="800" y="257" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#1f4f3a">5.83 GiB</text>
+        <text x="800" y="270" text-anchor="middle" font-size="9" fill="#5C5A54">（7 樣本合計）</text>
+
+        <text x="470" y="298" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">跑完後工作目錄裡只剩一個空的管道檔 —— BAM 本體一個位元組都沒留在磁碟上</text>
+        <text x="470" y="312" text-anchor="middle" font-size="10" fill="#1f4f3a">接著驗證：列數必須等於比對數、不得有未知的 HP 值、座標必須仍然有序，任一不過就中止</text>
+
+        <path d="M470,318 L470,338" stroke="#8a8578" stroke-width="1.6" marker-end="url(#u)" fill="none"/>
+
+        <rect x="120" y="340" width="340" height="66" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
+        <text x="290" y="360" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">⑦ FILTER 雙向重校正稽核</text>
+        <text x="290" y="376" text-anchor="middle" font-size="9.5" fill="#6b4310">比對正規化前後的 VCF，逐位點統計狀態轉移</text>
+        <text x="290" y="391" text-anchor="middle" font-size="9.5" fill="#6b4310">並確認除 FILTER 外其他欄位未被改動</text>
+        <text x="290" y="402" text-anchor="middle" font-size="9" fill="#9A3B3B">見下方 §3 — 這裡有個容易算錯的地方</text>
+
+        <rect x="480" y="340" width="340" height="66" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
+        <text x="650" y="360" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">⑧ SAVANA 拷貝數</text>
+        <text x="650" y="376" text-anchor="middle" font-size="9.5" fill="#6b4310">在雜合位點數等位比例，擬合純度與倍性</text>
+        <text x="650" y="391" text-anchor="middle" font-size="9.5" fill="#6b4310">刻意只跑 cna 子命令</text>
+        <text x="650" y="402" text-anchor="middle" font-size="9" fill="#9A3B3B">跑完整流程會吃到 400–488 GB 記憶體近乎 OOM</text>
+
+        <rect x="120" y="424" width="700" height="122" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.8"/>
+        <text x="470" y="446" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9A3B3B">為什麼要大費周章用管道，而不是存 tagged BAM？</text>
+        <text x="146" y="470" font-size="10.5" fill="#7a3030">7 個樣本的 tagged BAM 合計約 <tspan font-weight="700">1.67 TiB</tspan>，含餘裕需準備約 2.3 TB 空間。</text>
+        <text x="146" y="488" font-size="10.5" fill="#7a3030">而 sidecar 只有 <tspan font-weight="700">5.83 GiB</tspan>（壓縮後）／13.98 GiB（未壓縮）——<tspan font-weight="700">相差約 287 倍</tspan>。</text>
+        <text x="146" y="510" font-size="10.5" fill="#7a3030">更重要的是：分析真正需要的資訊只有「哪條 read、在哪、屬於哪個單倍型」這 9 個欄位，</text>
+        <text x="146" y="526" font-size="10.5" font-weight="700" fill="#9A3B3B">序列與品質字串佔了 99% 以上的體積卻完全用不到。</text>
+        <text x="146" y="540" font-size="9.5" fill="#7a3030">代價：無法直接用 IGV 之類的工具看標籤（見下方 §4）。</text>
+      </g>
+    </svg>

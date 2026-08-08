@@ -416,3 +416,9 @@ research/**/diagnostic_write_traces/**
 /gb_poc.err
 /gb_poc.done
 drilldown.paths.json
+
+# README / 文件展示用圖（例外於上方 *.png 全域忽略）
+# 這些是為 GitHub README 與 Wiki 產生的說明圖，需入版控才能在網頁上顯示。
+# 研究過程產生的大量圖表仍由上方 *.png 規則擋住。
+!docs/images/*.png
+!docs/images/*.svg

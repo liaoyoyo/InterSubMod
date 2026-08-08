@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- LongLineage 位點流失漏斗（為什麼輸出 0 棵樹）
+     來源: docs/explain/13_longlineage-io.standalone.html (svg #1)
+     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+<svg viewBox="0 0 940 610" role="img" aria-labelledby="l1t l1d" xmlns="http://www.w3.org/2000/svg">
+      <title id="l1t">LongLineage 位點流失漏斗</title>
+      <desc id="l1d">從 79,687 個凍結的體細胞突變位點開始，78,629 個可評估，
+      其中只有 12,851 個通過甲基化穩定分群關卡；這 12,851 個再經第二道關卡後只剩 5 個合格，
+      12,815 個被判為資訊不足、31 個被判為確實不合格；共現配對共 134,278 列但其中 134,276 列被前一道關卡擋掉；
+      聯合特徵檢定通過 0 個位點，最終拓撲單元為 0。</desc>
+  <rect x="0" y="0" width="940" height="610" fill="#FAF9F5"/>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+        <defs><marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker>
+          <marker id="b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#B06A16"/></marker></defs>
+
+        <rect x="250" y="12" width="420" height="42" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="460" y="30" text-anchor="middle" font-size="12" fill="#2F6690">凍結的體細胞突變位點（chr1–22）</text>
+        <text x="460" y="47" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">79,687</text>
+        <path d="M460,54 L460,72" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="74" width="420" height="42" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="460" y="92" text-anchor="middle" font-size="12" fill="#2F6690">M1 可評估（突變型 read 數足夠）</text>
+        <text x="460" y="109" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">78,629</text>
+        <path d="M670,95 L742,95" stroke="#B06A16" stroke-width="1.5" marker-end="url(#b2)" fill="none"/>
+        <rect x="748" y="78" width="180" height="36" rx="5" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.1"/>
+        <text x="838" y="93" text-anchor="middle" font-size="9.5" fill="#6b4310">突變型 read 太少 1,044</text>
+        <text x="838" y="107" text-anchor="middle" font-size="9.5" fill="#6b4310">距離矩陣不完整 14</text>
+        <path d="M460,116 L460,134" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="136" width="420" height="52" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="2"/>
+        <text x="460" y="154" text-anchor="middle" font-size="12" font-weight="700" fill="#5B3FA0">M1 甲基化分群「穩定」的位點</text>
+        <text x="460" y="171" text-anchor="middle" font-family="ui-monospace,monospace" font-size="14" font-weight="800" fill="#5B3FA0">12,851</text>
+        <text x="460" y="184" text-anchor="middle" font-size="9.5" fill="#5B3FA0">只佔全部的 16.1%</text>
+        <path d="M670,162 L742,162" stroke="#9A3B3B" stroke-width="1.8" marker-end="url(#b2)" fill="none"/>
+        <rect x="748" y="140" width="180" height="46" rx="5" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/>
+        <text x="838" y="157" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">66,836 個位點</text>
+        <text x="838" y="171" text-anchor="middle" font-size="9.5" fill="#7a3030">在共現層完全沒有任何列</text>
+        <text x="838" y="182" text-anchor="middle" font-size="9" fill="#7a3030">（連配對都不會產生）</text>
+        <path d="M460,188 L460,206" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="208" width="420" height="42" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+        <text x="460" y="226" text-anchor="middle" font-size="12" fill="#B06A16">M2 第二道關卡通過</text>
+        <text x="460" y="243" text-anchor="middle" font-family="ui-monospace,monospace" font-size="14" font-weight="800" fill="#9A3B3B">5</text>
+        <path d="M250,229 L182,229" stroke="#B06A16" stroke-width="1.5" marker-end="url(#b2)" fill="none"/>
+        <rect x="12" y="200" width="166" height="58" rx="5" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.1"/>
+        <text x="95" y="216" text-anchor="middle" font-size="9.5" font-weight="700" fill="#6b4310">資訊不足 12,815</text>
+        <text x="95" y="229" text-anchor="middle" font-size="8.5" fill="#6b4310">（不是「被證明是假象」）</text>
+        <text x="95" y="245" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9A3B3B">真正判定不合格 31</text>
+        <text x="95" y="256" text-anchor="middle" font-size="8.5" fill="#7a3030">5 + 31 + 12,815 = 12,851</text>
+        <path d="M460,250 L460,268" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="270" width="420" height="52" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+        <text x="460" y="288" text-anchor="middle" font-size="12" fill="#B06A16">共現配對表</text>
+        <text x="460" y="305" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#B06A16">134,278 列</text>
+        <text x="460" y="318" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9A3B3B">其中 134,276 列被前一道關卡標為不合格</text>
+        <path d="M460,322 L460,340" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="342" width="420" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/>
+        <text x="460" y="360" text-anchor="middle" font-size="12" fill="#9A3B3B">聯合特徵檢定通過的位點</text>
+        <text x="460" y="377" text-anchor="middle" font-family="ui-monospace,monospace" font-size="14" font-weight="800" fill="#9A3B3B">0</text>
+        <path d="M460,384 L460,402" stroke="#8a8578" stroke-width="1.6" marker-end="url(#b1)" fill="none"/>
+
+        <rect x="250" y="404" width="420" height="46" rx="6" fill="#9A3B3B" stroke="#7a3030" stroke-width="2"/>
+        <text x="460" y="424" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">最終拓撲單元</text>
+        <text x="460" y="442" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" font-weight="800" fill="#fff">0</text>
+
+        <!-- 解說 -->
+        <rect x="60" y="474" width="820" height="122" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.6"/>
+        <text x="78" y="496" font-size="12.5" font-weight="800" fill="#5B3FA0">為什麼這件事在科學上很重要</text>
+        <text x="78" y="518" font-size="10.5" fill="#3f2c70">直覺會以為「突變共現是獨立的骨幹，甲基化只是旁證」。但在這套實作裡，</text>
+        <text x="78" y="534" font-size="10.5" font-weight="700" fill="#5B3FA0">建立共現表的第一件事就是檢查甲基化有沒有分出穩定的群 —— 沒過就直接回空結果。</text>
+        <text x="78" y="554" font-size="10.5" fill="#3f2c70">後果：79,687 個位點裡有 66,836 個（83.9%）在共現層根本不存在任何一列。</text>
+        <text x="78" y="572" font-size="10.5" font-weight="700" fill="#9A3B3B">因此任何「共現覆蓋率」的解讀，都必須先扣掉這個甲基化前提，否則會嚴重高估。</text>
+        <text x="78" y="588" font-size="10" fill="#3f2c70">這也正是它與 InterSubMod「甲基化絕不進重建」立場衝突的地方（見系統全景頁 §2）。</text>
+      </g>
+    </svg>

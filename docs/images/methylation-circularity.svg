@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 為什麼甲基化不能用來重建譜系（cis-ASM 循環）
+     來源: docs/explain/11_system-map-overview.standalone.html (svg #2)
+     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+<svg viewBox="0 0 900 330" role="img" aria-labelledby="f2t f2d" xmlns="http://www.w3.org/2000/svg">
+      <title id="f2t">甲基化循環論證示意</title>
+      <desc id="f2d">左側顯示一個位點觀察到兩群不同甲基化模式的 read，右側列出四種可能成因：
+      germline 等位特異性甲基化、雜合性缺失導致的解遮蔽、拷貝數增益的劑量效應、以及真正的亞群譜系差異。
+      單一 bulk 樣本無法區分這四者，因此用甲基化分群來確認亞群等於用待證明的結論當前提。</desc>
+  <rect x="0" y="0" width="900" height="330" fill="#FAF9F5"/>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+
+        <text x="450" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#9A3B3B">
+          觀察到「兩群甲基化模式不同的 read」時，至少有四種成因，單一 bulk 分不開</text>
+
+        <!-- 觀察 -->
+        <rect x="20" y="42" width="200" height="120" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="120" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#5B3FA0">觀察</text>
+        <text x="120" y="86" text-anchor="middle" font-size="10.5" fill="#3f2c70">同一位點的 read</text>
+        <text x="120" y="101" text-anchor="middle" font-size="10.5" fill="#3f2c70">分成甲基化高 / 低兩群</text>
+        <!-- 小示意：兩排點 -->
+        <g>
+          <circle cx="60" cy="122" r="4.5" fill="#5B3FA0"/><circle cx="76" cy="122" r="4.5" fill="#5B3FA0"/>
+          <circle cx="92" cy="122" r="4.5" fill="#5B3FA0"/><circle cx="108" cy="122" r="4.5" fill="#5B3FA0"/>
+          <circle cx="60" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/><circle cx="76" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/>
+          <circle cx="92" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/><circle cx="108" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/>
+          <text x="132" y="126" font-size="9.5" fill="#3f2c70">甲基化高</text>
+          <text x="132" y="146" font-size="9.5" fill="#3f2c70">甲基化低</text>
+        </g>
+
+        <path d="M226,102 L266,102" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar2)" fill="none"/>
+        <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#9A3B3B"/></marker></defs>
+
+        <!-- 四種成因 -->
+        <rect x="274" y="42" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="60" font-size="11" font-weight="700" fill="#9A3B3B">① germline 等位特異性甲基化</text>
+        <text x="288" y="76" font-size="9.5" fill="#7a3030">天生兩套染色體的甲基化就不同（如印記基因）</text>
+
+        <rect x="274" y="92" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="110" font-size="11" font-weight="700" fill="#9A3B3B">② LOH 解遮蔽</text>
+        <text x="288" y="126" font-size="9.5" fill="#7a3030">腫瘤丟掉一套染色體，原本被平均掉的差異浮現</text>
+
+        <rect x="274" y="142" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="160" font-size="11" font-weight="700" fill="#9A3B3B">③ 拷貝數增益的劑量效應</text>
+        <text x="288" y="176" font-size="9.5" fill="#7a3030">某段被複製多份，比例被拉偏</text>
+
+        <rect x="274" y="192" width="290" height="42" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
+        <text x="288" y="210" font-size="11" font-weight="700" fill="#2F7D5B">④ 真正的亞群譜系差異 ← 我們想要的</text>
+        <text x="288" y="226" font-size="9.5" fill="#1f4f3a">不同細胞群確實帶不同甲基化</text>
+
+        <!-- 結論 -->
+        <path d="M570,138 L610,138" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar2)" fill="none"/>
+        <rect x="618" y="60" width="266" height="156" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.8"/>
+        <text x="751" y="84" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9A3B3B">循環論證</text>
+        <text x="632" y="106" font-size="10.5" fill="#7a3030">要用甲基化「確認」某群 read 是亞群，</text>
+        <text x="632" y="122" font-size="10.5" fill="#7a3030">得先排除 ①②③。</text>
+        <text x="632" y="144" font-size="10.5" fill="#7a3030">但要排除 ①②③，就得先知道</text>
+        <text x="632" y="160" font-size="10.5" fill="#7a3030">哪些 read 屬於哪個亞群 ——</text>
+        <text x="632" y="182" font-size="11" font-weight="700" fill="#9A3B3B">這正是待證明的結論。</text>
+        <text x="632" y="204" font-size="10" fill="#5C5A54">單一 bulk 樣本無法打破這個循環。</text>
+
+        <!-- 底部解方 -->
+        <rect x="20" y="252" width="864" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="36" y="274" font-size="12" font-weight="800" fill="#2F7D5B">✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹</text>
+        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。</text>
+        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">甲基化被結構性地隔離在主線之外：樹先由遺傳證據定好，甲基化只在事後做關聯描述，改不動任何一條邊。</text>
+      </g>
+    </svg>
