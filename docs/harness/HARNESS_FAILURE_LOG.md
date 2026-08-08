@@ -103,3 +103,27 @@ build_branch: research/subclonal-reconstruction-202606
 - **修法**：render 後 **JS 逐屏 scrollBy 到底觸發 lazy-load** → 再等 → 才數 broken(改後 400/400 正確)。
 - **永久防線**：任何「全頁 img 完整性」檢查必先滾動觸發 lazy-load 再判。
 - **連結**：`tools/batch_render_qa.py` scroll 段。
+
+## H-011 · 2026-08-06 · [silent-corruption] SVG `<text>` 內用 HTML `<b>` → 其後元素全部掉出圖外
+- **症狀**：手刻 SVG 圖只畫出前半，後半元素變成散落純文字堆在圖下方（數字黏在一起如 `30 8 6 25`、`HP1HP2`）。
+- **根因(機制)**：HTML parser 在 SVG 命名空間內遇到 HTML-only 標籤（`<b>`/`<i>`/`<br>`…）會**中止 SVG 解析上下文**，該標籤之後的所有 `<rect>/<text>/<path>` 都被當成 HTML 文字節點處理。SVG 內要加粗必須用 `<tspan font-weight="700">`。
+- **最小重現**：`<text ...>前段<b>後段</b></text>` 之後再放任意 `<rect>` → rect 不會被畫出。
+- **偵測訊號(含盲點)**：🔴 **所有既有訊號全部失效** — curl 200、`no pageerror`、`no broken images`（因為根本沒有 `<img>`）、頁面高度可能不變（掉出的文字若在摺疊 `<details>` 內完全看不出）。**唯一可靠訊號 = 逐個 svg 區塊做 XML 解析，或實際截圖用眼睛看**。
+- **影響量化(本輪實測)**：`docs/explain/02_ism-core` SVG#7「稀疏表 vs 密集表」**損失 16/32 元素(50%)**、SVG#2 損失 2/25(8%)；`04_subclone-reconstruction-chr2-18M` SVG#3 污染在最末元素故損失 0。**自 2026-06-12 建立起壞了近 2 個月無人發現。**
+- **修法**：`<b>x</b>` → `<tspan font-weight="700">x</tspan>`；本輪並批次修 4 處。
+- **永久防線**：`tools/explain_page_qa.py`（新建）—— 逐 svg 區塊 XML 解析 + 正則抓 `<text|tspan|desc|title>` 內的 HTML 標籤。交付前必跑。
+
+## H-012 · 2026-08-06 · [font] emoji 在目標環境是豆腐方框（CJK 字型缺 U+1F534 等）
+- **症狀**：頁面中 🔴 ⭐ ✅ ❌ 🟡 🟢 📌 全部顯示為空心方框，交付給教授的頁面出現大量豆腐字。
+- **根因**：`Noto Sans CJK TC` 等字型不含 Emoji block（U+1F300–1FAFF）與部分 Misc Symbols（U+2B50 ⭐、U+2705 ✅、U+274C ❌）。**但 U+2714 ✔ / U+2718 ✘ / U+25CF ● / U+2605 ★ / U+26A0 ⚠ / ①②③ 皆正常**。
+- **偵測訊號(含盲點)**：🔴 **grep 看不出來**（字元存在且合法）；render 無錯誤。只有**實際截圖用眼睛看**才發現。
+- **修法**：HTML 內 🔴→`<span style="color:var(--c-dead)">●</span>`、⭐→★、✅→✔、❌→✘；**SVG 內不能塞 `<span>`**，改為直接移除（顏色語意已由 `fill` 屬性承載）或換等價符號。
+- **影響範圍(本輪)**：解釋中心 17 頁中 **10 頁受影響**，最多的 `02_ism-core` 有 32 個。
+- **永久防線**：`tools/explain_page_qa.py` 內建 `TOFU_RISK` 字典（含替代建議）。新增符號前先在目標環境截圖確認。
+
+## H-013 · 2026-08-06 · [naming-lie] 檔名叫 `.standalone.html` 但實際 `<link>` 外部 CSS
+- **症狀**：`docs/explain/index.standalone.html` 等頁移動位置或單獨寄給他人時**完全失去樣式**。
+- **根因**：檔名宣稱 standalone，實際靠 `<link rel="stylesheet" href="_assets/explain.css">` 相對路徑。在原目錄開沒問題 → 長期未被發現。
+- **偵測訊號**：只有把檔案複製到別處或單獨寄出才會暴露。
+- **修法**：內嵌 CSS 全文，保留註解指明編輯 SoT 仍是 `_assets/explain.css`。本輪修 3 頁（index / 01 / 03）。
+- **永久防線**：`tools/explain_page_qa.py` 檢查外部依賴（並先剝除 `<style>` 與 HTML 註解，避免內嵌 CSS 註解中提到 `<link>` 造成假陽性）。

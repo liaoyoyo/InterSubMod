@@ -175,7 +175,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </ol>
   </div>
   <div class="ironclad">
-    <b>🔴 但守住這條邊界（本頁全程不越線）</b>
+    <b><span style="color:var(--c-dead);font-weight:800">●</span> 但守住這條邊界（本頁全程不越線）</b>
     <ol>
       <li>這裡甲基是<b>印證 / 刻畫（characterization）軸，不是驅動者、更不是變異 filter</b>。「用甲基當 filter 去濾真假突變」那條路在本專案已驗證為 <span class="badge b-dead">DEAD</span>。</li>
       <li>乾淨案例<b>依賴三個前提</b>：① LOH（單一親本）② somatic 定義的譜系 ③ 用正常組織對照扣掉既存的等位甲基差異。缺一就不能外推到一般非-LOH 位點。</li>
@@ -636,7 +636,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </figure>
 
   <div class="ironclad">
-    <b>🔴 標 tag 時必守的三條誠實底線（對抗式複核抓出的過度宣稱已撤回）</b>
+    <b><span style="color:var(--c-dead);font-weight:800">●</span> 標 tag 時必守的三條誠實底線（對抗式複核抓出的過度宣稱已撤回）</b>
     <ol>
       <li><b>是「~3 條譜系」不是「5 群」。</b>pos4(<code>chr2:18,096,269</code>) 後面緊接一段 <code>20bp poly-T</code> 同聚物（ONT 最易出錯的情境），它的 G/T/DEL 三態是<u>定序抖動</u>（HKU bq20 計數 C:21 / T:13 / DEL:10 / G:4，且 4 條 G 全是 reverse strand），不是三個真 subclone。pos4 變異本身真，但三態不可拆成三群 → 併成<b>一個 pos4-altered 的 β 子狀態</b>。</li>
       <li><b>突變的「先後順序」是 parsimony 推論，不是觀測。</b>α / β 是姊妹分支，不能用局部 VAF 排誰先誰後（局部 VAF 被 LOH 扭曲）；(4)(6) 共現也無法排序。任何「先突變/後突變」的句子都屬<b>推論層（L3）</b>。</li>
@@ -695,7 +695,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">這些是把本頁結論寫進論文/報告時必須一起帶上的邊界。完整權威裁決見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a> 與 <code>verdict_02</code>。</p>
 
   <details class="card cav"><summary>整體 tier = <span class="badge tier">L2</span>：單位點 × 單樣本 × 單 pipeline</summary>
-    <div class="body">cross-basecaller（HKU vs DORADO）是同一細胞株的<b>技術/資料重現</b>，不是獨立的生物學重複。要升 ⭐4 需要第二個樣本（如 COLO829）或第二個 LOH 位點。</div></details>
+    <div class="body">cross-basecaller（HKU vs DORADO）是同一細胞株的<b>技術/資料重現</b>，不是獨立的生物學重複。要升 ★4 需要第二個樣本（如 COLO829）或第二個 LOH 位點。</div></details>
   <details class="card cav"><summary>pos3 落 SEQC2 高信賴區間「空隙」→ 外部真值不可評估（非 FP）</summary>
     <div class="body">α 譜系的 pivot 突變只有內部 read linkage 支持，外部真值集無法確認此點。</div></details>
   <details class="card cav"><summary>甲基 confound 未完全形式排除</summary>

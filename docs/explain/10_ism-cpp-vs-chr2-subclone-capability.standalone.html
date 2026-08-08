@@ -142,7 +142,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 </div>
 
 <div class="ironclad">
-  <b>🔴 讀這頁的 4 條鐵則（避免把 ISM oversell）</b>
+  <b><span style="color:var(--c-dead);font-weight:800">●</span> 讀這頁的 4 條鐵則（避免把 ISM oversell）</b>
   <ol>
     <li>ISM 的 <code>SubcloneAnalyzer</code> <b>不是 subclone 重建器</b>——是把全基因組 ≥50 個 region 依 ASM 特徵塞進 4 個固定桶的 if/else（<code>SubcloneAnalyzer.cpp:100-128</code>）。沒有 read linkage、沒有樹、沒有 CCF、沒碰任何 SNV。</li>
     <li>ISM 的 <code>TreeStructure</code> <b>不是腫瘤演化樹</b>——是 read×read 甲基距離的 dendrogram（葉=read，邊=甲基距離），沒有祖先-後代、沒有 CCF。</li>
@@ -180,12 +180,12 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <table>
     <thead><tr><th class="lcol">Claim</th><th>已驗證內容</th><th>裁決</th></tr></thead>
     <tbody>
-      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor/normal allele 兩 basecaller 重現；normal 6 點全 REF</td><td class="verdict v-ok">✅ 確認</td></tr>
-      <tr><td><b>B</b> read linkage 定 α/β lineage</td><td>α(pos3=A) 與 β(pos1G/2C/6G) 互斥 0 違反；(3)A→(5)C 巢狀；「5 群」校正為 ~3 regional states</td><td class="verdict v-ok">✅ 骨幹確認</td></tr>
+      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor/normal allele 兩 basecaller 重現；normal 6 點全 REF</td><td class="verdict v-ok">✔ 確認</td></tr>
+      <tr><td><b>B</b> read linkage 定 α/β lineage</td><td>α(pos3=A) 與 β(pos1G/2C/6G) 互斥 0 違反；(3)A→(5)C 巢狀；「5 群」校正為 ~3 regional states</td><td class="verdict v-ok">✔ 骨幹確認</td></tr>
       <tr><td><b>C</b> 甲基把兩 lineage 分開</td><td>10 候選 CpG，扣 normal-HP ASM 後乾淨子集 <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code>，最強 <code>{3.1,3.2}</code>（如 3.2 HKU α0.97/β0.14 q=4.1e-5、DORADO 1.00/0.006 q=2.4e-5）</td><td class="verdict v-part">⚠ 有界</td></tr>
-      <tr><td><b>D</b> LOH + normal=REF</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 全 REF</td><td class="verdict v-ok">✅ 確認</td></tr>
+      <tr><td><b>D</b> LOH + normal=REF</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 全 REF</td><td class="verdict v-ok">✔ 確認</td></tr>
       <tr><td><b>E</b> 樹拓樸 + 順序</td><td>骨幹 parsimony 強制；演化順序僅 (3)→(5) nesting 可排，其餘不可排</td><td class="verdict v-part">⚠ 骨幹 L2 / 順序 L3</td></tr>
-      <tr><td><b>F</b> pos3「FP」其實真 somatic</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩 normal 0% A，僅落 SEQC2 HC 空隙</td><td class="verdict v-ok">✅ 最強單點</td></tr>
+      <tr><td><b>F</b> pos3「FP」其實真 somatic</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩 normal 0% A，僅落 SEQC2 HC 空隙</td><td class="verdict v-ok">✔ 最強單點</td></tr>
     </tbody>
   </table>
   <p class="muted">最終可防守用語（verdict_02）：<em>"a regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence"</em> —— <b>非</b>「confirmed five-subclone evolutionary reconstruction」。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
@@ -252,7 +252,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ============ 3. 逐 claim gap 對照 ============ -->
 <section id="gap">
   <h3><span class="num">3</span> 逐 claim 對照：ISM 撐得起哪些、缺哪些 <span class="badge b-warn">核心</span></h3>
-  <p class="sub">把第 1 節的 6 個 claim，逐一對到第 2 節的 ISM C++ as-built 能力。<span class="verdict v-ok">✅ 合理</span>＝ISM 有對應實作且實測支持；<span class="verdict v-part">⚠ 部分／弱</span>＝有但語意降級或較弱；<span class="verdict v-no">❌ 缺少</span>＝ISM 根本沒有，靠 pysam／外部。</p>
+  <p class="sub">把第 1 節的 6 個 claim，逐一對到第 2 節的 ISM C++ as-built 能力。<span class="verdict v-ok">✔ 合理</span>＝ISM 有對應實作且實測支持；<span class="verdict v-part">⚠ 部分／弱</span>＝有但語意降級或較弱；<span class="verdict v-no">✘ 缺少</span>＝ISM 根本沒有，靠 pysam／外部。</p>
 
   <table>
     <thead><tr><th class="lcol">chr2 claim</th><th>ISM C++ as-built 對應</th><th>裁決</th><th>原因（file:line）</th></tr></thead>
@@ -266,13 +266,13 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>B</b>　互斥 linkage 定 α/β lineage<br><span class="muted">（重建骨幹）</span></td>
         <td><b>無</b>。每 somatic SNV 獨立成 region；無 cross-SNV read linkage 引擎；唯一跨位點構造 <code>SubcloneAnalyzer</code> 是特徵向量分桶，非 read 共享</td>
-        <td class="verdict v-no">❌ 缺少</td>
+        <td class="verdict v-no">✘ 缺少</td>
         <td>骨幹（多 sSNV 在同 read 共現定 lineage）<b>不在 ISM C++</b>；由 pysam linkage 00/10/01/11 做（<code>main.cpp</code> 每 SNV 獨立、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
       </tr>
       <tr>
         <td><b>C</b>　甲基把兩 lineage 分開</td>
         <td>read×read 甲基距離 → 群 + <b>label-first allele/HP PERMANOVA</b>；<b>實測 allele PERMANOVA p=0.001 跨 3 位點複製</b></td>
-        <td class="verdict v-ok">✅ 合理<br><span class="muted">(單位點/allele 軸)</span></td>
+        <td class="verdict v-ok">✔ 合理<br><span class="muted">(單位點/allele 軸)</span></td>
         <td>ISM 直接把 read 依 ALT/REF 分組測甲基距離（<code>LabelTest.cpp:307,86-133</code>、<code>StructureTest.cpp:153-201</code>）。但這是<b>單位點 allele-甲基</b>，且未在 allele 軸跑 cis-control（見下節）</td>
       </tr>
       <tr>
@@ -290,13 +290,13 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>E</b>　樹拓樸 + 演化順序 + CCF</td>
         <td><b>無 clone tree</b>。<code>TreeStructure</code> 是 read×read 甲基距離 dendrogram；<code>SubcloneAnalyzer</code> 是 4-bucket 跨區分類；<b>grep CCF = 0 hits</b></td>
-        <td class="verdict v-no">❌ 缺少</td>
+        <td class="verdict v-no">✘ 缺少</td>
         <td>葉=read、邊=甲基距離，無祖先-後代、無 CCF、無跨位點 lineage（<code>TreeStructure.cpp</code>、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
       </tr>
       <tr>
         <td><b>F</b>　pos3 truth-gap somatic 驗證</td>
         <td><b>無</b>。ISM 不比對 SEQC2 truth、不做 strand/mapQ artifact 統計</td>
-        <td class="verdict v-no">❌ 缺少</td>
+        <td class="verdict v-no">✘ 缺少</td>
         <td>屬 pysam 逐 read 統計 + SEQC2 HC.bed 比對（<code>seqc2_subclone_concordance.py</code>）</td>
       </tr>
     </tbody>
@@ -304,7 +304,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <div class="split">
     <div class="col pass">
-      <h5>✅ ISM C++ 撐得起 ——「characterize」半邊</h5>
+      <h5>✔ ISM C++ 撐得起 ——「characterize」半邊</h5>
       <ul>
         <li><b>C</b> 甲基結構分群（read×read 距離 + PERMANOVA）+ <b>實測 allele PERMANOVA p=0.001 ×3</b></li>
         <li><b>C′</b> normal-anchored ASM-control（拆 germline vs tumor-acquired，雖弱）</li>
@@ -314,7 +314,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <p class="muted">＝「在已被獨立軸（allele/HP/LOH）定義好的結構上，<b>刻畫</b>甲基」。</p>
     </div>
     <div class="col dead">
-      <h5>❌ ISM C++ 缺少 ——「reconstruct」骨幹半邊</h5>
+      <h5>✘ ISM C++ 缺少 ——「reconstruct」骨幹半邊</h5>
       <ul>
         <li><b>B</b> 多 sSNV read linkage 定 α/β lineage（骨幹）</li>
         <li><b>E</b> clone tree / 演化順序 / CCF</li>
@@ -355,11 +355,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <section id="conclusion">
   <h3><span class="num">5</span> 結論：足夠解釋哪些、不足解釋哪些 <span class="badge tier">Tier 4 paper-scope</span></h3>
 
-  <div class="takeaway pass"><span class="lab">足夠 ✅</span>
+  <div class="takeaway pass"><span class="lab">足夠 ✔</span>
     ISM C++ 的數據與敘述<b>足夠解釋 chr2 subclone 故事的「甲基刻畫」半邊</b>：它在同一批 sSNV 位點上<b>獨立複製了 allele-軸甲基結構顯著</b>（allele PERMANOVA p=0.001 ×3，dispersion 排除），並提供 normal-anchored ASM-control 概念 + LOH 註記。這直接支撐主軸「甲基 = corroborate somatic 軸的 lineage coherence」。
   </div>
 
-  <div class="takeaway dead"><span class="lab">不足 ❌</span>
+  <div class="takeaway dead"><span class="lab">不足 ✘</span>
     ISM C++ <b>不足以解釋「重建骨幹」半邊</b>：多 sSNV read linkage 定 α/β lineage（claim B）、clone tree／演化順序／CCF（claim E）、truth-gap somatic 驗證（claim F）—— 這些是 <b>pysam 自訂腳本 + genetic haplotag + SEQC2</b> 做的，<b>不在 ISM C++</b>。ISM 的 <code>SubcloneAnalyzer</code>／<code>TreeStructure</code>／<code>"Subclone"</code> class 名實不符，不能拿來宣稱重建。
   </div>
 
@@ -375,7 +375,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <li><b>cross-SNV read linkage 引擎</b>：reads.tsv 加 PS 欄／or 多 anchor 同 read 共現表（補 claim B 骨幹）。</li>
     <li><b>allele 軸 cis-control</b>：在 region-level allele PERMANOVA 加 normal-HP1-vs-HP2 拆解（把 cis-ASM 與 subclone 甲基分開，現只在 pysam）。</li>
     <li><b>模組正名</b>：<code>SubcloneAnalyzer</code>→「per-region ASM-signature stratifier」；<code>"Subclone"</code> class→「unlabeled-structure candidate」；避免 over-claim。</li>
-    <li><b>第二 LOH 位點／第二樣本（COLO829）</b>：破單位點 L2 天花板（升 ⭐4）。</li>
+    <li><b>第二 LOH 位點／第二樣本（COLO829）</b>：破單位點 L2 天花板（升 ★4）。</li>
   </ol>
   <p class="muted">完整 9 步系統化構想見 <a href="06_ism-subclone-pipeline-concept.standalone.html">頁 06（pipeline 構想，非已實作）</a>。</p>
 

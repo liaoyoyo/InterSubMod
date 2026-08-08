@@ -146,17 +146,17 @@ mark{background:#fdf2c8;padding:0 2px}
   <p><strong>ISM</strong>（InterSubMod）= 對每個 somatic 突變位點，把周圍 reads 的甲基化模式做成 <em class="q">read×read 距離矩陣 → 階層聚類 → PERMANOVA 結構檢定</em>，量「甲基亞群是否與某個單倍型／體細胞突變<span class="key">結構連結</span>」。它<strong>不是</strong> variant filter，也不是算「兩組平均甲基率差多少」的工具。</p>
   <p class="pi">▸ <b>給 PI 一句話：</b>ISM 量的是 <b>between-molecule（分子間）結構</b>，核心貢獻 = <b>somatic sub-haplotype 解析度</b> + <b>normal-anchored cis-test</b>（去掉 copy／germline-allelic／drift 三種假象）。</p>
   <div class="kpis">
-    <div class="kpi pass"><div class="v">59 欄</div><div class="k">主輸出 <code>significance_summary.csv</code>（實測 head -1）<span class="badge b-pass">🟢 P</span></div></div>
-    <div class="kpi"><div class="v">0.34%</div><div class="k">全基因組 strong-ASM 稀有率（hypo 44%/hyper 56% 無偏好）<span class="badge tier">⭐3</span></div></div>
-    <div class="kpi"><div class="v">−0.122</div><div class="k">BRCA2 promoter HP-axis Δβ <span class="badge b-pass">🟢 P</span></div></div>
-    <div class="kpi dead"><div class="v">DEAD</div><div class="k">甲基→TP/FP filter：OR=0.194, p=1.8e-28；LOSO 100% 循環 <span class="badge b-dead">🔴 L4</span></div></div>
+    <div class="kpi pass"><div class="v">59 欄</div><div class="k">主輸出 <code>significance_summary.csv</code>（實測 head -1）<span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P</span></div></div>
+    <div class="kpi"><div class="v">0.34%</div><div class="k">全基因組 strong-ASM 稀有率（hypo 44%/hyper 56% 無偏好）<span class="badge tier">★3</span></div></div>
+    <div class="kpi"><div class="v">−0.122</div><div class="k">BRCA2 promoter HP-axis Δβ <span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P</span></div></div>
+    <div class="kpi dead"><div class="v">DEAD</div><div class="k">甲基→TP/FP filter：OR=0.194, p=1.8e-28；LOSO 100% 循環 <span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> L4</span></div></div>
   </div>
   <p class="howto" style="margin-top:var(--sp-4)">怎麼讀：<b>名詞</b>建直覺 → <b>作用位置</b>看流程圖 → <b>為何/發現/結論</b>看邏輯 → <b>難點拆解</b>是最會卡的 4 個點（都配圖）→ <b>數據/溯源</b>給嚴謹引用。</p>
 </div>
 
 <!-- 站級 4 鐵則 -->
 <div class="ironclad">
-  <b>🔴 全站 4 條鐵則（讀任何一頁都要記得）</b>
+  <b><span style="color:var(--c-dead);font-weight:800">●</span> 全站 4 條鐵則（讀任何一頁都要記得）</b>
   <ol>
     <li>「<b>存在</b> ASM」≠「<b>能判別</b> TP/FP」——兩個 claim 永遠分開講。</li>
     <li><b>HP-axis</b>（HP1 vs HP1-1）是 somatic-controlled；<b>ALLELE-axis</b>（ALT vs REF）被 germline het baseline 污染——宣稱 somatic ASM 必附 germline-het 對照。</li>
@@ -171,7 +171,7 @@ mark{background:#fdf2c8;padding:0 2px}
   <p class="sub">這頁會用到的關鍵術語，每個給「一句白話 → 直覺類比 → （折疊）嚴謹定義 + 圖 + 來源」。<span class="todo">canonical home 之後移到「背景名詞地基頁」，本頁先就地定義。</span></p>
 
   <details class="card def" id="term-delta-vs-dbeta" open>
-    <summary><span class="term">Δ（距離差）vs Δβ（甲基率差）</span> — 兩個完全不同的量 <span class="badge b-warn">🟡 最常混淆</span></summary>
+    <summary><span class="term">Δ（距離差）vs Δβ（甲基率差）</span> — 兩個完全不同的量 <span class="badge b-warn"><span style="color:var(--c-warn);font-weight:800">●</span> 最常混淆</span></summary>
     <div class="body">
       <div class="intuition"><b>直覺：</b>Δ 問「兩群 reads 的甲基<u>模式</u>距離多遠」（無方向、單位是距離）；Δβ 問「某 CpG 上甲基化<u>比例</u>差多少」（有方向、單位 0–1）。一個講「結構有沒有分開」，一個講「往哪邊偏」。</div>
       <figure>
@@ -217,7 +217,7 @@ mark{background:#fdf2c8;padding:0 2px}
   </details>
 
   <details class="card def" id="term-hp11">
-    <summary><span class="term">HP1-1</span> — somatic 子單倍型，<u>不是</u>第三條染色體 <span class="badge b-dead">🔴 易誤讀</span></summary>
+    <summary><span class="term">HP1-1</span> — somatic 子單倍型，<u>不是</u>第三條染色體 <span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> 易誤讀</span></summary>
     <div class="body">
       <div class="intuition"><b>直覺：</b>你有兩條染色體（父=HP1、母=HP2）。腫瘤在父那條上長出一個體細胞突變 → 帶這突變的 reads 被 longphase-S 標成 <b>HP1-1</b>。它仍是 HP1 那條，只是「帶了後天突變的那一份」。</div>
       <figure>
@@ -235,7 +235,7 @@ mark{background:#fdf2c8;padding:0 2px}
           <rect x="330" y="72" width="244" height="18" rx="9" fill="#B06A16"/><text x="452" y="85" font-size="9.5" fill="#fff" text-anchor="middle" font-weight="700">HP2（母）</text>
           <line x1="586" y1="24" x2="586" y2="64" stroke="#2E7D52" stroke-width="2"/><line x1="586" y1="24" x2="580" y2="24" stroke="#2E7D52" stroke-width="2"/><line x1="586" y1="64" x2="580" y2="64" stroke="#2E7D52" stroke-width="2"/>
           <text x="594" y="40" font-size="9" font-weight="700" fill="#2E7D52">HP-axis</text><text x="594" y="53" font-size="8" fill="#6B6B66">HP1 vs HP1-1</text><text x="594" y="64" font-size="8" fill="#6B6B66">copy 固定</text>
-          <text x="10" y="116" font-size="9.5" fill="#1c1b19">▸ HP-axis 比<b>同一條染色體</b>的「無突變 vs 有突變」份 → copy 數 hold constant → 唯一 somatic-controlled 的軸。</text>
+          <text x="10" y="116" font-size="9.5" fill="#1c1b19">▸ HP-axis 比<tspan font-weight="700">同一條染色體</tspan>的「無突變 vs 有突變」份 → copy 數 hold constant → 唯一 somatic-controlled 的軸。</text>
           <text x="10" y="136" font-size="9.5" fill="#9A3B3B">▸ 對比：ALLELE-axis（ALT vs REF）會把 germline 基線等位甲基差混進來 → 被 confound（鐵則 2）。</text>
           <text x="10" y="158" font-size="8.5" fill="#6B6B66">來源：HaplotagStrategy.cpp:505-516（盤點線 10）</text>
         </svg>
@@ -248,7 +248,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <summary><span class="term">PERMANOVA</span> — 置換檢定問「分群是真的、還是隨機」</summary>
     <div class="body">
       <div class="intuition"><b>直覺：</b>把 reads 的 HP 標籤<u>隨機洗牌</u>很多次，看「真實標籤下的群間/群內距離比」有沒有比洗牌後明顯大。明顯大 = 分群是真結構，不是巧合。</div>
-      <p>嚴謹定義：以距離矩陣算 pseudo-F =（群間離散/群內離散），再用標籤置換建 null 算 p。<mark>生產 pipeline 實跑 99 次置換</mark>（<code>RegionProcessor.cpp:1573</code> 覆寫；函式庫預設 999，見 <code>StructureTest.hpp:26</code>）→ p 解析度下限 ≈ 1/100 = 0.01。<span class="badge b-pass">🟢 源碼實測</span></p>
+      <p>嚴謹定義：以距離矩陣算 pseudo-F =（群間離散/群內離散），再用標籤置換建 null 算 p。<mark>生產 pipeline 實跑 99 次置換</mark>（<code>RegionProcessor.cpp:1573</code> 覆寫；函式庫預設 999，見 <code>StructureTest.hpp:26</code>）→ p 解析度下限 ≈ 1/100 = 0.01。<span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> 源碼實測</span></p>
       <div class="worked"><span class="lab">算式 worked example · pseudo-F</span>
         pseudo-F = (SS_between / (k−1)) / (SS_within / (n−k))（<code>StructureTest.cpp:150</code>）。
         <div class="calc">k=2 群, n=6：假設 SS_between=0.50, SS_within=0.10<br>→ F = (0.50 / 1) / (0.10 / 4) = 0.50 / 0.025 = <span class="res">20</span></div>
@@ -261,7 +261,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <summary><span class="term">normal-anchored cis-test</span> — 區分「真 cis」vs「copy 數假象」</summary>
     <div class="body">
       <div class="intuition"><b>直覺：</b>某 haplotype copy 變多，平均甲基看起來「偏一邊」其實只是份數多。用 matched normal 當錨點，比 normal-HP1（基準）vs tumor-HP1-1（帶突變）—— copy 數相同，差異才是真 cis。</div>
-      <p>判準 <code>|d_cis| &gt; 1.8×|d_drift| + 0.02</code>（<code>scripts/34:149</code>）；copy 塌陷 <code>|d_within| &lt; 0.5×|d_HP|</code>（<code>scripts/37:64</code>）。文獻：apparent ASM 有 82–92% 可被 copy 數解釋（Martin-Trujillo 2017）。<span class="badge b-warn">🟡 僅 HCC1395 完整</span> <span class="muted">（圖見 §5 難點 3）</span></p>
+      <p>判準 <code>|d_cis| &gt; 1.8×|d_drift| + 0.02</code>（<code>scripts/34:149</code>）；copy 塌陷 <code>|d_within| &lt; 0.5×|d_HP|</code>（<code>scripts/37:64</code>）。文獻：apparent ASM 有 82–92% 可被 copy 數解釋（Martin-Trujillo 2017）。<span class="badge b-warn"><span style="color:var(--c-warn);font-weight:800">●</span> 僅 HCC1395 完整</span> <span class="muted">（圖見 §5 難點 3）</span></p>
     </div>
   </details>
 
@@ -269,7 +269,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <summary><span class="term">Cramér's V reliability gate</span> 與「487 latent 位點」</summary>
     <div class="body">
       <div class="intuition"><b>直覺：</b>表格太稀疏時，相關性指標不可信。ISM 用 Cochran 規則（最小期望格≥5）打 reliable 旗標；不可靠就 gate 成 0——不是「沒分群」，是「這指標在這張稀疏表上不可信」。</div>
-      <p><code>summary CramersV = reliable ? v : 0</code>（<code>GlobalTest.cpp:128-141</code>）。762 個 MISSED 中 <b>487 個</b>是「CramérV gated=0 但 PERMANOVA 顯著」= 真有 HP 分群但被稀疏表閘住。<span class="badge b-info">🔵 S</span> <span class="badge b-dead">🔴 不可寫成 filter</span> <span class="muted">（圖見 §5 難點 4）</span></p>
+      <p><code>summary CramersV = reliable ? v : 0</code>（<code>GlobalTest.cpp:128-141</code>）。762 個 MISSED 中 <b>487 個</b>是「CramérV gated=0 但 PERMANOVA 顯著」= 真有 HP 分群但被稀疏表閘住。<span class="badge b-info">🔵 S</span> <span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> 不可寫成 filter</span> <span class="muted">（圖見 §5 難點 4）</span></p>
       <div class="worked"><span class="lab">算式 worked example · Cramér's V</span>
         2×2 時 V = √(χ² / n)（<code>MathUtils.hpp:85</code>，min(r,c)−1=1）。
         <div class="calc">表 [[30, 8], [6, 25]], n=69 → χ² ≈ 24.3 → V = √(24.3 / 69) ≈ <span class="res">0.59</span></div>
@@ -294,7 +294,7 @@ mark{background:#fdf2c8;padding:0 2px}
       <tr><td><code>Normal BAM</code>（可選）</td><td>normal-anchored cis-test 需要</td></tr>
       <tr><td><code>Reference FASTA</code></td><td>hg38，CIGAR→ref 定位 CpG 用</td></tr>
       <tr><td><code>Somatic SNV VCF</code></td><td>ClairS-TO；決定要分析哪些位點</td></tr>
-      <tr><td rowspan="3" class="imp" style="color:var(--c-pass)">輸出</td><td class="imp"><code>significance_summary.csv</code>（<b>59 欄</b>）</td><td>全位點滙總主表 <span class="badge b-pass">🟢</span></td></tr>
+      <tr><td rowspan="3" class="imp" style="color:var(--c-pass)">輸出</td><td class="imp"><code>significance_summary.csv</code>（<b>59 欄</b>）</td><td>全位點滙總主表 <span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span></span></td></tr>
       <tr><td>per-region 資料夾</td><td><code>clustering/</code> · <code>distance/</code> · <code>methylation/</code> · <code>reads/</code> · <code>significance.json</code></td></tr>
       <tr><td>下游量（Δβ / cis-test / copy-partition）</td><td>在 <b>Python 層</b>，<u>不在</u> binary 內</td></tr>
     </tbody>
@@ -361,7 +361,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <line x1="999.7" y1="476" x2="1021.7" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M1021.7,472.5 L1025.7,476 L1021.7,479.5" fill="#B8860B"/>
     <line x1="10" y1="528" x2="1170" y2="528" stroke="#eee"/>
     <text x="10" y="550" font-size="10.5" font-weight="700" fill="#7a4">▣ label-flip：HP1-1 ≡ HP1 germline 鏈上帶 somatic ALT 的子單倍型（非第三 haplotype）</text>
-    <text x="10" y="568" font-size="10" fill="#9a6212">⚠ 預設 germline_hp_only=off → HP1-1 併入 HP-family 1；somatic 子單倍型軸需 hp_fine 4 群；cis-test／copy-partition 在下游 Python；單樣本 HCC1395／⭐3</text>
+    <text x="10" y="568" font-size="10" fill="#9a6212">⚠ 預設 germline_hp_only=off → HP1-1 併入 HP-family 1；somatic 子單倍型軸需 hp_fine 4 群；cis-test／copy-partition 在下游 Python；單樣本 HCC1395／★3</text>
     </svg>
     <figcaption><b>圖：ISM 五階段。</b>① 輸入+取 read → ② 甲基矩陣 → ③ read×read 距離 → ④ UPGMA 聚類 → ⑤ 四路顯著性檢定。<br>※ 改編自 <code>docs/paper_focus/04_figures/fig1_ism_5stage.svg</code>；原圖「117 欄」<b>已更正為實測 59 欄</b>（原圖待同步修）。</figcaption>
   </figure>
@@ -381,9 +381,9 @@ mark{background:#fdf2c8;padding:0 2px}
   <table>
     <thead><tr><th style="width:5%"></th><th style="width:26%">發現</th><th style="width:40%">證據 / 數字</th><th>意涵</th></tr></thead>
     <tbody>
-      <tr><td>🔴</td><td class="imp">甲基當 TP/FP filter ＝ DEAD（最重要 NEGATIVE）</td><td>四道判死：LOSO 100% 循環 · AUC=0.505 · strong-ASM 在 FP 富集 5×（OR=0.194, p=1.8e-28）· LOSO held-out mean −0.00004（p=0.125，方向相反）<span class="badge b-dead">🔴 L4</span></td><td>勿再開此方向；但<u>不影響</u> ISM 作為 characterization 工具的價值</td></tr>
-      <tr><td>⭐</td><td class="imp">甲基分群是 germline-haplotype 層級</td><td>可靠分 HP1 vs HP2；同 haplotype 內 somatic 亞群信號弱（T3 AUC 0.65 &lt; null 0.71）</td><td>是<b>方法層級限制，非 bug</b>；別期待它拆同單倍型內亞群</td></tr>
-      <tr><td>⭐</td><td>全基因組 strong-ASM 極稀少</td><td>0.34%（hypo 44% / hyper 56% 無方向偏好）<span class="badge tier">⭐3</span></td><td>稀有率直接限制任何應用方向的<b>統計功效</b></td></tr>
+      <tr><td><span style="color:var(--c-dead);font-weight:800">●</span></td><td class="imp">甲基當 TP/FP filter ＝ DEAD（最重要 NEGATIVE）</td><td>四道判死：LOSO 100% 循環 · AUC=0.505 · strong-ASM 在 FP 富集 5×（OR=0.194, p=1.8e-28）· LOSO held-out mean −0.00004（p=0.125，方向相反）<span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> L4</span></td><td>勿再開此方向；但<u>不影響</u> ISM 作為 characterization 工具的價值</td></tr>
+      <tr><td>★</td><td class="imp">甲基分群是 germline-haplotype 層級</td><td>可靠分 HP1 vs HP2；同 haplotype 內 somatic 亞群信號弱（T3 AUC 0.65 &lt; null 0.71）</td><td>是<b>方法層級限制，非 bug</b>；別期待它拆同單倍型內亞群</td></tr>
+      <tr><td>★</td><td>全基因組 strong-ASM 極稀少</td><td>0.34%（hypo 44% / hyper 56% 無方向偏好）<span class="badge tier">★3</span></td><td>稀有率直接限制任何應用方向的<b>統計功效</b></td></tr>
     </tbody>
   </table>
 
@@ -420,7 +420,7 @@ mark{background:#fdf2c8;padding:0 2px}
   </figure>
 
   <div class="takeaway pass"><span class="lab">結論 So-what</span>ISM 的正當定位 = 去 confound 的 <b>characterization 工具</b>，<u>不是</u> discovery / filter。它能可靠回答：① 等位甲基差是真 cis 還是 copy/drift ② reads 是否可靠分亞群且與 HP/somatic 對齊 ③ 哪些位點統計可靠 vs 稀疏 artifact。</div>
-  <p class="muted">誠實限制：normal-anchored cis-test 只在有 matched normal 的樣本完整（目前僅 HCC1395）；依賴單一 pipeline → tier 上限 ⭐3；原創性在「sub-haplotype 解析度 + normal-anchoring」的組合。</p>
+  <p class="muted">誠實限制：normal-anchored cis-test 只在有 matched normal 的樣本完整（目前僅 HCC1395）；依賴單一 pipeline → tier 上限 ★3；原創性在「sub-haplotype 解析度 + normal-anchoring」的組合。</p>
 </section>
 
 <!-- ============ §4 old vs new ============ -->
@@ -527,7 +527,7 @@ mark{background:#fdf2c8;padding:0 2px}
           <text x="30" y="226" font-size="9.5" fill="#1c1b19">▸ 判準 <tspan font-family="monospace">|d_cis| &gt; 1.8×|d_drift| + 0.02</tspan>。例 <tspan font-weight="700">BRCA2</tspan>：d_within=−0.023 小、d_copy=−0.11 大 → <tspan font-weight="700" fill="#9A3B3B">copy 主導（不算乾淨 cis）</tspan></text>
           <text x="30" y="242" font-size="9.5" fill="#1c1b19">▸ 例 <tspan font-weight="700">chr17/TBC1D16</tspan>：d_within=0.142, perm p=0.001 → <tspan font-weight="700" fill="#2F7D5B">真 cis ✓</tspan></text>
         </svg>
-        <figcaption><b>（schematic）</b>用 normal-HP1 當錨點：normal→tumor-HP1 的差是 <b>copy/dosage</b>（d_copy）；tumor-HP1→HP1-1 的差才是 <b>cis 候選</b>（d_within）。只有 d_within 夠大才算真 cis。<span class="badge b-warn">🟡 僅 HCC1395 有 matched normal</span></figcaption>
+        <figcaption><b>（schematic）</b>用 normal-HP1 當錨點：normal→tumor-HP1 的差是 <b>copy/dosage</b>（d_copy）；tumor-HP1→HP1-1 的差才是 <b>cis 候選</b>（d_within）。只有 d_within 夠大才算真 cis。<span class="badge b-warn"><span style="color:var(--c-warn);font-weight:800">●</span> 僅 HCC1395 有 matched normal</span></figcaption>
       </figure>
     </div>
   </details>
@@ -549,7 +549,7 @@ mark{background:#fdf2c8;padding:0 2px}
             <text x="20" y="25" font-size="8" fill="#6B6B66">HP1</text><text x="20" y="65" font-size="8" fill="#6B6B66">HP2</text>
             <text x="70" y="-6" font-size="8" fill="#6B6B66">甲基</text><text x="130" y="-6" font-size="8" fill="#6B6B66">未甲</text>
           </g>
-          <text x="40" y="135" font-size="9.5" fill="#9A3B3B">→ reliable = <b>false</b></text>
+          <text x="40" y="135" font-size="9.5" fill="#9A3B3B">→ reliable = <tspan font-weight="700">false</tspan></text>
           <text x="40" y="151" font-size="9.5" fill="#9A3B3B" font-weight="700">→ summary CramérV gated = 0</text>
           <text x="40" y="170" font-size="9" fill="#6B6B66">（但 PERMANOVA 仍可能顯著 → latent）</text>
           <line x1="360" y1="14" x2="360" y2="196" stroke="#E3DACC" stroke-width="1.5" stroke-dasharray="4 3"/>
@@ -562,10 +562,10 @@ mark{background:#fdf2c8;padding:0 2px}
             <rect x="100" y="40" width="60" height="40" fill="#E4F0EA" stroke="#2F7D5B"/><text x="130" y="65">25</text>
             <text x="20" y="25" font-size="8" fill="#6B6B66">HP1</text><text x="20" y="65" font-size="8" fill="#6B6B66">HP2</text>
           </g>
-          <text x="430" y="135" font-size="9.5" fill="#2F7D5B">→ reliable = <b>true</b></text>
+          <text x="430" y="135" font-size="9.5" fill="#2F7D5B">→ reliable = <tspan font-weight="700">true</tspan></text>
           <text x="430" y="151" font-size="9.5" fill="#2F7D5B" font-weight="700">→ CramérV 保留（可信）</text>
         </svg>
-        <figcaption><b>（schematic）</b>左稀疏表的 Cramér's V 不可信 → gate 成 0（不代表沒分群）；右密集表才保留。762 MISSED 中 <b>487 個</b>屬「gated=0 但 PERMANOVA 顯著」。<span class="badge b-dead">🔴 不可寫成 filter</span></figcaption>
+        <figcaption><b>（schematic）</b>左稀疏表的 Cramér's V 不可信 → gate 成 0（不代表沒分群）；右密集表才保留。762 MISSED 中 <b>487 個</b>屬「gated=0 但 PERMANOVA 顯著」。<span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> 不可寫成 filter</span></figcaption>
       </figure>
     </div>
   </details>
@@ -574,19 +574,19 @@ mark{background:#fdf2c8;padding:0 2px}
 <!-- ============ §6 證據區 ============ -->
 <section id="evidence">
   <h3><span class="num">§6</span> 數據（每筆附 tier + 來源） <span class="badge b-info">N-CMP</span></h3>
-  <p class="sub">本頁引用的關鍵數字。tier：<span class="badge b-pass">🟢 P 原檔對賬</span> <span class="badge b-warn">🟡 S/caveat</span> <span class="badge b-dead">🔴 DEAD/NEGATIVE</span>。</p>
+  <p class="sub">本頁引用的關鍵數字。tier：<span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P 原檔對賬</span> <span class="badge b-warn"><span style="color:var(--c-warn);font-weight:800">●</span> S/caveat</span> <span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> DEAD/NEGATIVE</span>。</p>
   <table>
     <thead><tr><th>指標</th><th>值</th><th style="width:14%">tier</th><th style="width:30%">來源</th></tr></thead>
     <tbody>
-      <tr><td>主輸出 significance_summary.csv 欄數</td><td class="imp">59 欄</td><td><span class="badge b-pass">🟢 P</span></td><td>實測 <code>head -1 ...csv</code>；字典 <code>data_specs/20260411_..._01.md</code></td></tr>
-      <tr><td>PERMANOVA 置換次數（生產）</td><td>99（庫預設 999）</td><td><span class="badge b-pass">🟢 P</span></td><td><code>RegionProcessor.cpp:1573</code></td></tr>
-      <tr><td>strong-ASM 全基因組稀有率</td><td>0.34%（hypo 44%/hyper 56%）</td><td><span class="badge tier">⭐3</span></td><td>盤點線1 <code>01_ism_method_spec_from_source.md</code> L3</td></tr>
-      <tr><td>BRCA2 promoter HP-axis Δβ</td><td class="imp">−0.122（copy 主導；focal cis d_within=−0.023, p=0.024）</td><td><span class="badge b-pass">🟢 P</span></td><td>同上 L3；<span class="todo">−0.054 為 buggy 砍半值，禁用</span></td></tr>
-      <tr><td>乾淨 cis exemplar chr17/TBC1D16</td><td>d_within=0.142, perm p=0.001</td><td><span class="badge tier">⭐3</span></td><td>同上 L3</td></tr>
-      <tr><td>跨樣本 excess-over-null（3 癌種）</td><td>6/6 正，mean 0.168；somatic private 0/38</td><td><span class="badge tier">⭐3</span></td><td>同上 L3</td></tr>
-      <tr><td class="imp">甲基→TP/FP filter</td><td class="imp">OR=0.194, p=1.8e-28；LOSO 100% circularity；AUC=0.505</td><td><span class="badge b-dead">🔴 L4 DEAD</span></td><td>同上 L3</td></tr>
-      <tr><td>LOH-constrained phasing（NG=2 same-HP）</td><td>93–99%，6/6 樣本；Wilcoxon p=0.0078</td><td><span class="badge tier">B+ ⭐3</span></td><td>同上 L3</td></tr>
-      <tr><td>O11 epipolymorphism（校正前→後）</td><td>AUC 0.845 → 0.530（校正後=artifact）</td><td><span class="badge b-dead">🔴 NEG</span></td><td>同上 L3</td></tr>
+      <tr><td>主輸出 significance_summary.csv 欄數</td><td class="imp">59 欄</td><td><span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P</span></td><td>實測 <code>head -1 ...csv</code>；字典 <code>data_specs/20260411_..._01.md</code></td></tr>
+      <tr><td>PERMANOVA 置換次數（生產）</td><td>99（庫預設 999）</td><td><span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P</span></td><td><code>RegionProcessor.cpp:1573</code></td></tr>
+      <tr><td>strong-ASM 全基因組稀有率</td><td>0.34%（hypo 44%/hyper 56%）</td><td><span class="badge tier">★3</span></td><td>盤點線1 <code>01_ism_method_spec_from_source.md</code> L3</td></tr>
+      <tr><td>BRCA2 promoter HP-axis Δβ</td><td class="imp">−0.122（copy 主導；focal cis d_within=−0.023, p=0.024）</td><td><span class="badge b-pass"><span style="color:var(--c-pass);font-weight:800">●</span> P</span></td><td>同上 L3；<span class="todo">−0.054 為 buggy 砍半值，禁用</span></td></tr>
+      <tr><td>乾淨 cis exemplar chr17/TBC1D16</td><td>d_within=0.142, perm p=0.001</td><td><span class="badge tier">★3</span></td><td>同上 L3</td></tr>
+      <tr><td>跨樣本 excess-over-null（3 癌種）</td><td>6/6 正，mean 0.168；somatic private 0/38</td><td><span class="badge tier">★3</span></td><td>同上 L3</td></tr>
+      <tr><td class="imp">甲基→TP/FP filter</td><td class="imp">OR=0.194, p=1.8e-28；LOSO 100% circularity；AUC=0.505</td><td><span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> L4 DEAD</span></td><td>同上 L3</td></tr>
+      <tr><td>LOH-constrained phasing（NG=2 same-HP）</td><td>93–99%，6/6 樣本；Wilcoxon p=0.0078</td><td><span class="badge tier">B+ ★3</span></td><td>同上 L3</td></tr>
+      <tr><td>O11 epipolymorphism（校正前→後）</td><td>AUC 0.845 → 0.530（校正後=artifact）</td><td><span class="badge b-dead"><span style="color:var(--c-dead);font-weight:800">●</span> NEG</span></td><td>同上 L3</td></tr>
     </tbody>
   </table>
 </section>
