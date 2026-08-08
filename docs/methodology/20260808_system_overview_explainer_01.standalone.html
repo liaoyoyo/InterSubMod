@@ -150,93 +150,139 @@ ol.steps>li{margin:.45rem 0}
 <!-- ─────────────────────────── ② ─────────────────────────── -->
 <section id="flow">
 <div class="eyebrow">② 整體</div>
-<h2>兩個軟體、四個階段</h2>
+<h2>兩個生產軟體 ＋ 一個獨立的觀察層</h2>
+
+<p>常見的誤解是把觀察介面當成分析軟體的一部分。這裡刻意<b>不是</b>：
+觀察 HTML 是一個<b>能力探測驅動的整合層</b>，站在兩個生產軟體<b>之外</b>。
+它有什麼讀什麼 —— 只有拓撲骨幹是硬核心，其餘每一層缺席都只會讓對應面板降級。</p>
 
 <div class="fig">
-<svg viewBox="0 0 960 424" font-family="ui-monospace,monospace" font-size="11">
+<svg viewBox="0 0 960 520" font-family="ui-monospace,monospace" font-size="11">
   <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-    <path d="M0,0 L10,5 L0,10 z" fill="#52625a"/></marker></defs>
+    <path d="M0,0 L10,5 L0,10 z" fill="#52625a"/></marker>
+    <marker id="arl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#6b5592"/></marker></defs>
+
+  <!-- 生產層標題 -->
+  <text x="14" y="18" font-weight="700" fill="#667069" font-size="10.5">生產層 —— 各自獨立可跑、各自產出檔案</text>
 
   <!-- 輸入 -->
-  <rect x="14" y="14" width="176" height="92" rx="8" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="24" y="32" font-weight="700" fill="#17231e">輸入</text>
-  <text x="24" y="50" fill="#667069">LongPhase-S tagged BAM</text>
-  <text x="24" y="66" fill="#667069">somatic VCF</text>
-  <text x="24" y="82" fill="#667069">reference FASTA</text>
-  <text x="24" y="98" fill="#98a09a" font-size="9.5">（含 MM/ML 甲基標記）</text>
+  <rect x="14" y="26" width="150" height="88" rx="8" fill="#fffdf7" stroke="#c9c8bd"/>
+  <text x="24" y="44" font-weight="700" fill="#17231e">輸入</text>
+  <text x="24" y="61" fill="#667069" font-size="10">LongPhase-S BAM</text>
+  <text x="24" y="76" fill="#667069" font-size="10">somatic VCF</text>
+  <text x="24" y="91" fill="#667069" font-size="10">reference FASTA</text>
+  <text x="24" y="106" fill="#98a09a" font-size="9">（含 MM/ML 甲基）</text>
 
-  <!-- LongLineage 框 -->
-  <rect x="222" y="8" width="330" height="230" rx="10" fill="#eef5f1" stroke="#176b58" stroke-width="1.4"/>
-  <text x="236" y="28" font-weight="700" fill="#176b58" font-size="12.5">LongLineage（純遺傳）</text>
+  <!-- 上游 partition -->
+  <rect x="182" y="26" width="176" height="88" rx="8" fill="#f6f2e6" stroke="#b66e20"/>
+  <text x="194" y="44" font-weight="700" fill="#b66e20">⓪ exact-PS partition</text>
+  <text x="194" y="61" fill="#667069" font-size="10">read 共現 → 切 unit</text>
+  <text x="194" y="76" fill="#98a09a" font-size="9">topology.jsonl</text>
+  <text x="194" y="88" fill="#98a09a" font-size="9">exact_ps_mlhp.json</text>
+  <text x="194" y="100" fill="#98a09a" font-size="9">endpoint_edges.tsv.gz</text>
 
-  <rect x="238" y="40" width="298" height="52" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="250" y="58" font-weight="700" fill="#17231e">① 切區域</text>
-  <text x="250" y="74" fill="#667069">read 共現 ≥3 條 → 連通分量 = unit</text>
-  <text x="250" y="88" fill="#98a09a" font-size="9.5">11,590 個 block（≤12 位點）</text>
+  <!-- LongLineage -->
+  <rect x="376" y="26" width="256" height="88" rx="8" fill="#eef5f1" stroke="#176b58" stroke-width="1.4"/>
+  <text x="388" y="44" font-weight="700" fill="#176b58">① LongLineage（純遺傳）</text>
+  <text x="388" y="61" fill="#667069" font-size="10">解最簡約樹 → 標回每條 read</text>
+  <text x="388" y="76" fill="#98a09a" font-size="9">lineage_tagged.bam（單一檔，可進 IGV）</text>
+  <text x="388" y="88" fill="#98a09a" font-size="9">unit_lineage_paths / read_assignments</text>
+  <text x="388" y="100" fill="#98a09a" font-size="9">tag_bam.receipt.json</text>
 
-  <rect x="238" y="102" width="298" height="52" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="250" y="120" font-weight="700" fill="#17231e">② 建樹</text>
-  <text x="250" y="136" fill="#667069">最簡約 rooted tree（B&amp;B，窮盡）</text>
-  <text x="250" y="150" fill="#98a09a" font-size="9.5">9,130 個 unit 解出樹</text>
+  <!-- InterSubMod -->
+  <rect x="650" y="26" width="296" height="88" rx="8" fill="#eef3f8" stroke="#285f8f" stroke-width="1.4"/>
+  <text x="662" y="44" font-weight="700" fill="#285f8f">② InterSubMod（甲基關聯）</text>
+  <text x="662" y="61" fill="#667069" font-size="10">±1 kb 開窗 → 分群 → 多軸檢定</text>
+  <text x="662" y="76" fill="#98a09a" font-size="9">29,754 個逐位點目錄</text>
+  <text x="662" y="88" fill="#98a09a" font-size="9">methylation / distance / clustering / reads</text>
+  <text x="662" y="100" fill="#98a09a" font-size="9">significance_summary.csv（各軸 p 值）</text>
 
-  <rect x="238" y="164" width="298" height="60" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="250" y="182" font-weight="700" fill="#17231e">③ 標 BAM</text>
-  <text x="250" y="198" fill="#667069">每條 read → 樹上的位置 → aux tag</text>
-  <text x="250" y="212" fill="#98a09a" font-size="9.5">lv 階層路徑 / ls 可信度 / lp 觀察 pattern</text>
+  <line x1="164" y1="70" x2="178" y2="70" stroke="#52625a" stroke-width="1.3" marker-end="url(#ar)"/>
+  <line x1="358" y1="70" x2="372" y2="70" stroke="#52625a" stroke-width="1.3" marker-end="url(#ar)"/>
+  <line x1="632" y1="70" x2="646" y2="70" stroke="#52625a" stroke-width="1.3" marker-end="url(#ar)"/>
+  <text x="636" y="62" fill="#176b58" font-size="9">BAM</text>
 
-  <!-- InterSubMod 框 -->
-  <rect x="586" y="8" width="360" height="230" rx="10" fill="#eef3f8" stroke="#285f8f" stroke-width="1.4"/>
-  <text x="600" y="28" font-weight="700" fill="#285f8f" font-size="12.5">InterSubMod（甲基關聯）</text>
+  <!-- 分隔 -->
+  <line x1="14" y1="134" x2="946" y2="134" stroke="#c9c8bd" stroke-dasharray="5 4"/>
+  <text x="14" y="152" font-weight="700" fill="#6b5592" font-size="10.5">觀察層 —— 站在生產層之外，有什麼讀什麼</text>
 
-  <rect x="602" y="40" width="328" height="60" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="614" y="58" font-weight="700" fill="#17231e">④ 量甲基</text>
-  <text x="614" y="74" fill="#667069">每個 sSNV ±1 kb 開窗 → read×CpG 矩陣</text>
-  <text x="614" y="88" fill="#98a09a" font-size="9.5">→ read×read 距離 → UPGMA 分群</text>
+  <!-- 六條輸入箭頭 -->
+  <line x1="270" y1="114" x2="270" y2="176" stroke="#6b5592" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arl)"/>
+  <line x1="504" y1="114" x2="504" y2="176" stroke="#6b5592" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arl)"/>
+  <line x1="798" y1="114" x2="798" y2="176" stroke="#6b5592" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arl)"/>
 
-  <rect x="602" y="110" width="328" height="60" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="614" y="128" font-weight="700" fill="#17231e">⑤ 多軸檢定</text>
-  <text x="614" y="144" fill="#667069">甲基分群 vs HP / ALT / lineage / cluster</text>
-  <text x="614" y="158" fill="#98a09a" font-size="9.5">PERMANOVA + Δβ（BH-FDR）</text>
+  <!-- 觀察層框 -->
+  <rect x="14" y="180" width="932" height="164" rx="10" fill="#f4f1f8" stroke="#6b5592" stroke-width="1.4"/>
+  <text x="28" y="200" font-weight="700" fill="#6b5592" font-size="12.5">③ 觀察儀表板（能力探測整合層）</text>
+  <text x="28" y="216" fill="#667069" font-size="10">六個資料層各自獨立探測（存在 → 結構 → 體量 → 與骨幹的連結率）。缺了不是靜默省略，而是把面板骨架照畫、內容換成「不可用 ＋ 缺哪個路徑 ＋ 停在哪一段」。</text>
 
-  <rect x="602" y="180" width="328" height="44" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="614" y="198" font-weight="700" fill="#17231e">⑥ 觀察 HTML</text>
-  <text x="614" y="214" fill="#667069">五層下鑽 + 12 條守恆自檢</text>
+  <rect x="28" y="226" width="140" height="50" rx="6" fill="#fdf0ee" stroke="#a94336" stroke-width="1.4"/>
+  <text x="40" y="244" font-weight="700" fill="#a94336" font-size="10">topology（硬核心）</text>
+  <text x="40" y="259" fill="#667069" font-size="9.5">缺 → 整份拒繪 exit 3</text>
+  <text x="40" y="271" fill="#98a09a" font-size="9">來源：⓪</text>
 
-  <line x1="190" y1="60" x2="234" y2="60" stroke="#52625a" stroke-width="1.4" marker-end="url(#ar)"/>
-  <line x1="552" y1="120" x2="598" y2="120" stroke="#52625a" stroke-width="1.4" marker-end="url(#ar)"/>
-  <text x="556" y="112" fill="#176b58" font-size="9.5">tagged BAM</text>
+  <g font-size="9.5">
+    <rect x="180" y="226" width="118" height="50" rx="6" fill="#fffdf7" stroke="#c9c8bd"/>
+    <text x="190" y="243" font-weight="700" fill="#17231e">mlhp</text>
+    <text x="190" y="257" fill="#667069">read pattern</text><text x="190" y="269" fill="#98a09a">來源 ⓪</text>
 
-  <!-- 產物列 -->
-  <text x="14" y="272" font-weight="700" fill="#17231e" font-size="12">主要產物</text>
-  <rect x="14" y="282" width="216" height="52" rx="7" fill="#fffdf7" stroke="#176b58"/>
-  <text x="26" y="300" fill="#176b58" font-weight="700">lineage_tagged.bam</text>
-  <text x="26" y="315" fill="#667069" font-size="10">單一座標排序 BAM，可進 IGV</text>
-  <text x="26" y="328" fill="#98a09a" font-size="9.5">甲基 MM/ML 完整保留</text>
+    <rect x="308" y="226" width="118" height="50" rx="6" fill="#fffdf7" stroke="#c9c8bd"/>
+    <text x="318" y="243" font-weight="700" fill="#17231e">strict_edges</text>
+    <text x="318" y="257" fill="#667069">連鎖證據</text><text x="318" y="269" fill="#98a09a">來源 ⓪</text>
 
-  <rect x="242" y="282" width="216" height="52" rx="7" fill="#fffdf7" stroke="#285f8f"/>
-  <text x="254" y="300" fill="#285f8f" font-weight="700">逐位點甲基產物</text>
-  <text x="254" y="315" fill="#667069" font-size="10">29,754 個位點目錄</text>
-  <text x="254" y="328" fill="#98a09a" font-size="9.5">矩陣 / 距離 / 分群 / 各軸 p 值</text>
+    <rect x="436" y="226" width="118" height="50" rx="6" fill="#fffdf7" stroke="#176b58"/>
+    <text x="446" y="243" font-weight="700" fill="#176b58">lineage</text>
+    <text x="446" y="257" fill="#667069">階層 / LCA A-B</text><text x="446" y="269" fill="#98a09a">來源 ①</text>
 
-  <rect x="470" y="282" width="216" height="52" rx="7" fill="#fffdf7" stroke="#6b5592"/>
-  <text x="482" y="300" fill="#6b5592" font-weight="700">觀察 HTML</text>
-  <text x="482" y="315" fill="#667069" font-size="10">全基因組 → 位點五層下鑽</text>
-  <text x="482" y="328" fill="#98a09a" font-size="9.5">16,302 張甲基圖 + 5,410 張 IGV 圖</text>
+    <rect x="564" y="226" width="118" height="50" rx="6" fill="#fffdf7" stroke="#285f8f"/>
+    <text x="574" y="243" font-weight="700" fill="#285f8f">ism</text>
+    <text x="574" y="257" fill="#667069">甲基各軸</text><text x="574" y="269" fill="#98a09a">來源 ②</text>
 
-  <rect x="698" y="282" width="248" height="52" rx="7" fill="#fffdf7" stroke="#b66e20"/>
-  <text x="710" y="300" fill="#b66e20" font-weight="700">自檢報告</text>
-  <text x="710" y="315" fill="#667069" font-size="10">12 條守恆等式 + 輸入 sha256</text>
-  <text x="710" y="328" fill="#98a09a" font-size="9.5">10 通過 / 1 不成立 / 1 無法檢查</text>
+    <rect x="692" y="226" width="118" height="50" rx="6" fill="#fffdf7" stroke="#b66e20" stroke-dasharray="4 3"/>
+    <text x="702" y="243" font-weight="700" fill="#b66e20">annotations</text>
+    <text x="702" y="257" fill="#667069">CNV / LOH / 基因</text><text x="702" y="269" fill="#98a09a">外部 drop-in</text>
 
-  <rect x="14" y="352" width="932" height="58" rx="8" fill="#fff7e7" stroke="#e6d5b8"/>
-  <text x="28" y="372" font-weight="700" fill="#b66e20">為什麼要切成兩個軟體</text>
-  <text x="28" y="388" fill="#667069" font-size="10.5">甲基化<tspan font-weight="700" fill="#a94336">不能</tspan>參與樹的推論 —— 用甲基推分支、再用分支解釋甲基就是循環論證。</text>
-  <text x="28" y="402" fill="#667069" font-size="10.5">把「純遺傳的樹」與「事後的甲基 characterize」放在兩個軟體，讓這條界線<tspan font-weight="700">在架構上就成立</tspan>，而不是靠自律。</text>
+    <rect x="820" y="226" width="112" height="50" rx="6" fill="#f1f0e8" stroke="#c9c8bd" stroke-dasharray="4 3"/>
+    <text x="830" y="243" font-weight="700" fill="#98a09a">（未來層）</text>
+    <text x="830" y="257" fill="#98a09a">丟進去即用</text><text x="830" y="269" fill="#98a09a">零改碼</text>
+  </g>
+
+  <rect x="28" y="288" width="904" height="44" rx="7" fill="#fffdf7" stroke="#c9c8bd"/>
+  <text x="42" y="306" font-weight="700" fill="#17231e" font-size="10.5">產出：單頁 HTML ＋ 分片 ＋ 圖片 ＋ 自檢報告</text>
+  <text x="42" y="322" fill="#667069" font-size="10">19,849 個 sSNV 全顯示 · 16,302 張甲基圖 · 5,410 張 IGV 對齊圖 · 12 條守恆等式 · 每個輸入檔的 SHA-256</text>
+
+  <!-- 為什麼分三層 -->
+  <rect x="14" y="356" width="460" height="150" rx="8" fill="#fff7e7" stroke="#e6d5b8"/>
+  <text x="28" y="376" font-weight="700" fill="#b66e20">為什麼生產層要切成兩個</text>
+  <text x="28" y="394" fill="#667069" font-size="10.5">甲基化<tspan font-weight="700" fill="#a94336">不能</tspan>參與樹的推論 —— 用甲基推分支、</text>
+  <text x="28" y="409" fill="#667069" font-size="10.5">再用分支解釋甲基就是循環論證。</text>
+  <text x="28" y="428" fill="#667069" font-size="10.5">把「純遺傳的樹」與「事後的甲基 characterize」</text>
+  <text x="28" y="443" fill="#667069" font-size="10.5">放在兩個軟體，讓這條界線<tspan font-weight="700">在架構上就成立</tspan>，</text>
+  <text x="28" y="458" fill="#667069" font-size="10.5">而不是靠自律。</text>
+  <text x="28" y="480" fill="#98a09a" font-size="9.5">交界是一份標準 BAM 檔 —— 任何一邊都可單獨</text>
+  <text x="28" y="494" fill="#98a09a" font-size="9.5">使用、單獨驗證、單獨替換。</text>
+
+  <rect x="486" y="356" width="460" height="150" rx="8" fill="#f4f1f8" stroke="#d7cee6"/>
+  <text x="500" y="376" font-weight="700" fill="#6b5592">為什麼觀察層要放在外面</text>
+  <text x="500" y="394" fill="#667069" font-size="10.5">它讀的六層裡，只有一層是 InterSubMod 產的。</text>
+  <text x="500" y="409" fill="#667069" font-size="10.5">若把它算成 InterSubMod 的一部分，等於暗示</text>
+  <text x="500" y="424" fill="#667069" font-size="10.5">「沒有甲基資料就看不了」——<tspan font-weight="700">實際上不是</tspan>：</text>
+  <text x="500" y="439" fill="#667069" font-size="10.5">只有拓撲骨幹缺席才拒繪，其餘缺一層只降級一塊面板。</text>
+  <text x="500" y="461" fill="#98a09a" font-size="9.5">這也是它能吃 drop-in 註釋的原因：架構上它就是</text>
+  <text x="500" y="475" fill="#98a09a" font-size="9.5">「把手上有的東西整合起來看」，不是某個分析的附屬。</text>
+  <text x="500" y="496" fill="#98a09a" font-size="9.5">（程式碼放在 InterSubMod repo 內，但角色上是獨立層）</text>
 </svg>
-<div class="cap"><b>圖 2．系統架構。</b>左側 LongLineage 完全不碰甲基化，只用 read 共現與簡約原則建樹；
-右側 InterSubMod 讀那份帶標籤的 BAM，把甲基化<b>事後</b>疊上去問關聯。兩者的交界是一份標準 BAM 檔，
-所以任何一邊都可以單獨使用、單獨驗證、單獨替換。</div>
+<div class="cap"><b>圖 2．三層架構。</b>上排是<b>生產層</b>（各自獨立可跑、產出檔案），
+下框是<b>觀察層</b>（站在外面，有什麼讀什麼）。虛線箭頭表示觀察層向上游取用資料 ——
+<b>是「取用」而非「隸屬」</b>。六個資料層中只有 topology 是硬核心；
+其餘任一層缺席，只會讓對應面板顯示「不可用 ＋ 原因」，整份頁面照常產出。</div>
 </div>
+
+<div class="q"><b>怎麼確認這個架構是對的？</b>用一個具體測試：把 ISM 的輸出目錄改成不存在的路徑重跑 ——
+頁面照常產出，只是甲基面板、軸軌道、IGV 圖三塊變成「不可用 ＋ 缺哪個路徑」，
+拓撲、樹、read state matrix、共出現、自檢全部照常。
+反過來把 topology 改壞，則 <code>exit 3</code> 什麼都不產。<b>這就是「硬核心只有一個」的可驗證定義。</b></div>
 </section>
 
 <!-- ─────────────────────────── ③ ─────────────────────────── -->
@@ -292,56 +338,123 @@ ol.steps>li{margin:.45rem 0}
 
 <h3>步驟 2：在每個位點群上解最簡約的演化樹</h3>
 
+<p>這一步最容易被誤解的地方是：<b>並不是每一條 read 都在「宣告一個狀態」</b>。
+只有把該區域所有位點都讀到的 read（pattern 不含 <code>X</code>）才定義狀態；
+只讀到一部分的 read 無法定義新狀態，它只能被歸到某個已知狀態<b>或其後代</b>。
+下圖用一個三位點的最小例子把這兩種角色分開。</p>
+
 <div class="fig">
-<svg viewBox="0 0 900 250" font-family="ui-monospace,monospace" font-size="11">
-  <text x="12" y="20" font-weight="700" fill="#17231e" font-size="12.5">觀察到的 read pattern（R=參考 / A=突變 / X=此 read 未覆蓋）</text>
-  <g font-family="ui-monospace,monospace" font-size="12">
-    <rect x="16" y="34" width="26" height="20" fill="#f1f0e8"/><text x="29" y="49" text-anchor="middle" fill="#667069">R</text>
-    <rect x="44" y="34" width="26" height="20" fill="#f1f0e8"/><text x="57" y="49" text-anchor="middle" fill="#667069">R</text>
-    <rect x="72" y="34" width="26" height="20" fill="#f1f0e8"/><text x="85" y="49" text-anchor="middle" fill="#667069">R</text>
-    <text x="112" y="49" fill="#98a09a">×14 條</text>
-    <rect x="16" y="58" width="26" height="20" fill="#e4efe9"/><text x="29" y="73" text-anchor="middle" fill="#14503f">A</text>
-    <rect x="44" y="58" width="26" height="20" fill="#f1f0e8"/><text x="57" y="73" text-anchor="middle" fill="#667069">R</text>
-    <rect x="72" y="58" width="26" height="20" fill="#f1f0e8"/><text x="85" y="73" text-anchor="middle" fill="#667069">R</text>
-    <text x="112" y="73" fill="#98a09a">×9 條</text>
-    <rect x="16" y="82" width="26" height="20" fill="#e4efe9"/><text x="29" y="97" text-anchor="middle" fill="#14503f">A</text>
-    <rect x="44" y="82" width="26" height="20" fill="#e4efe9"/><text x="57" y="97" text-anchor="middle" fill="#14503f">A</text>
-    <rect x="72" y="82" width="26" height="20" fill="#f1f0e8"/><text x="85" y="97" text-anchor="middle" fill="#667069">R</text>
-    <text x="112" y="97" fill="#98a09a">×6 條</text>
-    <rect x="16" y="106" width="26" height="20" fill="#e4efe9"/><text x="29" y="121" text-anchor="middle" fill="#14503f">A</text>
-    <rect x="44" y="106" width="26" height="20" fill="#f6ecd9"/><text x="57" y="121" text-anchor="middle" fill="#7d4a12">X</text>
-    <rect x="72" y="106" width="26" height="20" fill="#f6ecd9"/><text x="85" y="121" text-anchor="middle" fill="#7d4a12">X</text>
-    <text x="112" y="121" fill="#98a09a">×32 條（只覆蓋部分）</text>
+<svg viewBox="0 0 900 408" font-family="ui-monospace,monospace" font-size="11">
+  <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#52625a"/></marker></defs>
+
+  <!-- ══ Panel A：兩種 read ══ -->
+  <text x="12" y="16" font-weight="700" fill="#17231e" font-size="12">① 完整覆蓋的 read（無 <tspan fill="#7d4a12">X</tspan>）</text>
+  <text x="12" y="31" fill="#667069" font-size="10">只有這些能<tspan font-weight="700">定義</tspan>樹上必須存在的狀態</text>
+
+  <g font-size="12">
+    <rect x="16" y="40" width="26" height="20" fill="#f1f0e8"/><text x="29" y="55" text-anchor="middle" fill="#667069">R</text>
+    <rect x="44" y="40" width="26" height="20" fill="#f1f0e8"/><text x="57" y="55" text-anchor="middle" fill="#667069">R</text>
+    <rect x="72" y="40" width="26" height="20" fill="#f1f0e8"/><text x="85" y="55" text-anchor="middle" fill="#667069">R</text>
+    <text x="108" y="55" fill="#98a09a" font-size="10.5">×14　全參考</text>
+
+    <rect x="16" y="64" width="26" height="20" fill="#e4efe9"/><text x="29" y="79" text-anchor="middle" fill="#14503f">A</text>
+    <rect x="44" y="64" width="26" height="20" fill="#e4efe9"/><text x="57" y="79" text-anchor="middle" fill="#14503f">A</text>
+    <rect x="72" y="64" width="26" height="20" fill="#f1f0e8"/><text x="85" y="79" text-anchor="middle" fill="#667069">R</text>
+    <text x="108" y="79" fill="#98a09a" font-size="10.5">×9　 帶 S1+S2</text>
+
+    <rect x="16" y="88" width="26" height="20" fill="#e4efe9"/><text x="29" y="103" text-anchor="middle" fill="#14503f">A</text>
+    <rect x="44" y="88" width="26" height="20" fill="#f1f0e8"/><text x="57" y="103" text-anchor="middle" fill="#667069">R</text>
+    <rect x="72" y="88" width="26" height="20" fill="#e4efe9"/><text x="85" y="103" text-anchor="middle" fill="#14503f">A</text>
+    <text x="108" y="103" fill="#98a09a" font-size="10.5">×6　 帶 S1+S3</text>
   </g>
-  <text x="16" y="150" fill="#a94336">沒有觀察到 RAR、RRA → 這兩個狀態不存在</text>
+  <text x="16" y="126" fill="#a94336" font-size="10">完整覆蓋裡沒有 <tspan font-weight="700">RAR</tspan> 或 <tspan font-weight="700">RRA</tspan></text>
+  <text x="16" y="140" fill="#667069" font-size="10">→ 沒有證據支持 S2 或 S3 早於 S1</text>
 
-  <line x1="290" y1="80" x2="330" y2="80" stroke="#52625a" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="12" y1="152" x2="292" y2="152" stroke="#c9c8bd" stroke-dasharray="4 3"/>
 
-  <text x="356" y="20" font-weight="700" fill="#17231e" font-size="12.5">最簡約樹（每個突變只發生一次）</text>
-  <circle cx="400" cy="80" r="20" fill="#17231e"/><text x="400" y="84" text-anchor="middle" fill="#fffdf7" font-size="9">ROOT</text>
-  <circle cx="530" cy="80" r="20" fill="#fffdf7" stroke="#176b58" stroke-width="2"/><text x="530" y="84" text-anchor="middle" font-size="10">ARR</text>
-  <circle cx="660" cy="80" r="20" fill="#fffdf7" stroke="#176b58" stroke-width="2"/><text x="660" y="84" text-anchor="middle" font-size="10">AAR</text>
-  <circle cx="790" cy="80" r="20" fill="#f5ead5" stroke="#b66e20" stroke-width="2" stroke-dasharray="4 3"/>
-  <text x="790" y="84" text-anchor="middle" font-size="10">AAA</text>
-  <line x1="420" y1="80" x2="508" y2="80" stroke="#52625a" stroke-width="2" marker-end="url(#ar)"/>
-  <line x1="550" y1="80" x2="638" y2="80" stroke="#52625a" stroke-width="2" marker-end="url(#ar)"/>
-  <line x1="680" y1="80" x2="768" y2="80" stroke="#52625a" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="464" y="70" text-anchor="middle" fill="#667069" font-size="9.5">獲得 S1</text>
-  <text x="594" y="70" text-anchor="middle" fill="#667069" font-size="9.5">獲得 S2</text>
-  <text x="724" y="70" text-anchor="middle" fill="#667069" font-size="9.5">獲得 S3</text>
+  <text x="12" y="172" font-weight="700" fill="#17231e" font-size="12">② 部分覆蓋的 read（含 <tspan fill="#7d4a12">X</tspan>）</text>
+  <text x="12" y="187" fill="#667069" font-size="10"><tspan font-weight="700">不</tspan>定義新狀態 —— 只能歸到已知狀態或其後代</text>
+  <g font-size="12">
+    <rect x="16" y="196" width="26" height="20" fill="#e4efe9"/><text x="29" y="211" text-anchor="middle" fill="#14503f">A</text>
+    <rect x="44" y="196" width="26" height="20" fill="#f6ecd9"/><text x="57" y="211" text-anchor="middle" fill="#7d4a12">X</text>
+    <rect x="72" y="196" width="26" height="20" fill="#f6ecd9"/><text x="85" y="211" text-anchor="middle" fill="#7d4a12">X</text>
+    <text x="108" y="211" fill="#98a09a" font-size="10.5">×32　只讀到 S1</text>
+  </g>
+  <text x="16" y="234" fill="#a94336" font-size="10">⚠ <tspan font-weight="700">AXX 不是第四個狀態</tspan> —— 它是「一次不完整的觀察」，</text>
+  <text x="16" y="248" fill="#667069" font-size="10">和 <tspan font-weight="700">ARR / AAR / ARA</tspan> 三者都不矛盾。</text>
 
-  <text x="356" y="128" fill="#176b58">● 實線綠圈 = 有 read 直接觀察到這個狀態</text>
-  <text x="356" y="146" fill="#b66e20">● 虛線琥珀 = solver 為使樹合法而補入的中間態，reads 未直接看到</text>
-  <text x="356" y="164" fill="#a94336">● 所有<tspan font-weight="700">邊</tspan>都是推論 —— 沒有任何一條邊被直接觀察到</text>
-  <text x="356" y="186" fill="#667069" font-size="10">全樣本 26,748 個節點中，補入的佔 37.8%（10,114 個）</text>
+  <line x1="300" y1="90" x2="326" y2="90" stroke="#52625a" stroke-width="1.4" marker-end="url(#ar4)"/>
+  <line x1="300" y1="206" x2="326" y2="206" stroke="#52625a" stroke-width="1.4" marker-end="url(#ar4)"/>
 
-  <rect x="12" y="200" width="876" height="40" rx="8" fill="#fff7e7" stroke="#e6d5b8"/>
-  <text x="26" y="218" font-weight="700" fill="#b66e20">「定不出來」也是一種答案</text>
-  <text x="26" y="234" fill="#667069">若有多棵同分最佳樹，系統標成「同分並列 N 棵」而不挑一棵當結論。實測 k=1 有 96.5% 唯一解，k=6 驟降到 4.5%，k≥7 全數 0%。</text>
+  <!-- ══ Panel B：樹 ══ -->
+  <rect x="332" y="6" width="240" height="256" rx="8" fill="#fbfaf5" stroke="#e6e4d8"/>
+  <text x="344" y="24" font-weight="700" fill="#17231e" font-size="12">推論出的最簡約樹</text>
+  <text x="344" y="38" fill="#667069" font-size="10">每個突變只發生一次</text>
+
+  <circle cx="452" cy="66" r="21" fill="#17231e"/><text x="452" y="70" text-anchor="middle" fill="#fffdf7" font-size="9">ROOT</text>
+  <text x="424" y="70" text-anchor="end" fill="#98a09a" font-size="9.5">RRR</text>
+
+  <circle cx="452" cy="140" r="21" fill="#f5ead5" stroke="#b66e20" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="452" y="144" text-anchor="middle" font-size="10" fill="#7d4a12">ARR</text>
+  <text x="479" y="136" fill="#b66e20" font-size="9">補入節點</text>
+  <text x="479" y="148" fill="#b66e20" font-size="9">無 read 讀到</text>
+
+  <circle cx="392" cy="216" r="21" fill="#fffdf7" stroke="#176b58" stroke-width="2"/>
+  <text x="392" y="220" text-anchor="middle" font-size="10">AAR</text>
+  <circle cx="514" cy="216" r="21" fill="#fffdf7" stroke="#176b58" stroke-width="2"/>
+  <text x="514" y="220" text-anchor="middle" font-size="10">ARA</text>
+  <text x="392" y="246" text-anchor="middle" fill="#176b58" font-size="9">實測 ×9</text>
+  <text x="514" y="246" text-anchor="middle" fill="#176b58" font-size="9">實測 ×6</text>
+
+  <line x1="452" y1="87" x2="452" y2="117" stroke="#52625a" stroke-width="2" marker-end="url(#ar4)"/>
+  <text x="460" y="106" fill="#667069" font-size="9.5">獲得 S1</text>
+  <line x1="437" y1="157" x2="404" y2="193" stroke="#52625a" stroke-width="2" marker-end="url(#ar4)"/>
+  <text x="384" y="180" text-anchor="end" fill="#667069" font-size="9.5">獲得 S2</text>
+  <line x1="467" y1="157" x2="502" y2="193" stroke="#52625a" stroke-width="2" marker-end="url(#ar4)"/>
+  <text x="522" y="180" fill="#667069" font-size="9.5">獲得 S3</text>
+
+  <!-- ══ Panel C：AXX 歸位 ══ -->
+  <rect x="586" y="6" width="302" height="256" rx="8" fill="#f4f1f8" stroke="#d7cee6"/>
+  <text x="598" y="24" font-weight="700" fill="#6b5592" font-size="12">那 32 條 AXX 放在哪？</text>
+  <text x="598" y="39" fill="#667069" font-size="10">逐一檢查它與每個節點相不相容：</text>
+
+  <g font-size="10.5">
+    <text x="602" y="60" fill="#a94336">✗</text><text x="620" y="60" fill="#17231e" font-weight="700">RRR</text>
+    <text x="668" y="60" fill="#667069">S1 是 R，但 read 讀到 A → 矛盾</text>
+    <text x="602" y="80" fill="#176b58">✓</text><text x="620" y="80" fill="#17231e" font-weight="700">ARR</text>
+    <text x="668" y="80" fill="#667069">S1=A 相符；S2/S3 未讀到，不矛盾</text>
+    <text x="602" y="100" fill="#176b58">✓</text><text x="620" y="100" fill="#17231e" font-weight="700">AAR</text>
+    <text x="668" y="100" fill="#667069">同上</text>
+    <text x="602" y="120" fill="#176b58">✓</text><text x="620" y="120" fill="#17231e" font-weight="700">ARA</text>
+    <text x="668" y="120" fill="#667069">同上</text>
+  </g>
+
+  <rect x="598" y="134" width="278" height="52" rx="6" fill="#fffdf7" stroke="#6b5592"/>
+  <text x="610" y="152" font-weight="700" fill="#6b5592" font-size="10.5">三個相容節點的最近共同祖先 = ARR</text>
+  <text x="610" y="168" fill="#667069" font-size="10">往下再走一步就會二選一，證據不允許；</text>
+  <text x="610" y="180" fill="#667069" font-size="10">往上退一步會與讀到的 A 矛盾。</text>
+
+  <rect x="598" y="194" width="278" height="58" rx="6" fill="#fffdf7" stroke="#c9c8bd"/>
+  <text x="610" y="212" fill="#667069" font-size="10.5">寫進 BAM：</text>
+  <text x="610" y="229" font-size="10.5"><tspan fill="#98a09a">lp</tspan> <tspan font-weight="700" fill="#17231e">AXX</tspan>　<tspan fill="#667069">（事實：讀到什麼）</tspan></text>
+  <text x="610" y="245" font-size="10.5"><tspan fill="#98a09a">lv</tspan> <tspan font-weight="700" fill="#17231e">…ARR+</tspan>　<tspan fill="#667069">（推論）</tspan>　<tspan fill="#98a09a">ls</tspan> <tspan font-weight="700" fill="#17231e">P</tspan></text>
+
+  <!-- ══ 底部兩條說明 ══ -->
+  <rect x="12" y="272" width="876" height="60" rx="8" fill="#fff7e7" stroke="#e6d5b8"/>
+  <text x="26" y="290" font-weight="700" fill="#b66e20">為什麼會冒出一個沒人看過的 ARR？</text>
+  <text x="26" y="307" fill="#667069">AAR 與 ARA 都帶 S1。若 S1 只能發生一次（最簡約原則），這兩者必定有一個<tspan font-weight="700">同時帶 S1、還沒帶 S2 也沒帶 S3</tspan> 的共同祖先 —— 那就是 ARR。</text>
+  <text x="26" y="323" fill="#667069">沒有任何 read 讀到它，但樹要合法就必須有它。<tspan font-weight="700">這是推論不是觀察，所以畫成虛線琥珀。</tspan>全樣本 26,748 個節點中，這樣補入的佔 37.8%（10,114 個）。</text>
+
+  <rect x="12" y="342" width="876" height="58" rx="8" fill="#fdf0ee" stroke="#eccfc9"/>
+  <text x="26" y="360" font-weight="700" fill="#a94336">「定不出來」也是一種答案</text>
+  <text x="26" y="377" fill="#667069">上例只有一棵最簡約樹。位點一多就常出現多棵同分最佳樹 —— 這時系統標成「同分並列 N 棵」而<tspan font-weight="700">不挑一棵當結論</tspan>。</text>
+  <text x="26" y="393" fill="#667069">實測：k=1 有 96.5% 唯一解，k=6 驟降到 4.5%，k≥7 全數 0%。這些 read 的 <tspan font-family="ui-monospace,monospace">ls</tspan> 記成 <tspan font-weight="700">M</tspan>（同分並列）或 <tspan font-weight="700">A</tspan>（拓撲未定），下游可自行排除。</text>
 </svg>
-<div class="cap"><b>圖 4．從 read pattern 到樹。</b>樹的節點是「突變狀態組合」，邊是「獲得某個突變」。
-最簡約原則 = 每個突變只發生一次。<b>三態必須分清楚</b>：實測節點、補入節點、以及「所有邊都是推論」。
-儀表板用實線／虛線／點線三種畫法，並在圖旁固定顯示圖例。</div>
+<div class="cap"><b>圖 4．從 read pattern 到樹（三位點示意例，read 條數為說明用；右下兩組比例為全樣本實測）。</b>
+關鍵在於<b>兩種 read 的角色不同</b>：完整覆蓋的 read 定義狀態、決定樹的形狀；
+部分覆蓋的 read 不定義任何狀態，只能透過<b>最近共同祖先</b>被歸到「某節點或其後代」，並以 <code>ls=P</code> 標明。
+把這兩者混為一談，會誤以為 <code>AXX</code> 是第四種狀態，進而數出根本不存在的分支。</div>
 </div>
 
 <h3>步驟 3：把樹上的位置寫回每條 read</h3>
@@ -459,6 +572,13 @@ ol.steps>li{margin:.45rem 0}
 <section id="out">
 <div class="eyebrow">⑥ 產出</div>
 <h2>一個可互動的觀察介面</h2>
+
+<p>再強調一次它的位置：這是<b>觀察層</b>，不隸屬於前面任何一個軟體（圖 2）。
+它不重跑分析、不改動任何上游檔案，只做三件事 ——
+把已凍結的產物<b>對起來</b>、把「哪些是事實／哪些是推論」<b>標出來</b>、
+把整體結果的守恆關係<b>算給你看</b>。
+因此它能在資料不完整時照樣產出：下面的數字是 HCC1395 六層全到齊的情形，
+若少了哪一層，對應的區塊會顯示「不可用 ＋ 缺哪個路徑」，其餘照常。</p>
 
 <div class="kpi">
   <div><div class="l">全基因組 sSNV</div><div class="v">19,849</div><div class="n">預設全顯示</div></div>
