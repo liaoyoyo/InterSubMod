@@ -1,0 +1,611 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InterSubMod 部件 — 吃什麼、做什麼、吐什麼</title>
+<!--
+  doc_type: explain_component_ism   version: v1   created: 2026-08-06
+  branch: research/subclonal-reconstruction-202606
+  data_sources: scratchpad/collect_ism_cli.json, collect_ism_pipeline.json, collect_ism_outputs.json
+  驗證: 所有 CLI 選項對照 include/utils/ArgParser.hpp 與 include/core/Config.hpp 逐行核對；
+        3 條範例指令全部實跑 exit 0；所有輸出檔 header 與範例行皆為實際 head 磁碟檔案所得
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+.topbar nav a.here{color:#fff;background:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.1rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.62rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-5) 0 var(--sp-2);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.1rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424}.takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.req{color:var(--c-dead);font-weight:800}
+.table-wrap{overflow-x:auto;margin:var(--sp-3) 0}
+table{border-collapse:collapse;width:100%;font-size:.85rem;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+figure{margin:var(--sp-5) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:.98rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.9rem}
+pre{font-family:var(--mono);font-size:.78rem;line-height:1.62;background:#F4F2ED;border:1px solid var(--c-border);border-radius:8px;padding:var(--sp-3) var(--sp-4);overflow-x:auto;margin:var(--sp-3) 0}
+pre code{background:none;padding:0;font-size:1em}
+pre.cmd{background:#1c1b19;color:#e8e4dc;border-color:#3a3833}
+pre.cmd .c{color:#8a8578}
+pre.cmd .f{color:#D9A77557}
+pre.out{background:#F7F5EF;border-left:4px solid var(--c-info)}
+.dot{color:var(--c-dead);font-weight:800}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-4) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+@media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+</style>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="11_system-map-overview.standalone.html">系統全景</a>
+    <a class="here" href="12_intersubmod-io.standalone.html">ISM 部件</a>
+    <a href="13_longlineage-io.standalone.html">LongLineage 部件</a>
+    <a href="14_upstream-data.standalone.html">上游與資料</a>
+    <a href="15_python-html-layer.standalone.html">分析與呈現層</a>
+    <a href="16_how-to-run.standalone.html">怎麼跑</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker">部件分冊 · 第 12 頁 · InterSubMod（inter_sub_mod）</div>
+  <h1>InterSubMod 吃什麼、做什麼、吐什麼</h1>
+  <p class="lede">
+    這是目前<b>真正跑得動、也真正產出論文核心數字</b>的那支程式。
+    本頁把它的 3 個必填輸入、8 個處理階段、17 種輸出檔案全部攤開，
+    每個檔案都附<b>實際 head 出來的 header 與資料行</b>。
+  </p>
+</header>
+
+<div class="bluf">
+  <h2>一句話</h2>
+  <p>
+    給它一個<b>腫瘤 BAM</b>、一份<b>參考基因組</b>、一份<b>體細胞突變清單（VCF）</b>，
+    它會對每個突變位點開一個視窗，把<b>跨過該位點的每一條 read</b> 的甲基化狀態排成矩陣，
+    算 read 兩兩之間的距離、做階層分群與統計檢定，全部落成檔案。
+  </p>
+  <p style="margin-top:10px;font-size:.95rem">
+    <b>為什麼要這樣做：</b>一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在<b>單一分子</b>上
+    同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，
+    因此能用 <b>read 層級</b>（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
+  </p>
+  <p style="margin-top:10px">
+    <span class="badge b-pass">實測可跑</span>
+    最小指令 <b>2.9 秒</b>完成、exit 0；含 normal BAM 與 LOH 標註的完整版本也 exit 0。
+  </p>
+</div>
+
+<div class="takeaway dead">
+  <span class="lab"><span class="dot">●</span> 用之前一定要知道的一件事</span>
+  目前 <code>build/bin/inter_sub_mod</code> 這個執行檔是 <b>STALE 的</b> ——
+  有 5 個原始碼檔的修改時間比它還新。<b>跑之前請先重新編譯</b>，否則你跑的不是現在的程式碼。
+</div>
+
+<!-- ═══════════ 1 輸入 ═══════════ -->
+<section id="s1">
+  <h3><span class="num">01</span>輸入 — 3 個必填、2 個選填</h3>
+  <p class="sub">下表的「實際路徑」都是磁碟上真實存在的檔案，可直接拿去跑。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr>
+      <th style="width:16%">參數</th><th style="width:9%">必填</th>
+      <th style="width:39%">這是什麼、程式拿它做什麼</th><th style="width:36%">限制與實測值</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><code>--tumor-bam</code><br><code>-t</code></td>
+        <td><span class="req">必填</span></td>
+        <td>腫瘤樣本的長 read 比對檔。程式<b>只抓跨過該突變位點的 read</b>，
+            並從中讀取 MM/ML 甲基化標記與 HP 單倍型標籤。</td>
+        <td>需 <code>.bai</code> 索引（缺了只印 Warning 不擋，但隨機存取實際上會失敗）。<br>
+            實測：<code>data/bam/HCC1395/tumor.bam</code> = 283 GB，同目錄有 119 MB 的 .bai。</td>
+      </tr>
+      <tr>
+        <td><code>--reference</code><br><code>-r</code></td>
+        <td><span class="req">必填</span></td>
+        <td>參考基因組序列。用來<b>找出視窗內所有 CpG 的位置</b>（要先有序列才知道哪裡是 CG），
+            也用來決定染色體長度以裁切視窗邊界。</td>
+        <td><span class="dot">●</span> <b><code>.fai</code> 索引缺失是 Hard error</b>，程式會直接停。<br>
+            實測：<code>data/ref/hg38.fa</code> → GRCh38（3.14 GB）。</td>
+      </tr>
+      <tr>
+        <td><code>--vcf</code><br><code>-v</code></td>
+        <td><span class="req">必填</span></td>
+        <td>體細胞突變清單。<b>每一筆記錄 = 一個分析區域</b>。
+            VCF 裡有幾個突變，就會產生幾個 region 目錄。</td>
+        <td><span class="dot">●</span> <b>VCF 的檔名會變成輸出目錄的第一層</b>（取 stem）。<br>
+            實測：<code>filtered_snv_tp.vcf.gz</code> = 1.15 MB。</td>
+      </tr>
+      <tr>
+        <td><code>--normal-bam</code><br><code>-n</code></td>
+        <td>選填</td>
+        <td>配對正常組織。<b>給了它才會有</b>：germline 甲基化基準線、腫瘤對正常的殘差、跨區域分層。
+            不給的話這些欄位一律是 <code>NOT_APPLICABLE_TUMOR_ONLY</code>。</td>
+        <td>正常 read 是用<b>整個視窗</b>抓（不是點抓），因為它們貢獻的是甲基化基準而非突變判讀。<br>
+            原始碼註解明文：<b>不要把 normal 的 HP 硬改成 0</b>。</td>
+      </tr>
+      <tr>
+        <td><code>--loh-bed</code></td>
+        <td>選填</td>
+        <td>雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，
+            讓後續分析可以把 LOH 區域分層看待。</td>
+        <td>只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>
+            實測檔案 1,094 行，載入時印 <code>Loaded 1094 LOH regions</code>。</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <details class="card">
+    <summary>全部 29 個 CLI 選項的預設值 — 以及 <b>兩個文件與程式碼不符的陷阱</b></summary>
+    <div class="body">
+      <p>本輪把 <code>--help</code> 的每一行都對照 <code>ArgParser.hpp</code> 與 <code>Config.hpp</code> 逐一比對。
+         大部分一致，但有<b>兩個</b>會讓你算錯資源或拿到非預期結果：</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:20%">選項</th><th style="width:22%">help 說的</th><th style="width:22%">實際的</th><th style="width:36%">後果</th></tr></thead>
+        <tbody>
+          <tr><td><code>--threads</code> / <code>-j</code></td>
+              <td><code>Default: 1</code></td>
+              <td><b>實際是 16</b><br><span class="muted">Config.hpp:43</span></td>
+              <td>不給這個旗標時，程式會用 16 條執行緒。
+                  <b>資源估算會整整差 16 倍</b>。實跑不帶旗標時 Configuration 印 <code>Threads: 16</code>。</td></tr>
+          <tr><td><code>--distance-metric</code></td>
+              <td>宣告預設 <code>BERNOULLI</code><br><span class="muted">Config.hpp:40</span></td>
+              <td><b>實際是 NHD</b><br><span class="muted">ArgParser.hpp:86,168</span></td>
+              <td>ArgParser 會<b>無條件清空</b>宣告的預設值再填入 NHD，
+                  所以 Config.hpp 的初值不可能存活。不明講就會拿到 NHD，且只產生 <code>distance/NHD/</code> 目錄。</td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin-top:12px"><b>其餘經比對確認一致的預設值</b>：
+        <code>--window-size 1000</code>、<code>--min-mapq 20</code>、<code>--min-read-length 1000</code>、
+        <code>--min-base-quality 20</code>、<code>--min-common-coverage 3</code>、
+        <code>--nan-distance-strategy SKIP</code>、<code>--methyl-high 0.8</code>、<code>--methyl-low 0.2</code>、
+        <code>--output-dir output</code>、<code>--log-level info</code>。</p>
+      <p><span class="dot">●</span> <b>另外三個設定是死的</b>（在 Config.hpp 以外零引用）：
+        <code>min_site_coverage</code>、<code>pmd_gating</code>、<code>pmd_bed_path</code>。
+        也就是說「本方法有 PMD gating」「有最小位點覆蓋度過濾」<b>是錯的敘述，不可寫進方法學章節</b>。</p>
+      <p><span class="dot">●</span> <b><code>--help</code> 的 exit code 是 1 不是 0</b>
+        （help 與 parse error 共用同一條 return 路徑）。
+        寫 CI smoke test 時 <code>--help &amp;&amp; next</code> 這種寫法會誤判失敗。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ═══════════ 2 流程 ═══════════ -->
+<section id="s2">
+  <h3><span class="num">02</span>內部流程 — 一條 read 從 BAM 到結果，經過什麼</h3>
+  <p class="sub">程式內部共 20 個細部步驟，下圖濃縮成 8 個關鍵階段。每個階段標了實際生效的參數。</p>
+
+  <figure>
+    <div class="figtitle">圖 1 · InterSubMod 內部處理鏈（每個方框下方是實際生效的參數，非文件宣稱值）</div>
+    <svg viewBox="0 0 960 700" role="img" aria-labelledby="g1t g1d" xmlns="http://www.w3.org/2000/svg">
+      <title id="g1t">InterSubMod 內部八階段處理鏈</title>
+      <desc id="g1d">從 VCF 載入突變錨點開始，依序為：以突變為中心開視窗、從 BAM 抓取 read、
+      read 過濾與單倍型解析、解析甲基化標記組成 read 乘 CpG 矩陣、二值化、計算 read 兩兩距離矩陣、
+      剔除含缺失值的 read 後做階層分群建樹、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+        <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
+
+        <!-- S1 -->
+        <rect x="250" y="12" width="440" height="46" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">① 載入突變錨點</text>
+        <text x="470" y="49" text-anchor="middle" font-size="10" fill="#2F6690">讀 VCF，每筆突變 = 一個 region</text>
+        <text x="706" y="38" font-size="9.5" fill="#5C5A54">用 OpenMP 把 region 分給多執行緒平行處理</text>
+        <path d="M470,58 L470,78" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S2 -->
+        <rect x="250" y="80" width="440" height="46" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="470" y="100" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">② 以突變為中心開視窗</text>
+        <text x="470" y="117" text-anchor="middle" font-size="10" fill="#2F6690">左右各展開 window bp，實際長度 = 2×window+1</text>
+        <text x="706" y="106" font-size="9.5" fill="#B06A16">canonical run 用 ±5000（不是預設的 ±1000）</text>
+        <path d="M470,126 L470,146" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S3 -->
+        <rect x="250" y="148" width="440" height="56" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="470" y="168" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5B3FA0">③ 抓 read（腫瘤與正常抓法不同）</text>
+        <text x="470" y="184" text-anchor="middle" font-size="10" fill="#3f2c70">腫瘤：只在突變那一個點抓（不跨過就沒用）</text>
+        <text x="470" y="198" text-anchor="middle" font-size="10" fill="#3f2c70">正常：抓整個視窗（它提供的是甲基化基準線）</text>
+        <path d="M470,204 L470,224" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S4 -->
+        <rect x="250" y="226" width="440" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="470" y="246" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5B3FA0">④ 過濾 + 讀單倍型 + 判定突變型/正常型</text>
+        <text x="470" y="262" text-anchor="middle" font-size="10" fill="#3f2c70">淘汰：次要比對 / 補充比對 / 重複 / 未比對 / MAPQ&lt;20 / 長度&lt;1000bp</text>
+        <text x="470" y="276" text-anchor="middle" font-size="10" fill="#3f2c70">走訪 CIGAR 找出突變位置對應的鹼基，比對是 ALT 還是 REF</text>
+        <text x="470" y="288" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9A3B3B">強制要求 MM+ML 甲基化標記，無標記直接淘汰（無 CLI 開關）</text>
+        <rect x="706" y="230" width="248" height="58" rx="6" fill="#fff" stroke="#5B3FA0" stroke-width="1"/>
+        <text x="716" y="246" font-size="9.5" font-weight="700" fill="#5B3FA0">HP 標籤實測值域（6 種）</text>
+        <text x="716" y="260" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">1:7864  2:6453  1-1:3856</text>
+        <text x="716" y="273" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">2-1:3161  0:1658  3:374</text>
+        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = 帶體細胞突變的單倍型</text>
+        <path d="M470,292 L470,312" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S5 -->
+        <rect x="250" y="314" width="440" height="66" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
+        <text x="470" y="334" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F7D5B">⑤ 解析甲基化 → read × CpG 矩陣</text>
+        <text x="470" y="350" text-anchor="middle" font-size="10" fill="#1f4f3a">MM 標記說「第幾個 C 有修飾」，ML 說「機率多高」（0–255 → 0–1）</text>
+        <text x="470" y="364" text-anchor="middle" font-size="10" fill="#1f4f3a">只取 5mC；反股 read 需反向掃描；並用參考序列驗證確實是 CpG</text>
+        <text x="470" y="376" text-anchor="middle" font-size="9.5" fill="#5C5A54">欄位 = 所有 read 提到的 CpG 聯集（不是交集），沒觀測到填 -1</text>
+        <path d="M470,380 L470,400" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S6 -->
+        <rect x="250" y="402" width="440" height="58" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
+        <text x="470" y="422" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F7D5B">⑥ 二值化（注意是三分不是二分）</text>
+        <text x="470" y="438" text-anchor="middle" font-size="10" fill="#1f4f3a">機率 ≥ 0.8 判為甲基化(1)；≤ 0.2 判為未甲基化(0)</text>
+        <text x="470" y="453" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">夾在 0.2～0.8 中間的曖昧值直接丟棄，與「沒觀測」共用 -1 編碼</text>
+        <path d="M470,460 L470,480" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S7 -->
+        <rect x="250" y="482" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+        <text x="470" y="502" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑦ read × read 距離矩陣</text>
+        <text x="470" y="518" text-anchor="middle" font-size="10" fill="#6b4310">只用兩條 read 都有觀測的 CpG；共同覆蓋 &lt; 3 個就判為無效對</text>
+        <text x="470" y="532" text-anchor="middle" font-size="10" fill="#6b4310">6 種距離可選：NHD（預設）· L1 · L2 · CORR · JACCARD · BERNOULLI</text>
+        <text x="470" y="544" text-anchor="middle" font-size="9.5" fill="#5C5A54">建樹前會先剔除含缺失值的 read（否則階層分群會當掉）</text>
+        <path d="M470,548 L470,568" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
+
+        <!-- S8 -->
+        <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
+        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
+        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
+        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
+
+        <!-- 右側：四檢定 -->
+        <rect x="706" y="482" width="248" height="154" rx="6" fill="#fff" stroke="#B06A16" stroke-width="1.1"/>
+        <text x="716" y="500" font-size="10" font-weight="700" fill="#B06A16">四類檢定各問不同問題</text>
+        <text x="716" y="518" font-size="9.5" font-weight="700" fill="#6b4310">Global</text>
+        <text x="716" y="531" font-size="9" fill="#5C5A54">分群結果與生物標籤有關聯嗎</text>
+        <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
+        <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
+        <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">群在距離空間真的分開了嗎</text>
+        <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
+        <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
+        <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>
+
+        <!-- 左側註記 -->
+        <rect x="12" y="226" width="228" height="66" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.1"/>
+        <text x="22" y="244" font-size="9.5" font-weight="700" fill="#9A3B3B">為什麼腫瘤只在點上抓 read</text>
+        <text x="22" y="259" font-size="9" fill="#7a3030">不跨過突變的 read 無法定型 ALT/REF，</text>
+        <text x="22" y="272" font-size="9" fill="#7a3030">下游本來就會濾掉。±5000 視窗下</text>
+        <text x="22" y="285" font-size="9" fill="#7a3030">約 40% 會是「未覆蓋突變」。</text>
+
+        <rect x="12" y="482" width="228" height="66" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.1"/>
+        <text x="22" y="500" font-size="9.5" font-weight="700" fill="#2F6690">建樹前為何要剔除缺失值</text>
+        <text x="22" y="515" font-size="9" fill="#2F6690">缺失值永遠不會被選成最小距離，</text>
+        <text x="22" y="528" font-size="9" fill="#2F6690">會產生退化的樹並在走訪時堆疊</text>
+        <text x="22" y="541" font-size="9" fill="#2F6690">溢位當掉（2026-06 修）。</text>
+      </g>
+    </svg>
+    <figcaption>
+      <b>最容易誤解的一步是 ⑥ 二值化</b>：它不是把機率一刀切成 0/1，而是<b>三分</b> ——
+      中間帶（0.2～0.8）被視為「不可信」直接丟棄。這代表<b>曖昧的甲基化訊號與「根本沒測到」在下游是同一件事</b>，
+      分析時要意識到這個資訊損失。
+      <br><b>另注意</b>：程式裡其實有三套不同的二值化門檻（主線 0.8/0.2、另一模組硬寫死的 0.5、Python 端的 128/255），
+      同一個 CpG 會因為走哪條路而得到不同判定，<b>跨模組的數字不可直接比較</b>。
+    </figcaption>
+  </figure>
+</section>
+
+<!-- ═══════════ 3 輸出 ═══════════ -->
+<section id="s3">
+  <h3><span class="num">03</span>輸出 — 每個檔案長什麼樣（真實內容）</h3>
+  <p class="sub">
+    輸出分兩層：<b>region 層</b>（每個突變位點一個目錄）與 <b>run 層</b>（整次執行一份總表）。
+    下面所有 header 與資料行都是<b>實際從磁碟 head 出來的</b>，不是照文件抄的。
+  </p>
+
+  <h4 class="mini">Region 層 — 每個突變位點一個目錄</h4>
+
+  <details class="card" open>
+    <summary><code>reads/reads.tsv</code> <span class="badge b-info">10 欄</span> — 這個位點有哪些 read</summary>
+    <div class="body">
+      <p>每條 read 一列：內部編號、真正的 read 名字（UUID）、座標、比對品質、單倍型標籤、支持突變型還是正常型、來自腫瘤還是正常、正反股。</p>
+      <pre class="out"><code>read_id	read_name	chr	start	end	mapq	hp	alt_support	is_tumor	strand
+0	56c0d051-1557-44af-99cc-46f5b9f48136	chr1	101290545	101347892	60	2-1	ALT	1	+</code></pre>
+      <p class="muted">注意檔案在 <code>reads/</code> 子目錄下，不在 region 根目錄。</p>
+    </div>
+  </details>
+
+  <details class="card" open>
+    <summary><code>methylation/methylation.csv</code> <span class="badge b-warn">核心矩陣</span> — read × CpG 甲基化機率</summary>
+    <div class="body">
+      <p>每一列一條 read，每一欄一個 CpG，<b>欄名就是基因體座標</b>，格子裡是甲基化機率 0–1，沒觀測到寫 <code>NA</code>。</p>
+      <pre class="out"><code>read_id,101330345,101330431,101330517,101330633,101330755,101330799,...
+0,NA,0.0235,0.0275,0.9922,0.0667,0.0078,...</code></pre>
+      <div class="takeaway dead" style="font-size:.95rem;margin-top:14px">
+        <span class="lab"><span class="dot">●</span> 這裡有一個會靜默出錯的陷阱</span>
+        第一欄 <code>read_id</code> 是<b>矩陣列號（整數）</b>，<b>不是 read 的名字</b>。
+        要知道第 0 列是哪條 read，必須去 <code>reads.tsv</code> 用同一個 <code>read_id</code> 查。
+        也就是說<b>甲基化與 read 身分的綁定完全靠列序約定</b>，程式沒有任何 key 校驗 ——
+        任何一邊做了過濾或重排而沒同步，就會<b>把甲基化配到別條 read 的單倍型上，而且不會有任何錯誤訊息</b>。
+      </div>
+      <p><b>搭配檔</b> <code>methylation/cpg_sites.tsv</code>（3 欄）把欄號對回實際座標：</p>
+      <pre class="out"><code>cpg_id	chr	position
+0	chr1	101330345</code></pre>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><code>distance/&lt;METRIC&gt;/matrix.csv</code> — read 兩兩距離方陣</summary>
+    <div class="body">
+      <p>N×N 方陣，第一欄與 header 都是 read_id，6 位小數，無法計算的填 <code>NA</code>。
+         <code>&lt;METRIC&gt;</code> 是子目錄名（如 <code>NHD</code>、<code>BERNOULLI</code>），指定幾個 metric 就會有幾個子目錄。</p>
+      <pre class="out"><code>read_id,0,1,2,3,4,5,6,7,8,...
+0,0.000000,0.000000,0.142857,0.400000,0.333333,0.250000,...</code></pre>
+      <p>同目錄另有 <code>stats.txt</code>（距離矩陣的體檢報告：用哪個 metric、多少對 read 有足夠共同 CpG、距離分佈）
+         與分股版本 <code>matrix_forward.csv</code> / <code>matrix_reverse.csv</code>。</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><code>clustering/tree.nwk</code> <span class="badge b-dead">最容易誤讀</span> — 階層分群樹</summary>
+    <div class="body">
+      <pre class="out"><code>(((((((56c0d051-1557-44af-99cc-46f5b9f48136:0.000001,15a3bad6-8744-45e2-a577-...</code></pre>
+      <div class="takeaway dead" style="font-size:.95rem">
+        <span class="lab"><span class="dot">●</span> 這棵樹的葉子是 read，不是 clone</span>
+        葉節點標籤是 <b>read 的名字（BAM 裡的 QNAME，一串 UUID）</b>。
+        這是一棵<b>「read 依甲基化相似度」的階層分群樹</b>，
+        <b>不是</b>細胞亞群的演化譜系樹。兩者是完全不同的東西，非常容易在報告裡被誤引。
+      </div>
+      <p>同目錄的 <code>leaf_order.txt</code> 是樹上葉子從左到右的順序 —— 畫熱圖時要照這個順序排 read，圖才會跟樹對得上。</p>
+      <p><span class="dot">●</span> <code>clustering/linkage_matrix.csv</code> <b>副檔名是 .csv，但實際內容是 TAB 分隔</b>。
+         用 <code>pandas.read_csv()</code> 預設的逗號分隔去讀，<b>整列會變成單一欄位，而且不會報錯</b>。
+         必須寫 <code>sep='\t'</code>。</p>
+    </div>
+  </details>
+
+  <h4 class="mini">Run 層 — 整次執行一份</h4>
+
+  <details class="card" open>
+    <summary><code>significance_summary.csv</code> <span class="badge b-dead">跨版本不相容</span> — 下游幾乎只吃這一份</summary>
+    <div class="body">
+      <p>一列一個 region，把所有統計欄位攤平。實務上絕大多數下游分析都只讀這個檔。</p>
+      <pre class="out"><code>RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
+0,chr1,877772,G,C,46,17,2.990000e-01,0.0000,3.065000e-01,0.0000,...</code></pre>
+      <div class="takeaway dead" style="font-size:.95rem">
+        <span class="lab"><span class="dot">●</span> 欄數會隨 binary 版本改變，而且檔案裡沒有版本欄位</span>
+        磁碟上實測到的欄數有 <b>59 / 114 / 117 / 157 / 180</b> 五種，而目前原始碼是 <b>193</b> 欄。
+        意思是<b>不同時期跑出來的結果，欄位位置是錯開的</b>。
+        任何用固定欄號（而非欄名）解析的下游腳本，<b>會靜默讀到錯的欄位</b>。
+        <b>務必用欄名讀，並記錄產生該檔的 binary 版本。</b>
+      </div>
+    </div>
+  </details>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:26%">其他 run 層檔案</th><th style="width:74%">內容</th></tr></thead>
+    <tbody>
+      <tr><td><code>significance_statistics.txt</code></td><td>一頁摘要：總共處理幾個 region、多少個顯著、各染色體分別多少。實測開頭 <code>=== Significance Analysis Statistics ===</code>、<code>Total Regions Processed: 1982</code>。</td></tr>
+      <tr><td><code>run.log</code></td><td>這次跑用了什麼輸入與參數，開頭是 <code>--- Configuration ---</code> 區塊。<b>這是回溯任何一份輸出「怎麼來的」唯一可靠依據</b>，不要刪。</td></tr>
+      <tr><td><code>subclone_structure.txt</code></td><td>跨 region 的分組摘要（分幾群、平均 ASM、LOH 比例）。只在部分 run 出現。</td></tr>
+      <tr><td><code>label_first_metrics.tsv</code></td><td>36 欄，label-first 路線的精簡指標表，用 <code>chr:pos:ref:alt</code> 當鍵。只在 canonical 配對輸出見到。</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="takeaway">
+    <span class="lab">文件與實際不符的一處</span>
+    <code>.claude/rules/output-structure.md</code> 宣稱 region 目錄會有視覺化 <code>*.png</code>，
+    但本輪在實際輸出目錄中<b>找不到任何 PNG</b>。圖是由 Python 層另外畫的（見
+    <a href="15_python-html-layer.standalone.html">分析與呈現層</a>），不是 C++ 產生的。
+  </div>
+</section>
+
+<!-- ═══════════ 4 指令 ═══════════ -->
+<section id="s4">
+  <h3><span class="num">04</span>怎麼跑 — 三條可直接複製的指令</h3>
+  <p class="sub">以下指令<b>本輪全部實際執行過</b>，exit code 皆為 0。路徑都是磁碟上真實存在的檔案。</p>
+
+  <h4 class="mini">① 最小可跑 — 驗證環境與執行檔正常（約 3 秒）</h4>
+  <p>先從 VCF 抽出單一個突變，只給三個必填參數：</p>
+  <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的 VCF</span>
+SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
+V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
+grep '^#' $V &gt; $SP/one_snv.vcf
+grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
+
+<span class="c"># 跑</span>
+/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
+  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
+  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
+  --vcf        $SP/one_snv.vcf \
+  --output-dir $SP/out_min</code></pre>
+  <p><b>預期輸出</b>（實跑結果）：</p>
+  <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
+Total reads processed: 85
+Forward strand (+): 40 / Reverse strand (-): 45
+Total CpG sites found: 11
+Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pre>
+
+  <h4 class="mini">② 典型分析 — 指定執行緒、視窗、兩種距離指標</h4>
+  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
+  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
+  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
+  --vcf        $SP/one_snv.vcf \
+  --output-dir $SP/out_typical \
+  --window-size 1000 \
+  --threads 8 \
+  --distance-metric BERNOULLI \
+  --distance-metric NHD \
+  --min-common-coverage 3 \
+  --nan-distance-strategy SKIP \
+  --log-level info</code></pre>
+  <p>
+    Configuration 區塊會印 <code>Threads: 8</code> 與 <code>Distance Metrics: BERNOULLI, NHD</code>，
+    每個 region 目錄下會同時出現 <code>distance/BERNOULLI/</code> 與 <code>distance/NHD/</code> 兩個子目錄。
+  </p>
+  <div class="takeaway" style="font-size:.95rem">
+    <span class="lab">要跑全基因組時</span>
+    把 <code>--vcf</code> 換成完整的 <code>filtered_snv_tp.vcf.gz</code> 即可 ——
+    但那會產生<b>數萬個 region</b>，屬於長時間計算，請用背景執行並先確認磁碟餘量。
+    <span class="muted">（本輪只以單一突變驗證同樣的參數組合可以跑通，未實跑全量。）</span>
+  </div>
+
+  <h4 class="mini">③ 完整配對分析 — 加上正常組織與 LOH 標註</h4>
+  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
+  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
+  --normal-bam /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam \
+  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
+  --vcf        $SP/one_snv.vcf \
+  --loh-bed    /big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed \
+  --output-dir $SP/out_full \
+  --window-size 1000 --threads 8 \
+  --distance-metric BERNOULLI --distance-metric NHD</code></pre>
+  <p><b>怎麼確認它真的用到了 normal 與 LOH</b>（實跑結果）：</p>
+  <pre class="out"><code>Loaded 1094 LOH regions from BED file
+Total reads processed: 110        &lt;- 85 腫瘤 + 25 正常（不給 normal 時只有 85）
+
+# significance_summary.csv 中：
+NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Delta=-0.010062</code></pre>
+</section>
+
+<!-- ═══════════ 5 陷阱 ═══════════ -->
+<section id="s5">
+  <h3><span class="num">05</span>陷阱清單 — 會靜默出錯的地方</h3>
+  <p class="sub">這節整理「不會報錯、但結果是錯的」那類問題。每一條都有原始碼或實測依據。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:5%">嚴重</th><th style="width:31%">問題</th><th style="width:64%">會怎麼咬你</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="dot">●</span></td>
+        <td><b>甲基化與 read 靠隱含列序綁定</b></td>
+        <td><code>methylation.csv</code> 首欄是列號不是 read 名，唯一的綁定在程式內部。
+            任何過濾或重排不同步 → <b>甲基化配到別條 read 的單倍型，無任何 assert 會抓到</b>。</td>
+      </tr>
+      <tr>
+        <td><span class="dot">●</span></td>
+        <td><b><code>significance_summary.csv</code> 跨 run 欄數不一致</b></td>
+        <td>實測 59/114/117/157/180 五種，原始碼 193，<b>且無版本欄位</b>。
+            用固定欄號解析的腳本會靜默錯位。<b>一律用欄名讀。</b></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-warn">中</span></td>
+        <td><b>二值化門檻有三套</b></td>
+        <td>主線 0.8/0.2 三分法、另一模組硬寫死 0.5 二分法、Python 端 128/255。
+            同一個 CpG 因為走哪條路而甲基化判定不同，<b>跨模組數字不可比</b>。</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-warn">中</span></td>
+        <td><b><code>linkage_matrix.csv</code> 其實是 TSV</b></td>
+        <td>副檔名與分隔符不符。<code>pandas.read_csv</code> 預設逗號 → 整列變單欄，<b>不會報錯</b>。</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-warn">中</span></td>
+        <td><b><code>--threads</code> 預設是 16 不是 1</b></td>
+        <td>help 寫 Default: 1，實際 Config.hpp 是 16。<b>資源估算差 16 倍</b>，
+            在共用機器上平行跑多個 job 時會嚴重超載。</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-warn">中</span></td>
+        <td><b><code>--distance-metric</code> 宣告值會被清掉</b></td>
+        <td>Config 宣告 BERNOULLI，但參數解析會無條件清空再填 NHD。<b>不明講就是 NHD。</b></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-info">低</span></td>
+        <td><b>群數最少一定是 2</b></td>
+        <td>輪廓係數從 k=2 開始掃，所以 <code>optimal_k</code> 永遠不會是 1 ——
+            <b>它不回答「有沒有結構」</b>。要看有沒有結構請看 PERMANOVA 與 gating 欄位。</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-info">低</span></td>
+        <td><b><code>--help</code> 回傳 exit code 1</b></td>
+        <td>help 與參數錯誤共用同一條 return 路徑。CI smoke test 會誤判失敗。</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-info">低</span></td>
+        <td><b>三個設定是死的</b></td>
+        <td><code>min_site_coverage</code>／<code>pmd_gating</code>／<code>pmd_bed_path</code> 在 Config.hpp 以外零引用。
+            <b>不可在方法學章節宣稱本方法有 PMD gating 或最小位點覆蓋度過濾。</b></td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="rel">
+    <a href="11_system-map-overview.standalone.html">← 回系統全景</a>
+    <a href="13_longlineage-io.standalone.html">下一頁：LongLineage 部件 →</a>
+    <a href="02_ism-core.standalone.html">深入：ISM 方法本體（既有頁）</a>
+    <a href="03_methylation-read-filter.standalone.html">深入：甲基化讀取與篩選（既有頁）</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <h4>本頁的驗證方式</h4>
+  <ul>
+    <li><b>CLI 選項</b>：<code>--help</code> 實跑輸出，逐行對照 <code>include/utils/ArgParser.hpp</code>
+        與 <code>include/core/Config.hpp</code>。兩個「文件 vs 程式碼」落差均以<b>原始碼行號 + 執行期輸出雙重確認</b>。</li>
+    <li><b>三條範例指令</b>：全部實際執行，exit code 皆 0，輸出檔案逐一讀回核對。</li>
+    <li><b>輸出檔格式</b>：所有 header 與資料行皆為<b>實際 head 磁碟檔案</b>所得，非照文件抄寫。</li>
+    <li><b>內部流程</b>：20 個階段逐一標註原始碼位置，本輪機械重驗行號有效性 100% 通過。</li>
+  </ul>
+  <h4 style="margin-top:16px">本頁未驗證的部分（誠實標註）</h4>
+  <ul>
+    <li>全基因組全量跑法<b>未實跑</b>（屬長時間計算），僅以單一突變驗證相同參數組合可跑通。</li>
+    <li>約 10 個較少用的旗標（如 <code>--full-read</code>、<code>--germline-hp-only</code>、
+        <code>--no-filter</code> 等）<b>其執行期副作用未逐一實跑驗證</b>；
+        其存在、型別與預設值已由 <code>--help</code> 與原始碼確認。</li>
+    <li><code>reads/filtered_reads.tsv</code> 的實際檔案在本輪查的 4 個 region 目錄中<b>都不存在</b>
+        （需開啟對應旗標且確實有 read 被濾掉才會寫出），其 header 取自原始碼字面。</li>
+  </ul>
+  <p style="margin-top:14px">
+    <b>路徑</b>：<code>InterSubMod/docs/explain/12_intersubmod-io.standalone.html</code> ·
+    分支 <code>research/subclonal-reconstruction-202606</code> · 建立於 2026-08-06
+  </p>
+</footer>
+</div>

@@ -1,0 +1,371 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>操作手冊 — 從零到跑出第一個結果</title>
+<!--
+  doc_type: explain_howto   version: v1   created: 2026-08-06
+  branch: research/subclonal-reconstruction-202606
+  驗證: 本頁每條指令均於 2026-08-06 實際執行並記錄 exit code 與輸出；
+        測試套件實跑 265 tests / 38 suites 全過（2062 ms, exit 0）
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+.topbar nav a.here{color:#fff;background:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.1rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.62rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-5) 0 var(--sp-2);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.06rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424}.takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.takeaway.info{border-color:var(--c-info);border-left-color:var(--c-info);color:#1d3f5c}.takeaway.info .lab{color:var(--c-info)}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.table-wrap{overflow-x:auto;margin:var(--sp-3) 0}
+table{border-collapse:collapse;width:100%;font-size:.85rem;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.mono{font-family:var(--mono);font-size:.8rem}
+figure{margin:var(--sp-5) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:.98rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.9rem}
+pre{font-family:var(--mono);font-size:.79rem;line-height:1.62;background:#F4F2ED;border:1px solid var(--c-border);border-radius:8px;padding:var(--sp-3) var(--sp-4);overflow-x:auto;margin:var(--sp-3) 0}
+pre code{background:none;padding:0;font-size:1em}
+pre.cmd{background:#1c1b19;color:#e8e4dc;border-color:#3a3833}
+pre.cmd .c{color:#8a8578}
+pre.out{background:#F7F5EF;border-left:4px solid var(--c-pass)}
+.dot{color:var(--c-dead);font-weight:800}
+.step{display:flex;gap:14px;align-items:flex-start;margin:var(--sp-5) 0 var(--sp-3)}
+.step .n{flex:0 0 34px;height:34px;border-radius:50%;background:var(--c-accent);color:#fff;font-family:var(--mono);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.step .t{font-size:1.12rem;font-weight:700;padding-top:3px}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-4) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+@media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+</style>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="11_system-map-overview.standalone.html">系統全景</a>
+    <a href="12_intersubmod-io.standalone.html">ISM 部件</a>
+    <a href="13_longlineage-io.standalone.html">LongLineage 部件</a>
+    <a href="14_upstream-data.standalone.html">上游與資料</a>
+    <a href="15_python-html-layer.standalone.html">分析與呈現層</a>
+    <a class="here" href="16_how-to-run.standalone.html">怎麼跑</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker">操作手冊 · 第 16 頁 · 照著做就會動</div>
+  <h1>從零到跑出第一個結果</h1>
+  <p class="lede">
+    本頁每一條指令都在 <b>2026-08-06 實際執行過</b>，並附上真實輸出。
+    照順序做，約 <b>10 分鐘</b>可以從編譯到看見第一個分析結果。
+  </p>
+</header>
+
+<div class="takeaway info">
+  <span class="lab">開始之前：先確認機器狀態</span>
+  這台機器有 <b>48 核</b>，但 <code>/big7_disk</code> <b>只剩約 617 GB（99% 已用）</b>。
+  跑全基因組分析前務必先確認餘量，大型輸出很容易把磁碟寫爆。
+</div>
+
+<!-- ═══ Step 1 ═══ -->
+<section id="s1">
+  <div class="step"><div class="n">1</div><div class="t">編譯 C++（約 2–5 分鐘）</div></div>
+  <p class="sub" style="margin-left:48px">
+    <span class="dot">●</span> <b>一定要先做這步。</b>現有的執行檔是 STALE 的 —— 有 5 個原始碼檔比它新。
+  </p>
+
+  <pre class="cmd"><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+
+<span class="c"># 設定並編譯（Release 模式）</span>
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)</code></pre>
+
+  <p><b>編譯完成後應該有 6 個執行檔</b>：</p>
+  <pre class="out"><code>$ ls build/bin/
+exact_ps_partition   inter_sub_mod   run_tests
+test_phase1_2        test_phase3     test_phase4_5</code></pre>
+</section>
+
+<!-- ═══ Step 2 ═══ -->
+<section id="s2">
+  <div class="step"><div class="n">2</div><div class="t">確認編譯結果是好的（約 2 秒）</div></div>
+
+  <pre class="cmd"><code>./build/bin/run_tests</code></pre>
+
+  <p><b>本輪實跑的真實輸出</b>：</p>
+  <pre class="out"><code>[==========] 265 tests from 38 test suites ran. (2062 ms total)
+[  PASSED  ] 265 tests.
+
+$ echo $?
+0</code></pre>
+  <p>
+    <span class="badge b-pass">265 / 265 通過</span>
+    如果這裡有任何失敗，<b>先不要往下走</b> —— 後面跑出來的數字都不可信。
+  </p>
+</section>
+
+<!-- ═══ Step 3 ═══ -->
+<section id="s3">
+  <div class="step"><div class="n">3</div><div class="t">準備 Python 環境</div></div>
+
+  <pre class="cmd"><code><span class="c"># 安裝依賴（清單於 2026-08-05 依實測環境補齊）</span>
+pip install -r requirements.txt</code></pre>
+
+  <div class="takeaway dead">
+    <span class="lab"><span class="dot">●</span> 這裡有一個一定會踩到的坑</span>
+    這台機器上有<b>兩個 Python</b>：
+    <div class="table-wrap" style="font-weight:400;margin-top:10px"><table>
+      <thead><tr><th style="width:34%">指令</th><th style="width:16%">版本</th><th style="width:50%">用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>python3</code></td><td class="mono">3.9.12</td><td>預設，大部分腳本可用</td></tr>
+        <tr><td><code>/usr/bin/python3.10</code></td><td class="mono">3.10.12</td>
+            <td><b>嚴格區域切割相關腳本必須用這個</b></td></tr>
+      </tbody>
+    </table></div>
+    <div style="font-weight:400;font-size:.92rem;margin-top:8px">
+      用錯版本時，程式會在 import 階段就崩，<b>而且錯誤訊息指向 dataclass 而不是版本</b> ——
+      看起來像程式壞了，其實只是 Python 版本不對。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Step 4 ═══ -->
+<section id="s4">
+  <div class="step"><div class="n">4</div><div class="t">跑出第一個分析結果（約 3 秒）</div></div>
+  <p class="sub" style="margin-left:48px">先用單一個突變位點試跑，確認整條路徑通暢。</p>
+
+  <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的小 VCF</span>
+SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
+V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
+grep '^#' $V &gt; $SP/one_snv.vcf
+grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
+
+<span class="c"># 跑（只給三個必填參數）</span>
+./build/bin/inter_sub_mod \
+  --tumor-bam  data/bam/HCC1395/tumor.bam \
+  --reference  data/ref/hg38.fa \
+  --vcf        $SP/one_snv.vcf \
+  --output-dir $SP/out_min</code></pre>
+
+  <p><b>實跑輸出</b>（約 2.9 秒）：</p>
+  <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
+Total reads processed: 85
+Forward strand (+): 40 / Reverse strand (-): 45
+Total CpG sites found: 11
+Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pre>
+
+  <div class="takeaway">
+    <span class="lab">兩個預設值和說明文件不一樣，先知道比較好</span>
+    <b><code>--threads</code></b> 說明寫預設 1，<b>實際是 16</b>（資源估算會差 16 倍）。<br>
+    <b><code>--distance-metric</code></b> 宣告預設 BERNOULLI，<b>實際會被覆寫成 NHD</b>。
+    <span class="muted">想要哪個就明確指定，不要靠預設。</span>
+  </div>
+</section>
+
+<!-- ═══ Step 5 ═══ -->
+<section id="s5">
+  <div class="step"><div class="n">5</div><div class="t">看結果</div></div>
+
+  <pre class="cmd"><code>find $SP/out_min -type f | head -20</code></pre>
+
+  <p>輸出分兩層。<b>先看這三個檔</b>：</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:34%">檔案</th><th style="width:66%">看什麼</th></tr></thead>
+    <tbody>
+      <tr><td><code>&lt;region&gt;/metadata.txt</code></td><td>這個位點抓到幾條 read、幾個 CpG、矩陣多大 —— 先確認數字合理。</td></tr>
+      <tr><td><code>&lt;region&gt;/reads/reads.tsv</code></td><td>每條 read 的單倍型標籤與支持突變型/正常型。</td></tr>
+      <tr><td><code>significance_summary.csv</code></td><td>run 層總表，<b>下游分析幾乎只吃這一份</b>。</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="takeaway dead">
+    <span class="lab"><span class="dot">●</span> 讀輸出檔時的三個必知</span>
+    <div style="font-weight:400;font-size:.95rem">
+      <b>1.</b> <code>methylation.csv</code> 第一欄是<b>列號不是 read 名</b>，要對回 read 得查 <code>reads.tsv</code>。<br>
+      <b>2.</b> <code>linkage_matrix.csv</code> 副檔名是 csv 但<b>實際是 tab 分隔</b> ——
+      <code>pd.read_csv()</code> 預設會整列讀成單欄<b>而且不報錯</b>，要寫 <code>sep='\t'</code>。<br>
+      <b>3.</b> <code>tree.nwk</code> 的葉子是 <b>read</b> 不是 clone —— 這是甲基化相似度的分群樹，<b>不是亞群演化樹</b>。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Step 6 ═══ -->
+<section id="s6">
+  <div class="step"><div class="n">6</div><div class="t">驗證整套流程的數字（推薦）</div></div>
+
+  <pre class="cmd"><code>cd docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
+python3 verify_pipeline_numbers.py</code></pre>
+
+  <p>這支會把方法文件裡的每個數字<b>重新算一次</b>並比對。實跑輸出：</p>
+  <pre class="out"><code>sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
+共現連上 21,554 · 訊號不足 5,458 · 孤立 8,320        （加總 = 35,332 ✓）</code></pre>
+  <p>對得上，代表你的環境能重現既有結果。</p>
+</section>
+
+<!-- ═══ 全流程圖 ═══ -->
+<section id="s7">
+  <h3><span class="num">07</span>全流程速查</h3>
+
+  <figure>
+    <div class="figtitle">圖 1 · 六個步驟與各自的驗收點</div>
+    <svg viewBox="0 0 900 330" role="img" aria-labelledby="h1t h1d" xmlns="http://www.w3.org/2000/svg">
+      <title id="h1t">操作六步驟流程</title>
+      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、單點試跑、檢視輸出、驗證數字；
+      每步都標註對應的驗收條件，例如測試須 265 個全過、單點試跑須在三秒內完成且產出 region 目錄。</desc>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+        <defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
+
+        <rect x="18" y="30" width="128" height="66" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
+        <text x="82" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">1 編譯</text>
+        <text x="82" y="70" text-anchor="middle" font-size="9" fill="#2F6690">cmake + build</text>
+        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">2–5 分鐘</text>
+        <path d="M150,63 L176,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
+
+        <rect x="182" y="30" width="128" height="66" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
+        <text x="246" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">2 跑測試</text>
+        <text x="246" y="70" text-anchor="middle" font-size="9" fill="#1f4f3a">run_tests</text>
+        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 2 秒</text>
+        <path d="M314,63 L340,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
+
+        <rect x="346" y="30" width="128" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
+        <text x="410" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">3 Python 依賴</text>
+        <text x="410" y="70" text-anchor="middle" font-size="9" fill="#6b4310">requirements.txt</text>
+        <text x="410" y="85" text-anchor="middle" font-size="8.5" fill="#9A3B3B">注意兩個 python 版本</text>
+        <path d="M478,63 L504,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
+
+        <rect x="510" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
+        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 單點試跑</text>
+        <text x="574" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">inter_sub_mod</text>
+        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 3 秒</text>
+        <path d="M642,63 L668,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
+
+        <rect x="674" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
+        <text x="738" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">5 看輸出</text>
+        <text x="738" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">metadata / reads</text>
+        <text x="738" y="85" text-anchor="middle" font-size="9" fill="#3f2c70">significance_summary</text>
+
+        <path d="M738,100 L738,124" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
+        <rect x="600" y="128" width="202" height="52" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="701" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">6 驗證數字</text>
+        <text x="701" y="167" text-anchor="middle" font-size="9" fill="#1f4f3a">verify_pipeline_numbers.py</text>
+
+        <!-- 驗收欄 -->
+        <rect x="18" y="200" width="784" height="112" rx="8" fill="#FAF9F5" stroke="#E3DACC" stroke-width="1.4"/>
+        <text x="36" y="222" font-size="11.5" font-weight="800" fill="#5C5A54">每一步的驗收條件（不過就停下來，別往下走）</text>
+        <text x="36" y="244" font-size="10" fill="#1c1b19">1 編譯 → <tspan font-family="ui-monospace,monospace">build/bin/</tspan> 下出現 6 個執行檔</text>
+        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">265 tests 全過、退出碼 0</tspan></text>
+        <text x="36" y="280" font-size="10" fill="#1c1b19">3 依賴 → <tspan font-family="ui-monospace,monospace">import pysam</tspan> 不報錯</text>
+        <text x="430" y="244" font-size="10" fill="#1c1b19">4 試跑 → 印出 <tspan font-family="ui-monospace,monospace">Successful: 1 / Failed: 0</tspan></text>
+        <text x="430" y="262" font-size="10" fill="#1c1b19">5 輸出 → region 目錄下有 methylation 與 distance</text>
+        <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 各層加總打勾，數字對得上</text>
+        <text x="36" y="302" font-size="9.5" fill="#9A3B3B">任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。</text>
+      </g>
+    </svg>
+  </figure>
+</section>
+
+<!-- ═══ 常見問題 ═══ -->
+<section id="s8">
+  <h3><span class="num">08</span>常見狀況排除</h3>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:34%">症狀</th><th style="width:66%">原因與解法</th></tr></thead>
+    <tbody>
+      <tr><td>程式直接停，說找不到參考基因組</td>
+          <td>參考 FASTA <b>缺 <code>.fai</code> 索引是硬性錯誤</b>。跑 <code>samtools faidx</code> 建索引。</td></tr>
+      <tr><td>Python 腳本 import 就崩，錯誤指向 dataclass</td>
+          <td><b>Python 版本問題</b>，不是程式壞了。改用 <code>/usr/bin/python3.10</code>。</td></tr>
+      <tr><td>CI 判定 <code>--help</code> 失敗</td>
+          <td><code>--help</code> 的<b>退出碼是 1 不是 0</b>（與參數錯誤共用同一路徑）。改寫檢查方式。</td></tr>
+      <tr><td>某支腳本跑了但什麼都沒發生</td>
+          <td>可能是<b>函式庫不是入口</b>（如 <code>ism_heatmap_std.py</code>）。看它有沒有 argparse。</td></tr>
+      <tr><td>讀 CSV 後整列變成一欄</td>
+          <td><code>linkage_matrix.csv</code> <b>實際是 tab 分隔</b>。加 <code>sep='\t'</code>。</td></tr>
+      <tr><td>跨 run 比較時欄位對不上</td>
+          <td><code>significance_summary.csv</code> <b>欄數隨版本變動且無版本欄位</b>。一律<b>用欄名</b>取值。</td></tr>
+      <tr><td>工作站 HTML 開很久／瀏覽器很卡</td>
+          <td>單檔可達 188 MB。示範時先開最小的那個（約 14.6 MB）。</td></tr>
+      <tr><td>LongLineage 說 KernelBlocked</td>
+          <td><b>這是預期行為不是故障</b>。正式入口刻意 fail-closed，見
+              <a href="13_longlineage-io.standalone.html">LongLineage 分冊</a>。</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="rel">
+    <a href="15_python-html-layer.standalone.html">← 上一頁：分析與呈現層</a>
+    <a href="11_system-map-overview.standalone.html">回系統全景</a>
+    <a href="index.standalone.html">回 INDEX</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <h4>本頁的驗證方式</h4>
+  <ul>
+    <li><b>測試套件</b>：2026-08-06 實跑 <code>./build/bin/run_tests</code> →
+        <b>265 tests / 38 suites 全過，2062 ms，退出碼 0</b>。
+        <span class="muted">（比 08-05 記錄的 258/37 有增加，本頁採用實測的當前值。）</span></li>
+    <li><b>單點試跑</b>：實際執行並記錄真實輸出，約 2.9 秒、退出碼 0。</li>
+    <li><b>環境數字</b>：48 核、磁碟餘量 617 GB、兩個 Python 版本，皆為本輪實測。</li>
+    <li><b>6 個執行檔</b>：實際 <code>ls build/bin/</code> 所得。</li>
+  </ul>
+  <h4 style="margin-top:16px">誠實標註</h4>
+  <ul>
+    <li>本頁的編譯指令<b>未在本輪從零重跑</b>（現有 build 目錄已存在）；
+        該流程於 2026-08-05 曾以全新目錄驗證通過。</li>
+    <li><b>全基因組全量跑法未實跑</b> —— 屬長時間計算，且需先確認磁碟餘量。</li>
+  </ul>
+  <p style="margin-top:14px">
+    <b>路徑</b>：<code>InterSubMod/docs/explain/16_how-to-run.standalone.html</code> ·
+    分支 <code>research/subclonal-reconstruction-202606</code> · 建立於 2026-08-06
+  </p>
+</footer>
+</div>

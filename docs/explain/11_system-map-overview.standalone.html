@@ -1,0 +1,733 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>系統全景 — 這套系統由哪些部件組成、各自做什麼</title>
+<!--
+  doc_type: explain_system_map   version: v1   created: 2026-08-06
+  branch: research/subclonal-reconstruction-202606
+  受眾: 指導教授 + 實驗室同學（第一次接觸這套系統的人）
+  data_sources: scratchpad/collect_{ism_cli,ism_pipeline,ism_outputs,ll_cli_status,
+                ll_science_flow,ll_artifacts,upstream_tools,python_html_layer,science_goal}.json
+  驗證: 334 個 source_ref(檔案:行號) + 111 個路徑宣稱，本輪全部機械重驗，0 捏造、0 行號越界
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+.topbar nav a.here{color:#fff;background:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.1rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.62rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.14rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424}.takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.1rem;line-height:1.6}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)}.ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em}.ironclad li{margin:5px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:190px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.55rem;font-weight:800;line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)}.kpi.dead .v{color:var(--c-dead)}
+.kpi.pass{border-left:4px solid var(--c-pass)}.kpi.pass .v{color:var(--c-pass)}
+.kpi.info{border-left:4px solid var(--c-info)}.kpi.info .v{color:var(--c-info)}
+.kpi.warn{border-left:4px solid var(--c-warn)}.kpi.warn .v{color:var(--c-warn)}
+.table-wrap{overflow-x:auto;margin:var(--sp-3) 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code,td.mono{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+figure{margin:var(--sp-5) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+pre{font-family:var(--mono);font-size:.8rem;line-height:1.6;background:#F4F2ED;border:1px solid var(--c-border);border-radius:8px;padding:var(--sp-3) var(--sp-4);overflow-x:auto;margin:var(--sp-3) 0}
+pre code{background:none;padding:0;font-size:1em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0}
+.pcard{background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);border-top:4px solid var(--c-border)}
+.pcard.ok{border-top-color:var(--c-pass)}.pcard.lim{border-top-color:var(--c-warn)}.pcard.blk{border-top-color:var(--c-dead)}
+.pcard h4{margin:0 0 4px;font-size:1.02rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pcard .oneline{font-size:.86rem;color:var(--c-text-soft);margin:5px 0}
+.pcard .io{font-size:.78rem;font-family:var(--mono);background:var(--c-bg);border-radius:6px;padding:6px 8px;margin-top:7px;line-height:1.55}
+.pcard a.go{display:inline-block;margin-top:9px;font-size:.8rem;text-decoration:none;color:var(--c-accent);font-weight:700}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-4) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+@media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+</style>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a class="here" href="11_system-map-overview.standalone.html">系統全景</a>
+    <a href="12_intersubmod-io.standalone.html">ISM 部件</a>
+    <a href="13_longlineage-io.standalone.html">LongLineage 部件</a>
+    <a href="14_upstream-data.standalone.html">上游與資料</a>
+    <a href="15_python-html-layer.standalone.html">分析與呈現層</a>
+    <a href="16_how-to-run.standalone.html">怎麼跑</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker">系統全景 · 第 11 頁 · 給第一次接觸的人</div>
+  <h1>這套系統由哪些部件組成，各自做什麼？</h1>
+  <p class="lede">
+    本頁回答四個問題：<b>目標是什麼</b>、<b>有哪些部件</b>、<b>每個部件吃什麼吐什麼</b>、<b>現在哪些真的能跑</b>。
+    每個部件的細節在各自分冊頁，本頁只給地圖與狀態。
+  </p>
+</header>
+
+<div class="bluf">
+  <h2>一分鐘版本</h2>
+  <p>
+    這套系統要解決的問題是：<b>一顆腫瘤裡混著好幾群帶不同突變的細胞，我們想知道哪個突變先發生、哪些突變住在同一群細胞裡</b>。
+  </p>
+  <p style="margin-top:12px">
+    傳統做法用短讀長測序，只能看到每個位點各自的變異頻率，再回頭猜組合 —— 這在數學上被證明是<b>無解</b>的（non-identifiable 反卷積）。
+    本系統改用 <b>ONT 長讀長</b>：一條 DNA 分子動輒數萬鹼基，可以<b>同時跨過好幾個突變位點</b>，
+    於是「這兩個突變在不在同一群細胞裡」從「用頻率推論」變成<b>直接看得到的觀測</b>。
+  </p>
+  <p style="margin-top:12px">
+    系統由 <b>兩支 C++ 主程式</b>（InterSubMod、LongLineage）＋ <b>一層上游工具鏈</b> ＋ <b>一層 Python 分析與 HTML 呈現</b>組成。
+    其中只有一部分現在真的跑得動 —— 下面的狀態表會誠實標出來。
+  </p>
+</div>
+
+<div class="takeaway pass">
+  <span class="lab">本系統最值得注意的設計</span>
+  它在<b>機器欄位的層級</b>把「技術跑通」和「科學可用」分開：canonical 輸出裡
+  <code>technical_all_pass = true</code> 但 <code>validation_evidence_eligible = false</code>。
+  程式全過、雜湊全對、265 個測試全綠 —— 但系統自己宣告這批結果<b>還不能當作驗證證據</b>。
+  這種「不確定就明講不確定」的紀律，貫穿整份設計。
+</div>
+
+<!-- ════════════════ 1 ════════════════ -->
+<section id="s1">
+  <h3><span class="num">01</span>全景圖 — 資料從哪裡進來，經過誰，變成什麼</h3>
+  <p class="sub">
+    由下而上共五層。方框顏色 = 現在的可用狀態：
+    <span class="badge b-pass">綠 可跑</span>
+    <span class="badge b-warn">黃 有限制</span>
+    <span class="badge b-dead">紅 被鎖住</span>。
+  </p>
+
+  <figure>
+    <div class="figtitle">圖 1 · 五層全景與資料流</div>
+    <svg viewBox="0 0 980 620" role="img" aria-labelledby="f1t f1d" xmlns="http://www.w3.org/2000/svg">
+      <title id="f1t">五層系統全景圖</title>
+      <desc id="f1d">由下而上分為原始資料層、上游工具層、中介契約層、兩支 C++ 主程式層、Python 分析與 HTML 呈現層。
+      原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤並存成 sidecar TSV；
+      InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入，前者可跑，後者只有 dataset-gate 子命令可跑；
+      輸出再由 Python 層算成統計與圖，最後生成離線可開的 HTML 工作站。</desc>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+
+        <!-- 層 1 原始資料 -->
+        <text x="14" y="30" font-size="12" font-weight="700" fill="#5C5A54">① 原始資料</text>
+        <rect x="14" y="38" width="952" height="58" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
+        <rect x="28" y="50" width="170" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
+        <text x="113" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">tumor BAM（ONT）</text>
+        <text x="113" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">HCC1395 = 292 GB</text>
+        <rect x="208" y="50" width="150" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
+        <text x="283" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">normal BAM</text>
+        <text x="283" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">配對正常組織</text>
+        <rect x="368" y="50" width="160" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
+        <text x="448" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">reference FASTA</text>
+        <text x="448" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">GRCh38 + .fai 必備</text>
+        <text x="546" y="72" font-size="10.5" fill="#5C5A54">← 這三樣是所有分析的共同起點；BAM 需自帶 MM/ML 甲基化標記</text>
+
+        <!-- 層 2 上游工具 -->
+        <text x="14" y="126" font-size="12" font-weight="700" fill="#5C5A54">② 上游工具（都是外部既有軟體，不是本專案寫的）</text>
+        <rect x="14" y="134" width="952" height="74" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
+        <rect x="28" y="146" width="164" height="50" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.3"/>
+        <text x="110" y="163" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">Dorado basecaller</text>
+        <text x="110" y="177" text-anchor="middle" font-size="9.5" fill="#2F7D5B">電訊號 → 鹼基 + 甲基化</text>
+        <text x="110" y="190" text-anchor="middle" font-size="9.5" fill="#2F7D5B">產出 MM / ML tag</text>
+        <rect x="202" y="146" width="164" height="50" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.3"/>
+        <text x="284" y="163" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">ClairS v0.4.0</text>
+        <text x="284" y="177" text-anchor="middle" font-size="9.5" fill="#2F7D5B">腫瘤/正常配對比對</text>
+        <text x="284" y="190" text-anchor="middle" font-size="9.5" fill="#2F7D5B">產出 somatic SNV VCF</text>
+        <rect x="376" y="146" width="176" height="50" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.3"/>
+        <text x="464" y="163" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">LongPhase-S</text>
+        <text x="464" y="177" text-anchor="middle" font-size="9.5" fill="#2F7D5B">判斷每條 read 來自哪一套染色體</text>
+        <text x="464" y="190" text-anchor="middle" font-size="9.5" fill="#2F7D5B">產出 HP / PS tag</text>
+        <rect x="562" y="146" width="150" height="50" rx="5" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.3"/>
+        <text x="637" y="163" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">SAVANA（cna）</text>
+        <text x="637" y="177" text-anchor="middle" font-size="9.5" fill="#B06A16">拷貝數變異</text>
+        <text x="637" y="190" text-anchor="middle" font-size="9.5" fill="#B06A16">目前 NOT_INTEGRATED</text>
+        <text x="726" y="166" font-size="10.5" fill="#5C5A54">前三個是必要輸入的生產者。</text>
+        <text x="726" y="182" font-size="10.5" fill="#B06A16">SAVANA 的 CN 結果尚未接進主線。</text>
+
+        <!-- 層 3 中介契約 -->
+        <text x="14" y="238" font-size="12" font-weight="700" fill="#5C5A54">③ 中介契約 — 兩支程式唯一 byte-level 一致的介面</text>
+        <rect x="14" y="246" width="952" height="60" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
+        <text x="30" y="268" font-size="12" font-weight="700" fill="#5B3FA0">HP/PS sidecar TSV（.tsv.gz + .tbi 索引）</text>
+        <text x="30" y="285" font-family="ui-monospace,Menlo,monospace" font-size="9.5" fill="#3f2c70">#CHROM  START0  END0  QNAME  FLAG  MAPQ  CIGAR_B2  HP  PS</text>
+        <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
+        <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
+        <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 個樣本的 tagged BAM 合計 1.67 TiB，磁碟放不下</text>
+
+        <!-- 層 4 兩支 C++ -->
+        <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
+        <rect x="14" y="344" width="470" height="150" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="30" y="366" font-size="13" font-weight="800" fill="#2F7D5B">InterSubMod（inter_sub_mod）</text>
+        <rect x="392" y="352" width="80" height="18" rx="9" fill="#2F7D5B"/>
+        <text x="432" y="365" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">可跑</text>
+        <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
+        <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
+        <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 最小指令 2.9 秒跑完 · exit 0</text>
+        <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
+        <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
+        <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>
+
+        <rect x="496" y="344" width="470" height="150" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
+        <text x="512" y="366" font-size="13" font-weight="800" fill="#B06A16">LongLineage（longlineage）</text>
+        <rect x="856" y="352" width="96" height="18" rx="9" fill="#B06A16"/>
+        <text x="904" y="365" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">部分可跑</text>
+        <text x="512" y="385" font-size="10.5" fill="#6b4310">工業化重寫版（clean-room，不是 fork）。強制 fail-closed：</text>
+        <text x="512" y="399" font-size="10.5" fill="#6b4310">每個輸出都有 schema 與 SHA-256 收據，證據不足就拒絕出結果。</text>
+        <text x="512" y="418" font-size="10.5" font-weight="700" fill="#6b4310">輸出粒度：per-read（每條 read 一列）</text>
+        <text x="512" y="437" font-size="10" fill="#9A3B3B">run / probe 子命令被鎖 · 只有 dataset-gate 能出科學結果</text>
+        <rect x="510" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#B06A16" stroke-width="1"/>
+        <text x="522" y="462" font-size="9.5" fill="#6b4310">吃：8 角色 manifest（BAM + VCF + sidecar + reference）</text>
+        <text x="522" y="475" font-size="9.5" fill="#6b4310">吐：site_reads · methyl_calls · cooccurrence_* · topology_unit</text>
+
+        <!-- 層 5 Python / HTML -->
+        <text x="14" y="524" font-size="12" font-weight="700" fill="#5C5A54">⑤ Python 分析層 → HTML 呈現層</text>
+        <rect x="14" y="532" width="952" height="72" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
+        <rect x="28" y="544" width="230" height="48" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
+        <text x="143" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">Python 分析腳本</text>
+        <text x="143" y="575" text-anchor="middle" font-size="9.5" fill="#2F6690">共現骨幹建構 · 分層樹枚舉</text>
+        <text x="143" y="588" text-anchor="middle" font-size="9.5" fill="#2F6690">funnel 普查 · 熱圖繪製</text>
+        <rect x="268" y="544" width="230" height="48" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.2"/>
+        <text x="383" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">standalone HTML 工作站</text>
+        <text x="383" y="575" text-anchor="middle" font-size="9.5" fill="#2F7D5B">離線可開 · 逐項人工判讀</text>
+        <text x="383" y="588" text-anchor="middle" font-size="9.5" fill="#2F7D5B">缺必填值就拒絕渲染</text>
+        <rect x="508" y="544" width="442" height="48" rx="5" fill="#fff" stroke="#E3DACC"/>
+        <text x="522" y="561" font-size="10.5" fill="#5C5A54">這層是「人真正看的東西」。C++ 只吐檔案，Python 把它變成</text>
+        <text x="522" y="575" font-size="10.5" fill="#5C5A54">可以用眼睛檢查的圖與表，並把人工判讀結果存回 localStorage 匯出。</text>
+        <text x="522" y="588" font-size="10" fill="#B06A16">⚠ 這層目前最碎片化，見「分析與呈現層」分冊</text>
+
+        <!-- 箭頭 -->
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
+        <path d="M490,96 L490,132" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+        <path d="M490,208 L490,244" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+        <path d="M250,306 L250,342" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+        <path d="M730,306 L730,342" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+        <path d="M250,494 L250,530" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+        <path d="M730,494 L730,530" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar)" fill="none"/>
+      </g>
+    </svg>
+    <figcaption>
+      <b>怎麼讀這張圖：</b>由下往上是資料流方向。第 ③ 層的 sidecar TSV 是全系統的<b>樞紐</b> ——
+      它是唯一被兩支 C++ 程式的原始碼<b>寫死成相同格式</b>的檔案，也是把「一條 read 屬於哪個單倍型」這件事持久化的地方。
+      <br><b>數字出處：</b>292 GB tumor BAM 與 40,859,727 列 sidecar 皆為實測檔案大小與行數；
+      1.67 TiB 為 7 個 tagged BAM 的位元組加總。
+    </figcaption>
+  </figure>
+</section>
+
+<!-- ════════════════ 2 ════════════════ -->
+<section id="s2">
+  <h3><span class="num">02</span>兩支程式是什麼關係？（和直覺不同）</h3>
+  <p class="sub">最容易誤會的一點：LongLineage <b>不是</b> InterSubMod 的新版本，也不是它的分支。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:14%"></th><th style="width:43%">InterSubMod（ISM）</th><th style="width:43%">LongLineage（LL）</th></tr></thead>
+    <tbody>
+      <tr><td><b>定位</b></td><td>研究原型：C++ 核心 ＋ 大量 Python 探索腳本</td><td>工業化重寫：truth-isolated、fail-closed</td></tr>
+      <tr><td><b>git 起源</b></td><td class="mono">71ce312e</td><td class="mono">7a8f75e8 — <b>完全不同的根 commit</b></td></tr>
+      <tr><td><b>血緣</b></td><td>—</td><td><b>clean-room 重建，不是 fork</b>。靠 <code>ORIGIN.md</code> 的 21 條對照與 17 條 authority 把 ISM 的某個 commit 釘死當規格</td></tr>
+      <tr><td><b>輸出粒度</b></td><td><b>per-region</b>（每個 SNV 位點一包）</td><td><b>per-read</b>（每條 read 一列）</td></tr>
+      <tr><td><b>單倍型來源</b></td><td>直接從 BAM 的 aux tag 讀</td><td><b>明文禁止讀 BAM tag</b>，只認 sidecar TSV</td></tr>
+      <tr><td><b>對「甲基化能不能參與重建」的立場</b></td><td><span class="badge b-dead">絕不參與</span> 只做事後關聯描述</td><td><span class="badge b-warn">是必要關卡</span> 甲基化分不出群的位點不會有拓撲解</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="takeaway dead">
+    <span class="lab"><span style="color:var(--c-dead);font-weight:800">●</span> 兩系統的科學立場直接衝突</span>
+    ISM 的既有結論是「甲基化<b>絕不</b>進入重建的 likelihood」，因為會產生循環論證（見下方 §4）。
+    但 LL 現行程式碼把「甲基化有沒有分出群」當成拓撲單元的<b>前置關卡</b>。
+    後果：在 LL 裡，<b>甲基化沒分出群的位點永遠不會有拓撲解</b> —— 這是一個選擇性偏誤來源。
+    任何跨系統的比較都必須明講這點，否則會得出與 ISM 既有結論矛盾的敘述。
+  </div>
+</section>
+
+<!-- ════════════════ 3 ════════════════ -->
+<section id="s3">
+  <h3><span class="num">03</span>現在到底哪些能跑？—— 誠實狀態表</h3>
+  <p class="sub">這張表是本頁最實用的部分。所有狀態都是本輪<b>實際執行過</b>或<b>讀原始碼確認</b>的結果，不是文件宣稱。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:22%">部件</th><th style="width:11%">狀態</th><th style="width:67%">實測依據與限制</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>inter_sub_mod</b><br><span class="muted">ISM 主程式</span></td>
+        <td><span class="badge b-pass">可跑</span></td>
+        <td>最小指令實跑 <b>2.9 秒</b>完成、exit 0；含 normal BAM ＋ LOH BED 的完整版本也 exit 0。
+            ⚠ 目前的 binary 是 <b>STALE</b>：有 5 個原始碼檔的修改時間新於它，用前建議重編。</td>
+      </tr>
+      <tr>
+        <td><b>longlineage preflight</b></td>
+        <td><span class="badge b-pass">可跑</span></td>
+        <td>驗證 8 個角色的 manifest 完整性。</td>
+      </tr>
+      <tr>
+        <td><b>longlineage dataset-gate</b></td>
+        <td><span class="badge b-warn">限制</span></td>
+        <td><b>唯一能產出科學結果的路徑</b>，已在真實 HCC1395 資料上完整跑完並產出 8 個 artifact。
+            <span style="color:var(--c-dead);font-weight:800">●</span> 但 <b>樣本名稱硬寫死在原始碼裡</b> —— 換一個樣本就會失敗，必須改 C++ 重新編譯。</td>
+      </tr>
+      <tr>
+        <td><b>longlineage run / probe</b></td>
+        <td><span class="badge b-dead">被鎖</span></td>
+        <td>即使所有閘門都通過，仍被無條件擋下（KernelBlocked, exit 6）。
+            <b>關鍵區辨：這不是「程式沒寫」</b> —— M1／M2／topology 的核心都已實作，也被 dataset-gate 實際執行過。
+            被鎖的原因是<b>對照驗證（parity）的證據還不存在</b>。</td>
+      </tr>
+      <tr>
+        <td><b>longlineage 的 topology 產出</b></td>
+        <td><span class="badge b-dead">目前為 0</span></td>
+        <td>HCC1395 全 autosome 唯一一次完整跑的結果：79,687 個位點 → 通過甲基化關卡的只剩 <b>5 個</b> → 最終拓撲單元 <b>0 個</b>。
+            134,278 個配對中有 134,276 個被標記為不合格。repo 自己的決策紀錄也承認這點。</td>
+      </tr>
+      <tr>
+        <td><b>longlineage-query / export-legacy</b></td>
+        <td><span class="badge b-dead">未實作</span></td>
+        <td>仍是 fail-closed 的空殼。</td>
+      </tr>
+      <tr>
+        <td><b>ISM 的分層樹枚舉 solver</b><br><span class="muted">Python + C++</span></td>
+        <td><span class="badge b-pass">可跑</span></td>
+        <td>這才是目前<b>實際產出論文核心數字</b>的路徑，7 個樣本全跑完（見下方 §5 的 funnel）。</td>
+      </tr>
+      <tr>
+        <td><b>7 個樣本的 sidecar 資料</b></td>
+        <td><span class="badge b-pass">齊全</span></td>
+        <td>實測 <code>run_status.tsv</code> 顯示 <b>7/7 全部 PASS</b>，可立即使用。</td>
+      </tr>
+      <tr>
+        <td><b>輸出帶標籤的 BAM</b></td>
+        <td><span class="badge b-dead">做不到</span></td>
+        <td>兩支程式<b>都沒有寫 BAM 的能力</b>（寫入 API 在整個 repo 出現 0 次）。
+            現存的 tagged BAM 全部是外部工具 LongPhase-S 產生的。LL 更在架構層明文禁止輸出 BAM。</td>
+      </tr>
+      <tr>
+        <td><b>兩支程式串起來跑</b></td>
+        <td><span class="badge b-dead">無</span></td>
+        <td><b>沒有任何腳本同時執行兩個 binary</b>（雙向搜尋皆無命中）。目前是兩條各自獨立的線。</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="ironclad">
+    <b>給教授看的三句重點</b>
+    <ol>
+      <li><b>能跑的那條線，是 InterSubMod ＋ 它的 Python 分層 solver</b>，不是 LongLineage 主線。論文核心數字出自前者。</li>
+      <li><b>LongLineage 被鎖的原因是「證據不足」不是「程式沒寫」</b> —— 這是它刻意的 fail-closed 設計，不是 bug。</li>
+      <li><b>沒有一條打通兩支程式的路</b>。零件很齊、契約很嚴，但接縫還沒建。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ════════════════ 4 ════════════════ -->
+<section id="s4">
+  <h3><span class="num">04</span>為什麼甲基化不能拿來重建譜系？</h3>
+  <p class="sub">這是整套方法論最核心、也最常被外部讀者質疑的設計決定，值得單獨解釋。</p>
+
+  <p>
+    直覺上會想：既然甲基化模式在不同細胞群之間有差異，那用甲基化把 read 分群，不就能找出亞群了嗎？
+    <b>不行 —— 因為會產生循環論證。</b>
+  </p>
+
+  <figure>
+    <div class="figtitle">圖 2 · cis-ASM 循環：為什麼「用甲基化確認亞群」證明不了東西</div>
+    <svg viewBox="0 0 900 330" role="img" aria-labelledby="f2t f2d" xmlns="http://www.w3.org/2000/svg">
+      <title id="f2t">甲基化循環論證示意</title>
+      <desc id="f2d">左側顯示一個位點觀察到兩群不同甲基化模式的 read，右側列出四種可能成因：
+      germline 等位特異性甲基化、雜合性缺失導致的解遮蔽、拷貝數增益的劑量效應、以及真正的亞群譜系差異。
+      單一 bulk 樣本無法區分這四者，因此用甲基化分群來確認亞群等於用待證明的結論當前提。</desc>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+
+        <text x="450" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#9A3B3B">
+          觀察到「兩群甲基化模式不同的 read」時，至少有四種成因，單一 bulk 分不開</text>
+
+        <!-- 觀察 -->
+        <rect x="20" y="42" width="200" height="120" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="120" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#5B3FA0">觀察</text>
+        <text x="120" y="86" text-anchor="middle" font-size="10.5" fill="#3f2c70">同一位點的 read</text>
+        <text x="120" y="101" text-anchor="middle" font-size="10.5" fill="#3f2c70">分成甲基化高 / 低兩群</text>
+        <!-- 小示意：兩排點 -->
+        <g>
+          <circle cx="60" cy="122" r="4.5" fill="#5B3FA0"/><circle cx="76" cy="122" r="4.5" fill="#5B3FA0"/>
+          <circle cx="92" cy="122" r="4.5" fill="#5B3FA0"/><circle cx="108" cy="122" r="4.5" fill="#5B3FA0"/>
+          <circle cx="60" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/><circle cx="76" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/>
+          <circle cx="92" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/><circle cx="108" cy="142" r="4.5" fill="#fff" stroke="#5B3FA0"/>
+          <text x="132" y="126" font-size="9.5" fill="#3f2c70">甲基化高</text>
+          <text x="132" y="146" font-size="9.5" fill="#3f2c70">甲基化低</text>
+        </g>
+
+        <path d="M226,102 L266,102" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar2)" fill="none"/>
+        <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#9A3B3B"/></marker></defs>
+
+        <!-- 四種成因 -->
+        <rect x="274" y="42" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="60" font-size="11" font-weight="700" fill="#9A3B3B">① germline 等位特異性甲基化</text>
+        <text x="288" y="76" font-size="9.5" fill="#7a3030">天生兩套染色體的甲基化就不同（如印記基因）</text>
+
+        <rect x="274" y="92" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="110" font-size="11" font-weight="700" fill="#9A3B3B">② LOH 解遮蔽</text>
+        <text x="288" y="126" font-size="9.5" fill="#7a3030">腫瘤丟掉一套染色體，原本被平均掉的差異浮現</text>
+
+        <rect x="274" y="142" width="290" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.2"/>
+        <text x="288" y="160" font-size="11" font-weight="700" fill="#9A3B3B">③ 拷貝數增益的劑量效應</text>
+        <text x="288" y="176" font-size="9.5" fill="#7a3030">某段被複製多份，比例被拉偏</text>
+
+        <rect x="274" y="192" width="290" height="42" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
+        <text x="288" y="210" font-size="11" font-weight="700" fill="#2F7D5B">④ 真正的亞群譜系差異 ← 我們想要的</text>
+        <text x="288" y="226" font-size="9.5" fill="#1f4f3a">不同細胞群確實帶不同甲基化</text>
+
+        <!-- 結論 -->
+        <path d="M570,138 L610,138" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar2)" fill="none"/>
+        <rect x="618" y="60" width="266" height="156" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.8"/>
+        <text x="751" y="84" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9A3B3B">循環論證</text>
+        <text x="632" y="106" font-size="10.5" fill="#7a3030">要用甲基化「確認」某群 read 是亞群，</text>
+        <text x="632" y="122" font-size="10.5" fill="#7a3030">得先排除 ①②③。</text>
+        <text x="632" y="144" font-size="10.5" fill="#7a3030">但要排除 ①②③，就得先知道</text>
+        <text x="632" y="160" font-size="10.5" fill="#7a3030">哪些 read 屬於哪個亞群 ——</text>
+        <text x="632" y="182" font-size="11" font-weight="700" fill="#9A3B3B">這正是待證明的結論。</text>
+        <text x="632" y="204" font-size="10" fill="#5C5A54">單一 bulk 樣本無法打破這個循環。</text>
+
+        <!-- 底部解方 -->
+        <rect x="20" y="252" width="864" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="36" y="274" font-size="12" font-weight="800" fill="#2F7D5B">✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹</text>
+        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。</text>
+        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">甲基化被結構性地隔離在主線之外：樹先由遺傳證據定好，甲基化只在事後做關聯描述，改不動任何一條邊。</text>
+      </g>
+    </svg>
+    <figcaption>
+      <b>這個設計的代價與收穫：</b>代價是甲基化這個資訊量很大的軸被降級成輔助；
+      收穫是重建結果<b>不會被審稿人以循環論證擊倒</b>。
+      實際數字上，甲基化輔助層共 1,045 個正式單元、811 個可評估、
+      最終只有 <b>3 個</b>（0.37%）達到穩健關聯 —— 這也印證了把它當骨幹會很危險。
+    </figcaption>
+  </figure>
+</section>
+
+<!-- ════════════════ 5 ════════════════ -->
+<section id="s5">
+  <h3><span class="num">05</span>實際跑出來長什麼樣？—— 全 7 樣本 funnel</h3>
+  <p class="sub">
+    這是目前的 canonical 結果（2026-08-01 凍結，7 個樣本、chr1–22）。
+    每一層的數字都能在 <code>denominator_registry.tsv</code> 或 <code>all7_summary.json</code> 裡查到。
+  </p>
+
+  <div class="kpis">
+    <div class="kpi info"><div class="v">469,849</div><div class="k">sSNV 資料列（全 7 樣本）</div></div>
+    <div class="kpi warn"><div class="v">66.5%</div><div class="k">單點無共現，無法建樹</div></div>
+    <div class="kpi pass"><div class="v">71,955</div><div class="k">有拓撲解且可排序的單元</div></div>
+    <div class="kpi dead"><div class="v">0</div><div class="k">confirmed 細胞亞群</div></div>
+  </div>
+
+  <figure>
+    <div class="figtitle">圖 3 · 從 469,849 個突變到 63,506 個單一拓撲：每一層流失到哪裡去了</div>
+    <svg viewBox="0 0 940 560" role="img" aria-labelledby="f3t f3d" xmlns="http://www.w3.org/2000/svg">
+      <title id="f3t">七樣本 funnel 分流圖</title>
+      <desc id="f3d">從 469,849 筆 sSNV 資料列開始，經連鎖成分建構得到 255,752 個成分，其中 66.5% 為單點無法建樹；
+      k 大於等於 2 者經有界切分成為 98,955 個分析單元，扣掉無突變者剩 85,941 個帶突變單元；
+      其中 12.47% 因搜尋資源上限而放棄，75,224 個完成候選家族枚舉；再扣除分母為零與遞迴篩選者，
+      71,955 個可排序；最終 39,648 個有唯一最佳樹、23,858 個形狀相同、8,449 個拓撲未解。</desc>
+      <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
+        <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker>
+          <marker id="ar3r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#B06A16"/></marker></defs>
+
+        <!-- L1 -->
+        <rect x="250" y="14" width="440" height="40" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">sSNV 資料列（7 樣本 · chr1–22）</text>
+        <text x="470" y="48" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">469,849</text>
+        <path d="M470,56 L470,76" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+
+        <!-- L2 -->
+        <rect x="250" y="78" width="440" height="40" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
+        <text x="470" y="96" text-anchor="middle" font-size="12" fill="#2F6690">嚴格 read-linked 連通成分</text>
+        <text x="470" y="112" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">255,752</text>
+        <path d="M470,120 L470,140" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <!-- 流失 1 -->
+        <path d="M690,98 L760,98" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
+        <rect x="766" y="80" width="166" height="38" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
+        <text x="849" y="96" text-anchor="middle" font-size="10" fill="#6b4310">k=1 單點，無共現可用</text>
+        <text x="849" y="111" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#B06A16">170,131（66.52%）</text>
+
+        <!-- L3 -->
+        <rect x="250" y="142" width="440" height="40" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="470" y="160" text-anchor="middle" font-size="12" fill="#5B3FA0">k≥2 有共現 → 有界切分後的分析單元</text>
+        <text x="470" y="176" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#5B3FA0">85,621 → 98,955</text>
+        <path d="M470,184 L470,204" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <text x="700" y="166" font-size="9.5" fill="#5C5A54">k&gt;12 的大成分被切開，</text>
+        <text x="700" y="179" font-size="9.5" fill="#5C5A54">所以單元數會變多</text>
+
+        <!-- L4 -->
+        <rect x="250" y="206" width="440" height="40" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
+        <text x="470" y="224" text-anchor="middle" font-size="12" fill="#5B3FA0">帶突變的單元</text>
+        <text x="470" y="240" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#5B3FA0">85,941（86.85%）</text>
+        <path d="M470,248 L470,268" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <path d="M690,226 L760,226" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
+        <rect x="766" y="208" width="166" height="38" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
+        <text x="849" y="224" text-anchor="middle" font-size="10" fill="#6b4310">無活躍 ALT，不推論</text>
+        <text x="849" y="239" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#B06A16">13,014（13.15%）</text>
+
+        <!-- L5 -->
+        <rect x="250" y="270" width="440" height="40" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
+        <text x="470" y="288" text-anchor="middle" font-size="12" fill="#2F7D5B">候選樹家族 <tspan font-weight="700">完整枚舉完成</tspan></text>
+        <text x="470" y="304" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">75,224（87.53%）</text>
+        <path d="M470,312 L470,332" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <path d="M690,290 L760,290" stroke="#9A3B3B" stroke-width="1.8" marker-end="url(#ar3r)" fill="none"/>
+        <rect x="766" y="270" width="166" height="42" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/>
+        <text x="849" y="286" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">算力上限，主動放棄</text>
+        <text x="849" y="300" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#9A3B3B">10,717（12.47%）</text>
+        <text x="849" y="311" text-anchor="middle" font-size="8.5" fill="#7a3030">非隨機缺失，集中在複雜區</text>
+
+        <!-- L6 -->
+        <rect x="250" y="334" width="440" height="40" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
+        <text x="470" y="352" text-anchor="middle" font-size="12" fill="#2F7D5B">可用 read-AF 排序</text>
+        <text x="470" y="368" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">71,955（95.65%）</text>
+        <path d="M690,354 L760,354" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
+        <rect x="766" y="336" width="166" height="38" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
+        <text x="849" y="352" text-anchor="middle" font-size="9.5" fill="#6b4310">分母為 0 / 遞迴篩選</text>
+        <text x="849" y="367" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#B06A16">3,224 + 45</text>
+
+        <!-- 三分支 -->
+        <path d="M470,376 L470,396" stroke="#8a8578" stroke-width="1.6" fill="none"/>
+        <path d="M180,396 L760,396" stroke="#8a8578" stroke-width="1.6" fill="none"/>
+        <path d="M180,396 L180,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <path d="M470,396 L470,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <path d="M760,396 L760,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+
+        <rect x="60" y="418" width="240" height="62" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
+        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">唯一最佳樹</text>
+        <text x="180" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">39,648（55.10%）</text>
+        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">AF 算術上唯一勝出</text>
+
+        <rect x="350" y="418" width="240" height="62" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.6"/>
+        <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列，但樹形相同</text>
+        <text x="470" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">23,858（33.16%）</text>
+        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">拓撲確定，只是標籤可換</text>
+
+        <rect x="640" y="418" width="240" height="62" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
+        <text x="760" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#B06A16">並列且跨不同樹形</text>
+        <text x="760" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#B06A16">8,449（11.74%）</text>
+        <text x="760" y="472" text-anchor="middle" font-size="9" fill="#6b4310">「定不出來」← 這也是答案</text>
+
+        <!-- 合併 -->
+        <path d="M180,482 L180,498 L470,498" stroke="#2F7D5B" stroke-width="1.6" fill="none"/>
+        <path d="M470,482 L470,498" stroke="#2F7D5B" stroke-width="1.6" fill="none"/>
+        <path d="M470,498 L470,512" stroke="#2F7D5B" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
+        <rect x="230" y="516" width="480" height="38" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="2"/>
+        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">單一 rooted-unlabeled 拓撲 = 39,648 + 23,858</text>
+        <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.26%</text>
+      </g>
+    </svg>
+    <figcaption>
+      <b>算術自洽性已驗證：</b>39,648 + 23,858 = 63,506；+ 8,449 = 71,955；+ 3,224 + 45 = 75,224；
+      + 10,717 = 85,941；+ 13,014 = 98,955。每一層加總都對得起來。
+      <br>
+      <b><span style="color:var(--c-dead);font-weight:800">●</span> 最常被誤引的數字就是那個 88.26%。</b>它的正確讀法是：
+      「在<b>已經可排序的 71,955 個單元中</b>，有 88.26% 收斂到單一樹形」——
+      這是 <b>model-conditional 的圖形統計</b>，<b>不是</b>「腫瘤裡 88% 的演化關係已經解出來了」。
+      分母不是全部突變，前面已經流失了 66.5% 的單點與 12.47% 的算力放棄。
+    </figcaption>
+  </figure>
+
+  <div class="takeaway dead">
+    <span class="lab"><span style="color:var(--c-dead);font-weight:800">●</span> 排序器同時也是篩選器 — 一個容易被忽略的細節</span>
+    read-AF 不只用來「排序」候選樹，它在同分的候選集合裡<b>取最大值並丟掉其餘</b>，
+    因此它實際上也<b>改變了候選集合本身</b>（實測丟棄 30.03%）。
+    後果：<b>純 parsimony（不靠 AF）的單一拓撲率只能說是一個區間，不能報單一數字</b>。
+    ⚠ 本輪查證發現：該區間的上界 88.26% 有 registry 佐證，
+    但下界 64.89% <b>在本 repo 內未 grep 到原始出處</b>，僅存在於工作記憶索引 ——
+    對外引用前必須先補上出處。
+  </div>
+</section>
+
+<!-- ════════════════ 6 ════════════════ -->
+<section id="s6">
+  <h3><span class="num">06</span>能回答什麼、不能回答什麼</h3>
+  <p class="sub">這節直接取自 <code>authority_manifest.json</code> 的 <code>claim_boundary</code> 欄位 —— 是機器可讀的宣稱邊界，不是散文。</p>
+
+  <div class="grid2">
+    <div class="pcard ok">
+      <h4>✔ 可以主張 <span class="badge b-pass">permitted</span></h4>
+      <ul style="font-size:.88rem;padding-left:1.2em;margin:8px 0">
+        <li>嚴格 read-linked 的<b>局部區域</b>結構</li>
+        <li>家族完整時，完整的最小 read-相容突變狀態候選家族</li>
+        <li>允許遞迴的 Hamming-1 父子樹候選</li>
+        <li><b>未經 CN/LOH 校正</b>的 deterministic read-AF 排序</li>
+        <li>全域 AF-best 數學樹的 exact rooted-unlabeled 拓撲普查</li>
+        <li>pattern-conditioned 的區域甲基化<b>關聯</b>（非因果）</li>
+      </ul>
+    </div>
+    <div class="pcard blk">
+      <h4>✘ 明文禁止主張 <span class="badge b-dead">forbidden</span></h4>
+      <ul style="font-size:.88rem;padding-left:1.2em;margin:8px 0">
+        <li><b>confirmed 細胞層級的 clone / subclone</b></li>
+        <li>CN/LOH 校正過的 CCF</li>
+        <li>校準過的 likelihood 或 posterior</li>
+        <li>把 read cluster 當成 cell clone</li>
+        <li>用甲基化差異重排拓撲</li>
+        <li>把 HCC1395 與其 DORADO 重跑當成生物學重複</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 class="mini">已被判定為死路的方向（不要重開）</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th style="width:34%">方向</th><th style="width:66%">為什麼不行</th></tr></thead>
+    <tbody>
+      <tr><td><b>對整棵樹做機率排序</b></td>
+        <td>候選樹在 likelihood 下<b>等機率</b>，posterior 只會吐 P=1/N。
+            換成連續 posterior「只是換個記法，變不出 reads 裡不存在的資訊」。</td></tr>
+      <tr><td><b>用甲基化排序拓撲</b></td>
+        <td>三個理由全否：cis 構造對稱、四配子最常見成因是拷貝數多重性而非二次突變、
+            等機率區沒有遺傳真值可校驗（等於拿甲基驗甲基）。</td></tr>
+      <tr><td><b>甲基化非監督分群確認亞群</b></td>
+        <td>單一位點的四種成因不可拆（見 §4），屬已判 NEGATIVE 的 tumor-only double-dip。</td></tr>
+      <tr><td><b>甲基化當變異 TP/FP 過濾器</b></td>
+        <td>DEAD，「方向已窮盡，勿再開」。</td></tr>
+      <tr><td><b>用舊的 50 kb 鄰近取代嚴格 read linkage</b></td>
+        <td>幾何鄰近不等於同分子連鎖。已被 read-linked 方法取代。</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="takeaway">
+    <span class="lab">證據等級的天花板</span>
+    <b>單一 bulk 樣本只能做 characterize（描述），不能做 confirm（確認）</b>，因此封頂 ★3。
+    要突破需要 single-cell 或 multi-region 資料。
+    這不是能力不足，而是資訊論上的界限 —— Steiner 節點會被誠實標成 <code>inferred</code>。
+  </div>
+</section>
+
+<!-- ════════════════ 7 ════════════════ -->
+<section id="s7">
+  <h3><span class="num">07</span>接下來看哪一頁</h3>
+  <p class="sub">依你的目的挑一頁進去。</p>
+
+  <div class="grid2">
+    <div class="pcard ok">
+      <h4>ISM 部件與輸入輸出 <span class="badge b-pass">可跑</span></h4>
+      <p class="oneline">主程式的 29 個選項、內部 8 個處理階段、每個輸出檔的真實欄位與範例行。</p>
+      <div class="io">吃 → tumor BAM + reference + somatic VCF<br>吐 → methylation.csv · distance_matrix · tree.nwk</div>
+      <a class="go" href="12_intersubmod-io.standalone.html">進入 ISM 分冊 →</a>
+    </div>
+    <div class="pcard lim">
+      <h4>LongLineage 部件與契約 <span class="badge b-warn">部分可跑</span></h4>
+      <p class="oneline">4 個子命令的真實狀態、M1→M2→topology 科學鏈、artifact schema 與 read_id 的算法。</p>
+      <div class="io">吃 → 8 角色 manifest<br>吐 → site_reads · cooccurrence_* · topology_unit</div>
+      <a class="go" href="13_longlineage-io.standalone.html">進入 LL 分冊 →</a>
+    </div>
+    <div class="pcard ok">
+      <h4>上游工具鏈與資料 <span class="badge b-pass">齊全</span></h4>
+      <p class="oneline">sSNV / HP-PS / 甲基化 / CN 各自從哪個工具來、7 個樣本的實體資料在哪。</p>
+      <div class="io">Dorado · ClairS · LongPhase-S · SAVANA · sidecar TSV</div>
+      <a class="go" href="14_upstream-data.standalone.html">進入上游分冊 →</a>
+    </div>
+    <div class="pcard lim">
+      <h4>Python 分析層與 HTML 呈現層</h4>
+      <p class="oneline">主力腳本各自做什麼、工作站 HTML 怎麼生成、這層目前的碎片化問題。</p>
+      <div class="io">分析腳本 → workstation spec → standalone HTML</div>
+      <a class="go" href="15_python-html-layer.standalone.html">進入呈現層分冊 →</a>
+    </div>
+    <div class="pcard ok">
+      <h4>怎麼跑 — 操作手冊 <span class="badge b-info">可複製指令</span></h4>
+      <p class="oneline">從編譯到跑出第一個結果的完整步驟，每條指令都已實際執行驗證過。</p>
+      <div class="io">build → 最小跑法 → 完整跑法 → 看結果</div>
+      <a class="go" href="16_how-to-run.standalone.html">進入操作手冊 →</a>
+    </div>
+    <div class="pcard">
+      <h4>科學方法細節 <span class="badge b-cs">既有頁面</span></h4>
+      <p class="oneline">名詞定義、ISM 方法本體、甲基化讀取與篩選、chr2:18M 真實案例逐步拆解。</p>
+      <div class="io">解釋中心第 01–10 頁</div>
+      <a class="go" href="index.standalone.html">回 INDEX 選頁 →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="prov">
+  <h4>本頁的資料來源與驗證方式</h4>
+  <p>
+    本頁所有數字、狀態、檔案格式，來自 2026-08-06 對兩個 repo 的一次系統性實測收集
+    （9 個維度並行，每個維度獨立收集後再做對抗式驗證）。
+  </p>
+  <ul>
+    <li><b>驗證覆蓋</b>：334 個「檔案:行號」宣稱 + 111 個路徑宣稱，全部經機械重驗
+        —— <b>0 個捏造、0 個行號越界</b>；28 個初判找不到者，經修正路徑寫法後 100% 定位到實體檔案。</li>
+    <li><b>可跑狀態</b>：所有標示「可跑」的部件，均為本輪<b>實際執行並檢查 exit code</b>的結果。</li>
+    <li><b>科學數字</b>：funnel 各層取自 <code>denominator_registry.tsv</code> 與
+        <code>all7_summary.json</code>（2026-08-01 凍結的 canonical 輸出），並已驗證各層加總自洽。</li>
+  </ul>
+  <h4 style="margin-top:16px">已知的資料缺口（誠實標註）</h4>
+  <ul>
+    <li>「純 parsimony 單一拓撲率」的<b>下界 64.89%</b> 在 repo 內未找到原始出處，
+        對外引用前需補齊；上界 88.26% 有 registry 佐證。</li>
+    <li>LongLineage 7 樣本的總執行時間與記憶體上界<b>無實測證據</b>，
+        且其文件明文禁止由單樣本外推。</li>
+    <li>拷貝數（CN／LOH）目前狀態為 <code>NOT_INTEGRATED</code>，尚未接入主線。</li>
+  </ul>
+  <p style="margin-top:14px">
+    <b>路徑</b>：<code>InterSubMod/docs/explain/11_system-map-overview.standalone.html</code> ·
+    分支 <code>research/subclonal-reconstruction-202606</code> · 建立於 2026-08-06
+  </p>
+</footer>
+</div>

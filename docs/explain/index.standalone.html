@@ -9,7 +9,131 @@
   commit: a7ab2d3  branch: research/subclonal-reconstruction-202606
   SoT: docs/explain/_planning/00_盤點..._01.md（L0 總覽表 + 關聯地圖）
 -->
-<link rel="stylesheet" href="_assets/explain.css">
+<!-- 共用樣式 _assets/explain.css 已內嵌（2026-08-06）：
+     原本用 <link> 外部引用，導致此頁移動位置或單獨寄出時完全失去樣式，
+     與檔名宣稱的 .standalone 不符。編輯 SoT 仍是 _assets/explain.css。 -->
+<style>
+/* ===========================================================
+   解釋中心 共用樣式 explain.css （canonical）
+   v2.1 · 2026-06-12 · 沿用 Anthropic 暖色盤
+   被 docs/explain/*.standalone.html 共用（<link rel="stylesheet" href="_assets/explain.css">）
+   改這一檔 = 全站套用。
+   =========================================================== */
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+/* topbar */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+/* hero */
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.1rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:860px;margin:0;font-size:1.07rem}
+/* 視覺層級 */
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.62rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:880px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+/* 重點提取盒 */
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.14rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424} .takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+/* 行內重要性 */
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+em.q{font-style:normal;background:var(--c-cs-soft);color:#3f2c70;padding:0 4px;border-radius:3px;font-weight:600}
+/* BLUF */
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.1rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.howto{background:var(--c-cs-soft);border:1px solid var(--c-cs);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.85rem;margin:var(--sp-3) 0;color:#3f2c70}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:4px 0}
+/* badges */
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+/* KPI */
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:200px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.6rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)} .kpi.info{border-left:4px solid var(--c-info)}
+/* flow / table */
+.flow1{font-family:var(--mono);font-size:.92rem;background:#fff;border:1px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);text-align:center;margin:var(--sp-3) 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+/* figures */
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+/* details */
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card>summary .term{font-family:var(--mono);color:var(--c-cs);font-size:.95em}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+details.card.def{border-left:4px solid var(--c-cs)} details.card.hcl{border-left:4px solid var(--c-warn)}
+.intuition{background:var(--c-cs-soft);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.9rem;margin:var(--sp-2) 0}
+.intuition b{color:var(--c-cs)}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+mark{background:#fdf2c8;padding:0 2px}
+/* 統計算式 worked example */
+.worked{background:#F7F5EF;border:1px solid var(--c-border);border-left:4px solid var(--c-info);border-radius:8px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.88rem}
+.worked .lab{font-family:var(--mono);font-size:.64rem;color:var(--c-info);letter-spacing:1px;text-transform:uppercase;font-weight:800;display:block;margin-bottom:5px}
+.worked .calc{font-family:var(--mono);font-size:.85rem;background:#fff;border:1px solid var(--c-border);border-radius:6px;padding:8px 10px;margin:7px 0;overflow-x:auto}
+.worked .res{font-weight:800;color:var(--c-info)}
+.svgnote{font-size:8.5px;fill:#6B6B66}
+/* INDEX 專用：研究線卡網格 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0}
+.lcard{background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);border-top:4px solid var(--c-border)}
+.lcard.method{border-top-color:var(--c-info)} .lcard.pos{border-top-color:var(--c-pass)} .lcard.neg{border-top-color:var(--c-dead)} .lcard.mixed{border-top-color:var(--c-warn)}
+.lcard h4{margin:0 0 4px;font-size:1.02rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lcard .oneline{font-size:.85rem;color:var(--c-text-soft);margin:4px 0}
+.lcard .pi{font-size:.8rem;background:var(--c-bg);border-radius:6px;padding:5px 8px;margin-top:6px}
+
+</style>
 <style>
 .progress{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-3) 0}
 .pchip{font-size:.8rem;font-family:var(--mono);padding:3px 10px;border-radius:14px;border:1px solid var(--c-border);background:#fff}
@@ -29,6 +153,8 @@
   <span class="brand">解釋中心</span>
   <nav>
     <a href="#lines">研究線</a><a href="#order">閱讀順序</a>
+    <a href="#system" style="border-color:var(--c-accent);color:var(--c-accent);font-weight:700">系統全景</a>
+    <a href="https://github.com/liaoyoyo/InterSubMod" title="GitHub 上的專案首頁與 Wiki">GitHub ↗</a>
     <a href="01_background-glossary.standalone.html">名詞地基</a>
     <a href="02_ism-core.standalone.html">ISM 方法</a>
     <a href="03_methylation-read-filter.standalone.html">甲基讀取/篩選</a>
@@ -56,7 +182,7 @@
 </div>
 
 <div class="ironclad">
-  <b>🔴 讀本站的 4 條鐵則</b>
+  <b><span style="color:var(--c-dead);font-weight:800">●</span> 讀本站的 4 條鐵則</b>
   <ol>
     <li>「<b>存在</b> ASM」≠「<b>能判別</b> TP/FP」——兩個 claim 永遠分開講。</li>
     <li><b>HP-axis</b>（HP1 vs HP1-1）somatic-controlled；<b>ALLELE-axis</b>（ALT vs REF）被 germline het baseline 污染。</li>
@@ -75,6 +201,12 @@
     <span class="pchip done">✓ 真實案例 chr2:18M subclone</span>
     <span class="pchip done">✓ chr2:18M 矯正 audit（權威裁決）</span>
     <span class="pchip done">✓ ISM subclone pipeline 構想（9 步）</span>
+    <span class="pchip done">✓ 系統全景（架構 · 狀態 · funnel）</span>
+    <span class="pchip done">✓ ISM 部件 I/O</span>
+    <span class="pchip done">✓ LongLineage 部件 I/O</span>
+    <span class="pchip done">✓ 上游工具鏈與資料</span>
+    <span class="pchip done">✓ 分析與呈現層</span>
+    <span class="pchip done">✓ 操作手冊</span>
     <span class="pchip todo">○ ism-vs-external</span>
     <span class="pchip todo">○ 四道 NEGATIVE</span>
     <span class="pchip todo">○ LOH-phasing 脊柱</span>
@@ -86,6 +218,62 @@
   <p class="muted">共用樣式 <code>_assets/explain.css</code>（改一處全站套用）· 名詞 SoT <code>01_background-glossary</code> · 盤點底稿 <code>_planning/00~04</code></p>
 </section>
 
+<!-- ============ 系統架構與操作（2026-08-06 新增）============ -->
+<section id="system">
+  <h3><span class="num">▤</span> 系統架構與操作 <span class="badge b-pass" style="font-size:.62rem">2026-08-06 新增</span></h3>
+  <p class="sub">
+    上面的頁面講的是<b>科學方法</b>；這一組講的是<b>系統本身</b> ——
+    有哪些部件、各自吃什麼吐什麼、現在哪些真的跑得動、以及怎麼動手跑。
+    <b>給第一次接觸這套系統的人（指導教授、新進同學）看的。</b>
+    每個部件標了狀態：<span class="badge b-pass">可跑</span>
+    <span class="badge b-warn">有限制</span> <span class="badge b-dead">被鎖住</span>。
+  </p>
+
+  <div class="grid">
+    <div class="lcard method">
+      <h4>系統全景 <span class="badge b-info">先看這頁</span></h4>
+      <div class="oneline">五層架構圖、兩個 repo 的關係（clean-room 重建不是 fork）、誠實狀態表、全 7 樣本 funnel、能與不能回答什麼。</div>
+      <div class="pi">▸ PI：技術層 <code>technical_all_pass=true</code> 但科學層 <code>validation_evidence_eligible=false</code> —— 系統在機器欄位層級就把「跑通」與「可用」分開。</div>
+      <a class="go" href="11_system-map-overview.standalone.html">看全景 →</a>
+    </div>
+
+    <div class="lcard pos">
+      <h4>InterSubMod 部件 <span class="badge b-pass">可跑</span></h4>
+      <div class="oneline">3 個必填輸入、8 個內部階段、17 種輸出檔（附真實 header 與資料行）、3 條實跑驗證過的指令、9 條會靜默出錯的陷阱。</div>
+      <div class="pi">▸ 重點：<code>tree.nwk</code> 的葉子是 <b>read 不是 clone</b>；<code>significance_summary.csv</code> 欄數跨版本不一致且無版本欄位。</div>
+      <a class="go" href="12_intersubmod-io.standalone.html">看 ISM 部件 →</a>
+    </div>
+
+    <div class="lcard mixed">
+      <h4>LongLineage 部件 <span class="badge b-warn">部分可跑</span></h4>
+      <div class="oneline">4 個子命令的真實狀態、M1→M2→topology 科學鏈、artifact 契約、為什麼真實資料上輸出 0 棵樹。</div>
+      <div class="pi">▸ 重點：「BLOCKED」是<b>對照證據不存在</b>不是程式沒寫；甲基化在此是<b>總開關</b>，83.9% 位點連配對都不會產生。</div>
+      <a class="go" href="13_longlineage-io.standalone.html">看 LL 部件 →</a>
+    </div>
+
+    <div class="lcard pos">
+      <h4>上游工具鏈與資料 <span class="badge b-pass">7/7 齊全</span></h4>
+      <div class="oneline">Dorado / ClairS / LongPhase-S / SAVANA 各產生什麼、sidecar 格式、7 樣本實體資料、三個會讓你算錯數字的陷阱。</div>
+      <div class="pi">▸ 重點：FILTER 重校正是<b>雙向</b>的（救回 4,592、降級 5,528、淨 −936）；<code>HP</code> 有字串與整數兩種型別，用錯 parser 會靜默丟資料。</div>
+      <a class="go" href="14_upstream-data.standalone.html">看上游 →</a>
+    </div>
+
+    <div class="lcard mixed">
+      <h4>分析與呈現層</h4>
+      <div class="oneline">實際會用到的 Python 腳本、工作站 HTML 的「拒絕渲染」防捏造設計、這層的四個坑。</div>
+      <div class="pi">▸ 重點：182 支腳本硬編了<b>另一個分支</b>的 worktree 路徑；預設 python3 版本會讓部分腳本直接崩。</div>
+      <a class="go" href="15_python-html-layer.standalone.html">看分析層 →</a>
+    </div>
+
+    <div class="lcard pos">
+      <h4>操作手冊 <span class="badge b-info">可複製指令</span></h4>
+      <div class="oneline">從編譯到跑出第一個結果的 6 個步驟，每步附驗收條件與真實輸出；常見狀況排除表。</div>
+      <div class="pi">▸ 本輪實跑：<code>run_tests</code> → <b>265 tests / 38 suites 全過</b>；單點分析 2.9 秒完成。</div>
+      <a class="go" href="16_how-to-run.standalone.html">照著跑 →</a>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 10 研究線 ============ -->
 <section id="lines">
   <h3><span class="num">▦</span> 10 條研究線（一句話 + 給 PI 重點 + tier）</h3>
@@ -93,7 +281,7 @@
 
   <div class="grid">
     <div class="lcard method">
-      <h4>ISM 方法本體 <span class="badge tier">⭐3</span></h4>
+      <h4>ISM 方法本體 <span class="badge tier">★3</span></h4>
       <div class="oneline">讀 ONT 癌症 BAM，對每 somatic 位點做甲基矩陣→read-read 距離→聚類→PERMANOVA 結構檢定。量「結構連結」非 filter。</div>
       <div class="pi">▸ PI：量 between-molecule 結構；核心 = somatic sub-haplotype 解析度 + normal-anchored cis-test 去 3 假象。</div>
       <a class="go" href="02_ism-core.standalone.html">方法本體 →</a> &nbsp;<a class="go" href="03_methylation-read-filter.standalone.html">甲基讀取/篩選細節 →</a>
@@ -115,35 +303,35 @@
     </div>
 
     <div class="lcard method">
-      <h4>ism-vs-external（軸 C vs 軸 A）<span class="badge tier">⭐3</span></h4>
+      <h4>ism-vs-external（軸 C vs 軸 A）<span class="badge tier">★3</span></h4>
       <div class="oneline">ISM 把「read 是否結構分亞群」當主問題（軸 C），而非算「兩組率差」（軸 A）；且誠實 NEGATIVE：甲基不判別 TP/FP。</div>
       <div class="pi">▸ PI：可防守新穎 = read-read 距離 + PERMANOVA + normal-anchored cis 三位一體，但每個單元件都有更成熟競品。</div>
       <a class="go dis">待建</a>
     </div>
 
     <div class="lcard neg">
-      <h4>四道 NEGATIVE（filter DEAD）<span class="badge b-dead">⭐2 L4</span></h4>
+      <h4>四道 NEGATIVE（filter DEAD）<span class="badge b-dead">★2 L4</span></h4>
       <div class="oneline">用甲基特徵辨別 TP/FP 多道驗證全失敗——這些 NEGATIVE 本身即論文貢獻（防彈負結果）。</div>
       <div class="pi">▸ PI：pilot ΔF1=+0.00242 低於門檻 / LOSO 100% 循環 / 消融確認甲基是第 5 順位 vestigial。</div>
       <a class="go dis">待建</a>
     </div>
 
     <div class="lcard pos">
-      <h4>LOH-phasing 脊柱 <span class="badge tier">B+ ⭐3</span></h4>
+      <h4>LOH-phasing 脊柱 <span class="badge tier">B+ ★3</span></h4>
       <div class="oneline">LOH 區突變留下「同單倍型分裂」phasing 特徵可與 germline FP 區分，但由 LOH 物理結構決定故帶 by-construction 循環。</div>
       <div class="pi">▸ PI：LOH 內 NG=2 reads 93-99% same-hap（7/7, p=0.0078），但 self-ref 全基因組負控（~25-50hr）未跑 → Grade A 待決策。</div>
       <a class="go dis">待建</a>
     </div>
 
     <div class="lcard mixed">
-      <h4>ASM ZAR1L/BRCA2 + 跨樣本 <span class="badge tier">⭐3</span></h4>
+      <h4>ASM ZAR1L/BRCA2 + 跨樣本 <span class="badge tier">★3</span></h4>
       <div class="oneline">BRCA2/ZAR1L 確有 ASM、真實可重現，但「存在」與「能判別 TP/FP」是兩件事——它判別不了。</div>
       <div class="pi">▸ PI：Δβ=−0.122、6/6 樣本 excess&gt;0 跨 3 癌種；但 strong-ASM 在 FP 富集 5×（OR=0.194）→ 生物現象非可用 filter。</div>
       <a class="go dis">待建</a>
     </div>
 
     <div class="lcard neg">
-      <h4>ASM cis + CN confound <span class="badge tier">⭐3</span></h4>
+      <h4>ASM cis + CN confound <span class="badge tier">★3</span></h4>
       <div class="oneline">ASM 廣存但既不判別 TP/FP，其 cis 殘差也不改善判別，甚至 FP 比 TP 更常出 cis 訊號。</div>
       <div class="pi">▸ PI：6 樣本 28 萬位點 powered：TP 顯著率 3.95% &gt; FP 1.07% 但絕對靈敏度~4% / COLO829 TP≈FP。</div>
       <a class="go dis">待建</a>
@@ -185,7 +373,7 @@
     </div>
 
     <div class="lcard method">
-      <h4>ism-evolution（統計口徑稽核）<span class="badge tier">⭐3</span></h4>
+      <h4>ism-evolution（統計口徑稽核）<span class="badge tier">★3</span></h4>
       <div class="oneline">ISM 現行版有多個統計口徑問題（Fisher 假獨立 / 5mC-only / germline 軸 Δβ 污染 / 跨 region 無多重檢定），稽核後無翻轉結論但需補修。</div>
       <div class="pi">▸ PI：「結構存在嗎」沒根本錯誤，但 Fisher 假 read 獨立 + 跨 region 無 MT 校正 → ASM 存在率偏樂觀。</div>
       <a class="go dis">待建（偏方法學讀者）</a>
