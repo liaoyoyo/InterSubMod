@@ -50,7 +50,18 @@ GitHub 的 Wiki repo **要先在網頁上建立第一個頁面才會存在**，�
 2. 點 **Create the first page**，隨便存一個內容（等下會被覆蓋）
 3. 接著執行下面的指令
 
-### 每次發布
+### 每次發布（建議用腳本）
+
+```bash
+bash scripts/publish_wiki.sh          # 預覽會改什麼，不推送
+bash scripts/publish_wiki.sh --push   # 確認後實際發布
+```
+
+腳本會先擋掉最常見的失敗：**引用的圖還沒推到 `develop`**（那會讓 Wiki 全是破圖），
+以及 **wiki repo 尚未初始化**（會告訴你去哪裡點「Create the first page」）。
+
+<details>
+<summary>手動步驟（腳本壞掉時的備援）</summary>
 
 ```bash
 cd /big7_disk/liaoyoyo2001/InterSubMod
@@ -73,6 +84,8 @@ git add -A
 git commit -m "docs(wiki): sync from docs/wiki/ (source: docs/explain/)"
 git push
 ```
+
+</details>
 
 推完後到 `https://github.com/liaoyoyo/InterSubMod/wiki` 確認：
 **每一頁的圖都有顯示**、側邊欄有出現、頁面之間的連結都能點。
