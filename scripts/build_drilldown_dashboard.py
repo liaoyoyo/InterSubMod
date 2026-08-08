@@ -38,12 +38,43 @@ import cooccurrence as mod_cooccur                             # noqa: E402
 import bake as mod_bake                                        # noqa: E402
 from capability import EXIT_REFUSE, Refuse, Registry           # noqa: E402
 
-# 站點預設路徑。全部可用 CLI 覆寫；找不到就是對應能力 ABSENT，不是致命錯誤。
-DEF_TOPOLOGY_ROOT = ("/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/"
-                     "20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/samples")
+# 站點路徑一律外部提供，不寫死在原始碼裡 —— 寫死等於別人 clone 下來跑不動。
+# 三種來源，優先序由高到低：
+#   1. CLI 旗標
+#   2. 環境變數 DD_TOPOLOGY_ROOT / DD_ISM_ROOT / DD_LINEAGE_ROOT
+#   3. 專案根的 drilldown.paths.json（gitignored，各站點自己維護）
+#
+# 這是 LongLineage 的 scripts/ci/check_repo_hygiene.sh 強制的慣例
+# （該 CI 會 exit 2 阻擋寫死的絕對路徑）；InterSubMod 沒有那道 gate，
+# 所以本檔自己遵守。
+import os as _os
+
+_CFG_NAME = "drilldown.paths.json"
 
 
-DEF_ISM_ROOT = "/bip7_disk/liaoyoyo2001/ism_lineage_v1"
+def _load_site_config(start: Path) -> dict:
+    """往上找 drilldown.paths.json。找不到回空 dict，不是錯誤。"""
+    d = start.resolve()
+    for _ in range(5):
+        f = d / _CFG_NAME
+        if f.is_file():
+            try:
+                return json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                print(f"  [warn] {f} 無法解析，忽略：{exc}", file=sys.stderr)
+                return {}
+        if d.parent == d:
+            break
+        d = d.parent
+    return {}
+
+
+_SITE = _load_site_config(HERE)
+
+
+def site_path(key: str, env: str, default=None):
+    """取站點路徑：CLI > 環境變數 > 設定檔 > default(None)。"""
+    return _os.environ.get(env) or _SITE.get(key) or default
 
 
 def _loci_with_ism(l1, ism_cap):
@@ -60,6 +91,14 @@ def _loci_with_ism(l1, ism_cap):
         if i in hit:
             out.append((chroms[l1["chrom"][i]], acc))
     return out
+
+
+def _missing_hint(key: str, env: str, flag: str) -> str:
+    return (f"找不到 {key}。三種提供方式擇一：\n"
+            f"  1. CLI:  {flag} <PATH>\n"
+            f"  2. 環境變數:  export {env}=<PATH>\n"
+            f"  3. 設定檔:  在專案根建 {_CFG_NAME}，內容如\n"
+            f'       {{"topology_root": "...", "ism_root": "...", "lineage_root": "..."}}')
 
 
 def build_registry(args) -> Registry:
@@ -101,13 +140,13 @@ def main() -> int:
     ap.add_argument("--topology-receipt")
     ap.add_argument("--mlhp", help="MLHP json（read pattern；預設由 --sample 推導）")
     ap.add_argument("--out", help="輸出目錄；--probe-only 時可省略")
-    ap.add_argument("--ism-root", default=DEF_ISM_ROOT,
+    ap.add_argument("--ism-root",
                     help="ISM run 根目錄（擴充能力；缺則甲基面板降級）")
     ap.add_argument("--chrom-root",
                     help="partition 的 chromosomes/ 目錄（strict endpoint edges；預設由 --sample 推導）")
-    ap.add_argument("--lca-pre", default="/bip7_disk/liaoyoyo2001/lineage_out/HCC1395_v1/bam_pre_lca_receipts",
+    ap.add_argument("--lca-pre",
                     help="pre-LCA receipt 目錄（量化 LCA 增益）")
-    ap.add_argument("--lca-post", default="/bip7_disk/liaoyoyo2001/lineage_out/HCC1395_v1/bam",
+    ap.add_argument("--lca-post",
                     help="post-LCA receipt 目錄")
     ap.add_argument("--annot-dir",
                     help="註釋 drop-in 資料夾：把 .bed / .tsv 丟進去就會自動變成篩選維度，"
@@ -121,14 +160,32 @@ def main() -> int:
                     help="copy（預設，輸出夾自足可搬走）/ link（symlink，搬移會斷）/ ref（相對路徑）")
     args = ap.parse_args()
 
+    lin_root = site_path("lineage_root", "DD_LINEAGE_ROOT")
+    if not args.ism_root:
+        args.ism_root = site_path("ism_root", "DD_ISM_ROOT")
+    if not args.lca_pre and lin_root:
+        args.lca_pre = f"{lin_root}/bam_pre_lca_receipts"
+    if not args.lca_post and lin_root:
+        args.lca_post = f"{lin_root}/bam"
+    if not args.lineage_assign and lin_root:
+        args.lineage_assign = (f"{lin_root}/assign/{args.sample}"
+                               ".all.read_lineage_assignments.tsv.gz")
+    if not args.lineage_paths and lin_root:
+        args.lineage_paths = f"{lin_root}/paths/{args.sample}.unit_lineage_paths.tsv.gz"
+
     if not args.topology:
-        args.topology = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.topology.jsonl"
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        if not root:
+            ap.error(_missing_hint("topology_root", "DD_TOPOLOGY_ROOT", "--topology"))
+        args.topology = f"{root}/{args.sample}/{args.sample}.topology.jsonl"
     if not args.topology_receipt:
         args.topology_receipt = args.topology.replace(".jsonl", ".receipt.json")
     if not args.mlhp:
-        args.mlhp = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/{args.sample}.exact_ps_mlhp.json"
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        args.mlhp = f"{root}/{args.sample}/{args.sample}.exact_ps_mlhp.json" if root else ""
     if not args.chrom_root:
-        args.chrom_root = f"{DEF_TOPOLOGY_ROOT}/{args.sample}/chromosomes"
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        args.chrom_root = f"{root}/{args.sample}/chromosomes" if root else ""
     if not args.probe_only and not args.out:
         ap.error("需要 --out（或加 --probe-only）")
     if not args.annot_dir and args.out:
