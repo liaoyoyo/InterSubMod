@@ -1,0 +1,71 @@
+name: Deploy docs to GitHub Pages
+
+# 為什麼不用 legacy 的「branch + /docs」模式：
+#   docs/ 在 develop 上是 627 MB / 2,986 檔（含 66 MB 的 HTML 與多個 20-28 MB 的
+#   JSON/CSV 研究衍生資料）。把整個 docs/ 當站台根目錄會讓 Pages 建置直接失敗
+#   （2026-08-06 實測 errored）。這個 workflow 只打包真正要給人看的部分（約 3 MB）。
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'docs/explain/**'
+      - 'docs/images/**'
+      - 'docs/index.html'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:        # 允許手動觸發
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時只跑一個部署；不取消進行中的，避免半完成的站台
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site (explanation centre + figures only)
+        run: |
+          set -euo pipefail
+          mkdir -p _site/explain _site/images
+          cp -R docs/explain/. _site/explain/
+          cp -R docs/images/.  _site/images/
+          cp    docs/index.html _site/index.html
+          touch _site/.nojekyll          # 原樣提供，不經 Jekyll 處理
+          echo "--- site contents ---"
+          find _site -type f | sort
+          echo "--- total size ---"
+          du -sh _site
+
+      - name: Fail if the site got unexpectedly large
+        run: |
+          # 這個站台應該只有幾 MB。若暴增，代表有人把研究資料放進 explain/ 或 images/，
+          # 應該先處理而不是讓它悄悄上線。
+          size_kb=$(du -sk _site | cut -f1)
+          echo "site size: ${size_kb} KB"
+          if [ "$size_kb" -gt 51200 ]; then
+            echo "::error::_site is ${size_kb} KB (> 50 MB). Refusing to deploy."
+            echo "Check for large files under docs/explain/ or docs/images/."
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
