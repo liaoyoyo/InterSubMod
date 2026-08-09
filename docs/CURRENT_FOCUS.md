@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-08-05 (工程交接驗收：證據鏈 19/19 hash MATCH、clean build exit 0、C++ 258/258 tests PASS；四項工程 gate 未過〔pytest 缺、磁碟 617GB、580 未提交、GitHub 落後 268 commits〕，皆非科學問題) | 2026-08-01 (Exact-PS 全 7 資料集 HTML observation report = VALIDATED_DERIVED_OBSERVATION) | 2026-07-24 (全 sSNV Task-B 科學分析已驗證；signed release因nested v29 finalizer blocker依bounded policy停止，無authority/receipt/signature) | 2026-07-23 (exact-PS strict completion audit：L1 read-linkage 7/7；production strict directed topology 0/7；clone/parent/fusion 0/7) | 2026-07-22 (全 sSNV Task-B：v7 source authority已簽署；primary v6與singleton audit v2 PASS；102,842-task raw-identity preflight v9執行中)
+更新時間: 2026-08-10 (對外文件層上線：README雙語/Wiki 8頁/Pages 17頁皆線上200；修正public repo上「用甲基化區分細胞群體」的錯誤能力宣稱；修復02_ism-core一張已壞近兩月的SVG〔損失50%元素〕+10頁62個缺字emoji，全17頁0 FAIL；Pages改Actions部署627MB→2.0MB。未改動任何科學結論或canonical數值) | 2026-08-05 (工程交接驗收：證據鏈 19/19 hash MATCH、clean build exit 0、C++ 258/258 tests PASS；四項工程 gate 未過〔pytest 缺、磁碟 617GB、580 未提交、GitHub 落後 268 commits〕，皆非科學問題) | 2026-08-01 (Exact-PS 全 7 資料集 HTML observation report = VALIDATED_DERIVED_OBSERVATION) | 2026-07-24 (全 sSNV Task-B 科學分析已驗證；signed release因nested v29 finalizer blocker依bounded policy停止，無authority/receipt/signature) | 2026-07-23 (exact-PS strict completion audit：L1 read-linkage 7/7；production strict directed topology 0/7；clone/parent/fusion 0/7) | 2026-07-22 (全 sSNV Task-B：v7 source authority已簽署；primary v6與singleton audit v2 PASS；102,842-task raw-identity preflight v9執行中)
 狀態: in_progress（全sSNV正式release與Read-linked Hypercube M2兩條Task-B）+ validated（下方明示之已驗證結果）
 資料來源:
   - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md
@@ -19,6 +19,94 @@
 -->
 
 # 當前目標
+
+## 2026-08-10 — 對外文件層上線：README／Wiki／Pages；並修正一項公開的錯誤能力宣稱
+
+> **本輪性質**：文件與對外呈現層。**未改動任何科學結論、canonical 數值或 C++ 邏輯**；
+> 科學層權威仍為 20260801 的 `authority_manifest.json`。
+
+### 🔴 最重要的一項：public repo 上的錯誤宣稱已移除
+
+本 repo 是 **public** 的（無認證 `git ls-remote` 實測可讀）。先前的 README（36 行，2026-03-27）
+對外宣稱：
+
+> 「亞克隆解析：利用 Read-level **甲基化模式，區分不同的細胞群體**」
+
+這與現行結論直接矛盾 —— 甲基化做不到這件事（cis-ASM 循環：單一 bulk 無法區分
+germline ASM／LOH 解遮蔽／CN 劑量／真譜系差異四種成因）。已改為正確表述：
+**sSNV 單分子共現為非循環骨幹，甲基化為 bounded-auxiliary，樹定好後才算、動不了任何一條邊**。
+另修正兩處與實測不符：「自動生成熱圖」（C++ 實測不產 PNG）、未提 sSNV 骨幹與 LongLineage。
+
+### 已上線（皆經線上實測 HTTP 200）
+
+| 交付 | 位置 | 規模 |
+|---|---|---|
+| 雙語 README | repo 首頁 · `README.md` / `README.zh-TW.md` | 547 行、7 張嵌入圖 |
+| GitHub Wiki | `github.com/liaoyoyo/InterSubMod/wiki` | 8 頁 + 側邊欄、1,459 行 |
+| 文件網站（Pages） | `liaoyoyo.github.io/InterSubMod/` | 解釋中心 17 頁 |
+| 展示圖 | `docs/images/` | 8 張 × PNG+SVG，964 KB |
+
+解釋中心（`docs/explain/`）由 10 頁擴為 **17 頁**：新增 11 系統全景／12 ISM 部件／
+13 LL 部件／14 上游與資料／15 分析呈現層／16 操作手冊，補上「科學方法層」之外的
+「部件與操作層」。內容以 18 個 subagent 實測收集 + 獨立對抗驗證產生：
+**334 個「檔案:行號」+ 111 個路徑宣稱經機械重驗 → 0 捏造、0 行號越界**；
+Wiki 轉換再驗一次 **800+ 個數字出現位置，6 頁全 CLEAN**。
+
+### 🔴 發現並修復：一張核心圖已靜默損壞近兩個月
+
+`02_ism-core` 的 SVG#7「稀疏表 vs 密集表」**損失 16/32 元素（50%）** —— 右半「密集表」
+整個未繪出，數字變成散落裸文字。根因：SVG `<text>` 內誤用 HTML `<b>`，會中止 SVG
+命名空間、其後元素全部掉出圖外。自 2026-06-12 建立起即損壞。
+
+**偵測盲點（這是重點）**：curl 200、無 pageerror、無 broken image（頁面本就沒有 `<img>`）、
+頁面高度可能不變（圖在摺疊 `<details>` 內完全看不出）。**唯一可靠訊號是逐 svg 區塊做
+XML 解析，或實際截圖用眼睛看。**
+
+同批修復：10 頁共 62 個缺字 emoji（本機無 emoji 字型，🔴⭐✅❌ 顯示為豆腐方框）、
+3 頁名為 `.standalone` 卻 `<link>` 外部 CSS。**全 17 頁現為 0 FAIL。**
+
+新增永久防線 `tools/explain_page_qa.py`（六項檢查），並追加
+`HARNESS_FAILURE_LOG.md` **H-011／H-012／H-013**。
+
+### GitHub Pages 建置失敗的根因（已解）
+
+首次以 legacy「branch + /docs」模式啟用即 `errored`。根因非設定而是體積：
+**`docs/` 在 develop 上 = 627.8 MB / 2,986 檔**（最大 66.4 MB 單一 HTML，另有
+28.3／25.3／22.0／21.4 MB 的 JSON、CSV）—— 即先前記載的
+「`.gitignore` 未擋 `docs/methodology/_assets/`」問題的直接後果。`.nojekyll` 無效（問題是體積）。
+
+改為 **GitHub Actions 只打包 `docs/explain/` + `docs/images/` + 入口頁 = 2.0 MB**，
+並加 50 MB 上限守衛（超過即讓建置失敗而非默默上線）。
+
+### 兩處必要的規則例外（皆精準限定 `docs/images/`）
+
+- `.gitignore`：原 `*.png` 全域忽略會使 README 上線即七張破圖 → 加 `!docs/images/*.png|svg`
+- `scripts/hooks/no_binary_commit.sh`：raw URL 只能解析已提交的檔案 → 加同名例外
+
+其他路徑的 PNG／研究輸出圖仍照擋（已用模擬 staged 清單逐項驗證）。
+
+### 維護流程（已固化）
+
+```
+改 docs/explain/*.standalone.html
+  → python3 tools/explain_page_qa.py docs/explain/*.standalone.html   # 須 0 FAIL
+  → python3 tools/extract_svg_for_github.py                            # 圖有變才需要
+  → 更新 docs/wiki/ 對應 .md
+  → bash scripts/publish_wiki.sh --push
+Pages 於 push 到 develop 時自動重新部署（.github/workflows/pages.yml）
+```
+
+### 誠實標註的缺口（未因上線而改變）
+
+- 「純 parsimony 單一拓撲率」**下界 64.89% 在 repo 內 grep 不到原始出處**
+  （上界 88.26% 有 `denominator_registry.tsv` 佐證）—— 已寫入頁面警告，對外引用前須補齊
+- LongLineage 7 樣本執行時間與記憶體上界**從未實測**，其文件明文禁止由單樣本外推
+- CN／LOH 仍為 `NOT_INTEGRATED`，現有結論皆為「未經拷貝數校正」
+- 本輪**未觸及** 20260805 記載的四項工程 gate（pytest 缺、磁碟 617 GB、
+  未提交項、GitHub 落後）；其中「GitHub 落後」因本輪推送而部分改善，但
+  `docs/` 的大型衍生資料仍在 tracked 內，尚未瘦身
+
+---
 
 ## 2026-08-05 — 工程交接驗收：科學證據鏈完好，四項工程 gate 未過
 
