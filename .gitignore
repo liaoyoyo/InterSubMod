@@ -409,6 +409,15 @@ research/**/audit_notes/**/*_v[0-9]*.py
 # intersubmod_v17_c_child_write_trace_20260723T0945Z.2877413 等 49 個，以 PID 結尾）
 research/**/diagnostic_write_traces/**
 
+# === hook 產生的 telemetry log（added 2026-08-13）===
+# 這些由 PostToolUse/SessionStart hook 持續 append，每次操作都會變動，
+# 造成 git status 永遠不乾淨。它們是 per-machine 遙測，不是研究證據
+# （研究證據鏈的 SoT 是 research/autoresearch/evidence_ledger.jsonl，該檔仍進 git）。
+docs/postmortems/hook_failures.log
+docs/postmortems/subagent_completion_*.log
+docs/postmortems/recall_log_*.log
+docs/postmortems/task_type_recall_*.log
+
 # === 根目錄一次性執行輸出（added 2026-08-05）===
 # gb_poc.* 為 2026-07-05 的 HP-oriented matched-normal cis-control PoC 輸出，
 # 內容已無下游依賴；檔案保留在工作區，只是不進版本控制。
