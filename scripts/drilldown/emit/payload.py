@@ -66,6 +66,37 @@ def build_dims(topo_cap, extra=None) -> list:
 AXIS_BITS = [("hp", 1, "HP", "#285f8f"), ("allele", 2, "ALT/REF", "#a94336"),
              ("lineage", 4, "lineage", "#6b5592")]
 AXIS_NONE = 8          # 有測但都不顯著
+AXIS_UNTESTED = 16     # 有 ISM summary 列，但三個全域軸都無法檢定
+
+# 全域軸與 detail-only 軸必須明確分開。舊 standalone 頁會同時列出
+# allele / HP 軸，但沒有一個可多樣本重現的定義表；改由 payload 作 SoT。
+AXIS_DEFINITIONS = [
+    {
+        "id": "hp", "label": "HP（merged）", "field": "HPMergedP",
+        "scope": "全域軸道 + 位點細節",
+        "definition": "比較 merged haplotype 分組的甲基距離；raw p ≤ 0.05 只作探索標記。",
+    },
+    {
+        "id": "allele", "label": "ALT / REF", "field": "AlleleP",
+        "scope": "全域軸道 + 位點細節",
+        "definition": "比較 ALT-support 與 REF-support read 的甲基距離；是關聯，不是因果。",
+    },
+    {
+        "id": "lineage", "label": "lineage", "field": "LineagePermanovaP",
+        "scope": "全域軸道 + 位點細節",
+        "definition": "比較 read lineage 分組；lineage vertex 不等於 clone / CCF。",
+    },
+    {
+        "id": "hpfine", "label": "HP（fine）", "field": "HPFineP",
+        "scope": "只在位點細節",
+        "definition": "較細 HP 分組，與 merged HP 相關；不重複編入全域單一類別軸。",
+    },
+    {
+        "id": "cluster", "label": "甲基自身分群", "field": "ClusterPermanovaP",
+        "scope": "只在位點細節，不納入結論",
+        "definition": "分群標籤與檢定使用同一距離矩陣，屬循環論證軸。",
+    },
+]
 
 
 def fill_axis_codes(l1: dict, ism_cap) -> None:
@@ -100,8 +131,72 @@ def fill_axis_codes(l1: dict, ism_cap) -> None:
                 code |= bit
         if tested and code == 0:
             code = AXIS_NONE
+        elif not tested:
+            # 不能與「沒有 summary 列」共用 0，否則 missingness 會被誤畫成
+            # ISM 完全缺席。
+            code = AXIS_UNTESTED
         codes[i] = code
     l1["axis"] = codes
+
+
+def observation_scope(l1: dict, ism_cap) -> dict:
+    """全基因組觀察的分母與 missingness ledger。
+
+    這是從舊 standalone 頁「總體 → 符合條件 → 頁面展示」漏斗汲取的可泛化
+    部分；不帶入該頁尚未驗證的科學結論或 HCC 常數。
+    """
+    n = int(l1.get("n", 0) or 0)
+    defs = []
+    available_axes = set()
+    if ism_cap and ism_cap.usable and ism_cap.payload:
+        available_axes = {a.get("id") for a in (ism_cap.payload.get("axes") or [])}
+    for row in AXIS_DEFINITIONS:
+        item = dict(row)
+        item["available_in_run"] = row["id"] in available_axes
+        defs.append(item)
+
+    base = {
+        "claim_ceiling": "OBSERVATION_ONLY_NO_TRUTH_SET",
+        "universe": {"num": n, "den": n, "unit": "sSNV", "available": True,
+                     "label": "topology 觀察母體"},
+        "axis_definitions": defs,
+        "alpha": 0.05,
+        "multiplicity": "raw p ≤ 0.05；未在此全域觀察層做 cohort-wide 多重檢定校正",
+        "legacy_crosswalk": ("本頁不把舊 standalone 的 A_ALLELE_clean / HP 類別映射到現行軸；"
+                             "兩者母體、檢定與分類 contract 不同，只沿用其漸進展開與"
+                             "明示選案的資訊架構。"),
+        "missingness": ("ISM 可得性受 coverage / CpG gate 影響，不可假設為隨機缺失；"
+                        "必須搭配自檢頁的「ISM 可得性 × k」前哨。"),
+    }
+    if not (ism_cap and ism_cap.usable and ism_cap.payload):
+        reason = (ism_cap.reason if ism_cap else "未提供 ISM 能力") or "ISM 能力不可用"
+        base.update({
+            "available": False, "reason": reason,
+            "summary_join": {"available": False, "num": None, "den": n},
+            "axis_testable": {"available": False, "num": None, "den": n},
+            "axis_significant_raw": {"available": False, "num": None, "den": None},
+            "detail_available": {"available": False, "num": None, "den": n},
+        })
+        return base
+
+    codes = list(l1.get("axis") or [0] * n)
+    summary_n = sum(1 for c in codes if c != 0)
+    testable_n = sum(1 for c in codes if c not in (0, AXIS_UNTESTED))
+    sig_mask = sum(bit for _aid, bit, _lab, _col in AXIS_BITS)
+    sig_n = sum(1 for c in codes if c & sig_mask)
+    detail_n = len(ism_cap.payload.get("hit_dir") or set())
+    base.update({
+        "available": True,
+        "summary_join": {"available": True, "num": summary_n, "den": n,
+                         "label": "有 significance summary 列"},
+        "axis_testable": {"available": True, "num": testable_n, "den": summary_n,
+                          "label": "至少一個預指定非循環軸可檢定"},
+        "axis_significant_raw": {"available": True, "num": sig_n, "den": testable_n,
+                                 "label": "至少一個全域軸 raw p ≤ 0.05"},
+        "detail_available": {"available": True, "num": detail_n, "den": n,
+                             "label": "有逐位點細節目錄"},
+    })
+    return base
 
 
 def axis_dim(ism_cap) -> list:
@@ -112,15 +207,20 @@ def axis_dim(ism_cap) -> list:
             "disabled": True, "disabledReason": "缺 ISM 能力",
             "keys": [{"v": "none", "label": "（不可用）"}],
         }]
-    keys = [{"v": "0", "label": "無 ISM 資料", "color": "#e7e5da"},
-            {"v": "8", "label": "有測但都不顯著", "color": "#c9c8bd"}]
+    keys = [{"v": "0", "label": "無 ISM summary 列", "color": "#e7e5da"},
+            {"v": str(AXIS_UNTESTED), "label": "有 summary，但全域軸皆未檢定",
+             "color": "#d7a85b"},
+            {"v": str(AXIS_NONE), "label": "至少一軸有檢定，但都不顯著",
+             "color": "#c9c8bd"}]
     keys += [{"v": str(bit), "label": lab + " 顯著", "color": col}
              for _aid, bit, lab, col in AXIS_BITS]
     keys.append({"v": "multi", "label": "多軸同時顯著", "color": "#17231e"})
     return [{
         "id": "axis", "title": "甲基沿哪個軸顯著", "src": "ism", "srcLabel": "ISM",
         "keys": keys,
-        "note": "不含「甲基自身分群」—— 該軸是循環論證，見自檢 C10",
+        "note": ("全域只編碼 HP merged、ALT/REF、lineage；HP fine 留在位點細節。"
+                 "不含「甲基自身分群」——該軸是循環論證，見自檢 C10。"
+                 "此處使用 raw p ≤ 0.05，僅供探索式下鑽。"),
     }]
 
 

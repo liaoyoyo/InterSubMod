@@ -8,6 +8,7 @@
      purple  紫  第四類別
 */
 :root {
+    --authority-height: 34px;
     --paper: #f3f0e6;
     --panel: #fffdf7;
     --ink: #17231e;
@@ -24,6 +25,8 @@
 }
 
 * { box-sizing: border-box; }
+
+html, body { max-width: 100%; overflow-x: clip; }
 
 body {
     margin: 0;
@@ -49,25 +52,34 @@ a { color: var(--accent2); }
 }
 .authority b { font-weight: 700; letter-spacing: .04em; }
 .authority .sep { opacity: .4; }
+.authority > span { min-width: 0; overflow-wrap: anywhere; }
+.authority .validation {
+    margin-left: auto; border: 1px solid currentColor; border-radius: 999px;
+    padding: .08rem .5rem; font-weight: 700; white-space: nowrap;
+}
+.authority .validation-fail { color: #ffd2ca; background: rgba(169, 67, 54, .28); }
+.authority .validation-incomplete,
+.authority .validation-unavailable { color: #ffe4ad; background: rgba(182, 110, 32, .25); }
+.authority .validation-pass { color: #ccebdd; background: rgba(23, 107, 88, .3); }
 
-.shell { width: min(1560px, 100% - 28px); margin: 0 auto; padding-bottom: 5rem; }
+.shell { width: min(1560px, calc(100% - 28px)); max-width: 100%; min-width: 0; margin: 0 auto; padding-bottom: 5rem; }
 
 /* ── 分層切換 + 麵包屑 ───────────────────────────────────────── */
 .levelbar {
-    position: sticky; top: 34px; z-index: 35;
+    position: sticky; top: var(--authority-height); z-index: 35;
     background: var(--paper); border-bottom: 1px solid var(--line);
     padding: .55rem 0; margin-bottom: .9rem;
     display: flex; flex-wrap: wrap; gap: .7rem 1.1rem; align-items: center;
 }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel); }
+.seg { display: inline-flex; max-width: 100%; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel); }
 .seg button {
     border: 0; background: transparent; color: var(--muted);
-    padding: .42rem .95rem; font: inherit; font-size: .86rem; cursor: pointer; min-height: 38px;
+    padding: .42rem .95rem; font: inherit; font-size: .86rem; cursor: pointer; min-width: 0; min-height: 38px;
 }
 .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
 .seg button:disabled { opacity: .38; cursor: not-allowed; }
 
-.crumb { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; font-size: .82rem; font-family: var(--mono); color: var(--muted); }
+.crumb { display: flex; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; gap: .3rem; align-items: center; font-size: .82rem; font-family: var(--mono); color: var(--muted); }
 .crumb button { border: 0; background: transparent; color: var(--accent2); cursor: pointer; font: inherit; padding: .15rem .3rem; border-radius: 4px; }
 .crumb button:hover { background: var(--soft); }
 .crumb .caret { opacity: .45; }
@@ -86,8 +98,48 @@ a { color: var(--accent2); }
     border-radius: 7px; padding: .3rem .7rem; font: inherit; font-size: .8rem; cursor: pointer; min-height: 32px;
 }
 
+/* ── 閱讀軌道 + 觀察分母帳本 ──────────────────────────────────────── */
+.interpretation-rail {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    border: 1px solid var(--line); border-radius: 11px; overflow: hidden;
+    margin-bottom: .7rem; background: #f8f5eb;
+}
+.interpretation-rail > div { padding: .58rem .75rem; min-width: 0; border-right: 1px solid var(--line); }
+.interpretation-rail > div:last-child { border-right: 0; }
+.interpretation-rail b {
+    display: block; font: 700 .69rem/1.3 var(--mono); letter-spacing: .05em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: .18rem;
+}
+.interpretation-rail span { display: block; color: var(--muted); font-size: .77rem; }
+.claim-ceiling { display: flex; flex-wrap: wrap; gap: .25rem .45rem; align-items: center; }
+.view-jump {
+    margin-left: auto; border: 1px solid var(--amber); background: transparent; color: #7d4a12;
+    border-radius: 999px; padding: .24rem .62rem; min-height: 32px; font: 700 .72rem/1.2 var(--mono);
+    cursor: pointer;
+}
+.view-jump:hover, .view-jump:focus-visible { background: #f6ecd9; outline: 2px solid rgba(182,110,32,.24); }
+.scope-ledger {
+    display: grid; grid-template-columns: repeat(5, minmax(148px, 1fr)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    margin: .72rem 0 .35rem;
+}
+.scope-card { background: var(--panel); padding: .62rem .7rem; min-width: 0; }
+.scope-card.unavailable { background: repeating-linear-gradient(45deg, var(--panel), var(--panel) 7px, #f3f0e6 7px, #f3f0e6 14px); }
+.scope-card-top { display: flex; gap: .3rem; align-items: flex-start; justify-content: space-between; }
+.scope-card-top > span:first-child { color: var(--muted); font-size: .69rem; line-height: 1.25; }
+.scope-value { font: 800 clamp(.94rem, 1.5vw, 1.28rem)/1.2 var(--mono); margin: .3rem 0 .15rem; overflow-wrap: anywhere; }
+.scope-card.unavailable .scope-value { color: var(--amber); font-size: .82rem; letter-spacing: .03em; }
+.scope-note { color: var(--muted); font: .65rem/1.4 var(--mono); }
+.scope-ledger-note { margin-bottom: .65rem; }
+.axis-contract { margin-bottom: .9rem; }
+.axis-availability { display: inline-block; white-space: nowrap; border-radius: 999px; padding: .08rem .4rem; font-size: .67rem; }
+.axis-availability.yes { color: #14503f; background: #e4efe9; }
+.axis-availability.no { color: #7d4a12; background: #f6ecd9; }
+.legacy-crosswalk { margin: .45rem 0 .9rem; padding-left: .65rem; border-left: 2px solid var(--line); }
+.analysis-mount:empty { display: none; }
+
 /* ── 通用面板 ────────────────────────────────────────────────── */
-.section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(.9rem, 2vw, 1.5rem); margin-bottom: 1.1rem; box-shadow: var(--shadow); }
+.section { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(.9rem, 2vw, 1.5rem); margin-bottom: 1.1rem; box-shadow: var(--shadow); }
 .section > header { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline; margin-bottom: .7rem; }
 .eyebrow { font-size: .7rem; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .denom { font-size: .76rem; color: var(--muted); font-family: var(--mono); }
@@ -154,6 +206,7 @@ a { color: var(--accent2); }
 .dim.disabled { opacity: .55; }
 .dim.disabled .keys { pointer-events: none; }
 .dim.disabled h3 { text-decoration: line-through; }
+.dim-note { color: var(--muted); font: .66rem/1.45 var(--mono); margin: -.05rem 0 .35rem; }
 
 /* ── 圖層：與篩選正交，用不同控件形狀區分「藏起來」和「篩掉」 ── */
 .layers { display: flex; flex-wrap: wrap; gap: .45rem; }
@@ -175,7 +228,8 @@ a { color: var(--accent2); }
 .pop .meta { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
 
 /* ── 虛擬清單：不截斷，捲到底看得到最後一筆 ──────────────────── */
-.browser { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 1rem; }
+.browser { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 1rem; }
+.browser > *, .grid-2 > * { min-width: 0; }
 .vlist { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); height: 640px; overflow-y: auto; position: relative; }
 .vlist-inner { position: relative; }
 .vrow { position: absolute; left: 0; right: 0; display: flex; gap: .5rem; align-items: center; padding: .3rem .55rem; border-bottom: 1px solid var(--soft); cursor: pointer; font-size: .8rem; }
@@ -209,6 +263,31 @@ code, .mono { font-family: var(--mono); font-size: .82em; }
     #genomeCanvas { height: 520px; }
     .vlist { height: 380px; }
     .detail { min-height: 0; }
+    .scope-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+    .shell { width: calc(100% - 16px); }
+    .authority { gap: .35rem .55rem; padding: .38rem .55rem; flex-wrap: nowrap; }
+    .authority .sep { display: none; }
+    .authority .authority-secondary { display: none; }
+    .authority .authority-primary { white-space: nowrap; }
+    .authority .validation { margin-left: auto; white-space: nowrap; font-size: .68rem; }
+    .levelbar { align-items: stretch; padding: .35rem 0; margin-bottom: .65rem; }
+    .levelbar .crumb { display: none; }
+    .seg { width: 100%; border-radius: 9px; }
+    .seg button { flex: 1 1 0; padding: .38rem .28rem; font-size: .75rem; white-space: nowrap; }
+    .section { padding: .75rem; }
+    .dims { grid-template-columns: minmax(0, 1fr); }
+    .interpretation-rail { grid-template-columns: 1fr; }
+    .interpretation-rail > div { border-right: 0; border-bottom: 1px solid var(--line); }
+    .interpretation-rail > div:last-child { border-bottom: 0; }
+    .scope-ledger { grid-template-columns: minmax(0, 1fr); }
+    .view-jump { margin-left: 0; width: 100%; }
+}
+
+@media (max-width: 420px) {
+    .authority .authority-primary { display: none; }
 }
 
 /* ── Locus 排列圖（回應「三個突變位點看不出 ALT 量與比例」）──────── */
@@ -258,13 +337,19 @@ details[open] > summary { border-bottom: 1px solid var(--soft); }
     color: var(--muted); min-height: 28px;
 }
 .panel-tools button[aria-pressed="true"] { background: var(--accent2); color: #fff; border-color: var(--accent2); }
-.panel-scroll { border-radius: 8px; background: #11161f; }
+.panel-scroll {
+    width: 100%; max-width: 100%; min-width: 0; contain: inline-size;
+    border-radius: 8px; background: #11161f;
+}
 .panel-scroll[data-mode="fit"] { overflow: hidden; }
-.panel-scroll[data-mode="zoom"] { overflow: auto; max-height: 620px; cursor: grab; }
+.panel-scroll[data-mode="zoom"] {
+    overflow: auto; max-height: 620px; cursor: grab; overscroll-behavior: contain;
+}
 /* aspect-ratio 由 JS 依 PNG 實際長寬設定 —— 甲基矩陣的一格是一個 read×CpG，
    長寬比失真等於語意失真。 */
 .panel-fig { position: relative; background: #11161f; border-radius: 8px; padding-bottom: 16px; }
-.panel-scroll[data-mode="fit"] .panel-fig { width: 100%; }
+.panel-scroll[data-mode="fit"] .panel-fig { width: 100% !important; max-width: 100%; }
+.panel-scroll[data-mode="zoom"] .panel-fig { max-width: none; }
 .panel-fig img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .panel-fig .panel-ov { position: absolute; top: 0; left: 0; right: 0; bottom: 16px; width: 100%; pointer-events: none; }
 .panel-marks { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; }

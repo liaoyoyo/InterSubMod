@@ -18,6 +18,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -234,7 +235,9 @@ class Registry:
         n = len(self.order)
         ok = sum(1 for cid in self.order if self.caps[cid].state == PRESENT)
         part = sum(1 for cid in self.order if self.caps[cid].state == PARTIAL)
-        return f"能力 {ok}/{n} 完整、{part} 部分可用、{n - ok - part} 不可用"
+        # PRESENT 只表示資料層通過 S0–S3 技術探測，不代表科學上「完整」
+        # 或已有 truth-set 驗證。用「可用」避免把 capability presence 誤當 validation。
+        return f"能力狀態：{ok}/{n} 可用、{part} 部分可用、{n - ok - part} 不可用"
 
 
 def probe(cap: Capability, stage: str, ok: bool, detail: str) -> bool:
@@ -295,12 +298,38 @@ def probe_count(cap: Capability, actual: int, expected: Optional[int], label: st
     return True
 
 
-def probe_linkage(cap: Capability, numerator: int, denominator: int, method: str) -> bool:
-    """S3：與硬核心的 join 率。這裡不設通過門檻 —— 低就低，誠實顯示，
-    由使用者決定那個面板可不可信。"""
+def probe_linkage(cap: Capability, numerator: int, denominator: int, method: str,
+                  min_rate: Optional[float] = None, fail_state: str = PARTIAL) -> bool:
+    """S3：與硬核心的 join 率。
+
+    ``min_rate=None`` 保留舊行為（只記錄，不設門檻）。跨樣本容易混用的
+    source 應明確傳入門檻；低於門檻時以 ``fail_state`` 降級。需要完全禁用
+    extension 時用 ``MALFORMED``，只是覆蓋不足但仍可看部分資料時用 ``PARTIAL``。
+    """
+    if min_rate is not None and not 0.0 <= min_rate <= 1.0:
+        raise ValueError(f"min_rate 必須介於 0 與 1：{min_rate}")
+    if fail_state not in (PARTIAL, MALFORMED, ABSENT):
+        raise ValueError(f"不支援的 fail_state：{fail_state}")
     cap.linkage = Linkage(numerator=numerator, denominator=denominator, method=method)
-    probe(cap, "S3", True, f"{numerator:,} / {denominator:,} = {cap.linkage.rate * 100:.2f}%（{method}）")
-    return True
+    detail = f"{numerator:,} / {denominator:,} = {cap.linkage.rate * 100:.2f}%（{method}）"
+    if min_rate is not None and cap.linkage.rate < min_rate:
+        cap.state = fail_state
+        return probe(cap, "S3", False,
+                     detail + f"；低於門檻 {min_rate * 100:.2f}%，已 fail-closed")
+    return probe(cap, "S3", True, detail +
+                 (f"；門檻 {min_rate * 100:.2f}%" if min_rate is not None else ""))
+
+
+def sample_in_path(path: object, expected_sample: str) -> bool:
+    """樣本名必須是路徑的獨立 token，不接受子字串碰巧命中。
+
+    例如 HCC1395 可命中 ``/HCC1395_v2/`` 與 ``HCC1395.bam``，但不會把
+    ``HCC1395BL.bam`` 當成 tumor sample HCC1395 的明確身分證據。
+    """
+    if not path or not expected_sample:
+        return False
+    pat = rf"(?<![A-Za-z0-9]){re.escape(str(expected_sample))}(?![A-Za-z0-9])"
+    return re.search(pat, str(path), flags=re.IGNORECASE) is not None
 
 
 def finalize(cap: Capability, note: str = "") -> Capability:

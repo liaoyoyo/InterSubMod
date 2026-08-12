@@ -22,8 +22,9 @@ import json
 import os
 from pathlib import Path
 
-from capability import (Capability, Registry, finalize, make, probe,
-                        probe_count, probe_exists, probe_linkage)
+from capability import (MALFORMED, Capability, Registry, file_ref, finalize, make,
+                        probe, probe_count, probe_exists, probe_linkage,
+                        sample_in_path)
 
 # 各軸在 significance_summary.csv 的欄名。舊 binary 沒有 Lineage* 欄，
 # 探測時會發現並把 lineage 軸標成不可用而非靜默當成「不顯著」。
@@ -71,7 +72,7 @@ def _truthy(v):
     return str(v).strip().lower() in ("1", "true", "yes")
 
 
-def load(reg: Registry, root, l1, chroms) -> Capability:
+def load(reg: Registry, root, l1, chroms, expected_sample=None) -> Capability:
     """root = ISM run 根目錄（底下每條染色體一個子目錄）。"""
     cap = make(reg, "ism_dirs", "ISM 甲基層（逐位點產物）",
                enables=["methyl_panel", "filter:axis", "cooccur:ism_k", "layer:ismRing"])
@@ -92,6 +93,7 @@ def load(reg: Registry, root, l1, chroms) -> Capability:
         if not s.is_file():
             continue
         have_chrom.append(c)
+        cap.paths.append(file_ref(s))
         with open(s, newline="") as fh:
             rd = csv.DictReader(fh)
             cols = set(rd.fieldnames or [])
@@ -118,6 +120,55 @@ def load(reg: Registry, root, l1, chroms) -> Capability:
         probe(cap, "S1", False, f"{root} 底下找不到任何 <chrom>/significance_summary.csv")
         return cap
 
+    # 每條有 summary 的染色體都必須有 run_params，且其明確 sample metadata
+    # 或 tumor BAM path 必須能證明與 --sample 一致。光靠 region_id join 率不夠：
+    # 不同樣本也可能碰巧共用少數位點。
+    windows = set()
+    for c in have_chrom:
+        rp = root / c / "run_params.json"
+        if not rp.is_file():
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"{c} 缺 run_params.json，無法確認 ISM 樣本身分")
+            return cap
+        cap.paths.append(file_ref(rp))
+        try:
+            doc = json.loads(rp.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"{c}/run_params.json 無法解析：{exc}")
+            return cap
+        explicit = _explicit_sample(doc)
+        tumor_bam = str((doc.get("io") or {}).get("tumor_bam_path") or "")
+        if expected_sample:
+            if explicit:
+                matches = explicit == str(expected_sample)
+                evidence = f"metadata sample={explicit}"
+            else:
+                matches = sample_in_path(tumor_bam, str(expected_sample))
+                evidence = f"tumor_bam_path={tumor_bam or '(缺)'}"
+            if not matches:
+                cap.state = MALFORMED
+                probe(cap, "S1", False,
+                      f"ISM sample 不符：--sample={expected_sample}，{c} {evidence}；"
+                      "為避免跨樣本混用已禁用此層")
+                return cap
+        w = (doc.get("region") or {}).get("window_size_bp")
+        if w is not None:
+            try:
+                windows.add(int(w))
+            except (TypeError, ValueError):
+                pass
+
+    if len(windows) > 1:
+        cap.state = MALFORMED
+        probe(cap, "S1", False,
+              "ISM 各染色體 window_size_bp 不一致：" +
+              "、".join(str(x) for x in sorted(windows)))
+        return cap
+    if expected_sample:
+        probe(cap, "S1", True,
+              f"{len(have_chrom)} 條染色體 run_params 皆確認 sample={expected_sample}")
+
     missing_axes = [a["title"] for a in AXES if a["id"] not in axis_present]
     probe(cap, "S1", True,
           f"{len(have_chrom)} 條染色體有 summary；可用軸 {len(axis_present)}/{len(AXES)}"
@@ -128,12 +179,8 @@ def load(reg: Registry, root, l1, chroms) -> Capability:
                       " 軸。那些軸顯示為「未檢定」，<b>不等於不顯著</b>。")
 
     # 窗大小：直接影響 CpG 數與分群強度，不同 run 不可互比
-    rp = root / have_chrom[0] / "run_params.json"
-    if rp.is_file():
-        try:
-            window_bp = json.loads(rp.read_text(encoding="utf-8"))["region"]["window_size_bp"]
-        except (OSError, ValueError, KeyError):
-            window_bp = None
+    if windows:
+        window_bp = next(iter(windows))
     cap.counts["window_size_bp"] = window_bp
     cap.counts["window_span_bp"] = (window_bp * 2 + 1) if window_bp else None
     probe(cap, "S2", True,
@@ -157,7 +204,10 @@ def load(reg: Registry, root, l1, chroms) -> Capability:
         if p in d:
             hit_dir.add(i)
 
-    probe_linkage(cap, len(hit), l1["n"], "sSNV 在 significance_summary 中有對應列")
+    if not probe_linkage(cap, len(hit), l1["n"],
+                         "sSNV 在 significance_summary 中有對應列",
+                         min_rate=0.50, fail_state=MALFORMED):
+        return cap
     cap.counts["locus_dir_hit"] = len(hit_dir)
     probe(cap, "S3", True,
           f"有逐位點產物目錄的 sSNV：{len(hit_dir):,} / {l1['n']:,}"
@@ -173,6 +223,17 @@ def load(reg: Registry, root, l1, chroms) -> Capability:
         "root": str(root),
     }
     return finalize(cap)
+
+
+def _explicit_sample(doc: dict) -> str:
+    """取 run_params 中的明確樣本欄。兼容新舊 schema，但不從
+    normal BAM 或 output root 猜樣本。"""
+    for obj in (doc, doc.get("run") or {}, doc.get("io") or {}, doc.get("metadata") or {}):
+        for key in ("sample", "sample_id", "tumor_sample", "tumor_sample_id"):
+            value = obj.get(key) if isinstance(obj, dict) else None
+            if value is not None and str(value).strip():
+                return str(value).strip()
+    return ""
 
 
 def _abs_pos(l1, i):

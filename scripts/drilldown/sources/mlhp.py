@@ -14,10 +14,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from capability import Capability, Registry, finalize, make, probe, probe_exists, probe_linkage
+from capability import (MALFORMED, Capability, Registry, finalize, make, probe,
+                        probe_exists, probe_linkage)
 
 
-def load(reg: Registry, path, region_ids: set) -> Capability:
+def load(reg: Registry, path, region_ids: set, expected_sample=None) -> Capability:
     cap = make(reg, "mlhp", "MLHP（read pattern 分布）",
                enables=["read_state_matrix", "pattern_stats"])
     if not path or not Path(path).is_file():
@@ -33,6 +34,16 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
         cap.state = "MALFORMED"
         probe(cap, "S1", False, f"無法解析：{type(exc).__name__}: {exc}")
         return cap
+
+    if expected_sample:
+        observed = str(doc.get("sample") or doc.get("sample_id") or "").strip()
+        if observed != str(expected_sample):
+            cap.state = MALFORMED
+            probe(cap, "S1", False,
+                  f"MLHP sample 不符：--sample={expected_sample}，"
+                  f"文件 sample={observed or '(缺)'}；為避免跨樣本混用已禁用此層")
+            return cap
+        probe(cap, "S1", True, f"sample 身分一致：{observed}")
 
     groups = doc.get("groups")
     if not isinstance(groups, list) or not groups:
@@ -128,8 +139,10 @@ def load(reg: Registry, path, region_ids: set) -> Capability:
         }
 
     hit = len(region_ids & set(by_region)) if region_ids else len(by_region)
-    probe_linkage(cap, hit, len(region_ids) if region_ids else len(by_region),
-                  "region_id 對得上 topology")
+    if not probe_linkage(cap, hit, len(region_ids) if region_ids else len(by_region),
+                         "region_id 對得上 topology", min_rate=0.50,
+                         fail_state=MALFORMED):
+        return cap
     cap.counts["groups"] = len(by_region)
     cap.counts["broken_cooccurrence"] = n_broken
     probe(cap, "S2", True,

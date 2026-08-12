@@ -1,7 +1,7 @@
 /* 共出現與自檢的前端渲染。
  *
- * 共出現矩陣的每一格都可以點 —— 點下去等同「把 X 維度限縮到該欄、Y 限縮到該列」，
- * 這就是「看維度之間的交集」的操作化。Shift+點 = 疊加到現有篩選。
+ * 只有明確提供 filterMap 的矩陣格才可點。描述性矩陣不能畫 pointer 或宣稱
+ * 能篩選，否則使用者會把沒有作用的 affordance 當成壞掉的功能。
  *
  * 所有比例在 n < 30 時抑制（NCHS 標準），只顯示原始計數。
  */
@@ -31,6 +31,7 @@
 
     function renderMatrix(spec) {
         var m = spec.matrix;
+        var interactive = !!spec.filterMap;
         var head = "<tr><th></th>" + m.xs.map(function (x, i) {
             return "<th class='num'>" + DD.esc(x) + "<div class='denom'>" + DD.fmt(m.colsum[i]) + "</div></th>";
         }).join("") + "</tr>";
@@ -39,9 +40,11 @@
                 "<div class='denom'>" + DD.fmt(m.rowsum[r]) + "</div></th>" +
                 m.cells[r].map(function (c, k) {
                     return "<td class='num' style='background:" + residColor(c.resid) +
-                        ";cursor:" + (c.n ? "pointer" : "default") + "'" +
-                        (c.n ? " data-x='" + DD.esc(m.xs[k]) + "' data-y='" + DD.esc(y) +
-                               "' data-spec='" + DD.esc(spec.id) + "'" : "") +
+                        ";cursor:" + (interactive && c.n ? "pointer" : "default") + "'" +
+                        (interactive && c.n ? " data-x='" + DD.esc(m.xs[k]) +
+                               "' data-y='" + DD.esc(y) + "' data-spec='" + DD.esc(spec.id) +
+                               "' role='button' tabindex='0' aria-label='套用 " +
+                               DD.esc(m.xs[k] + " × " + y) + " 交集篩選'" : "") +
                         " title='" + DD.esc(m.xs[k] + " × " + y) + "：n=" + c.n +
                         (c.resid !== null && !c.small ? "，Pearson 殘差 " + c.resid : "") + "'>" +
                         cellHtml(c) + "</td>";
@@ -84,30 +87,51 @@
     }
 
     function renderCooccur() {
-        var host = document.getElementById("view-cooccur");
-        var inner = host.querySelector(".capability-off");
+        var inner = document.getElementById("cooccurContent");
+        var specs = Array.isArray(A.cooccur) ? A.cooccur : [];
+        if (!inner || !specs.length) {
+            if (inner) inner.innerHTML = "<div class='capability-off'><b>共出現分析不可用。</b>" +
+                "analysisData 沒有可渲染的 cooccur payload；空白不代表交集為 0。</div>";
+            return;
+        }
+        var hasInteractive = specs.some(function (spec) { return !!spec.filterMap; });
         var html = "<div class='callout warn'><b>怎麼讀。</b>格子裡第一行是計數，" +
             "第二行是欄百分比，<code>r</code> 是 Pearson 殘差（觀察−期望）/√期望 —— " +
             "|r| ≥ 2 才上色，因為更小的偏離跟隨機沒兩樣。" +
-            "<b>點任一格</b>可把該交集套成篩選。</div>";
-        html += A.cooccur.map(panel).join("");
-        if (inner) inner.outerHTML = html; else host.insertAdjacentHTML("beforeend", html);
+            (hasInteractive
+                ? "只有標示為可操作的格子可把交集套成篩選。"
+                : "目前矩陣是描述性摘要，未提供交集篩選；格子不可點。") + "</div>";
+        html += specs.map(panel).join("");
+        inner.innerHTML = html;
 
-        host.querySelectorAll("td[data-x]").forEach(function (td) {
-            td.onclick = function () {
-                var spec = A.cooccur.find(function (s) { return s.id === td.dataset.spec; });
+        function applyMatrixFilter(td) {
+                var spec = specs.find(function (s) { return s.id === td.dataset.spec; });
                 if (!spec || !spec.filterMap) return;
                 var fm = spec.filterMap;
                 if (fm.x) DD.setFilter(fm.x, [td.dataset.x]);
                 if (fm.y) DD.setFilter(fm.y, [td.dataset.y]);
                 document.querySelector(".seg button[data-view='genome']").click();
+        }
+        inner.querySelectorAll("td[data-x]").forEach(function (td) {
+            td.onclick = function () { applyMatrixFilter(td); };
+            td.onkeydown = function (e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    applyMatrixFilter(td);
+                }
             };
         });
     }
 
     function renderSelfcheck() {
-        var host = document.getElementById("view-selfcheck");
-        var s = A.selfcheck.summary;
+        var inner = document.getElementById("selfcheckContent");
+        var selfcheck = A.selfcheck || {};
+        var s = selfcheck.summary;
+        if (!inner || !s || !Array.isArray(selfcheck.checks)) {
+            if (inner) inner.innerHTML = "<div class='capability-off'><b>自檢細節不可用。</b>" +
+                "analysisData 缺 summary/checks；請改讀同目錄 <code>SELFCHECK.md</code>。</div>";
+            return;
+        }
         var mark = { PASS: "✅", FAIL: "❌", SKIP: "⊘" };
         var color = { PASS: "var(--accent)", FAIL: "var(--danger)", SKIP: "var(--muted)" };
 
@@ -128,7 +152,7 @@
 
         html += "<div class='table-wrap'><table class='data'><thead><tr>" +
             "<th>#</th><th>守恆等式</th><th>狀態</th><th>實際</th></tr></thead><tbody>" +
-            A.selfcheck.checks.map(function (c) {
+            selfcheck.checks.map(function (c) {
                 return "<tr><td class='mono'>" + DD.esc(c.id) + "</td>" +
                     "<td>" + DD.esc(c.title) +
                     (c.need ? "<div class='denom'>需要能力 <code>" + DD.esc(c.need) + "</code></div>" : "") +
@@ -143,7 +167,7 @@
             "<div class='table-wrap' style='margin-top:.4rem'><table class='data'><thead><tr>" +
             "<th>項目</th><th class='num'>分子</th><th class='num'>分母</th>" +
             "<th class='num'>比率</th><th>缺的是什麼</th></tr></thead><tbody>" +
-            A.selfcheck.coverage.map(function (c) {
+            (selfcheck.coverage || []).map(function (c) {
                 var r = c.den ? (c.num / c.den * 100).toFixed(1) + "%" : "—";
                 return "<tr><td>" + DD.esc(c.title) + "</td>" +
                     "<td class='num'>" + DD.fmt(c.num) + "</td>" +
@@ -153,7 +177,11 @@
             }).join("") + "</tbody></table></div>";
 
         // 選擇偏誤前哨置頂於此區塊之上
-        var sent = A.sentinel;
+        var sent = A.sentinel || {
+            available: false,
+            title: "ISM 可得性 × k（選擇偏誤前哨）",
+            reason: "analysisData 未附 selection sentinel；不可假設 missingness 為隨機。"
+        };
         var sentHtml = sent.available
             ? panel(sent)
             : "<div class='capability-off'><b>" + DD.esc(sent.title) + "</b><br>" +
@@ -162,11 +190,10 @@
             "所有甲基結論的前提檢查 —— 先看這張再看下面任何東西。</div>" +
             sentHtml + "<hr style='border:0;border-top:1px solid var(--line);margin:1.2rem 0'>" + html;
 
-        var inner = host.querySelector(".capability-off");
-        if (inner) inner.outerHTML = html; else host.insertAdjacentHTML("beforeend", html);
+        inner.innerHTML = html;
     }
 
-    // 讓共出現的格子能反過來套篩選
+    // 讓具 filterMap 的共出現格子能反過來套篩選
     DD.setFilter = function (dimId, keys) {
         var f = DD.state.filters[dimId];
         if (!f) return;

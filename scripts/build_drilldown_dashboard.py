@@ -15,6 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
+import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -73,9 +76,18 @@ def _load_site_config(start: Path) -> dict:
 _SITE = _load_site_config(HERE)
 
 
-def site_path(key: str, env: str, default=None):
-    """取站點路徑：CLI > 環境變數 > 設定檔 > default(None)。"""
-    return _os.environ.get(env) or _SITE.get(key) or default
+def site_path(key: str, env: str, default=None, sample: str = ""):
+    """取站點路徑：CLI > 環境變數 > 設定檔 > default(None)。
+
+    多樣本站點可用 ``{"HCC1395": "...", "COLO829": "..."}`` mapping，
+    或在字串中使用 ``{sample}`` placeholder。舊的純字串設定仍相容。
+    """
+    raw = _os.environ.get(env) or _SITE.get(key) or default
+    if isinstance(raw, dict):
+        raw = raw.get(sample) if sample else None
+    if isinstance(raw, str) and sample:
+        raw = raw.replace("{sample}", sample)
+    return raw
 
 
 def _loci_with_ism(l1, ism_cap):
@@ -104,17 +116,146 @@ def _missing_hint(key: str, env: str, flag: str) -> str:
 
 def build_registry(args) -> Registry:
     reg = Registry()
-    topo = src_topology.load(reg, args.topology, args.topology_receipt)
+    topo = src_topology.load(reg, args.topology, args.topology_receipt,
+                             expected_sample=args.sample)
     if topo.usable:
         l1 = topo.payload["l1"]
         rids = {r["id"] for r in topo.payload["regions"]}
-        src_mlhp.load(reg, args.mlhp, rids)
-        src_ism.load(reg, args.ism_root, l1, l1["chroms"])
+        src_mlhp.load(reg, args.mlhp, rids, expected_sample=args.sample)
+        src_ism.load(reg, args.ism_root, l1, l1["chroms"],
+                     expected_sample=args.sample)
         src_annot.load(reg, args.annot_dir, l1)
-        src_lca_ab.load(reg, args.lca_pre, args.lca_post)
-        src_lineage_paths.load(reg, args.paths_dir, rids)
-        src_edges.load(reg, args.chrom_root, topo.payload["regions"], reg.get("mlhp"))
+        src_lca_ab.load(reg, args.lca_pre, args.lca_post,
+                        expected_sample=args.sample)
+        src_lineage_paths.load(reg, args.paths_dir, rids,
+                               expected_sample=args.sample)
+        src_edges.load(reg, args.chrom_root, topo.payload["regions"], reg.get("mlhp"),
+                       expected_sample=args.sample)
     return reg
+
+
+def _generator_provenance() -> dict:
+    """產生器身分證據。dirty 只檢查本產生器相關原始碼，避免被 repo 內
+    無關的研究產物干擾。"""
+    repo = HERE.parent
+
+    def _run(argv):
+        try:
+            return subprocess.run(argv, cwd=repo, capture_output=True, text=True,
+                                  timeout=15, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+
+    rev = _run(["git", "rev-parse", "HEAD"])
+    source_paths = ["scripts/build_drilldown_dashboard.py", "scripts/drilldown"]
+    dirty_work = _run(["git", "diff", "--quiet", "--", *source_paths])
+    dirty_index = _run(["git", "diff", "--cached", "--quiet", "--", *source_paths])
+    dirty = None
+    if dirty_work is not None and dirty_index is not None:
+        dirty = dirty_work.returncode != 0 or dirty_index.returncode != 0
+    return {
+        "git_commit": rev.stdout.strip() if rev and rev.returncode == 0 else "",
+        "dirty": dirty,
+        "script_path": str(Path(__file__).resolve()),
+        "script_sha256": cap_mod.sha256_file(Path(__file__).resolve()),
+        "python": platform.python_version(),
+    }
+
+
+def _output_inventory(out: Path) -> dict:
+    """輸出類型 count/bytes；不做全檔 hash，避免對數萬張 PNG/JS 的巨大 IO。
+
+    receipt.json 本身排除，否則「receipt 記錄自己的 bytes」會形成無限遞迴。
+    """
+    kinds = {}
+    total_count = total_bytes = 0
+    for path in out.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(out).as_posix()
+        if rel == "receipt.json":
+            continue
+        if rel == "index.html":
+            kind = "html"
+        elif rel == "SELFCHECK.md":
+            kind = "selfcheck"
+        elif rel.startswith("panels/") and rel.endswith(".T.png"):
+            kind = "panel_tumor_png"
+        elif rel.startswith("panels/") and rel.endswith(".png"):
+            kind = "panel_base_png"
+        elif rel.startswith("igv/") and rel.endswith(".js"):
+            kind = "igv_js"
+        elif rel.startswith("data/") and rel.endswith(".js"):
+            kind = "data_js"
+        elif rel.startswith("annotations/"):
+            kind = "annotation"
+        else:
+            kind = "other"
+        try:
+            size = path.stat().st_size
+        except OSError:
+            continue
+        ent = kinds.setdefault(kind, {"count": 0, "bytes": 0})
+        ent["count"] += 1
+        ent["bytes"] += size
+        total_count += 1
+        total_bytes += size
+    return {"excludes": ["receipt.json"], "total_count": total_count,
+            "total_bytes": total_bytes, "by_type": kinds}
+
+
+def _validation_record(summary: dict, generator: dict, reg: Registry) -> dict:
+    """Derive validation gates; never infer scientific validity from data presence."""
+    malformed = sorted(cid for cid in reg.order if reg.caps[cid].state == cap_mod.MALFORMED)
+    unhashed = sorted(
+        ref.path for ref in reg.all_file_refs()
+        if ref.exists and ref.size_bytes > 0 and not ref.sha256
+    )
+    gates = {
+        "selfcheck_complete": summary.get("fail", 0) == 0 and summary.get("skip", 0) == 0,
+        "sample_identity_and_schema": not malformed,
+        "generator_clean": generator.get("dirty") is False,
+        "input_file_hashes_complete": not unhashed,
+        # This dashboard does not consume SEQC2 truth calls / HC BED / som.py output.
+        "truth_set_validation": False,
+    }
+    blockers = []
+    if malformed:
+        blockers.append("MALFORMED_CAPABILITIES:" + ",".join(malformed))
+    if summary.get("fail", 0):
+        blockers.append(f"SELF_CHECK_FAIL:{summary['fail']}")
+    if summary.get("skip", 0):
+        blockers.append(f"SELF_CHECK_SKIP:{summary['skip']}")
+    if generator.get("dirty") is not False:
+        blockers.append("GENERATOR_NOT_CLEAN")
+    if unhashed:
+        blockers.append("UNHASHED_INPUT_FILES:" + ",".join(unhashed))
+    blockers.append("NO_TRUTH_SET_BENCHMARK")
+
+    if malformed:
+        status = "INPUT_IDENTITY_OR_SCHEMA_FAILED"
+    elif summary.get("fail", 0):
+        status = "SELF_CHECK_FAILED"
+    elif generator.get("dirty") is not False:
+        status = "SOURCE_STATE_BLOCKED"
+    elif unhashed:
+        status = "PROVENANCE_INCOMPLETE"
+    elif summary.get("skip", 0):
+        status = "SELF_CHECK_INCOMPLETE"
+    else:
+        status = "SELF_CHECK_PASS_INTERNAL"
+    return {
+        "status": status,
+        "gates": gates,
+        "malformed_capabilities": malformed,
+        "unhashed_input_files": unhashed,
+        "blockers": blockers,
+        "publishable_internal_qa": all((
+            gates["selfcheck_complete"], gates["sample_identity_and_schema"],
+            gates["generator_clean"], gates["input_file_hashes_complete"],
+        )),
+        "scientifically_validated": False,
+    }
 
 
 def print_matrix(reg: Registry) -> None:
@@ -155,17 +296,19 @@ def main() -> int:
                          "不用改程式。預設 <out>/annotations/")
     ap.add_argument("--bake-panels", default="0",
                     help="產甲基雙面板 PNG：0（不產）/ N（前 N 個）/ all（全部）")
+    ap.add_argument("--igv-mode", choices=["build", "skip"], default="build",
+                    help="build（預設，產逐 region IGV JS）/ skip（僅供輕量 QA；receipt/UI 明示未產）")
     ap.add_argument("--lineage-assign", help="read_lineage_assignments.tsv.gz（側欄 lineage 軌）")
     ap.add_argument("--lineage-paths", help="unit_lineage_paths.tsv.gz")
     ap.add_argument("--paths-dir", help="放 *.unit_lineage_paths.tsv.gz 的目錄（自檢 C8 用）")
     ap.add_argument("--probe-only", action="store_true", help="只探測並印能力矩陣，不產頁")
-    ap.add_argument("--figs-mode", choices=["copy", "link", "ref"], default="copy",
-                    help="copy（預設，輸出夾自足可搬走）/ link（symlink，搬移會斷）/ ref（相對路徑）")
+    ap.add_argument("--figs-mode", choices=["copy"], default="copy",
+                    help="copy（唯一已實作模式；輸出夾自足可搬走）")
     args = ap.parse_args()
 
-    lin_root = site_path("lineage_root", "DD_LINEAGE_ROOT")
+    lin_root = site_path("lineage_root", "DD_LINEAGE_ROOT", sample=args.sample)
     if not args.ism_root:
-        args.ism_root = site_path("ism_root", "DD_ISM_ROOT")
+        args.ism_root = site_path("ism_root", "DD_ISM_ROOT", sample=args.sample)
     if not args.lca_pre and lin_root:
         args.lca_pre = f"{lin_root}/bam_pre_lca_receipts"
     if not args.lca_post and lin_root:
@@ -179,17 +322,17 @@ def main() -> int:
         args.paths_dir = f"{lin_root}/paths"
 
     if not args.topology:
-        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT", sample=args.sample)
         if not root:
             ap.error(_missing_hint("topology_root", "DD_TOPOLOGY_ROOT", "--topology"))
         args.topology = f"{root}/{args.sample}/{args.sample}.topology.jsonl"
     if not args.topology_receipt:
         args.topology_receipt = args.topology.replace(".jsonl", ".receipt.json")
     if not args.mlhp:
-        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT", sample=args.sample)
         args.mlhp = f"{root}/{args.sample}/{args.sample}.exact_ps_mlhp.json" if root else ""
     if not args.chrom_root:
-        root = site_path("topology_root", "DD_TOPOLOGY_ROOT")
+        root = site_path("topology_root", "DD_TOPOLOGY_ROOT", sample=args.sample)
         args.chrom_root = f"{root}/{args.sample}/chromosomes" if root else ""
     if not args.probe_only and not args.out:
         ap.error("需要 --out（或加 --probe-only）")
@@ -223,6 +366,8 @@ def main() -> int:
     boot_annot = {d["id"]: d["values"] for d in annot_dims}
     boot = emit_payload.build_boot(args.sample, reg, dims)
     boot["annotValues"] = boot_annot
+    boot["assetPolicy"] = {"igv": args.igv_mode, "methylPanels": str(args.bake_panels)}
+    boot["observationScope"] = emit_payload.observation_scope(topo.payload["l1"], ismc)
     sec = reg.get("strict_edges")
     boot["edges"] = ({
         "thresholds": sec.payload["thresholds"],
@@ -241,12 +386,15 @@ def main() -> int:
         "missingAxes": ismc.payload["missing_axes"],
         "windowBp": ismc.payload["window_bp"],
         "hitDir": sorted(ismc.payload["hit_dir"]),
+        "alpha": boot["observationScope"]["alpha"],
+        "multiplicity": boot["observationScope"]["multiplicity"],
+        "axisDefinitions": boot["observationScope"]["axis_definitions"],
     } if (ismc and ismc.usable and ismc.payload) else None)
     chroms = topo.payload["l1"]["chroms"]
 
     # IGV 式 read 對齊圖（平行產；逐 region 讀多個 ISM 窗，單執行緒太慢）
     igv_map = {}
-    if ismc and ismc.usable:
+    if ismc and ismc.usable and args.igv_mode == "build":
         import igv as mod_igv
         igv_map = mod_igv.build_many(ismc.payload["root"], topo.payload["regions"])
 
@@ -263,7 +411,7 @@ def main() -> int:
         n_b = 0
         for rid, v in igv_map.items():
             safe = "".join(ch if (ch.isalnum() or ch in "._-") else "_" for ch in rid)
-            f = igv_dir / safe[:120] + ".js" if False else igv_dir / (safe[:120] + ".js")
+            f = igv_dir / (safe[:120] + ".js")
             f.parent.mkdir(parents=True, exist_ok=True)
             body = ("window.__DD=window.__DD||{};window.__DD.IGV=window.__DD.IGV||{};"
                     f"window.__DD.IGV[{_json.dumps(rid)}]="
@@ -299,21 +447,42 @@ def main() -> int:
     }
     size = emit_shell.write(out / "index.html", boot, reg.matrix(), meta, analysis)
 
-    inputs = [r.as_dict() for r in reg.all_file_refs()]
+    input_refs = reg.all_file_refs()
+    # panel baking 另外直接讀 lineage assignment/path，它們不一定會經過
+    # capability loader，因此只在實際 bake 時補進 receipt。
+    if panel_info:
+        known = {r.path for r in input_refs}
+        for raw in (args.lineage_assign, args.lineage_paths):
+            if raw and str(raw) not in known:
+                input_refs.append(cap_mod.file_ref(raw))
+                known.add(str(raw))
+    inputs = [r.as_dict() for r in input_refs]
     (out / "SELFCHECK.md").write_text(
         mod_selfcheck.to_markdown(analysis["selfcheck"], args.sample, inputs), encoding="utf-8")
 
+    output_inventory = _output_inventory(out)
+    generator = _generator_provenance()
+    validation = _validation_record(analysis["selfcheck"]["summary"], generator, reg)
     receipt = {
+        "schema_name": "intersubmod.drilldown_dashboard_receipt",
+        "schema_version": "2.0.0",
         "sample": args.sample,
         "panels": ({k: v for k, v in panel_info.items() if k != "panels"}
                    if panel_info else None),
         "built_at": meta["built_at"],
+        "generator": generator,
+        "command": shlex.join([sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]]),
+        "claim_ceiling": "OBSERVATION_ONLY_NO_TRUTH_SET",
+        "validation_status": validation["status"],
+        "validation": validation,
         "capabilities": reg.matrix(),
         "selfcheck": analysis["selfcheck"]["summary"],
         "inputs": inputs,
         "figs_mode": args.figs_mode,
+        "asset_policy": boot["assetPolicy"],
         "shards": shards,
         "index_bytes": size,
+        "output_inventory": output_inventory,
     }
     (out / "receipt.json").write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")

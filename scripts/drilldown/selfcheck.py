@@ -155,12 +155,17 @@ def run(reg) -> dict:
         d = ab.payload
         same = d.get("identical_fields", 0)
         diff = d.get("differing_fields", [])
-        ok = set(diff) <= {"lv_written", "lca_resolved", "lca_candidates_sum"}
+        stats_bad = d.get("per_chrom_unexpected") or {}
+        input_bad = d.get("per_chrom_input_mismatch") or {}
+        ok = (set(diff) <= {"lv_written", "lca_resolved", "lca_candidates_sum"}
+              and not stats_bad and not input_bad)
         checks.append(_chk(
             "C11", "pre-LCA 與 post-LCA receipt 是乾淨的 A/B（只有 LCA 相關欄位不同）",
             PASS if ok else FAIL,
-            f"兩套各 {d.get('n_files', 0)} 檔；{same} 個欄位完全相同，"
-            f"不同的只有 {'、'.join(diff) or '無'}；"
+            f"兩套交集 {d.get('shared_files', d.get('n_files', 0))} 檔；"
+            f"{same} 個聚合 stats 欄位完全相同，不同的只有 {'、'.join(diff) or '無'}；"
+            f"逐染色體 stats mismatch {len(stats_bad)} 條，"
+            f"input/threads identity mismatch {len(input_bad)} 條；"
             f"lv 覆蓋 {d.get('pre_lv', 0):,} → {d.get('post_lv', 0):,}"
             f"（{d.get('gain', 0):.2f}×）"))
     else:
@@ -168,7 +173,7 @@ def run(reg) -> dict:
             "C11", "pre-LCA 與 post-LCA receipt 是乾淨的 A/B", SKIP,
             "缺 bam_pre_lca_receipts/，無法量化 LCA 到底買到什麼", need="lca_ab"))
 
-    # ── C12 block 的 sSNV 由通過門檻的連鎖邊連通 ──────────────────
+    # ── C12 MLHP original-sSNV block 由通過門檻的連鎖邊連通 ──────
     #
     # 🔴 這一條曾經用錯資料源：拿 MLHP 的 subread_groups_by_hp（投影後的
     #    pattern 表）算連通性，得到「16.16% 的 block 斷裂」的錯誤結論。
@@ -180,16 +185,17 @@ def run(reg) -> dict:
     if se and se.usable and se.payload:
         d = se.payload
         checks.append(_chk(
-            "C12", "每個 block 的 sSNV 都由通過門檻的連鎖邊連通",
+            "C12", "每個 MLHP original-sSNV block 都由通過門檻的連鎖邊連通",
             PASS if d["broken"] == 0 else FAIL,
-            f"斷裂 {d['broken']:,} / {d['checked']:,} 個 k≥2 的 block"
+            f"斷裂 {d['broken']:,} / {d['checked']:,} 個 MLHP original-sSNV block"
+            "（分母依 original sSNV 定義，不是 topology active k）"
             + (f"；例：{'、'.join(d['broken_ids'][:3])}" if d["broken_ids"] else "")
             + f"　（資料源 endpoint_edges：{d['n_pass']:,}/{d['n_edge']:,} 條邊通過主門檻）"
             + f"　另：只看 active 子集時 {d.get('broken_active', 0):,} 個會斷 —— "
             f"那是橋接者為非 active 位點，非資料問題"))
     else:
         checks.append(_chk(
-            "C12", "每個 block 的 sSNV 都由通過門檻的連鎖邊連通", SKIP,
+            "C12", "每個 MLHP original-sSNV block 都由通過門檻的連鎖邊連通", SKIP,
             "缺 strict_edges 能力。⚠ 不可改用 MLHP 的 pattern 表代替 —— "
             "那是投影後的視圖，會誤判成斷裂", need="strict_edges"))
 

@@ -18,7 +18,7 @@
 
     var boot = JSON.parse(document.getElementById("bootData").textContent);
     var ISM = boot.ism;
-    var ALPHA = 0.05;
+    var ALPHA = (ISM && ISM.alpha) || 0.05;
 
     var STATE = { SIG: "顯著", NS: "不顯著", NT: "未檢定" };
 
@@ -26,11 +26,10 @@
        「甲基自身分群」的 cluster_labels 是從甲基距離矩陣分出來的，
        PERMANOVA 又拿同一個距離矩陣檢定那些 cluster
        （SignificanceAnalyzer.cpp:123 run_permanova(filtered_dist, filtered_labels)）。
-       分群本來就在最大化組間距離，所以檢定幾乎必然顯著。
-       全基因組實證：20,903 / 20,904 = 100.0% 顯著，只有 1 個例外。 */
+       分群本來就在最大化組間距離，所以同矩陣回測的 p 值不可當外部證據。 */
     var CIRCULAR = {
         cluster: "此軸的分群標籤是從同一個甲基距離矩陣分出來的，PERMANOVA 又用該矩陣檢定它 —— " +
-                 "<b>循環論證，p 值不可當證據</b>。全基因組 20,903/20,904（100.0%）顯著即為此機制的實證。" +
+                 "<b>循環論證，p 值不可當證據</b>。" +
                  "它能說的只有「這個位點的甲基可以被分成幾群」，不能說「分群有意義」。"
     };
 
@@ -108,7 +107,8 @@
             verdict = "<div class='callout'>甲基分群與 <b>" +
                 sig.map(function (a) { return DD.esc(a.title); }).join("、") +
                 "</b> 對得上（p ≤ " + ALPHA + "；已檢定 " + tested.length + " 軸中的 " + sig.length + " 個）。" +
-                "<b>這是關聯不是因果</b> —— 甲基沒有參與拓撲推論，這裡是事後 characterize。</div>";
+                "<b>這是探索關聯，不是因果或 cohort-wide 顯著結論</b> —— " +
+                "甲基沒有參與拓撲推論，這裡是事後 characterize。</div>";
         }
 
         return verdict + circNote + missing +
@@ -118,6 +118,7 @@
             "<tbody>" + rows + "</tbody></table></div>" +
             "<div class='denom' style='margin-top:.4rem'>" +
             "斜線底紋 = 未檢定（第三態，<b>不等於不顯著</b>）。" +
+            DD.esc(ISM.multiplicity || "raw p 僅供探索；未在此層做多重檢定校正") + "。" +
             "窗 ±" + DD.fmt(ISM.windowBp || 0) + " bp —— " +
             "窗大小決定 CpG 數，直接影響分群強度，<b>不同窗的 run 不可互比</b>。" +
             "</div>";

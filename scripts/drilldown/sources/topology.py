@@ -14,8 +14,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from capability import (CORE, Capability, Registry, finalize, first_jsonl, make,
-                        open_maybe_gzip, probe, probe_count, probe_exists, probe_schema)
+from capability import (CORE, MALFORMED, Capability, Registry, file_ref, finalize,
+                        first_jsonl, make, open_maybe_gzip, probe, probe_count,
+                        probe_exists, probe_schema)
 
 SCHEMA = "intersubmod.exact_ps_cpp_topology_af.unit"
 
@@ -95,7 +96,7 @@ def _compact_region(rec: dict, idx: int) -> dict:
     }
 
 
-def load(reg: Registry, topology_path, receipt_path=None) -> Capability:
+def load(reg: Registry, topology_path, receipt_path=None, expected_sample=None) -> Capability:
     cap = make(reg, "topology", "拓撲骨幹（topology.jsonl）", tier=CORE,
                enables=["genome", "region", "tree", "filter:k", "filter:hp",
                         "filter:unit_status", "cooccur:k"])
@@ -106,6 +107,14 @@ def load(reg: Registry, topology_path, receipt_path=None) -> Capability:
     head = first_jsonl(topology_path)
     if not probe_schema(cap, head, SCHEMA):
         return cap
+    if expected_sample:
+        observed = str(head.get("sample") or "").strip()
+        if observed != str(expected_sample):
+            cap.state = MALFORMED
+            probe(cap, "S1", False,
+                  f"topology sample 不符：--sample={expected_sample}，首筆 sample={observed or '(缺)'}")
+            return cap
+        probe(cap, "S1", True, f"sample 身分一致：{observed}")
     missing = sorted(REQUIRED_FIELDS - set(head))
     if missing:
         cap.state = "MALFORMED"
@@ -122,6 +131,12 @@ def load(reg: Registry, topology_path, receipt_path=None) -> Capability:
             if not line:
                 continue
             rec = json.loads(line)
+            if expected_sample and str(rec.get("sample") or "").strip() != str(expected_sample):
+                cap.state = MALFORMED
+                probe(cap, "S1", False,
+                      f"topology 內混入異樣本：region={rec.get('region_id', '?')}，"
+                      f"sample={rec.get('sample') or '(缺)'}，期望 {expected_sample}")
+                return cap
             chrom = rec.get("chrom", "")
             if chrom not in CHROM_INDEX:
                 skipped[chrom] = skipped.get(chrom, 0) + 1
@@ -142,6 +157,7 @@ def load(reg: Registry, topology_path, receipt_path=None) -> Capability:
     if receipt_path:
         rp = Path(receipt_path)
         if rp.is_file():
+            cap.paths.append(file_ref(rp))
             try:
                 rec = json.loads(rp.read_text(encoding="utf-8"))
                 for key in ("units", "unit_count", "records", "rows"):

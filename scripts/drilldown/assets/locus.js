@@ -5,7 +5,7 @@
  *   下排  每個位點一張卡：ALT/REF 計數 + ALT 比例條
  *
  * ⚠ ALT 比例的分母是該位點 exact-PS 投影後的 ALT+REF read 數，
- *   不是 VAF、不是 CCF。本樣本共現區 94% 為 CN-altered，read 豐度受拷貝數影響。
+ *   不是 VAF、不是 CCF。沒有 sample-matched CN provenance 時不可量化 CN-altered 比例。
  */
 (function () {
     "use strict";
@@ -171,7 +171,8 @@
             "虛線框 = <b>未檢定，不等於不顯著</b>。" +
             "<b>不含「甲基自身分群」軸</b>（循環論證，見自檢 C10）。<br>" +
             "<b>ALT 比例的分母是該位點 exact-PS 投影後的 ALT+REF read 數 —— 不是 VAF、不是 CCF。</b>" +
-            "本樣本共現區 94% 為 CN-altered，read 豐度受拷貝數影響。</div>";
+            "read 豐度可能受拷貝數與其他混雜影響；本頁未接 sample-matched CN provenance，" +
+            "因此不量化 CN-altered 比例。</div>";
     };
 
 })();

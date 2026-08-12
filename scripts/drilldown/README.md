@@ -18,10 +18,24 @@ cp drilldown.paths.example.json drilldown.paths.json   # 專案根，已 gitigno
 ```json
 {
   "topology_root": "/path/to/<ROUND>/samples",
-  "ism_root":      "/path/to/ism_run_root",
-  "lineage_root":  "/path/to/lineage_out/<SAMPLE>"
+  "ism_root":      "/path/to/ism_runs/{sample}",
+  "lineage_root":  "/path/to/lineage_out/{sample}"
 }
 ```
+
+`ism_root` / `lineage_root` 也可用樣本 mapping：
+
+```json
+{
+  "ism_root": {"HCC1395": "/run/HCC1395", "COLO829": "/run/COLO829"},
+  "lineage_root": {"HCC1395": "/lineage/HCC1395", "COLO829": "/lineage/COLO829"}
+}
+```
+
+產生器會將 topology / MLHP 內的 sample 欄、ISM `run_params.json` 的 tumor
+input、lineage/LCA 檔名與 receipt input identity 逐層對上 `--sample`。不一致時
+必須 fail-closed：硬核心 topology 會 refuse，extension 會變成不可用，不會用
+region join 的少數碰巧命中來掩蓋跨樣本混用。
 
 也可改用環境變數 `DD_TOPOLOGY_ROOT` / `DD_ISM_ROOT` / `DD_LINEAGE_ROOT`，
 或每次用 CLI 旗標指定。優先序：**CLI > 環境變數 > 設定檔**。
@@ -41,8 +55,9 @@ python3 scripts/build_drilldown_dashboard.py --sample HCC1395 --probe-only
 python3 scripts/build_drilldown_dashboard.py --sample HCC1395 --out <DIR>
 ```
 
-加 `--bake-panels all` 會另外產 16,302 個位點的甲基雙面板 PNG（約 133 MB、
-24 核平行約 30 分鐘）。`--bake-panels 200` 可先產一小批試看。
+加 `--bake-panels all` 會另外產逐位點甲基雙面板 PNG。receipt 會分列
+`base_bytes` / `tumor_only_bytes` / 合計 `bytes`；實際體積取決於合格位點與
+read 數。`--bake-panels 200` 可先產一小批試看。
 
 ### 4. 開啟
 
@@ -61,7 +76,7 @@ xdg-open <DIR>/index.html
 |---|---|
 | `--probe-only` | 只探測不產檔。**每次換資料先跑這個** |
 | `--bake-panels {0\|N\|all}` | 甲基雙面板 PNG：不產／前 N 個／全部 |
-| `--figs-mode {copy\|link\|ref}` | 預設 `copy`（輸出夾自足可搬走）；`link` 用 symlink，搬移會斷 |
+| `--figs-mode copy` | 唯一已實作模式；輸出夾自足可搬走 |
 | `--annot-dir <DIR>` | 註釋 drop-in 夾，預設 `<out>/annotations/` |
 
 ---

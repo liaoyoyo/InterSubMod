@@ -47,8 +47,11 @@
     function hasFlag(i, bit) { return (flagOf[i] >> bit) & 1; }
 
     /* ── 狀態 ───────────────────────────────────────────────────── */
-    // 與 payload.py 的 AXIS_BITS 一致：1 HP / 2 ALT / 4 lineage / 8 有測但不顯著
-    var AXIS_COLOR = { 1: "#285f8f", 2: "#a94336", 4: "#6b5592", 8: "#c9c8bd" };
+    // 與 payload.py 一致：1 HP / 2 ALT / 4 lineage / 8 有檢定但不顯著 /
+    // 16 有 summary 但全域軸皆未檢定。0 則是沒有 summary 列，不可混為同一類。
+    var AXIS_COLOR = {
+        1: "#285f8f", 2: "#a94336", 4: "#6b5592", 8: "#c9c8bd", 16: "#d7a85b"
+    };
 
     var state = {
         view: "genome",
@@ -77,6 +80,7 @@
             var c = AXIS[i] || 0;
             if (c === 0) return "0";
             if (c === 8) return "8";
+            if (c === 16) return "16";
             // 多軸同時顯著要單獨成一類，否則會被算進每一個單軸而重複計數
             var bits = (c & 1 ? 1 : 0) + (c & 2 ? 1 : 0) + (c & 4 ? 1 : 0);
             return bits > 1 ? "multi" : String(c);
@@ -172,6 +176,9 @@
             var off = d.disabled
                 ? "<div class='denom' style='color:var(--danger)'>不可用 — " + esc(d.disabledReason || "缺對應資料層") + "</div>"
                 : "";
+            var note = d.note
+                ? "<div class='dim-note'>" + esc(d.note) + "</div>"
+                : "";
             return "<div class='dim" + (d.disabled ? " disabled" : "") + "'>" +
                 "<header><h3>" + esc(d.title) + "</h3>" +
                 "<span class='src src-" + esc(d.src || "topology") + "'>◆ " + esc(d.srcLabel || "topology") + "</span>" +
@@ -181,7 +188,7 @@
                 "<button type='button' data-act='invert' data-dim='" + esc(d.id) + "'>反選</button>" +
                 "<button type='button' data-act='mode' data-dim='" + esc(d.id) + "' aria-pressed='" +
                 (f.mode === "exclude") + "' title='包含 ⇄ 排除'>排除</button>" +
-                "</span></header>" + off +
+                "</span></header>" + off + note +
                 "<div class='keys'>" + keys + "</div></div>";
         }).join("");
 
@@ -339,7 +346,8 @@
                     : "全基因組 · 22 條共用 chr1 的 bp 尺度") +
             " · 上排點：綠=唯一解 / 琥珀=非唯一" +
             (AXIS.length ? " · 下排細軌：藍=HP 顯著 / 紅=ALT 顯著 / 紫=lineage 顯著 / " +
-             "黑=多軸 / 淺灰=有測但不顯著（不畫=無 ISM 資料）" : "") +
+             "黑=多軸 / 淺灰=有檢定但不顯著 / 琥珀=有 summary 但未檢定" +
+             "（不畫=無 ISM summary 列）" : "") +
             " · 點擊選取，同一像素有多個時會列出候選";
     }
 

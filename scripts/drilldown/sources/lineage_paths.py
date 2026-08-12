@@ -13,14 +13,16 @@
 from __future__ import annotations
 
 import gzip
+import json
 from pathlib import Path
 
-from capability import EXTENSION, Capability, Registry, finalize, make, probe, probe_linkage
+from capability import (EXTENSION, MALFORMED, Capability, Registry, file_ref, finalize,
+                        make, probe, probe_linkage, sample_in_path)
 
 REQUIRED = {"region_id", "vertex", "vertex_label", "is_hidden", "depth", "lineage_path"}
 
 
-def load(reg: Registry, paths_dir, region_ids=None) -> Capability:
+def load(reg: Registry, paths_dir, region_ids=None, expected_sample=None) -> Capability:
     cap = make(reg, "lineage_paths", "lineage 頂點表（unit_lineage_paths）",
                tier=EXTENSION, enables=["selfcheck:C8", "panel:tree_depth"])
     d = Path(paths_dir) if paths_dir else None
@@ -28,11 +30,42 @@ def load(reg: Registry, paths_dir, region_ids=None) -> Capability:
         cap.state = "ABSENT"
         probe(cap, "S0", False, f"paths 目錄不存在：{d}")
         return cap
-    files = sorted(d.glob("*.unit_lineage_paths.tsv.gz"))
+    all_files = sorted(d.glob("*.unit_lineage_paths.tsv.gz"))
+    files = ([f for f in all_files if sample_in_path(f.name, str(expected_sample))]
+             if expected_sample else all_files)
     if not files:
-        cap.state = "ABSENT"
-        probe(cap, "S0", False, f"{d} 下沒有 *.unit_lineage_paths.tsv.gz")
+        cap.state = MALFORMED if (expected_sample and all_files) else "ABSENT"
+        seen = "、".join(f.name for f in all_files[:5]) or "無"
+        probe(cap, "S0", False,
+              f"{d} 下沒有 sample={expected_sample or '*'} 的 unit_lineage_paths；"
+              f"其他檔案：{seen}")
         return cap
+    for f in files:
+        if expected_sample and not sample_in_path(f.name, str(expected_sample)):
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"lineage paths 檔名不屬於 {expected_sample}：{f.name}")
+            return cap
+        cap.paths.append(file_ref(f))
+        receipt = f.with_name(f.name.replace(".tsv.gz", ".receipt.json"))
+        if not receipt.is_file():
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"{f.name} 缺配對 receipt，無法驗證 input identity")
+            return cap
+        cap.paths.append(file_ref(receipt))
+        try:
+            rdoc = json.loads(receipt.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"{receipt.name} 無法解析：{exc}")
+            return cap
+        if expected_sample:
+            identity_paths = [p for p in (rdoc.get("input"), rdoc.get("output")) if p]
+            if not identity_paths or any(not sample_in_path(p, str(expected_sample))
+                                         for p in identity_paths):
+                cap.state = MALFORMED
+                probe(cap, "S1", False,
+                      f"{receipt.name} input/output identity 不屬於 {expected_sample}")
+                return cap
     total_bytes = sum(f.stat().st_size for f in files)
     probe(cap, "S0", True, f"{len(files)} 檔、{total_bytes:,} bytes")
 
@@ -75,8 +108,10 @@ def load(reg: Registry, paths_dir, region_ids=None) -> Capability:
           f"補入節點 {hidden:,}（{hidden / max(rows, 1) * 100:.1f}%）、最深 depth {depth_max}")
 
     if region_ids:
-        probe_linkage(cap, len(regions & set(region_ids)), len(region_ids),
-                      "region_id 對得上 topology")
+        if not probe_linkage(cap, len(regions & set(region_ids)), len(region_ids),
+                             "region_id 對得上 topology", min_rate=0.50,
+                             fail_state=MALFORMED):
+            return cap
 
     cap.counts["vertices"] = rows
     cap.counts["hidden"] = hidden

@@ -131,6 +131,12 @@
     }
 
     DD.methylFigure = function (chrom, pos, host) {
+        if (!boot.panels) {
+            host.innerHTML = "<div class='capability-off'><b>此 build 未生成甲基雙面板。</b>" +
+                "這是輸出資產政策，不代表此位點沒有甲基／read-level 訊號；" +
+                "請讀頁首 asset policy，或使用啟用 <code>--bake-panels</code> 的新輸出查證。</div>";
+            return;
+        }
         host.innerHTML = "<div class='denom'>載入面板…</div>";
         ensureL5(chrom, function (ok) {
             var info = (ok && DD.L5[chrom]) ? DD.L5[chrom][String(pos)] : null;

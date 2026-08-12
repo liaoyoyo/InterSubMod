@@ -18,16 +18,18 @@ from __future__ import annotations
 
 import csv
 import gzip
+import json
 from collections import defaultdict
 from pathlib import Path
 
-from capability import Capability, Registry, finalize, make, probe, probe_linkage
+from capability import (MALFORMED, Capability, Registry, file_ref, finalize, make,
+                        probe, probe_linkage, sample_in_path)
 
 REQUIRED = {"chrom", "hp_family", "phase_set", "pos_i1", "pos_j1",
             "support_total", "passes_primary_threshold"}
 
 
-def load(reg: Registry, root, regions, mlhp_cap=None) -> Capability:
+def load(reg: Registry, root, regions, mlhp_cap=None, expected_sample=None) -> Capability:
     cap = make(reg, "strict_edges", "strict endpoint edges（read 連鎖證據）",
                enables=["edge_support", "selfcheck:C12", "threshold_whatif"])
     root = Path(root) if root else None
@@ -35,13 +37,55 @@ def load(reg: Registry, root, regions, mlhp_cap=None) -> Capability:
         cap.state = "ABSENT"
         probe(cap, "S0", False, f"chromosomes 目錄不存在：{root}")
         return cap
+    if expected_sample and not sample_in_path(root, str(expected_sample)):
+        cap.state = MALFORMED
+        probe(cap, "S1", False,
+              f"strict endpoint root 不屬於 --sample={expected_sample}：{root}")
+        return cap
 
     files = sorted(root.glob("chr*/strict_regions/*.endpoint_edges.tsv.gz"))
     if not files:
         cap.state = "ABSENT"
         probe(cap, "S0", False, f"{root} 底下找不到 */strict_regions/*.endpoint_edges.tsv.gz")
         return cap
+    edge_refs = {}
+    for f in files:
+        ref = file_ref(f)
+        cap.paths.append(ref)
+        edge_refs[str(f)] = ref
+
+        # endpoint_edges 是構造 component 的直接證據；只雜湊 TSV 還不足以
+        # 追溯 builder/input。每條染色體的 receipt 也必須進 dashboard receipt，
+        # 並核對它聲稱的 edge output 身分與雜湊。
+        receipt = f.parent / "receipt.json"
+        if not receipt.is_file():
+            cap.state = MALFORMED
+            probe(cap, "S0", False, f"{f} 缺 strict-region receipt.json")
+            return cap
+        cap.paths.append(file_ref(receipt))
+        try:
+            rdoc = json.loads(receipt.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            cap.state = MALFORMED
+            probe(cap, "S1", False, f"{receipt} 無法解析：{exc}")
+            return cap
+        edge_doc = ((rdoc.get("outputs") or {}).get("edges") or {})
+        claimed_path = edge_doc.get("path") or ""
+        claimed_sha = edge_doc.get("sha256") or ""
+        if (not claimed_path or Path(claimed_path).resolve() != f.resolve() or
+                claimed_sha != ref.sha256):
+            cap.state = MALFORMED
+            probe(cap, "S1", False,
+                  f"{receipt} 的 outputs.edges path/sha256 與實際檔不一致")
+            return cap
+        if expected_sample and not sample_in_path(claimed_path, str(expected_sample)):
+            cap.state = MALFORMED
+            probe(cap, "S1", False,
+                  f"{receipt} 的 outputs.edges 不屬於 {expected_sample}")
+            return cap
     probe(cap, "S0", True, f"{len(files)} 個染色體的 endpoint_edges")
+    probe(cap, "S1", True,
+          f"{len(files)} 份 strict-region receipt 的 output path/sha256 均吻合")
 
     by_ps = defaultdict(dict)      # (chrom, hp, ps) -> {(a,b): edge}
     n_edge = n_pass = 0
@@ -148,8 +192,10 @@ def load(reg: Registry, root, regions, mlhp_cap=None) -> Capability:
             if nc2 > 1:
                 broken_active += 1
 
-    probe_linkage(cap, checked - broken, checked,
-                  "k≥2 的 block 其**全部** sSNV 由通過門檻的邊連通")
+    if not probe_linkage(cap, checked - broken, checked,
+                         "MLHP original-sSNV block 的全部位點由通過門檻的邊連通",
+                         min_rate=0.99, fail_state=MALFORMED):
+        return cap
     probe(cap, "S3", True,
           f"只看 active 子集時斷裂的 block：{broken_active:,} / {checked:,}"
           f"（{broken_active / max(checked, 1) * 100:.2f}%）—— "

@@ -19,6 +19,17 @@ from pathlib import Path
 import composite
 
 
+def panel_byte_totals(info: dict) -> tuple[int, int, int]:
+    """回傳 (base, tumor-only, total) bytes。
+
+    舊版 receipt 只累加 base PNG，但 bundle 同時寫入 ``*.T.png``，造成
+    panels.bytes 明顯小於磁碟實際用量。統一在這個 pure helper 計算，便於測試。
+    """
+    base = int((info or {}).get("bytes") or 0)
+    tumor = int(((info or {}).get("tumorOnly") or {}).get("bytes") or 0)
+    return base, tumor, base + tumor
+
+
 def load_lineage_map(assign_path, paths_path) -> dict:
     """qname_sha256 → lineage_path。給側欄的 lineage 軌用。
 
@@ -93,7 +104,8 @@ def bake(ism_root, out_dir: Path, loci, lineage_map=None, cell_h: int = 2,
     for c in {c for c, _ in loci}:
         (Path(out_dir) / "panels" / c).mkdir(parents=True, exist_ok=True)
 
-    manifest, made, skipped, total_bytes = {}, 0, 0, 0
+    manifest, made, skipped = {}, 0, 0
+    base_bytes, tumor_only_bytes, total_bytes = 0, 0, 0
     reasons = {}
     tasks = [(str(ism_root), str(out_dir), c, p, lineage_map, cell_h) for c, p in loci]
 
@@ -106,13 +118,17 @@ def bake(ism_root, out_dir: Path, loci, lineage_map=None, cell_h: int = 2,
                 continue
             manifest.setdefault(chrom, {})[str(pos)] = info
             made += 1
-            total_bytes += info["bytes"]
+            b0, bt, ball = panel_byte_totals(info)
+            base_bytes += b0
+            tumor_only_bytes += bt
+            total_bytes += ball
             if made % 2000 == 0:
                 log(f"  已產 {made:,} 張（{total_bytes / 2**20:.0f} MB）")
 
     if reasons:
         log("  略過原因：" + "、".join(f"{k}×{v:,}" for k, v in sorted(reasons.items())))
     return {"panels": manifest, "made": made, "skipped": skipped,
+            "base_bytes": base_bytes, "tumor_only_bytes": tumor_only_bytes,
             "bytes": total_bytes, "cellH": cell_h, "skipReasons": reasons}
 
 
