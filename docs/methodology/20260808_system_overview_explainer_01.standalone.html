@@ -326,14 +326,16 @@ ol.steps>li{margin:.45rem 0}
   <text x="26" y="272" fill="#667069">主要就是單 read 邊（占全部 22.6%）。</text>
 
   <rect x="458" y="202" width="430" height="76" rx="8" fill="#fffdf7" stroke="#c9c8bd"/>
-  <text x="472" y="222" font-weight="700" fill="#b66e20">MAX_SNV = 12</text>
-  <text x="472" y="240" fill="#667069">樹的候選空間隨位點數指數成長。超過 12 個位點</text>
-  <text x="472" y="256" fill="#667069">solver 會主動放棄（ABSTAIN_RESOURCE_LIMIT），</text>
-  <text x="472" y="272" fill="#667069">標成「定不出來」而非給一個不可靠的答案。</text>
+  <text x="472" y="222" font-weight="700" fill="#b66e20">位點數上限：名目 12，實際約 6</text>
+  <text x="472" y="238" fill="#667069">樹的候選空間隨位點數指數成長，solver 撞到搜尋</text>
+  <text x="472" y="253" fill="#667069">上限就主動放棄（ABSTAIN_RESOURCE_LIMIT）。</text>
+  <text x="472" y="268" fill="#a94336">實測綁死的不是 12 —— k=6 只有 4/89 解得出，</text>
+  <text x="472" y="283" fill="#a94336">k≥7 的 153 個全數棄權。</text>
 </svg>
 <div class="cap"><b>圖 3．連鎖切區域。</b>節點是突變位點，邊是「有幾條 read 同時定住兩端」。
 連通分量就是一個分析單元。<b>門檻不是拍腦袋定的</b>：低於 3 條的連鎖無法與技術誤差區分。
-儀表板內建 what-if 面板，可直接看門檻改成 1／2／5 各會多／少多少邊。</div>
+儀表板內建 what-if 面板，可直接看門檻改成 1／2／5 各會多／少多少邊。
+<b>位點數上限要看實測而非名目</b>：宣告的 12 從未成為綁束條件，真正的天花板落在 k≈6。</div>
 </div>
 
 <h3>步驟 2：在每個位點群上解最簡約的演化樹</h3>

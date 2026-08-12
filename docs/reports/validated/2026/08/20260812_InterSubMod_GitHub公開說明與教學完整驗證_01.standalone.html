@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InterSubMod GitHub 公開說明與 CCU 教學站完整驗證</title>
+<style>
+:root{--ink:#172033;--muted:#5a6475;--paper:#f7f5ef;--card:#fff;--line:#d8d4c9;--navy:#173b57;--blue:#256b8c;--green:#24705a;--amber:#a35c00;--red:#a33232;--redbg:#fff1ef;--amberbg:#fff7df;--greenbg:#eaf7f0;--bluebg:#edf5f9;--shadow:0 5px 16px rgba(23,32,51,.09);--radius:14px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;max-width:100%;overflow-x:clip}body{margin:0;max-width:100%;overflow-x:clip;background:var(--paper);color:var(--ink);font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.72}a{color:#155f83;text-underline-offset:3px}code{font-family:"SFMono-Regular",Consolas,monospace;background:#eef0f2;padding:.08em .34em;border-radius:4px;font-size:.91em;overflow-wrap:anywhere}h1,h2,h3{line-height:1.27;color:var(--navy);letter-spacing:.01em}h1{font-size:clamp(1.85rem,4vw,3.15rem);margin:.25rem 0 1rem}h2{font-size:1.55rem;margin:3rem 0 1rem;border-bottom:2px solid var(--line);padding-bottom:.48rem}h3{font-size:1.1rem;margin:1.7rem 0 .55rem}.layout{display:grid;grid-template-columns:248px minmax(0,1fr);max-width:1460px;min-width:0;margin:auto}.side{position:sticky;top:0;height:100vh;max-width:100%;min-width:0;padding:25px 18px;border-right:1px solid var(--line);background:#f0eee8;overflow:auto}.side .kicker{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}.side strong{display:block;margin:.25rem 0 1.1rem;color:var(--navy)}.side a{display:block;color:#344257;text-decoration:none;padding:.36rem .55rem;border-radius:7px;font-size:.88rem}.side a:hover{background:#fff}.content{min-width:0;max-width:100%;overflow:hidden;padding:34px clamp(22px,5vw,78px) 80px}.hero{background:var(--navy);color:#fff;border-radius:20px;padding:clamp(26px,5vw,56px);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:220px;height:220px;border:46px solid rgba(255,255,255,.07);border-radius:50%;right:-58px;top:-90px}.hero h1,.hero p{color:#fff;position:relative;z-index:1}.hero .eyebrow{font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:#bfe2f1}.hero .verdict{display:inline-block;background:#ffd88a;color:#5d3100;padding:.4rem .8rem;border-radius:999px;font-weight:850;position:relative;z-index:1}.hero .meta{font-size:.86rem;color:#d5e2ea;margin-top:1.25rem}.stats{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px;margin:18px 0}.stat{min-width:0;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--blue);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}.stat.problem{border-top-color:var(--red)}.stat.warn{border-top-color:var(--amber)}.stat.ok{border-top-color:var(--green)}.stat .n{font:800 1.8rem/1.1 Georgia,serif;color:var(--navy)}.stat .label{font-size:.78rem;color:var(--muted);margin-top:.35rem;overflow-wrap:anywhere}.callout{padding:15px 18px;border-left:5px solid var(--blue);background:var(--bluebg);border-radius:0 10px 10px 0;margin:1rem 0}.callout.red{border-color:var(--red);background:var(--redbg)}.callout.amber{border-color:var(--amber);background:var(--amberbg)}.callout.green{border-color:var(--green);background:var(--greenbg)}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.card h3{margin-top:0}.pill{display:inline-block;border-radius:999px;padding:.18rem .58rem;font-size:.72rem;font-weight:850;letter-spacing:.04em}.p0{background:#ffd8d3;color:#7f1717}.p1{background:#ffe8b8;color:#784000}.p2{background:#dcecf5;color:#174d69}.pass{background:#d8eee3;color:#15523f}.limit{background:#e7e9ef;color:#394256}.table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;vertical-align:top;padding:.67rem .72rem;border-bottom:1px solid #e6e2d8;overflow-wrap:anywhere}th{background:#edf0f1;color:#26394a;position:sticky;top:0;z-index:1}tbody tr:hover{background:#fbfaf6}.num{text-align:right;font-variant-numeric:tabular-nums}.small{font-size:.84rem;color:var(--muted)}.check{list-style:none;padding:0}.check li{padding:.67rem .7rem .67rem 2rem;border-bottom:1px solid #e5e1d8;position:relative}.check li:before{content:"□";position:absolute;left:.55rem;color:var(--red);font-weight:900}.check.done li:before{content:"✓";color:var(--green)}details{min-width:0;max-width:100%;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{cursor:pointer;font-weight:850;color:var(--navy);padding:14px 18px}details>div{padding:0 18px 18px}.figure{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:18px 0;box-shadow:var(--shadow)}.figure figcaption{font-size:.82rem;color:var(--muted);padding:.45rem .35rem 0}.figure svg{display:block;width:100%;height:auto}.source-list li{margin:.45rem 0}.footer{border-top:2px solid var(--line);margin-top:3rem;padding-top:1rem;color:var(--muted);font-size:.82rem}.mono{font-family:"SFMono-Regular",Consolas,monospace;font-size:.83em}.nowrap{white-space:nowrap}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.grid3{grid-template-columns:1fr}.layout{grid-template-columns:minmax(0,1fr)}.side{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line);display:flex;gap:4px;overflow:auto;padding:10px}.side .kicker,.side strong{display:none}.side a{white-space:nowrap}.content{padding-top:20px}}
+@media(max-width:690px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:minmax(0,1fr)}.content{padding:14px 12px 50px}.hero{border-radius:14px}.stat .n{font-size:1.5rem}table{font-size:.79rem}th,td{padding:.55rem}.hide-mobile{display:none}}
+@media print{body{background:#fff}.layout{display:block}.side{display:none}.content{padding:0}.hero{background:#fff;color:#000;border:2px solid #333}.hero h1,.hero p,.hero .meta{color:#000}.card,.stat,.figure{box-shadow:none;break-inside:avoid}details>div,details:not([open])>:not(summary){display:block!important}summary{list-style:none}a{color:#000;text-decoration:none}h2{break-after:avoid}.table-wrap{overflow:visible}th{position:static}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side" aria-label="本報告目錄">
+  <span class="kicker">Evidence audit</span><strong>InterSubMod × CCU</strong>
+  <a href="#verdict">總結裁決</a><a href="#scope">範圍與版本</a><a href="#ceiling">證據上限</a><a href="#counts">問題數量</a><a href="#p0">P0 修正</a><a href="#all58">完整 58 項</a><a href="#confirmed">確認清單</a><a href="#numbers">數據重算</a><a href="#chr2">chr2 重跑</a><a href="#ccu">CCU 新版</a><a href="#needed">要補的資料</a><a href="#receipts">證據收據</a>
+</nav>
+<main class="content">
+<header class="hero" id="verdict">
+  <div class="eyebrow">SCQA + Claim–Evidence–Verdict · Task B comprehensive validation</div>
+  <h1>公開說明可用，但尚不可當作無條件的科學權威入口</h1>
+  <p>InterSubMod 158 組去重 claim families 中，58 組需要修正或補證據；工程建置與測試通過，但多處把 molecule-level evidence 升格成 cellular clone／lineage，另有可由算術、source 與 fresh runtime 直接反駁的說法。</p>
+  <span class="verdict">CONDITIONAL PASS · MAJOR REVISION REQUIRED</span>
+  <div class="meta">稽核日 2026-08-12 · 影響：高 · 信心：高 · 未修改任何 GitHub remote 或 live site</div>
+</header>
+
+<section class="stats" aria-label="摘要統計">
+  <div class="stat"><div class="n">158</div><div class="label">去重公開主張</div></div>
+  <div class="stat problem"><div class="n">58</div><div class="label">有問題／缺證據（36.71%）</div></div>
+  <div class="stat problem"><div class="n">34</div><div class="label">P0 優先修正</div></div>
+  <div class="stat warn"><div class="n">29/31</div><div class="label">artifact 至少一項 actionable</div></div>
+  <div class="stat ok"><div class="n">270/270</div><div class="label">fresh CTest 通過</div></div>
+  <div class="stat problem"><div class="n">29/32</div><div class="label">CCU findings 尚未完全解決</div></div>
+</section>
+
+<div class="callout red"><strong>最重要的讀法：</strong>36.71% 不是「所有句子中 36.71% 都錯」。同一命題在英中 README、Wiki、Pages 重複時只算一個 family；58=28 needs correction + 26 contradicted + 4 unverifiable。</div>
+
+<section id="scope">
+<h2>1. 範圍與版本：目前是四個公開面混用</h2>
+<div class="grid2">
+  <div class="card"><h3>InterSubMod public surfaces</h3><p><b>31</b> 個現存 artifacts，加 1 個 missing endpoint。涵蓋 GitHub About、default first-hop docs、feature README EN/ZH、Wiki 全頁、Pages 17 頁。</p></div>
+  <div class="card"><h3>CCU lab-tutorial</h3><p><b>25</b> 個正式 live routes 全部 HTTP 200 且與 remote main <code>9eb1618</code> byte-match；<code>sr6.html</code> 是 source-only draft／HTTP 404。</p></div>
+</div>
+<figure class="figure">
+<svg viewBox="0 0 980 330" role="img" aria-labelledby="vtitle vdesc">
+<title id="vtitle">InterSubMod 公開版本漂移</title><desc id="vdesc">Default main、feature、Wiki、Pages 與本地 authority 使用不同 commits，形成版本混用風險。</desc>
+<defs><marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#607080"/></marker></defs>
+<rect x="35" y="60" width="175" height="92" rx="12" fill="#fff1ef" stroke="#a33232" stroke-width="2"/><text x="122" y="88" text-anchor="middle" font-size="17" font-weight="700" fill="#7f1717">GitHub main</text><text x="122" y="116" text-anchor="middle" font-size="14" fill="#172033">635437a</text><text x="122" y="138" text-anchor="middle" font-size="12" fill="#5a6475">舊 README／ZH 404</text>
+<rect x="268" y="60" width="175" height="92" rx="12" fill="#edf5f9" stroke="#256b8c" stroke-width="2"/><text x="355" y="88" text-anchor="middle" font-size="17" font-weight="700" fill="#173b57">feature/develop</text><text x="355" y="116" text-anchor="middle" font-size="14" fill="#172033">ddd8909</text><text x="355" y="138" text-anchor="middle" font-size="12" fill="#5a6475">較新 README</text>
+<rect x="535" y="35" width="175" height="92" rx="12" fill="#fff7df" stroke="#a35c00" stroke-width="2"/><text x="622" y="63" text-anchor="middle" font-size="17" font-weight="700" fill="#784000">Wiki</text><text x="622" y="91" text-anchor="middle" font-size="14" fill="#172033">6cfc990</text><text x="622" y="113" text-anchor="middle" font-size="12" fill="#5a6475">人工同步 derivative</text>
+<rect x="535" y="171" width="175" height="92" rx="12" fill="#eaf7f0" stroke="#24705a" stroke-width="2"/><text x="622" y="199" text-anchor="middle" font-size="17" font-weight="700" fill="#15523f">Pages</text><text x="622" y="227" text-anchor="middle" font-size="14" fill="#172033">fbdf7c7</text><text x="622" y="249" text-anchor="middle" font-size="12" fill="#5a6475">17/17 live match</text>
+<rect x="780" y="104" width="165" height="92" rx="12" fill="#f1f1f4" stroke="#4f5968" stroke-width="2"/><text x="862" y="132" text-anchor="middle" font-size="17" font-weight="700" fill="#26394a">Authority/code</text><text x="862" y="160" text-anchor="middle" font-size="14" fill="#172033">73afaea</text><text x="862" y="182" text-anchor="middle" font-size="12" fill="#5a6475">本次驗證基準</text>
+<path d="M210 106H268" stroke="#607080" stroke-width="2" marker-end="url(#arr1)"/><path d="M443 96L535 81" stroke="#607080" stroke-width="2" marker-end="url(#arr1)"/><path d="M443 116L535 205" stroke="#607080" stroke-width="2" marker-end="url(#arr1)"/><path d="M710 81L800 116" stroke="#607080" stroke-width="2" marker-end="url(#arr1)"/><path d="M710 217L800 184" stroke="#607080" stroke-width="2" marker-end="url(#arr1)"/>
+<text x="490" y="305" text-anchor="middle" font-size="14" fill="#a33232" font-weight="700">同一專案的「目前版本」不是單一 commit；能力、數字、schema 必須逐面釘版本</text>
+</svg>
+<figcaption>圖 1｜版本漂移是高風險根因：讀者從 main、Wiki 或 Pages 進站會讀到不同世代的 claim。</figcaption>
+</figure>
+</section>
+
+<section id="ceiling">
+<h2>2. 證據上限：能看到 molecule，不等於看到 cell</h2>
+<figure class="figure">
+<svg viewBox="0 0 980 420" role="img" aria-labelledby="ctitle cdesc">
+<title id="ctitle">InterSubMod 證據階梯與目前斷點</title><desc id="cdesc">BAM VCF 到 read-level observation 可直接確認，local molecular candidate 與 methylation association 是模型推論，cellular clone lineage 仍缺獨立證據。</desc>
+<defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#256b8c"/></marker></defs>
+<rect x="70" y="36" width="840" height="64" rx="12" fill="#eaf7f0" stroke="#24705a" stroke-width="2"/><text x="490" y="64" text-anchor="middle" font-size="19" font-weight="700" fill="#15523f">L1 直接觀測</text><text x="490" y="86" text-anchor="middle" font-size="14" fill="#172033">per-read allele · exact PS/HP · same-molecule co-occurrence · MM/ML pattern</text>
+<path d="M490 101V133" stroke="#256b8c" stroke-width="3" marker-end="url(#arr2)"/>
+<rect x="110" y="140" width="760" height="70" rx="12" fill="#edf5f9" stroke="#256b8c" stroke-width="2"/><text x="490" y="168" text-anchor="middle" font-size="19" font-weight="700" fill="#173b57">L2 模型條件推論</text><text x="490" y="193" text-anchor="middle" font-size="14" fill="#172033">bounded local recurrence-allowed mutation-state candidate topology</text>
+<path d="M490 211V243" stroke="#256b8c" stroke-width="3" marker-end="url(#arr2)"/>
+<rect x="150" y="250" width="680" height="66" rx="12" fill="#fff7df" stroke="#a35c00" stroke-width="2"/><text x="490" y="278" text-anchor="middle" font-size="19" font-weight="700" fill="#784000">L2 conditioned association</text><text x="490" y="301" text-anchor="middle" font-size="14" fill="#172033">genetic-label-associated regional methylation · association only</text>
+<line x1="120" y1="339" x2="860" y2="339" stroke="#a33232" stroke-width="5" stroke-dasharray="15 9"/><text x="490" y="331" text-anchor="middle" font-size="13" fill="#a33232" font-weight="700">目前 claim ceiling：缺 CN/LOH/purity/multiplicity/CCF + independent cellular truth</text>
+<rect x="235" y="360" width="510" height="46" rx="12" fill="#fff1ef" stroke="#a33232" stroke-width="2"/><text x="490" y="389" text-anchor="middle" font-size="17" font-weight="700" fill="#7f1717">尚未確認：cellular clone · biological lineage · whole-sample phylogeny · gene silencing</text>
+</svg>
+<figcaption>圖 2｜工程測試可確認 code contract，卻不能跨越紅色斷點成為 cellular truth。</figcaption>
+</figure>
+<div class="table-wrap"><table><thead><tr><th>Tier</th><th>證據</th><th>最強允許語氣</th></tr></thead><tbody>
+<tr><td>L1</td><td>machine artifact、source、runtime、hash、numerator/denominator</td><td>確認該版本/grain 的直接事實；不是 biological truth</td></tr>
+<tr><td>L2</td><td>technical repeats、LOSO/held-out、獨立重算</td><td>有限再現／泛化；technical pair 不是 biological replicate</td></tr>
+<tr><td>L3</td><td>validated authority/report 的多來源整合</td><td>bounded integrated verdict；不能凌駕 L1 反證</td></tr>
+<tr><td>L4</td><td>spec、proposal、toy model</td><td>設計／假說／候選；不能寫 production result</td></tr>
+<tr><td>L5</td><td>教學直覺、無 receipt 數字／novelty</td><td>不可用作確認，應補來源或移除</td></tr>
+</tbody></table></div>
+<div class="callout amber"><b>標準替換：</b>「同一 molecule 是直接觀測；cellular co-membership/lineage 是模型推論。輸出是局部 mutation-state candidate，不是已確認的 clone tree。」</div>
+</section>
+
+<section id="counts">
+<h2>3. 問題數量與判定方法</h2>
+<div class="table-wrap"><table><thead><tr><th>Verdict</th><th class="num">數量</th><th class="num">比例</th><th>處理方式</th></tr></thead><tbody>
+<tr><td><span class="pill pass">CONFIRMED</span></td><td class="num">69</td><td class="num">43.67%</td><td>可保留，仍需維持 provenance</td></tr>
+<tr><td><span class="pill limit">WITH LIMITS</span></td><td class="num">31</td><td class="num">19.62%</td><td>核心合理；必須顯示版本／分母／scope</td></tr>
+<tr><td><span class="pill p1">NEEDS CORRECTION</span></td><td class="num">28</td><td class="num">17.72%</td><td>重寫，避免推論升格</td></tr>
+<tr><td><span class="pill p0">CONTRADICTED</span></td><td class="num">26</td><td class="num">16.46%</td><td>已有直接反證，立即修</td></tr>
+<tr><td><span class="pill p2">UNVERIFIABLE</span></td><td class="num">4</td><td class="num">2.53%</td><td>移除，或補 replayable receipt</td></tr>
+</tbody></table></div>
+<p class="small">計數單位是 deduplicated claim family。完整 occurrence、證據與最小改寫見 claim_inventory.tsv。</p>
+</section>
+
+<section id="p0">
+<h2>4. P0 校正清單：34 組</h2>
+<div class="grid3">
+<div class="card"><span class="pill p0">語意上限</span><h3>Molecule ≠ cell</h3><p>C107–C109、C112、C124–C131、C135–C136、C140：統一降為 local molecular/mutation-state candidate；methylation 是 conditioned association。</p></div>
+<div class="card"><span class="pill p0">公開入口</span><h3>Main／Wiki／Pages 對齊</h3><p>C108、C134–C135、C141、C150：一次修 GitHub About、default README EN/ZH、Wiki Home、Pages index，附版本 manifest 與 receipts。</p></div>
+<div class="card"><span class="pill p0">機械錯誤</span><h3>分母／schema／CLI</h3><p>C059、C113、C142–C144、C151：170,131 是 strict components；199 columns；effective NHD；exact-PS solver provenance 分流。</p></div>
+<div class="card"><span class="pill p0">可重現性</span><h3>Fresh clone 目前跑不起來</h3><p>C137–C139、C148–C150：標 internal-only 或發布 tiny fixture；validator 只可聲稱它真的重算的 families。</p></div>
+<div class="card"><span class="pill p0">chr2 因果</span><h3>相容不等於唯一</h3><p>C152–C155：LOH 不排除 error/CN；zero co-occurrence 不唯一；沒有 expression 或 per-read truth。</p></div>
+<div class="card"><span class="pill p0">版本能力</span><h3>Tagged BAM 是 branch-scoped</h3><p>C043：InterSubMod 不寫 BAM；LongLineage feature b9aaa12 有 tagged-BAM binary，main 5daf50f 沒有。</p></div>
+</div>
+</section>
+
+<section id="all58">
+<h2>5. 完整 58 項問題索引</h2>
+<p>下表每列都是一個去重 claim family；「最低修正」是能先避免誤導的最小文字／證據變動，不代表已完成科學升級。</p>
+<details open><summary>P0（34）— 會改變讀者主要結論或公開可重現性</summary><div class="table-wrap"><table><thead><tr><th>ID</th><th>現行問題</th><th>最低修正</th></tr></thead><tbody>
+<tr><td>C043</td><td>兩專案都不能寫 tagged BAM</td><td>分 repo/branch：ISM 無；LongLineage feature 有、main 無</td></tr>
+<tr><td>C059</td><td>summary 193 欄且無 schema</td><td>改 199 欄，列兩個 schema fields 與 commit</td></tr>
+<tr><td>C107</td><td>README headline 稱 subclonal reconstruction</td><td>改 local mutation-state candidate reconstruction</td></tr>
+<tr><td>C108</td><td>GitHub About 稱 subclone resolution</td><td>改 read-level integration／local candidate／methyl association</td></tr>
+<tr><td>C109</td><td>same molecule 寫成 same lineage</td><td>直接觀測 molecule；lineage 是模型推論</td></tr>
+<tr><td>C112</td><td>candidate topology 簡稱 tree</td><td>加 local、recurrence-allowed、candidate、model-conditional</td></tr>
+<tr><td>C113</td><td>170,131 標作無 partner single sites</td><td>k=1 strict components 170,131/255,752</td></tr>
+<tr><td>C124</td><td>allele PERMANOVA 稱 clone hard evidence</td><td>locus-specific association，非 clone validation</td></tr>
+<tr><td>C125</td><td>normal-screen-negative 稱 tumour-acquired</td><td>tumour-associated、normal-ASM-screen-negative</td></tr>
+<tr><td>C126</td><td>宣稱 clean subset 中 subclone methyl 真實存在</td><td>改為與 lineage-associated hypothesis 相容</td></tr>
+<tr><td>C127</td><td>regional state 稱 subclonal state</td><td>改 regional molecular-state candidate</td></tr>
+<tr><td>C128</td><td>approx TVAF/CCF 稱外部 clone corroboration</td><td>標歷史、case-specific、noncanonical</td></tr>
+<tr><td>C129</td><td>一條 read 等同一個 tumour cell chromosome</td><td>說明 originating cell 未被 barcode、未知</td></tr>
+<tr><td>C130</td><td>methylation 稱 independent/orthogonal confirmation</td><td>改 genetic grouping 後的 bounded association</td></tr>
+<tr><td>C131</td><td>承諾 methyl rescue 得到 correct tag</td><td>candidate label；rescue 改未驗證假說</td></tr>
+<tr><td>C134</td><td>聲稱所有數字/命令/格式都驗過</td><td>改 artifact-level receipt table</td></tr>
+<tr><td>C135</td><td>default README 稱已解 subclonal structure</td><td>用修正後 bounded README 取代</td></tr>
+<tr><td>C136</td><td>methyl pattern 區分 cell populations</td><td>改 pattern-conditioned association</td></tr>
+<tr><td>C137</td><td>C++ 自動產 heatmaps</td><td>說下游 Python 可產；core 不自動 render</td></tr>
+<tr><td>C138</td><td>內部 hard-coded script 當 public standard</td><td>標 internal-only 或改 portable wrapper/fixture</td></tr>
+<tr><td>C139</td><td>one-click raw BAM→plot</td><td>分內部 orchestration 與 public workflow</td></tr>
+<tr><td>C140</td><td>heatmap clusters 稱 subclone groups</td><td>改 read-level methylation clusters</td></tr>
+<tr><td>C141</td><td>聲稱 default branch bilingual</td><td>合併修正版 EN/ZH；修掉 ZH 404</td></tr>
+<tr><td>C142</td><td>66.52% 說成 all mutations</td><td>固定 strict-component 分母</td></tr>
+<tr><td>C143</td><td>filter page 稱 production BERNOULLI</td><td>effective default=NHD</td></tr>
+<tr><td>C144</td><td>glossary/core 同樣稱 BERNOULLI</td><td>同步 01–03；分 initializer 與 CLI behavior</td></tr>
+<tr><td>C148</td><td>validator 稱重算 methods 全部數字</td><td>列真正 coverage；其他 family 加 validator</td></tr>
+<tr><td>C149</td><td>fresh clone 約 10 分鐘首個結果</td><td>標 internal-only 或發布 fixture/checksum</td></tr>
+<tr><td>C150</td><td>blanket verification assurance</td><td>每 claim 顯示 VERIFIED/UNVERIFIED/INTERNAL_ONLY</td></tr>
+<tr><td>C151</td><td>ISM binary 被寫成 exact-PS funnel generator</td><td>分開 per-region ISM 與 research solver provenance</td></tr>
+<tr><td>C152</td><td>LOH 推出差異必是 somatic、非 error</td><td>列 error/CN/stochastic 等 alternatives</td></tr>
+<tr><td>C153</td><td>zero α/β 只有 sister-branch 解</td><td>改 parsimony-compatible、非唯一</td></tr>
+<tr><td>C154</td><td>methylation 告知關閉哪些 genes</td><td>只述 local methyl state；功能需 expression assay</td></tr>
+<tr><td>C155</td><td>methyl rescue 已產正確 final tag</td><td>移到 unvalidated future hypothesis</td></tr>
+</tbody></table></div></details>
+<details open><summary>P1（20）— 會影響數值、工具使用或統計解讀</summary><div class="table-wrap"><table><thead><tr><th>ID</th><th>現行問題</th><th>最低修正</th></tr></thead><tbody>
+<tr><td>C047</td><td>1.67 TiB tagged BAM 無 registry</td><td>公布 7 paths/exact bytes/hash/compression</td></tr>
+<tr><td>C048</td><td>1.67 TiB ÷ 5.83 GiB 說 287×</td><td>顯示值應為 293.34×；最好 exact bytes 重算</td></tr>
+<tr><td>C089</td><td>整個 storage snapshot 稱 fully verified</td><td>sidecar 可留；tagged BAM 標未驗證</td></tr>
+<tr><td>C090</td><td>SEQ/QUAL &gt;99% 且 0% utility</td><td>補 byte/utility audit，否則只述欄位未保留</td></tr>
+<tr><td>C110</td><td>short-read reconstruction 普遍可證無解</td><td>限定 marginal VAF-only assumptions，附 theorem</td></tr>
+<tr><td>C111</td><td>single bulk 普遍不能分 methyl causes</td><td>限定 current measurements／no orthogonal data</td></tr>
+<tr><td>C114</td><td>eligibility flags artifact 未指名</td><td>指到 cohort_receipt/all7_summary</td></tr>
+<tr><td>C115</td><td>Wiki 稱自動同源產物</td><td>說人工同步 derivative，補 drift CI</td></tr>
+<tr><td>C117</td><td>filter DEAD／never reopen</td><td>限定 tested formulation；新假說需 pre-audit</td></tr>
+<tr><td>C119</td><td>paired caller 可精準分開</td><td>改通常改善但不完美、需 benchmark</td></tr>
+<tr><td>C120</td><td>heuristic 結果稱 true cis</td><td>改 cis-compatible/copy-screen-negative</td></tr>
+<tr><td>C121</td><td>PERMANOVA-positive 稱 latent truth</td><td>改 candidate structure missed by V gate</td></tr>
+<tr><td>C122</td><td>p 控制 truth</td><td>p 是與 null 不相容度；V 是 association magnitude</td></tr>
+<tr><td>C123</td><td>PERMANOVA 驗證 grouping 有效</td><td>改 centroid separation；配合 PERMDISP</td></tr>
+<tr><td>C133</td><td>generator 讓 fabrication 不可能</td><td>只說阻止 required metrics 靜默缺失</td></tr>
+<tr><td>C145</td><td>265 tests/38 suites 過期</td><td>current 270/39，釘 commit/date</td></tr>
+<tr><td>C146</td><td>全 repo Python=2,144</td><td>deploy commit 實為 2,147，附命令</td></tr>
+<tr><td>C147</td><td>scripts Python=268</td><td>deploy commit 實為 291，列 counting rule</td></tr>
+<tr><td>C156</td><td>normal reads 六點全 REF</td><td>只說未見六個 expected ALT；有其他 errors</td></tr>
+<tr><td>C157</td><td>32-core linear／&lt;300 ms 無 receipt</td><td>移除或發布完整 benchmark artifact</td></tr>
+</tbody></table></div></details>
+<details open><summary>P2（4）— 透明度與外部定位</summary><div class="table-wrap"><table><thead><tr><th>ID</th><th>現行問題</th><th>最低修正</th></tr></thead><tbody>
+<tr><td>C116</td><td>29 diagrams 無定義；raw SVG=37</td><td>報 37 或發布 semantic diagram registry</td></tr>
+<tr><td>C118</td><td>negative tests 稱 bulletproof</td><td>改 evaluated formulation 的 convergent negatives</td></tr>
+<tr><td>C132</td><td>暗示方法組合 first/unique</td><td>補 dated review/head-to-head，否則移除</td></tr>
+<tr><td>C158</td><td>外部 novelty 不可驗證</td><td>描述 components，不主張 priority</td></tr>
+</tbody></table></div></details>
+</section>
+
+<section id="confirmed">
+<h2>6. 重要確認清單：為何可確認</h2>
+<ul class="check done">
+<li><b>7 technical datasets／6 biological IDs／469,849 records</b>：authority JSON 可重算，7/7 scope pass；technical pair 不當 biological replicate。</li>
+<li><b>170,131/255,752=66.5219%</b>：arithmetic 與 denominator registry 一致；只確認 strict-component k=1。</li>
+<li><b>63,506/71,955=88.2579%</b>：funnel 加總自洽；只確認 ranked mathematical shape。</li>
+<li><b>3/811=0.3699%</b>：formal methyl registry 可重算；只確認 conditioned regional association。</li>
+<li><b>paired-pure read-level ΔF1=+0.011159</b>：95% bootstrap CI +0.004437 到 +0.018808；73,230 reads／537 regions 的 frozen comparison；不是 variant caller whole-genome F1。</li>
+<li><b>HCC1395 paired/TO variant ΔF1=+0.000981/+0.000274</b>：canonical outputs 可重算；不泛化其他樣本。</li>
+<li><b>VAF Spearman≈0.909</b>：technical pair reproduction；不能改名 accuracy 或 truth。</li>
+<li><b>InterSubMod build＋tests</b>：fresh configure/build exit 0；direct 270/39 PASS；CTest 270/270 PASS。</li>
+<li><b>One-locus runtime</b>：1.90 s、85 reads、11 CpGs、3,443 valid／127 invalid pairs；同時確認 &lt;100 reads 會 fallback，非 KDE-corrected benchmark。</li>
+<li><b>LongLineage feature foundation</b>：clean build、47/47、check_all FOUNDATION_PASS；stdout 仍列 release blockers。</li>
+<li><b>Pages deployment</b>：17/17 HTTP 200、live bytes 與 deploy source 相同。</li>
+<li><b>Sidecar 5.83 GiB</b>：7 檔 exact sum=6,256,168,164 bytes；此確認不延伸到未登錄的 tagged BAM。</li>
+</ul>
+</section>
+
+<section id="numbers">
+<h2>7. 關鍵分母與數據重算</h2>
+<figure class="figure">
+<svg viewBox="0 0 1040 420" role="img" aria-labelledby="ftitle fdesc">
+<title id="ftitle">Exact-PS analysis funnel</title><desc id="fdesc">469849 dataset records 經 strict components 與 bounded groups 到 ranked topology，其中 63506 個有 one rooted unlabeled shape。</desc>
+<rect x="40" y="40" width="190" height="70" rx="10" fill="#edf5f9" stroke="#256b8c" stroke-width="2"/><text x="135" y="68" text-anchor="middle" font-weight="700" font-size="16">469,849</text><text x="135" y="91" text-anchor="middle" font-size="12">dataset-records</text>
+<rect x="285" y="40" width="190" height="70" rx="10" fill="#edf5f9" stroke="#256b8c" stroke-width="2"/><text x="380" y="68" text-anchor="middle" font-weight="700" font-size="16">255,752</text><text x="380" y="91" text-anchor="middle" font-size="12">strict components</text>
+<rect x="530" y="40" width="190" height="70" rx="10" fill="#fff7df" stroke="#a35c00" stroke-width="2"/><text x="625" y="68" text-anchor="middle" font-weight="700" font-size="16">170,131</text><text x="625" y="91" text-anchor="middle" font-size="12">k=1 abstain · 66.52%</text>
+<path d="M230 75H285M475 75H530" stroke="#607080" stroke-width="2"/>
+<text x="505" y="135" text-anchor="middle" font-size="13" fill="#a33232">不能把 66.52% 改掛在 469,849「所有 mutations」上</text>
+<rect x="120" y="182" width="160" height="62" rx="10" fill="#f1f1f4" stroke="#596372"/><text x="200" y="208" text-anchor="middle" font-weight="700">98,955</text><text x="200" y="229" text-anchor="middle" font-size="12">bounded groups</text>
+<rect x="330" y="182" width="160" height="62" rx="10" fill="#f1f1f4" stroke="#596372"/><text x="410" y="208" text-anchor="middle" font-weight="700">85,941</text><text x="410" y="229" text-anchor="middle" font-size="12">mutation-bearing</text>
+<rect x="540" y="182" width="160" height="62" rx="10" fill="#f1f1f4" stroke="#596372"/><text x="620" y="208" text-anchor="middle" font-weight="700">75,224</text><text x="620" y="229" text-anchor="middle" font-size="12">family-complete</text>
+<rect x="750" y="182" width="160" height="62" rx="10" fill="#edf5f9" stroke="#256b8c"/><text x="830" y="208" text-anchor="middle" font-weight="700">71,955</text><text x="830" y="229" text-anchor="middle" font-size="12">ranked-complete</text>
+<path d="M280 213H330M490 213H540M700 213H750" stroke="#607080" stroke-width="2"/>
+<rect x="217" y="302" width="190" height="62" rx="10" fill="#eaf7f0" stroke="#24705a" stroke-width="2"/><text x="312" y="328" text-anchor="middle" font-weight="700">39,648</text><text x="312" y="349" text-anchor="middle" font-size="12">unique best</text>
+<rect x="447" y="302" width="190" height="62" rx="10" fill="#eaf7f0" stroke="#24705a" stroke-width="2"/><text x="542" y="328" text-anchor="middle" font-weight="700">23,858</text><text x="542" y="349" text-anchor="middle" font-size="12">tied · same shape</text>
+<rect x="677" y="302" width="190" height="62" rx="10" fill="#fff1ef" stroke="#a33232" stroke-width="2"/><text x="772" y="328" text-anchor="middle" font-weight="700">8,449</text><text x="772" y="349" text-anchor="middle" font-size="12">tied · cross-shape</text>
+<text x="427" y="399" text-anchor="middle" font-size="15" font-weight="700" fill="#15523f">39,648 + 23,858 = 63,506 / 71,955 = 88.2579%</text>
+</svg>
+<figcaption>圖 3｜同一數字若換了 grain 就改變問題本身。88.26% 是 ranked mathematical shapes，不是 tumor clone prevalence。</figcaption>
+</figure>
+<div class="grid2">
+<div class="card"><h3>Methyl formal assay</h3><p><b>1,045 formal → 811 evaluable → 3 robust（0.3699%）</b>。三個 robust 仍是 association-only，不是 topology confirmation。</p></div>
+<div class="card"><h3>Storage</h3><p><b>Sidecar=6,256,168,164 bytes=5.82651 GiB</b> 可重算；tagged BAM 1.67 TiB 缺 registry。用顯示單位計不是 287×，而是 293.34×。</p></div>
+</div>
+</section>
+
+<section id="chr2">
+<h2>8. chr2:18M fresh 重跑</h2>
+<figure class="figure">
+<svg viewBox="0 0 1000 350" role="img" aria-labelledby="xtitle xdesc">
+<title id="xtitle">chr2 case 的支持與缺口</title><desc id="xdesc">Fresh audit 支持局部分子狀態與部分同分子共現，但無 distant block bridge、cell truth 與無混雜 methylation，不能升格完整 clone tree。</desc>
+<rect x="40" y="40" width="430" height="265" rx="14" fill="#eaf7f0" stroke="#24705a" stroke-width="2"/><text x="255" y="76" text-anchor="middle" font-size="20" font-weight="700" fill="#15523f">Fresh data 支持</text><text x="75" y="116" font-size="15">✓ 1–2 cooccur：HKU 13／Dorado 6</text><text x="75" y="150" font-size="15">✓ 3–5 nested：HKU 4／Dorado 2</text><text x="75" y="184" font-size="15">✓ 4ALT–6：HKU 10／Dorado 1</text><text x="75" y="218" font-size="15">✓ strict α/β violation=0</text><text x="75" y="252" font-size="15">✓ 至少 3 個 regional molecular states 相容</text><text x="75" y="282" font-size="13" fill="#5a6475">同 cell line 技術重複，不是 biological replication</text>
+<rect x="530" y="40" width="430" height="265" rx="14" fill="#fff1ef" stroke="#a33232" stroke-width="2"/><text x="745" y="76" text-anchor="middle" font-size="20" font-weight="700" fill="#7f1717">目前不能支持</text><text x="565" y="116" font-size="15">× distant blocks 沒有 coverage bridge</text><text x="565" y="150" font-size="15">× pos4 有 G/T/DEL ambiguity</text><text x="565" y="184" font-size="15">× 多數 methyl cases 有 normal ASM confound</text><text x="565" y="218" font-size="15">× 沒有 cell barcode／per-read truth</text><text x="565" y="252" font-size="15">× 無法確認 cellular clones／唯一 phylogeny</text><text x="565" y="282" font-size="13" fill="#5a6475">association 與 parsimony compatibility ≠ causal confirmation</text>
+</svg>
+<figcaption>圖 4｜案例有真實、可重算的 linkage；問題在公開文字把「相容」寫成「唯一且已確認」。</figcaption>
+</figure>
+</section>
+
+<section id="ccu">
+<h2>9. CCU lab-tutorial 現行版本：新版有改善，但關鍵錯誤仍在</h2>
+<p>比較前次完整 audit commit <code>46b6f5b</code> 與 live/main <code>9eb1618</code>：57 files、+8,105/−2,774 lines。大部分新增集中在 SR2b/SR2c 與 guardrails；不能只看 UI 改動判定科學問題已解。</p>
+<p class="small">M6/M7 的工具 claim 依 P-14 順序，以 LongPhase-S/TO 知識庫、pinned local source、binary <code>--help</code> 三層核對；commit 與 binary SHA 見 command receipt R20。</p>
+<div class="stats"><div class="stat problem"><div class="n">17</div><div class="label">OPEN</div></div><div class="stat warn"><div class="n">6</div><div class="label">PARTIAL</div></div><div class="stat problem"><div class="n">6</div><div class="label">REGRESSED</div></div><div class="stat ok"><div class="n">3</div><div class="label">RESOLVED</div></div><div class="stat"><div class="n">25/25</div><div class="label">正式 routes byte-match</div></div><div class="stat warn"><div class="n">1</div><div class="label">draft sr6 仍 404</div></div></div>
+<div class="callout amber"><b>計數口徑：</b>29/32 是 problem-focused delta findings 尚未完全解決，不是「全站 90.6% 的句子錯」。其中 17 是舊/新問題仍 open、6 是只修一部分、6 是新版新增 regression。</div>
+<div class="table-wrap"><table><thead><tr><th>Claim</th><th>Current status</th><th>證據／推論</th><th>動作</th></tr></thead><tbody>
+<tr><td>M6 <code>HP1-1-1</code></td><td><span class="pill p0">OPEN</span></td><td>仍存在；同站 SR2c 明寫 extended set 恰好五值、無更長 suffix</td><td>移除，建立 tag enum source test</td></tr>
+<tr><td>M6 TO only ONT</td><td><span class="pill p1">OPEN</span></td><td><code>longphase-to phase --help</code> 同時列 <code>--ont</code>、<code>--pb</code></td><td>按 release/commit 重寫</td></tr>
+<tr><td>M7/glossary TO=<code>HP:Z</code></td><td><span class="pill p1">OPEN</span></td><td>TO runtime/code contract 是 integer <code>HP:i</code>；與 LongPhase-S somatic string tag 混用</td><td>按 binary 分型並附 receipt</td></tr>
+<tr><td>M13 synthetic <code>f=p</code></td><td><span class="pill p0">OPEN</span></td><td><code>f=.2, κ=3.2 → p=.135135</code>；僅 κ=2 等條件下相等</td><td>修掉無條件恰好相等</td></tr>
+<tr><td>51.2%–80.4%</td><td><span class="pill limit">PASS WITH LIMIT</span></td><td>residual/M1 範圍可重算；不是 subclone prevalence</td><td>保留 numerator/denominator 與 M1 定義</td></tr>
+<tr><td>9.5%／35.4%</td><td><span class="pill limit">PASS WITH LIMIT</span></td><td>COLO829/H2009 M1/all sSNV 可重算；不是 formal assay eligibility</td><td>明示 operational screen</td></tr>
+<tr><td>88.26%</td><td><span class="pill limit">PASS WITH LIMIT</span></td><td>63,506/71,955=88.2579%；ranked mathematical shapes</td><td>不可稱 clone accuracy/prevalence</td></tr>
+<tr><td>64.89%</td><td><span class="pill p1">UNTRACEABLE</span></td><td>authority 無 numerator/denominator；interval 因而未完整驗證</td><td>移除或補 registry＋validator</td></tr>
+<tr><td>0.909</td><td><span class="pill p1">PARTIAL</span></td><td>可重現 VAF Spearman=0.9093；classification/composition agreement 缺 receipt；不是 accuracy</td><td>固定 metric 名；移除「訊號是真的」</td></tr>
+<tr><td>SR2c local node</td><td><span class="pill pass">IMPROVED</span></td><td>已明示 molecular state、非 cell population、非 global clone tree</td><td>保留 guardrail，向其他頁同步</td></tr>
+</tbody></table></div>
+<h3>新版新增的 6 個 regression</h3>
+<div class="grid2">
+<div class="card"><span class="pill p0">REGRESSED</span><h3>HP family = physical copy</h3><p>未校正 CN/LOH、沒有 parental origin 時，只能稱 phase/haplotag read families；不能視為可識別的實體 chromosome copy。</p></div>
+<div class="card"><span class="pill p1">REGRESSED</span><h3>Likelihood product 必然錯</h3><p>條件獨立性與 misassignment bias 取決於完整生成模型；需 simulation/calibration，不能先固定偏誤方向。</p></div>
+<div class="card"><span class="pill p1">REGRESSED</span><h3>ξ 主導 error floor</h3><p>缺 ξ decomposition/calibration，現有式子也未涵蓋 mapping、chimera、Hamming-1 與 partial coverage。</p></div>
+<div class="card"><span class="pill p1">REGRESSED</span><h3>δ·r = detection limit</h3><p>Background probability 不等於 detection limit；還需 n、α、power、multiple testing 與 detector definition。</p></div>
+<div class="card"><span class="pill p1">REGRESSED</span><h3>Optimizer 幾毫秒收斂</h3><p>頁面同時承認 non-concavity/multi-start，卻無 hardware、input、repeat、failure-rate benchmark。</p></div>
+<div class="card"><span class="pill p0">REGRESSED</span><h3>Production likelihood</h3><p>spec 尚未 calibration/simulation/truth-set/deployment gate，只能稱 proposed likelihood。</p></div>
+</div>
+<details open><summary>32 項 current-delta 完整確認／修正索引（可點擊收合）</summary><div class="table-wrap"><table><thead><tr><th>ID</th><th>Status</th><th>目前最小動作</th></tr></thead><tbody>
+<tr><td>OLD-P0-INDEX</td><td><span class="pill p0">OPEN</span></td><td>read/cell、DNA fraction/cellular purity 分開；改 molecular carrier state</td></tr>
+<tr><td>OLD-P1-GLOSSARY</td><td><span class="pill p1">PARTIAL</span></td><td>保留 f→p 公式；補 triplet/read-AF 條件並修 TO HP type</td></tr>
+<tr><td>OLD-P0-PRINTALL</td><td><span class="pill p0">OPEN</span></td><td>先修所有來源頁，再生成並搜尋全部 P0/P1</td></tr>
+<tr><td>OLD-P1-M02</td><td><span class="pill p1">OPEN</span></td><td>0.909 固定為 VAF technical reproducibility；補 truth/version receipt</td></tr>
+<tr><td>OLD-P1-M03</td><td><span class="pill p1">OPEN</span></td><td>每個 F1 補 source/version/dataset/region/denominator/mode</td></tr>
+<tr><td>OLD-P1-M05</td><td><span class="pill p1">OPEN</span></td><td>加入 self-phasing/candidate-held-out 與 systematics guardrail</td></tr>
+<tr><td>OLD-P1-M06</td><td><span class="pill p1">OPEN</span></td><td>刪 HP1-1-1；TO 改 ONT/PacBio；釘版本</td></tr>
+<tr><td>OLD-P1-M07</td><td><span class="pill p1">OPEN</span></td><td>TO 改 integer HP:i；揭露本 repo safe-filter negative result</td></tr>
+<tr><td>OLD-P0-M09</td><td><span class="pill p0">OPEN</span></td><td>cell group→pattern-conditioned association；分 M1 與 formal 3/811</td></tr>
+<tr><td>OLD-P1-M11</td><td><span class="pill p1">OPEN</span></td><td>列 tested release/commit/binary SHA/runtime help</td></tr>
+<tr><td>OLD-P0-M12</td><td><span class="pill p0">OPEN</span></td><td>癌細胞群→local haplotype-carrier state；效能限 paper scope</td></tr>
+<tr><td>OLD-P0-M13</td><td><span class="pill p1">PARTIAL</span></td><td>移除必然/cell group；只有 κ=2 等條件時 f=p</td></tr>
+<tr><td>OLD-P0-SR1</td><td><span class="pill p0">OPEN</span></td><td>分長期願景與 current validated output；methyl 非 universal clock</td></tr>
+<tr><td>OLD-P1-SR2</td><td><span class="pill p1">OPEN</span></td><td>首屏固定 PROPOSAL／NOT IMPLEMENTED／NOT VALIDATED</td></tr>
+<tr><td>OLD-P0-SR2B</td><td><span class="pill p1">PARTIAL</span></td><td>加 superseded banner；同步 nested funnel；0.909 非 truth</td></tr>
+<tr><td>OLD-P1-SR2C</td><td><span class="pill p1">PARTIAL</span></td><td>保留 molecular guardrail；64.89 移除或補完整 receipt</td></tr>
+<tr><td>OLD-P1-SR4</td><td><span class="pill p1">OPEN</span></td><td>標 algebra/spec-only；補 self-phasing/CN/LOH independence</td></tr>
+<tr><td>OLD-P1-SR5</td><td><span class="pill pass">RESOLVED</span></td><td>維持尚未 real/simulated validation 的 persistent banner</td></tr>
+<tr><td>OLD-P1-SR6</td><td><span class="pill p1">OPEN</span></td><td>部署並標 SPEC/CN-LOH未整合，或正式排除 live contract</td></tr>
+<tr><td>DELTA-NEW-001</td><td><span class="pill p0">REGRESSED</span></td><td>physical chromosome copy→phase/haplotag read family</td></tr>
+<tr><td>DELTA-NEW-002</td><td><span class="pill p0">REGRESSED</span></td><td>likelihood product/偏誤方向改為待 simulation 的模型問題</td></tr>
+<tr><td>DELTA-NEW-003</td><td><span class="pill p1">OPEN</span></td><td>K/tree/CCF/purity 全部標 proposal state，不是 current output</td></tr>
+<tr><td>DELTA-NEW-004</td><td><span class="pill p0">REGRESSED</span></td><td>ξ 量級與主導性降為 candidate error channel，補 calibration</td></tr>
+<tr><td>DELTA-NEW-005</td><td><span class="pill p0">REGRESSED</span></td><td>δ·r 只稱 background probability；另做 power analysis</td></tr>
+<tr><td>DELTA-NEW-006</td><td><span class="pill p0">REGRESSED</span></td><td>刪 milliseconds；補 optimizer/hardware/runtime/failure benchmark</td></tr>
+<tr><td>DELTA-NEW-007</td><td><span class="pill p1">PARTIAL</span></td><td>four-gamete 結論限 strict infinite-sites/no-loss scope</td></tr>
+<tr><td>DELTA-NEW-008</td><td><span class="pill p0">REGRESSED</span></td><td>production likelihood→proposed likelihood，待 calibration gate</td></tr>
+<tr><td>DELTA-NEW-009</td><td><span class="pill p1">PARTIAL</span></td><td>LOH 未建模「必錯」→可能系統性誤表達；預設 abstain</td></tr>
+<tr><td>DELTA-NEW-010</td><td><span class="pill p1">OPEN</span></td><td>補 per-dataset k histogram/runtime profile；19× 只稱相關</td></tr>
+<tr><td>DELTA-NEW-011</td><td><span class="pill p1">OPEN</span></td><td>0.07 補 detector/alpha/power/multiple testing/formula</td></tr>
+<tr><td>DELTA-NUM-012</td><td><span class="pill pass">RESOLVED</span></td><td>保留 CN=2/4 的 0.20/0.11 算式與 CN/LOH caveat</td></tr>
+<tr><td>DELTA-NUM-013</td><td><span class="pill pass">RESOLVED</span></td><td>保留 f=.2,κ=3.2→p=.135；同步修正文 M13</td></tr>
+</tbody></table></div></details>
+<div class="callout red"><b>現行 P0 gate：</b>首頁/M9/M12/M13/SR1 任何尚存的 molecule→cell、aspiration→validated-result 句子，以及 M13 的 <code>f=p</code>，在修正前都不宜讓網站成為研究結論的權威入口。</div>
+</section>
+
+<section id="needed">
+<h2>10. 我們最需要補的資料</h2>
+<div class="grid3">
+<div class="card"><span class="pill p0">科學 P0</span><h3>Allele-specific CN/LOH/purity/CCF</h3><p>每 locus/block 需 caller/version、segment confidence、purity/ploidy、multiplicity、CCF uncertainty。Coverage proxy 不等於 correction。</p></div>
+<div class="card"><span class="pill p0">科學 P0</span><h3>Independent cellular truth</h3><p>single-cell DNA/joint methyl、colonies、spatial/multi-region 或 longitudinal；必須能把 molecule state 對回 cell population。</p></div>
+<div class="card"><span class="pill p0">科學 P0</span><h3>Known-truth benchmark</h3><p>固定 genotype/tree/frequency/CN/LOH/error 的 simulation/mixture，報 topology、frequency、abstention、calibration。</p></div>
+<div class="card"><span class="pill p0">科學 P0</span><h3>Biological replication</h3><p>HCC1395/Dorado 是 technical pair；需不同 biological samples 的 pre-registered held-out replication。</p></div>
+<div class="card"><span class="pill p0">科學 P0</span><h3>Per-read rescue truth</h3><p>若主張 correct tag，需 confusion matrix、false-rescue、abstention、calibration 與 held-out validation。</p></div>
+<div class="card"><span class="pill p0">工程 P0</span><h3>Portable fixture + claim registry</h3><p>tiny licensed BAM/FASTA/VCF、hash、expected outputs；每 claim 連 validator、分母、版本與 status。</p></div>
+<div class="card"><span class="pill p1">證據 P1</span><h3>Storage registry</h3><p>7 tagged BAM exact bytes/hash/compression；另做 BAM field-level byte census。</p></div>
+<div class="card"><span class="pill p1">證據 P1</span><h3>Performance benchmark</h3><p>hardware、compiler、commit、inputs、repeats、median/IQR/tails、threads curve。</p></div>
+<div class="card"><span class="pill p2">定位 P2</span><h3>Dated novelty review</h3><p>databases、query、date、納排與 head-to-head；沒有就不說 first/unique。</p></div>
+</div>
+</section>
+
+<section id="receipts">
+<h2>11. 可重播證據與交付物</h2>
+<ul class="source-list">
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv">158-row claim inventory</a>：每個 proposition、occurrence、evidence、verdict、priority、minimum rewrite。</li>
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/algorithm_cli_matrix.tsv">35-row algorithm／CLI matrix</a>：claim→symbol/runtime→verdict。</li>
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/verification_results.tsv">Verification results</a>：fresh build/test/data arithmetic/HTTP/hash 結果。</li>
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/command_receipts.md">Command receipts</a>：完整 input、command、output、exit code、actual fragments。</li>
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/chr2_18M_independent_audit_fresh.json">chr2 fresh JSON</a>：本輪獨立重算 machine artifact。</li>
+<li><a href="../../../../../research/20260812_intersubmod_github_public_docs_full_validation/lab_tutorial_delta_reaudit.tsv">CCU current delta audit</a>：舊 finding 在 current commit 的 occurrence/status/rewrite。</li>
+<li><a href="20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md">完整 Markdown 報告</a>：推論、限制、驗收 Gate 與外部 primary sources。</li>
+</ul>
+<div class="callout green"><b>結論：</b>不是停止這個研究方向，而是把公開敘述退回目前證據真正能支持的層級；同時優先補能跨越 claim ceiling 的 CN/LOH/purity/CCF、cellular truth、known-truth benchmark 與 biological replication。</div>
+</section>
+
+<footer class="footer">來源版本與數字均鎖定於本報告列出的 commits／artifacts。外部論文只用於限制領域性絕對 claim，不替代 InterSubMod 自身 accuracy validation。HTML 為單檔、無外部套件；列印時展開全部 details。</footer>
+</main>
+</div>
+</body>
+</html>
