@@ -1,0 +1,106 @@
+{
+  "$comment": "frozen binary 的永久凍結副本收據。binary 本體不進 git（280 KB 二進位，且政策禁止），此處只記錄路徑、雜湊與判定結果。",
+  "schema_name": "intersubmod.frozen_binary_bundle_receipt",
+  "schema_version": "1.0.0",
+  "receipt_id": "frozen-exact-ps-topology-af-20260813",
+  "created_at": "2026-08-13",
+  "created_by_branch": "chore/handoff-20260813",
+
+  "binary": {
+    "role": "產生論文核心數字（71,955 read-AF ranked units、exact topology signature census）",
+    "original_path": "/bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af",
+    "size_bytes": 280176,
+    "mtime": "2026-07-24T16:50:00+08:00",
+    "sha256": "ba13ccf23d091854c191f81dd97fa891368d11179df9a69e915f0340b7233b2e",
+    "sha256_verified_at": "2026-08-13"
+  },
+
+  "frozen_bundle": {
+    "path": "/bip7_disk/liaoyoyo2001/_frozen/exact_ps_topology_af_20260724/",
+    "total_size": "14 MB",
+    "checksums_file": "SHA256SUMS",
+    "entries_registered": 431,
+    "entries_verified_ok": 431,
+    "contents": {
+      "build/": "完整 build tree 410 檔，含 binary、41 個 .o、compile_commands.json、CMakeCache.txt",
+      "ism_cli/": "InterSubMod research CLI 源碼 2 檔",
+      "ll_source_b979760/": "LongLineage commit b979760 的 solver 源碼（8 個 .cpp + header）",
+      "ldd.txt": "動態連結依賴快照",
+      "toolchain.txt": "編譯器與核心版本"
+    }
+  },
+
+  "source_adjudication": {
+    "verdict": "RESOLVED_CANDIDATE_A",
+    "adjudication_doc": "docs/provenance/20260813_frozen_binary_source_adjudication_01.md",
+    "method": "以 compile_commands.json 的原始旗標逐字重編兩個候選，三層比對（cmp / objdump -d / nm --defined-only）",
+    "intersubmod_side": {
+      "path": "research/20260724_exact_ps_cpp_topology_af_all_samples/cpp/exact_ps_topology_af.cpp",
+      "sha256": "629fc3099272b2471db43afdf29c1d52eb835f6768fedc4886e51fd62387340d",
+      "size_bytes": 62571,
+      "mtime": "2026-07-24T16:48:00+08:00",
+      "tracked_in_git": true,
+      "note": "mtime 早於 binary 2 分鐘，時序一致"
+    },
+    "longlineage_side": {
+      "resolved_commit": "b979760",
+      "commit_date": "2026-07-22T22:55:00+08:00",
+      "repo": "/big7_disk/liaoyoyo2001/LongLineage",
+      "modules_verified_byte_identical": [
+        "src/solver/obligation_bnb.cpp",
+        "src/solver/parent_mapping.cpp",
+        "src/solver/evidence_builder.cpp",
+        "src/solver/small_q_oracle.cpp",
+        "src/solver/terminal_subset_dp.cpp"
+      ],
+      "verified_count": 5,
+      "obligation_bnb_o_sha256": "37e203682c74c678cce28d08e7024c4e8e98fdda73cd6d71cee7886723c82e26",
+      "not_individually_verified": [
+        "src/artifact/topology_record.cpp — 其 .o 亦存在於 build tree，但不屬 solver 核心，本輪未單獨重編驗證"
+      ]
+    },
+    "rejected_candidate": {
+      "source": "LongLineage worktree 2026-07-26",
+      "obligation_bnb_cpp_sha256": "c499954e10836b7d0fea0888c5b68779456bec03dadb84d481a89bb10985d97a",
+      "why_rejected": "含 2026-07-26 才加入的 options.seed_incumbent 功能，晚於 binary 建置 2 天；重編後 .o 為 57,416 B（frozen 為 57,392 B），28,665 bytes 相異、3,868 行指令差異",
+      "note": "此即 20260801 登錄表誤記的值"
+    }
+  },
+
+  "corrects": {
+    "target_doc": "docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/20260801_權威資料與過期來源登錄_01.md",
+    "target_section": "§3 Frozen implementation identity",
+    "corrected_fields": {
+      "src/solver/obligation_bnb.cpp": {
+        "was": "c499954e10836b7d0fea0888c5b68779456bec03dadb84d481a89bb10985d97a",
+        "now": "LongLineage b979760 版本",
+        "reason": "登錄時取的是當下 worktree 狀態，而該 worktree 已於 07-26 被修改，晚於 binary 的 07-24"
+      },
+      "src/solver/parent_mapping.cpp": {
+        "was": "95aa509b9bca1e3eef67be25f56b48b42373c5e127decb8a31c7485414163862",
+        "now": "不變 — 兩候選一致，原登錄正確"
+      }
+    },
+    "policy_note": "依 evidence_ledger 的 append-only 慣例，不修改 20260801 的凍結文件，於本 receipt 與 adjudication doc 登錄更正"
+  },
+
+  "supersedes_status": {
+    "field": "handoff_manifest.json#implementation.frozen_binary.relationship_to_current_dirty_sources",
+    "was": "not_proven_byte_reproducible",
+    "now": "PROVEN_BYTE_IDENTICAL_AGAINST_LL_b979760",
+    "evidence": "5/5 solver 模組 byte-identical（cmp 通過），obligation_bnb .o sha256 完全相同"
+  },
+
+  "citation_policy": {
+    "rule": "論文軟體引用只引 InterSubMod + commit hash，不引 LongLineage",
+    "tension_resolved_in": "docs/provenance/20260813_frozen_binary_source_adjudication_01.md#6",
+    "basis": "solver 8 個 .cpp 對 methyl/Methyl/cpg/CpG/beta_value/m1_/label 掃描全部命中 0；輸入型別僅 pattern_raox / base_qualities / multiplicity，為純組合最佳化，不引入甲基化語意",
+    "methods_section_guidance": "演算法實作處註明 solver 來源與版本（LongLineage b979760）；結果歸屬處只引 InterSubMod"
+  },
+
+  "verification_commands": [
+    "sha256sum /bip7_disk/liaoyoyo2001/_frozen/exact_ps_topology_af_20260724/build/bin/exact_ps_topology_af",
+    "sha256sum -c /bip7_disk/liaoyoyo2001/_frozen/exact_ps_topology_af_20260724/SHA256SUMS",
+    "git -C /big7_disk/liaoyoyo2001/LongLineage cat-file -e b979760^{commit}"
+  ]
+}
