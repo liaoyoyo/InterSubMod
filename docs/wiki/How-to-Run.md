@@ -198,7 +198,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 
 ## 07 · 全流程速查
 
-![howto-six-steps](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/ddd8909a838318d8a77969313e9561c8ff9d01c2/docs/images/howto-six-steps.png)
+![howto-six-steps](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/howto-six-steps.png)
 
 > **圖 1 · 六個步驟與各自的驗收點** —— 六個步驟依序為：編譯、跑測試、裝 Python 依賴、tiny synthetic DEMO、檢視輸出、驗證歷史數字；測試數須由該 commit 的 CTest/run_tests 動態輸出，驗收為 0 failure。Tiny fixture 是 public fresh-clone smoke，不是 real-data science。
 

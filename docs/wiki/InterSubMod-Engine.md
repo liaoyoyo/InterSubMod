@@ -59,7 +59,7 @@
 
 程式內部共 20 個細部步驟，下圖濃縮成 8 個關鍵階段。每個階段標了實際生效的參數。
 
-![ism-internal-pipeline](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/ddd8909a838318d8a77969313e9561c8ff9d01c2/docs/images/ism-internal-pipeline.png)
+![ism-internal-pipeline](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/ism-internal-pipeline.png)
 
 > **圖 1 · InterSubMod 內部處理鏈**（每個方框下方是實際生效的參數，非文件宣稱值）
 >
