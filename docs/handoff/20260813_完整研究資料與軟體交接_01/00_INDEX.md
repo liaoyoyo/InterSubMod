@@ -96,8 +96,8 @@ Artifact registry共有20筆`FINAL_FOR_SCOPE`：其中19筆是frozen science/sou
 | Frozen authority bytes | **PASS** | 19/19 SHA-256 MATCH |
 | Repo hygiene | **PASS** | isolated HEAD 0 absolute/broken symlink；tracked local settings移除且可復原 |
 | Unified inventory | **PASS** | 51 physical runs、36 artifacts、16 machine paths、11 storage roots；6/6 schemas與11/11 tests PASS |
-| Clean build/C++/Python | **IN PROGRESS** | 必須由本 release stack動態產生 receipt |
-| Synthetic E2E | **DEMO PASS / STACK PENDING** | isolated run已驗199欄與12 read leaves；仍須在portable commit clean clone重播，不得取代science |
+| Clean build/C++/Python | **LOCAL PASS / HOSTED PENDING** | clean snapshot CTest與完整Python suite PASS；精確test/suite count由當次CTest/pytest receipt動態產生，GitHub-hosted receipt仍待PR執行 |
+| Synthetic E2E | **DEMO PASS** | bip7由portable commit `fb806d9b` clean clone重播，驗199欄、12 read leaves與binary/output SHA-256；不得取代science |
 | bip7 fresh-clone | **BLOCKED** | real-data paths存在但4個local checksum locator缺失；完整 fresh-clone receipt待補 |
 | bip8 fresh-clone | **BLOCKED** | 尚未在 hostname=bip8執行 |
 | 158 claims/source | **BLOCKED** | 完整working stack的33/33 local P0 guards PASS，第34筆C108 external-only BLOCKED，排定由後續`public-claim-corrections` PR處理；69 confirmed、64 confirmed-with-limits、25 unverified，Wiki／Pages／About live驗證未閉合 |

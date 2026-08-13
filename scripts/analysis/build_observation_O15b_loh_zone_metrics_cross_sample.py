@@ -19,12 +19,16 @@ import argparse
 import sys
 import time
 import warnings
+from pathlib import Path
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
-from observation_common import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.analysis.observation_common import (  # noqa: E402
     load_master_dataset, setup_plot_style, save_figure, add_caption,
     compute_auc, compute_effect_size,
     encode_truth_binary, ensure_dir, safe_div,
@@ -35,7 +39,6 @@ from observation_common import (
 
 import json
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import matplotlib
@@ -48,10 +51,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.lib.verification_schema_contract import (  # noqa: E402
     LEGACY_CLASSES,
