@@ -11,7 +11,7 @@
       "authority.frozen_binary"
     ],
     "evidence_status": "VALIDATED_DERIVED",
-    "filesystem_mtime": "2026-08-13T10:41:05+08:00",
+    "filesystem_mtime": "2026-08-13T18:53:33+08:00",
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": "2026-08-13T10:49:23+08:00",
     "genome_build": null,
@@ -23,10 +23,10 @@
     "known_limits": [
       "Append-only correction; the 2026-08-01 authority manifest remains immutable."
     ],
-    "license": "GPL-3.0-or-later",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/provenance/20260813_frozen_binary_source_adjudication_01.md"
@@ -36,13 +36,13 @@
     "producer": "frozen build-tree cmp/objdump/nm adjudication",
     "producer_commit": "e3c0889100da88e6056e9268e07f6f94f8e9312b",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: validate docs/provenance/20260813_frozen_binary_bundle_receipt.json and docs/provenance/20260813_frozen_binary_source_adjudication_01.md; no science rerun",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
     "semantic_description": "2026-08-13 append-only correction linking the frozen binary to InterSubMod CLI and LongLineage b979760",
-    "sha256": "3c85d15de0f069c3277ba317689f4bc574bf93c296cd181d32109e7c5c40fbb9",
-    "size_bytes": 8457,
+    "sha256": "12c18c2130e2feb3879eca11b97f07ae0f650b099416242c3a54dcd6eddf9dae",
+    "size_bytes": 9428,
     "supersedes": [
       "status:not_proven_byte_reproducible",
       "source-role:authority.source_snapshot_4"
@@ -54,7 +54,7 @@
     "validates": [
       "5/5 LongLineage solver modules byte-identical to frozen build objects"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.all7_cohort_receipt",
@@ -85,10 +85,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/cohort_receipt.json"
@@ -98,7 +98,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
@@ -111,7 +111,7 @@
     "validates": [
       "all7 chr1-22"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.all7_cpp_reader_report",
@@ -142,10 +142,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/20260724_C++_exact_PS拓撲與read_AF全七樣本驗證_01.md"
@@ -155,7 +155,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "document",
     "scope": "FULL",
@@ -168,7 +168,7 @@
     "validates": [
       "all7 chr1-22"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.all7_summary",
@@ -199,10 +199,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/summary/all7_summary.json"
@@ -212,7 +212,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
@@ -225,7 +225,7 @@
     "validates": [
       "98,955 final groups"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.candidate_factorization_receipt",
@@ -256,10 +256,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260725_exact_ps_candidate_factorization/all7_v2/receipt.json"
@@ -269,7 +269,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.1.0",
     "scope": "FULL",
@@ -282,7 +282,7 @@
     "validates": [
       "71,955 ranked units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.frozen_binary",
@@ -309,10 +309,10 @@
       "2026-08-13 append-only adjudication proves 5/5 solver modules byte-identical to LongLineage b979760.",
       "source_snapshot_4 is a later LongLineage worktree byte snapshot and is explicitly rejected as binary source truth."
     ],
-    "license": "GPL-3.0-or-later; linked source-origin recorded in append-only adjudication",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; linked source-origin recorded in append-only adjudication",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af"
@@ -322,7 +322,7 @@
     "producer": "InterSubMod research CLI linked with LongLineage solver modules",
     "producer_commit": "InterSubMod 387a101e6a3292e0d7f230ba8d20271c7434972a + LongLineage b979760 (append-only adjudication)",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "binary-build-tree-v1",
     "scope": "FULL",
@@ -336,7 +336,7 @@
       "authority.all7_summary"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.methyl_manifest",
@@ -367,10 +367,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260727_multisite_pattern_methyl_topology_validation/manifest.yaml"
@@ -380,7 +380,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "yaml_contract",
     "scope": "FULL",
@@ -393,7 +393,7 @@
     "validates": [
       "1,045 formal multi-sSNV pattern units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.methyl_reader_report",
@@ -424,10 +424,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260727_multisite_pattern_methyl_topology_validation/20260727_多sSNV_pattern與甲基關聯全面驗證_01.md"
@@ -437,7 +437,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "document",
     "scope": "FULL",
@@ -450,7 +450,7 @@
     "validates": [
       "1,045 formal methyl units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.methyl_report_data",
@@ -481,10 +481,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/report/20260727_multisite_pattern_methyl_association_data_06.json"
@@ -494,7 +494,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "report_data_v06",
     "scope": "FULL",
@@ -507,7 +507,7 @@
     "validates": [
       "1,045 formal methyl units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.methyl_sidecar_receipt",
@@ -538,10 +538,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260727_multisite_pattern_methyl_topology_validation/all7_v1/sidecar/pattern_methyl_sidecar.v1.receipt.json"
@@ -551,7 +551,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1",
     "scope": "FULL",
@@ -564,7 +564,7 @@
     "validates": [
       "methyl sidecar"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.read_af_decision_report",
@@ -595,10 +595,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_likelihood_vaf_edge_identifiability_audit/20260724_HP-specific_read-AF與Likelihood路徑排序決策_02.md"
@@ -608,7 +608,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "document",
     "scope": "FULL",
@@ -621,7 +621,7 @@
     "validates": [
       "read-AF, likelihood and CCF identifiability"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.source_snapshot_1",
@@ -637,14 +637,17 @@
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": null,
     "genome_build": null,
-    "inputs": [],
+    "inputs": [
+      "authority_manifest_20260801",
+      "registered filesystem source object: /big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/cpp/exact_ps_topology_af.cpp"
+    ],
     "known_limits": [
       "Current mtimes and Git HEAD are not substitutes for the frozen SHA-256."
     ],
-    "license": "GPL-3.0-or-later; cross-repo source-origin recorded separately",
+    "license": "GPL-3.0-only; cross-repo source-origin recorded separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/cpp/exact_ps_topology_af.cpp"
@@ -652,9 +655,9 @@
     ],
     "mode": null,
     "producer": "2026-08-01 handoff inventory",
-    "producer_commit": null,
+    "producer_commit": "UNCOMMITTED_AT_20260801; exact bytes later committed as 886fb5e648978f80b5d435360ce1c16432fa6843",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; this immutable source snapshot is not regenerated",
     "sample_id": null,
     "schema_version": "source-snapshot-v1",
     "scope": "FULL",
@@ -667,7 +670,7 @@
       "authority.frozen_binary"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.source_snapshot_2",
@@ -683,14 +686,17 @@
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": null,
     "genome_build": null,
-    "inputs": [],
+    "inputs": [
+      "authority_manifest_20260801",
+      "registered filesystem source object: /big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/scripts/run_exact_ps_cpp_topology_all7.py"
+    ],
     "known_limits": [
       "Current mtimes and Git HEAD are not substitutes for the frozen SHA-256."
     ],
-    "license": "GPL-3.0-or-later; cross-repo source-origin recorded separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; cross-repo source-origin recorded separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_af_all_samples/scripts/run_exact_ps_cpp_topology_all7.py"
@@ -698,9 +704,9 @@
     ],
     "mode": null,
     "producer": "2026-08-01 handoff inventory",
-    "producer_commit": null,
+    "producer_commit": "UNCOMMITTED_AT_20260801; exact bytes later committed as 6583ae1382befd20ff4a4c4ff076cb17020537de",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; this immutable source snapshot is not regenerated",
     "sample_id": null,
     "schema_version": "source-snapshot-v1",
     "scope": "FULL",
@@ -713,7 +719,7 @@
       "authority.all7_cohort_receipt"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.source_snapshot_3",
@@ -729,14 +735,17 @@
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": null,
     "genome_build": null,
-    "inputs": [],
+    "inputs": [
+      "authority_manifest_20260801",
+      "registered filesystem source object: /big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/exact_ps_partition_to_mlhp.py"
+    ],
     "known_limits": [
       "Current mtimes and Git HEAD are not substitutes for the frozen SHA-256."
     ],
-    "license": "GPL-3.0-or-later; cross-repo source-origin recorded separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; cross-repo source-origin recorded separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/exact_ps_partition_to_mlhp.py"
@@ -744,9 +753,9 @@
     ],
     "mode": null,
     "producer": "2026-08-01 handoff inventory",
-    "producer_commit": null,
+    "producer_commit": "UNCOMMITTED_AT_20260801; exact bytes later committed as 23aef3f5527bd2dd9b4b05712414b68f8183baea",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; this immutable source snapshot is not regenerated",
     "sample_id": null,
     "schema_version": "source-snapshot-v1",
     "scope": "FULL",
@@ -757,7 +766,7 @@
     "technical_dataset_id": null,
     "used_by": [],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.source_snapshot_4",
@@ -773,16 +782,19 @@
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": null,
     "genome_build": null,
-    "inputs": [],
+    "inputs": [
+      "authority_manifest_20260801",
+      "registered filesystem source object: /big7_disk/liaoyoyo2001/LongLineage/src/solver/obligation_bnb.cpp"
+    ],
     "known_limits": [
       "The bytes remain part of the immutable 2026-08-01 19-item replay.",
       "This snapshot includes a 2026-07-26 seed_incumbent change and post-dates the 2026-07-24 binary.",
       "Do not list this artifact as an input to authority.frozen_binary."
     ],
-    "license": "GPL-3.0-or-later; cross-repo source-origin recorded separately",
+    "license": "GPL-3.0-only; cross-repo source-origin recorded separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/LongLineage/src/solver/obligation_bnb.cpp"
@@ -790,9 +802,9 @@
     ],
     "mode": null,
     "producer": "2026-08-01 handoff inventory",
-    "producer_commit": null,
+    "producer_commit": "UNCOMMITTED_AT_20260801; exact bytes later committed as 9ad976b10eb51589a043b55ccc52b6232df9fa3a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; this immutable source snapshot is not regenerated",
     "sample_id": null,
     "schema_version": "source-snapshot-v1",
     "scope": "FULL",
@@ -803,7 +815,7 @@
     "technical_dataset_id": null,
     "used_by": [],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.source_snapshot_5",
@@ -819,14 +831,17 @@
     "finality": "FINAL_FOR_SCOPE",
     "generated_at": null,
     "genome_build": null,
-    "inputs": [],
+    "inputs": [
+      "authority_manifest_20260801",
+      "registered filesystem source object: /big7_disk/liaoyoyo2001/LongLineage/src/solver/parent_mapping.cpp"
+    ],
     "known_limits": [
       "Current mtimes and Git HEAD are not substitutes for the frozen SHA-256."
     ],
-    "license": "GPL-3.0-or-later; cross-repo source-origin recorded separately",
+    "license": "GPL-3.0-only; cross-repo source-origin recorded separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/LongLineage/src/solver/parent_mapping.cpp"
@@ -834,9 +849,9 @@
     ],
     "mode": null,
     "producer": "2026-08-01 handoff inventory",
-    "producer_commit": null,
+    "producer_commit": "b9797605cdc859e571c1961c1b4343c40d7c7183",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; this immutable source snapshot is not regenerated",
     "sample_id": null,
     "schema_version": "source-snapshot-v1",
     "scope": "FULL",
@@ -849,7 +864,7 @@
       "authority.frozen_binary"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.strict_linkage_ready",
@@ -880,10 +895,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/READY.json"
@@ -893,7 +908,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
@@ -906,7 +921,7 @@
     "validates": [
       "7 datasets x chr1-22 strict linkage"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.topology_reader_report",
@@ -937,10 +952,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/20260724_exactPS最佳樹拓撲Signature精確統計_01.md"
@@ -950,7 +965,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "document",
     "scope": "FULL",
@@ -963,7 +978,7 @@
     "validates": [
       "71,955 ranked units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.topology_receipt",
@@ -994,10 +1009,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/receipt.v2.json"
@@ -1007,7 +1022,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
@@ -1020,7 +1035,7 @@
     "validates": [
       "71,955 ranked units and 680,527 global-best trees"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "authority.topology_summary",
@@ -1051,10 +1066,10 @@
       "The thesis draft predates the 2026-07-24 and 2026-07-27 results.",
       "The InterSubMod and LongLineage working trees are dirty; current mtimes and Git HEAD alone are not release authority."
     ],
-    "license": "GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION; upstream dataset license tracked separately",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/summary.json"
@@ -1064,7 +1079,7 @@
     "producer": "frozen exact-PS / methylation research pipeline",
     "producer_commit": "387a101e6a3292e0d7f230ba8d20271c7434972a",
     "public_uri": null,
-    "regeneration_command": null,
+    "regeneration_command": "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py --manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json --output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science",
     "sample_id": null,
     "schema_version": "1.0.0",
     "scope": "FULL",
@@ -1077,7 +1092,7 @@
     "validates": [
       "71,955 ranked units"
     ],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.colo829.paired_full",
@@ -1104,7 +1119,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/COLO829_tagged.bam"
@@ -1127,7 +1142,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.colo829.paired_pileup",
@@ -1154,7 +1169,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_pileup/20260315_COLO829_paired_pileup_pileup_complete_matrix/longphase_s/COLO829_tagged.bam"
@@ -1177,7 +1192,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.h1437.paired_full",
@@ -1204,7 +1219,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H1437/paired_full/20260315_H1437_paired_full_full_complete_matrix/longphase_s/H1437_tagged.bam"
@@ -1227,7 +1242,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.h1437.paired_pileup",
@@ -1254,7 +1269,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H1437/paired_pileup/20260315_H1437_paired_pileup_pileup_complete_matrix/longphase_s/H1437_tagged.bam"
@@ -1277,7 +1292,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.h2009.paired_full",
@@ -1304,7 +1319,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H2009/paired_full/20260315_H2009_paired_full_full_complete_matrix/longphase_s/H2009_tagged.bam"
@@ -1327,7 +1342,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.h2009.paired_pileup",
@@ -1354,7 +1369,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H2009/paired_pileup/20260315_H2009_paired_pileup_pileup_complete_matrix/longphase_s/H2009_tagged.bam"
@@ -1377,7 +1392,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1395.paired_full",
@@ -1404,7 +1419,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam"
@@ -1427,7 +1442,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1395.paired_pileup",
@@ -1454,7 +1469,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_pileup/20260314_HCC1395_paired_pileup_pileup_complete_matrix/longphase_s/HCC1395_tagged.bam"
@@ -1477,7 +1492,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1395_dorado.paired_full",
@@ -1504,7 +1519,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395_DORADO/paired_full/20260315_HCC1395_DORADO_paired_full_full_complete_matrix/longphase_s/HCC1395_DORADO_tagged.bam"
@@ -1527,7 +1542,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1395_dorado.paired_pileup",
@@ -1554,7 +1569,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395_DORADO/paired_pileup/20260315_HCC1395_DORADO_paired_pileup_pileup_complete_matrix/longphase_s/HCC1395_DORADO_tagged.bam"
@@ -1577,7 +1592,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1937.paired_full",
@@ -1604,7 +1619,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1937/paired_full/20260315_HCC1937_paired_full_full_complete_matrix/longphase_s/HCC1937_tagged.bam"
@@ -1627,7 +1642,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1937.paired_pileup",
@@ -1654,7 +1669,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1937/paired_pileup/20260315_HCC1937_paired_pileup_pileup_complete_matrix/longphase_s/HCC1937_tagged.bam"
@@ -1677,7 +1692,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1954.paired_full",
@@ -1704,7 +1719,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1954/paired_full/20260315_HCC1954_paired_full_full_complete_matrix/longphase_s/HCC1954_tagged.bam"
@@ -1727,7 +1742,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "canonical.pre_fix_tagged_bam.hcc1954.paired_pileup",
@@ -1754,7 +1769,7 @@
     "license": "Upstream public research dataset license and redistribution review required; payload remains local",
     "machine_locations": [
       {
-        "last_seen_at": "2026-08-13T11:21:47+08:00",
+        "last_seen_at": "2026-08-13T20:41:53+08:00",
         "location_status": "PRESENT",
         "machine": "bip7",
         "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1954/paired_pileup/20260315_HCC1954_paired_pileup_pileup_complete_matrix/longphase_s/HCC1954_tagged.bam"
@@ -1777,7 +1792,7 @@
       "historical ASM and LOH/HP analyses"
     ],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "claim.invalidated_canonical_19_runs",
@@ -1795,7 +1810,7 @@
     "known_limits": [
       "Do not invent a nineteenth logical run or collapse 51 physical directories into 18 logical records."
     ],
-    "license": "GPL-3.0-or-later",
+    "license": "PROJECT_LICENSE_PENDING_MAINTAINER_CONFIRMATION",
     "machine_locations": [],
     "mode": null,
     "producer": "legacy line-count calculation",
@@ -1812,7 +1827,7 @@
     "technical_dataset_id": null,
     "used_by": [],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   },
   {
     "artifact_id": "legacy.big7_runbook_original",
@@ -1847,6 +1862,6 @@
     "technical_dataset_id": null,
     "used_by": [],
     "validates": [],
-    "verified_at": "2026-08-13T11:21:47+08:00"
+    "verified_at": "2026-08-13T20:41:53+08:00"
   }
 ]

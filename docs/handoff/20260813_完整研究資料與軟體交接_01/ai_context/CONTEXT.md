@@ -46,13 +46,16 @@
 - LongPhase-TO：tumor-only candidate phasing、PON/LOH/HI context、tagged reads。
 - exact-PS／LongLineage：從exact PS×HP read assignments建local candidate mutation-state families／graph shapes／abstains。
 - InterSubMod：BAM+FASTA+VCF → per-region methylation、read distance、read clustering與statistics。
-- Python／HTML：呈現validated data；不重新計算或創造science。
+- Commit-pinned Python research solver／analysis script：可以是 science producer，但必須自帶
+  input、producer commit、command receipt、schema、scope 與 output hash。
+- Python validator／publication builder／HTML：只驗證與呈現 validated data；不得暗中重新計算、
+  改寫 denominator 或創造 science。不能用「Python」一詞把 producer 與 presenter 混成同一層。
 
 ## Git freeze
 
 - InterSubMod include baseline：`ddd8909a838318d8a77969313e9561c8ff9d01c2`。
 - InterSubMod exclude：`73afaeac`、2026-08-13 drilldown/CNV dirty work；標`IN_PROGRESS/PARTIAL`。
-- LongLineage preview include：`b9aaa12`。
+- LongLineage preview include：`b9aaa12`；該 immutable candidate 的 frozen baseline為47/47 tests。後續private safety stack `f60b5f3`為49/49 foundation PASS，但不是preview baseline，不能把49歸給`b9aaa12`。
 - LongLineage exclude：`9ad976b`、`6ce62b2`、dirty work。
 - LongLineage production `run` intentionally returns`KernelBlocked` exit 6；P3/P4/P5/P7/P8 BLOCKED。
 
@@ -72,7 +75,9 @@
 ## 六問標準答案
 
 1. **專案是什麼？** Read-level sSNV linkage、local mutation-state candidate reconstruction與methylation association研究。
-2. **目前結論？** 有frozen technical/model evidence；沒有confirmed cellular clone或ancestry；methyl association-only；CN/LOH未整合。
+2. **目前結論？** 有frozen technical/model evidence；沒有confirmed cellular clone或ancestry；
+   methyl association-only；CN/LOH未整合進frozen candidate reconstruction，沒有CN/LOH-corrected
+   inference。InterSubMod optional LOH BED僅用於annotation／stratification。
 3. **哪些資料final？** 查artifact registry，不看資料夾名；只有AUTHORITY+FULL+FINAL_FOR_SCOPE+hash。
 4. **三套工具如何分工？** LongPhase上游tag/phasing；exact-PS/LongLineage candidate reconstruction；InterSubMod read-methylation/statistics。
 5. **bip7/bip8如何跑？** bootstrap profile→doctor→plan→clean build/test→synthetic smoke→real-data read-only preflight；每台host各自receipt。
@@ -90,10 +95,10 @@
 
 ## 目前阻塞
 
-- 158 public claims中33/33 local P0 guards已PASS；第34筆P0 C108為GitHub About external-only且仍blocked。另25 claims仍`UNVERIFIED`，Wiki/Pages/About等live publication gate未閉合。
+- 158 public claims中33/33 local P0 guards已PASS；第34筆P0 `C108` GitHub About已由live re-fetch取得bounded live `CONFIRMED_WITH_LIMITS`。Registry現為69 `CONFIRMED`、69 `CONFIRMED_WITH_LIMITS`、20 `UNVERIFIED`；P1/P2、default branch、Wiki與Pages仍未閉合，publication/release維持`BLOCKED`。
 - bip8 host-local receipt缺失。
 - full-history secret scan工具/gate未閉合。
-- LongLineage foundation 49/49 tests已PASS，但4 source rows、21 source-license rows、11 dependency license determinations與7 history findings仍blocked；repository目前private，曾公開暴露不能視為未發生。
+- LongLineage後續private safety stack `f60b5f3` foundation 49/49 tests已PASS（`b9aaa12` frozen baseline是47/47），但4 source rows、21 source-license rows、11 dependency license determinations與7 history findings仍blocked；repository目前private，曾公開暴露不能視為未發生。
 - tag／GitHub Release不得建立。
 
 本context只負責避免誤解；真正數字與狀態以registries及receipts為準。

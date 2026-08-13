@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-08-05
-狀態: validated
+狀態: HISTORICAL_SUPERSEDED（僅代表 2026-08-05 當時快照曾被驗證）
 目標: 工程交接包的單一入口 — 30 秒結論、閱讀順序、第一天該做什麼
 處理範圍: 資料層 / 程式層 / 輸出層 / 收斂驗收；補 20260801 科學交接包未涵蓋的工程面
 關聯檔案:
@@ -9,6 +9,9 @@
   - InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/README.md（科學層 parent）
 驗證方式: 2026-08-05 實跑 clean build + C++ 258 tests + 19 artifact hash + 資料量測
 -->
+
+> [!CAUTION]
+> **HISTORICAL / SUPERSEDED — 只用於追溯 2026-08-05 當時觀察。** 本包中的磁碟餘量、測試數、dirty-file 數、CLI/schema 欄數與 readiness 判定都不是 2026-08-13 現況，也不得覆蓋 frozen science authority。請從[2026-08-13 完整研究交接](../20260813_完整研究資料與軟體交接_01/00_INDEX.md)進入；原始 JSON receipts 保留為歷史證據，未被改寫。
 
 # InterSubMod 系統交接與驗收包（2026-08-05）
 

@@ -1,0 +1,1509 @@
+{
+  "schema_name": "intersubmod.algorithm_cli_claim_crosswalk",
+  "schema_version": "1.0.0",
+  "crosswalk_id": "intersubmod-algorithm-cli-claims-20260813",
+  "assessed_at": "2026-08-13T20:00:00+08:00",
+  "assessed_git_commit": "e83437ab9775d2cd3e27eb4e57f89f7d38126023",
+  "source_state": "COMMIT_PINNED",
+  "source_matrix": {
+    "path": "research/20260812_intersubmod_github_public_docs_full_validation/algorithm_cli_matrix.tsv",
+    "sha256": "6da495a6e50a3a9b94149ab3f65100dd2c702f873cb7156209c59274abd4504f",
+    "rows": 35
+  },
+  "claim_inventory": {
+    "path": "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+    "sha256": "d5d8794c2467ac6ac466711f91890666f3dbc571d9b3e27b07ba5f10d642ddbc",
+    "rows": 158
+  },
+  "guard_registry": {
+    "path": "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json",
+    "sha256": "f9f03ab14047493db3b1fa27e13a270560f5f67f8a8f40c77902cd40cd3b3dfc"
+  },
+  "source_snapshot": [
+    {
+      "path": "QUICKSTART.md",
+      "sha256": "ef009531f4bac8cfe01f06c6e95cd09f551e74ff8891f6d99d91e6f438080c0c"
+    },
+    {
+      "path": "README.md",
+      "sha256": "3c7ddda6487b96546f0014a341d964768dc158cb3003dae494e90debb616777c"
+    },
+    {
+      "path": "README.zh-TW.md",
+      "sha256": "939c2cc1f64fe16b7ab820e854b7711a596e823035d87817c4c3a5a796913f95"
+    },
+    {
+      "path": "README_PROJECT_SUMMARY.md",
+      "sha256": "0cdecebde4d6f4f5d20424826b2fedf44369527b3298dc4df4c819d17ec5a6ae"
+    },
+    {
+      "path": "docs/explain/03_methylation-read-filter.standalone.html",
+      "sha256": "3817da0cc0f7f22ed3575ab48b8f324cba92f91000c8d65bf592e69e201dec9e"
+    },
+    {
+      "path": "docs/explain/11_system-map-overview.standalone.html",
+      "sha256": "845083195d995649fa6449ad791388cd45b539bdeb6a646647cb161c7dc76f47"
+    },
+    {
+      "path": "docs/explain/12_intersubmod-io.standalone.html",
+      "sha256": "5c0ce35d8ea78f876ab2e1baaa512fcaa34c55d7ebc095ed7949682a90137078"
+    },
+    {
+      "path": "docs/explain/14_upstream-data.standalone.html",
+      "sha256": "37740d427dec1593838612ba7e1e6e14460ffbfeaae73a4c2c0181ebb88459c7"
+    },
+    {
+      "path": "docs/explain/16_how-to-run.standalone.html",
+      "sha256": "83a9aca2eed4841c0dc13a347f3059105704a912e86f88b1fe57c1eb44e67d46"
+    },
+    {
+      "path": "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_bip7_bip8操作與驗證_01.md",
+      "sha256": "a857bc061b32950f23478d9bf1482741047a82263e04f68d627da52e695e0205"
+    },
+    {
+      "path": "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md",
+      "sha256": "75ad360ef9047fbddae26165cf3e6b2c2e755c2592c5f2f20c2fd15be38a9d3d"
+    },
+    {
+      "path": "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md",
+      "sha256": "a8564ab8194e17a7bb7935fb2d1f20fb99ab2f4f14dbe6d18342a0d77121a9e7"
+    },
+    {
+      "path": "docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/longlineage_capability_matrix.md",
+      "sha256": "5b8d8961d88ec39b82558d5514f75d7c16ed2c3ea92af089a5ce70561e62066c"
+    },
+    {
+      "path": "docs/wiki/Analysis-and-Presentation.md",
+      "sha256": "b52655ebf9a8e41a6681980ffccb87cd470ea2b918128f8e159013a4d1413049"
+    },
+    {
+      "path": "docs/wiki/Home.md",
+      "sha256": "de7724de10351e68887af170235e2c70d5ccd763384ca435f933da6d45c3d1aa"
+    },
+    {
+      "path": "docs/wiki/How-to-Run.md",
+      "sha256": "d243c32e504f43fbc7334dcd064d6cef3b869873524c855da7c8f077d1986faf"
+    },
+    {
+      "path": "docs/wiki/InterSubMod-Engine.md",
+      "sha256": "92a141c74e76f545bbc0d21c1f2c0141ef2d5d609034b60a07f067407ff3b4ee"
+    },
+    {
+      "path": "docs/wiki/LongLineage-Engine.md",
+      "sha256": "843c09c5f791749753d6cac144dfe0c7ffabf1b3315248c2f3f169ae420a78fc"
+    },
+    {
+      "path": "docs/wiki/System-Overview.md",
+      "sha256": "7f91309b313ed9e057ba0a506009c6be6a5b32334c5e8cbf6fac47afe27eb5e6"
+    },
+    {
+      "path": "docs/wiki/Upstream-and-Data.md",
+      "sha256": "4f125c74260dbc9b7caae0db7fcde50b30df528691cb91595001ce959a53b01d"
+    },
+    {
+      "path": "pipeline/README.md",
+      "sha256": "37f8ab43307504da9e4ae3ecd8bc2b2c24c86e44d7fb23ac71966d1a586ee8bf"
+    }
+  ],
+  "source_snapshot_tree_sha256": "5327f37e5daa78a5deddeff1ad9389d75ec24d8d115fc02b89806fbd3285e891",
+  "disposition_semantics": {
+    "applies_to": "bounded_current_claim_not_original_public_claim",
+    "CONFIRMED": "The bounded current claim has direct verified evidence; this never revives a contradicted original claim.",
+    "CONFIRMED_WITH_LIMITS": "The bounded current claim is supported only within its explicit revision, path, fixture or evidence ceiling.",
+    "UNVERIFIED": "The claim lacks a replayable or sufficiently direct receipt and remains fail-closed."
+  },
+  "counts": {
+    "records": 35,
+    "related_claim_links": 40,
+    "records_with_related_claim_ids": 29,
+    "records_without_related_claim_ids": 6,
+    "by_current_disposition": {
+      "CONFIRMED": 6,
+      "CONFIRMED_WITH_LIMITS": 27,
+      "UNVERIFIED": 2
+    },
+    "by_source_correction": {
+      "LOCAL_SOURCE_CORRECTED": 26,
+      "NOT_APPLICABLE": 1,
+      "NO_CHANGE_REQUIRED": 8
+    },
+    "by_guard_status": {
+      "MISSING": 14,
+      "NOT_REQUIRED": 5,
+      "PASS": 16
+    },
+    "by_evidence_status": {
+      "HISTORICAL_ONLY": 5,
+      "MISSING": 1,
+      "SOURCE_INSPECTION_ONLY": 8,
+      "VERIFIED": 6,
+      "VERIFIED_WITH_LIMITS": 15
+    }
+  },
+  "gates": {
+    "CROSSWALK_COMPLETENESS": {
+      "status": "PASS",
+      "reason": "ALG-001 through ALG-035 are present exactly once and hash-bound to the 2026-08-12 source rows."
+    },
+    "PUBLICATION_ASSET_READY": {
+      "status": "PASS",
+      "reason": "The crosswalk is publishable as a bounded, hash-bound inventory; this does not prove live default-branch, Wiki or Pages publication/refetch."
+    },
+    "RELEASE_ASSET_READY": {
+      "status": "PASS",
+      "reason": "The crosswalk is acceptable as a research-snapshot asset because ALG-023 and ALG-030 remain conspicuously UNVERIFIED and row-level BLOCKED; this is not aggregate repository release approval."
+    }
+  },
+  "records": [
+    {
+      "algorithm_claim_id": "ALG-001",
+      "source_row_sha256": "20ae339782321f7eafa1383a1475a4b054f2ef94ec661bf78f3fe2ab7fa7bb56",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "CLI help says --threads defaults to 1 while the effective Config default is 16",
+      "bounded_current_claim": "The normal Config/ArgParser path uses 16 threads when --threads is omitted; the current help string still says Default: 1.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C052"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md"
+        ],
+        "note": "Public docs disclose the help/runtime mismatch instead of treating help text as authority."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/include/core/Config.hpp:43; InterSubMod/include/utils/ArgParser.hpp:57",
+          "./build/bin/inter_sub_mod --help exits 1 and prints Default: 1; source initializes threads=16"
+        ],
+        "claim_ceiling": "Applies to the normal Config plus ArgParser entry path at the assessed source snapshot."
+      },
+      "known_limits": [
+        "The CLI help text itself remains stale and no dedicated cross-document guard covers this mismatch."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Correct the help string or add a generated CLI-default conformance test before release."
+    },
+    {
+      "algorithm_claim_id": "ALG-002",
+      "source_row_sha256": "48af7e3cec29ff243be8fbc26af9e9b9c5edbca8572c76bbd62cd567666ac3ee",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "Thread count is used for OpenMP parallel processing",
+      "bounded_current_claim": "OpenMP parallelism is primarily across regions; per-region distance work is configured to one worker in the inspected path.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C051"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/System-Overview.md"
+        ],
+        "note": "Current summary scopes parallelism to regions."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:734-799,946-977",
+          "Selected 270-test ctest run passed; fresh one-region run with --threads 1 reports Threads: 1"
+        ],
+        "claim_ceiling": "Source and selected tests support wiring, not a throughput or scaling guarantee."
+      },
+      "known_limits": [
+        "No controlled cross-core scaling receipt is included."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add a commit- and hardware-pinned 1/4/8/16/32-thread benchmark if performance is cited."
+    },
+    {
+      "algorithm_claim_id": "ALG-003",
+      "source_row_sha256": "2f775bbafac97b0ea3dafa40402b35bcbc5c1e5f98cbf037157c3d6a7ea80fef",
+      "audit_verdict": "OVERSTATED",
+      "original_public_claim": "The implementation has approximately linear 32-core scaling",
+      "bounded_current_claim": "No reproducible controlled 32-core scaling benchmark is available, so approximately linear scaling is not a current claim.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C157"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README_PROJECT_SUMMARY.md"
+        ],
+        "note": "The unqualified scaling claim was replaced by an explicit evidence gap."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "HISTORICAL_ONLY",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:946-977",
+          "The cited legacy run used 4 threads on 32 SNVs and estimated 3.76x from 222 ms x 32; no measured 1/4/8/16/32 scaling receipt was found"
+        ],
+        "claim_ceiling": "This confirms the documentation/evidence boundary, not a measured scaling curve."
+      },
+      "known_limits": [
+        "The historical estimate used four threads and 32 SNVs rather than a controlled core-count series."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Keep the performance claim absent until a controlled scaling receipt is published."
+    },
+    {
+      "algorithm_claim_id": "ALG-004",
+      "source_row_sha256": "185580951c1c4186e48b40f7f3c5148d99755d0200f436c6b4d5740dc5f7f749",
+      "audit_verdict": "STALE",
+      "original_public_claim": "Average processing time is less than 300 ms per region",
+      "bounded_current_claim": "The historical 222 ms mean is configuration-specific and does not establish an unqualified less-than-300-ms per-region runtime.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C157"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README_PROJECT_SUMMARY.md"
+        ],
+        "note": "The universal runtime claim was removed."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "HISTORICAL_ONLY",
+        "references": [
+          "InterSubMod/docs/archive/2025/12/20251218_final_completion_report_01.md:36-70,115-124",
+          "Historical 32-SNV, 4-thread, +/-2 kb run reports 222 ms mean; fresh chr19:29283968, 1-thread, +/-1 kb run reports 1129.48 ms mean"
+        ],
+        "claim_ceiling": "Historical timing and one slower counterexample bound the claim; neither is a current performance benchmark."
+      },
+      "known_limits": [
+        "Hardware, I/O cache, window, threads and region distribution are not controlled across observations."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Publish a versioned benchmark distribution before stating a runtime target."
+    },
+    {
+      "algorithm_claim_id": "ALG-005",
+      "source_row_sha256": "9e40a9c0751a57e0b77617e2fd63b819b0ed91186d9c497cc53b90fd34b3307b",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "The parser silently forces every distance metric request to NHD",
+      "bounded_current_claim": "The effective no-argument default is NHD; explicit NHD/BERNOULLI selections are honored, and repeated selections are retained.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C053",
+        "C143",
+        "C144"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/wiki/How-to-Run.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/explain/16_how-to-run.standalone.html"
+        ],
+        "note": "Current public-source wording distinguishes omission from explicit metric selection."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_NHD_CLI_DEFAULT_SEMANTICS",
+          "P0:C143",
+          "P0:C144"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/include/utils/ArgParser.hpp:86-90,181-194; InterSubMod/include/core/Config.hpp:40",
+          "Explicit --distance-metric BERNOULLI is retained; repeated --distance-metric values are retained; omission defaults to NHD"
+        ],
+        "claim_ceiling": "This is parser behavior at the assessed commit, not a promise for other entry points or revisions."
+      },
+      "known_limits": [
+        "Config.hpp still initializes BERNOULLI before the normal parser replaces the list."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Keep the fail-closed semantic guard in the release validation suite."
+    },
+    {
+      "algorithm_claim_id": "ALG-006",
+      "source_row_sha256": "4194f6f799f6be52a98201905e21334c6de9e96e6b8d3b932087e4f338cf3c73",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "Multiple distance metrics can be requested in one run",
+      "bounded_current_claim": "Repeatable distance metrics are accepted; the first drives clustering and later metrics add output distance matrices only.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C055"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md"
+        ],
+        "note": "Current README and Wiki sources state the order-sensitive first-metric behavior and repeatable outputs."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_NHD_CLI_DEFAULT_SEMANTICS"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:1376-1400",
+          "Parser inspection confirms repeatable metrics; source emits additional matrices"
+        ],
+        "claim_ceiling": "The source loop establishes behavior, but no dedicated multi-metric runtime receipt is embedded."
+      },
+      "known_limits": [
+        "Changing metric order can change clustering."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add a two-metric E2E assertion covering matrix outputs and first-metric clustering."
+    },
+    {
+      "algorithm_claim_id": "ALG-007",
+      "source_row_sha256": "fb99c3c2af553fcda1d384fe5f6d15a5063a6e7035960f8a909984b63b6715fb",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "--help returns nonzero status",
+      "bounded_current_claim": "At the assessed source, inter_sub_mod --help returns exit code 1, which wrappers must not treat as a normal success code.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "docs/wiki/InterSubMod-Engine.md"
+        ],
+        "note": "The nonstandard help exit is already disclosed."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/include/utils/ArgParser.hpp",
+          "./build/bin/inter_sub_mod --help exits 1"
+        ],
+        "claim_ceiling": "The observation is revision-specific and is not a POSIX compatibility guarantee."
+      },
+      "known_limits": [
+        "No dedicated CI guard pins the help exit code."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Either normalize help to exit 0 or add a revision-specific CLI test."
+    },
+    {
+      "algorithm_claim_id": "ALG-008",
+      "source_row_sha256": "7e3a63cbd2360d4a7aa730188f30ada07d290bb60cb6f92bc20334f2b37bf3f6",
+      "audit_verdict": "BRANCH_SCOPED",
+      "original_public_claim": "The CLI exposes 29 options",
+      "bounded_current_claim": "CLI option counts are revision-scoped and must be generated from the exact binary/help output rather than treated as a stable API count.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "note": "Current source pins the 29-option census to ddd8909a and labels the count branch-scoped."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_CLI_OPTION_COUNT_BRANCH_SCOPED"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "HISTORICAL_ONLY",
+        "references": [
+          "InterSubMod/include/core/Config.hpp:75-88; InterSubMod/include/utils/ArgParser.hpp:118-129",
+          "Local feature commit 73afaea adds lineage options; public remote commit 635437a does not contain the same interface"
+        ],
+        "claim_ceiling": "This bounds the count claim; it does not establish the option count of another branch."
+      },
+      "known_limits": [
+        "Feature commit 73afaea and public baseline snapshots expose different interfaces; the underlying generated option census is not embedded here."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Regenerate the option table from the exact release binary and retain the branch-scope guard."
+    },
+    {
+      "algorithm_claim_id": "ALG-009",
+      "source_row_sha256": "e09056182b95ed43ae9acf99250237c8cc30b0522f66ccb1d79f4d085eb6d8ae",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "pmd_bed_path, pmd_gating and min_site_coverage are configuration fields without live CLI/runtime use",
+      "bounded_current_claim": "At the assessed source, pmd_bed_path, pmd_gating and min_site_coverage have declarations but no repository-wide runtime use.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C056"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "docs/wiki/InterSubMod-Engine.md"
+        ],
+        "note": "The Wiki labels these fields dormant rather than implemented method features."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/include/core/Config.hpp",
+          "Repository-wide symbol search finds only their Config declarations"
+        ],
+        "claim_ceiling": "The absence statement is pinned to the assessed source snapshot."
+      },
+      "known_limits": [
+        "A later revision can wire these fields without changing their declarations."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add symbol-use and CLI coverage tests if the fields become active."
+    },
+    {
+      "algorithm_claim_id": "ALG-010",
+      "source_row_sha256": "8717c7a2bc8b72579a056b71b11f9e5b1d1cfd410ec4a29899c76b11ff8c052a",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "MM and ML tags are required for reads to enter methylation analysis",
+      "bounded_current_claim": "In the canonical RegionProcessor path, reads lacking required MM/ML modified-base tags are excluded from methylation analysis.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C050"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "pipeline/README.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/03_methylation-read-filter.standalone.html"
+        ],
+        "note": "Current public sources state the MM/ML requirement."
+      },
+      "guard": {
+        "status": "NOT_REQUIRED",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/include/core/ReadParser.hpp:15-23; InterSubMod/src/core/RegionProcessor.cpp:775-781; InterSubMod/src/core/ReadParser.cpp:57-67",
+          "Three selected MethylationParser tests pass, including missing-MM behavior"
+        ],
+        "claim_ceiling": "Confirmed for the canonical RegionProcessor path and tested missing-MM behavior."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Preserve missing-tag regression coverage."
+    },
+    {
+      "algorithm_claim_id": "ALG-011",
+      "source_row_sha256": "fb711655e451e108b6a3fc4a129fa32255b6febbcfe51c5259c8b76bea062595",
+      "audit_verdict": "OVERSTATED",
+      "original_public_claim": "MM/ML parsing completely supports modified-base tag content",
+      "bounded_current_claim": "The parser consumes ML:B:C and extracts C+m blocks, but exhaustive support for every SAM MM grammar variant is not established.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C050"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README_PROJECT_SUMMARY.md",
+          "docs/explain/03_methylation-read-filter.standalone.html"
+        ],
+        "note": "The completeness claim is scoped to covered fixtures and test cases."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/MethylationParser.cpp:21-43,66-113,119-213",
+          "Tests cover forward C+m, reverse-strand CpG collapse and missing MM"
+        ],
+        "claim_ceiling": "Verified fixtures do not cover all MM grammar and modification combinations."
+      },
+      "known_limits": [
+        "Other modification blocks are advanced over rather than modeled."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add named fixtures for every grammar variant before using complete-support language."
+    },
+    {
+      "algorithm_claim_id": "ALG-012",
+      "source_row_sha256": "07a7a1189b6986145169cea56a6c0a6f1561c6c8b09367dcc5cf2e2c8a52b555",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "HP, PS and LongLineage auxiliary tags are parsed into read metadata",
+      "bounded_current_claim": "HP parsing has direct tests; PS and lineage auxiliary extraction are visible in source but lack equivalent direct extraction tests.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C069"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "pipeline/README.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md"
+        ],
+        "note": "The handoff distinguishes supported HP/ALT use from private lineage-tag preview fields."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/src/core/ReadParser.cpp:123-215; InterSubMod/include/core/DataStructs.hpp:39-52",
+          "HP tests cover integer and string forms including 1, 2, 11, 21 and 33"
+        ],
+        "claim_ceiling": "Only HP integer/string forms have the direct tests cited by the audit."
+      },
+      "known_limits": [
+        "An orphan lv without ls is discarded; germline-hp-only narrows accepted values."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add direct PS and lineage-aux extraction tests before claiming equivalent coverage."
+    },
+    {
+      "algorithm_claim_id": "ALG-013",
+      "source_row_sha256": "502080e0103d4aa3867b9c9546600bdfc6570e13da500e401e6eb9510ba21f28",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "Multiple --lineage-axis values are independently evaluated in one run",
+      "bounded_current_claim": "Repeatable lineage-axis syntax is accepted, but the inspected evaluation loop processes only the first lineage axis.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "pipeline/README.md"
+        ],
+        "note": "The pipeline documentation now says only the first lineage axis is evaluated and denies independent multi-axis evaluation."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_LINEAGE_AXIS_FIRST_ONLY"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:3456-3488",
+          "Source loop breaks after the first lineage axis"
+        ],
+        "claim_ceiling": "The conclusion applies to the inspected feature-source loop, which breaks after the first axis."
+      },
+      "known_limits": [
+        "The lineage-axis interface is preview-only and excluded from the supported release baseline."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Preserve the first-axis guard and add a direct runtime test before claiming broader support."
+    },
+    {
+      "algorithm_claim_id": "ALG-014",
+      "source_row_sha256": "7b531bdc8f1e82cc2b69f2edb5160a977ce42d242ed2e624bafa17ee19e66a54",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "The methylation representation is sparse",
+      "bounded_current_claim": "Per-read observations are sparse-like during collection, but the final methylation matrix is a dense rectangular read-by-CpG vector.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README_PROJECT_SUMMARY.md"
+        ],
+        "note": "The summary now distinguishes temporary observations from the final representation."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_MATRIX_REPRESENTATION_DENSE_FINAL"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/src/core/MatrixBuilder.cpp:74-83; InterSubMod/include/core/MatrixBuilder.hpp:108-115; InterSubMod/src/core/RegionWriter.cpp:229-254",
+          "Source allocates every read x CpG cell and writes a rectangular CSV with NA/missing sentinels"
+        ],
+        "claim_ceiling": "This is an implementation representation statement, not a measured memory benchmark."
+      },
+      "known_limits": [
+        "Memory grows with the product of read and CpG counts."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add a representation regression or memory bound before publishing scalability estimates."
+    },
+    {
+      "algorithm_claim_id": "ALG-015",
+      "source_row_sha256": "e58a0a180202cd94144b7bae1a6da352906fb73e7860e86fbc7e3edb763b1d85",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "The first methylation.csv column is a BAM read identifier",
+      "bounded_current_claim": "methylation.csv starts with a matrix row index; join it positionally to reads.tsv read_id, whose read_name is the BAM QNAME.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C058"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "note": "Current docs warn that the first column is not a read name."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "InterSubMod/src/core/RegionWriter.cpp:146-187,229-255; InterSubMod/src/core/RegionProcessor.cpp:1334-1340",
+          "Writer inspection shows methylation.csv uses integer row index r; reads.tsv carries read_id and read_name"
+        ],
+        "claim_ceiling": "The positional join holds for canonical producer order only."
+      },
+      "known_limits": [
+        "Downstream sorting or editing can silently break positional alignment."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Add a checked read key to methylation.csv or validate row alignment explicitly."
+    },
+    {
+      "algorithm_claim_id": "ALG-016",
+      "source_row_sha256": "1e9022f039f07bb9b91808d2adba83c4103a806e93626f99e7c6d23a51976a89",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "tree.nwk leaves are reads and the tree is based on methylation similarity, not a clone phylogeny",
+      "bounded_current_claim": "tree.nwk leaves are reads labeled by read_name and represent methylation-distance clustering, not clone phylogeny.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C057"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md"
+        ],
+        "note": "All current entry paths state the read-dendrogram ceiling."
+      },
+      "guard": {
+        "status": "NOT_REQUIRED",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:3321-3346; InterSubMod/src/core/HierarchicalClustering.cpp:27-60,83-87; InterSubMod/src/core/TreeWriter.cpp:37-62",
+          "Twenty-two selected HierarchicalClustering tests pass; emitted labels come from read_name"
+        ],
+        "claim_ceiling": "Confirmed for the assessed implementation; invalid-distance reads can be removed before construction."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Preserve leaf-label and no-cellular-phylogeny tests in E2E validation."
+    },
+    {
+      "algorithm_claim_id": "ALG-017",
+      "source_row_sha256": "c1d60301439b37c6cc8c43e1fe00eff078573180c5e8456c2d685b8b640d6dea",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "significance_summary.csv currently has 193 columns and no schema-version fields",
+      "bounded_current_claim": "At frozen release baseline ddd8909a, significance_summary.csv has 199 columns with VerificationSchemaVersion=2 and RegionStratificationSchemaVersion=1.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C059"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "note": "Current source replaces the stale 193-column statement with the baseline-pinned 199-column contract."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_SCHEMA_CURRENT_199",
+          "P0:C059"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:1895-1998",
+          "Static header parse and fresh runtime both show 199 columns; column 187 VerificationSchemaVersion=2 and column 196 RegionStratificationSchemaVersion=1"
+        ],
+        "claim_ceiling": "The count is commit-specific; there is still no single whole-file layout-version field."
+      },
+      "known_limits": [
+        "Historical outputs have other column counts."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Continue binding consumers by header name and producer commit."
+    },
+    {
+      "algorithm_claim_id": "ALG-018",
+      "source_row_sha256": "3d6d49c64dc7ff03a311b6fd824ab776115cef55147b2788a25d110486fb943d",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "Consumers should parse significance_summary.csv by column name rather than fixed numeric index",
+      "bounded_current_claim": "Consumers must parse significance_summary.csv by column name and verify required component schema fields rather than fixed numeric positions.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C059"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "note": "Current docs require name-based parsing and commit/schema provenance."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_SCHEMA_CURRENT_199",
+          "P0:C059"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:1895-1998",
+          "The current schema differs from the public 193-column description and contains 199 fields"
+        ],
+        "claim_ceiling": "Name binding prevents positional drift but does not prove semantic compatibility."
+      },
+      "known_limits": [
+        "No single whole-file semantic version exists."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Keep required-column/schema validation in downstream consumers."
+    },
+    {
+      "algorithm_claim_id": "ALG-019",
+      "source_row_sha256": "63e3c489a9e79b67a7b80356b02a00a949c469d8b0c8c7dca216ff8d2716686a",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "subclone_structure.txt reports inferred cellular subclones",
+      "bounded_current_claim": "subclone_structure.txt is a legacy-named deprecation/region-stratification artifact and does not report inferred cellular subclones.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C024"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md"
+        ],
+        "note": "Current Wiki and standalone I/O tables identify the file as a legacy-named deprecation/region-stratification artifact and deny cellular-subclone inference."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_SUBCLONE_STRUCTURE_DEPRECATION",
+          "G_CONFIRMED_CLAIM_CEILING_ZERO"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:404-411,1083-1189",
+          "Source writes a deprecation stub and treats subclone_id as a deprecated alias for region stratification"
+        ],
+        "claim_ceiling": "Source shows the deprecation stub; the filename itself remains misleading."
+      },
+      "known_limits": [
+        "The legacy filename remains for compatibility and must never be interpreted by name alone."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Preserve the file-specific deprecation and zero-cellular-claim guards."
+    },
+    {
+      "algorithm_claim_id": "ALG-020",
+      "source_row_sha256": "aeb6e79d37fc97efbe421cd131da9e8b79b1bed3f68b5dc5e5bb955abb0a1ad9",
+      "audit_verdict": "OVERSTATED",
+      "original_public_claim": "CN and LOH are entirely not integrated",
+      "bounded_current_claim": "Allele-specific CN, purity/CCF and SAVANA-segment integration are absent; optional LOH BED annotation and coverage-proxy categories exist.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C068"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md"
+        ],
+        "note": "Current docs distinguish optional LOH annotation/stratification from missing CN-adjusted biological inference."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_CN_LOH_INFERENCE_BOUNDARY"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/include/utils/ArgParser.hpp:40-41; InterSubMod/src/core/LohBedAnnotator.cpp; InterSubMod/src/core/RegionProcessor.cpp:423-566,837-845,3597-3621",
+          "Seven estimate-coverage and two coverage tests pass; source loads optional LOH BED and computes coverage proxy categories"
+        ],
+        "claim_ceiling": "Coverage-proxy categories are not copy-number inference."
+      },
+      "known_limits": [
+        "CN loss, cnLOH, multiplicity, purity and CCF remain unresolved."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Preserve the CN/LOH inference-boundary guard until corrected inference is implemented and validated."
+    },
+    {
+      "algorithm_claim_id": "ALG-021",
+      "source_row_sha256": "828ff17785c854f0d3e48eb0db4598a1126e998279823b247df21a4da0fd2812",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "The report generator refuses to publish when an enumerated required metric is missing",
+      "bounded_current_claim": "The audited workstation generator exits 3 and refuses output when one of its enumerated required metrics is absent.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C073"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "README.md",
+          "docs/wiki/Analysis-and-Presentation.md"
+        ],
+        "note": "Current docs scope refuse-on-missing to declared required fields."
+      },
+      "guard": {
+        "status": "NOT_REQUIRED",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/docs/explain/build_workstation.py:13-15,32,43-47,215-227,298-313",
+          "Removing required CV from the spec exits 3 with [REFUSE §13-A] and produces no HTML"
+        ],
+        "claim_ceiling": "The result proves presence/non-null enforcement only."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Retain the negative missing-required-field test."
+    },
+    {
+      "algorithm_claim_id": "ALG-022",
+      "source_row_sha256": "35dde12cca2ed92b2fb23f970a6ffb708e087ad11cd1ac4bc075496abaaefa9a",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "The report pipeline makes data fabrication structurally impossible",
+      "bounded_current_claim": "Refuse-on-missing does not validate value truth, denominator correctness, source existence or scientific interpretation.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C133"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "docs/wiki/Analysis-and-Presentation.md"
+        ],
+        "note": "Current docs explicitly deny the former structurally-impossible-fabrication claim."
+      },
+      "guard": {
+        "status": "NOT_REQUIRED",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/docs/explain/build_workstation.py:215-227,298-313",
+          "A spec containing CV=999999 and source /definitely/not/a/source.json:999 exits 0 and generates HTML"
+        ],
+        "claim_ceiling": "The counterexample establishes the validation boundary, not that published values were fabricated."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Preserve source/value adversarial tests and keep the bounded wording."
+    },
+    {
+      "algorithm_claim_id": "ALG-023",
+      "source_row_sha256": "bf683b3f85ac10c2d26ea8f0c305d054f71ae1ea412c6587c2fa01baecad18d5",
+      "audit_verdict": "UNVERIFIABLE",
+      "original_public_claim": "334 source references and 111 asset paths were mechanically reverified with zero fabricated and zero out-of-bounds values",
+      "bounded_current_claim": "The historical 334-source-reference/111-asset audit cannot be independently replayed from this repository because its inventories and receipt are absent.",
+      "current_disposition": "UNVERIFIED",
+      "related_claim_ids": [
+        "C134",
+        "C150"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "docs/wiki/Home.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html"
+        ],
+        "note": "Current public-source pages retain the historical self-report only with an adjacent ALG-023 UNVERIFIED warning."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_ALG023_HISTORICAL_AUDIT_UNVERIFIED"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "MISSING",
+        "references": [
+          "Claimed scratchpad/collect_*.json audit inputs are absent from the public repository and all reachable git objects",
+          "No versioned inventory, command log, hashes or replayable receipt was found at deployed commit 9eb1618"
+        ],
+        "claim_ceiling": "Absence of a receipt does not prove the historical audit did not happen; it prevents independent reproduction and current blanket guarantees."
+      },
+      "known_limits": [
+        "No versioned 334/111 inventories, command log, source hashes or replayable result table were found."
+      ],
+      "release_gate": "BLOCKED",
+      "next_action": "Publish commit-pinned 334/111 inventories and a replay receipt, or remove the counts from current public surfaces."
+    },
+    {
+      "algorithm_claim_id": "ALG-024",
+      "source_row_sha256": "37991904dce6c007cff1d937543f21a9e209d5a3384cb944785ed602af582b10",
+      "audit_verdict": "BRANCH_SCOPED",
+      "original_public_claim": "Neither LongLineage nor InterSubMod can write a lineage-tagged BAM",
+      "bounded_current_claim": "InterSubMod does not write BAM; LongLineage private candidate b9aaa12 contains longlineage-tag-bam, while the private baseline/main snapshot 5daf50f does not.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C043",
+        "C072"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/Upstream-and-Data.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/14_upstream-data.standalone.html"
+        ],
+        "note": "Current source uses revision-scoped private-preview terminology."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "P0:C043"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "/big7_disk/liaoyoyo2001/LongLineage/apps/tag_bam_main.cpp; /big7_disk/liaoyoyo2001/LongLineage/CMakeLists.txt:221",
+          "Local committed LongLineage feature commit b9aaa12 builds longlineage-tag-bam and --help exits 0; remote main 5daf50f lacks this target"
+        ],
+        "claim_ceiling": "Feature presence at b9aaa12 is not a public-main or production capability."
+      },
+      "known_limits": [
+        "LongLineage remains NOT_READY/non-production with P3/P4/P5/P7/P8 blocked."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Keep immutable revision pins and verify live public visibility separately."
+    },
+    {
+      "algorithm_claim_id": "ALG-025",
+      "source_row_sha256": "d818117e1842946b8c3db8da8c657b60313531d1288791acc969a5358ae8948e",
+      "audit_verdict": "STALE",
+      "original_public_claim": "LongLineage and InterSubMod are independent engines connected only by byte-identical sidecars",
+      "bounded_current_claim": "InterSubMod reads HP/PS from BAM aux tags; LongLineage/exact-PS use sidecars for candidate reconstruction. These are parallel provenance branches, not a direct engine-to-engine runtime interface.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C044",
+        "C049",
+        "C069",
+        "C072"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/Upstream-and-Data.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/14_upstream-data.standalone.html"
+        ],
+        "note": "Current source separates the BAM-tag path from sidecar-based reconstruction and denies an automatic bridge."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_HPPS_REPRESENTATION_BOUNDARY"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "/big7_disk/liaoyoyo2001/LongLineage/apps/tag_bam_main.cpp; InterSubMod/src/core/ReadParser.cpp:123-215",
+          "LongLineage feature code writes HP/PS and lc/lu/lv/lp/lo/ls tags; InterSubMod feature code consumes them"
+        ],
+        "claim_ceiling": "Source inspection establishes representations and consumers, not an end-to-end supported cross-engine workflow."
+      },
+      "known_limits": [
+        "No tracked top-level script automatically invokes both engines end to end; tagged-BAM capability is private-preview only."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Preserve the boundary guard and add an E2E bridge receipt only if such a workflow becomes supported."
+    },
+    {
+      "algorithm_claim_id": "ALG-026",
+      "source_row_sha256": "1e12df1b61ffcaffa1ad930d19759aec08e75e53135caa43c02d80da2094b156",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "The production LongLineage endpoint has zero topology units",
+      "bounded_current_claim": "The formal production LongLineage dataset-gate endpoint has zero topology units; separate exact-PS research artifacts do not change that endpoint verdict.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C031",
+        "C039"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "docs/wiki/LongLineage-Engine.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/longlineage_capability_matrix.md"
+        ],
+        "note": "Current handoff separates formal production gates from exploratory exact-PS evidence."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/docs/CURRENT_FOCUS.md:217-225; exact-PS research artifacts",
+          "Current focus still records formal production 0/7 while separate exact-PS research/topology artifacts exist"
+        ],
+        "claim_ceiling": "Zero is scoped to the formal dataset-gate output, not all topology evidence."
+      },
+      "known_limits": [
+        "LongLineage preview phases P3/P4/P5/P7/P8 remain blocked."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Retain endpoint- and revision-specific wording."
+    },
+    {
+      "algorithm_claim_id": "ALG-027",
+      "source_row_sha256": "3ad357a9833cd87a586157909c6409a879bece0b65f919c4d54bc71f1d8c5a64",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "Seven of seven canonical samples have strict read-linkage sidecars",
+      "bounded_current_claim": "Seven of seven frozen technical datasets have strict read-linkage sidecars with technical_all_pass=true, while validation_evidence_eligible=false.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C025",
+        "C045"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html"
+        ],
+        "note": "Current docs distinguish technical completion from biological eligibility."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/docs/CURRENT_FOCUS.md:52 and canonical cohort receipt paths",
+          "Current status reports L1 strict read-linkage 7/7; canonical receipt has technical_all_pass=true and validation_evidence_eligible=false"
+        ],
+        "claim_ceiling": "Technical receipt success is not biological validation eligibility."
+      },
+      "known_limits": [
+        "The claim is frozen-snapshot and cohort-receipt scoped."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Keep exact cohort receipt paths and both machine fields adjacent."
+    },
+    {
+      "algorithm_claim_id": "ALG-028",
+      "source_row_sha256": "6a7d022e4c7f85502e37ec6fdedc12ae5dde02c074335fd1119dcfa9a25c63c2",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "The documented LongLineage run_sample.sh example is executable as written",
+      "bounded_current_claim": "The historical LongLineage run_sample.sh invocation omitted required partition-root, topology and sidecar inputs and is not a supported executable example.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C149"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "pipeline/README.md"
+        ],
+        "note": "The historical pipeline is now marked SUPERSEDED/HISTORICAL and no longer offers that command as an execution entry."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "P0:C149",
+          "G_HISTORICAL_PIPELINE_REDIRECT"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "HISTORICAL_ONLY",
+        "references": [
+          "/big7_disk/liaoyoyo2001/LongLineage/scripts/run_sample.sh:1-212",
+          "Running the shown argument pattern exits 2 with need --partition-root; topology and sidecar are also required"
+        ],
+        "claim_ceiling": "The negative execution result pertains to the inspected private feature script."
+      },
+      "known_limits": [
+        "A future public script can have a different interface."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Do not restore an example until a public-clone smoke receipt covers all required arguments."
+    },
+    {
+      "algorithm_claim_id": "ALG-029",
+      "source_row_sha256": "f8f3e3c64f5aac84c813ac96357921c396aaf7ec885305bd7394107366531367",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "The default LongLineage workflow emits HCC1395.chr1.lineage_tagged.bam",
+      "bounded_current_claim": "In the inspected private feature script, the default merged output is HCC1395.lineage_tagged.bam; per-chromosome outputs require --split-by-chrom.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "pipeline/README.md"
+        ],
+        "note": "The superseded historical pipeline no longer promises a per-chromosome default output."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "SOURCE_INSPECTION_ONLY",
+        "references": [
+          "/big7_disk/liaoyoyo2001/LongLineage/scripts/run_sample.sh:1-212",
+          "Source defaults to a merged HCC1395.lineage_tagged.bam; per-chromosome BAMs require --split-by-chrom"
+        ],
+        "claim_ceiling": "Output naming is private-feature behavior and not a public production contract."
+      },
+      "known_limits": [
+        "LongLineage preview is NOT_READY and production phases remain blocked."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Document output naming only in the revision-pinned private preview until publication."
+    },
+    {
+      "algorithm_claim_id": "ALG-030",
+      "source_row_sha256": "12ef47c69db0ac709ab9d5d4c8dcffde1518eee7a71c5cdbfb148b3a54ea1f49",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "A whole-genome HCC1395 tagged-BAM run has concrete write counts",
+      "bounded_current_claim": "Historical LongLineage documentation records whole-genome tagged-BAM write counts, but the immutable raw receipt/log is not present in this handoff.",
+      "current_disposition": "UNVERIFIED",
+      "related_claim_ids": [],
+      "source_correction": {
+        "status": "NOT_APPLICABLE",
+        "target_paths": [],
+        "note": "The counts are not promoted into current InterSubMod public-source claims."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "HISTORICAL_ONLY",
+        "references": [
+          "/big7_disk/liaoyoyo2001/LongLineage/docs/lineage/KNOWN_ISSUES.md:257-293",
+          "Documentation records 39,617,373 alignments, 1,251,092 lineage-written, 1,009,543 assignments and 1,001,670 distinct QNAMEs"
+        ],
+        "claim_ceiling": "A secondary documentation record is insufficient to independently validate the exact counts."
+      },
+      "known_limits": [
+        "Generating commit and immutable raw machine log/hash are missing."
+      ],
+      "release_gate": "BLOCKED",
+      "next_action": "Publish the raw receipt/log hashes and exact producer commit before citing the counts as verified."
+    },
+    {
+      "algorithm_claim_id": "ALG-031",
+      "source_row_sha256": "cc433bfd5b54cfb6c50395c0c8cb0d965ca114ca224c02a1e3045ac634f86b54",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "Current outputs do not establish clones, clone ancestry or cellular prevalence",
+      "bounded_current_claim": "Current outputs establish read clustering, region stratification and bounded association, not cellular clones, clone ancestry or cellular prevalence.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C024",
+        "C057",
+        "C070"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md"
+        ],
+        "note": "All primary handoff entry paths enforce zero confirmed cellular subclones and zero confirmed linear ancestry."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_CONFIRMED_CLAIM_CEILING_ZERO"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:404-411,1083-1189,3321-3346",
+          "Source exposes read clustering and region stratification, and explicitly deprecates cellular subclone interpretation"
+        ],
+        "claim_ceiling": "The claim is a scientific ceiling, not evidence that true subclones do not exist."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Do not promote molecule-level or model-selected results without independent cellular truth."
+    },
+    {
+      "algorithm_claim_id": "ALG-032",
+      "source_row_sha256": "1ff9f40502f482c9fed145a7c3dc2a2d252e774a28b14419ee766a833edef39a",
+      "audit_verdict": "CONTRADICTED",
+      "original_public_claim": "technical_all_pass and validation_evidence_eligible are fields of the authority manifest",
+      "bounded_current_claim": "technical_all_pass belongs to canonical/cohort_receipt.json and validation_evidence_eligible belongs to summary/all7_summary.json; neither is a top-level authority-manifest field.",
+      "current_disposition": "CONFIRMED",
+      "related_claim_ids": [
+        "C025"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html"
+        ],
+        "note": "Current docs name the correct containers and deny authority-manifest attribution."
+      },
+      "guard": {
+        "status": "NOT_REQUIRED",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED",
+        "references": [
+          "InterSubMod/output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/cohort_receipt.json; corresponding summary",
+          "jq shows technical_all_pass=true and validation_evidence_eligible=false in the canonical cohort receipt/summary; the authority manifest only indexes artifacts"
+        ],
+        "claim_ceiling": "The values and paths are frozen-snapshot scoped."
+      },
+      "known_limits": [],
+      "release_gate": "SOURCE_READY",
+      "next_action": "Keep container paths adjacent to the fields in all future summaries."
+    },
+    {
+      "algorithm_claim_id": "ALG-033",
+      "source_row_sha256": "416608c05ad54e5068daf24c7c90d2d3ec922326a3faeb53fdabd82783c581af",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "The documented build baseline is compatible with CMake 3.14, C++17, htslib and Python dependencies",
+      "bounded_current_claim": "The assessed InterSubMod baseline builds with CMake 3.14, C++17, HTSlib and declared Python dependencies on the validated bip7 environment.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C051"
+      ],
+      "source_correction": {
+        "status": "NO_CHANGE_REQUIRED",
+        "target_paths": [
+          "README.md",
+          "QUICKSTART.md",
+          "docs/wiki/How-to-Run.md"
+        ],
+        "note": "Current docs state dependencies and separate machine-specific validation from portability claims."
+      },
+      "guard": {
+        "status": "MISSING",
+        "guard_ids": [],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/CMakeLists.txt; InterSubMod/requirements.txt",
+          "Audit environment reports Python 3.9.12, CMake 3.14.4 and htslib 1.18; current project builds and tests"
+        ],
+        "claim_ceiling": "This is one-machine evidence, not a complete dependency-range or cross-platform matrix."
+      },
+      "known_limits": [
+        "bip8 fresh-clone validation remains separately gated."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Publish exact tool hashes and bip8 receipt before claiming dual-machine portability."
+    },
+    {
+      "algorithm_claim_id": "ALG-034",
+      "source_row_sha256": "eabc7d842f1f62105b07961f64438eb9efee73dccce3683708529f1cc765b44a",
+      "audit_verdict": "SUPPORTED_WITH_LIMITS",
+      "original_public_claim": "The current InterSubMod test suite passes",
+      "bounded_current_claim": "The exact-commit clean InterSubMod test suite must report exit 0 and zero failures; test and suite counts are generated dynamically rather than hard-coded.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C145"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "README.md",
+          "README.zh-TW.md",
+          "QUICKSTART.md",
+          "docs/wiki/How-to-Run.md"
+        ],
+        "note": "Current docs removed the stale fixed 265/38 and 270/39 counts."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_README_DYNAMIC_TEST_COUNTS"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/build/CTestTestfile.cmake and test binaries",
+          "ctest --test-dir build --output-on-failure exits 0 with 270/270 passed in 6.86 s",
+          "research/20260813_complete_research_handoff/receipts/bip7_portable_validation_587aeb67.json"
+        ],
+        "claim_ceiling": "A passing software suite does not validate biological claims and must be bound to the exact tested commit."
+      },
+      "known_limits": [
+        "Hosted CI and bip8 remain separate gates."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Regenerate the count and receipt on the final immutable release candidate."
+    },
+    {
+      "algorithm_claim_id": "ALG-035",
+      "source_row_sha256": "5b939d97cf8fa6bf486fc37f084ae46f66999f0e5610388a145082acfbc4d7cd",
+      "audit_verdict": "SUPPORTED",
+      "original_public_claim": "A canonical one-SNV run produces internally consistent 199-column output and declared schema values",
+      "bounded_current_claim": "The tracked tiny synthetic DEMO completes a one-SNV run and validates a 199-column schema plus read-level tree semantics.",
+      "current_disposition": "CONFIRMED_WITH_LIMITS",
+      "related_claim_ids": [
+        "C059"
+      ],
+      "source_correction": {
+        "status": "LOCAL_SOURCE_CORRECTED",
+        "target_paths": [
+          "QUICKSTART.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_bip7_bip8操作與驗證_01.md"
+        ],
+        "note": "The public run path is explicitly labeled DEMO and schema-only evidence."
+      },
+      "guard": {
+        "status": "PASS",
+        "guard_ids": [
+          "G_FIXTURE_DOCUMENTED_AS_TRACKED_DEMO",
+          "G_SCHEMA_CURRENT_199"
+        ],
+        "validator": "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+      },
+      "evidence": {
+        "status": "VERIFIED_WITH_LIMITS",
+        "references": [
+          "InterSubMod/src/core/RegionProcessor.cpp:1895-1998",
+          "chr19:29283968 run exits 0; 1/1 region succeeds; header and data each have 199 columns; schema values are 2 and 1",
+          "research/20260813_complete_research_handoff/receipts/bip7_tiny_e2e_fb806d9b.json"
+        ],
+        "claim_ceiling": "The one-region synthetic run is not a cohort performance or biological benchmark."
+      },
+      "known_limits": [
+        "Fixture inputs are synthetic and intentionally tiny."
+      ],
+      "release_gate": "SOURCE_READY_WITH_LIMITS",
+      "next_action": "Replay on the final candidate and keep DEMO labeling adjacent to every result."
+    }
+  ]
+}

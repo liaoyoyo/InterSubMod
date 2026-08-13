@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from collections import Counter
@@ -20,6 +21,17 @@ PACKAGE_RELATIVE_PATH = Path("docs/handoff/20260813_完整研究資料與軟體�
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 EXTERNAL_URL_RE = re.compile(r"(?:https?:)?//", re.IGNORECASE)
+EVIDENCE_STATUS_ENUM = {
+    "AUTHORITY",
+    "VALIDATED_DERIVED",
+    "PARTIAL",
+    "HISTORICAL",
+    "INVALIDATED",
+    "IN_PROGRESS",
+}
+SCOPE_ENUM = {"FULL", "PARTIAL", "DEMO"}
+FINALITY_ENUM = {"FINAL_FOR_SCOPE", "NON_FINAL", "SUPERSEDED"}
+REGENERATION_SEMANTIC_PREFIXES = ("REPLAY_ONLY:", "VERIFY_ONLY:", "NOT_REGENERABLE_FROM_HANDOFF:")
 
 
 class ContractError(ValueError):
@@ -37,6 +49,29 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def repository_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def declared_source_path(raw_source: object) -> tuple[Path | None, str]:
+    """Resolve an evidence source without pretending unavailable private repos exist.
+
+    InterSubMod sources are always required to resolve against this checkout.  A
+    LongLineage source is verified only when the caller explicitly supplies the
+    clean preview checkout through ``INTERSUBMOD_HANDOFF_LONGLINEAGE_ROOT``.
+    """
+
+    require(isinstance(raw_source, str) and raw_source, "evidence source_path must be non-empty")
+    if raw_source.startswith("InterSubMod/"):
+        return repository_root() / raw_source.removeprefix("InterSubMod/"), "REQUIRED_LOCAL_SOURCE"
+    if raw_source.startswith("LongLineage/"):
+        external_root = os.environ.get("INTERSUBMOD_HANDOFF_LONGLINEAGE_ROOT")
+        if external_root:
+            return Path(external_root).expanduser().resolve() / raw_source.removeprefix("LongLineage/"), "EXPLICIT_EXTERNAL_SOURCE"
+        return None, "EXTERNAL_SOURCE_NOT_MOUNTED"
+    return None, "NON_FILE_SOURCE_DESCRIPTION"
 
 
 def load_json(path: Path) -> Any:
@@ -105,15 +140,49 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
 
     sha256_bound_count = 0
     summary_count = 0
+    source_equal_count = 0
+    external_source_not_mounted = 0
+    size_bound_count = 0
+    required_size_bound = {"public_claim_validation_20260813", "full_claim_registry_20260813"}
     for row in records:
         evidence_id = row["evidence_id"]
+        if "evidence_status" in row:
+            require(
+                row["evidence_status"] in EVIDENCE_STATUS_ENUM,
+                f"invalid evidence_status enum for {evidence_id}: {row['evidence_status']!r}",
+            )
+        if "scope" in row:
+            require(row["scope"] in SCOPE_ENUM, f"invalid scope enum for {evidence_id}: {row['scope']!r}")
+        if "finality" in row:
+            require(
+                row["finality"] in FINALITY_ENUM,
+                f"invalid finality enum for {evidence_id}: {row['finality']!r}",
+            )
         path = package_path(package_root, row.get("path"), f"evidence {evidence_id} path")
         require(path.is_file(), f"evidence path does not exist: {row.get('path')}")
+        if "size_bytes" in row or evidence_id in required_size_bound:
+            expected_size = row.get("size_bytes")
+            require(
+                isinstance(expected_size, int) and not isinstance(expected_size, bool) and expected_size >= 0,
+                f"invalid size_bytes for {evidence_id}",
+            )
+            require(path.stat().st_size == expected_size, f"evidence size mismatch: {evidence_id}")
+            size_bound_count += 1
         copy_status = row.get("copy_status")
         if copy_status in {"EXACT_COPY", "NEW_PACKAGE_RECEIPT", "PACKAGE_RELINKED_COPY"}:
             expected = row.get("sha256")
             require(isinstance(expected, str) and SHA256_RE.fullmatch(expected), f"invalid sha256 for {evidence_id}")
             require(sha256_file(path) == expected, f"evidence sha256 mismatch: {evidence_id}")
+            if copy_status == "EXACT_COPY":
+                source, source_status = declared_source_path(row.get("source_path"))
+                if source is not None:
+                    require(source.is_file(), f"declared exact-copy source is missing: {row.get('source_path')}")
+                    source_hash = sha256_file(source)
+                    require(source_hash == expected, f"exact-copy source hash drift: {evidence_id}")
+                    require(source.read_bytes() == path.read_bytes(), f"exact-copy bytes differ from source: {evidence_id}")
+                    source_equal_count += 1
+                elif source_status == "EXTERNAL_SOURCE_NOT_MOUNTED":
+                    external_source_not_mounted += 1
             if copy_status == "PACKAGE_RELINKED_COPY":
                 source_sha = row.get("source_sha256")
                 require(
@@ -133,10 +202,23 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
             summary_count += 1
         else:
             raise ContractError(f"unsupported evidence copy_status for {evidence_id}: {copy_status!r}")
+    by_id = {row["evidence_id"]: row for row in records}
+    sampled_contracts = {
+        "tagged_bam_sampled_identity_baseline_20260711": ("HISTORICAL", "PARTIAL", "NON_FINAL"),
+        "tagged_bam_sampled_replay_manifest_20260813": ("VALIDATED_DERIVED", "PARTIAL", "NON_FINAL"),
+        "tagged_bam_sampled_identity_replay_20260813": ("VALIDATED_DERIVED", "PARTIAL", "NON_FINAL"),
+    }
+    for evidence_id, expected in sampled_contracts.items():
+        require(evidence_id in by_id, f"missing sampled tagged BAM evidence record: {evidence_id}")
+        actual = tuple(by_id[evidence_id].get(key) for key in ("evidence_status", "scope", "finality"))
+        require(actual == expected, f"sampled tagged BAM evidence contract drifted for {evidence_id}: {actual!r}")
     return {
         "records": len(records),
         "sha256_bound_records": sha256_bound_count,
         "summary_hash_bound": summary_count,
+        "exact_copy_source_equal": source_equal_count,
+        "external_exact_copy_sources_not_mounted": external_source_not_mounted,
+        "size_bound_records": size_bound_count,
         "missing": 0,
         "hash_mismatch": 0,
     }
@@ -208,6 +290,19 @@ def check_artifact_registry(package_root: Path) -> dict[str, Any]:
             isinstance(row.get("sha256"), str) and SHA256_RE.fullmatch(row["sha256"]),
             f"final artifact lacks valid sha256: {artifact_id}",
         )
+        require(
+            isinstance(row.get("producer_commit"), str) and row["producer_commit"].strip(),
+            f"final artifact lacks producer_commit provenance: {artifact_id}",
+        )
+        require(
+            isinstance(row.get("inputs"), list) and len(row["inputs"]) > 0,
+            f"final artifact lacks input provenance: {artifact_id}",
+        )
+        command = row.get("regeneration_command")
+        require(
+            isinstance(command, str) and command.startswith(REGENERATION_SEMANTIC_PREFIXES),
+            f"final artifact lacks typed replay/regeneration semantics: {artifact_id}",
+        )
 
     tagged_bams = [row for row in records if row.get("artifact_type") == "longphase_s_tagged_bam"]
     require(len(tagged_bams) == 14, f"expected 14 tagged BAM artifacts, found {len(tagged_bams)}")
@@ -215,13 +310,116 @@ def check_artifact_registry(package_root: Path) -> dict[str, Any]:
         require(row.get("scope") == "PARTIAL", f"tagged BAM is not PARTIAL: {row.get('artifact_id')}")
         require(row.get("evidence_status") == "PARTIAL", f"tagged BAM evidence is not PARTIAL: {row.get('artifact_id')}")
         require(row.get("finality") == "NON_FINAL", f"tagged BAM is not NON_FINAL: {row.get('artifact_id')}")
+
+    paired_full = [row for row in tagged_bams if row.get("mode") == "paired_full"]
+    paired_pileup = [row for row in tagged_bams if row.get("mode") == "paired_pileup"]
+    require(len(paired_full) == 7 and len(paired_pileup) == 7, "tagged BAM inventory is not 7 paired_full + 7 paired_pileup")
+    require(
+        sum(row.get("size_bytes", -1) for row in paired_full) == 1_840_983_466_353,
+        "paired_full tagged BAM byte total drifted",
+    )
+    require(
+        sum(row.get("size_bytes", -1) for row in tagged_bams) == 3_709_322_840_333,
+        "14-object tagged BAM byte total drifted",
+    )
+
+    baseline_path = package_root / "evidence/canonical_longphase_tagged_bam_sampled_identity_v1.json"
+    replay_manifest_path = package_root / "evidence/tagged_bam_sampled_replay_manifest.json"
+    replay_path = package_root / "evidence/tagged_bam_sampled_identity_replay_20260813.json"
+    baseline = load_json(baseline_path)
+    replay_manifest = load_json(replay_manifest_path)
+    replay = load_json(replay_path)
+    require(
+        baseline.get("schema_name") == "intersubmod.canonical_longphase_bam_immutability"
+        and baseline.get("schema_version") == "1.0.0"
+        and baseline.get("dataset_count") == 7,
+        "tagged BAM sampled baseline contract mismatch",
+    )
+    require(
+        baseline.get("identity_set_sha256")
+        == "ce6c63d42e3f334d6847a1a6d3e46ead165b59a03197acb098319be5c67fcf90",
+        "tagged BAM sampled baseline set identity drifted",
+    )
+    baseline_samples = baseline.get("samples")
+    require(isinstance(baseline_samples, list) and len(baseline_samples) == 7, "sampled baseline must contain seven rows")
+    artifacts_by_dataset = {row.get("technical_dataset_id"): row for row in paired_full}
+    require(len(artifacts_by_dataset) == 7, "paired_full technical dataset IDs are not unique")
+    for sample_row in baseline_samples:
+        require(isinstance(sample_row, dict), "sampled baseline contains a non-object row")
+        sample = sample_row.get("sample")
+        identity = sample_row.get("identity")
+        require(sample in artifacts_by_dataset and isinstance(identity, dict), f"sampled baseline dataset is not registered: {sample!r}")
+        artifact = artifacts_by_dataset[sample]
+        locations = artifact.get("machine_locations")
+        require(isinstance(locations, list) and len(locations) == 1, f"paired_full location contract mismatch: {sample}")
+        require(identity.get("requested_path") == locations[0].get("path"), f"sampled baseline path mismatch: {sample}")
+        require(identity.get("size_bytes") == artifact.get("size_bytes"), f"sampled baseline size mismatch: {sample}")
+        chunks = identity.get("chunks")
+        require(
+            isinstance(chunks, list)
+            and [chunk.get("label") for chunk in chunks if isinstance(chunk, dict)] == ["first", "middle", "last"]
+            and all(isinstance(chunk.get("sha256"), str) and SHA256_RE.fullmatch(chunk["sha256"]) for chunk in chunks),
+            f"sampled baseline chunk contract mismatch: {sample}",
+        )
+
+    require(
+        replay_manifest.get("schema_name") == "intersubmod.tagged_bam_sampled_replay_manifest"
+        and replay_manifest.get("scope") == "HISTORICAL_PRE_FIX_PAIRED_FULL_SAMPLED_IDENTITY_ONLY"
+        and replay_manifest.get("evidence_status") == "PARTIAL"
+        and replay_manifest.get("finality") == "NON_FINAL",
+        "tagged BAM replay manifest overstates its scope or finality",
+    )
+    manifest_samples = replay_manifest.get("samples")
+    require(isinstance(manifest_samples, list) and len(manifest_samples) == 7, "tagged BAM replay manifest must contain seven rows")
+    manifest_map = {
+        row.get("sample"): row.get("tumor_bam")
+        for row in manifest_samples
+        if isinstance(row, dict)
+    }
+    require(
+        manifest_map == {
+            dataset: artifact["machine_locations"][0]["path"]
+            for dataset, artifact in artifacts_by_dataset.items()
+        },
+        "tagged BAM replay manifest does not exactly join the paired_full artifact registry",
+    )
+    require(
+        replay.get("schema_name") == "intersubmod.canonical_longphase_bam_immutability_verification"
+        and replay.get("schema_version") == "1.0.0"
+        and replay.get("baseline_sha256") == sha256_file(baseline_path)
+        and replay.get("manifest_sha256") == sha256_file(replay_manifest_path)
+        and replay.get("dataset_count") == 7
+        and replay.get("all_match") is True,
+        "tagged BAM sampled replay contract is not a seven-object PASS",
+    )
+    comparisons = replay.get("comparisons")
+    require(isinstance(comparisons, list) and len(comparisons) == 7, "tagged BAM replay must contain seven comparisons")
+    require(
+        {row.get("sample") for row in comparisons if isinstance(row, dict)} == set(artifacts_by_dataset)
+        and all(
+            isinstance(row, dict) and row.get("match") is True and row.get("differing_fields") == []
+            for row in comparisons
+        ),
+        "tagged BAM replay contains a mismatch or incomplete comparison",
+    )
     return {
         "artifacts": 36,
         "unique_artifact_ids": 36,
         "final_for_scope": 20,
         "science_authority_final": 19,
         "provenance_only_validated_derived_final": 1,
+        "final_with_producer_commit_inputs_and_typed_replay_semantics": 20,
         "tagged_bam_partial_non_final": 14,
+        "tagged_bam_inventory_bytes": 3_709_322_840_333,
+        "paired_full_sampled_identity": {
+            "objects": 7,
+            "bytes": 1_840_983_466_353,
+            "identity_set_sha256": baseline["identity_set_sha256"],
+            "replay_match": 7,
+            "full_file_sha256": "NOT_COMPUTED",
+            "evidence_status": "PARTIAL",
+            "finality": "NON_FINAL",
+        },
     }
 
 
@@ -261,7 +459,62 @@ def check_claim_registries(package_root: Path) -> dict[str, Any]:
     require(pointer.get("gates") == expected_gates, "embedded release gate statuses are not fail-closed")
     for gate, expected_status in expected_gates.items():
         require(full.get("gates", {}).get(gate, {}).get("status") == expected_status, f"full claim gate differs: {gate}")
-    return {"claims": 158, "unique_claim_ids": 158, "sha256_match": True, "release_gates": expected_gates}
+
+    # The exact-copy receipt must also bind this embedded registry and the
+    # current QA matrix.  A matching stale receipt is not freshness evidence.
+    validation = load_json(package_root / "evidence/public_claim_validation_receipt.json")
+    require(
+        validation.get("schema_name") == "intersubmod.public_claim_validation_receipt"
+        and validation.get("schema_version") == "2.0.0",
+        "public claim validation receipt is not freshness-bound schema 2.0.0",
+    )
+    require(validation.get("verdict") == "PASS", "public claim validation receipt is not PASS")
+    require(
+        isinstance(validation.get("publication_status"), str)
+        and validation["publication_status"].startswith("BLOCKED_")
+        and validation.get("release_status") == "BLOCKED",
+        "public claim validation receipt promotes publication or release",
+    )
+    require(
+        validation.get("scope") == "LOCAL_SOURCE_PLUS_C108_LIVE_RECEIPT_PLUS_CHROMIUM_QA",
+        "public claim validation receipt scope is stale or incomplete",
+    )
+    claim_contract = validation.get("claim_registry_contract")
+    require(isinstance(claim_contract, dict), "public claim receipt lacks claim_registry_contract")
+    require(claim_contract.get("verdict") == "PASS", "claim registry contract is not PASS")
+    require(claim_contract.get("errors") == [], "claim registry contract contains errors")
+    require(claim_contract.get("registry_sha256") == expected_hash, "validation receipt binds a different claim registry")
+    require(claim_contract.get("public_source_files") == 34, "validation receipt does not bind 34 public sources")
+    browser_contract = validation.get("browser_qa_contract")
+    require(isinstance(browser_contract, dict), "public claim receipt lacks browser_qa_contract")
+    require(browser_contract.get("verdict") == "PASS", "browser QA contract is not PASS")
+    require(browser_contract.get("errors") == [], "browser QA contract contains errors")
+    require(
+        (
+            browser_contract.get("html_files"),
+            browser_contract.get("standalone_svg_files"),
+            browser_contract.get("browser_cases"),
+        )
+        == (21, 21, 84),
+        "validation receipt does not bind the exact 21 HTML / 21 SVG / 84 browser-case matrix",
+    )
+    runner = validation.get("runner")
+    require(isinstance(runner, dict), "public claim validation receipt lacks runner provenance")
+    python_match = re.fullmatch(r"(\d+)\.(\d+)(?:\.(\d+))?", str(runner.get("python", "")))
+    require(
+        python_match is not None and tuple(int(value or 0) for value in python_match.groups()) >= (3, 10, 0),
+        "public claim validation receipt was not produced with Python >=3.10",
+    )
+    require(pointer.get("verified_at") == validation.get("created_at"), "claim pointer and validation receipt timestamps differ")
+    return {
+        "claims": 158,
+        "unique_claim_ids": 158,
+        "sha256_match": True,
+        "public_source_files": 34,
+        "browser_qa_matrix": {"html": 21, "standalone_svg": 21, "cases": 84},
+        "validation_receipt_schema": "2.0.0",
+        "release_gates": expected_gates,
+    }
 
 
 def check_site_profile_join(package_root: Path) -> dict[str, Any]:
@@ -485,10 +738,28 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     html = (package_root / "20260813_完整研究交接總覽_01.standalone.html").read_text(encoding="utf-8")
     public_surfaces = "\n".join((index, notes, context, html))
 
-    require("34/34" not in public_surfaces, "P0 readiness incorrectly promotes the external-only C108 claim")
-    require("33/33" in index and "C108" in index, "index lacks the 33 local / 1 external P0 denominator")
-    require("33/33" in notes and "C108" in notes, "implementation notes lack the P0 denominator boundary")
-    require("33/33" in html and "C108" in html, "standalone HTML lacks the P0 denominator boundary")
+    claim_pointer = load_json(package_root / "registries/claim_registry.json")
+    claim_counts = claim_pointer.get("counts", {}).get("by_current_verdict", {})
+    require(
+        claim_counts == {"CONFIRMED": 69, "CONFIRMED_WITH_LIMITS": 69, "UNVERIFIED": 20},
+        f"reader contract claim denominator drifted: {claim_counts!r}",
+    )
+    unverified_count = claim_counts["UNVERIFIED"]
+
+    require(
+        "34/34" not in public_surfaces,
+        "P0 readiness must preserve the 33 local guards / 1 bounded About distinction",
+    )
+    for label, text in (("index", index), ("implementation notes", notes), ("AI context", context), ("standalone HTML", html)):
+        require("33/33" in text and "C108" in text, f"{label} lacks the 33 local / 1 About P0 denominator")
+        require(
+            "bounded live" in text and "CONFIRMED_WITH_LIMITS" in text,
+            f"{label} lacks the bounded C108 live verdict",
+        )
+        require(
+            str(unverified_count) in text and "UNVERIFIED" in text,
+            f"{label} lacks the current hash-bound UNVERIFIED denominator {unverified_count}",
+        )
 
     require("scripts/site/bootstrap --template" in html, "standalone HTML bootstrap command lacks --template")
     require("--output config/site-profile.local.json" in html, "standalone HTML bootstrap command lacks --output")
@@ -534,7 +805,8 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     )
     return {
         "p0_local_guards": 33,
-        "p0_external_only_blocked": 1,
+        "p0_about_bounded_live_confirmed_with_limits": 1,
+        "claim_verdict_counts": claim_counts,
         "bootstrap_interface": "--template/--output",
         "registry_paths_prefixed": 3,
         "package_local_crosswalk_evidence": 3,
@@ -593,7 +865,10 @@ def default_package_root() -> Path:
 def write_receipt(path: Path, receipt: dict[str, Any]) -> None:
     path = path.resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    payload = json.dumps(receipt, ensure_ascii=False, indent=2) + "\n"
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    temporary.write_text(payload, encoding="utf-8")
+    os.replace(temporary, path)
 
 
 def build_parser() -> argparse.ArgumentParser:

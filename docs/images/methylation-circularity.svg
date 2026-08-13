@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 為什麼甲基化不能用來重建譜系（cis-ASM 循環）
-     來源: docs/explain/11_system-map-overview.standalone.html (svg #2)
-     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+     source: docs/explain/11_system-map-overview.standalone.html (svg #2)
+     source_document_sha256: 82f5e4358b0f8a9de0417a8901f5bb5072c152325247835a922522d9a34752e8
+     inline_svg_sha256: d4d4318a654d48f5411dd860c0b0d1ab352515e8a8169246f48f38f2f2167a8e
+     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 900 330" role="img" aria-labelledby="f2t f2d" xmlns="http://www.w3.org/2000/svg">
       <title id="f2t">甲基化循環論證示意</title>
       <desc id="f2d">左側顯示一個位點觀察到兩群不同甲基化模式的 read，右側列出四種可能成因：
       germline 等位特異性甲基化、雜合性缺失導致的解遮蔽、拷貝數增益的劑量效應、以及真正的亞群譜系差異。
-      單一 bulk 樣本無法區分這四者，因此用甲基化分群來確認亞群等於用待證明的結論當前提。</desc>
+      在目前 single-bulk 測量集合下，若無 orthogonal data 或額外假設，這四者不可識別；因此不能用甲基化分群獨立確認亞群。</desc>
   <rect x="0" y="0" width="900" height="330" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
 
@@ -58,12 +60,16 @@
         <text x="632" y="144" font-size="10.5" fill="#7a3030">但要排除 ①②③，就得先知道</text>
         <text x="632" y="160" font-size="10.5" fill="#7a3030">哪些 read 屬於哪個亞群 ——</text>
         <text x="632" y="182" font-size="11" font-weight="700" fill="#9A3B3B">這正是待證明的結論。</text>
-        <text x="632" y="204" font-size="10" fill="#5C5A54">單一 bulk 樣本無法打破這個循環。</text>
+        <text x="632" y="198" font-size="9.5" fill="#5C5A54">
+          <tspan x="632" dy="0">目前 single-bulk measurements</tspan>
+          <tspan x="632" dy="13">加現有假設，無法識別四種成因。</tspan>
+        </text>
 
         <!-- 底部解方 -->
         <rect x="20" y="252" width="864" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
         <text x="36" y="274" font-size="12" font-weight="800" fill="#2F7D5B">✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹</text>
-        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。</text>
-        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">甲基化被結構性地隔離在主線之外：樹先由遺傳證據定好，甲基化只在事後做關聯描述，改不動任何一條邊。</text>
+        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個候選 allele = 物理分子連鎖；只在不使用甲基化衍生標籤下非循環。</text>
+        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">仍依賴 variant calling、alignment、basecalling 與 haplotag 假設；不是 assumption-free truth。</text>
+        <text x="36" y="321" font-size="10.5" fill="#1f4f3a">甲基化被隔離在主線之外：遺傳候選結構先固定，甲基只在事後做關聯描述，改不動邊。</text>
       </g>
     </svg>

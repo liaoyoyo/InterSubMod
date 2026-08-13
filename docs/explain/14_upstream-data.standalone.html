@@ -4,8 +4,16 @@
 <!--
   doc_type: explain_upstream   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   data_sources: scratchpad/collect_upstream_tools.json
-  驗證: sidecar header 與資料行為實際 zcat 所得；7 樣本狀態取自 run_status.tsv；
+  驗證: sidecar header 與資料行為實際 zcat 所得；7 technical datasets／6 biological IDs 狀態取自 run_status.tsv；
         FILTER 轉移數取自 filter_transition_audit.json
 -->
 <style>
@@ -92,6 +100,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 
 <div class="topbar"><div class="in">
@@ -128,7 +170,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td><b>體細胞突變清單</b><br>VCF</td><td>ClairS（配對模式）</td>
           <td>哪些位置是腫瘤才有、正常組織沒有的突變。</td></tr>
       <tr><td><b>單倍型標籤</b><br><code>HP</code>／<code>PS</code></td><td>LongPhase-S</td>
-          <td>這條 read 來自父源還是母源那一套染色體。<b>存成 sidecar 檔案，不存回 BAM。</b></td></tr>
+          <td>這條 read 來自父源還是母源那一套染色體。<b>本交接的 frozen FIFO workflow 抽成 sidecar，該次 run 不新增落地 BAM；歷史 PRE-FIX workflows 曾落地 tagged BAM。</b></td></tr>
       <tr><td><b>拷貝數</b><br>CN 區段</td><td>SAVANA（僅 cna）</td>
           <td>哪些區段被複製或缺失。<b>目前狀態是 NOT_INTEGRATED，尚未接入主線。</b></td></tr>
     </tbody>
@@ -136,10 +178,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 </div>
 
 <div class="kpis">
-  <div class="kpi pass"><div class="v">7 / 7</div><div class="k">樣本 sidecar 全部生產完成</div></div>
-  <div class="kpi info"><div class="v">5.83 GiB</div><div class="k">7 樣本 sidecar 總量（壓縮後）</div></div>
-  <div class="kpi warn"><div class="v">1.67 TiB</div><div class="k">若改存 tagged BAM 需要的空間</div></div>
-  <div class="kpi info"><div class="v">287×</div><div class="k">sidecar 方案節省的倍數</div></div>
+  <div class="kpi pass"><div class="v">7 / 7</div><div class="k">technical datasets sidecar 全部生產完成</div></div>
+  <div class="kpi info"><div class="v">5.83 GiB</div><div class="k">7 technical datasets／6 biological IDs sidecar 總量（壓縮後）</div></div>
+  <div class="kpi warn"><div class="v">14 PRE-FIX</div><div class="k">3,709,322,840,333 bytes；7 paired_full sampled-ID 7/7 MATCH；無 full-file SHA；PARTIAL/NON_FINAL</div></div>
+  <div class="kpi info"><div class="v">294.2669×</div><div class="k">exact stat-byte 跨世代 footprint quotient；不是壓縮率，舊 287× 無效</div></div>
 </div>
 
 <!-- ═══════ 1 ═══════ -->
@@ -148,14 +190,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">從原始訊號到兩支 C++ 吃得下的東西。步驟 ① 通常在資料交付時就已完成。</p>
 
   <figure>
-    <div class="figtitle">圖 1 · 上游前處理鏈，以及為什麼 tagged BAM 從不落地</div>
+    <div class="figtitle">圖 1 · 上游前處理鏈，以及 FIFO 如何避免該次 run 新增落地 BAM</div>
     <svg viewBox="0 0 940 560" role="img" aria-labelledby="u1t u1d" xmlns="http://www.w3.org/2000/svg">
       <title id="u1t">上游八步驟前處理鏈</title>
       <desc id="u1d">從 ONT 原始訊號經 Dorado basecalling 產生帶甲基化標記的 BAM；
       正常組織 BAM 經 Clair3 與 LongPhase 產生定相的 germline 變異；
       腫瘤與正常配對經 ClairS 產生體細胞突變 VCF 並正規化；
       LongPhase-S 以 germline 單倍型為骨架標記每條 read，
-      其輸出的 tagged BAM 寫入具名管道由另一程序即時抽成 sidecar TSV，BAM 本體從不寫入磁碟；
+      在 FIFO workflow mode 中，tagged BAM 寫入具名管道由另一程序即時抽成 sidecar TSV，可避免為該次 run 新增落地 BAM；
       最後另跑 SAVANA 取得拷貝數。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -193,7 +235,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <!-- FIFO 重點 -->
         <rect x="60" y="186" width="820" height="132" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="2"/>
-        <text x="470" y="208" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2F7D5B">⑥ 關鍵設計：tagged BAM 寫進「具名管道」，從不寫到磁碟</text>
+        <text x="470" y="208" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2F7D5B">⑥ FIFO mode：tagged BAM 寫進具名管道，避免該次 run 新增落地 BAM</text>
 
         <rect x="90" y="222" width="176" height="56" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="1.2"/>
         <text x="178" y="242" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">LongPhase-S 寫出</text>
@@ -215,9 +257,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <rect x="740" y="222" width="120" height="56" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
         <text x="800" y="242" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">sidecar TSV</text>
         <text x="800" y="257" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#1f4f3a">5.83 GiB</text>
-        <text x="800" y="270" text-anchor="middle" font-size="9" fill="#5C5A54">（7 樣本合計）</text>
+        <text x="800" y="270" text-anchor="middle" font-size="9" fill="#5C5A54">（7 technical datasets 合計）</text>
 
-        <text x="470" y="298" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">跑完後工作目錄裡只剩一個空的管道檔 —— BAM 本體一個位元組都沒留在磁碟上</text>
+        <text x="470" y="298" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2F7D5B">該次 FIFO run 不新增落地 BAM；歷史 canonical 仍有 14 個 PRE-FIX tagged BAM</text>
         <text x="470" y="312" text-anchor="middle" font-size="10" fill="#1f4f3a">接著驗證：列數必須等於比對數、不得有未知的 HP 值、座標必須仍然有序，任一不過就中止</text>
 
         <path d="M470,318 L470,338" stroke="#8a8578" stroke-width="1.6" marker-end="url(#u)" fill="none"/>
@@ -236,25 +278,27 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <rect x="120" y="424" width="700" height="122" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.8"/>
         <text x="470" y="446" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9A3B3B">為什麼要大費周章用管道，而不是存 tagged BAM？</text>
-        <text x="146" y="470" font-size="10.5" fill="#7a3030">7 個樣本的 tagged BAM 合計約 <tspan font-weight="700">1.67 TiB</tspan>，含餘裕需準備約 2.3 TB 空間。</text>
-        <text x="146" y="488" font-size="10.5" fill="#7a3030">而 sidecar 只有 <tspan font-weight="700">5.83 GiB</tspan>（壓縮後）／13.98 GiB（未壓縮）——<tspan font-weight="700">相差約 287 倍</tspan>。</text>
+        <text x="146" y="470" font-size="10.5" fill="#7a3030">14 PRE-FIX BAM：3,709,322,840,333 bytes；其中 7 paired_full = 1.6743647 TiB。</text>
+        <text x="146" y="488" font-size="10.5" fill="#7a3030">sampled-identity 7/7 MATCH；full-file SHA未算。294.2669×僅跨世代footprint；287×無效。</text>
         <text x="146" y="510" font-size="10.5" fill="#7a3030">更重要的是：分析真正需要的資訊只有「哪條 read、在哪、屬於哪個單倍型」這 9 個欄位，</text>
-        <text x="146" y="526" font-size="10.5" font-weight="700" fill="#9A3B3B">序列與品質字串佔了 99% 以上的體積卻完全用不到。</text>
+        <text x="146" y="526" font-size="10.5" font-weight="700" fill="#9A3B3B">SEQ/QUAL未納入九欄contract；占比與用途需另做byte decomposition。</text>
         <text x="146" y="540" font-size="9.5" fill="#7a3030">代價：無法直接用 IGV 之類的工具看標籤（見下方 §4）。</text>
       </g>
     </svg>
     <figcaption>
       <b>這個設計是本系統最值得學習的工程決定之一</b> ——
       它把「我需要什麼資訊」與「這些資訊被裝在什麼容器裡」分開來想，
-      結果用 1/287 的空間保留了 100% 需要的內容。
+      sidecar保留 frozen downstream contract要求的全部欄位；不代表保留所有可能有用BAM資訊。
     </figcaption>
   </figure>
 </section>
 
 <!-- ═══════ 2 ═══════ -->
 <section id="s2">
-  <h3><span class="num">02</span>sidecar 長什麼樣 — 全系統的樞紐檔案</h3>
-  <p class="sub">這是唯一被兩支 C++ 程式的原始碼<b>寫死成相同格式</b>的檔案。</p>
+  <h3><span class="num">02</span>sidecar 長什麼樣 — exact-PS／LongLineage 的 commit-scoped contract</h3>
+  <p class="sub">InterSubMod 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。
+    兩者是平行 provenance contracts，<b>不是</b>兩支引擎直接串接的執行期介面；
+    tagged-BAM writer 只能依明示 feature/preview commit 宣稱。</p>
 
   <pre class="out"><code>#CHROM	START0	END0	QNAME	FLAG	MAPQ	CIGAR_B2	HP	PS</code></pre>
 
@@ -268,7 +312,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </tbody>
   </table></div>
 
-  <h4 class="mini">7 個樣本的實際規模</h4>
+  <h4 class="mini">7 個 technical datasets／6 個 biological IDs 的實際規模</h4>
   <div class="table-wrap"><table>
     <thead><tr><th style="width:26%">資料集</th><th style="width:22%">sidecar 列數</th><th style="width:52%">備註</th></tr></thead>
     <tbody>
@@ -344,23 +388,22 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">這是被問最多的需求之一，答案有點反直覺。</p>
 
   <div class="takeaway">
-    <span class="lab">現況</span>
-    <b>兩支 C++ 程式都沒有寫 BAM 的能力</b>（寫入 API 在整個 repo 出現 0 次，所有開檔都是唯讀模式）。
-    現存的 tagged BAM 全部由外部工具 LongPhase-S 產生。
-    而 LongLineage 更在架構層<b>明文禁止</b>輸出 BAM —— 這是寫進格式規範裡的硬性限制，不是可調參數。
+    <span class="lab">版本邊界（不可混講）</span>
+    <b>InterSubMod 仍沒有寫 BAM 的能力</b>（寫入 API 在本 repo 出現 0 次，所有開檔都是唯讀模式）。
+    <b>LongLineage 則必須指定版本</b>：private baseline/main snapshot <code>5daf50f</code> 沒有 BAM writer；private public-preview candidate <code>b9aaa12</code> 已含 <code>longlineage-tag-bam</code> tagged-BAM 輸出，但仍是 <code>NOT_READY</code>/non-production，<code>P3/P4/P5/P7/P8</code> BLOCKED。
+    因此「LongLineage 架構上禁止 BAM」已不是跨版本真實的敘述。
   </div>
 
-  <p><b>好消息是技術上完全可行</b>，因為比對用的鍵是確定性的正向計算：</p>
+  <p><b>若以 private <code>5daf50f</code> baseline 行為作參考，仍需獨立匯出工具；若評估 candidate <code>b9aaa12</code>，可測 <code>longlineage-tag-bam</code></b>。兩條路徑都依賴確定性的比對鍵：</p>
   <ul>
     <li>sidecar 裡的 <code>QNAME</code> 是<b>明文</b>的 UUID</li>
     <li>LongLineage 的 <code>read_id</code> 是它的 <b>SHA-256 雜湊</b></li>
     <li>所以讀 BAM 時對每條 read 名重算一次雜湊就能對上，<b>不需要任何反查表</b></li>
   </ul>
   <p>
-    可行的做法是寫一個<b>獨立的匯出工具</b>（讀凍結結果 + 原始 BAM，重算雜湊做比對），
-    放在正式流程之外。這不違反上述任何限制，因為它不是流程本身的產物。
-    <br><span class="dot">●</span> <b>但要先解決磁碟問題</b>：目前該磁碟只剩約 617 GB，
-    而全量 tagged BAM 需要 1.67 TiB。實務上建議只針對感興趣的區間產生子集。
+    private <code>5daf50f</code> baseline 行為下的可行做法是寫一個<b>獨立的匯出工具</b>（讀凍結結果 + 原始 BAM，重算雜湊做比對）；candidate 則要以實際 build/test receipt 確認 <code>longlineage-tag-bam</code> 的輸入契約與輸出語意，不可將「candidate 存在」當成「已公開／production 可用」。
+    <br><span class="dot">●</span> <b>但要先解決磁碟問題</b>：2026-08-05 receipt 記錄當時約 617 GB available；這是 volatile observation，執行前必須用 <code>scripts/site/doctor</code> 或 <code>df</code> 重查。現有 14 個 PRE-FIX BAM
+    合計 3,709,322,840,333 bytes，但尚未 hash、壓縮／byte decomposition 與 production eligibility 都未驗；實務上建議只針對感興趣區間產生子集。
   </p>
 
   <div class="rel">
@@ -374,7 +417,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <h4>本頁的驗證方式</h4>
   <ul>
     <li><b>sidecar 格式</b>：實際 zcat 取得表頭與資料行，與 LongLineage 原始碼中的常數逐位元組比對一致。</li>
-    <li><b>7 樣本狀態</b>：實際讀取生產狀態表，7/7 皆為 PASS。</li>
+    <li><b>cohort 狀態</b>：實際讀取生產狀態表，7/7 technical datasets 皆為 PASS；對應 6 biological IDs。</li>
     <li><b>FILTER 轉移數</b>：取自稽核 JSON，並驗算 4,592 − 5,528 = −936 與前後總數相符。</li>
     <li><b>磁碟數字</b>：實際檔案位元組數加總。</li>
   </ul>

@@ -1,0 +1,43 @@
+{
+  "schema_name": "intersubmod.tagged_bam_sampled_replay_manifest",
+  "schema_version": "1.0.0",
+  "created_at": "2026-08-13T00:00:00+08:00",
+  "scope": "HISTORICAL_PRE_FIX_PAIRED_FULL_SAMPLED_IDENTITY_ONLY",
+  "evidence_status": "PARTIAL",
+  "finality": "NON_FINAL",
+  "samples": [
+    {
+      "sample": "HCC1395",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam"
+    },
+    {
+      "sample": "HCC1395_DORADO",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395_DORADO/paired_full/20260315_HCC1395_DORADO_paired_full_full_complete_matrix/longphase_s/HCC1395_DORADO_tagged.bam"
+    },
+    {
+      "sample": "COLO829",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/COLO829_tagged.bam"
+    },
+    {
+      "sample": "H1437",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H1437/paired_full/20260315_H1437_paired_full_full_complete_matrix/longphase_s/H1437_tagged.bam"
+    },
+    {
+      "sample": "H2009",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H2009/paired_full/20260315_H2009_paired_full_full_complete_matrix/longphase_s/H2009_tagged.bam"
+    },
+    {
+      "sample": "HCC1937",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1937/paired_full/20260315_HCC1937_paired_full_full_complete_matrix/longphase_s/HCC1937_tagged.bam"
+    },
+    {
+      "sample": "HCC1954",
+      "tumor_bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1954/paired_full/20260315_HCC1954_paired_full_full_complete_matrix/longphase_s/HCC1954_tagged.bam"
+    }
+  ],
+  "known_limits": [
+    "This manifest points to local historical BAM payloads and does not redistribute them.",
+    "Replay reads only first/middle/last 1 MiB chunks plus filesystem metadata; it is not full-file hashing.",
+    "Producer-run/revision and byte-equivalence to later sidecars are not established."
+  ]
+}

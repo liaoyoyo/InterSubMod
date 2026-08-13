@@ -1,8 +1,8 @@
 ---
 title: 統一名詞表（Unified Glossary）— ISM Subclonal Reconstruction 論文解釋頁複用
 doc_type: glossary
-status: planning
-scope: 名詞表為單一真相來源（SoT），供所有解釋頁 / HTML / slide 複用；避免各頁定義漂移
+status: superseded_revision_scoped_planning
+scope: 2026-06-12 歷史名詞底稿；不是 current scientific SoT，current 數字與 claim boundary 由 2026-08-13 claim registry 與 04_number_resolution.md 約束
 created: 2026-06-12
 source: 10 條研究線盤點 JSON 各自 glossary 去重合併（ism-core / ism-evolution / ism-vs-external / main-axis / methyl-phasing-assist / asm-zar1l-brca2 / asm-cis-confound / negatives / loh-phasing / background-glossary）
 note: 名詞表只定義「概念」。專案特定數字（如某位點的 Δβ、某樣本 AUC、各線統計結果）一律不放此表，數字請引各研究線報告。
@@ -10,7 +10,9 @@ note: 名詞表只定義「概念」。專案特定數字（如某位點的 Δβ
 
 # 統一名詞表（Unified Glossary）
 
-> **用法**：本表是所有解釋頁 / HTML / slide 的名詞**單一真相來源**。任何頁面引用某名詞時，定義以本表為準，不在各頁重寫定義（避免漂移）。
+> **SUPERSEDED / HISTORICAL PLANNING SNAPSHOT（2026-06-12）**：本表可用來理解歷史名詞，但不是 current scientific SoT。公開 claim 口徑以 `research/20260813_public_docs_p0_correction/claim_remediation_registry.json`、`p0_claim_registry.json` 與本目錄 [`04_number_resolution.md`](04_number_resolution.md) 為準；不得從本歷史底稿升格生物結論。
+>
+> **用法**：只複用已與 current registry 相容的概念定義；若與 current 公開頁、schema 或 claim registry 不一致，本歷史底稿一律退讓。
 > **分組**：① haplotype 與 phasing ② 變異與 CN ③ 甲基化 ④ 統計與評估 ⑤ 工具與 pipeline。
 > **標記**：🧩 = 高認知負荷、建議配 SVG 示意圖（讀者直覺易誤，需圖輔助）。
 > **每條欄位**：嚴謹定義（資訊工程師科學敘述）／ 直覺類比 ／ 具體例子 ／ 常見誤解（若有）／ 關聯名詞。
@@ -410,17 +412,17 @@ note: 名詞表只定義「概念」。專案特定數字（如某位點的 Δβ
 - **關聯名詞**：BH-FDR、Fisher exact test、global_p
 
 ### Cramér's V reliability gate（Cochran gate）🧩
-- **嚴謹定義**：對 HP-cluster 列聯表計算 Cramér's V（關聯強度），並用 Cochran 準則（所有格期望值≥5）判斷卡方近似是否有效；不滿足時 gated 值在 summary 輸出 reliable?v:0（歸零），但 significance.json 仍保留原始未閘控值（雙口徑）。稀疏表下 gated 與 raw 可天差地遠。
-- **直覺類比**：Cramér's V 是用卡方推導的，需每格樣本夠多才近似成立；Cochran gate 像把關門說「你的表太稀疏，這個強度數字不算數」。
-- **具體例子**：一個位點 gated CramérV=0 但 PERMANOVA 顯著，不是矛盾——是稀疏表使卡方不可靠（見 latent 真結構）。
-- **常見誤解**：(1) 把 gated 與 raw 當同一欄混用；(2) 把 CramérV=0 當「無分群」（可能只是 reliability gate 觸發）。
-- **關聯名詞**：latent 真結構、PERMANOVA、Cochran 準則、雙口徑
+- **嚴謹定義**：對 HP–cluster 列聯表計算 raw Cramér's V（關聯強度）。現行程式的 reliability 旗標是「期望次數≥5 的格子佔比≥80%」（等價於期望次數<5 的格子不超過 20%），不是要求所有格子都≥5。`significance.json` 保留 raw V；summary 只投影 reliability 通過的 V，否則投影為 0。`GlobalTest::passed_gate` 則是 p-value 與 raw V 門檻的另一個複合決策，不得與 reliability 旗標當成同一件事。
+- **直覺類比**：raw V 是量到的關聯強度；reliability 旗標是「這個近似值是否適合放到 summary」；`passed_gate` 又是另一個結合 p-value 與 effect-size threshold 的決策。
+- **具體例子**：一個位點 summary CramérV=0 但 PERMANOVA 顯著，表示列聯表近似不可靠，但距離空間出現 association；這可列為待表徵候選，不能因此宣稱「真分群」或 cellular subclone。
+- **常見誤解**：(1) 把 summary、raw 與 `passed_gate` 混成同一口徑；(2) 把 summary V=0 當「無關聯」；(3) 反過來把 PERMANOVA 顯著升格為生物真實性。
+- **關聯名詞**：歷史稱「latent structure」的待表徵候選、PERMANOVA、Cochran 準則、多口徑
 
-### latent 真結構（latent real structure）
-- **嚴謹定義**：gated Cramér's V=0（被 Cochran 閘控歸零）但 PERMANOVA（距離法，對稀疏穩健）顯著的 ASM 位點——reads 確實按 HP 分群，只是卡方統計因稀疏列聯表判定不可靠而被過濾。屬「被保守統計過濾掉的真訊號」。
-- **直覺類比**：reads 的分群（距離角度）確實存在且與 HP 對齊，但因樣本少讓卡方說「我沒把握」——真信號被保守方法濾掉。
-- **具體例子**：這類位點適合以 PERMANOVA gate 做 characterization，但不可寫成 TP/FP filter。
-- **常見誤解**：把 latent 位點當 noise 丟棄（只看 Cramér's V）。
+### 「latent 結構」待表徵候選（歷史名稱；非 truth label）
+- **嚴謹定義**：歷史筆記把 summary Cramér's V=0 且 PERMANOVA 顯著的 ASM 位點稱為「latent real structure」。現行交接口徑只允許稱為「稀疏列聯表下的距離 association 待表徵候選」：PERMANOVA 顯著不能證明該分群是真實 cellular subclone，也不是 truth label。
+- **直覺類比**：一個方法說「列聯表太稀疏」，另一個方法說「距離分佈有差」；它們共同產生待追蹤候選，不會自動產生生物真相。
+- **具體例子**：這類位點可用獨立樣本、orthogonal assay 與共變異證據繼續 characterization，但不可寫成 confirmed TP/FP filter 或 confirmed lineage。
+- **常見誤解**：把歷史名稱中的「real」當成已驗證的 truth status。
 - **關聯名詞**：Cramér's V reliability gate、PERMANOVA、credible ASM
 
 ### AUC（Area Under the ROC Curve）

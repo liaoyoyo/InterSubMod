@@ -1,54 +1,65 @@
 # Analysis & Presentation 分析與呈現層
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
-> 部件分冊 · 第 15 頁 · Python 分析層 + HTML 呈現層
+> 部件分冊 · 第 15 頁 · Python science producers + validator／HTML 呈現層
 
-C++ 只吐檔案，**把資料變成看得懂的圖與表的是這一層**。這也是實驗室同學實際上花最多時間的地方。本頁挑出真正該用的入口，並誠實說明這層目前的碎片化問題。
+**Python 是實作語言，不是 evidence tier。** Commit-pinned research solver／analysis script 可以是
+science producer，但必須自帶 input、producer commit、command receipt、schema、scope 與 hash；
+validator／publication builder／HTML 則只能呈現 validated data，不得暗中重算或改寫 science。
+本頁同時列出這兩種角色，並誠實說明目前的碎片化問題。
 
 | 數字 | 意義 |
 |---|---|
-| **2,144** | 全 repo 的 Python 檔 |
+| **2,147** | deploy `fbdf7c7` 的全 repo Python 檔（以 `find . -type f -name '*.py'` 計數） |
 | **59 / 117** | ⚠️ 讀 CSV 但無任何欄位檢查 |
 | **182** | 🔴 硬編了別的分支路徑的腳本 |
 | **1** | ✅ 最推薦的第一支腳本（見下） |
 
 ---
 
-## 01 先跑這一支 — 一鍵重算所有關鍵數字
+## 01 Historical producer replay — 重算具名 35,332-site pipeline 指標
 
-如果你只想跑一個指令來確認整套東西是活的，跑這個。
+如果你只想重驗 historical 35,332-site script 與它的具名 inputs，跑這個；它不是全系統 health check。
 
 ```bash
-cd /big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
-python3 verify_pipeline_numbers.py
+REPO_ROOT="<REPO_ROOT>"
+cd "$REPO_ROOT"
+python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/verify_pipeline_numbers.py
 ```
 
-**它會做什麼**：把方法說明文件裡的**每一個數字重新算一次**，並與文件宣稱值比對。實跑輸出摘要：
+**它會做什麼**：重算 2026-06-27 教材所用的 **historical 35,332-site pipeline** 指標，並與該版文件宣稱值比對。它**不會**驗證 2026-07-24 exact-PS funnel、LongLineage、儲存量、程式碼檔案數或目前測試數。實跑輸出摘要：
 
 ```text
 sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 共現連上   21,554  ·  訊號不足 5,458  ·  孤立 8,320   （加總 = 35,332 ✓）
 ```
 
-✅ **實跑 exit 0** — 這支腳本的價值在於它是**可執行的文件**：如果數字對不上，它會直接告訴你，而不是讓錯誤的數字悄悄流進報告。
+✅ **實跑 exit 0** — 這只證明 historical 35,332-site 指標與其輸入相符，不能外推成「整份 Wiki／所有版本已驗證」。
+
+| Claim family | 應使用的分開驗證來源 | `verify_pipeline_numbers.py` 是否覆蓋 |
+|---|---|---|
+| historical 35,332-site pipeline | `verify_pipeline_numbers.py` | ✅ |
+| 2026-07-24 exact-PS funnel | `docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv`、`authority_manifest.json` 與對應 solver receipts | ❌ |
+| LongLineage 功能／版本 | 對指定 commit 分別跑 `preflight`／`dataset-gate`／binary inventory | ❌ |
+| 儲存量、程式碼數、測試數 | 在目標 commit／機器上分別做檔案統計、source inventory 與 fresh test run | ❌ |
 
 > **建議的閱讀順序**
-> 先跑上面這支確認環境沒問題 → 再看 §02 挑你需要的分析腳本 → 最後用 §03 的工作站 HTML 看結果。
+> 先跑上面這支確認 historical 35,332-site script 與具名 inputs 在本環境相符 → 再看 §02 挑你需要的分析腳本 → 最後用 §03 的工作站 HTML 看結果。其他 claim family 必須分別驗證。
 
 ---
 
 ## 02 主力腳本 — 各自產出什麼
 
-從 2,144 個 Python 檔中挑出真正是「入口」的那幾支。
+從 deploy `fbdf7c7` 的 2,147 個 Python 檔中挑出真正是「入口」的那幾支；此數字不代表 production entry-point 數。
 
 | 腳本 | 產出什麼、回答什麼問題 |
 |---|---|
-| `verify_pipeline_numbers.py`<br>✅ **先跑這個** | 一鍵重算並驗證方法文件裡的每個數字。**最適合當第一支跑的腳本。** |
-| `sm_linkage_genomewide.py` | 建立**全基因組突變共現地圖** —— 這是整套方法的骨幹。對每一對距離 50 kb 內的突變，統計有幾條 read 同時看到它們、四種等位組合各幾條、判成巢狀／互斥／共連鎖／獨立哪一種關係。<br>*實測產物 26.5 MB：53,094 對配對 + 35,332 筆位點帳本。* |
-| `build_strict_ps_hp_regions.py` | 用**嚴格規則**切出可建樹的區域：同一定相組、同一 germline 單倍型內、至少 3 條分子同時確定兩端 —— 才連一條邊。<br>🔴 **距離只記錄、不參與連邊**，這是刻意的方法學選擇（避免用幾何鄰近冒充分子連鎖）。 |
-| `build_layered_per_sample.py` | 產生 7 樣本的**分層工作站 HTML**（呈現層主成品）。 |
-| `build_exact_ps_layered_workstation.py` | 4,741 行的完整工作站建構器。支援 `--verify-only` —— **只驗證上游契約還成立、不重建**，適合用來確認資料沒漂移。 |
-| `build_workstation.py`<br>**通用** | 317 行的**通用**工作站生成器：吃一份宣告式 spec，吐互動判讀 HTML。見 §03。 |
+| `verify_pipeline_numbers.py`<br>historical replay | 重算 historical 35,332-site pipeline 的 TP／FP／共現／訊號不足／孤立；這是具名 historical input 的 producer replay，**不覆蓋** exact-PS、LongLineage、儲存量、code count 或 test count。 |
+| `sm_linkage_genomewide.py`<br>science producer | 建立**全基因組突變共現地圖**。要作 evidence 時必須釘選 producer commit、input、command、schema、scope 與 output hash；不能只憑這個檔名引用。 |
+| `build_strict_ps_hp_regions.py`<br>science producer | 用嚴格 PS×HP/read linkage 規則建立候選 region；距離只記錄、不參與連邊。只有對應 receipt 完整時才能作 science evidence。 |
+| `build_layered_per_sample.py`<br>publication builder | 讀 validated artifacts 產生 7 technical datasets／6 biological IDs 的分層工作站；不得改寫上游 denominator 或 claim ceiling。 |
+| `build_exact_ps_layered_workstation.py`<br>validator/builder | `--verify-only` 只驗證明示上游契約；其他模式的 producer／presentation responsibility 必須由該 run receipt 說明，不能因輸出是 HTML 就當成無 science transform。 |
+| `build_workstation.py`<br>通用 presenter | 吃宣告式 validated spec，吐互動判讀 HTML；缺必填欄位 fail closed。見 §03。 |
 
 <details>
 <summary>關鍵中間產物 — 想直接分析資料時該讀哪些檔</summary>
@@ -56,7 +67,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 | 檔案 | 內容 |
 |---|---|
 | `per_sSNV_census.tsv` | 每個突變一列的帳本：來源、正常組織的支持數、是否確認為體細胞突變、變異頻率、50 kb 內有幾個潛在夥伴、實際連上幾個、最高共讀深度、拷貝數狀態。 |
-| `regions.tsv` | 每個共現區域一列：座標、跨度、含幾個突變、重建出的樹是什麼形狀、節點數、巢狀／兄弟關係各幾對、最大深度、**有沒有矛盾**。 |
+| `regions.tsv` | 在 frozen recurrence-allowed revision 中，每個共現區域一列：座標、跨度、突變數、local candidate graph／arborescence 的形狀摘要、節點與相容／矛盾計數。這不是 biological tree、ancestry 或 clone truth，且尚未做 allele-specific CN／LOH correction。 |
 | `funnel_census_HCC1395.json` | **所有百分比的分母來源**。六層漏斗，每層丟了多少、為什麼丟，並**自我檢查各層加總等於總數**。要引用任何比例前先看這個檔。 |
 
 </details>
@@ -67,11 +78,11 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 產出的是**零外部依賴、可離線開啟**的單一 HTML 檔，可以直接寄給別人。
 
-### 圖 1 · 工作站生成器的「拒絕渲染」設計 — 由構造防止捏造數字
+### 圖 1 · 工作站生成器的「拒絕渲染」設計 — 防止必填欄位被靜默省略
 
-![workstation-refuse-design](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/workstation-refuse-design.png)
+![workstation-refuse-design](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/workstation-refuse-design.png)
 
-> 這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。**純文字的規則擋不住，只有讓它在構造上做不到才有效。**
+> 這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。此 generator 能防止已宣告必填欄位被靜默省略；**它不保證數值來源或科學解讀正確**。
 >
 > 🔴 但目前這個通用生成器**只有 2 個真正的複用者** —— 實務上大家用的是 4,741 行的專用版本。這是這一層最明顯的技術債。
 
@@ -86,7 +97,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ⚠️ **為什麼要這樣設計**
 如果缺資料時填一個破折號，報告看起來仍然完整，讀的人不會發現那一格其實沒有依據。
-🔴 「拒絕產出」讓「看起來有資料但其實沒有」這件事在結構上不可能發生 —— 這比任何檢查清單都可靠。
+🔴 「拒絕產出」阻止已宣告必填欄位缺失時仍生成完整外觀；它不涵蓋未宣告欄位，也不保證科學正確性。
 
 ### 現成的工作站成品
 
@@ -134,7 +145,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ### ⚠️ 坑四：資料讀取普遍沒有欄位檢查
 
-`scripts/` 下 268 個 Python 檔中，117 個會讀 CSV／TSV，但其中 **59 個**（超過一半）原始碼裡**沒有任何 schema 或欄位檢查**。
+`scripts/` 下 **291** 個 Python 檔（deploy `fbdf7c7`；含 generated/test helpers）中，117 個會讀 CSV／TSV，其中 **59 個**原始碼裡**沒有任何 schema 或欄位檢查**。不同母體不可直接用「超過一半」解讀。
 
 配合 [ISM 分冊](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine)提到的「`significance_summary.csv` 欄數跨版本不一致」，這代表**拿舊資料餵新腳本時很可能靜默讀到錯的欄位**。
 
@@ -144,7 +155,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ## 本頁的驗證方式
 
-- **腳本可用性**：主力腳本的 `--help` 本輪實跑取 exit code；`verify_pipeline_numbers.py` 完整跑完並讀回輸出。
+- **腳本可用性**：主力腳本的 `--help` 本輪實跑取 exit code；`verify_pipeline_numbers.py` 完整跑完並讀回 historical 35,332-site 輸出。此驗證不涵蓋其他 claim family。
 - **拒絕渲染行為**：以自建的最小 spec（故意缺一個必填指標）實測，確認退出碼為 3。
 - **檔案大小與腳本計數**：實際 `ls` 與遞迴統計，非估計值。
 - **python 版本問題**：以預設 `python3` 實跑重現崩潰，再以 3.10 實跑確認正常。

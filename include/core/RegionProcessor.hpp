@@ -144,11 +144,10 @@ struct RegionResult {
     double local_best_p_value;   ///< Best cluster's local p-value
     int local_best_cluster;      ///< Best cluster ID
     double heuristic_score;      ///< Combined heuristic score [0-1] (LEGACY — saturated, not for ranking)
-    // [Strength score] continuous association strength for ranking/grading (replaces saturated HeuristicScore).
-    // 0.30*struct(HP-AUC) + 0.25*eff(|Δβ|) + 0.25*assoc(CramersV) + 0.20*sig(-log10 GlobalP). Validated:
-    // median 0.344/max 0.975, Top500 = 498 Strong (concords), finds 31 strong regions VC missed.
+    // [Strength score] Equal-weight mean of the five observable component fields below; see RegionProcessor.cpp.
+    // This is a bounded association-ranking diagnostic, not a biological-correctness or lineage score.
     double strength_score;       ///< Association strength [0,1], continuous ranking
-    std::string strength_grade;  ///< 5-level: A>=0.65 / B>=0.5 / C>=0.35 / D>=0.2 / E<0.2
+    std::string strength_grade;  ///< 5-level: A>=0.50 / B>=0.35 / C>=0.22 / D>=0.12 / E<0.12
     bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
     double cluster_permanova_f;      ///< Cluster-based PERMANOVA pseudo-F
     double cluster_permanova_p;      ///< Cluster-based PERMANOVA p-value

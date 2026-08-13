@@ -89,9 +89,9 @@
     .blocked { color: var(--danger); }
     .limited { color: var(--warn); }
     .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; align-items: stretch; }
-    .flow article { position: relative; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfd; }
+    .flow article { position: relative; min-width: 0; overflow-wrap: anywhere; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfd; }
     .flow article:not(:last-child)::after { content: "→"; position: absolute; right: -0.62rem; top: 43%; z-index: 2; color: var(--accent); font-size: 1.5rem; font-weight: 900; }
-    code { padding: 0.08em 0.3em; border-radius: 5px; background: #edf1f4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+    code { overflow-wrap: anywhere; padding: 0.08em 0.3em; border-radius: 5px; background: #edf1f4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
     pre { overflow: auto; padding: 1rem; border-radius: 10px; color: #e7f8f7; background: #142d36; }
     pre code { padding: 0; color: inherit; background: transparent; }
     .small { color: var(--muted); font-size: 0.88rem; }
@@ -199,7 +199,7 @@
           <article><h3>1 · LongPhase-S / TO</h3><p><strong>輸入：</strong>BAM/VCF/reference。</p><p><strong>輸出：</strong>HP/PS、phased/recalibrated VCF、tagged reads/BAM。</p><p class="small">外部工具行為以 KB / paper 為準；不可由本專案報告反推。</p></article>
           <article><h3>2 · exact-PS / LongLineage</h3><p><strong>輸入：</strong>exact PS×HP endpoints、read observations、candidate records。</p><p><strong>輸出：</strong>read assignments、candidate mutation-state families、bounded topology records。</p><p class="small">Feature candidate <code>b9aaa12</code>；不是 cellular lineage truth。</p></article>
           <article><h3>3 · InterSubMod</h3><p><strong>輸入：</strong>tagged tumor BAM、reference、somatic VCF。</p><p><strong>輸出：</strong>per-region methylation、read distance、read clustering、statistics、<code>tree.nwk</code>。</p><p class="small"><code>tree.nwk</code> 是 methylation-distance read dendrogram。</p></article>
-          <article><h3>4 · Python / HTML</h3><p><strong>輸入：</strong>validated summary/receipt/registry。</p><p><strong>輸出：</strong>圖表與 standalone HTML。</p><p class="small">Presentation only；不得重新定義分母或暗中重算 science。</p></article>
+          <article><h3>4 · Python producer vs presenter</h3><p><strong>Research solver：</strong>可產 science，但須有 commit/input/command/schema/hash receipt。</p><p><strong>Validator／HTML：</strong>呈現 validated data。</p><p class="small">角色依 receipt，不依語言；publication path 不得暗中重算 science。</p></article>
         </div>
         <div class="callout warn" style="margin-top:1rem"><strong>避免混線：</strong>LongPhase 的 HP/PS tagging、LongLineage 的 candidate reconstruction、InterSubMod 的 read methylation clustering 是不同 provenance chain；不能用同一個「lineage」字樣把它們視為同一種結果。</div>
       </section>
@@ -272,13 +272,15 @@ scripts/handoff/run_tiny_public_e2e.sh --repo-root "$PWD" --jobs 4</code></pre>
           <thead><tr><th>Gate</th><th>狀態</th><th>證據／未決</th></tr></thead>
           <tbody>
             <tr><td>Frozen authority replay</td><td class="state pass">PASS</td><td>19 MATCH / 0 missing / 0 mismatch</td></tr>
-            <tr><td>Repo hygiene</td><td class="state pass">PASS</td><td>isolated HEAD：0 broken/absolute symlink、0 tracked local settings</td></tr>
-            <tr><td>Unified registries</td><td class="state pass">PASS</td><td>6 schemas、51 run rows、36 artifacts、11/11 unit tests</td></tr>
+            <tr><td>Structural repo hygiene</td><td class="state pass">PASS</td><td>isolated HEAD：0 broken/absolute symlink、0 tracked local settings</td></tr>
+            <tr><td>Large-asset data plane</td><td class="state blocked">BLOCKED</td><td>唯一&gt;50 MiB HTML已local archive驗hash並改redirect；仍有101個tracked &gt;1 MiB、499,500,347 bytes待producer/finality/license與Release target裁定</td></tr>
+            <tr><td>Unified registries</td><td class="state pass">PASS</td><td>Core registry receipt驗證51 run rows、36 artifacts與當次schema checks；whole-package schema/test count由各驗收receipt動態產生</td></tr>
             <tr><td>Tiny synthetic E2E</td><td class="state limited">DEMO PASS / CLEAN STACK PENDING</td><td>199 columns、12 read leaves、fail-closed negative；須於 portable commit clean clone重播</td></tr>
             <tr><td>InterSubMod clean build + full tests</td><td class="state limited">PENDING</td><td>需在完整 stacked commit動態產生 CTest/Python receipt</td></tr>
-            <tr><td>Public claims</td><td class="state blocked">BLOCKED</td><td>33/33 local P0 guards ready；第34筆C108為GitHub About external-only blocked；158 registry仍有25 UNVERIFIED</td></tr>
+            <tr><td>Public claims</td><td class="state blocked">BLOCKED</td><td>33/33 local P0 guards ready；第34筆C108 About已bounded live CONFIRMED_WITH_LIMITS；158 registry為69 CONFIRMED、69 CONFIRMED_WITH_LIMITS、20 UNVERIFIED，P1/P2與publication/release仍blocked</td></tr>
             <tr><td>LongLineage preview</td><td class="state blocked">KEEP PRIVATE</td><td>4 unresolved source rows、21 license mappings pending、11 dependency NOASSERTION、7 history findings；P3/P4/P5/P7/P8 blocked</td></tr>
             <tr><td>bip7 / bip8 acceptance</td><td class="state blocked">BLOCKED</td><td>兩台都未取得完整 host-local acceptance receipts</td></tr>
+            <tr><td>Meeting notes / media curation</td><td class="state blocked">PARTIAL / BLOCKED</td><td>只完成Meeting root immediate-child inventory；尚無逐件決策、結論、figure provenance、finality與license curated index，原始PPTX/PDF/media未進Git</td></tr>
             <tr><td>Tag / GitHub Release</td><td class="state blocked">NO-GO</td><td>不得建立 <code>research-handoff-2026.08.1</code></td></tr>
           </tbody>
         </table></div>
