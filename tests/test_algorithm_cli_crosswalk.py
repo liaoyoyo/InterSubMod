@@ -103,12 +103,16 @@ def test_hash_bound_source_snapshot_drift_fails_closed():
     assert any("source snapshot sha256 mismatch" in error for error in errors)
 
 
-def test_false_commit_pinned_state_fails_closed():
+def test_false_source_state_fails_closed():
     def mutate(data):
-        data["source_state"] = "COMMIT_PINNED"
+        data["source_state"] = (
+            "WORKTREE_HASH_BOUND_PENDING_COMMIT"
+            if data["source_state"] == "COMMIT_PINNED"
+            else "COMMIT_PINNED"
+        )
 
     errors, _ = validate_mutation(mutate)
-    assert any("source_state COMMIT_PINNED" in error for error in errors)
+    assert any("source_state" in error for error in errors)
 
 
 def test_source_snapshot_tree_hash_drift_fails_closed():
