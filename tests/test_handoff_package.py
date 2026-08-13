@@ -72,6 +72,11 @@ class HandoffPackageValidationTest(unittest.TestCase):
         self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["columns"], 199)
         self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["read_leaves"], 12)
         self.assertFalse(by_id["tiny_e2e_receipt"]["details"]["machine_acceptance"])
+        self.assertTrue(by_id["evidence_manifest"]["details"]["temporal_order_validated"])
+        self.assertEqual(
+            by_id["evidence_manifest"]["details"]["latest_embedded_source"],
+            "bip7_tiny_e2e_7c7fbd6f:$.verified_at",
+        )
 
     def test_tiny_e2e_receipt_cannot_promote_machine_acceptance(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -134,6 +139,17 @@ class HandoffPackageValidationTest(unittest.TestCase):
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
             receipt = MODULE.validate_package(package)
             self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+
+    def test_evidence_manifest_verified_at_cannot_precede_embedded_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["verified_at"] = "2026-08-13T21:00:00+08:00"
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
 
     def test_public_claim_evidence_size_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

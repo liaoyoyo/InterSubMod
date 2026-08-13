@@ -80,6 +80,30 @@ def load_json(path: Path) -> Any:
         return json.load(handle)
 
 
+def parse_aware_timestamp(value: object, label: str) -> datetime:
+    require(isinstance(value, str) and value, f"{label} must be a non-empty ISO-8601 timestamp")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ContractError(f"{label} is not a valid ISO-8601 timestamp: {value!r}") from error
+    require(parsed.tzinfo is not None, f"{label} must include an explicit timezone offset")
+    return parsed
+
+
+def iter_embedded_timestamps(value: Any, path: str = "$"):
+    """Yield timestamp-like provenance fields from a parsed evidence receipt."""
+
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            nested_path = f"{path}.{key}"
+            if key.endswith("_at") and isinstance(nested, str) and "T" in nested:
+                yield nested_path, nested
+            yield from iter_embedded_timestamps(nested, nested_path)
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            yield from iter_embedded_timestamps(nested, f"{path}[{index}]")
+
+
 def package_path(package_root: Path, relative: str, label: str, *, base: Path | None = None) -> Path:
     require(isinstance(relative, str) and relative.strip() != "", f"{label} must be a non-empty path")
     candidate = ((base or package_root) / relative).resolve()
@@ -132,6 +156,8 @@ def check_json_parse(package_root: Path) -> dict[str, Any]:
 
 def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
     manifest = load_json(package_root / "evidence/EVIDENCE_MANIFEST.json")
+    manifest_verified_at_raw = manifest.get("verified_at")
+    manifest_verified_at = parse_aware_timestamp(manifest_verified_at_raw, "EVIDENCE_MANIFEST verified_at")
     records = manifest.get("records")
     require(isinstance(records, list) and records, "EVIDENCE_MANIFEST records must be a non-empty list")
     evidence_ids = [row.get("evidence_id") for row in records if isinstance(row, dict)]
@@ -145,6 +171,9 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
     external_source_not_mounted = 0
     size_bound_count = 0
     required_size_bound = {"public_claim_validation_20260813", "full_claim_registry_20260813"}
+    temporal_fields_checked = 0
+    latest_embedded_at: datetime | None = None
+    latest_embedded_source: str | None = None
     for row in records:
         evidence_id = row["evidence_id"]
         if "evidence_status" in row:
@@ -161,6 +190,22 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
             )
         path = package_path(package_root, row.get("path"), f"evidence {evidence_id} path")
         require(path.is_file(), f"evidence path does not exist: {row.get('path')}")
+        if path.suffix.lower() == ".json":
+            payload = load_json(path)
+            for timestamp_path, raw_timestamp in iter_embedded_timestamps(payload):
+                embedded_at = parse_aware_timestamp(
+                    raw_timestamp,
+                    f"embedded evidence timestamp {evidence_id}:{timestamp_path}",
+                )
+                temporal_fields_checked += 1
+                require(
+                    embedded_at <= manifest_verified_at,
+                    "EVIDENCE_MANIFEST verified_at precedes embedded evidence timestamp: "
+                    f"{evidence_id}:{timestamp_path}={raw_timestamp}",
+                )
+                if latest_embedded_at is None or embedded_at > latest_embedded_at:
+                    latest_embedded_at = embedded_at
+                    latest_embedded_source = f"{evidence_id}:{timestamp_path}"
         if "size_bytes" in row or evidence_id in required_size_bound:
             expected_size = row.get("size_bytes")
             require(
@@ -230,6 +275,13 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
         "missing": 0,
         "hash_mismatch": 0,
         "reader_acceptance_records": 1,
+        "manifest_verified_at": manifest_verified_at_raw,
+        "temporal_fields_checked": temporal_fields_checked,
+        "latest_embedded_at_utc": (
+            latest_embedded_at.astimezone(timezone.utc).isoformat() if latest_embedded_at is not None else None
+        ),
+        "latest_embedded_source": latest_embedded_source,
+        "temporal_order_validated": True,
     }
 
 
