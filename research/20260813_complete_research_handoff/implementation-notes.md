@@ -195,6 +195,13 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 - **Why it matters**: 依檔名猜語言會讓 `bash -n` 產生假失敗；registry 與驗證命令均應讀 shebang。
 - **Evidence**: Python `py_compile` PASS；shell-only 檔案 `bash -n` PASS。
 
+### [2026-08-13] Clean suite 必須阻斷跨 clone Python import
+
+- **Constraint**: historical analysis modules曾在import時將原dirty repo的`scripts/analysis`插到`sys.path`最前面；測試雖PASS，實際混用兩棵source tree。
+- **Why it matters**: clean clone test count不等於clean clone source provenance；未阻斷時可將本機原repo的module誤當candidate驗證。
+- **Resolution**: observation/Phase1 helpers改clone-relative package import；pytest session-end guard及獨立subprocess test對checkout外`scripts.*`與foreign InterSubMod `sys.path` fail closed。
+- **Evidence**: commit `587aeb676823d9d3f9f96c68ae2048528b3b412e`的clean checkout CTest 270/270、pytest 223 tests + 8 subtests，warning source全部位於該checkout。
+
 ## Provenance Footer
 
 - **Commit**: `ddd8909a838318d8a77969313e9561c8ff9d01c2`
