@@ -56,6 +56,7 @@ status: IN_PROGRESS_WITH_FAIL_CLOSED_GATES
 - **Status**：Accepted。
 - **決定**：17份 public explain HTML 加 4 份 handoff HTML，共 21 頁，固定跑 desktop 1440、mobile 390、no-JS 390與print 1440；禁止external runtime request，檢查document overflow、page/console error、HTML/XML/SVG parse，print只在記憶體產生。
 - **觀察**：第一輪真實抓到page07 desktop `1506/1440`與mobile `1196/390` overflow；修正generator的container/grid/table/long-token CSS。將所有現存handoff HTML納入後，最終需以 84-case clean-source receipt 作驗收。
+- **觀察**：擴充為完整21頁後的首輪為80/84 PASS；current 20260813 handoff與historical 20260806 handoff各在mobile/no-JS有table overflow。其餘80 cases、desktop/print、page/console error與external request均通過；此輪刻意寫成`FAIL_CLOSED`，修正並完整重跑前不得升格。
 - **驗證**：runner與receipt皆入Git；receipt明示不驗science、accessibility、非Chromium browser或publication state。
 
 ### [2026-08-13] 第二輪 adversarial semantic audit 擴充跨文件 guard

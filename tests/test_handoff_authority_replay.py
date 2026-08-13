@@ -6,6 +6,10 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "handoff" / "replay_authority.py"
+RUNBOOK = (
+    Path(__file__).parents[1]
+    / "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_bip7_bip8操作與驗證_01.md"
+)
 SPEC = importlib.util.spec_from_file_location("replay_authority", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
@@ -55,6 +59,12 @@ class AuthorityReplayTest(unittest.TestCase):
             receipt = MODULE.replay(manifest)
             self.assertFalse(receipt["pass"])
             self.assertEqual(receipt["tally"]["MISSING"], 1)
+
+    def test_public_runbook_uses_manifest_cli_flag(self):
+        text = RUNBOOK.read_text(encoding="utf-8")
+        replay_command = text.split("python3 scripts/handoff/replay_authority.py", 1)[1].split("```", 1)[0]
+        self.assertIn("--manifest ", replay_command)
+        self.assertNotIn("--authority ", replay_command)
 
 
 if __name__ == "__main__":

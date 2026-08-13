@@ -91,7 +91,7 @@
     .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; align-items: stretch; }
     .flow article { position: relative; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfd; }
     .flow article:not(:last-child)::after { content: "→"; position: absolute; right: -0.62rem; top: 43%; z-index: 2; color: var(--accent); font-size: 1.5rem; font-weight: 900; }
-    code { padding: 0.08em 0.3em; border-radius: 5px; background: #edf1f4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+    code { overflow-wrap: anywhere; padding: 0.08em 0.3em; border-radius: 5px; background: #edf1f4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
     pre { overflow: auto; padding: 1rem; border-radius: 10px; color: #e7f8f7; background: #142d36; }
     pre code { padding: 0; color: inherit; background: transparent; }
     .small { color: var(--muted); font-size: 0.88rem; }

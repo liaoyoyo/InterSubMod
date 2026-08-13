@@ -50,6 +50,8 @@
 - [偏離] LongLineage PR #6最初以moving `origin/main`作history base，hosted CI 5 jobs fail。已改讀safety receipt的immutable `5daf50f…`，新版9/9 hosted checks PASS。
 - [偏離] 一次full CTest誤用只build governance target的build dir，造成多個`Not Run`；該次明確作廢，不列PASS/FAIL證據。正式clean-clone full build後重跑49/49 PASS。
 - [偏離] Frozen binary adjudication曾把5/5 solver module byte identity與19/19 authority replay寫成「論文核心數字可從版本控制完整重建」。已改為binary/source identity與重編骨架；TiB/local data plane的science未全量重算。
+- [偏離] 雙機操作文件的authority replay範例曾誤用registry builder的`--authority`參數；實際`replay_authority.py`介面是`--manifest`。首次命令exit 2且未產生receipt；修正後read-only replay為19/19 MATCH，並新增CLI文件regression test。
+- [驗證事件] 21頁×4模式Chromium首輪為80/84 PASS；兩份handoff HTML只在mobile/no-JS出現table橫向overflow，desktop/print、HTML/XML/SVG parse、page/console error及external request均通過。該輪維持FAIL CLOSED，不能當最終browser receipt。
 
 ## 折衷
 
