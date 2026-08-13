@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterSubMod physical run registry with logical metadata merge",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_type", "verified_at", "claim_ceiling", "reconciliation", "records"],
+  "properties": {
+    "schema_version": {"const": "2.0.0"},
+    "registry_type": {"const": "physical_run_registry_with_logical_metadata_merge"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "claim_ceiling": {"type": "string", "minLength": 1},
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_file_lines", "manifest_header_lines", "logical_manifest_rows", "physical_directories_total",
+        "current_physical_directories", "pending_archive_physical_directories", "logical_rows_merged_current",
+        "logical_rows_merged_pending_archive", "current_physical_unregistered", "pending_archive_extras",
+        "explanation_18_19_35", "merge_policy"
+      ],
+      "properties": {
+        "manifest_file_lines": {"const": 19},
+        "manifest_header_lines": {"const": 1},
+        "logical_manifest_rows": {"const": 18},
+        "physical_directories_total": {"const": 51},
+        "current_physical_directories": {"const": 35},
+        "pending_archive_physical_directories": {"const": 16},
+        "logical_rows_merged_current": {"const": 9},
+        "logical_rows_merged_pending_archive": {"const": 9},
+        "current_physical_unregistered": {"const": 26},
+        "pending_archive_extras": {"const": 7},
+        "explanation_18_19_35": {"type": "string", "minLength": 1},
+        "merge_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 51,
+      "maxItems": 51,
+      "items": {"$ref": "#/$defs/run"}
+    }
+  },
+  "$defs": {
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "physical_run_id", "run_id", "sample_id", "mode", "layout_class", "storage_state", "physical_path",
+        "logical_manifest_member", "logical_manifest_run_id", "logical_manifest_metadata", "run_context_path",
+        "source_created_at", "run_started_at", "run_completed_at", "verified_at", "published_at", "last_seen_at", "filesystem_mtime",
+        "scope", "evidence_status", "finality", "availability", "machine_locations", "known_limits"
+      ],
+      "properties": {
+        "physical_run_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "sample_id": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["paired_full", "paired_pileup", "to_pileup", "unknown"]},
+        "layout_class": {"enum": ["MATERIALIZED_MANIFEST_BUNDLE", "COMPLETE_MATRIX", "APR_FULL_RERUN", "SMOKECHECK", "PERMANOVA_RERUN", "PARALLEL_TEST", "OTHER"]},
+        "storage_state": {"enum": ["CURRENT", "PENDING_ARCHIVE"]},
+        "physical_path": {"type": "string", "pattern": "^/"},
+        "logical_manifest_member": {"type": "boolean"},
+        "logical_manifest_run_id": {"type": ["string", "null"]},
+        "logical_manifest_metadata": {"type": ["object", "null"]},
+        "run_context_path": {"type": ["string", "null"]},
+        "source_created_at": {"type": ["string", "null"], "format": "date-time"},
+        "run_started_at": {"type": ["string", "null"], "format": "date-time"},
+        "run_completed_at": {"type": ["string", "null"], "format": "date-time"},
+        "verified_at": {"type": "string", "format": "date-time"},
+        "published_at": {"type": ["string", "null"], "format": "date-time"},
+        "last_seen_at": {"type": "string", "format": "date-time"},
+        "filesystem_mtime": {"type": "string", "format": "date-time"},
+        "scope": {"enum": ["FULL", "PARTIAL", "DEMO"]},
+        "evidence_status": {"enum": ["AUTHORITY", "VALIDATED_DERIVED", "PARTIAL", "HISTORICAL", "INVALIDATED", "IN_PROGRESS"]},
+        "finality": {"enum": ["FINAL_FOR_SCOPE", "NON_FINAL", "SUPERSEDED"]},
+        "availability": {"enum": ["GIT", "GITHUB_RELEASE", "LOCAL_CANONICAL", "EXTERNAL_SOURCE", "MISSING"]},
+        "machine_locations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["machine", "path", "last_seen_at", "location_status"],
+            "properties": {
+              "machine": {"type": "string", "minLength": 1},
+              "path": {"type": "string", "pattern": "^/"},
+              "last_seen_at": {"type": "string", "format": "date-time"},
+              "location_status": {"enum": ["PRESENT", "MISSING", "NFS_VISIBLE_NOT_HOST_VERIFIED", "ARCHIVE_PENDING_UNRECEIPTED"]}
+            }
+          }
+        },
+        "known_limits": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    }
+  }
+}

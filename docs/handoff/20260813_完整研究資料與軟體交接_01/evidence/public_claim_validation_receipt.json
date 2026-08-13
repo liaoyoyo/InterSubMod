@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-13T11:55:30+08:00",
+  "task_type": [
+    "B_COMPREHENSIVE_VALIDATION",
+    "D_EXTERNAL_HANDOFF"
+  ],
+  "scope": "LOCAL_SOURCE_ONLY",
+  "verdict": "PASS",
+  "publication_status": "BLOCKED_NOT_PUBLISHED_OR_REFETCHED",
+  "release_status": "BLOCKED",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/build_claim_remediation_registry.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"schema_version\": 1,\n  \"output\": \"research/20260813_public_docs_p0_correction/claim_remediation_registry.json\",\n  \"output_sha256\": \"4bfe997d663f7c5f900c4fe7a6d6fc942c030c06356c4c49c103952bde9a20d6\",\n  \"source_inventory_sha256\": \"d5d8794c2467ac6ac466711f91890666f3dbc571d9b3e27b07ba5f10d642ddbc\",\n  \"counts\": {\n    \"claims\": 158,\n    \"by_priority\": {\n      \"P0\": 34,\n      \"P1\": 20,\n      \"P2\": 35,\n      \"P3\": 69\n    },\n    \"by_current_verdict\": {\n      \"CONFIRMED\": 69,\n      \"CONFIRMED_WITH_LIMITS\": 64,\n      \"UNVERIFIED\": 25\n    },\n    \"by_source_status\": {\n      \"EXTERNAL_ONLY_BLOCKED\": 1,\n      \"FROZEN_CONFIRMED_WITH_LIMITS\": 31,\n      \"FROZEN_EVIDENCE_CONFIRMED\": 69,\n      \"SOURCE_EDITED_REVIEW_REQUIRED\": 24,\n      \"SOURCE_READY\": 33\n    }\n  },\n  \"gates\": {\n    \"P0_SOURCE_READY\": {\n      \"status\": \"PASS\",\n      \"reason\": \"33 local P0 claims pass fail-closed source guards; C108 is external-only.\"\n    },\n    \"SOURCE_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"P1/P2 source edits still require dedicated guards/evidence closure; GitHub About remains open.\"\n    },\n    \"PUBLICATION_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"Default branch, Wiki, Pages and About have not been published and re-fetched.\"\n    },\n    \"RELEASE_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"Publication gate and broader research-handoff release gates remain open.\"\n    }\n  }\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "python3",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/validate_public_p0_claims.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"checked_target_rules\": 77,\n  \"errors\": 0,\n  \"external_actions\": 35,\n  \"external_only_claims\": 1,\n  \"external_public_surfaces\": 4,\n  \"forbidden_anchors\": 85,\n  \"inventory_p0\": 34,\n  \"local_claims\": 33,\n  \"registry_p0\": 34,\n  \"required_anchors\": 149,\n  \"unique_documents\": 27,\n  \"verdict\": \"PASS\"\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "python3",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/validate_claim_remediation_registry.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"claims\": 158,\n  \"current_verdicts\": {\n    \"CONFIRMED\": 69,\n    \"CONFIRMED_WITH_LIMITS\": 64,\n    \"UNVERIFIED\": 25\n  },\n  \"denominator_checks\": 7,\n  \"errors\": 0,\n  \"p0_guard\": {\n    \"checked_target_rules\": 77,\n    \"errors\": 0,\n    \"external_actions\": 35,\n    \"external_only_claims\": 1,\n    \"external_public_surfaces\": 4,\n    \"forbidden_anchors\": 85,\n    \"inventory_p0\": 34,\n    \"local_claims\": 33,\n    \"registry_p0\": 34,\n    \"required_anchors\": 149,\n    \"unique_documents\": 27,\n    \"verdict\": \"PASS\"\n  },\n  \"source_statuses\": {\n    \"EXTERNAL_ONLY_BLOCKED\": 1,\n    \"FROZEN_CONFIRMED_WITH_LIMITS\": 31,\n    \"FROZEN_EVIDENCE_CONFIRMED\": 69,\n    \"SOURCE_EDITED_REVIEW_REQUIRED\": 24,\n    \"SOURCE_READY\": 33\n  },\n  \"tiny_fixture_paths\": 8,\n  \"unique_claim_ids\": 158,\n  \"verdict\": \"PASS\"\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "research/20260813_public_docs_p0_correction/tests/test_claim_remediation_registry.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "",
+      "stderr_tail": "test_denominator_and_capability_drift_fail (research.20260813_public_docs_p0_correction.tests.test_claim_remediation_registry.ClaimRemediationRegistryTest) ... ok\ntest_illegal_verdict_and_missing_evidence_fail (research.20260813_public_docs_p0_correction.tests.test_claim_remediation_registry.ClaimRemediationRegistryTest) ... ok\ntest_missing_and_duplicate_claims_fail (research.20260813_public_docs_p0_correction.tests.test_claim_remediation_registry.ClaimRemediationRegistryTest) ... ok\ntest_registry_passes (research.20260813_public_docs_p0_correction.tests.test_claim_remediation_registry.ClaimRemediationRegistryTest) ... ok\ntest_source_live_collapse_fails (research.20260813_public_docs_p0_correction.tests.test_claim_remediation_registry.ClaimRemediationRegistryTest) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 2.402s\n\nOK\n"
+    }
+  ],
+  "json_files_checked": [
+    "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json",
+    "research/20260813_public_docs_p0_correction/claim_remediation_registry.json",
+    "research/20260813_public_docs_p0_correction/claim_remediation_build_receipt.json"
+  ],
+  "json_errors": [],
+  "html_source_checks": {
+    "files": 17,
+    "inline_svg_elements": 37,
+    "xml_svg_parse_errors": [],
+    "external_runtime_resources": [],
+    "desktop_mobile_print_nojs": "NOT_RUN_IN_THIS_SOURCE_ONLY_SUBTASK",
+    "verdict": "PASS"
+  },
+  "claim_ceiling": {
+    "confirmed_cellular_subclone": 0,
+    "confirmed_linear_ancestry": 0,
+    "methylation": "ASSOCIATION_ONLY",
+    "cn_loh": "NOT_INTEGRATED",
+    "graph_shape_88_2579_percent": "MODEL_CONDITIONAL_NOT_BIOLOGICAL_PREVALENCE"
+  }
+}

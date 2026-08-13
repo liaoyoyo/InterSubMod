@@ -1,0 +1,353 @@
+{
+  "actual_host": "bip7",
+  "claim_ceiling": "Path and mount observations only; NFS visibility is not host-local bip8 validation.",
+  "records": [
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": {
+        "branch": "chore/handoff-20260813",
+        "clean": false,
+        "dirty_entry_count": 75,
+        "head": "95d420f6f397487822ce97dbab8151eb9e56af53"
+      },
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-08-13T11:00:42+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod",
+      "path_id": "repo.intersubmod_dirty",
+      "semantic_role": "Active/dirty InterSubMod research repository",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": {
+        "branch": "agent/research-handoff-data-governance-20260813",
+        "clean": false,
+        "dirty_entry_count": 79,
+        "head": "19fdb748e26d44b77198424506811973bcfe0c5b"
+      },
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-08-13T11:20:55+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+      "path_id": "repo.intersubmod_release_worktree",
+      "semantic_role": "Clean-baseline-derived handoff worktree",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": {
+        "branch": "feat/lineage-tagging-toolchain",
+        "clean": true,
+        "dirty_entry_count": 0,
+        "head": "0b2172b76b8a5149aabcc9e80d4fd0a3fbb97024"
+      },
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-08-09T23:37:17+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/LongLineage",
+      "path_id": "repo.longlineage_active",
+      "semantic_role": "Active LongLineage repository",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": {
+        "branch": "agent/public-preview-docs-security-20260813",
+        "clean": true,
+        "dirty_entry_count": 0,
+        "head": "1179a39c8dc58adebb7fec6f6e4ed7662d31a7a7"
+      },
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-08-13T11:09:57+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/worktrees/ll-preview-20260813",
+      "path_id": "repo.longlineage_preview",
+      "semantic_role": "LongLineage public-preview worktree",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-07-15T00:12:44+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output",
+      "path_id": "storage.big7_output",
+      "semantic_role": "Primary big7 output root",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-04-22T04:47:52+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical",
+      "path_id": "storage.big7_canonical",
+      "semantic_role": "Current canonical physical runs",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-07-11T01:06:40+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis",
+      "path_id": "storage.big7_synthesis",
+      "semantic_role": "Research synthesis and observations",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-06-12T16:24:52+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/_ARCHIVE_pending_cleanup_202606",
+      "path_id": "storage.pending_archive",
+      "semantic_role": "Pending-cleanup archive root",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-04-20T04:28:59+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/big8_output_archive",
+      "path_id": "storage.big7_big8_archive",
+      "semantic_role": "Materialized big8 archive",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-06-01T19:51:24+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/bip8_output_archive",
+      "path_id": "storage.big7_bip8_archive",
+      "semantic_role": "Materialized bip8 archive",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "big8",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "nfs4",
+        "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246",
+        "source": "140.123.104.246:/big8_disk",
+        "target": "/big8_disk"
+      },
+      "mtime": "2026-03-08T03:43:37+08:00",
+      "observation_status": "NFS_VISIBLE_NOT_HOST_VERIFIED",
+      "observed_from_host": "bip7",
+      "path": "/big8_disk/liaoyoyo2001/InterSubMod_runs/output",
+      "path_id": "legacy.big8_output",
+      "semantic_role": "Legacy big8 InterSubMod output root",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip8",
+      "git_state": null,
+      "known_limits": [
+        "Observed through NFS from bip7; this is not an independent bip8 host receipt."
+      ],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "nfs4",
+        "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246",
+        "source": "140.123.104.246:/bip8_disk",
+        "target": "/bip8_disk"
+      },
+      "mtime": "2026-03-07T15:55:46+08:00",
+      "observation_status": "NFS_VISIBLE_NOT_HOST_VERIFIED",
+      "observed_from_host": "bip7",
+      "path": "/bip8_disk/liaoyoyo2001/InterSubMod_out/output",
+      "path_id": "legacy.bip8_output",
+      "semantic_role": "Legacy bip8 InterSubMod output root",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": "2026-07-30T05:18:51+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/Meeting",
+      "path_id": "meeting.root",
+      "semantic_role": "Meeting notes and presentation workspace",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "MISSING",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [
+        "MISSING_SOURCE; reconstructed indexes must never impersonate the original directory."
+      ],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "ext4",
+        "options": "rw,relatime",
+        "source": "/dev/sdc1",
+        "target": "/big7_disk"
+      },
+      "mtime": null,
+      "observation_status": "MISSING",
+      "observed_from_host": "bip7",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod_big7_runbook",
+      "path_id": "legacy.runbook",
+      "semantic_role": "Historical runbook root",
+      "size_bytes": null
+    },
+    {
+      "entry_type": "FILE",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "xfs",
+        "options": "rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota",
+        "source": "/dev/sdb1",
+        "target": "/bip7_disk"
+      },
+      "mtime": "2026-07-24T16:50:36+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/bip7_disk/liaoyoyo2001/build-exact-af-20260724/bin/exact_ps_topology_af",
+      "path_id": "binary.frozen_original",
+      "semantic_role": "Original frozen exact-PS binary",
+      "size_bytes": 280176
+    },
+    {
+      "entry_type": "DIRECTORY",
+      "expected_machine": "bip7",
+      "git_state": null,
+      "known_limits": [],
+      "last_seen_at": "2026-08-13T11:21:47+08:00",
+      "mount": {
+        "fstype": "xfs",
+        "options": "rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota",
+        "source": "/dev/sdb1",
+        "target": "/bip7_disk"
+      },
+      "mtime": "2026-08-13T03:12:52+08:00",
+      "observation_status": "PRESENT",
+      "observed_from_host": "bip7",
+      "path": "/bip7_disk/liaoyoyo2001/_frozen/exact_ps_topology_af_20260724",
+      "path_id": "binary.frozen_bundle",
+      "semantic_role": "Permanent frozen binary/source/build bundle",
+      "size_bytes": null
+    }
+  ],
+  "registry_type": "machine_path_registry",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T11:21:47+08:00"
+}

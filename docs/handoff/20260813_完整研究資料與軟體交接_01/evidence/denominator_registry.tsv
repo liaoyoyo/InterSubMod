@@ -1,0 +1,20 @@
+metric	numerator	denominator	percent	scope	status	authority_artifact_id	parent_metric	excluded_count	unknown_count	exclusion_reason	interpretation
+ssnv_dataset_records	469849	469849	100.0000	all7_chr1_22	current	strict_linkage_ready	NA	0	0	NA	LongPhase-S recalibrated PASS biallelic autosomal dataset-records
+strict_components	255752	255752	100.0000	all7_chr1_22	current	strict_linkage_ready	ssnv_dataset_records	0	0	NA	Strict endpoint read-linkage connected components
+k1_linkage_abstain	170131	255752	66.5219	strict_components	current	strict_linkage_ready	strict_components	85621	0	component_k_ge_2	Singleton components excluded from multi-sSNV tree inference
+strict_read_linked_w	85621	255752	33.4781	strict_components	current	strict_linkage_ready	strict_components	170131	0	component_k_eq_1	k>=2 strict read-linked components
+final_groups	98955	98955	100.0000	all7_chr1_22	current	all7_summary	strict_read_linked_w	0	0	one_to_many_bounded_partition	Local topology groups after bounded partition; count exceeds W because one W may split into multiple blocks
+no_active_alt	13014	98955	13.1514	final_groups	current	all7_summary	final_groups	85941	0	no_supported_active_alt	No mutation-tree inference; not a biological single tree
+mutation_bearing_units	85941	98955	86.8486	all7_chr1_22	current	all7_summary	final_groups	13014	0	no_active_alt	Units with at least one active ALT bit
+family_complete	75224	85941	87.5298	mutation_bearing	current	all7_summary	mutation_bearing_units	10717	0	search_node_guard	Minimum vertex-set family completely enumerated
+resource_abstain	10717	85941	12.4702	mutation_bearing	current	all7_summary	mutation_bearing_units	75224	0	family_complete	Tree decision maps to ABSTAIN_INCOMPLETE with SEARCH_NODE_GUARD
+ranked_complete	71955	75224	95.6543	family_complete	current	all7_summary	family_complete	3269	0	zero_denominator_or_recurrence_screen	Complete families with usable read-AF and AF recurrence screen passed
+zero_denominator	3224	75224	4.2859	family_complete	current	all7_summary	family_complete	72000	0	read_af_denominator_missing	Structure available but read-AF denominator unavailable
+af_recurrence_screen_abstain	45	75224	0.0598	family_complete	current	all7_summary	family_complete	75179	0	all_minimum_sets_recurrence_required	Structural family retained; read-AF monotonicity ordering not applied
+unique_best_tree	39648	71955	55.1011	ranked_complete	current	topology_summary	ranked_complete	32307	0	af_best_tied	Exact arithmetic unique winner under frozen read-AF score
+tied_same_rooted_unlabeled_topology	23858	71955	33.1568	ranked_complete	current	topology_summary	ranked_complete	48097	0	unique_or_cross_topology_tie	Multiple best labeled trees but one rooted-unlabeled topology signature
+tied_cross_topology	8449	71955	11.7421	ranked_complete	current	topology_summary	ranked_complete	63506	0	one_rooted_unlabeled_topology	Multiple best rooted-unlabeled topologies
+one_rooted_unlabeled_topology	63506	71955	88.2579	ranked_complete	current	topology_summary	ranked_complete	8449	0	cross_topology_tie	One rooted-unlabeled topology signature; not biological topology prevalence
+methyl_formal_units	1045	1045	100.0000	methyl_formal_family	current	methyl_manifest	NA	0	0	NA	Frozen pattern-conditioned methylation units
+methyl_evaluable_units	811	1045	77.6077	methyl_formal_family	current	methyl_manifest	methyl_formal_units	234	0	analysis_not_evaluable	Units passing analysis eligibility
+methyl_robust_associations	3	811	0.3699	methyl_evaluable	current	methyl_manifest	methyl_evaluable_units	808	0	no_robust_or_confounded	Association-only; not a topology or clone claim

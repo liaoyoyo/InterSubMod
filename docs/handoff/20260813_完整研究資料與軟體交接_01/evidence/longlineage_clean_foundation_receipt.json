@@ -1,0 +1,50 @@
+{
+  "receipt_type": "longlineage_clean_foundation_validation",
+  "schema_version": "1.0.0",
+  "candidate_baseline": "b9aaa12a11fa00606bd174dabd0f172a5d112359",
+  "validated_stacked_commit": "f60b5f3274123bdf818371600b608d52626c893e",
+  "validated_at": "2026-08-13T14:00:00+08:00",
+  "hostname": "bip7",
+  "clean_clone": "/tmp/longlineage-pr3-clean.XIE616/LongLineage",
+  "input_repository": "/big7_disk/liaoyoyo2001/worktrees/ll-preview-20260813",
+  "commands": [
+    "/usr/bin/cmake -S . -B build-verify-debug -DCMAKE_BUILD_TYPE=Debug",
+    "/usr/bin/cmake --build build-verify-debug -j2",
+    "PATH=/usr/bin:/bin:$PATH scripts/ci/check_all.sh build-verify-debug",
+    "scripts/ci/check_public_preview_gate.sh HEAD"
+  ],
+  "results": {
+    "configure_exit": 0,
+    "build_exit": 0,
+    "ctest_passed": 49,
+    "ctest_total": 49,
+    "ctest_failed": 0,
+    "no_network": "PASS",
+    "foundation": "FOUNDATION_PASS",
+    "strict_public_preview_gate_exit": 1,
+    "strict_public_preview_gate_interpretation": "EXPECTED_SAFE_FAILURE",
+    "production_run_expected_exit": 6,
+    "production_run_expected_status": "KernelBlocked"
+  },
+  "strict_public_preview_blockers": {
+    "repository_license_review": "PENDING_PUBLIC_RELEASE_AUDIT",
+    "unresolved_source_rows": 4,
+    "unapproved_source_license_rows": 21,
+    "dependency_license_noassertion": 11,
+    "history_findings": 7
+  },
+  "hosted_ci": {
+    "pr5": "https://github.com/liaoyoyo/LongLineage/pull/5",
+    "pr6": "https://github.com/liaoyoyo/LongLineage/pull/6",
+    "pr6_checks_passed": 9,
+    "pr6_checks_total": 9,
+    "pr7": "https://github.com/liaoyoyo/LongLineage/pull/7",
+    "pr7_status_at_receipt": "DRAFT_CHECKS_PENDING_OR_RUNNING"
+  },
+  "github_visibility_after_validation": "PRIVATE",
+  "candidate_tag_observed": false,
+  "github_release_observed": false,
+  "blocked_phases": ["P3", "P4", "P5", "P7", "P8"],
+  "verdict": "KEEP_PRIVATE_NO_TAG_NO_RELEASE",
+  "claim_ceiling": "Foundation build/test evidence only. It does not prove scientific parity, production readiness, cellular lineage, license clearance, or public safety."
+}

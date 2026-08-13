@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "site_id": "bip7-path-preflight-20260813",
+  "expected_hostname": "bip7",
+  "project_root": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+  "data_roots": {
+    "primary": "/big8_disk/data",
+    "output": "/big7_disk/liaoyoyo2001/big7_disk_output",
+    "knowledge": "/big8_disk/liaoyoyo2001/Knowledge"
+  },
+  "reference": {
+    "fasta": {
+      "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta",
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.sha256"
+    },
+    "indexes": [
+      {
+        "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.fai",
+        "checksum_policy": "SIZE_ONLY"
+      }
+    ]
+  },
+  "tools": {
+    "samtools": {
+      "path": "/usr/local/bin/samtools",
+      "checksum_policy": "EXPECTED_SHA256",
+      "sha256": "b13ec3fdf13b783c608b3296b5102764933dd19fb4cc198e8cfd88709879ee7f",
+      "required": true
+    },
+    "bcftools": {
+      "path": "/usr/bin/bcftools",
+      "checksum_policy": "EXPECTED_SHA256",
+      "sha256": "d006ee249f30301d9c58ff453d886591769e1ae6d93557c9d04ffd008f7dcba6",
+      "required": true
+    },
+    "longphase_s": {
+      "path": "/big8_disk/liaoyoyo2001/Knowledge/codebase/longphase-s/longphase-s",
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md",
+      "required": true
+    },
+    "intersubmod": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod",
+      "checksum_policy": "SIZE_ONLY",
+      "required": true
+    }
+  },
+  "datasets": {
+    "HCC1395_ONT_5kHz": {
+      "biological_id": "HCC1395",
+      "technical_dataset_id": "HCC1395",
+      "genome_build": "GRCh38",
+      "inputs": {
+        "tumor_bam": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.sha256"
+        },
+        "tumor_bam_index": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.bai",
+          "checksum_policy": "SIZE_ONLY"
+        },
+        "normal_bam": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.sha256"
+        },
+        "normal_bam_index": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.bai",
+          "checksum_policy": "SIZE_ONLY"
+        },
+        "somatic_vcf": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz.sha256"
+        },
+        "truth_vcf": {
+          "path": "/big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/"
+        },
+        "truth_bed": {
+          "path": "/big8_disk/data/HCC1395/SEQC2/High-Confidence_Regions_v1.2.bed",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/"
+        }
+      }
+    }
+  }
+}

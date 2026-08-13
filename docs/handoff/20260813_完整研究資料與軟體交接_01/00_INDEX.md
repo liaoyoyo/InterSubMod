@@ -1,0 +1,112 @@
+<!--
+建立時間: 2026-08-13 11:30 +08:00
+目標: 提供 InterSubMod／LongLineage research handoff snapshot 的單一入口
+處理範圍: Task Type B Comprehensive validation + D External handoff；7 technical datasets／6 biological IDs／chr1-22
+關聯檔案:
+  - InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json
+  - InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv
+  - InterSubMod/research/20260813_complete_research_handoff/release_freeze_manifest.json
+驗證方式: authority SHA-256 replay、registry validator、clean build/test、synthetic E2E、reader acceptance test
+證據等級: mixed；每一 claim 以 registry/文件內的 evidence status 為準
+狀態: RESEARCH_HANDOFF_SNAPSHOT / RELEASE_BLOCKED
+-->
+
+# InterSubMod／LongLineage 完整研究交接索引
+
+> **RESEARCH HANDOFF SNAPSHOT — 非 production release。** 本包整理的是截至 2026-08-13 的研究狀態、資料治理與可重現介面。InterSubMod 的 tag／GitHub Release，以及 LongLineage 的 public preview，必須等各自 gate 全數通過；目前不得稱為 release-ready。
+
+用 SCQA + Claim–Evidence–Verdict：**現有 frozen science evidence 可重播且 19/19 bytes 相符，但公開文件、雙機、LongLineage license/source-origin 與 live publication gates 尚未全部閉合，所以可交接研究、不可發布 production。**
+
+## 30 秒答案
+
+| 問題 | 可安全回答 |
+|---|---|
+| 這是什麼專案？ | 以 ONT 長讀序列的 sSNV read linkage、候選 mutation-state reconstruction 與 read-level methylation association，研究癌症樣本內的分子狀態；不是已完成的 cellular lineage caller。 |
+| 現在的科學結論？ | `confirmed cellular subclone = 0`、`confirmed linear ancestry = 0`。Methylation 僅為 association；CN/LOH 未整合。`88.2579%` 只是 frozen model 下 71,955 ranked units 的 rooted-unlabeled graph-shape 統計。 |
+| 哪些數字可引用？ | 只從 2026-08-01 frozen authority manifest、denominator registry 及其 19/19 replay receipt引用，並同時保留 denominator、scope 與 claim boundary。 |
+| 哪些資料是 final？ | 只有 registry 同時標為 `AUTHORITY + FULL + FINAL_FOR_SCOPE` 且有 producer/hash 的 artifact；final 僅代表其 scope，並非整個研究 final。 |
+| 軟體如何分工？ | LongPhase-S/TO 產生 phasing／HP/PS／recalibrated VCF／tagged reads；exact-PS／LongLineage 建候選 mutation-state families；InterSubMod 產 per-region methylation、read distance、read clustering與統計；Python/HTML只呈現 validated data。 |
+| bip7／bip8 怎麼跑？ | 先 bootstrap site profile，再跑 doctor、`run_benchmark.sh --plan`、clean build/test與 synthetic smoke。只有真正登入該主機取得的 receipt 才能宣稱該主機 PASS。 |
+| 如何繼續研究？ | 先選 registry 中非 superseded artifact，建立新 cycle/pre-decision audit，固定 source commit、輸入 hash、scope、denominator與停止條件；active CNV/drilldown另走後續 PR。 |
+
+## 科學權威與判讀順序
+
+1. [2026-08-01 authority manifest（包內exact copy）](evidence/authority_manifest.json)
+2. [2026-08-01 denominator registry（包內exact copy）](evidence/denominator_registry.tsv)
+3. [本包 artifact registry](registries/artifact_registry.json)
+4. [本包 authority／superseded crosswalk](registries/authority_superseded_crosswalk.json)
+5. [2026-08-13 authority replay receipt（包內exact copy）](evidence/authority_replay_receipt.json)
+
+禁止從目錄名稱、檔名中的 `final`、最新 mtime、目前 Git HEAD 或 HTML 視覺呈現自行推定權威。
+
+## 文件地圖
+
+| 讀者需求 | 文件／registry | 用途 |
+|---|---|---|
+| 現況、時間與結論 | [研究結論、時間與 finality](20260813_研究結論時間與Finality_01.md) | 每個核心 claim 的證據、限制與 verdict |
+| 三套工具與資料流 | [軟體輸入輸出與研究流程](20260813_軟體輸入輸出與研究流程_01.md) | LongPhase、LongLineage/exact-PS、InterSubMod、Python/HTML 的責任邊界 |
+| bip7／bip8 操作 | [雙機操作與驗證](20260813_bip7_bip8操作與驗證_01.md) | profile、doctor、plan、build/test、replay、fail-closed 規則 |
+| AI cold start | [AI context bundle](ai_context/CONTEXT.md) | 無對話背景仍能正確回答六問；含禁止升格規則 |
+| 資料集 | [dataset registry](registries/dataset_registry.json) | 7 technical datasets 與 6 biological IDs |
+| Run | [run registry](registries/run_registry.json) | 18 logical rows合併至51 physical dirs（35 current＋16 pending archive）與取代關係 |
+| Artifact | [artifact registry](registries/artifact_registry.json) | producer、commit、input、hash、scope、finality、限制與位置 |
+| 公開 claims | [claim registry snapshot](registries/claim_registry.json) | hash-bind完整158-row registry、verdict分布與source/publication/release gates |
+| Dataset alias | [dataset alias registry](registries/dataset_alias_registry.json) | site-profile operator key與canonical technical dataset ID的join規則 |
+| 機器路徑 | [machine-path registry](registries/machine_path_registry.json) | bip7 本機路徑、遠端 mount view、missing source 與最後確認時間 |
+| 中間資料根 | [storage-root manifest](registries/storage_root_manifest.json) | directory-level manifest、數量、大小量測狀態與重生方式 |
+| 離線瀏覽 | [Standalone HTML overview](20260813_完整研究交接總覽_01.standalone.html) | 無外部 request 的單檔總覽；數字仍回指 registry |
+| 實作紀錄 | [Implementation notes](implementation-notes.md) | 決策、偏離、折衷、驗證事件與發布阻塞 |
+| 包內證據 | [Evidence manifest](evidence/EVIDENCE_MANIFEST.json) | authority、denominator、replay、preflight、claims、hygiene與LongLineage safety的SHA-256 |
+
+## 固定狀態
+
+| 項目 | 固定值／狀態 |
+|---|---|
+| InterSubMod baseline | `ddd8909a838318d8a77969313e9561c8ff9d01c2` |
+| Excluded InterSubMod work | `73afaeac` 與 2026-08-13 drilldown/CNV dirty work：`IN_PROGRESS/PARTIAL` |
+| LongLineage preview candidate | `b9aaa12`；research preview only |
+| Excluded LongLineage work | `9ad976b`、`6ce62b2` 與未提交修改；另開科研 PR |
+| Authority scope | 7 technical datasets／6 biological IDs／chr1-22 |
+| Frozen byte replay | 19 MATCH／0 missing／0 mismatch |
+| Public-claim audit | 初始58/158有問題、34 P0；完整working stack內33/33 local P0 guards ready，第34筆C108為GitHub About external-only且仍blocked。該source patch屬後續`public-claim-corrections` PR，本data-governance PR不可單獨宣稱source-ready。完整registry仍有25 `UNVERIFIED`，live publication未驗收 |
+| LongLineage readiness | P3/P4/P5/P7/P8 `BLOCKED`；production `run` intentionally blocked |
+| bip7 | local data preflight已取得 receipt；仍須合併後 fresh-clone全鏈驗收 |
+| bip8 | 尚無在 bip8 hostname 上取得的 receipt；`BIP8_DATA_PREFLIGHT_BLOCKED` |
+| Release/tag | `BLOCKED`；不得建立 `research-handoff-2026.08.1` tag／Release，直到所有 gate PASS |
+
+## Enum 快速判讀
+
+- `evidence_status`: `AUTHORITY | VALIDATED_DERIVED | PARTIAL | HISTORICAL | INVALIDATED | IN_PROGRESS`
+- `scope`: `FULL | PARTIAL | DEMO`
+- `finality`: `FINAL_FOR_SCOPE | NON_FINAL | SUPERSEDED`
+- `availability`: `GIT | GITHUB_RELEASE | LOCAL_CANONICAL | EXTERNAL_SOURCE | MISSING`
+
+`FINAL_FOR_SCOPE` 只回答「在明示 scope 內是否固定」，不回答「是否具生物真實性」「是否 production-ready」「是否可以外推」。
+
+Artifact registry共有20筆`FINAL_FOR_SCOPE`：其中19筆是frozen science/source byte authority（`AUTHORITY`），另1筆是append-only source adjudication（`VALIDATED_DERIVED`，只對provenance correction final）。後者不可被計作新增science authority或生物結果。
+
+## 目前 gate verdict
+
+| Gate | Verdict | 理由 |
+|---|---|---|
+| Frozen authority bytes | **PASS** | 19/19 SHA-256 MATCH |
+| Repo hygiene | **PASS** | isolated HEAD 0 absolute/broken symlink；tracked local settings移除且可復原 |
+| Unified inventory | **PASS** | 51 physical runs、36 artifacts、16 machine paths、11 storage roots；6/6 schemas與11/11 tests PASS |
+| Clean build/C++/Python | **IN PROGRESS** | 必須由本 release stack動態產生 receipt |
+| Synthetic E2E | **DEMO PASS / STACK PENDING** | isolated run已驗199欄與12 read leaves；仍須在portable commit clean clone重播，不得取代science |
+| bip7 fresh-clone | **BLOCKED** | real-data paths存在但4個local checksum locator缺失；完整 fresh-clone receipt待補 |
+| bip8 fresh-clone | **BLOCKED** | 尚未在 hostname=bip8執行 |
+| 158 claims/source | **BLOCKED** | 完整working stack的33/33 local P0 guards PASS，第34筆C108 external-only BLOCKED，排定由後續`public-claim-corrections` PR處理；69 confirmed、64 confirmed-with-limits、25 unverified，Wiki／Pages／About live驗證未閉合 |
+| GitHub live surfaces | **BLOCKED** | main／Wiki／Pages／About尚未綁定同一 release commit |
+| LongLineage public preview | **BLOCKED** | private-first三層draft PR已建立；source/license/history blockers仍在，repo目前為private |
+| Tag/GitHub Release | **NO-GO** | 上述任一 blocking gate存在即不得發布 |
+
+交接包內嵌manifest、registry、receipt與來源裁定，並用relative links相互連結。Frozen authority的19個底層payload依資料分層政策留在local canonical/frozen data plane，不複製進Git；[authority replay receipt](evidence/authority_replay_receipt.json)保留其絕對路徑與實測hash。因此「包可獨立解讀」不等於「包含所有大型payload」。
+
+## 變更與發布政策
+
+本交接包採 stacked、single-intent PR。讀者看到 branch/PR PASS，只代表該 PR 的 bounded gate；必須在整個 stack 合併後，從同一 commit重跑 aggregate acceptance，才可評估 tag／Release。任何真實 secret finding 都先撤銷憑證並另案處理 Git history；本輪不重寫歷史。
+
+---
+
+**Partial flag**：本索引的資料根盤點是 comprehensive inventory，但執行驗證仍有明列 blocked gate；不得把本檔單獨當 release receipt。

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/docs/handoff/20260813_完整研究資料與軟體交接_01/schemas/artifact-registry.schema.json",
+  "title": "InterSubMod research handoff artifact registry",
+  "type": "array",
+  "items": {"$ref": "#/$defs/artifact"},
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "artifact_type", "semantic_description", "sample_id",
+        "technical_dataset_id", "mode", "genome_build", "producer",
+        "producer_commit", "schema_version", "inputs", "derived_from",
+        "validates", "supersedes", "used_by", "created_at", "generated_at", "filesystem_mtime",
+        "verified_at", "scope", "evidence_status", "finality", "availability",
+        "size_bytes", "sha256", "license", "claim_ceiling", "known_limits",
+        "regeneration_command", "public_uri", "machine_locations"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "artifact_type": {"type": "string", "minLength": 1},
+        "semantic_description": {"type": "string", "minLength": 1},
+        "sample_id": {"type": ["string", "null"]},
+        "technical_dataset_id": {"type": ["string", "null"]},
+        "mode": {"type": ["string", "null"]},
+        "genome_build": {"type": ["string", "null"]},
+        "producer": {"type": "string", "minLength": 1},
+        "producer_commit": {"type": ["string", "null"]},
+        "schema_version": {"type": "string", "minLength": 1},
+        "inputs": {"$ref": "#/$defs/stringList"},
+        "derived_from": {"$ref": "#/$defs/stringList"},
+        "validates": {"$ref": "#/$defs/stringList"},
+        "supersedes": {"$ref": "#/$defs/stringList"},
+        "used_by": {"$ref": "#/$defs/stringList"},
+        "created_at": {"type": ["string", "null"], "format": "date-time"},
+        "generated_at": {"type": ["string", "null"], "format": "date-time"},
+        "filesystem_mtime": {"type": ["string", "null"], "format": "date-time"},
+        "verified_at": {"type": ["string", "null"], "format": "date-time"},
+        "scope": {"enum": ["FULL", "PARTIAL", "DEMO"]},
+        "evidence_status": {"enum": ["AUTHORITY", "VALIDATED_DERIVED", "PARTIAL", "HISTORICAL", "INVALIDATED", "IN_PROGRESS"]},
+        "finality": {"enum": ["FINAL_FOR_SCOPE", "NON_FINAL", "SUPERSEDED"]},
+        "availability": {"enum": ["GIT", "GITHUB_RELEASE", "LOCAL_CANONICAL", "EXTERNAL_SOURCE", "MISSING"]},
+        "size_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "license": {"type": "string", "minLength": 1},
+        "claim_ceiling": {"type": "string", "minLength": 1},
+        "known_limits": {"$ref": "#/$defs/stringList"},
+        "regeneration_command": {"type": ["string", "null"]},
+        "public_uri": {"type": ["string", "null"]},
+        "machine_locations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/machineLocation"}
+        }
+      }
+    },
+    "machineLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["machine", "path", "last_seen_at", "location_status"],
+      "properties": {
+        "machine": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "pattern": "^/"},
+        "last_seen_at": {"type": "string", "format": "date-time"},
+        "location_status": {"enum": ["PRESENT", "MISSING", "NFS_VISIBLE_NOT_HOST_VERIFIED", "ARCHIVE_PENDING_UNRECEIPTED"]}
+      }
+    },
+    "stringList": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  }
+}
