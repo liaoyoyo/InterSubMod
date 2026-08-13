@@ -1,0 +1,42 @@
+{
+  "schema_name": "intersubmod.bip7_tiny_e2e_summary_receipt",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T05:16:55.457203+00:00",
+  "hostname": "bip7",
+  "scope": "DEMO",
+  "evidence_status": "VALIDATED_DERIVED",
+  "machine_acceptance": false,
+  "overall_release_gate": "NOT_EVALUATED",
+  "claim_ceiling": "Clean-clone DEMO I/O and schema reproducibility only; no biological or real-data validation",
+  "source_checkout": {
+    "source_repository": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+    "requested_revision": "fb806d9bce3e08fd7b2562aafae126d1fa152b9e",
+    "resolved_commit": "fb806d9bce3e08fd7b2562aafae126d1fa152b9e",
+    "clean": true,
+    "status_line_count": 0
+  },
+  "command": "InterSubMod/scripts/handoff/run_tiny_public_e2e.sh --source-repository /big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813 --revision fb806d9bce3e08fd7b2562aafae126d1fa152b9e --work-dir /tmp/ism-pr4-e2e-parent-QtSbVq/run --jobs 2",
+  "exit_code": 0,
+  "results": {
+    "all_pass": true,
+    "clean_clone_e2e_pass": true,
+    "summary_column_count": 199,
+    "summary_row_count": 1,
+    "tree_leaf_count": 12,
+    "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage"
+  },
+  "hashes": {
+    "binary_sha256": "63165d66eb36433894129fef19ab7653a72c5fe6be7068e98223994e7352c98b",
+    "significance_summary_sha256": "9412bf098e033e1df241e22366230e4092d26d26af9432b6b195d5079e1d03ab",
+    "tree_newick_sha256": "7c2483ecb138da6e570f89bad7b32b3757020a58845da573090eba4e82d952b7",
+    "run_command_sha256": "9c2b0353ff25019aa75a6aad08adacbad5e059863ef46d4e0eb5bce929858d86",
+    "full_ephemeral_receipt_sha256": "e661b0e8e8980d66d39651064916b08d740e6c38dc9e4709b2d59dd40040249c"
+  },
+  "full_receipt_local_path": "/tmp/ism-pr4-e2e-parent-QtSbVq/run/tiny_public_e2e_receipt.json",
+  "known_limits": [
+    "The fixture is synthetic and scope=DEMO.",
+    "This receipt does not satisfy the bip7 real-data read-only preflight gate.",
+    "This receipt does not satisfy any bip8 host-local gate.",
+    "The full receipt is ephemeral; this committed summary preserves its source commit, result, semantics, and key hashes."
+  ]
+}

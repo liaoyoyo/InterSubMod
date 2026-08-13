@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Run a read-only site preflight and optionally save its receipt."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from site_profile import inspect_profile, load_profile
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", required=True, type=Path)
+    parser.add_argument("--mode", choices=("synthetic", "real-preflight"), default="synthetic")
+    parser.add_argument("--receipt", type=Path, help="Explicitly write a JSON receipt")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    print(f"[INPUT] site_profile={args.profile.resolve()}")
+    try:
+        profile = load_profile(args.profile)
+    except (OSError, json.JSONDecodeError, ValueError) as error:
+        print(f"[ERROR] invalid profile: {error}", file=sys.stderr)
+        return 3
+    result = inspect_profile(
+        profile,
+        include_real_data=args.mode == "real-preflight",
+        profile_path=args.profile,
+    )
+    if args.receipt:
+        args.receipt.parent.mkdir(parents=True, exist_ok=True)
+        args.receipt.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"[OUTPUT] receipt={args.receipt.resolve()}")
+    print(json.dumps({key: result[key] for key in ("site_id", "profile", "hostname", "hostname_match", "mode", "mounts", "tool_hashes", "tally", "pass")}, ensure_ascii=False))
+    print(f"[RESULT] pass={str(result['pass']).lower()}")
+    return 0 if result["pass"] else 5
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

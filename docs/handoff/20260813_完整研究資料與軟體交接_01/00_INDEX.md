@@ -54,6 +54,7 @@
 | Dataset alias | [dataset alias registry](registries/dataset_alias_registry.json) | site-profile operator key與canonical technical dataset ID的join規則 |
 | 機器路徑 | [machine-path registry](registries/machine_path_registry.json) | bip7 本機路徑、遠端 mount view、missing source 與最後確認時間 |
 | 中間資料根 | [storage-root manifest](registries/storage_root_manifest.json) | directory-level manifest、數量、大小量測狀態與重生方式 |
+| Workflow／script治理 | [workflow registry](registries/workflow_registry.json) | Git tracked `scripts/**` exact inventory、portable support allowlist、legacy/archive界線、blob hash與absolute-path token盤點 |
 | 離線瀏覽 | [Standalone HTML overview](20260813_完整研究交接總覽_01.standalone.html) | 無外部 request 的單檔總覽；數字仍回指 registry |
 | 實作紀錄 | [Implementation notes](implementation-notes.md) | 決策、偏離、折衷、驗證事件與發布阻塞 |
 | 包內證據 | [Evidence manifest](evidence/EVIDENCE_MANIFEST.json) | authority、denominator、replay、preflight、claims、hygiene與LongLineage safety的SHA-256 |
@@ -80,6 +81,9 @@
 - `scope`: `FULL | PARTIAL | DEMO`
 - `finality`: `FINAL_FOR_SCOPE | NON_FINAL | SUPERSEDED`
 - `availability`: `GIT | GITHUB_RELEASE | LOCAL_CANONICAL | EXTERNAL_SOURCE | MISSING`
+- workflow `classification`: `SUPPORTED | REPRODUCIBLE_LEGACY | ARCHIVED`
+
+Workflow registry中的`REPRODUCIBLE_LEGACY`不代表腳本已壞；它只表示本交接不承諾該檔案具bip7／bip8 portable support。`scripts/pipeline/steps/04_cleanup.sh`因含直接刪除而固定不在`SUPPORTED` allowlist；portable pipeline須加`--skip-cleanup`，直到archive-first replacement完成驗證。
 
 `FINAL_FOR_SCOPE` 只回答「在明示 scope 內是否固定」，不回答「是否具生物真實性」「是否 production-ready」「是否可以外推」。
 
@@ -92,8 +96,8 @@ Artifact registry共有20筆`FINAL_FOR_SCOPE`：其中19筆是frozen science/sou
 | Frozen authority bytes | **PASS** | 19/19 SHA-256 MATCH |
 | Repo hygiene | **PASS** | isolated HEAD 0 absolute/broken symlink；tracked local settings移除且可復原 |
 | Unified inventory | **PASS** | 51 physical runs、36 artifacts、16 machine paths、11 storage roots；6/6 schemas與11/11 tests PASS |
-| Clean build/C++/Python | **IN PROGRESS** | 必須由本 release stack動態產生 receipt |
-| Synthetic E2E | **DEMO PASS / STACK PENDING** | isolated run已驗199欄與12 read leaves；仍須在portable commit clean clone重播，不得取代science |
+| Clean build/C++/Python | **LOCAL PASS / HOSTED PENDING** | clean snapshot CTest與完整Python suite PASS；精確test/suite count由當次CTest/pytest receipt動態產生，GitHub-hosted receipt仍待PR執行 |
+| Synthetic E2E | **DEMO PASS** | bip7由portable commit `fb806d9b` clean clone重播，驗199欄、12 read leaves與binary/output SHA-256；不得取代science |
 | bip7 fresh-clone | **BLOCKED** | real-data paths存在但4個local checksum locator缺失；完整 fresh-clone receipt待補 |
 | bip8 fresh-clone | **BLOCKED** | 尚未在 hostname=bip8執行 |
 | 158 claims/source | **BLOCKED** | 完整working stack的33/33 local P0 guards PASS，第34筆C108 external-only BLOCKED，排定由後續`public-claim-corrections` PR處理；69 confirmed、64 confirmed-with-limits、25 unverified，Wiki／Pages／About live驗證未閉合 |

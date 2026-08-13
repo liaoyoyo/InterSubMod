@@ -30,9 +30,12 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 # -- shared observation utilities --
-sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
-from observation_common import (
+from scripts.analysis.observation_common import (  # noqa: E402
     setup_plot_style, save_figure, add_caption,
     compute_auc, compute_effect_size, mannwhitney_test, chi2_test,
     bootstrap_ci, format_p, format_ci,
@@ -40,10 +43,6 @@ from observation_common import (
     markdown_table, OUTPUT_ROOT,
     COLOR_TP, COLOR_FP, COLOR_PAIRED, COLOR_TO,
 )
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.lib.verification_schema_contract import (  # noqa: E402
     LEGACY_CLASSES,

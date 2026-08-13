@@ -8,13 +8,14 @@
 # Tool Paths
 # ============================================================================
 
-PROJECT_ROOT_DEFAULT="/big7_disk/liaoyoyo2001/InterSubMod"
+PROJECT_ROOT_DEFAULT="${INTERSUBMOD_PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+SITE_PROFILE_ACTIVE="${SITE_PROFILE_ACTIVE:-false}"
 LONGPHASE_S_BIN="${LONGPHASE_S_BIN:-/big8_disk/liaoyoyo2001/Knowledge/codebase/longphase-s/longphase-s}"
 INTERSUBMOD_BIN="${INTERSUBMOD_BIN:-${PROJECT_ROOT_DEFAULT}/build/bin/inter_sub_mod}"
-INTERSUBMOD_BIN_FALLBACK="/big8_disk/liaoyoyo2001/Knowledge/codebase/InterSubMod/build/bin/inter_sub_mod"
-REFERENCE="/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta"
-SAMTOOLS="/usr/local/bin/samtools"
-BCFTOOLS="/usr/bin/bcftools"
+INTERSUBMOD_BIN_FALLBACK="${INTERSUBMOD_BIN_FALLBACK:-/big8_disk/liaoyoyo2001/Knowledge/codebase/InterSubMod/build/bin/inter_sub_mod}"
+REFERENCE="${REFERENCE:-/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta}"
+SAMTOOLS="${SAMTOOLS:-/usr/local/bin/samtools}"
+BCFTOOLS="${BCFTOOLS:-/usr/bin/bcftools}"
 
 # ============================================================================
 # Execution Parameters
@@ -62,6 +63,9 @@ HCC1395_TRUTH_BED="/big8_disk/data/HCC1395/SEQC2/High-Confidence_Regions_v1.2.be
 resolve_intersubmod_bin() {
     if [[ -x "${INTERSUBMOD_BIN}" ]]; then
         echo "${INTERSUBMOD_BIN}"
+    elif [[ "${SITE_PROFILE_ACTIVE}" == true ]]; then
+        echo "[ERROR] Profile-declared InterSubMod binary is unavailable: ${INTERSUBMOD_BIN}" >&2
+        return 1
     elif [[ -x "${INTERSUBMOD_BIN_FALLBACK}" ]]; then
         echo "[CONFIG] Using fallback InterSubMod binary: ${INTERSUBMOD_BIN_FALLBACK}" >&2
         echo "${INTERSUBMOD_BIN_FALLBACK}"
@@ -71,6 +75,177 @@ resolve_intersubmod_bin() {
         echo "[ERROR]   Fallback: ${INTERSUBMOD_BIN_FALLBACK}" >&2
         return 1
     fi
+}
+
+# Load the complete profile as a standalone authority. In profile mode no
+# built-in sample or /big* fallback is consulted for missing values.
+load_site_profile_config() {
+    local profile="$1"
+    local sample="$2"
+    local loader="${PROJECT_ROOT_DEFAULT}/scripts/site/site_profile.py"
+    local runtime_project_root
+    runtime_project_root="$(realpath -e -- "${PROJECT_ROOT_DEFAULT}")" || return 3
+    if [[ ! -f "${profile}" ]]; then
+        log_error "Site profile not found: ${profile}"
+        return 3
+    fi
+    if [[ ! -f "${loader}" ]]; then
+        log_error "Site profile loader not found: ${loader}"
+        return 3
+    fi
+    local profile_sha_before profile_sha_after
+    profile_sha_before="$(sha256sum -- "${profile}" | awk '{print $1}')" || return 3
+    local profile_payload assignments
+    profile_payload="$(python3 - "${loader}" "${profile}" "${sample}" <<'PY'
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+loader_path = Path(sys.argv[1])
+profile_path = Path(sys.argv[2])
+sample = sys.argv[3]
+spec = importlib.util.spec_from_file_location("site_profile_runtime", loader_path)
+module = importlib.util.module_from_spec(spec)
+assert spec and spec.loader
+spec.loader.exec_module(module)
+profile = module.load_profile(profile_path)
+dataset_id = module.dataset_id_for_sample(profile, sample)
+receipt = module.inspect_profile(
+    profile,
+    include_real_data=True,
+    profile_path=profile_path,
+    dataset_ids={dataset_id},
+)
+print(json.dumps({
+    "shell": module.shell_assignments(profile, sample),
+    "preflight": receipt,
+}, ensure_ascii=False, sort_keys=True))
+PY
+    )" || return $?
+    profile_sha_after="$(sha256sum -- "${profile}" | awk '{print $1}')" || return 3
+    if [[ "${profile_sha_before}" != "${profile_sha_after}" ]]; then
+        log_error "Site profile changed while it was being parsed; refusing mixed-authority configuration."
+        return 3
+    fi
+    assignments="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["shell"])' <<< "${profile_payload}")" || return 3
+    SITE_PROFILE_PREFLIGHT_JSON="$(python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["preflight"], ensure_ascii=False, sort_keys=True))' <<< "${profile_payload}")" || return 3
+    eval "${assignments}"
+    local declared_project_root
+    declared_project_root="$(realpath -e -- "${PROJECT_ROOT_DEFAULT}")" || {
+        log_error "Profile project_root does not exist: ${PROJECT_ROOT_DEFAULT}"
+        return 3
+    }
+    if [[ "${declared_project_root}" != "${runtime_project_root}" ]]; then
+        log_error "Profile project_root does not match the executing clone: declared=${declared_project_root} runtime=${runtime_project_root}"
+        return 3
+    fi
+    SITE_PROFILE_SOURCE="$(realpath -e -- "${profile}")" || return 3
+    SITE_PROFILE_SHA256="${profile_sha_after}"
+    SITE_PROFILE_ACTIVE=true
+    export SITE_PROFILE_ACTIVE SITE_PROFILE_SOURCE SITE_PROFILE_SHA256 SITE_PROFILE_PREFLIGHT_JSON
+    export PROJECT_ROOT_DEFAULT REFERENCE REFERENCE_GENOME_BUILD CONTIG_NAMING CONTIG_SCOPE
+    export SAMTOOLS BCFTOOLS LONGPHASE_S_BIN INTERSUBMOD_BIN
+    export BIG7_OUTPUT_ROOT CANONICAL_OUTPUT_ROOT OUTPUT_ROOT
+    export PLATFORM_LABEL TRUTH_SET_LABEL TRUTH_TOTAL TUMOR_BAM TUMOR_BAM_INDEX
+    export NORMAL_BAM NORMAL_BAM_INDEX SOMATIC_VCF SOMATIC_VCF_INDEX
+    export SOMATIC_VCF_PILEUP SOMATIC_VCF_PILEUP_INDEX SOMATIC_VCF_INDEL SOMATIC_VCF_INDEL_INDEX
+    export TO_SOMATIC_VCF TO_SOMATIC_VCF_INDEX TO_SOMATIC_VCF_PILEUP TO_SOMATIC_VCF_PILEUP_INDEX
+    export TO_SOMATIC_VCF_INDEL TO_SOMATIC_VCF_INDEL_INDEX
+    export GERMLINE_PHASED_DIR TRUTH_VCF TRUTH_VCF_INDEX TRUTH_BED
+}
+
+# Child steps in a portable run consume the already-resolved environment. They
+# verify the run-local immutable profile instead of re-reading the operator's
+# mutable source file.
+verify_parent_profile_lock() {
+    if [[ "${SITE_PROFILE_PARENT_LOCKED:-false}" != true ]]; then
+        return 0
+    fi
+    if [[ -z "${SITE_PROFILE_LOCK_PATH:-}" ]] || [[ -z "${SITE_PROFILE_SHA256:-}" ]]; then
+        log_error "Profile parent lock metadata is incomplete."
+        return 3
+    fi
+    if [[ ! -f "${SITE_PROFILE_LOCK_PATH}" ]]; then
+        log_error "Locked site profile is missing: ${SITE_PROFILE_LOCK_PATH}"
+        return 3
+    fi
+    local locked_sha
+    locked_sha="$(sha256sum -- "${SITE_PROFILE_LOCK_PATH}" | awk '{print $1}')" || return 3
+    if [[ "${locked_sha}" != "${SITE_PROFILE_SHA256}" ]]; then
+        log_error "Locked site profile SHA-256 mismatch: expected ${SITE_PROFILE_SHA256}, got ${locked_sha}"
+        return 3
+    fi
+}
+
+validate_expected_sha256() {
+    local value="$1"
+    local label="$2"
+    if [[ ! "${value}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+        log_error "${label} requires a 64-character SHA-256 value."
+        return 3
+    fi
+}
+
+resolve_governed_existing_artifact() {
+    local requested_path="$1"
+    local expected_sha="$2"
+    local label="$3"
+    validate_expected_sha256 "${expected_sha}" "${label}" || return $?
+    if [[ -z "${requested_path}" ]]; then
+        log_error "${label} path is required in profile mode with --skip-longphase."
+        return 3
+    fi
+    local resolved
+    resolved="$(realpath -e -- "${requested_path}")" || {
+        log_error "${label} not found: ${requested_path}"
+        return 3
+    }
+    if [[ ! -f "${resolved}" ]] || [[ ! -s "${resolved}" ]]; then
+        log_error "${label} must be a non-empty regular file: ${resolved}"
+        return 3
+    fi
+    echo "${resolved}"
+}
+
+verify_artifact_sha256() {
+    local path="$1"
+    local expected_sha="$2"
+    local label="$3"
+    local actual_sha
+    actual_sha="$(sha256sum -- "${path}" | awk '{print $1}')" || return 3
+    if [[ "${actual_sha}" != "${expected_sha,,}" ]]; then
+        log_error "${label} SHA-256 mismatch: expected ${expected_sha,,}, got ${actual_sha}"
+        return 3
+    fi
+}
+
+is_safe_run_component() {
+    [[ "$1" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]
+}
+
+path_is_within() {
+    local candidate root
+    candidate="$(realpath -m -- "$1")" || return 1
+    root="$(realpath -m -- "$2")" || return 1
+    [[ "${candidate}" == "${root}" || "${candidate}" == "${root}/"* ]]
+}
+
+path_has_symlink_component() {
+    local path="$1"
+    if [[ "${path}" != /* ]]; then
+        path="${PWD}/${path}"
+    fi
+    local current="/"
+    local component
+    local -a components=()
+    IFS='/' read -r -a components <<< "${path}"
+    for component in "${components[@]}"; do
+        [[ -z "${component}" ]] && continue
+        current="${current%/}/${component}"
+        [[ -L "${current}" ]] && return 0
+    done
+    return 1
 }
 
 # Get sample configuration by name
@@ -215,6 +390,38 @@ caller_model_name() {
         indel) echo "indel" ;;
         output|full|"") echo "full" ;;
         *) echo "${source}" ;;
+    esac
+}
+
+validate_benchmark_mode() {
+    case "${1:-}" in
+        s-pure|s-pure-pileup|to-pure|to_pure|to-full|to_full) return 0 ;;
+        *) log_error "Unsupported --mode: ${1:-<empty>} (expected s-pure, s-pure-pileup, to-pure, or to-full)"; return 2 ;;
+    esac
+}
+
+validate_vcf_source() {
+    case "${1:-}" in
+        output|pileup|indel) return 0 ;;
+        *) log_error "Unsupported --vcf-source: ${1:-<empty>} (expected output, pileup, or indel)"; return 2 ;;
+    esac
+}
+
+select_somatic_vcf() {
+    local mode="$1"
+    local source="$2"
+    validate_benchmark_mode "${mode}" || return $?
+    validate_vcf_source "${source}" || return $?
+    case "${mode}:${source}" in
+        s-pure:output|s-pure-pileup:output) echo "${SOMATIC_VCF}" ;;
+        s-pure:pileup|s-pure-pileup:pileup) echo "${SOMATIC_VCF_PILEUP}" ;;
+        s-pure:indel|s-pure-pileup:indel) echo "${SOMATIC_VCF_INDEL}" ;;
+        to-pure:output|to_pure:output|to-full:output|to_full:output)
+            if [[ "${SITE_PROFILE_ACTIVE}" == true ]]; then echo "${TO_SOMATIC_VCF}"; else echo "${TO_SOMATIC_VCF:-${SOMATIC_VCF}}"; fi ;;
+        to-pure:pileup|to_pure:pileup|to-full:pileup|to_full:pileup) echo "${TO_SOMATIC_VCF_PILEUP}" ;;
+        to-pure:indel|to_pure:indel|to-full:indel|to_full:indel)
+            if [[ "${SITE_PROFILE_ACTIVE}" == true ]]; then echo "${TO_SOMATIC_VCF_INDEL}"; else echo "${TO_SOMATIC_VCF_INDEL:-${SOMATIC_VCF_INDEL}}"; fi ;;
+        *) return 2 ;;
     esac
 }
 

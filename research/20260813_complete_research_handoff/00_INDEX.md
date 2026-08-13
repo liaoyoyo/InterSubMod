@@ -81,13 +81,14 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 
 - [x] baseline commits fixed
 - [x] authority and claim audit inputs identified
-- [ ] include/exclude and dirty-work registries generated
-- [ ] authority replay receipt committed
-- [ ] environment/tool hashes recorded
-- [ ] synthetic inputs and expected schema/hash committed
-- [ ] bip7 independent receipt
+- [x] include/exclude and dirty-work registries generated
+- [x] authority replay receipt committed
+- [x] bip7 environment/tool hashes recorded（real-data preflight仍fail-closed）
+- [x] synthetic inputs and expected schema/hash committed
+- [x] bip7 clean-clone DEMO receipt
+- [ ] bip7 real-data fresh-clone acceptance receipt
 - [ ] bip8 independent receipt
-- [ ] InterSubMod CI receipt
+- [ ] InterSubMod GitHub-hosted CI receipt
 - [ ] LongLineage preview CI/license receipt
 
 ## §6 Evidence state
@@ -95,12 +96,13 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 | Gate | Current verdict | Evidence |
 |---|---|---|
 | clean worktree freeze | PASS | two exact HEADs; dirty=0 |
-| frozen authority | PASS on bip7 data plane | fresh 19/19 hash replay；receipt待落檔 |
-| handoff inventory | PROBE | 18/19/35 尚待逐項裁決 |
-| public claims | BLOCKED | 58/158 need action；34 P0 |
-| bip7 acceptance | PENDING | 尚未完整 build/smoke/preflight |
+| frozen authority | PASS on bip7 data plane | fresh 19/19 hash replay；receipt已進交接包 |
+| handoff inventory | PASS | 18 logical rows／19 physical manifest lines／35 current dirs差異已裁決；51 physical runs登錄 |
+| public claims | BLOCKED | 33/34 local P0 guards PASS；C108 GitHub About與25個UNVERIFIED claims仍阻擋 |
+| bip7 synthetic acceptance | DEMO PASS | clean clone `fb806d9b`；199 columns、12 read leaves、binary/output hashes已記錄 |
+| bip7 real-data acceptance | BLOCKED | 4個local checksum locator缺失，不以DEMO替代 |
 | bip8 acceptance | BLOCKED | 尚無 hostname=`bip8` receipt |
-| LongLineage private preview work | GO | candidate clean；license audit待完成 |
+| LongLineage private preview work | PROBE | 三個private-first draft PR與49-test CI完成；license/source/history仍有blocker |
 | LongLineage public visibility | BLOCKED | source-origin/license/notices/SBOM 未過 |
 | InterSubMod tag/Release | BLOCKED | release gates 未全過 |
 

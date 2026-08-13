@@ -19,8 +19,11 @@ from pathlib import Path
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
-from observation_common import *
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.analysis.observation_common import *  # noqa: E402,F403
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -28,10 +31,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.lib.verification_schema_contract import (  # noqa: E402
     UNKNOWN_CURRENT_CLASS,
