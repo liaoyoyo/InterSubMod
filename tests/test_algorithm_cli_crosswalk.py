@@ -45,6 +45,16 @@ def test_current_crosswalk_passes():
 def test_builder_is_deterministic_and_matches_tracked_candidate():
     current = json.loads(CROSSWALK.read_text(encoding="utf-8"))
     assert BUILDER.build() == current
+    assert current["assessed_git_commit"] == BUILDER.ASSESSED_GIT_COMMIT
+
+
+def test_builder_rejects_moving_or_invalid_assessment_revision():
+    try:
+        BUILDER.build("not-a-commit")
+    except ValueError as error:
+        assert "full lowercase Git SHA" in str(error)
+    else:
+        raise AssertionError("invalid assessed Git revision did not fail closed")
 
 
 def test_duplicate_or_missing_algorithm_row_fails_closed():

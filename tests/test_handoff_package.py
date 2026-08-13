@@ -38,7 +38,7 @@ class HandoffPackageValidationTest(unittest.TestCase):
 
     def test_complete_package_passes_all_gates(self):
         self.assertTrue(self.valid_receipt["pass"], self.valid_receipt)
-        self.assertEqual(self.valid_receipt["tally"], {"PASS": 13, "FAIL": 0})
+        self.assertEqual(self.valid_receipt["tally"], {"PASS": 14, "FAIL": 0})
 
     def test_receipt_exposes_required_counts(self):
         by_id = {row["check_id"]: row for row in self.valid_receipt["checks"]}
@@ -66,6 +66,20 @@ class HandoffPackageValidationTest(unittest.TestCase):
         )
         self.assertEqual(by_id["claim_registries"]["details"]["claims"], 158)
         self.assertEqual(by_id["authority_replay"]["details"]["match"], 19)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["questions"], 6)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["prohibited_promotions"], 8)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["source_files"], 15)
+
+    def test_reader_acceptance_receipt_semantic_drift_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            path = package / "evidence/reader_acceptance_receipt.json"
+            reader = json.loads(path.read_text(encoding="utf-8"))
+            reader["questions"][0]["answer"] = "See the documentation for details."
+            path.write_text(json.dumps(reader, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "reader_acceptance_receipt")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
 
     def test_broken_markdown_link_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

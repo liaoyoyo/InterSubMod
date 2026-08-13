@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -212,6 +213,13 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
         require(evidence_id in by_id, f"missing sampled tagged BAM evidence record: {evidence_id}")
         actual = tuple(by_id[evidence_id].get(key) for key in ("evidence_status", "scope", "finality"))
         require(actual == expected, f"sampled tagged BAM evidence contract drifted for {evidence_id}: {actual!r}")
+    reader_id = "reader_acceptance_20260813"
+    require(reader_id in by_id, "fresh-reader acceptance evidence record is missing")
+    reader_contract = tuple(by_id[reader_id].get(key) for key in ("evidence_status", "scope", "finality"))
+    require(
+        reader_contract == ("VALIDATED_DERIVED", "FULL", "FINAL_FOR_SCOPE"),
+        f"fresh-reader acceptance evidence contract drifted: {reader_contract!r}",
+    )
     return {
         "records": len(records),
         "sha256_bound_records": sha256_bound_count,
@@ -221,6 +229,7 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
         "size_bound_records": size_bound_count,
         "missing": 0,
         "hash_mismatch": 0,
+        "reader_acceptance_records": 1,
     }
 
 
@@ -814,6 +823,25 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     }
 
 
+def check_reader_acceptance_receipt(package_root: Path) -> dict[str, Any]:
+    receipt = package_root / "evidence/reader_acceptance_receipt.json"
+    require(receipt.is_file(), "fresh-reader acceptance receipt is missing")
+    validator_path = repository_root() / "scripts/handoff/validate_reader_acceptance.py"
+    spec = importlib.util.spec_from_file_location("handoff_reader_acceptance_validator", validator_path)
+    require(spec is not None and spec.loader is not None, "cannot load fresh-reader acceptance validator")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    errors, summary = module.validate(
+        receipt,
+        package_root,
+        require_head=False,
+        source_repo=repository_root(),
+    )
+    require(not errors, "fresh-reader acceptance receipt failed: " + "; ".join(errors))
+    require(summary.get("verdict") == "PASS", "fresh-reader acceptance verdict is not PASS")
+    return summary
+
+
 CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("markdown_links", check_markdown_links),
     ("json_parse", check_json_parse),
@@ -827,6 +855,7 @@ CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("authority_replay", check_authority_replay),
     ("release_gate_text", check_release_gate_text),
     ("reader_contract", check_reader_contract),
+    ("reader_acceptance_receipt", check_reader_acceptance_receipt),
 )
 
 

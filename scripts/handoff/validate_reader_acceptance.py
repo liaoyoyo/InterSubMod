@@ -316,6 +316,7 @@ def validate(
     package: Path,
     *,
     require_head: bool = False,
+    source_repo: Path | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
     """Validate a receipt against current package bytes and a reachable source commit.
 
@@ -336,11 +337,19 @@ def validate(
     if not isinstance(receipt, dict):
         return errors or ["receipt must be an object"], {"verdict": "FAIL", "errors": len(errors) or 1}
 
-    try:
-        repo = discover_repo(package)
-    except ValueError as error:
-        errors.append(str(error))
-        repo = None
+    source_repo_override = source_repo is not None
+    if source_repo is None:
+        try:
+            repo = discover_repo(package)
+        except ValueError as error:
+            errors.append(str(error))
+            repo = None
+    else:
+        repo = source_repo.resolve()
+        probe = run_git(repo, "rev-parse", "--show-toplevel")
+        if probe.returncode != 0:
+            errors.append(f"source_repo is not a Git repository: {repo}")
+            repo = None
 
     commit = receipt.get("tested_git_commit")
     commit_reachable = False
@@ -394,11 +403,14 @@ def validate(
         else:
             manifest_current_matches += 1
         if repo is not None and commit_reachable:
-            try:
-                repo_relative = current_path.relative_to(repo).as_posix()
-            except ValueError:
-                errors.append(f"manifest path is outside Git repository: {relative}")
-                continue
+            if source_repo_override:
+                repo_relative = (PACKAGE_RELATIVE / relative).as_posix()
+            else:
+                try:
+                    repo_relative = current_path.relative_to(repo).as_posix()
+                except ValueError:
+                    errors.append(f"manifest path is outside Git repository: {relative}")
+                    continue
             committed = run_git(repo, "show", f"{commit}:{repo_relative}")
             if committed.returncode != 0:
                 errors.append(f"manifest path absent at tested_git_commit: {relative}")
