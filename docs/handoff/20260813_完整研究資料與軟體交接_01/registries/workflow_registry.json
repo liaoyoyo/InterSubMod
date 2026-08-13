@@ -1514,19 +1514,19 @@
       "type": "PYTHON"
     },
     {
-      "absolute_path_token_count": 9,
+      "absolute_path_token_count": 8,
       "classification": "REPRODUCIBLE_LEGACY",
       "git_mode": "100644",
       "known_limits": [
         "REPRODUCIBLE_LEGACY does not mean broken; it means bip7/bip8 portable support is not promised.",
         "Dependencies, side effects, and scientific validity require workflow-specific review before reuse.",
-        "Lexical scan found 9 literal POSIX absolute-path token(s); review their runtime role."
+        "Lexical scan found 8 literal POSIX absolute-path token(s); review their runtime role."
       ],
       "path": "scripts/analysis/build_observation_O15b_loh_zone_metrics_cross_sample.py",
       "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
-      "sha256": "f53737b072e55cc357f155253ed05ef99980919a8f5bc0a0040354331bdd5c17",
+      "sha256": "62fbd67039c87c45f9906789968bbeb6e5a4c2c157bc35b4be476c5935e1ac16",
       "shebang": "#!/usr/bin/env python3",
-      "size_bytes": 68931,
+      "size_bytes": 68956,
       "suffix": ".py",
       "type": "PYTHON"
     },
@@ -6482,9 +6482,9 @@
       ],
       "path": "scripts/regression/regression_check.sh",
       "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
-      "sha256": "cb6e36178c4b3e0940042ac26bf25b53e8612448ad502337e832f6fa7ae0cfcd",
+      "sha256": "c6942fa53a0af475465488b513ccb097f2f713e291a95dcd4858bdb1ee517cb7",
       "shebang": "#!/bin/bash",
-      "size_bytes": 7244,
+      "size_bytes": 7393,
       "suffix": ".sh",
       "type": "SHELL"
     },
@@ -7324,7 +7324,7 @@
   "records_hash": {
     "algorithm": "sha256",
     "canonicalization": "UTF-8 canonical JSON of records; generated_at excluded",
-    "value": "8aef1a152b422b09918b9f0dd47dcd7a0fe6b47fe79753e04efa110638f188b1"
+    "value": "7d0fe828fb66b86b1efeea6c5c1c4270e615b838542cdc1e809b100462705efa"
   },
   "registry_type": "git_tracked_workflow_governance",
   "schema_version": "1.0.0",
@@ -7335,7 +7335,7 @@
     "untracked_files_used": false
   },
   "summary": {
-    "absolute_path_token_total": 4269,
+    "absolute_path_token_total": 4268,
     "by_classification": {
       "ARCHIVED": 5,
       "REPRODUCIBLE_LEGACY": 407,
@@ -7358,6 +7358,6 @@
   "tree_content_hash": {
     "algorithm": "sha256",
     "canonicalization": "sorted(path NUL git_mode NUL size_bytes NUL sha256 NUL LF)",
-    "value": "a4bf0e514fc606dd82375667271c20c5344be72f47ae60426f66d16b79a6ae05"
+    "value": "faa1d2f7b61089c3f3e441ced9ee590e37fc1efdb51ffe40f544b7f4dc34da4a"
   }
 }

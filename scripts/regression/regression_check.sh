@@ -30,9 +30,6 @@ if [ "$#" -ne 0 ]; then
   exit 2
 fi
 
-export TMPDIR=/big7_disk/liaoyoyo2001/tmp
-mkdir -p "$TMPDIR"
-
 validate_contract_file() {  # $1=file $2=label
   local file="$1"
   local label="$2"
@@ -102,6 +99,11 @@ PY
 # Validate both frozen goldens before launching the expensive C++ process.
 validate_contract_file "$GOLDEN_SKIP" "SKIP golden"
 validate_contract_file "$GOLDEN_MAXDIST" "MAX_DIST golden"
+
+# The frozen schema guards above must fail before any host-specific output setup.
+# This keeps the contract check side-effect free on clean runners.
+export TMPDIR=/big7_disk/liaoyoyo2001/tmp
+mkdir -p "$TMPDIR"
 
 run_extract() {  # $1=nan_strategy $2=outdir
   local strategy="$1"
