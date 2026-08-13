@@ -80,7 +80,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ### 圖 1 · 工作站生成器的「拒絕渲染」設計 — 防止必填欄位被靜默省略
 
-![workstation-refuse-design](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/workstation-refuse-design.png)
+![workstation-refuse-design](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/workstation-refuse-design.png)
 
 > 這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。此 generator 能防止已宣告必填欄位被靜默省略；**它不保證數值來源或科學解讀正確**。
 >

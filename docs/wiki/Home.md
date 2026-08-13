@@ -11,7 +11,7 @@
 
 ## 先看這張圖
 
-![系統架構](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/architecture-overview.png)
+![系統架構](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/architecture-overview.png)
 
 由下而上五層。方框顏色代表現在的可用狀態：綠＝可跑、黃＝有限制、紅＝被鎖住。
 

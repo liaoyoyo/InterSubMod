@@ -29,7 +29,7 @@
 
 從原始訊號到兩支 C++ 吃得下的東西。步驟 ① 通常在資料交付時就已完成。
 
-![upstream-toolchain](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/upstream-toolchain.png)
+![upstream-toolchain](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/upstream-toolchain.png)
 
 > **圖 1 · 上游前處理鏈，以及 FIFO 如何避免該次 run 新增落地 BAM**
 >

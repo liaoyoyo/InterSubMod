@@ -61,7 +61,7 @@ LongLineage 把 ONT 資料算成「**哪些 candidate somatic variants 共同出
 
 這是本頁最重要的一節。答案不在程式效能或資料量，而在**科學設計的一個前提**。
 
-![longlineage-funnel](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/longlineage-funnel.png)
+![longlineage-funnel](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/longlineage-funnel.png)
 
 > **圖 1 · candidate `b9aaa12` 的 frozen HCC1395 dataset-gate receipt：79,687 個位點如何流失到 0 candidate units**
 >

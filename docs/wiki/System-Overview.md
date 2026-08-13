@@ -33,7 +33,7 @@
 
 由下而上共五層。方框顏色 = 現在的可用狀態：✅ 可跑 · ⚠️ 有限制 · 🔴 被鎖住。
 
-![architecture-overview](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/architecture-overview.png)
+![architecture-overview](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/architecture-overview.png)
 
 > **圖 1 · 五層全景與資料流**
 >
@@ -160,7 +160,7 @@ producer receipt 或 authority data。
 直覺上會想：既然甲基化模式在不同細胞群之間有差異，那用甲基化把 read 分群，不就能找出亞群了嗎？
 **現行形式不行 —— 若用甲基化定義群，再用同一甲基化訊號驗證群，會產生循環論證。這不是對所有可能甲基訊號或新設計的總檢定。**
 
-![methylation-circularity](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/methylation-circularity.png)
+![methylation-circularity](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/methylation-circularity.png)
 
 > **圖 2 · cis-ASM 循環：為什麼「用甲基化確認亞群」證明不了東西**
 >
@@ -198,7 +198,7 @@ producer receipt 或 authority data。
 | confirmed 細胞亞群 | 🔴 **0** |
 | confirmed 線性祖先關係 | 🔴 **0** |
 
-![funnel-7samples](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/0e1822b5957cb4bf8720f0f6ce84f5d0297ef1df/docs/images/funnel-7samples.png)
+![funnel-7samples](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/funnel-7samples.png)
 
 > **圖 3 · 從 469,849 筆 dataset records 到 63,506 個 model-assigned candidate-shape records：每一層如何改變分析 grain**
 >
