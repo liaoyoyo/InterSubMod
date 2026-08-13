@@ -1,1 +1,1 @@
-/big7_disk/liaoyoyo2001/InterSubMod/research/ng_kde_rescaling/scripts/step8_multidim_panorama.py
+../../ng_kde_rescaling/scripts/step8_multidim_panorama.py
