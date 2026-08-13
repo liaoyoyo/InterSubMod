@@ -28,7 +28,9 @@ jobs:
       - name: Check out source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 1
+          # Commit-pinned provenance validators and history hygiene gates must
+          # be able to resolve their immutable source commits on hosted CI.
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Select Python 3.10
