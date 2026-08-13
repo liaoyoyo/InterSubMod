@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.1.0",
+  "site_id": "bip7-example",
+  "expected_hostname": "bip7",
+  "project_root": "/big7_disk/liaoyoyo2001/InterSubMod",
+  "data_roots": {
+    "primary": "/big8_disk/data",
+    "output": "/big7_disk/liaoyoyo2001/big7_disk_output",
+    "knowledge": "/big8_disk/liaoyoyo2001/Knowledge"
+  },
+  "reference": {
+    "genome_build": "GRCh38",
+    "contig_contract": {
+      "naming": "CHR_PREFIXED",
+      "scope": "AUTOSOMES_1_22",
+      "required_contigs": [
+        "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11",
+        "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22"
+      ]
+    },
+    "fasta": {
+      "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta",
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.sha256"
+    },
+    "indexes": [
+      {
+        "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.fai",
+        "checksum_policy": "EXISTENCE_ONLY"
+      }
+    ]
+  },
+  "tools": {
+    "samtools": {
+      "path": "/usr/local/bin/samtools",
+      "checksum_policy": "EXPECTED_SHA256",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "required": true
+    },
+    "bcftools": {
+      "path": "/usr/bin/bcftools",
+      "checksum_policy": "EXPECTED_SHA256",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "required": true
+    },
+    "longphase_s": {
+      "path": "/big8_disk/liaoyoyo2001/Knowledge/codebase/longphase-s/longphase-s",
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md",
+      "required": true
+    },
+    "intersubmod": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod",
+      "checksum_policy": "EXPECTED_SHA256",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "required": true
+    }
+  },
+  "datasets": {
+    "HCC1395_ONT_5kHz": {
+      "biological_id": "HCC1395",
+      "technical_dataset_id": "HCC1395",
+      "genome_build": "GRCh38",
+      "platform_label": "ONT_5kHz",
+      "truth_set_label": "SEQC2_v1.2.1_HC_SNV",
+      "truth_total": 39447,
+      "inputs": {
+        "tumor_bam": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.sha256"
+        },
+        "tumor_bam_index": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.bai",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "normal_bam": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.sha256"
+        },
+        "normal_bam_index": {
+          "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.bai",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "somatic_vcf": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz.sha256"
+        },
+        "somatic_vcf_index": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "somatic_vcf_pileup": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_1/tmp/vcf_output/pileup_filter.vcf",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "somatic_vcf_indel": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_1/indel.vcf.gz",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "somatic_vcf_indel_index": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_1/indel.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/snv.vcf.gz",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf_index": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/snv.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf_pileup": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/snv.vcf.gz",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf_pileup_index": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/snv.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf_indel": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/indel.vcf.gz",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "to_somatic_vcf_indel_index": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0/indel.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "germline_phased_dir": {
+          "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/tmp/clair3_output/clair3_normal_output"
+        },
+        "truth_vcf": {
+          "path": "/big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/"
+        },
+        "truth_vcf_index": {
+          "path": "/big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz.tbi",
+          "checksum_policy": "EXISTENCE_ONLY"
+        },
+        "truth_bed": {
+          "path": "/big8_disk/data/HCC1395/SEQC2/High-Confidence_Regions_v1.2.bed",
+          "checksum_policy": "LOCATOR_ONLY",
+          "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/"
+        }
+      }
+    }
+  }
+}

@@ -29,6 +29,8 @@ LOCAL_DISTANCE_METRIC="${DISTANCE_METRIC}"
 LOCAL_LOG_LEVEL="${LOG_LEVEL}"
 LOCAL_PLOT_TYPE="${PLOT_TYPE}"
 DRY_RUN=false
+SITE_PROFILE=""
+SAMPLE=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -43,6 +45,8 @@ while [[ $# -gt 0 ]]; do
         --log-level)        LOCAL_LOG_LEVEL="$2"; shift 2 ;;
         --plot-type)        LOCAL_PLOT_TYPE="$2"; shift 2 ;;
         --dry-run)          DRY_RUN=true; shift ;;
+        --site-profile)     SITE_PROFILE="$2"; shift 2 ;;
+        --sample)           SAMPLE="$2"; shift 2 ;;
         -h|--help)
             echo "Usage: $0 --tagged-bam BAM --normal-bam BAM --tp-vcf VCF --fp-vcf VCF --output-dir DIR [OPTIONS]" >&2
             exit 0
@@ -50,6 +54,16 @@ while [[ $# -gt 0 ]]; do
         *) echo "Unknown argument: $1" >&2; exit 1 ;;
     esac
 done
+
+if [[ -n "${SITE_PROFILE}" ]]; then
+    if [[ -z "${SAMPLE}" ]]; then
+        log_error "--sample is required with --site-profile."
+        exit 2
+    fi
+    load_site_profile_config "${SITE_PROFILE}" "${SAMPLE}" || exit $?
+elif [[ "${SITE_PROFILE_ACTIVE}" == true ]]; then
+    verify_parent_profile_lock || exit $?
+fi
 
 if [[ -z "${TAGGED_BAM}" ]] || [[ -z "${TP_VCF}" ]] || [[ -z "${FP_VCF}" ]] || [[ -z "${ISM_OUTPUT_DIR}" ]]; then
     log_error "--tagged-bam, --tp-vcf, --fp-vcf, and --output-dir are all required."

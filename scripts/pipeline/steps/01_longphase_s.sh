@@ -23,6 +23,7 @@ LOCAL_THREADS="${THREADS}"
 LOCAL_INDEX_THREADS=""
 OVERRIDE_SOMATIC_VCF=""
 OVERRIDE_TUMOR_BAM=""
+SITE_PROFILE=""
 DRY_RUN=false
 
 bcftools_sort_supports_threads() {
@@ -37,6 +38,7 @@ while [[ $# -gt 0 ]]; do
         --index-threads) LOCAL_INDEX_THREADS="$2"; shift 2 ;;
         --somatic-vcf) OVERRIDE_SOMATIC_VCF="$2"; shift 2 ;;
         --tumor-bam)   OVERRIDE_TUMOR_BAM="$2"; shift 2 ;;
+        --site-profile) SITE_PROFILE="$2"; shift 2 ;;
         --dry-run)    DRY_RUN=true; shift ;;
         -h|--help)
             echo "Usage: $0 --sample NAME --output-dir DIR [--threads N] [--somatic-vcf FILE] [--tumor-bam FILE] [--dry-run]" >&2
@@ -59,7 +61,13 @@ fi
 # Load Sample Configuration
 # ============================================================================
 
-eval "$(get_sample_config "${SAMPLE}")"
+if [[ -n "${SITE_PROFILE}" ]]; then
+    load_site_profile_config "${SITE_PROFILE}" "${SAMPLE}" || exit $?
+elif [[ "${SITE_PROFILE_ACTIVE}" == true ]]; then
+    verify_parent_profile_lock || exit $?
+else
+    eval "$(get_sample_config "${SAMPLE}")"
+fi
 
 if [[ -n "${OVERRIDE_SOMATIC_VCF:-}" ]]; then
     log_info "Overriding Somatic VCF: ${OVERRIDE_SOMATIC_VCF}"
@@ -176,7 +184,7 @@ if [[ "${DRY_RUN}" == true ]]; then
     echo "  ${LONGPHASE_CMD[*]}" >&2
 else
     log_info "  Running LongPhase-S..."
-    print_disk_space
+    print_disk_space "${LONGPHASE_OUTPUT_DIR}"
 
     LONGPHASE_LOG="${LONGPHASE_OUTPUT_DIR}/longphase_s.log"
 

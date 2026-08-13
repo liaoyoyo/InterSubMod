@@ -26,7 +26,7 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 
 - **Spec source**: 使用者 2026-08-13 鎖定之完整實作計畫
 - **AI session**: 2026-08-13 Codex
-- **Last updated**: 2026-08-13 10:40 +08:00
+- **Last updated**: 2026-08-13 13:08 +08:00
 - **Cycle**: `cycle_20260813-1032-complete-research-handoff`
 
 ## 設計決定（Design Decisions）
@@ -67,6 +67,17 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 - **理由**: 防止 clean build 被誤讀為 science rerun。
 - **影響範圍**: artifact registry、acceptance receipt、README、HTML。
 - **Revisit if**: 有 byte-reproducible clean-source rebuild receipt。
+- **Evidence tier**: L1 ⭐⭐⭐⭐⭐
+
+### [2026-08-13 13:08] 可攜介面採 fail-closed site profile 1.1
+
+- **Status**: Accepted
+- **背景**: 只驗證檔案存在無法證明 genome build、index、工具 bytes 或 pipeline clone 一致。
+- **決定**: `site-profile` 1.1 強制 reference contig contract、必要 index、required-tool SHA-256、project-root binding 與 real-data preflight；執行時鎖定 profile bytes，不讓 child step 重讀可變設定。
+- **理由**: 將 bip7／bip8 的路徑差異轉成可驗證 contract，並阻止 inherited environment 或 `latest` 猜測偷偷改變輸入。
+- **影響範圍**: `scripts/site/*`、portable pipeline、machine receipt 與 CI。
+- **驗證**: 222 Python tests + 8 subtests、7/7 JSON Schema、13/13 handoff package checks；真正雙機 receipt 仍為 publication blocker。
+- **Revisit if**: 需要支援第二 genome build，或 profile schema 進入 2.x migration。
 - **Evidence tier**: L1 ⭐⭐⭐⭐⭐
 
 ## 偏離之處（Deviations）
@@ -177,6 +188,12 @@ data_sources: InterSubMod/research/20260813_complete_research_handoff/pre-decisi
 - **Constraint**: hostname=`bip7`；`/big8_disk`、`/bip8_disk` 為 NFS mounts。
 - **Why it matters**: 雙 mount 不是雙主機驗收。
 - **Evidence**: red-team hostname/findmnt receipt。
+
+### [2026-08-13] 無副檔名 CLI 必須依 shebang 分類
+
+- **Constraint**: `scripts/site/bootstrap` 與 `scripts/site/doctor` 是 Python，不是 shell。
+- **Why it matters**: 依檔名猜語言會讓 `bash -n` 產生假失敗；registry 與驗證命令均應讀 shebang。
+- **Evidence**: Python `py_compile` PASS；shell-only 檔案 `bash -n` PASS。
 
 ## Provenance Footer
 
