@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "github_visibility_containment",
+  "repository": "liaoyoyo/LongLineage",
+  "incident_id": "LL-VIS-20260813-01",
+  "expected_pre_gate_visibility": "PRIVATE",
+  "observed_pre_containment": {
+    "visibility": "PUBLIC",
+    "is_private": false,
+    "default_branch": "main",
+    "forks_count": 0,
+    "stargazers_count": 1,
+    "has_pages": false,
+    "repository_updated_at": "2026-08-13T02:17:57Z",
+    "repository_pushed_at": "2026-08-13T02:19:58Z",
+    "observation_source": "GitHub CLI gh repo view and REST repos endpoint"
+  },
+  "containment": {
+    "command": "gh repo edit liaoyoyo/LongLineage --visibility private --accept-visibility-change-consequences",
+    "verified_visibility": "PRIVATE",
+    "verified_is_private": true,
+    "github_updated_at_after_containment": "2026-08-13T02:37:56Z",
+    "verification_source": "GitHub CLI gh repo view"
+  },
+  "known_exposure_limits": {
+    "github_reports_forks": 0,
+    "github_reports_pages": false,
+    "github_reports_stargazers": 1,
+    "interpretation": "Containment stops continuing public access; it cannot prove that no prior clone or download exists."
+  },
+  "gate_status": "FAIL_CLOSED",
+  "publication_blockers": [
+    "SOURCE_ORIGIN_AUDIT_FAILED",
+    "LICENSE_DISPOSITION_INCOMPLETE",
+    "THIRD_PARTY_NOTICES_MISSING",
+    "SBOM_MISSING",
+    "PUBLIC_SAFETY_HISTORY_FINDINGS_OPEN",
+    "P8_NOT_VERIFIED"
+  ],
+  "claim_ceiling": "Repository restored to private; public-preview readiness is not established."
+}
