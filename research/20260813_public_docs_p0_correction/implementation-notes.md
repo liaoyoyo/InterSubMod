@@ -64,7 +64,7 @@ status: IN_PROGRESS_WITH_FAIL_CLOSED_GATES
 - **Status**：Accepted／executed。
 - **決定**：新增 cohort grain、PERMANOVA、cis heuristic、LOH mechanism、methylation-topology bridge與LongLineage blocker-set六類 corpus guard；不只比對單一頁面的固定句子。
 - **理由**：第一輪P0 anchors可防已知原句回歸，卻不足以攔截同義改寫、否定詞遺失或把7 technical datasets寫成7 biological samples。
-- **驗證**：28個guards在30個public source files執行450次document checks、150 required anchors、1,056 forbidden anchors，0 errors；35個回歸測試全部通過。
+- **驗證**：42個guards在34個public source files執行500次document checks、285 required anchors、1,217 forbidden anchors，0 errors；回歸測試數由本次runner receipt動態記錄，不手抄固定數量。
 
 ### [2026-08-13] 生成圖必須綁定最新HTML source bytes
 

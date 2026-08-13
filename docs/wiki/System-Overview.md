@@ -18,7 +18,9 @@
 
 > **宣稱邊界**：exact-PS 主線產出的是 **local recurrence-allowed minimum mutation-state candidate arborescence／topology**。read-AF 是未經 CN／LOH 校正的條件式排序；甲基化只做 pattern-conditioned association。它不確認 cellular clone、subclone 或 biological ancestry。
 
-系統由 **兩支 C++ 主程式**（InterSubMod、LongLineage）＋ **一層上游工具鏈** ＋ **一層 Python 分析與 HTML 呈現**組成。其中只有一部分現在真的跑得動 —— 下面的狀態表會誠實標出來。
+系統由 **兩支 C++ 主程式**（InterSubMod、LongLineage）＋ **一層上游工具鏈** ＋
+**commit-pinned Python research solvers** ＋ **validator／HTML 呈現層**組成。其中只有一部分
+現在真的跑得動；Python 是實作語言，不是 evidence tier，producer 與 presentation 必須分開記錄。
 
 > **✅ 本系統最值得注意的設計**
 > 它在**機器欄位的層級**把「技術跑通」和「科學可用」分開：canonical `cohort_receipt.json` 承載 `technical_all_pass = true`，而 `summary/all7_summary.json` 承載 `validation_evidence_eligible = false`；兩者不是 `authority_manifest.json` 的 top-level 欄位。
@@ -35,7 +37,10 @@
 
 > **圖 1 · 五層全景與資料流**
 >
-> **怎麼讀這張圖：** 由下往上是資料流方向。第 ③ 層的 sidecar TSV 是全系統的**樞紐** —— 它是唯一被兩支 C++ 程式的原始碼**寫死成相同格式**的檔案，也是把「一條 read 屬於哪個單倍型」這件事持久化的地方。
+> **怎麼讀這張圖：** 由下往上是資料流方向。HP/PS 有兩種 commit-scoped representation：
+> InterSubMod 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。兩者是平行
+> provenance contracts，不是兩支引擎直接串接的執行期介面；feature/preview 的 tagged-BAM
+> writer 能力另依明示 branch/commit 判讀。
 >
 > **數字出處：** 292 GB tumor BAM 與 40,859,727 列 sidecar 是具名歷史檔案量測。2026-08-13 盤點識別 7 個 PRE-FIX `paired_full` BAM，exact paths/bytes/mtimes 合計 1,840,983,466,353 bytes（1.67436 TiB），另有 7 個 `paired_pileup`；14 個總計 3,709,322,840,333 bytes。Sampled-content set identity 已凍結，但未讀全檔 SHA-256、generation-level correspondence 未閉合，全為 `PARTIAL`/`NON_FINAL`。`paired_full` 除以現行 7 sidecar exact stat bytes 為 **294.2669×**，只是跨世代 storage-footprint quotient；不是因果壓縮效果或 frozen authority，舊 287× 錯誤。
 
@@ -62,7 +67,7 @@
 
 前三個是必要輸入的生產者。⚠️ SAVANA 的 CN 結果尚未接進主線。
 
-#### ③ 中介契約 — 兩支程式唯一 byte-level 一致的介面
+#### ③ Read-label representations — BAM aux tags 與 sidecar 是平行契約
 
 **HP/PS sidecar TSV**（`.tsv.gz` + `.tbi` 索引）
 
@@ -72,6 +77,10 @@
 
 每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。
 
+InterSubMod 的 supported core input 是含 HP/PS aux tags 的 BAM，**不直接讀這份 sidecar**；
+sidecar 是 exact-PS／LongLineage 的輸入契約。LongLineage preview 的 tagged-BAM writer 則是
+branch/commit-specific capability，不能由檔名推成 public supported workflow。
+
 為什麼用 sidecar：FIFO mode 可避免為該次 run 新增落地 BAM，sidecar只保留 frozen 九欄 contract。這不代表歷史 tagged BAM 從未落地；7 `paired_full` + 7 `paired_pileup` PRE-FIX inventory 仍是 `PARTIAL/NON_FINAL`，不可將 294.2669× footprint quotient 寫成壓縮效果。
 
 #### ④ 兩支 C++ 主程式（本專案核心）
@@ -80,18 +89,20 @@
 |---|---|---|
 | 定位 | 研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read 的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。 | **PRIVATE research-preview candidate**；source-origin／license／dependency audit pending，`NOT_READY`/non-production，P3/P4/P5/P7/P8 BLOCKED。Schema/receipt 與 fail-closed 是工程契約，不證明生物正確性。 |
 | 輸出粒度 | **per-region**（每個位點一包結果） | **per-read**（每條 read 一列） |
-| 現況 | 29 個 CLI 選項；build output 不入版控，fresh clone 需 exact checkout + clean build。2.9 秒只是一份具名 internal fixture receipt，不是 runtime promise。 | 🔴 candidate `b9aaa12` 的 `run` / `probe` 被鎖；frozen HCC1395 receipt 中只有 `dataset-gate` 觀察到 research artifacts |
+| 現況 | frozen release baseline `ddd8909a` 的釘選 source census 為 29 個 CLI 選項；此數量 branch-sensitive，不是穩定 API。build output 不入版控，fresh clone 需 exact checkout + clean build。2.9 秒只是一份具名 internal fixture receipt，不是 runtime promise。 | 🔴 candidate `b9aaa12` 的 `run` / `probe` 被鎖；frozen HCC1395 receipt 中只有 `dataset-gate` 觀察到 research artifacts |
 | 吃 | tumor BAM + reference + somatic VCF（必要） | 8 角色 manifest（BAM + VCF + sidecar + reference） |
 | 吐 | `methylation.csv` · `distance_matrix` · `tree.nwk` · `significance_summary.csv` | `site_reads` · `methyl_calls` · `cooccurrence_*` · `topology_unit` |
 
-#### ⑤ Python 分析層 → HTML 呈現層
+#### ⑤ Python science producers 與 validator／HTML 呈現層
 
 | 部件 | 說明 |
 |---|---|
-| **Research solver + Python 分析腳本** | exact-PS 共現骨幹建構 · local recurrence-allowed minimum mutation-state candidate family 枚舉 · funnel 普查 · 熱圖繪製 |
-| **standalone HTML 工作站** | 離線可開 · 逐項人工判讀 · 缺必填值就拒絕渲染 |
+| **Commit-pinned research solver／分析腳本** | exact-PS 共現骨幹建構 · local recurrence-allowed minimum mutation-state candidate family 枚舉；只有 producer commit、input、command receipt、schema 與 hash 齊全時才可作 science evidence |
+| **Validator／publication builder／standalone HTML** | 驗證既有 JSON/TSV、明示分母、產生圖表資料與離線人工判讀頁；不得暗中重跑或改寫 science |
 
-這層是「人真正看的東西」。C++ 只吐檔案，Python 把它變成可以用眼睛檢查的圖與表，並把人工判讀結果存回 `localStorage` 匯出。
+Python research solver 是獨立 science producer；validator／publication builder 與 HTML 才是呈現路徑。
+HTML 只能讓人檢查 validated artifact，人工判讀可由 `localStorage` 匯出，但不能反過來取代
+producer receipt 或 authority data。
 
 ⚠️ 這層目前最碎片化，見「分析與呈現層」分冊。
 
@@ -269,7 +280,7 @@
 
 | 分冊 | 狀態 | 一句話 | 吃 → 吐 |
 |---|---|---|---|
-| [ISM 部件與輸入輸出](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) | ✅ 可跑 | 主程式的 29 個選項、內部 8 個處理階段、每個輸出檔的真實欄位與範例行。 | tumor BAM + reference + somatic VCF → `methylation.csv` · `distance_matrix` · `tree.nwk` |
+| [ISM 部件與輸入輸出](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) | ✅ 可跑 | `ddd8909a` 的釘選 29-option census、內部 8 個處理階段、每個輸出檔的真實欄位與範例行；option count 是 branch-scoped。 | tumor BAM + reference + somatic VCF → `methylation.csv` · `distance_matrix` · `tree.nwk` |
 | [LongLineage 部件與契約](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) | ⚠️ 部分可跑 | 4 個子命令的真實狀態、M1→M2→topology 科學鏈、artifact schema 與 `read_id` 的算法。 | 8 角色 manifest → `site_reads` · `cooccurrence_*` · `topology_unit` |
 | [上游工具鏈與資料](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) | ✅ 齊全 | sSNV / HP-PS / 甲基化 / CN 各自從哪個工具來、7 technical datasets／6 biological IDs 的實體資料在哪。 | Dorado · ClairS · LongPhase-S · SAVANA · sidecar TSV |
 | [Python 分析層與 HTML 呈現層](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) | ⚠️ | 主力腳本各自做什麼、工作站 HTML 怎麼生成、這層目前的碎片化問題。 | 分析腳本 → workstation spec → standalone HTML |
@@ -282,7 +293,10 @@
 
 本頁所有數字、狀態、檔案格式，來自 2026-08-06 對兩個 repo 的一次系統性實測收集（9 個維度並行，每個維度獨立收集後再做對抗式驗證）。
 
-- **驗證覆蓋**：334 個「檔案:行號」宣稱 + 111 個路徑宣稱，全部經機械重驗 —— **0 個捏造、0 個行號越界**；28 個初判找不到者，經修正路徑寫法後 100% 定位到實體檔案。
+- **歷史自述、目前 `UNVERIFIED`**：2026-08-06 文件曾記錄「334 個 source refs＋111 個
+  paths，0 missing／0 out-of-bounds」。公開 repo 目前缺 commit-pinned inventory、command log、
+  hashes 與 replay receipt，因此不能把該自述當成 current blanket guarantee；ALG-023 維持
+  `UNVERIFIED`，待可重播 receipt 補齊才可升格。
 - **可跑狀態**：所有標示「可跑」的部件，均為本輪**實際執行並檢查 exit code** 的結果。
 - **科學數字**：funnel 各層取自 `denominator_registry.tsv` 與 `all7_summary.json`（2026-08-01 凍結的 canonical 輸出），並已驗證各層加總自洽。
 

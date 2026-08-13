@@ -3,27 +3,33 @@
   "schema_version": "1.0.0",
   "snapshot_id": "intersubmod-public-claims-remediation-20260813",
   "records_uri": "../evidence/full_claim_registry.json",
-  "records_sha256": "4bfe997d663f7c5f900c4fe7a6d6fc942c030c06356c4c49c103952bde9a20d6",
+  "records_sha256": "938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5",
   "records_count": 158,
   "materialization": {
     "validated_working_stack": "PASS",
-    "source_patch_delivery": "PLANNED_PUBLIC_CLAIM_CORRECTIONS_PR",
+    "source_patch_delivery": "PUBLIC_CLAIM_CORRECTIONS_WORKING_STACK_VALIDATED",
     "standalone_data_governance_pr_source_ready": false,
-    "known_limit": "SOURCE_READY counts describe the validated complete working stack. The source edits are intentionally delivered in the later public-claim-corrections PR, so this data-governance PR alone must not be described as source-ready."
+    "known_limit": "The synchronized evidence describes the validated public-claim-corrections working stack. P0_SOURCE_READY is PASS; P1/P2 closure plus default-branch, Wiki and Pages publication checks keep SOURCE_READY, PUBLICATION_READY and RELEASE_READY BLOCKED."
   },
   "counts": {
-    "by_priority": {"P0": 34, "P1": 20, "P2": 35, "P3": 69},
+    "by_priority": {
+      "P0": 34,
+      "P1": 20,
+      "P2": 35,
+      "P3": 69
+    },
     "by_current_verdict": {
       "CONFIRMED": 69,
-      "CONFIRMED_WITH_LIMITS": 64,
-      "UNVERIFIED": 25
+      "CONFIRMED_WITH_LIMITS": 69,
+      "UNVERIFIED": 20
     },
     "by_source_status": {
-      "EXTERNAL_ONLY_BLOCKED": 1,
-      "FROZEN_CONFIRMED_WITH_LIMITS": 31,
+      "EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS": 1,
+      "FROZEN_CONFIRMED_WITH_LIMITS": 32,
       "FROZEN_EVIDENCE_CONFIRMED": 69,
-      "SOURCE_EDITED_REVIEW_REQUIRED": 24,
-      "SOURCE_READY": 33
+      "SOURCE_EDITED_REVIEW_REQUIRED": 20,
+      "SOURCE_READY": 33,
+      "VALIDATED_DERIVED_WITH_LIMITS": 3
     }
   },
   "gates": {
@@ -33,5 +39,5 @@
     "RELEASE_READY": "BLOCKED"
   },
   "claim_ceiling": "This pointer summarizes and hash-binds the full 158-row registry. Resolve records_uri for per-claim evidence; no gate other than P0_SOURCE_READY is passed.",
-  "verified_at": "2026-08-13T14:00:00+08:00"
+  "verified_at": "2026-08-13T20:38:49+08:00"
 }

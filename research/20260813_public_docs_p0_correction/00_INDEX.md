@@ -30,7 +30,7 @@ status: P0_SOURCE_READY__ABOUT_C108_LIVE_CONFIRMED__ALL_SOURCE_BLOCKED__PUBLICAT
    → 驗證：158 IDs 完全相等、無重複／遺漏。
 2. 輸入：README EN/ZH、Quickstart、Summary、8 Wiki sources、17 Pages HTML、page-07 generator
    → 輸出：受控source corrections與可重跑guard
-   → 驗證：P0 guard 34/34、27 target documents、77 target rules；28個cross-document guards在30個public source files執行450次document checks、150 required anchors、1,056 forbidden anchors、0 errors。
+   → 驗證：P0 guard 34/34、27 target documents、77 target rules；42個cross-document guards在34個public source files執行500次document checks、285 required anchors、1,217 forbidden anchors、0 errors。
 3. 輸入：2026-08-01 denominator_registry.tsv
    → 輸出：7 個固定 denominator assertions
    → 驗證：469,849、255,752、170,131、71,955、63,506、811、3 與精確百分比一致。

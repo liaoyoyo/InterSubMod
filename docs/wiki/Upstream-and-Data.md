@@ -70,9 +70,11 @@ tagged BAM 串流       ───►       .fifo      ───►  每條 read 
 
 ---
 
-## 02 · sidecar 長什麼樣 — 全系統的樞紐檔案
+## 02 · sidecar 長什麼樣 — exact-PS／LongLineage 的 commit-scoped contract
 
-這是唯一被兩支 C++ 程式的原始碼**寫死成相同格式**的檔案。
+InterSubMod 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。兩者是平行
+provenance contracts，**不是**兩支引擎直接串接的執行期介面。LongLineage preview 的
+tagged-BAM writer 只可在明示 branch/commit 下宣稱，不能由這份 sidecar 推成 supported E2E。
 
 ```text
 #CHROM	START0	END0	QNAME	FLAG	MAPQ	CIGAR_B2	HP	PS

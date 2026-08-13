@@ -52,7 +52,7 @@
 | **BamReader** | `src/core/BamReader.cpp` | 基於 HTSlib，負責 BAM 讀取與索引查詢。 |
 | **ReadParser** | `src/core/ReadParser.cpp` | 解析 BAM Record，提取 CIGAR、Mapping Quality、HP Tag 等資訊。 |
 | **MethylationParser** | `src/core/MethylationParser.cpp` | **關鍵模組**。解析 MM/ML 標籤、處理 Delta Encoding，並依 CIGAR 將修飾機率對應回 Reference 座標。 |
-| **MatrixBuilder** | `src/core/MatrixBuilder.cpp` | 動態建構稀疏甲基化矩陣 (Sparse Methylation Matrix)，優化記憶體使用。 |
+| **MatrixBuilder** | `src/core/MatrixBuilder.cpp` | 先收集每條 read 的 sparse-like methylation observations，再配置並填入完整 `read × CpG` rectangular `vector<vector<double>>`；最終矩陣是 dense rectangular representation，記憶體隨 read 與 CpG 數乘積成長。 |
 | **RegionProcessor** | `src/core/RegionProcessor.cpp` | 管理多執行緒任務調度，平行處理多個 SNV 區域。 |
 | **RegionWriter** | `src/io/RegionWriter.cpp` | 輸出標準化的 TSV/CSV 檔案，供後續分析使用。 |
 

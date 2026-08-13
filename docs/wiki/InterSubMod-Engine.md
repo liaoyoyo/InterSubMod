@@ -33,17 +33,18 @@
 | `--reference`<br>`-r` | **必填** | 參考基因組序列。用來**找出視窗內所有 CpG 的位置**（要先有序列才知道哪裡是 CG），也用來決定染色體長度以裁切視窗邊界。 | 🔴 **`.fai` 索引缺失是 Hard error**，程式會直接停。<br>實測：`data/ref/hg38.fa` → GRCh38（3.14 GB）。 |
 | `--vcf`<br>`-v` | **必填** | 體細胞突變清單。**每一筆記錄 = 一個分析區域**。VCF 裡有幾個突變，就會產生幾個 region 目錄。 | 🔴 **VCF 的檔名會變成輸出目錄的第一層**（取 stem）。<br>實測：`filtered_snv_tp.vcf.gz` = 1.15 MB。 |
 | `--normal-bam`<br>`-n` | 選填 | 配對正常組織。**給了它才會有**：germline 甲基化基準線、腫瘤對正常的殘差、跨區域分層。不給的話這些欄位一律是 `NOT_APPLICABLE_TUMOR_ONLY`。 | 正常 read 是用**整個視窗**抓（不是點抓），因為它們貢獻的是甲基化基準而非突變判讀。<br>原始碼註解明文：**不要把 normal 的 HP 硬改成 0**。 |
-| `--loh-bed` | 選填 | 雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，讓後續分析可以把 LOH 區域分層看待。 | 只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>實測檔案 1,094 行，載入時印 `Loaded 1094 LOH regions`。 |
+| `--loh-bed` | 選填 | 雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，讓後續分析可以把 LOH 區域分層看待。 | LOH BED 僅供 annotation／stratification；CN/LOH 未整合進 frozen candidate reconstruction，也沒有 CN/LOH-corrected inference。只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>實測檔案 1,094 行，載入時印 `Loaded 1094 LOH regions`。 |
 
 <details>
-<summary>全部 29 個 CLI 選項的預設值 — 以及<b>兩個文件與程式碼不符的陷阱</b></summary>
+<summary>frozen release baseline <code>ddd8909a</code> 的 29-option census — 以及<b>兩個文件與程式碼不符的陷阱</b></summary>
 
+這個 29-option 數量是 `ddd8909a` 的 **branch-scoped** source census，不是穩定 API。
 本輪把 `--help` 的每一行都對照 `ArgParser.hpp` 與 `Config.hpp` 逐一比對。大部分一致，但有**兩個**會讓你算錯資源或拿到非預期結果：
 
 | 選項 | help 說的 | 實際的 | 後果 |
 |---|---|---|---|
 | `--threads` / `-j` | `Default: 1` | **實際是 16**<br>（`Config.hpp:43`） | 不給這個旗標時，程式會用 16 條執行緒。**資源估算會整整差 16 倍**。實跑不帶旗標時 Configuration 印 `Threads: 16`。 |
-| `--distance-metric` | 宣告預設 `BERNOULLI`<br>（`Config.hpp:40`） | **實際是 NHD**<br>（`ArgParser.hpp:86,168`） | ArgParser 會**無條件清空**宣告的預設值再填入 NHD，所以 `Config.hpp` 的初值不可能存活。不明講就會拿到 NHD，且只產生 `distance/NHD/` 目錄。 |
+| `--distance-metric` | `Config.hpp` initializer 是 `BERNOULLI` | **未指定時的 effective CLI default 是 NHD**<br>（`ArgParser.hpp:86,181-193`） | parser 以 CLI list 取代 initializer；明示 NHD、BERNOULLI 或重複多值都會保留。多值時只有第一個 metric 驅動 clustering，後續 metric 只輸出額外 distance matrix，因此順序會改變 tree／cluster。 |
 
 **其餘經比對確認一致的預設值**：`--window-size 1000`、`--min-mapq 20`、`--min-read-length 1000`、`--min-base-quality 20`、`--min-common-coverage 3`、`--nan-distance-strategy SKIP`、`--methyl-high 0.8`、`--methyl-low 0.2`、`--output-dir output`、`--log-level info`。
 
@@ -201,7 +202,7 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 |---|---|
 | `significance_statistics.txt` | 一頁摘要：總共處理幾個 region、多少個顯著、各染色體分別多少。實測開頭 `=== Significance Analysis Statistics ===`、`Total Regions Processed: 1982`。 |
 | `run.log` | 這次跑用了什麼輸入與參數，開頭是 `--- Configuration ---` 區塊。它是 provenance 的**必要但不充分**證據：仍須搭配 producer commit、site profile／tool hash、輸入與輸出 checksum、schema 與 command receipt；不要單靠 log 宣稱可重現。 |
-| `subclone_structure.txt` | 跨 region 的分組摘要（分幾群、平均 ASM、LOH 比例）。只在部分 run 出現。 |
+| `subclone_structure.txt` | **Legacy-named deprecation／region-stratification artifact**；不是 inferred cellular subclones。只在部分 run 出現，檔名不得當作 biological claim。 |
 | `label_first_metrics.tsv` | 36 欄，label-first 路線的精簡指標表，用 `chr:pos:ref:alt` 當鍵。只在 canonical 配對輸出見到。 |
 
 > ⚠️ **文件與實際不符的一處**
@@ -313,7 +314,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
 | ⚠️ 中 | **二值化門檻有三套** | 主線 0.8/0.2 三分法、另一模組硬寫死 0.5 二分法、Python 端 128/255。同一個 CpG 因為走哪條路而甲基化判定不同，**跨模組數字不可比**。 |
 | ⚠️ 中 | **`linkage_matrix.csv` 其實是 TSV** | 副檔名與分隔符不符。`pandas.read_csv` 預設逗號 → 整列變單欄，**不會報錯**。 |
 | ⚠️ 中 | **`--threads` 預設是 16 不是 1** | help 寫 Default: 1，實際 `Config.hpp` 是 16。**資源估算差 16 倍**，在共用機器上平行跑多個 job 時會嚴重超載。 |
-| ⚠️ 中 | **`--distance-metric` 宣告值會被清掉** | Config 宣告 BERNOULLI，但參數解析會無條件清空再填 NHD。**不明講就是 NHD。** |
+| ⚠️ 中 | **`--distance-metric` 的 initializer 不是 CLI default；多值順序有語意** | 未指定時是 NHD；明示 selection 會保留。多值時只有第一個 metric 驅動 clustering，後續只輸出額外 matrix，因此改變順序可能改變 tree／cluster。 |
 | ℹ️ 低 | **群數最少一定是 2** | 輪廓係數從 k=2 開始掃，所以 `optimal_k` 永遠不會是 1 —— **它不證明 unsupervised cluster existence/truth**。PERMANOVA 只測指定 label 與 read-distance variation／centroid separation 在置換 null 下的 association，且須與 PERMDISP 合讀；Fisher／Cramér's V 只測 label association，均不證明 cellular group 或因果。 |
 | ℹ️ 低 | **`--help` 回傳 exit code 1** | help 與參數錯誤共用同一條 return 路徑。CI smoke test 會誤判失敗。 |
 | ℹ️ 低 | **三個設定是死的** | `min_site_coverage`／`pmd_gating`／`pmd_bed_path` 在 `Config.hpp` 以外零引用。**不可在方法學章節宣稱本方法有 PMD gating 或最小位點覆蓋度過濾。** |

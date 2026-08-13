@@ -79,6 +79,31 @@ class HandoffRegistryTest(unittest.TestCase):
                 for row in final
             )
         )
+        file_specific_gpl_only = {
+            "authority.source_snapshot_1",
+            "authority.source_snapshot_4",
+            "authority.source_snapshot_5",
+        }
+        self.assertTrue(
+            all(
+                artifacts_by_id[artifact_id]["license"].startswith("GPL-3.0-only;")
+                for artifact_id in file_specific_gpl_only
+            )
+        )
+        repository_content_pending = [
+            row for row in artifacts
+            if row["artifact_type"] != "longphase_s_tagged_bam"
+            and row["artifact_id"] != "legacy.big7_runbook_original"
+            and row["artifact_id"] not in file_specific_gpl_only
+        ]
+        self.assertTrue(
+            all(
+                MODULE.PROJECT_LICENSE_PENDING in row["license"]
+                for row in repository_content_pending
+            ),
+            "repository-content SPDX choice must remain maintainer-gated",
+        )
+        self.assertFalse(any("GPL-3.0-or-later" in row["license"] for row in artifacts))
         source4 = artifacts_by_id["authority.source_snapshot_4"]
         frozen = artifacts_by_id["authority.frozen_binary"]
         self.assertEqual(source4["used_by"], [])

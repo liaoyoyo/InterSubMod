@@ -102,7 +102,9 @@ Wiki 的 editorial 初稿源自 2026-08-06 對兩個 repo 的系統性實測收�
 2026-08-01 authority bundle，公開 claim inventory 鎖於 2026-08-12，本輪 source corrections
 日期為 2026-08-13。這些時間層不可合併成「同一次全部驗證」：
 
-- **334 個「檔案:行號」宣稱 + 111 個路徑宣稱**在該次機械重驗中為 **0 缺失指標、0 行號越界**；這只驗證 pointer 可解析，不證明來源內容真實、claim inventory 完整或科學解讀正確
+- **歷史自述、目前 `UNVERIFIED`（ALG-023）**：2026-08-06 文件曾記錄 334 個 source refs
+  ＋111 個 paths 為 0 missing／0 out-of-bounds；公開 repo 缺 commit-pinned inventory、commands、
+  hashes 與 replay receipt，因此不能把它當成 current blanket guarantee
 - 標示「可跑」的部件，都是**實際執行並檢查 exit code** 的結果
 - funnel 各層數字取自凍結的 canonical 輸出，且**已驗證各層加總自洽**
 

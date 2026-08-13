@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 五層系統全景：資料 → 上游工具 → 兩支 C++ → Python → HTML
      source: docs/explain/11_system-map-overview.standalone.html (svg #1)
-     source_document_sha256: 82f5e4358b0f8a9de0417a8901f5bb5072c152325247835a922522d9a34752e8
-     inline_svg_sha256: 9b35de1adfe449422c627544f68423926d70302becef65acc2ba1bf486313813
+     source_document_sha256: 845083195d995649fa6449ad791388cd45b539bdeb6a646647cb161c7dc76f47
+     inline_svg_sha256: a975246f1c9eba93e71da46e608ed3079f71f0ecee161e597992cd03bd2408c9
      generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 980 620" role="img" aria-labelledby="f1t f1d" xmlns="http://www.w3.org/2000/svg">
       <title id="f1t">五層系統全景圖</title>
-      <desc id="f1d">由下而上分為原始資料層、上游工具層、中介契約層、兩支 C++ 主程式層、Python 分析與 HTML 呈現層。
-      原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤並存成 sidecar TSV；
+      <desc id="f1d">由下而上分為原始資料層、上游工具層、read-label representation、兩支 C++ 主程式層、Python producer 與 validator/HTML 呈現層。
+      原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤；InterSubMod 從 BAM aux tags 讀 HP/PS，exact-PS/LongLineage 使用 sidecar，兩者不是直接 runtime interface；
       InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入；前者可由 exact checkout clean build，後者在 private candidate b9aaa12 可跑 preflight，且 frozen HCC1395 receipt 由 dataset-gate 產生 research artifacts，run/probe 仍 BLOCKED；
-      輸出再由 Python 層算成統計與圖，最後生成離線可開的 HTML 工作站。</desc>
+      commit-pinned Python research solver 可作有獨立 receipt 的 science producer；validator/builders 與 HTML 只呈現 validated data，不暗中重算 science。</desc>
   <rect x="0" y="0" width="980" height="620" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
 
@@ -49,15 +49,15 @@
         <text x="726" y="166" font-size="10.5" fill="#5C5A54">前三個是必要輸入的生產者。</text>
         <text x="726" y="182" font-size="10.5" fill="#B06A16">SAVANA 的 CN 結果尚未接進主線。</text>
 
-        <!-- 層 3 中介契約 -->
-        <text x="14" y="238" font-size="12" font-weight="700" fill="#5C5A54">③ 中介契約 — 兩支程式唯一 byte-level 一致的介面</text>
+        <!-- 層 3 read-label representations -->
+        <text x="14" y="238" font-size="12" font-weight="700" fill="#5C5A54">③ Read-label representations — BAM tags 與 sidecar 平行、非直接 runtime interface</text>
         <rect x="14" y="246" width="952" height="60" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
         <text x="30" y="268" font-size="12" font-weight="700" fill="#5B3FA0">HP/PS sidecar TSV（.tsv.gz + .tbi 索引）</text>
         <text x="30" y="285" font-family="ui-monospace,Menlo,monospace" font-size="9.5" fill="#3f2c70">#CHROM  START0  END0  QNAME  FLAG  MAPQ  CIGAR_B2  HP  PS</text>
-        <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
+        <text x="30" y="299" font-size="10" fill="#5C5A54">exact-PS/LongLineage 用 sidecar；InterSubMod 從 BAM aux tags 讀 HP/PS，不直接讀 sidecar。</text>
         <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
         <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
-        <text x="654" y="287" font-size="10" fill="#3f2c70">7 paired_full：1.67436 TiB；sampled-ID only，PARTIAL/NON_FINAL</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 paired_full = 1.674 TiB；sampled-only；NON_FINAL</text>
 
         <!-- 層 4 兩支 C++ -->
         <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
@@ -68,7 +68,7 @@
         <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
         <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
         <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
-        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · exact checkout clean build；internal receipt exit 0</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">ddd8909a 釘選 census：29 options（branch-scoped）· clean build receipt exit 0</text>
         <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
         <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
         <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>
@@ -85,21 +85,21 @@
         <text x="522" y="462" font-size="9.5" fill="#6b4310">吃：8 角色 manifest（BAM + VCF + sidecar + reference）</text>
         <text x="522" y="475" font-size="9.5" fill="#6b4310">吐：site_reads · methyl_calls · cooccurrence_* · topology_unit</text>
 
-        <!-- 層 5 Python / HTML -->
-        <text x="14" y="524" font-size="12" font-weight="700" fill="#5C5A54">⑤ Python 分析層 → HTML 呈現層</text>
+        <!-- 層 5 Python producers / presentation -->
+        <text x="14" y="524" font-size="12" font-weight="700" fill="#5C5A54">⑤ Python science producer vs validator／HTML presentation</text>
         <rect x="14" y="532" width="952" height="72" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
         <rect x="28" y="544" width="230" height="48" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
-        <text x="143" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">Python 分析腳本</text>
-        <text x="143" y="575" text-anchor="middle" font-size="9.5" fill="#2F6690">共現骨幹建構 · 分層樹枚舉</text>
-        <text x="143" y="588" text-anchor="middle" font-size="9.5" fill="#2F6690">funnel 普查 · 熱圖繪製</text>
+        <text x="143" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">Commit-pinned research solver</text>
+        <text x="143" y="575" text-anchor="middle" font-size="9.5" fill="#2F6690">共現骨幹 · candidate family</text>
+        <text x="143" y="588" text-anchor="middle" font-size="9.5" fill="#2F6690">獨立 input/command/schema/hash receipt</text>
         <rect x="268" y="544" width="230" height="48" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.2"/>
-        <text x="383" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">standalone HTML 工作站</text>
-        <text x="383" y="575" text-anchor="middle" font-size="9.5" fill="#2F7D5B">離線可開 · 逐項人工判讀</text>
-        <text x="383" y="588" text-anchor="middle" font-size="9.5" fill="#2F7D5B">缺必填值就拒絕渲染</text>
+        <text x="383" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">Validator · builder · HTML</text>
+        <text x="383" y="575" text-anchor="middle" font-size="9.5" fill="#2F7D5B">validated data · 明示分母</text>
+        <text x="383" y="588" text-anchor="middle" font-size="9.5" fill="#2F7D5B">缺值拒絕渲染 · 不重算 science</text>
         <rect x="508" y="544" width="442" height="48" rx="5" fill="#fff" stroke="#E3DACC"/>
-        <text x="522" y="561" font-size="10.5" fill="#5C5A54">這層是「人真正看的東西」。C++ 只吐檔案，Python 把它變成</text>
-        <text x="522" y="575" font-size="10.5" fill="#5C5A54">可以用眼睛檢查的圖與表，並把人工判讀結果存回 localStorage 匯出。</text>
-        <text x="522" y="588" font-size="10" fill="#B06A16">⚠ 這層目前最碎片化，見「分析與呈現層」分冊</text>
+        <text x="522" y="561" font-size="10.5" fill="#5C5A54">Python 是語言，不是 evidence tier：solver 與 presenter 必須分開登錄。</text>
+        <text x="522" y="575" font-size="10.5" fill="#5C5A54">HTML 只能呈現 validated artifact；localStorage 判讀不能取代 producer receipt。</text>
+        <text x="522" y="588" font-size="10" fill="#B06A16">⚠ 未釘選 producer/receipt 的 Python 結果不得升格 authority</text>
 
         <!-- 箭頭 -->
         <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">

@@ -1,9 +1,12 @@
 # Analysis & Presentation 分析與呈現層
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
-> 部件分冊 · 第 15 頁 · Python 分析層 + HTML 呈現層
+> 部件分冊 · 第 15 頁 · Python science producers + validator／HTML 呈現層
 
-C++ 只吐檔案，**把資料變成看得懂的圖與表的是這一層**。這也是實驗室同學實際上花最多時間的地方。本頁挑出真正該用的入口，並誠實說明這層目前的碎片化問題。
+**Python 是實作語言，不是 evidence tier。** Commit-pinned research solver／analysis script 可以是
+science producer，但必須自帶 input、producer commit、command receipt、schema、scope 與 hash；
+validator／publication builder／HTML 則只能呈現 validated data，不得暗中重算或改寫 science。
+本頁同時列出這兩種角色，並誠實說明目前的碎片化問題。
 
 | 數字 | 意義 |
 |---|---|
@@ -14,7 +17,7 @@ C++ 只吐檔案，**把資料變成看得懂的圖與表的是這一層**。這
 
 ---
 
-## 01 先跑這一支 — 重算 historical 35,332-site pipeline 指標
+## 01 Historical producer replay — 重算具名 35,332-site pipeline 指標
 
 如果你只想重驗 historical 35,332-site script 與它的具名 inputs，跑這個；它不是全系統 health check。
 
@@ -51,12 +54,12 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 | 腳本 | 產出什麼、回答什麼問題 |
 |---|---|
-| `verify_pipeline_numbers.py`<br>✅ **先跑這個** | 重算 historical 35,332-site pipeline 的 TP／FP／共現／訊號不足／孤立等指標；**不覆蓋** exact-PS、LongLineage、儲存量、code count 或 test count。 |
-| `sm_linkage_genomewide.py` | 建立**全基因組突變共現地圖** —— 這是整套方法的骨幹。對每一對距離 50 kb 內的突變，統計有幾條 read 同時看到它們、四種等位組合各幾條、判成巢狀／互斥／共連鎖／獨立哪一種關係。<br>*實測產物 26.5 MB：53,094 對配對 + 35,332 筆位點帳本。* |
-| `build_strict_ps_hp_regions.py` | 用**嚴格規則**切出可建樹的區域：同一定相組、同一 germline 單倍型內、至少 3 條分子同時確定兩端 —— 才連一條邊。<br>🔴 **距離只記錄、不參與連邊**，這是刻意的方法學選擇（避免用幾何鄰近冒充分子連鎖）。 |
-| `build_layered_per_sample.py` | 產生 7 technical datasets／6 biological IDs 的**分層工作站 HTML**（呈現層主成品）。 |
-| `build_exact_ps_layered_workstation.py` | 4,741 行的完整工作站建構器。支援 `--verify-only` —— **只驗證上游契約還成立、不重建**，適合用來確認資料沒漂移。 |
-| `build_workstation.py`<br>**通用** | 317 行的**通用**工作站生成器：吃一份宣告式 spec，吐互動判讀 HTML。見 §03。 |
+| `verify_pipeline_numbers.py`<br>historical replay | 重算 historical 35,332-site pipeline 的 TP／FP／共現／訊號不足／孤立；這是具名 historical input 的 producer replay，**不覆蓋** exact-PS、LongLineage、儲存量、code count 或 test count。 |
+| `sm_linkage_genomewide.py`<br>science producer | 建立**全基因組突變共現地圖**。要作 evidence 時必須釘選 producer commit、input、command、schema、scope 與 output hash；不能只憑這個檔名引用。 |
+| `build_strict_ps_hp_regions.py`<br>science producer | 用嚴格 PS×HP/read linkage 規則建立候選 region；距離只記錄、不參與連邊。只有對應 receipt 完整時才能作 science evidence。 |
+| `build_layered_per_sample.py`<br>publication builder | 讀 validated artifacts 產生 7 technical datasets／6 biological IDs 的分層工作站；不得改寫上游 denominator 或 claim ceiling。 |
+| `build_exact_ps_layered_workstation.py`<br>validator/builder | `--verify-only` 只驗證明示上游契約；其他模式的 producer／presentation responsibility 必須由該 run receipt 說明，不能因輸出是 HTML 就當成無 science transform。 |
+| `build_workstation.py`<br>通用 presenter | 吃宣告式 validated spec，吐互動判讀 HTML；缺必填欄位 fail closed。見 §03。 |
 
 <details>
 <summary>關鍵中間產物 — 想直接分析資料時該讀哪些檔</summary>

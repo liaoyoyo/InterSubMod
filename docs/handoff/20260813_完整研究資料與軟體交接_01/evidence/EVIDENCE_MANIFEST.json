@@ -35,16 +35,18 @@
     {
       "evidence_id": "public_claim_validation_20260813",
       "path": "evidence/public_claim_validation_receipt.json",
-      "sha256": "15ec74a215fc57a04135c4d518b5180188407e94ed89ec2a5db2cb2822c9f3ab",
+      "sha256": "60b9be57531542348df5f5ee79b0d92b1a0a147ed7fb586e3520353168ac482b",
       "copy_status": "EXACT_COPY",
-      "source_path": "InterSubMod/research/20260813_public_docs_p0_correction/validation_receipt.json"
+      "source_path": "InterSubMod/research/20260813_public_docs_p0_correction/validation_receipt.json",
+      "size_bytes": 11867
     },
     {
       "evidence_id": "full_claim_registry_20260813",
       "path": "evidence/full_claim_registry.json",
-      "sha256": "4bfe997d663f7c5f900c4fe7a6d6fc942c030c06356c4c49c103952bde9a20d6",
+      "sha256": "938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5",
       "copy_status": "EXACT_COPY",
-      "source_path": "InterSubMod/research/20260813_public_docs_p0_correction/claim_remediation_registry.json"
+      "source_path": "InterSubMod/research/20260813_public_docs_p0_correction/claim_remediation_registry.json",
+      "size_bytes": 210545
     },
     {
       "evidence_id": "longlineage_public_safety_20260813",
@@ -85,7 +87,7 @@
     {
       "evidence_id": "frozen_binary_source_adjudication_20260813",
       "path": "evidence/frozen_binary_source_adjudication.md",
-      "sha256": "3c85d15de0f069c3277ba317689f4bc574bf93c296cd181d32109e7c5c40fbb9",
+      "sha256": "12c18c2130e2feb3879eca11b97f07ae0f650b099416242c3a54dcd6eddf9dae",
       "copy_status": "EXACT_COPY",
       "source_path": "InterSubMod/docs/provenance/20260813_frozen_binary_source_adjudication_01.md"
     },
@@ -118,6 +120,50 @@
       "sha256": "0de76aee7900e0344545a66710876e60becae7902aa470c3ada9609115a4c868",
       "copy_status": "NEW_PACKAGE_RECEIPT",
       "source_path": "Clean clone validation of LongLineage stacked private-first branch at f60b5f3274123bdf818371600b608d52626c893e"
+    },
+    {
+      "evidence_id": "tagged_bam_sampled_identity_baseline_20260711",
+      "path": "evidence/canonical_longphase_tagged_bam_sampled_identity_v1.json",
+      "sha256": "5956bc5a065409163daa9c8417387267977e5b8bdc3deee169d043275913a4d4",
+      "size_bytes": 10793,
+      "copy_status": "NEW_PACKAGE_RECEIPT",
+      "source_path": "Historical PRE-FIX paired_full sampled-identity baseline recorded on 2026-07-11",
+      "evidence_status": "HISTORICAL",
+      "scope": "PARTIAL",
+      "finality": "NON_FINAL"
+    },
+    {
+      "evidence_id": "tagged_bam_sampled_replay_manifest_20260813",
+      "path": "evidence/tagged_bam_sampled_replay_manifest.json",
+      "sha256": "4ea9b1f16a60317a89966dfb3e379a5174a02edf51c37e8da4b9568afe2e4096",
+      "size_bytes": 2109,
+      "copy_status": "NEW_PACKAGE_RECEIPT",
+      "source_path": "Read-only 2026-08-13 replay manifest for seven paired_full tagged BAM objects",
+      "evidence_status": "VALIDATED_DERIVED",
+      "scope": "PARTIAL",
+      "finality": "NON_FINAL"
+    },
+    {
+      "evidence_id": "tagged_bam_sampled_identity_replay_20260813",
+      "path": "evidence/tagged_bam_sampled_identity_replay_20260813.json",
+      "sha256": "2376436f9994592eb31f4e00d4e2a8f3112ab05fea5bbc3a2c85ef46da488094",
+      "size_bytes": 21523,
+      "copy_status": "NEW_PACKAGE_RECEIPT",
+      "source_path": "Seven-object sampled identity replay performed on 2026-08-13; no full-file SHA-256 was computed",
+      "evidence_status": "VALIDATED_DERIVED",
+      "scope": "PARTIAL",
+      "finality": "NON_FINAL"
+    },
+    {
+      "evidence_id": "large_asset_migration_20260813",
+      "path": "evidence/large_asset_migration_receipt.json",
+      "sha256": "4c45a80c9218c4e57ae94947f4c189a8ca1e8fdfd8a9409a1b018c6ce6f854f7",
+      "size_bytes": 1317,
+      "copy_status": "NEW_PACKAGE_RECEIPT",
+      "source_path": "Archive-first migration receipt for the 69,606,961-byte tracked HTML at source commit 3383974a370dcff6aa0ae7a2fae20a6c6dc166ce",
+      "evidence_status": "VALIDATED_DERIVED",
+      "scope": "PARTIAL",
+      "finality": "NON_FINAL"
     }
   ],
   "claim_ceiling": "Embedded evidence makes the handoff package independently readable. It does not expand the scientific scope or imply a TiB-scale rerun."

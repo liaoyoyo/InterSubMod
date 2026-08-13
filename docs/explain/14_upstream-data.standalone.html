@@ -295,8 +295,10 @@ pre code,
 
 <!-- ═══════ 2 ═══════ -->
 <section id="s2">
-  <h3><span class="num">02</span>sidecar 長什麼樣 — 全系統的樞紐檔案</h3>
-  <p class="sub">這是唯一被兩支 C++ 程式的原始碼<b>寫死成相同格式</b>的檔案。</p>
+  <h3><span class="num">02</span>sidecar 長什麼樣 — exact-PS／LongLineage 的 commit-scoped contract</h3>
+  <p class="sub">InterSubMod 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。
+    兩者是平行 provenance contracts，<b>不是</b>兩支引擎直接串接的執行期介面；
+    tagged-BAM writer 只能依明示 feature/preview commit 宣稱。</p>
 
   <pre class="out"><code>#CHROM	START0	END0	QNAME	FLAG	MAPQ	CIGAR_B2	HP	PS</code></pre>
 

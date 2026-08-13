@@ -238,6 +238,167 @@
           "ancestral ref read.{0,40}(?:確實存在|exists)",
           "祖先.{0,30}(?:確實存在|已觀測)"
         ]
+      },
+      {
+        "guard_id": "G_HPPS_REPRESENTATION_BOUNDARY",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/Upstream-and-Data.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/14_upstream-data.standalone.html"
+        ],
+        "required_all": [
+          "(?:InterSubMod|inter_sub_mod).{0,120}(?:BAM.{0,50}HP/PS|HP/PS.{0,50}BAM)",
+          "(?:exact[- ]PS|LongLineage).{0,120}sidecar",
+          "(?:not|不是|並非).{0,100}(?:direct|直接).{0,100}(?:runtime|執行期)"
+        ],
+        "forbidden_any": [
+          "only byte-identical contract between both engines",
+          "兩支(?: C\\+\\+)?(?:程式|引擎).{0,50}唯一.{0,50}(?:byte-level|相同格式|介面)",
+          "sidecar TSV.{0,40}全系統的(?:樞紐|hub)"
+        ]
+      },
+      {
+        "guard_id": "G_NHD_CLI_DEFAULT_SEMANTICS",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/How-to-Run.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/explain/16_how-to-run.standalone.html"
+        ],
+        "required_all": [
+          "(?:no-argument|未指定).{0,100}(?:default|預設).{0,50}NHD",
+          "(?:explicit|明示).{0,100}(?:NHD.{0,40}BERNOULLI|BERNOULLI.{0,40}NHD).{0,120}(?:honored|保留|生效)",
+          "(?:first|第一個).{0,100}(?:drives?|驅動).{0,50}(?:clustering|分群)"
+        ],
+        "forbidden_any": [
+          "silently forced to NHD",
+          "靜默改成 NHD",
+          "無條件清空.{0,80}(?:再填入|改成) NHD",
+          "實際會被覆寫成 NHD"
+        ]
+      },
+      {
+        "guard_id": "G_ALG023_HISTORICAL_AUDIT_UNVERIFIED",
+        "targets": [
+          "docs/wiki/Home.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html"
+        ],
+        "required_all": [
+          "ALG-023",
+          "UNVERIFIED",
+          "commit-pinned"
+        ],
+        "forbidden_any": [
+          "334.{0,120}111.{0,160}全部經機械重驗",
+          "0 個捏造.{0,80}0 個行號越界"
+        ]
+      },
+      {
+        "guard_id": "G_CLI_OPTION_COUNT_BRANCH_SCOPED",
+        "targets": [
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "ddd8909a",
+          "29(?:-option| 個 CLI| 個選項)",
+          "branch[- ]scope(?:d)?|branch-sensitive"
+        ],
+        "forbidden_any": [
+          "(?:全部|all) 29 個 CLI 選項.{0,80}(?:stable|穩定|固定)"
+        ]
+      },
+      {
+        "guard_id": "G_MATRIX_REPRESENTATION_DENSE_FINAL",
+        "targets": [
+          "README_PROJECT_SUMMARY.md"
+        ],
+        "required_all": [
+          "sparse-like",
+          "dense rectangular representation",
+          "read × CpG"
+        ],
+        "forbidden_any": [
+          "動態建構稀疏甲基化矩陣.{0,80}優化記憶體"
+        ]
+      },
+      {
+        "guard_id": "G_PYTHON_PRODUCER_PRESENTER_BOUNDARY",
+        "targets": [
+          "docs/wiki/Analysis-and-Presentation.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/ai_context/CONTEXT.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_完整研究交接總覽_01.standalone.html"
+        ],
+        "required_all": [
+          "Python.{0,160}(?:science producer|research solver)",
+          "(?:validator|publication builder).{0,180}(?:validated|呈現|驗證)"
+        ],
+        "forbidden_any": [
+          "Python/HTML只呈現",
+          "Python／HTML：呈現validated data",
+          "Python 分析層 → HTML 呈現層"
+        ]
+      },
+      {
+        "guard_id": "G_LINEAGE_AXIS_FIRST_ONLY",
+        "targets": [
+          "pipeline/README.md"
+        ],
+        "required_all": [
+          "lineage-axis",
+          "(?:only|只).{0,50}(?:first|第一)",
+          "(?:not|不).{0,100}(?:multi-axis|多軸|各自獨立)"
+        ],
+        "forbidden_any": [
+          "多軸並行.{0,100}每個位點"
+        ]
+      },
+      {
+        "guard_id": "G_SUBCLONE_STRUCTURE_DEPRECATION",
+        "targets": [
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "subclone_structure\\.txt",
+          "Legacy-named deprecation",
+          "not inferred cellular subclones|不是 inferred cellular subclones"
+        ],
+        "forbidden_any": [
+          "subclone_structure\\.txt.{0,120}(?:reports?|推論|報告).{0,60}(?:cellular )?subclones?"
+        ]
+      },
+      {
+        "guard_id": "G_CN_LOH_INFERENCE_BOUNDARY",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/ai_context/CONTEXT.md"
+        ],
+        "required_all": [
+          "CN/LOH.{0,120}(?:not integrated into|未整合進).{0,80}(?:frozen candidate reconstruction|frozen reconstruction)",
+          "LOH BED.{0,120}(?:(?:only|僅|只).{0,40}(?:annotation|stratification)|(?:annotation|stratification).{0,40}(?:only|僅|只))"
+        ],
+        "forbidden_any": [
+          "(?:CN/LOH|LOH).{0,100}(?:integrated|已整合).{0,100}(?:cellular|clone|lineage)",
+          "LOH BED.{0,100}(?:proves?|證明).{0,80}(?:clone|lineage|subclone)"
+        ]
       }
     ],
     "corpus_rules": [

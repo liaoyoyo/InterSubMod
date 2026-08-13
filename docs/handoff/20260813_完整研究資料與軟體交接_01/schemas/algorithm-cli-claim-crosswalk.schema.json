@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/schemas/algorithm-cli-claim-crosswalk.schema.json",
+  "title": "InterSubMod 2026-08-12 algorithm and CLI claim crosswalk",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "crosswalk_id",
+    "assessed_at",
+    "assessed_git_commit",
+    "source_state",
+    "source_matrix",
+    "claim_inventory",
+    "guard_registry",
+    "source_snapshot",
+    "source_snapshot_tree_sha256",
+    "disposition_semantics",
+    "counts",
+    "gates",
+    "records"
+  ],
+  "properties": {
+    "schema_name": {"const": "intersubmod.algorithm_cli_claim_crosswalk"},
+    "schema_version": {"const": "1.0.0"},
+    "crosswalk_id": {"const": "intersubmod-algorithm-cli-claims-20260813"},
+    "assessed_at": {"type": "string", "format": "date-time"},
+    "assessed_git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_state": {"enum": ["COMMIT_PINNED", "WORKTREE_HASH_BOUND_PENDING_COMMIT"]},
+    "source_matrix": {"$ref": "#/$defs/sourceBinding"},
+    "claim_inventory": {"$ref": "#/$defs/sourceBinding"},
+    "guard_registry": {"$ref": "#/$defs/sourceBinding"},
+    "source_snapshot": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sourceBinding"}
+    },
+    "source_snapshot_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "disposition_semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applies_to", "CONFIRMED", "CONFIRMED_WITH_LIMITS", "UNVERIFIED"],
+      "properties": {
+        "applies_to": {"const": "bounded_current_claim_not_original_public_claim"},
+        "CONFIRMED": {"type": "string", "minLength": 1},
+        "CONFIRMED_WITH_LIMITS": {"type": "string", "minLength": 1},
+        "UNVERIFIED": {"type": "string", "minLength": 1}
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["records", "related_claim_links", "records_with_related_claim_ids", "records_without_related_claim_ids", "by_current_disposition", "by_source_correction", "by_guard_status", "by_evidence_status"],
+      "properties": {
+        "records": {"const": 35},
+        "related_claim_links": {"type": "integer", "minimum": 0},
+        "records_with_related_claim_ids": {"type": "integer", "minimum": 0},
+        "records_without_related_claim_ids": {"type": "integer", "minimum": 0},
+        "by_current_disposition": {"$ref": "#/$defs/countMap"},
+        "by_source_correction": {"$ref": "#/$defs/countMap"},
+        "by_guard_status": {"$ref": "#/$defs/countMap"},
+        "by_evidence_status": {"$ref": "#/$defs/countMap"}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["CROSSWALK_COMPLETENESS", "PUBLICATION_ASSET_READY", "RELEASE_ASSET_READY"],
+      "properties": {
+        "CROSSWALK_COMPLETENESS": {"$ref": "#/$defs/gate"},
+        "PUBLICATION_ASSET_READY": {"$ref": "#/$defs/gate"},
+        "RELEASE_ASSET_READY": {"$ref": "#/$defs/gate"}
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 35,
+      "maxItems": 35,
+      "items": {"$ref": "#/$defs/record"}
+    }
+  },
+  "$defs": {
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "rows": {"type": "integer", "minimum": 1}
+      }
+    },
+    "countMap": {
+      "type": "object",
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason"],
+      "properties": {
+        "status": {"enum": ["PASS", "BLOCKED"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "sourceCorrection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "target_paths", "note"],
+      "properties": {
+        "status": {"enum": ["NO_CHANGE_REQUIRED", "LOCAL_SOURCE_CORRECTED", "PARTIAL", "BLOCKED", "NOT_APPLICABLE"]},
+        "target_paths": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "note": {"type": "string", "minLength": 1}
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "guard_ids", "validator"],
+      "properties": {
+        "status": {"enum": ["PASS", "PARTIAL", "MISSING", "NOT_REQUIRED"]},
+        "guard_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "validator": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "references", "claim_ceiling"],
+      "properties": {
+        "status": {"enum": ["VERIFIED", "VERIFIED_WITH_LIMITS", "SOURCE_INSPECTION_ONLY", "HISTORICAL_ONLY", "MISSING"]},
+        "references": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "claim_ceiling": {"type": "string", "minLength": 1}
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm_claim_id",
+        "source_row_sha256",
+        "audit_verdict",
+        "original_public_claim",
+        "bounded_current_claim",
+        "current_disposition",
+        "related_claim_ids",
+        "source_correction",
+        "guard",
+        "evidence",
+        "known_limits",
+        "release_gate",
+        "next_action"
+      ],
+      "properties": {
+        "algorithm_claim_id": {"pattern": "^ALG-0(?:0[1-9]|[12][0-9]|3[0-5])$"},
+        "source_row_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "audit_verdict": {"enum": ["SUPPORTED", "SUPPORTED_WITH_LIMITS", "OVERSTATED", "STALE", "CONTRADICTED", "BRANCH_SCOPED", "UNVERIFIABLE"]},
+        "original_public_claim": {"type": "string", "minLength": 1},
+        "bounded_current_claim": {"type": "string", "minLength": 1},
+        "current_disposition": {"enum": ["CONFIRMED", "CONFIRMED_WITH_LIMITS", "UNVERIFIED"]},
+        "related_claim_ids": {"type": "array", "items": {"pattern": "^C[0-9]{3}$"}, "uniqueItems": true},
+        "source_correction": {"$ref": "#/$defs/sourceCorrection"},
+        "guard": {"$ref": "#/$defs/guard"},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "known_limits": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "release_gate": {"enum": ["SOURCE_READY", "SOURCE_READY_WITH_LIMITS", "BLOCKED"]},
+        "next_action": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

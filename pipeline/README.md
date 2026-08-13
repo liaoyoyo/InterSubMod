@@ -59,7 +59,7 @@ private preview，不能從本歷史檔複製命令執行。
 
 | 參數 | 值 | 說明 |
 |---|---|---|
-| `--group-by-tag` | `HP` / `ALT` / `lc` / `lu` / `lv`（可多選，逗號分隔） | 要檢定哪些分組軸。多軸並行，讓每個位點能回答「甲基差異與**哪個**軸有關」 |
+| `--group-by-tag` | `HP` / `ALT` / `lc` / `lu` / `lv`（feature syntax可重複／逗號分隔） | **歷史文字曾誤稱多軸並行。** Inspected feature loop 目前只評估第一個 lineage axis；後續 lineage-axis values 不會各自獨立產生檢定。HP／ALT 是另一路 grouping，不能用來推論所有 lineage axes 已 multi-axis。此介面不在 `ddd8909a` supported baseline。 |
 | `--require-tag-status` | `U`（預設）/ `UM` / `any` | 使用 lineage 軸時的最低可信度 |
 
 ⚠ **樣本量警告**：HCC1395 全基因組的 `ls` 分佈為
@@ -71,7 +71,7 @@ private preview，不能從本歷史檔複製命令執行。
 
 | 檔案 | 內容 |
 |---|---|
-| `significance_summary.csv` | per-region 多軸統計 |
+| `significance_summary.csv` | per-region 統計；feature lineage-axis 僅第一軸被評估，不可稱完整多軸輸出 |
 | `<region>/reads/reads.tsv` | per-read，**後 7 欄**為 lineage 資訊（無標籤時寫 `.`） |
 | `<region>/methylation/methylation.csv` | read × CpG 甲基矩陣 |
 

@@ -150,7 +150,9 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127
 ### ⚠️ 兩個預設值和說明文件不一樣，先知道比較好
 
 - **`--threads`** 說明寫預設 1，**實際是 16**（資源估算會差 16 倍）。
-- **`--distance-metric`** 宣告預設 BERNOULLI，**實際會被覆寫成 NHD**。
+- **未指定 `--distance-metric`** 時，effective CLI default 是 **NHD**；明示的 NHD、
+  BERNOULLI 或重複多值都會保留。多值時只有第一個 metric 驅動 clustering，後續 metric
+  只多輸出 distance matrix，因此順序會改變 tree／cluster。
 
 想要哪個就明確指定，不要靠預設。
 

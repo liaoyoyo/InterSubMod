@@ -738,6 +738,14 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     html = (package_root / "20260813_完整研究交接總覽_01.standalone.html").read_text(encoding="utf-8")
     public_surfaces = "\n".join((index, notes, context, html))
 
+    claim_pointer = load_json(package_root / "registries/claim_registry.json")
+    claim_counts = claim_pointer.get("counts", {}).get("by_current_verdict", {})
+    require(
+        claim_counts == {"CONFIRMED": 69, "CONFIRMED_WITH_LIMITS": 69, "UNVERIFIED": 20},
+        f"reader contract claim denominator drifted: {claim_counts!r}",
+    )
+    unverified_count = claim_counts["UNVERIFIED"]
+
     require(
         "34/34" not in public_surfaces,
         "P0 readiness must preserve the 33 local guards / 1 bounded About distinction",
@@ -748,7 +756,10 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
             "bounded live" in text and "CONFIRMED_WITH_LIMITS" in text,
             f"{label} lacks the bounded C108 live verdict",
         )
-        require("24" in text and "UNVERIFIED" in text, f"{label} lacks the current UNVERIFIED denominator")
+        require(
+            str(unverified_count) in text and "UNVERIFIED" in text,
+            f"{label} lacks the current hash-bound UNVERIFIED denominator {unverified_count}",
+        )
 
     require("scripts/site/bootstrap --template" in html, "standalone HTML bootstrap command lacks --template")
     require("--output config/site-profile.local.json" in html, "standalone HTML bootstrap command lacks --output")
@@ -795,6 +806,7 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     return {
         "p0_local_guards": 33,
         "p0_about_bounded_live_confirmed_with_limits": 1,
+        "claim_verdict_counts": claim_counts,
         "bootstrap_interface": "--template/--output",
         "registry_paths_prefixed": 3,
         "package_local_crosswalk_evidence": 3,

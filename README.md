@@ -33,9 +33,9 @@ Five layers, bottom to top. Only some of them are currently runnable — see
 |---|---|---|
 | Raw data | tumour / normal BAM, reference FASTA | ONT long reads carrying methylation tags |
 | Upstream | Dorado · ClairS · LongPhase-S · SAVANA | basecalling + methylation, somatic SNV calling, haplotagging, copy number |
-| Interface | **HP/PS sidecar TSV** | one row per read; the only byte-identical contract between both engines |
+| Read-label representations | **BAM HP/PS aux tags** · **HP/PS sidecar TSV** | `inter_sub_mod` reads HP/PS from BAM aux tags; exact-PS/LongLineage use the sidecar. These are parallel, commit-scoped contracts, not a direct engine-to-engine runtime interface. |
 | Engines | **`inter_sub_mod`** (C++17) · `longlineage` (C++17) | per-region methylation/statistics · version-scoped per-read artefacts |
-| Presentation | Python analysis + standalone HTML | figures, funnels, interactive review workstations |
+| Research/presentation | commit-pinned Python research solvers · validators/builders · standalone HTML | a Python solver may produce science only with its own inputs/receipt; publication builders and HTML present validated data without silently recomputing science |
 
 ---
 
@@ -239,8 +239,10 @@ it is **DEMO scope** and cannot support biological, benchmark, or release-scienc
 
 - **`--threads` defaults to 16, not 1.** The help text says `Default: 1`; the actual
   default in `Config.hpp` is `16`. Resource estimates will be off by 16×.
-- **`--distance-metric` is silently forced to `NHD`.** `Config.hpp` declares `BERNOULLI`,
-  but the argument parser unconditionally clears it. Always specify it explicitly.
+- **The no-argument `--distance-metric` default is `NHD`.** The parser replaces the
+  `Config.hpp` initializer with its CLI list: explicit `NHD`, `BERNOULLI`, or repeated
+  selections are honored. When several metrics are requested, only the first drives
+  clustering; later metrics produce additional distance matrices, so order matters.
 - **`tree.nwk` leaves are *reads*, not clones.** It is a hierarchical clustering tree over
   read methylation similarity — **not** a subclonal phylogeny. This is the single most
   commonly misread output.
@@ -357,6 +359,8 @@ The exact commands and captured output are preserved in the
 the per-claim correction status is tracked in the
 [P0 correction cycle](research/20260813_public_docs_p0_correction/00_INDEX.md).
 
-Known gaps, stated honestly: copy-number is `NOT_INTEGRATED`; LongLineage's seven-technical-dataset/six-biological-ID runtime
+Known gaps, stated honestly: CN/LOH are not integrated into the frozen candidate reconstruction
+and its inferences are not CN/LOH-corrected; InterSubMod's optional LOH BED is annotation/
+stratification only. LongLineage's seven-technical-dataset/six-biological-ID runtime
 and memory ceiling have **never been measured** and its own documentation forbids
 extrapolating from one sample.

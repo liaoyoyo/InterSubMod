@@ -1,0 +1,112 @@
+{
+  "schema_name": "intersubmod.public_claim_remediation_build_receipt",
+  "schema_version": "2.0.0",
+  "receipt_id": "intersubmod-public-claims-remediation-build-20260813",
+  "generated_at": "2026-08-13T00:00:00+08:00",
+  "output": {
+    "path": "research/20260813_public_docs_p0_correction/claim_remediation_registry.json",
+    "sha256": "938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5",
+    "schema_name": "intersubmod.public_claim_remediation_registry",
+    "schema_version": "2.0.0",
+    "registry_id": "intersubmod-public-claims-remediation-20260813"
+  },
+  "source_inventory": {
+    "path": "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+    "sha256": "d5d8794c2467ac6ac466711f91890666f3dbc571d9b3e27b07ba5f10d642ddbc"
+  },
+  "source_scope": {
+    "path": "research/20260812_intersubmod_github_public_docs_full_validation/source_scope.tsv",
+    "sha256": "dfdc7fa9441f4b97eda6caf4f8048bca98b4a3a5949d7b8136674a03d2cef96f"
+  },
+  "p0_guard": {
+    "path": "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json",
+    "sha256": "f9f03ab14047493db3b1fa27e13a270560f5f67f8a8f40c77902cd40cd3b3dfc",
+    "validation_summary": {
+      "inventory_p0": 34,
+      "registry_p0": 34,
+      "local_claims": 33,
+      "external_only_claims": 1,
+      "checked_target_rules": 77,
+      "required_anchors": 160,
+      "forbidden_anchors": 93,
+      "external_actions": 35,
+      "external_public_surfaces": 4,
+      "unique_documents": 27,
+      "cross_document_guard": {
+        "guard_contract": "scripts/p0_claim_registry.json",
+        "public_source_files": 34,
+        "guard_ids": 42,
+        "checked_documents": 500,
+        "required_anchors": 285,
+        "forbidden_anchors": 1217,
+        "context_occurrences": 54,
+        "required_tracked_paths": 8,
+        "tracked_regular_paths": 8,
+        "errors": 0,
+        "verdict": "PASS"
+      },
+      "errors": 0,
+      "verdict": "PASS"
+    }
+  },
+  "github_about": {
+    "path": "research/20260813_public_docs_p0_correction/github_about_c108_receipt.json",
+    "sha256": "0cfe40131bdf0f6a61538af75d7debd52f6b3cee895371be920be80d7debf0c6",
+    "semantic_status": "PASS"
+  },
+  "manifests": {
+    "public_sources": {
+      "sha256": "25f0766feefa0541354540142cabad852ef460288f9dd244389b17d749363636",
+      "files": 34
+    },
+    "github_about_snapshots": {
+      "sha256": "3b5240e6899df128ec2db881fb51e5561204aa404e1216ee1be2360636d7e7f4",
+      "files": 3
+    }
+  },
+  "allowed_current_verdicts": [
+    "CONFIRMED",
+    "CONFIRMED_WITH_LIMITS",
+    "UNVERIFIED"
+  ],
+  "counts": {
+    "claims": 158,
+    "by_priority": {
+      "P0": 34,
+      "P1": 20,
+      "P2": 35,
+      "P3": 69
+    },
+    "by_current_verdict": {
+      "CONFIRMED": 69,
+      "CONFIRMED_WITH_LIMITS": 69,
+      "UNVERIFIED": 20
+    },
+    "by_source_status": {
+      "EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS": 1,
+      "FROZEN_CONFIRMED_WITH_LIMITS": 32,
+      "FROZEN_EVIDENCE_CONFIRMED": 69,
+      "SOURCE_EDITED_REVIEW_REQUIRED": 20,
+      "SOURCE_READY": 33,
+      "VALIDATED_DERIVED_WITH_LIMITS": 3
+    }
+  },
+  "gates": {
+    "P0_SOURCE_READY": {
+      "status": "PASS",
+      "reason": "33 local P0 claims pass fail-closed source guards; C108 About was updated and re-fetched with a bounded receipt."
+    },
+    "SOURCE_READY": {
+      "status": "BLOCKED",
+      "reason": "P1/P2 source edits still require dedicated guards/evidence closure."
+    },
+    "PUBLICATION_READY": {
+      "status": "BLOCKED",
+      "reason": "Default branch, Wiki and Pages have not been published and re-fetched; About C108 alone is confirmed."
+    },
+    "RELEASE_READY": {
+      "status": "BLOCKED",
+      "reason": "Publication gate and broader research-handoff release gates remain open."
+    }
+  }
+}

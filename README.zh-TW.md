@@ -29,9 +29,9 @@
 |---|---|---|
 | 原始資料 | tumour / normal BAM、參考基因組 | 帶甲基化標記的 ONT 長讀長 |
 | 上游工具 | Dorado · ClairS · LongPhase-S · SAVANA | 鹼基判讀＋甲基化、體細胞突變、單倍型標記、拷貝數 |
-| 中介契約 | **HP/PS sidecar TSV** | 每條 read 一列；兩支引擎唯一 byte-level 一致的介面 |
+| read 標籤表示 | **BAM HP/PS aux tags** · **HP/PS sidecar TSV** | `inter_sub_mod` 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。兩者是 commit-scoped 的平行契約，不是兩支引擎直接串接的執行期介面。 |
 | 兩支引擎 | **`inter_sub_mod`**（C++17）· `longlineage`（C++17） | per-region 甲基化／統計 · 版本限定的 per-read artefact |
-| 呈現層 | Python 分析 ＋ standalone HTML | 圖表、漏斗、互動判讀工作站 |
+| 研究／呈現層 | commit-pinned Python research solver · validator/builder · standalone HTML | Python solver 只有在自帶 input/receipt 時才是 science producer；公開 builder 與 HTML 只呈現 validated data，不暗中重算 science |
 
 ---
 
@@ -207,8 +207,9 @@ PASS receipt 只證明 clone→build→run→schema 的接線可用；scope 是 
 
 - **`--threads` 預設是 16 不是 1。** help 寫 `Default: 1`，但 `Config.hpp` 的實際預設是 `16`。
   資源估算會整整差 16 倍。
-- **`--distance-metric` 會被靜默改成 `NHD`。** `Config.hpp` 宣告 `BERNOULLI`，
-  但參數解析器會無條件清空再填入 NHD。**永遠明確指定它。**
+- **未指定 `--distance-metric` 時的 effective CLI default 是 `NHD`。** parser 以 CLI list
+  取代 `Config.hpp` initializer；明示的 `NHD`、`BERNOULLI` 或重複多值都會保留。若指定多個
+  metric，只有第一個驅動 clustering，後續 metric 只多輸出 distance matrix，所以順序會改變分群結果。
 - **`tree.nwk` 的葉子是 *read* 不是 clone。** 它是「read 依甲基化相似度」的階層分群樹，
   **不是**亞群演化譜系樹。這是最常被誤讀的輸出。
 
@@ -316,6 +317,9 @@ state/                      研究 cycle 狀態機
 逐 claim 修正狀態記錄於
 [P0 correction cycle](research/20260813_public_docs_p0_correction/00_INDEX.md)。
 
-**誠實標註的已知缺口**：拷貝數目前是 `NOT_INTEGRATED`；
+**誠實標註的已知缺口**：CN/LOH 未整合進 frozen candidate reconstruction，現有推論也未做
+CN/LOH correction；InterSubMod 選填的 LOH BED 僅供 annotation／stratification，不能當作
+allele-specific CN、purity、multiplicity、CCF 或 cellular lineage inference。拷貝數整合狀態為
+`NOT_INTEGRATED`；
 LongLineage 的 7 個 technical datasets／6 個 biological IDs cohort 執行時間與記憶體上界**從未實測**，
 且其自身文件明文禁止由單一樣本外推。

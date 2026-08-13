@@ -46,7 +46,10 @@
 - LongPhase-TO：tumor-only candidate phasing、PON/LOH/HI context、tagged reads。
 - exact-PS／LongLineage：從exact PS×HP read assignments建local candidate mutation-state families／graph shapes／abstains。
 - InterSubMod：BAM+FASTA+VCF → per-region methylation、read distance、read clustering與statistics。
-- Python／HTML：呈現validated data；不重新計算或創造science。
+- Commit-pinned Python research solver／analysis script：可以是 science producer，但必須自帶
+  input、producer commit、command receipt、schema、scope 與 output hash。
+- Python validator／publication builder／HTML：只驗證與呈現 validated data；不得暗中重新計算、
+  改寫 denominator 或創造 science。不能用「Python」一詞把 producer 與 presenter 混成同一層。
 
 ## Git freeze
 
@@ -72,7 +75,9 @@
 ## 六問標準答案
 
 1. **專案是什麼？** Read-level sSNV linkage、local mutation-state candidate reconstruction與methylation association研究。
-2. **目前結論？** 有frozen technical/model evidence；沒有confirmed cellular clone或ancestry；methyl association-only；CN/LOH未整合。
+2. **目前結論？** 有frozen technical/model evidence；沒有confirmed cellular clone或ancestry；
+   methyl association-only；CN/LOH未整合進frozen candidate reconstruction，沒有CN/LOH-corrected
+   inference。InterSubMod optional LOH BED僅用於annotation／stratification。
 3. **哪些資料final？** 查artifact registry，不看資料夾名；只有AUTHORITY+FULL+FINAL_FOR_SCOPE+hash。
 4. **三套工具如何分工？** LongPhase上游tag/phasing；exact-PS/LongLineage candidate reconstruction；InterSubMod read-methylation/statistics。
 5. **bip7/bip8如何跑？** bootstrap profile→doctor→plan→clean build/test→synthetic smoke→real-data read-only preflight；每台host各自receipt。
