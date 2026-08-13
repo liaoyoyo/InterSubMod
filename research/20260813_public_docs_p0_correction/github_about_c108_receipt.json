@@ -1,0 +1,73 @@
+{
+  "schema_name": "intersubmod.github_about_claim_receipt",
+  "schema_version": "2.0.0",
+  "claim_id": "C108",
+  "repository": {
+    "id": 1101135409,
+    "node_id": "R_kgDOQaH-MQ",
+    "name_with_owner": "liaoyoyo/InterSubMod",
+    "html_url": "https://github.com/liaoyoyo/InterSubMod",
+    "visibility": "public",
+    "default_branch": "main"
+  },
+  "action": {
+    "api_route": "PATCH /repos/liaoyoyo/InterSubMod and PUT /repos/liaoyoyo/InterSubMod/topics",
+    "executed_at": "2026-08-13T06:43:02Z",
+    "verified_at": "2026-08-13T08:42:53Z",
+    "before_description": "InterSubMod - performs read-level integration of methylation profiles with haplotypes, somatic alleles, and tumor/normal labels, enabling somatic variant validation, subclone resolution, and single-molecule epigenomic clustering.",
+    "after_description": "ONT read-level somatic-mutation integration for local mutation-state candidate analysis and methylation association; research software.",
+    "removed_topics": [
+      "phylogeny",
+      "subclone"
+    ],
+    "verified_topics": [
+      "bioinformatics",
+      "clustering",
+      "dna",
+      "haplotype",
+      "long-reads",
+      "methylation",
+      "phasing",
+      "read-level",
+      "somatic-variants",
+      "tumor"
+    ]
+  },
+  "verification": {
+    "actor": {
+      "login": "liaoyoyo",
+      "id": 51171925,
+      "node_id": "MDQ6VXNlcjUxMTcxOTI1"
+    },
+    "refetched_at": "2026-08-13T08:42:53Z",
+    "commands": [
+      {
+        "command": "gh api -i repos/liaoyoyo/InterSubMod",
+        "exit_code": 0,
+        "http_status": 200,
+        "response_snapshot": "research/20260813_public_docs_p0_correction/github_about_evidence/repository_response.json",
+        "response_sha256": "b9bcf87f45ae19b32e632205647094bcc5ecbe05ee821925b140ede0b4a5249d"
+      },
+      {
+        "command": "gh api -i repos/liaoyoyo/InterSubMod/topics",
+        "exit_code": 0,
+        "http_status": 200,
+        "response_snapshot": "research/20260813_public_docs_p0_correction/github_about_evidence/topics_response.json",
+        "response_sha256": "8a9e066f1ac2a45e9939a7b5ee30a0d54314b88be6614a3796358689049e0fcb"
+      },
+      {
+        "command": "gh api -i user",
+        "exit_code": 0,
+        "http_status": 200,
+        "response_snapshot": "research/20260813_public_docs_p0_correction/github_about_evidence/actor_response.json",
+        "response_sha256": "1a13c9a74baae5bc295d7f276981c9971818c491c3a752e46d0aef9bd5390f4a"
+      }
+    ]
+  },
+  "evidence_status": "VALIDATED_DERIVED",
+  "scope": "FULL",
+  "finality": "FINAL_FOR_SCOPE",
+  "live_status": "CONFIRMED_WITH_LIMITS_AFTER_REFETCH",
+  "claim_ceiling": "The About surface describes local mutation-state candidate analysis and methylation association only; it does not claim confirmed cellular subclones, biological phylogeny, production readiness, or release readiness.",
+  "publication_effect": "C108 is closed on the GitHub About surface only. Default-branch, Wiki, Pages, and release gates remain BLOCKED."
+}

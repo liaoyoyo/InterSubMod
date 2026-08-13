@@ -2,15 +2,18 @@
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 > **部件分冊 · 第 13 頁 · LongLineage**
-> **LongLineage：契約很嚴、程式都在，但目前輸出 0 棵樹**
+> **LongLineage：PRIVATE research preview；frozen HCC1395 receipt 為 0 個 candidate topology units**
 >
-> 這是同一套科學想法的**工業化重寫版**。它的設計品質很高（每個輸出都有 schema 與 SHA-256 收據），但目前主線被鎖住，而且在真實資料上的拓撲產出是 **0**。本頁解釋**為什麼**是 0 —— 這不是 bug，理解原因比理解程式碼更重要。
+> 這是 **PRIVATE research-preview candidate**；source-origin、license 與 dependency audit 尚待完成，不能先宣稱 clean-room 或已適合公開。Immutable candidate 是 `b9aaa12`，狀態 `NOT_READY`／non-production；`P3/P4/P5/P7/P8` 仍 **BLOCKED**。本頁的「0」只指該 revision 的 frozen HCC1395 dataset-gate receipt，不外推其他資料或 run。
+
+> [!CAUTION]
+> Repository 目前為 **PRIVATE**；`b9aaa12` 是 public-preview candidate、不是已公開版本。Production `run` 刻意 fail-closed，尚無 production tag 或 GitHub Release。`5daf50f` 只作 private baseline/main capability snapshot。
 
 ---
 
 ## 一句話
 
-LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一條 read 上**」的證據表，再用**最少隱藏節點的超立方體**解出這些突變之間的譜系關係。
+LongLineage 把 ONT 資料算成「**哪些 candidate somatic variants 共同出現在同一條 read 上**」的證據表，再以最少隱藏節點的超立方體建立**局部、允許遞迴、model-conditional 的最小突變狀態候選拓撲**。同一 read 上的共現是分子層直接觀測；somatic acquisition、cellular clone／subclone 與 biological lineage 不是直接觀測，也未被此流程確認。
 
 **它與 InterSubMod 的根本差異**：ISM 輸出是 **per-region**（每個位點一包結果），LL 輸出是 **per-read**（每條 read 一列）；ISM 從 BAM 直接讀單倍型標籤，LL **明文禁止讀 BAM tag**，只認 sidecar 檔案。
 
@@ -23,14 +26,14 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 
 ---
 
-## 01 · 四個子命令，只有一個能出科學結果
+## 01 · 四個子命令：frozen HCC1395 receipt 中只有 dataset-gate 產生 research artifacts
 
-下表的狀態都是本輪**實跑取得 exit code** 或讀原始碼確認的。
+下表限定 private candidate `b9aaa12` 與具名 frozen HCC1395 receipt；狀態由該次 exit code 或對應 source inspection 取得，不外推其他 revision／dataset。
 
 | 子命令 | 狀態 | 實測依據 |
 |---|---|---|
 | `preflight` | ✅ 可跑 | 驗證 8 個角色的 manifest 完整性。 |
-| `dataset-gate` | ⚠️ 可跑但綁死 | **唯一能真的算出科學結果的入口**，已在真實 HCC1395 資料上完整跑完，產出 8 個 artifact。 |
+| `dataset-gate` | ⚠️ 可跑但綁死 | 在該 frozen HCC1395 receipt 中，唯一觀察到能產生 research artifacts 的介面；該次產出 8 個 artifact，不等於 production science validation。 |
 | `run` | 🔴 被鎖 | 回 `KernelBlocked`（exit 6）。實測 `message="release attestation is NOT_READY"`。 |
 | `probe` | 🔴 被鎖 | 同上。且其輸出依設計「永遠是 PARTIAL，不能成為驗證證據」。 |
 
@@ -39,9 +42,10 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 > **不行。** 就算通過 attestation 這道閘門，控制流走到函式最後一段，仍會對 `run` 與 `probe` **無條件**回傳 KernelBlocked。**正式入口與科學核心之間根本沒有接線。**
 
 > ℹ️ **但請注意這個關鍵區辨**
-> **「BLOCKED」指的是「對照驗證的證據不存在」，不是「程式碼沒寫」。**
-> M1／M2／topology 的計算核心**都已經實作完成**，而且被 `dataset-gate` 實際執行過。這是刻意的 fail-closed 設計 —— 在證明結果與參考實作一致之前，拒絕讓任何人拿它當正式結論。
-> （目前 4 條 blocker：M1 對照未驗證、M2 共現對照未驗證、拓撲對照未驗證、拓撲排序未驗證。）
+> `BLOCKED` 是 `release_attestation.json` 中的 P3/P4/P5，加上 phase ledger／public-safety receipt 中的 P7/P8 具名 gates尚未通過，涵蓋
+> parity／validation、source-origin、license、dependency 與 release-safety。部分 M1／M2／topology
+> kernels 曾由具名 `dataset-gate` 執行，但不等於全部核心路徑、production entry、
+> 生物驗證或公開 redistribution 資格已完成。整體仍是 `NOT_READY`／non-production。
 
 ### 周邊工具的真實狀態
 
@@ -49,15 +53,17 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 
 🔴 另外 `longlineage-query` 只接受狀態為 `VALIDATED_FROZEN` 的 run，但 HCC1395 那個 run 的狀態是 `VALIDATED_FROZEN_DATASET_GATE` —— 實測回 exit 8 拒絕。**要讀資料目前只能自己 zcat。**
 
+⚠️ tagged-BAM 能力有明確版本邊界：private baseline/main snapshot **`5daf50f`** 沒有 writer；private public-preview candidate **`b9aaa12`** 已含 `longlineage-tag-bam`，但仍是 `NOT_READY`／non-production。因此不可把 candidate 能力視為已公開或 production 主線能力。
+
 ---
 
 ## 02 · 為什麼輸出是 0？—— 甲基化是總開關，不是輔助
 
 這是本頁最重要的一節。答案不在程式效能或資料量，而在**科學設計的一個前提**。
 
-![longlineage-funnel](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/longlineage-funnel.png)
+![longlineage-funnel](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/ddd8909a838318d8a77969313e9561c8ff9d01c2/docs/images/longlineage-funnel.png)
 
-> **圖 1 · HCC1395 全 autosome 唯一一次完整跑：79,687 個位點如何流失到 0**
+> **圖 1 · candidate `b9aaa12` 的 frozen HCC1395 dataset-gate receipt：79,687 個位點如何流失到 0 candidate units**
 >
 > **數字已驗算**：5 + 31 + 12,815 = 12,851，與 M1 穩定位點數完全相符。
 >
@@ -85,7 +91,7 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 
 這也正是它與 InterSubMod「甲基化絕不進重建」立場衝突的地方（見系統全景頁 §2）。
 
-> 🔴 **「LongLineage 能算出樹」目前沒有 run 層級的實證**
+> 🔴 **Candidate `b9aaa12` 尚無非空 candidate topology 的 run-level evidence**
 > 現存三個完整科學 run 的拓撲輸出檔**都是 28 bytes**（僅檔案結尾標記，零筆資料）。如果直接拿 LL 當「已經算出亞群樹」的證據，會落空。
 > 真正跑出區域樹的是另一條 descriptive-only 的相容路徑，但該路徑的規格文件明文禁止它宣稱 clone／祖先／時序／正式拓撲發現。
 
@@ -153,7 +159,7 @@ ONT 是單端資料通常沒差別，但如果你想拿 `read_id` 回去 BAM 對
 ## 誠實標註
 
 - 本頁所有 funnel 數字**僅來自 HCC1395 這一個樣本**。LongLineage 的文件**明文禁止由單樣本外推**到其他樣本。
-- 7 樣本的總執行時間與記憶體上界**無任何實測證據**；最大樣本（BAM 為 HCC1395 的 1.62 倍）完全沒有跑過。
+- 7 technical datasets／6 biological IDs cohort 的總執行時間與記憶體上界**無任何實測證據**；最大 technical dataset（BAM 為 HCC1395 的 1.62 倍）完全沒有跑過。
 - 本輪在磁碟上**找不到部分 artifact 的實體檔案**（以搜尋確認），相關列數取自 run 的摘要檔而非直接讀檔。
 
 ---

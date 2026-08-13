@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).parents[1]
@@ -46,7 +47,23 @@ class HandoffPackageValidationTest(unittest.TestCase):
         self.assertEqual(by_id["run_registry"]["details"]["physical_runs"], 51)
         self.assertEqual(by_id["artifact_registry"]["details"]["artifacts"], 36)
         self.assertEqual(by_id["artifact_registry"]["details"]["final_for_scope"], 20)
+        self.assertEqual(
+            by_id["artifact_registry"]["details"]["final_with_producer_commit_inputs_and_typed_replay_semantics"],
+            20,
+        )
         self.assertEqual(by_id["artifact_registry"]["details"]["tagged_bam_partial_non_final"], 14)
+        self.assertEqual(
+            by_id["artifact_registry"]["details"]["paired_full_sampled_identity"],
+            {
+                "objects": 7,
+                "bytes": 1_840_983_466_353,
+                "identity_set_sha256": "ce6c63d42e3f334d6847a1a6d3e46ead165b59a03197acb098319be5c67fcf90",
+                "replay_match": 7,
+                "full_file_sha256": "NOT_COMPUTED",
+                "evidence_status": "PARTIAL",
+                "finality": "NON_FINAL",
+            },
+        )
         self.assertEqual(by_id["claim_registries"]["details"]["claims"], 158)
         self.assertEqual(by_id["authority_replay"]["details"]["match"], 19)
 
@@ -73,6 +90,46 @@ class HandoffPackageValidationTest(unittest.TestCase):
             evidence = package / "evidence/denominator_registry.tsv"
             evidence.write_text(evidence.read_text(encoding="utf-8") + "\nmutation\n", encoding="utf-8")
             receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+
+    def test_evidence_manifest_rejects_ad_hoc_enum_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            row = next(
+                item
+                for item in manifest["records"]
+                if item["evidence_id"] == "tagged_bam_sampled_identity_replay_20260813"
+            )
+            row["evidence_status"] = "VALIDATED_DERIVED_PARTIAL"
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+
+    def test_public_claim_evidence_size_mismatch_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            row = next(item for item in manifest["records"] if item["evidence_id"] == "full_claim_registry_20260813")
+            row["size_bytes"] += 1
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+
+    def test_exact_copy_source_drift_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            fake_repo = package.parents[3]
+            manifest = json.loads((package / "evidence/EVIDENCE_MANIFEST.json").read_text(encoding="utf-8"))
+            row = next(item for item in manifest["records"] if item["evidence_id"] == "full_claim_registry_20260813")
+            relative = row["source_path"].removeprefix("InterSubMod/")
+            source = fake_repo / relative
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_bytes((package / row["path"]).read_bytes() + b"\n")
+            with mock.patch.object(MODULE, "repository_root", return_value=fake_repo):
+                receipt = MODULE.validate_package(package)
             self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
 
     def test_summary_source_hash_mismatch_fails_closed(self):
@@ -104,6 +161,17 @@ class HandoffPackageValidationTest(unittest.TestCase):
             receipt = MODULE.validate_package(package)
             self.assertEqual(self.failed_check(receipt, "artifact_registry")["status"], "FAIL")
 
+    def test_final_artifact_without_typed_replay_semantics_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            path = package / "registries/artifact_registry.json"
+            registry = json.loads(path.read_text(encoding="utf-8"))
+            final = next(row for row in registry if row["finality"] == "FINAL_FOR_SCOPE")
+            final["regeneration_command"] = None
+            path.write_text(json.dumps(registry), encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "artifact_registry")["status"], "FAIL")
+
     def test_tagged_bam_promoted_to_final_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             package = self.copy_package(directory)
@@ -115,6 +183,35 @@ class HandoffPackageValidationTest(unittest.TestCase):
             receipt = MODULE.validate_package(package)
             self.assertEqual(self.failed_check(receipt, "artifact_registry")["status"], "FAIL")
 
+    def test_tagged_bam_sampled_replay_mismatch_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            replay_path = package / "evidence/tagged_bam_sampled_identity_replay_20260813.json"
+            replay = json.loads(replay_path.read_text(encoding="utf-8"))
+            replay["all_match"] = False
+            replay["comparisons"][0]["match"] = False
+            replay["comparisons"][0]["differing_fields"] = ["sampled_chunk_sha256"]
+            replay_path.write_text(json.dumps(replay, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            # Keep the outer evidence hash/size binding coherent so this test
+            # proves that the semantic artifact contract independently fails.
+            import hashlib
+
+            payload = replay_path.read_bytes()
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            row = next(
+                item
+                for item in manifest["records"]
+                if item["evidence_id"] == "tagged_bam_sampled_identity_replay_20260813"
+            )
+            row["sha256"] = hashlib.sha256(payload).hexdigest()
+            row["size_bytes"] = len(payload)
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "PASS")
+            self.assertEqual(self.failed_check(receipt, "artifact_registry")["status"], "FAIL")
+
     def test_claim_pointer_hash_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             package = self.copy_package(directory)
@@ -123,6 +220,39 @@ class HandoffPackageValidationTest(unittest.TestCase):
             pointer["records_sha256"] = "0" * 64
             path.write_text(json.dumps(pointer), encoding="utf-8")
             receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "claim_registries")["status"], "FAIL")
+
+    def test_stale_validation_receipt_registry_binding_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            receipt_path = package / "evidence/public_claim_validation_receipt.json"
+            validation = json.loads(receipt_path.read_text(encoding="utf-8"))
+            validation["claim_registry_contract"]["registry_sha256"] = "0" * 64
+            receipt_path.write_text(json.dumps(validation, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            # Keep the outer manifest self-consistent so this mutation proves
+            # that the internal freshness contract independently fails closed.
+            import hashlib
+
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            row = next(
+                item
+                for item in manifest["records"]
+                if item["evidence_id"] == "public_claim_validation_20260813"
+            )
+            payload = receipt_path.read_bytes()
+            row["sha256"] = hashlib.sha256(payload).hexdigest()
+            row["size_bytes"] = len(payload)
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            with mock.patch.object(
+                MODULE,
+                "declared_source_path",
+                return_value=(None, "NON_FILE_SOURCE_DESCRIPTION"),
+            ):
+                receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "PASS")
             self.assertEqual(self.failed_check(receipt, "claim_registries")["status"], "FAIL")
 
     def test_unregistered_site_profile_alias_fails_closed(self):

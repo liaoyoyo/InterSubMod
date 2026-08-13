@@ -25,7 +25,12 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 
-VERIFY_TIME = "2026-08-13T11:21:47+08:00"
+# A live inventory must not inherit an earlier run's verification timestamp.
+# Set INTERSUBMOD_HANDOFF_VERIFIED_AT only when replaying a declared snapshot.
+VERIFY_TIME = os.environ.get(
+    "INTERSUBMOD_HANDOFF_VERIFIED_AT",
+    datetime.now().astimezone().isoformat(timespec="seconds"),
+)
 AUTHORITY_CREATED = "2026-08-01T00:00:00+08:00"
 GENOME_BUILD = "GRCh38"
 EXPECTED_TAGGED_BAM_BYTES = 3_709_322_840_333
@@ -42,6 +47,12 @@ EVIDENCE_ENUM = {"AUTHORITY", "VALIDATED_DERIVED", "PARTIAL", "HISTORICAL", "INV
 SCOPE_ENUM = {"FULL", "PARTIAL", "DEMO"}
 FINALITY_ENUM = {"FINAL_FOR_SCOPE", "NON_FINAL", "SUPERSEDED"}
 AVAILABILITY_ENUM = {"GIT", "GITHUB_RELEASE", "LOCAL_CANONICAL", "EXTERNAL_SOURCE", "MISSING"}
+REGENERATION_SEMANTIC_PREFIXES = ("REPLAY_ONLY:", "VERIFY_ONLY:", "NOT_REGENERABLE_FROM_HANDOFF:")
+AUTHORITY_REPLAY_COMMAND = (
+    "REPLAY_ONLY: python3 scripts/handoff/replay_authority.py "
+    "--manifest docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/authority_manifest.json "
+    "--output-json <NEW_RECEIPT_PATH>; verifies frozen bytes only and does not rerun science"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -350,6 +361,7 @@ def build_artifacts(
                 license="GPL-3.0-or-later for repository content; upstream dataset license tracked separately",
                 claim_ceiling=item["claim_boundary"],
                 known_limits=list(manifest["known_limitations"]),
+                regeneration_command=AUTHORITY_REPLAY_COMMAND,
                 machine_locations=machine_location(path, "PRESENT" if path.exists() else "MISSING"),
             )
         )
@@ -384,6 +396,7 @@ def build_artifacts(
                 "2026-08-13 append-only adjudication proves 5/5 solver modules byte-identical to LongLineage b979760.",
                 "source_snapshot_4 is a later LongLineage worktree byte snapshot and is explicitly rejected as binary source truth.",
             ],
+            regeneration_command=AUTHORITY_REPLAY_COMMAND,
             machine_locations=machine_location(binary_path, "PRESENT" if binary_path.exists() else "MISSING"),
         )
     )
@@ -393,6 +406,13 @@ def build_artifacts(
         3: ("Partition preparation script; not a compiled binary input", []),
         4: ("Later LongLineage worktree snapshot rejected as frozen-binary source truth", []),
         5: ("LongLineage parent_mapping module compiled into the frozen binary", ["authority.frozen_binary"]),
+    }
+    source_content_commits = {
+        1: "UNCOMMITTED_AT_20260801; exact bytes later committed as 886fb5e648978f80b5d435360ce1c16432fa6843",
+        2: "UNCOMMITTED_AT_20260801; exact bytes later committed as 6583ae1382befd20ff4a4c4ff076cb17020537de",
+        3: "UNCOMMITTED_AT_20260801; exact bytes later committed as 23aef3f5527bd2dd9b4b05712414b68f8183baea",
+        4: "UNCOMMITTED_AT_20260801; exact bytes later committed as 9ad976b10eb51589a043b55ccc52b6232df9fa3a",
+        5: "b9797605cdc859e571c1961c1b4343c40d7c7183",
     }
     for index, source in enumerate(implementation["source_snapshots"], start=1):
         path = Path(source["path"])
@@ -404,8 +424,9 @@ def build_artifacts(
                 artifact_type="registered_source_byte_snapshot",
                 semantic_description=f"Immutable 2026-08-01 registered source snapshot {index}: {semantic_role}",
                 producer="2026-08-01 handoff inventory",
-                producer_commit=None,
+                producer_commit=source_content_commits[index],
                 schema_version="source-snapshot-v1",
+                inputs=["authority_manifest_20260801", f"registered filesystem source object: {path}"],
                 derived_from=["authority_manifest_20260801"],
                 used_by=consumers,
                 filesystem_mtime=iso_from_stat(path) if path.exists() else None,
@@ -429,6 +450,10 @@ def build_artifacts(
                     ]
                     if rejected
                     else ["Current mtimes and Git HEAD are not substitutes for the frozen SHA-256."]
+                ),
+                regeneration_command=(
+                    "VERIFY_ONLY: use python3 scripts/handoff/replay_authority.py with the package authority manifest; "
+                    "this immutable source snapshot is not regenerated"
                 ),
                 machine_locations=machine_location(path, "PRESENT" if path.exists() else "MISSING"),
             )
@@ -502,6 +527,10 @@ def build_artifacts(
                 license="GPL-3.0-or-later",
                 claim_ceiling="Corrects source identity only; does not alter frozen scientific outputs or make LongLineage production-ready.",
                 known_limits=["Append-only correction; the 2026-08-01 authority manifest remains immutable."],
+                regeneration_command=(
+                    "VERIFY_ONLY: validate docs/provenance/20260813_frozen_binary_bundle_receipt.json and "
+                    "docs/provenance/20260813_frozen_binary_source_adjudication_01.md; no science rerun"
+                ),
                 machine_locations=machine_location(repository_root / "docs/provenance/20260813_frozen_binary_source_adjudication_01.md"),
             ),
             artifact_row(
@@ -837,8 +866,14 @@ def validate_registries(
             errors.append(f"artifact enum violation: {row['artifact_id']}")
         if row["finality"] not in FINALITY_ENUM or row["availability"] not in AVAILABILITY_ENUM:
             errors.append(f"artifact enum violation: {row['artifact_id']}")
-        if row["finality"] == "FINAL_FOR_SCOPE" and (not row["sha256"] or not row["producer"]):
-            errors.append(f"final artifact lacks hash or producer: {row['artifact_id']}")
+        if row["finality"] == "FINAL_FOR_SCOPE":
+            if not row["sha256"] or not row["producer"]:
+                errors.append(f"final artifact lacks hash or producer: {row['artifact_id']}")
+            if not row["producer_commit"] or not row["inputs"]:
+                errors.append(f"final artifact lacks producer_commit or input provenance: {row['artifact_id']}")
+            command = row["regeneration_command"]
+            if not isinstance(command, str) or not command.startswith(REGENERATION_SEMANTIC_PREFIXES):
+                errors.append(f"final artifact lacks typed replay/regeneration semantics: {row['artifact_id']}")
 
     source4 = next(row for row in artifacts if row["artifact_id"] == "authority.source_snapshot_4")
     frozen = next(row for row in artifacts if row["artifact_id"] == "authority.frozen_binary")

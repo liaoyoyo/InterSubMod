@@ -2,100 +2,142 @@
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 > **從零到跑出第一個結果**
-> 本頁每一條指令都在 **2026-08-06 實際執行過**，並附上真實輸出。
-> 照順序做，約 **10 分鐘**可以從編譯到看見第一個分析結果。
+> 編譯、測試與 tracked tiny synthetic DEMO 可由 public clone 執行；真正的 `inter_sub_mod` 分析另需使用者合法取得的 BAM、FASTA 與 VCF。
+> 下方 HCC1395 輸出是 **2026-08-06 內部資料收據**，不是 public-clone 的 runtime 承諾。
+
+> **公開可重現性邊界**：Git 物件已追蹤 `tests/fixtures/tiny_public/` 的 synthetic FASTA／VCF／SAM source 與 schema，runner 會在暫存目錄建立 BAM/index。Git 不含 HCC1395 tumor BAM、hg38 FASTA 或 real-data VCF；tiny PASS 只證明軟體接線，不是生物驗證。
 
 ---
 
 ## ⚠️ 開始之前：先確認機器狀態
 
-這台機器有 **48 核**，但 `/big7_disk` **只剩約 617 GB（99% 已用）**。
-跑全基因組分析前務必先確認餘量，大型輸出很容易把磁碟寫爆。
+執行時間與容量依硬體、mount 與輸入而異。跑分析前請執行 site doctor，並在自己的
+`$DATA_ROOT`／輸出 mount 檢查可用容量、索引與 tool hash；本頁不承諾固定 runtime。
 
 ---
 
-## 步驟 1 · 編譯 C++（約 2–5 分鐘）
+## 步驟 1 · 編譯 C++（runtime 依環境而異）
 
-🔴 **一定要先做這步。** 現有的執行檔是 STALE 的 —— 有 5 個原始碼檔比它新。
+🔴 **一定要先做這步。** Git 不發布受版控的 build output。請從 release manifest 複製 immutable commit SHA，detached checkout 後在 repo 外的新目錄 clean build；不要沿用 clone 內的舊 `build/`。
 
 ```bash
-cd /big7_disk/liaoyoyo2001/InterSubMod
+git clone https://github.com/liaoyoyo/InterSubMod.git
+cd InterSubMod
+HANDOFF_COMMIT="<IMMUTABLE_HANDOFF_COMMIT_SHA>"
+git checkout --detach "$HANDOFF_COMMIT"
+test "$(git rev-parse HEAD)" = "$HANDOFF_COMMIT"
+test -z "$(git status --porcelain)"
 
-# 設定並編譯（Release 模式）
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
+# repo 外的全新 Release build；build output 不進版本控制
+REPO_ROOT="$(pwd -P)"
+BUILD_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/ism-build.XXXXXXXX")"
+cmake -S "$REPO_ROOT" -B "$BUILD_ROOT" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$BUILD_ROOT" -j$(nproc)
+test -z "$(git -C "$REPO_ROOT" status --porcelain)"
 ```
 
-**編譯完成後應該有 6 個執行檔**：
+**執行檔數量與名稱是 commit-specific**，由該次 clean-build receipt 動態保存；本流程只固定檢查兩個必要入口：
 
-```text
-$ ls build/bin/
-exact_ps_partition   inter_sub_mod   run_tests
-test_phase1_2        test_phase3     test_phase4_5
+```bash
+find "$BUILD_ROOT/bin" -maxdepth 1 -type f -perm -u+x -printf '%f\n' | sort
+test -x "$BUILD_ROOT/bin/inter_sub_mod"
+test -x "$BUILD_ROOT/bin/run_tests"
 ```
 
 ---
 
-## 步驟 2 · 確認編譯結果是好的（約 2 秒）
+## 步驟 2 · 確認編譯結果是好的（不宣稱固定 runtime）
 
 ```bash
-./build/bin/run_tests
+"$BUILD_ROOT/bin/run_tests"
+ctest --test-dir "$BUILD_ROOT" --output-on-failure
 ```
 
 **本輪實跑的真實輸出**：
 
 ```text
-[==========] 265 tests from 38 test suites ran. (2062 ms total)
-[  PASSED  ] 265 tests.
+[==========] <N> tests from <S> test suites ran.
+[  PASSED  ] <N> tests.
 
 $ echo $?
 0
 ```
 
-✅ **265 / 265 通過** — 如果這裡有任何失敗，**先不要往下走** —— 後面跑出來的數字都不可信。
+✅ **以當次輸出動態取得 N／S，且 N/N 通過、0 failure** — 如果這裡有任何失敗，**先不要往下走** —— 後面跑出來的數字都不可信。
 
 ---
 
 ## 步驟 3 · 準備 Python 環境
 
 ```bash
-# 安裝依賴（清單於 2026-08-05 依實測環境補齊）
-pip install -r requirements.txt
+# 建立與 hosted acceptance 相同的 hash-locked Python 3.10 環境
+PYTHON_ENV="$(mktemp -d "${TMPDIR:-/tmp}/ism-python.XXXXXXXX")/venv"
+python3.10 -m venv "$PYTHON_ENV"
+"$PYTHON_ENV/bin/python" -m pip install --require-hashes \
+  --requirement "$REPO_ROOT/requirements-ci.lock"
+export PATH="$PYTHON_ENV/bin:$PATH"
 ```
 
-### 🔴 這裡有一個一定會踩到的坑
+### 🔴 Python 版本是 hard requirement
 
-這台機器上有**兩個 Python**：
+Public acceptance workflow 與 hash-locked CI 使用 **Python 3.10**：
 
 | 指令 | 版本 | 用途 |
 |---|---|---|
-| `python3` | 3.9.12 | 預設，大部分腳本可用 |
-| `/usr/bin/python3.10` | 3.10.12 | **嚴格區域切割相關腳本必須用這個** |
+| `python3.10` | 3.10 | site tooling、portable workflow、fixture validation 與嚴格區域切割 |
 
-用錯版本時，程式會在 import 階段就崩，**而且錯誤訊息指向 dataclass 而不是版本** —— 看起來像程式壞了，其實只是 Python 版本不對。
+先跑 `python3.10 --version`；缺少 3.10 應 fail closed，不把 import/dataclass 錯誤誤判成研究程式缺陷。
+一般研究繪圖可另依 `requirements.txt` 建環境，但那不是 handoff acceptance receipt 的環境。
 
 ---
 
-## 步驟 4 · 跑出第一個分析結果（約 3 秒）
+## 步驟 4 · Public tiny synthetic E2E（DEMO）
 
-先用單一個突變位點試跑，確認整條路徑通暢。
+public repo 追蹤 synthetic FASTA／VCF／SAM source；runner在新的暫存目錄建立BAM/index，
+完成 build→run→schema validation：
 
 ```bash
-# 準備一個只含單一突變的小 VCF
-SP=/tmp/ism_demo && mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
-grep '^#' $V > $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V >> $SP/one_snv.vcf
-
-# 跑（只給三個必填參數）
-./build/bin/inter_sub_mod \
-  --tumor-bam  data/bam/HCC1395/tumor.bam \
-  --reference  data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min
+"$REPO_ROOT/scripts/handoff/run_tiny_public_e2e.sh" --repo-root "$REPO_ROOT" --jobs 4
 ```
 
-**實跑輸出**（約 2.9 秒）：
+驗收輸出含 `TINY_E2E_RESULT`、`"all_pass": true` 與
+`"tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage"`。這是醒目 **DEMO**：
+只驗軟體接線，不是生物資料、benchmark或science validation，不寫入science ledger。
+
+### 進階：自備／內部真實資料（internal-data example）
+
+下列三個輸入必須由使用者自行提供並確認授權。執行時間取決於硬體與資料；
+HCC1395 內部具名 fixture 只保存結果 receipt，不提供一般 runtime promise。
+
+```bash
+# 將 placeholder 換成本機 profile；絕對路徑只維護於 untracked machine profile／registry
+SITE_PROFILE="<SITE_PROFILE>"
+"$REPO_ROOT/scripts/site/doctor" --profile "$SITE_PROFILE" --mode real-preflight
+eval "$("$REPO_ROOT/scripts/site/site_profile.py" shell \
+  --profile "$SITE_PROFILE" --sample HCC1395)"
+ISM_DEMO_DIR="${TMPDIR:-/tmp}/ism_demo"
+mkdir -p "$ISM_DEMO_DIR"
+
+# shell contract 由 profile 提供 TUMOR_BAM、REFERENCE、SOMATIC_VCF
+test -r "$TUMOR_BAM"
+test -r "$REFERENCE" && test -r "${REFERENCE}.fai"
+test -r "$SOMATIC_VCF"
+samtools quickcheck "$TUMOR_BAM"
+
+# 取輸入 VCF 的第一筆 biallelic SNV 作小型 smoke test
+bcftools view -h "$SOMATIC_VCF" > "$ISM_DEMO_DIR/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$SOMATIC_VCF" | head -n 1 >> "$ISM_DEMO_DIR/one_snv.vcf"
+test "$(bcftools view -H "$ISM_DEMO_DIR/one_snv.vcf" | wc -l)" -eq 1
+
+# 跑（只給三個必填參數）
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$TUMOR_BAM" \
+  --reference  "$REFERENCE" \
+  --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
+  --output-dir "$ISM_DEMO_DIR/out_min"
+```
+
+**內部 HCC1395 收據的實跑輸出**（不是任意輸入的 runtime／數值預期）：
 
 ```text
 Total regions: 1 / Successful: 1 / Failed: 0
@@ -117,7 +159,7 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127
 ## 步驟 5 · 看結果
 
 ```bash
-find $SP/out_min -type f | head -20
+find "$ISM_DEMO_DIR/out_min" -type f | head -20
 ```
 
 輸出分兩層。**先看這三個檔**：
@@ -136,40 +178,40 @@ find $SP/out_min -type f | head -20
 
 ---
 
-## 步驟 6 · 驗證整套流程的數字（推薦）
+## 步驟 6 · 驗證 historical 35,332-site pipeline 數字（推薦）
 
 ```bash
 cd docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
 python3 verify_pipeline_numbers.py
 ```
 
-這支會把方法文件裡的每個數字**重新算一次**並比對。實跑輸出：
+這支只重算 2026-06-27 教材所用的 **historical 35,332-site pipeline** 指標並比對；它不驗證 2026-07-24 exact-PS、LongLineage、儲存量、code count 或目前 test count。實跑輸出：
 
 ```text
 sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 共現連上 21,554 · 訊號不足 5,458 · 孤立 8,320        （加總 = 35,332 ✓）
 ```
 
-對得上，代表你的環境能重現既有結果。
+對得上，只代表 tracked historical data 能重現上述 35,332-site 指標。exact-PS 應另查 `docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv`、`authority_manifest.json` 與 solver receipts；LongLineage 則須在指定 commit 分別執行其 gates／binary inventory。
 
 ---
 
 ## 07 · 全流程速查
 
-![howto-six-steps](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/howto-six-steps.png)
+![howto-six-steps](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/ddd8909a838318d8a77969313e9561c8ff9d01c2/docs/images/howto-six-steps.png)
 
-> **圖 1 · 六個步驟與各自的驗收點** —— 六個步驟依序為：編譯、跑測試、裝 Python 依賴、單點試跑、檢視輸出、驗證數字；每步都標註對應的驗收條件，例如測試須 265 個全過、單點試跑須在三秒內完成且產出 region 目錄。
+> **圖 1 · 六個步驟與各自的驗收點** —— 六個步驟依序為：編譯、跑測試、裝 Python 依賴、tiny synthetic DEMO、檢視輸出、驗證歷史數字；測試數須由該 commit 的 CTest/run_tests 動態輸出，驗收為 0 failure。Tiny fixture 是 public fresh-clone smoke，不是 real-data science。
 
 ### 每一步的驗收條件（不過就停下來，別往下走）
 
 | 步驟 | 驗收條件 |
 |---|---|
-| 1 編譯 | `build/bin/` 下出現 6 個執行檔 |
-| 2 測試 | **265 tests 全過、退出碼 0** |
+| 1 編譯 | immutable commit clean checkout；repo 外 build 完成；receipt 動態保存 executable inventory |
+| 2 測試 | **動態取得 test/suite count；0 failure、退出碼 0** |
 | 3 依賴 | `import pysam` 不報錯 |
-| 4 試跑 | 印出 `Successful: 1 / Failed: 0` |
+| 4 試跑 | `TINY_E2E_RESULT` 含 `"all_pass": true`，且 receipt 標 `scope=DEMO` |
 | 5 輸出 | region 目錄下有 methylation 與 distance |
-| 6 驗證 | 各層加總打勾，數字對得上 |
+| 6 驗證 | historical 35,332-site 指標加總打勾；不代表其他 claim family 已驗證 |
 
 🔴 任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。
 
@@ -180,11 +222,11 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 | 症狀 | 原因與解法 |
 |---|---|
 | 程式直接停，說找不到參考基因組 | 參考 FASTA **缺 `.fai` 索引是硬性錯誤**。跑 `samtools faidx` 建索引。 |
-| Python 腳本 import 就崩，錯誤指向 dataclass | **Python 版本問題**，不是程式壞了。改用 `/usr/bin/python3.10`。 |
+| Python 腳本 import 就崩，錯誤指向 dataclass | 先確認 **Python ≥ 3.10**；低版本不是受支援環境。 |
 | CI 判定 `--help` 失敗 | `--help` 的**退出碼是 1 不是 0**（與參數錯誤共用同一路徑）。改寫檢查方式。 |
 | 某支腳本跑了但什麼都沒發生 | 可能是**函式庫不是入口**（如 `ism_heatmap_std.py`）。看它有沒有 argparse。 |
 | 讀 CSV 後整列變成一欄 | `linkage_matrix.csv` **實際是 tab 分隔**。加 `sep='\t'`。 |
-| 跨 run 比較時欄位對不上 | `significance_summary.csv` **欄數隨版本變動且無版本欄位**。一律**用欄名**取值。 |
+| 跨 run 比較時欄位對不上 | `significance_summary.csv` 欄數隨版本變動。Frozen release baseline `ddd8909a` 的 source header 為 199 欄，含 `VerificationSchemaVersion=2` 與 `RegionStratificationSchemaVersion=1` 兩個 component-level 欄，但仍無 single whole-file layout version；一律**用欄名並檢查 schema 欄**。歷史 `73afaeac-dirty` audit 不是 release source。 |
 | 工作站 HTML 開很久／瀏覽器很卡 | 單檔可達 188 MB。示範時先開最小的那個（約 14.6 MB）。 |
 | LongLineage 說 KernelBlocked | 🔴 **這是預期行為不是故障**。正式入口刻意 fail-closed，見 [LongLineage 分冊](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine)。 |
 
@@ -192,14 +234,15 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 
 ## 本頁的驗證方式
 
-- **測試套件**：2026-08-06 實跑 `./build/bin/run_tests` → **265 tests / 38 suites 全過，2062 ms，退出碼 0**。（比 08-05 記錄的 258/37 有增加，本頁採用實測的當前值。）
-- **單點試跑**：實際執行並記錄真實輸出，約 2.9 秒、退出碼 0。
-- **環境數字**：48 核、磁碟餘量 617 GB、兩個 Python 版本，皆為本輪實測。
-- **6 個執行檔**：實際 `ls build/bin/` 所得。
+- **測試套件**：執行 `"$BUILD_ROOT/bin/run_tests"` 與 `ctest --test-dir "$BUILD_ROOT" --output-on-failure`；test/suite count 由本次輸出與 release receipt 動態產生，不在文件手抄固定數字。驗收為退出碼 0、0 failure。
+- **Public synthetic smoke**：由 fresh clone 執行 tracked fixture，保存 exit code、schema 與 checksum receipt；scope 固定為 DEMO。
+- **內部單點 receipt**：具名 HCC1395 inputs 的歷史輸出與退出碼 0；不作 runtime 或 public reproduction claim。
+- **環境條件**：由 site doctor 在每次驗收動態記錄，不把舊機器 CPU、容量或 Python 狀態抄成讀者預期。
+- **執行檔 inventory**：數量／名稱依 immutable commit 決定，由 clean-build receipt 動態列出；不把歷史「6 個」當成 current contract。
 
 ## ⚠️ 誠實標註
 
-- 本頁的編譯指令**未在本輪從零重跑**（現有 build 目錄已存在）；該流程於 2026-08-05 曾以全新目錄驗證通過。
+- 2026-08-05 的全新目錄 build 是**具名歷史 receipt**；handoff acceptance 仍須對 release manifest 指定 commit 另做 repo 外 clean build，舊 build 不可代替。
 - **全基因組全量跑法未實跑** —— 屬長時間計算，且需先確認磁碟餘量。
 
 ---

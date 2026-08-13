@@ -69,6 +69,16 @@ class HandoffRegistryTest(unittest.TestCase):
         self.assertEqual(machine_by_id["legacy.bip8_output"]["observation_status"], "NFS_VISIBLE_NOT_HOST_VERIFIED")
 
         artifacts_by_id = {row["artifact_id"]: row for row in artifacts}
+        final = [row for row in artifacts if row["finality"] == "FINAL_FOR_SCOPE"]
+        self.assertEqual(len(final), 20)
+        self.assertTrue(all(row["producer_commit"] for row in final))
+        self.assertTrue(all(row["inputs"] for row in final))
+        self.assertTrue(
+            all(
+                row["regeneration_command"].startswith(MODULE.REGENERATION_SEMANTIC_PREFIXES)
+                for row in final
+            )
+        )
         source4 = artifacts_by_id["authority.source_snapshot_4"]
         frozen = artifacts_by_id["authority.frozen_binary"]
         self.assertEqual(source4["used_by"], [])
@@ -151,6 +161,54 @@ class HandoffRegistryTest(unittest.TestCase):
         )
         errors = MODULE.validate_registries(datasets, run_registry, [artifact, source4, frozen], machine, storage, crosswalk)
         self.assertTrue(any("lacks hash" in error for error in errors))
+
+    def test_final_artifact_without_typed_replay_semantics_fails(self):
+        artifact = MODULE.artifact_row(
+            artifact_id="bad.final.provenance",
+            artifact_type="fixture",
+            semantic_description="fixture",
+            producer="test",
+            producer_commit="0" * 40,
+            inputs=["fixture input"],
+            claim_ceiling="fixture",
+            finality="FINAL_FOR_SCOPE",
+            sha256="0" * 64,
+            regeneration_command=None,
+        )
+        datasets = [
+            {"technical_dataset_id": name, "biological_id": "HCC1395" if name == "HCC1395_DORADO" else name}
+            for name in MODULE.TECHNICAL_TO_BIOLOGICAL
+        ]
+        run_registry = {
+            "reconciliation": {
+                "manifest_file_lines": 19, "logical_manifest_rows": 18, "physical_directories_total": 51,
+                "current_physical_directories": 35, "pending_archive_physical_directories": 16,
+                "logical_rows_merged_current": 9, "logical_rows_merged_pending_archive": 9,
+                "current_physical_unregistered": 26, "pending_archive_extras": 7,
+            },
+            "records": [{"physical_run_id": f"p{i}", "logical_manifest_member": i < 18} for i in range(51)],
+        }
+        source4 = MODULE.artifact_row(
+            artifact_id="authority.source_snapshot_4", artifact_type="source_snapshot",
+            semantic_description="fixture", producer="test", producer_commit="1" * 40,
+            inputs=["fixture"], claim_ceiling="fixture", finality="FINAL_FOR_SCOPE",
+            sha256="1" * 64, regeneration_command="VERIFY_ONLY: fixture",
+        )
+        frozen = MODULE.artifact_row(
+            artifact_id="authority.frozen_binary", artifact_type="binary",
+            semantic_description="fixture", producer="test", producer_commit="2" * 40,
+            inputs=["fixture"], claim_ceiling="fixture", finality="FINAL_FOR_SCOPE",
+            sha256="2" * 64, regeneration_command="REPLAY_ONLY: fixture",
+        )
+        errors = MODULE.validate_registries(
+            datasets,
+            run_registry,
+            [artifact, source4, frozen],
+            {"records": [{"path_id": "legacy.runbook", "observation_status": "MISSING"}]},
+            {"records": []},
+            {"crosswalks": []},
+        )
+        self.assertTrue(any("typed replay/regeneration" in error for error in errors))
 
     def test_source_snapshot_4_cannot_feed_frozen_binary(self):
         source4 = MODULE.artifact_row(

@@ -2,6 +2,8 @@
 
 **[🏠 Home](https://github.com/liaoyoyo/InterSubMod/wiki)**
 
+<sub>Local mutation-state candidate reconstruction from single-molecule sSNV co-occurrence</sub>
+
 ---
 
 **系統**
@@ -11,8 +13,8 @@
 **部件**
 
 - [⚙️ InterSubMod Engine<br><sub>輸入 · 8 階段 · 輸出檔</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine)
-- [🧬 LongLineage Engine<br><sub>契約 · 為何輸出 0 棵樹</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine)
-- [🔬 Upstream & Data<br><sub>四個上游工具 · sidecar · 7 樣本</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data)
+- [🧬 LongLineage Engine<br><sub>PRIVATE preview · HCC1395 receipt: 0 candidate units</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine)
+- [🔬 Upstream & Data<br><sub>四個上游工具 · sidecar · 7 technical datasets / 6 biological IDs</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data)
 - [📊 Analysis & Presentation<br><sub>Python 腳本 · HTML 工作站</sub>](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation)
 
 **操作**
@@ -24,8 +26,8 @@
 **記住三件事**
 
 1. `tree.nwk` 葉子是 **read** 不是 clone
-2. 88.26% 的分母是**可排序單元**，不是全部突變
-3. LongLineage 的 BLOCKED＝**證據不存在**，不是程式沒寫
+2. 88.26% 的分母是**71,955 個可排序單元**；66.52% 是 **170,131 / 255,752 個 strict components 為 k=1**
+3. LongLineage 的 P3／P4／P5／P7／P8 release blockers 表示**所需驗證證據尚未成立**；不可把 feature presence 當成 production PASS
 
 ---
 

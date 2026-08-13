@@ -6,7 +6,12 @@ scope: LongLineage 全 repo + 與 InterSubMod 交界
 verdict: 前提錯誤已澄清；三條路線待裁決
 data_sources: scratchpad/ll_audit.json, scratchpad/methyl_gate_chain_verified.md, LongLineage/docs/reports/20260720_HCC1395完整科學運算與parity報告_01.json
 build_branch: research/subclonal-reconstruction-202606
+status: HISTORICAL_SUPERSEDED
+superseded_by: 20260813_完整研究資料與軟體交接_01/00_INDEX.md
 ---
+
+> [!CAUTION]
+> **HISTORICAL / SUPERSEDED — 2026-08-06 checkout-specific audit。** LongLineage 的現行公開候選邊界固定為 private `b9aaa12`、`NOT_READY`／non-production；`release_attestation.json` 只列 P3/P4/P5，P7/P8 由 phase ledger／public-safety receipt 管理，五者皆 `BLOCKED`。Source-origin、license、dependency 尚未閉合，不能稱 clean-room、production 或已適合公開。請以[2026-08-13 完整研究交接](20260813_完整研究資料與軟體交接_01/00_INDEX.md)為現行入口；以下原文只保留決策 provenance。
 
 # LongLineage 充分性稽核與路線裁決
 

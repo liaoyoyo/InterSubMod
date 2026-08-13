@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 五層系統全景：資料 → 上游工具 → 兩支 C++ → Python → HTML
-     來源: docs/explain/11_system-map-overview.standalone.html (svg #1)
-     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+     source: docs/explain/11_system-map-overview.standalone.html (svg #1)
+     source_document_sha256: 82f5e4358b0f8a9de0417a8901f5bb5072c152325247835a922522d9a34752e8
+     inline_svg_sha256: 9b35de1adfe449422c627544f68423926d70302becef65acc2ba1bf486313813
+     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 980 620" role="img" aria-labelledby="f1t f1d" xmlns="http://www.w3.org/2000/svg">
       <title id="f1t">五層系統全景圖</title>
       <desc id="f1d">由下而上分為原始資料層、上游工具層、中介契約層、兩支 C++ 主程式層、Python 分析與 HTML 呈現層。
       原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤並存成 sidecar TSV；
-      InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入，前者可跑，後者只有 dataset-gate 子命令可跑；
+      InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入；前者可由 exact checkout clean build，後者在 private candidate b9aaa12 可跑 preflight，且 frozen HCC1395 receipt 由 dataset-gate 產生 research artifacts，run/probe 仍 BLOCKED；
       輸出再由 Python 層算成統計與圖，最後生成離線可開的 HTML 工作站。</desc>
   <rect x="0" y="0" width="980" height="620" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
@@ -55,7 +57,7 @@
         <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
         <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
         <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
-        <text x="654" y="287" font-size="10" fill="#3f2c70">7 個樣本的 tagged BAM 合計 1.67 TiB，磁碟放不下</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 paired_full：1.67436 TiB；sampled-ID only，PARTIAL/NON_FINAL</text>
 
         <!-- 層 4 兩支 C++ -->
         <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
@@ -66,7 +68,7 @@
         <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
         <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
         <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
-        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 最小指令 2.9 秒跑完 · exit 0</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · exact checkout clean build；internal receipt exit 0</text>
         <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
         <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
         <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>
@@ -75,10 +77,10 @@
         <text x="512" y="366" font-size="13" font-weight="800" fill="#B06A16">LongLineage（longlineage）</text>
         <rect x="856" y="352" width="96" height="18" rx="9" fill="#B06A16"/>
         <text x="904" y="365" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">部分可跑</text>
-        <text x="512" y="385" font-size="10.5" fill="#6b4310">工業化重寫版（clean-room，不是 fork）。強制 fail-closed：</text>
-        <text x="512" y="399" font-size="10.5" fill="#6b4310">每個輸出都有 schema 與 SHA-256 收據，證據不足就拒絕出結果。</text>
+        <text x="512" y="385" font-size="10.5" fill="#6b4310">PRIVATE research-preview candidate；origin/license/dependency audit pending。</text>
+        <text x="512" y="399" font-size="10.5" fill="#6b4310">NOT_READY / non-production；P3/P4/P5/P7/P8 BLOCKED。</text>
         <text x="512" y="418" font-size="10.5" font-weight="700" fill="#6b4310">輸出粒度：per-read（每條 read 一列）</text>
-        <text x="512" y="437" font-size="10" fill="#9A3B3B">run / probe 子命令被鎖 · 只有 dataset-gate 能出科學結果</text>
+        <text x="512" y="437" font-size="10" fill="#9A3B3B">b9aaa12 candidate：run/probe 被鎖；HCC1395 frozen dataset-gate 有 artifacts</text>
         <rect x="510" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#B06A16" stroke-width="1"/>
         <text x="522" y="462" font-size="9.5" fill="#6b4310">吃：8 角色 manifest（BAM + VCF + sidecar + reference）</text>
         <text x="522" y="475" font-size="9.5" fill="#6b4310">吐：site_reads · methyl_calls · cooccurrence_* · topology_unit</text>

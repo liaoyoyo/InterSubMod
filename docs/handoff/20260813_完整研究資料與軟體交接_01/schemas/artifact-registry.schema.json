@@ -46,7 +46,10 @@
         "license": {"type": "string", "minLength": 1},
         "claim_ceiling": {"type": "string", "minLength": 1},
         "known_limits": {"$ref": "#/$defs/stringList"},
-        "regeneration_command": {"type": ["string", "null"]},
+        "regeneration_command": {
+          "type": ["string", "null"],
+          "pattern": "^(REPLAY_ONLY:|VERIFY_ONLY:|NOT_REGENERABLE_FROM_HANDOFF:).+"
+        },
         "public_uri": {"type": ["string", "null"]},
         "machine_locations": {
           "type": "array",

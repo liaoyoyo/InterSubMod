@@ -4,8 +4,8 @@
 目標: 判定 frozen binary exact_ps_topology_af 的真實源碼，並更正 20260801 登錄表的錯誤
 處理範圍: InterSubMod research CLI + LongLineage solver 全部 5 個模組
 build_branch: chore/handoff-20260813
-build_commit: 73afaeac
-worktree: dirty
+execution_context: 73afaeac-dirty (historical adjudication workspace; excluded from release baseline)
+adjudication_commit: e3c0889100da88e6056e9268e07f6f94f8e9312b
 data_sources:
   - /bip7_disk/liaoyoyo2001/build-exact-af-20260724/（frozen build tree，含 41 個 .o 與 compile_commands.json）
   - /big7_disk/liaoyoyo2001/LongLineage @ b979760 與 @ HEAD
@@ -17,9 +17,10 @@ data_sources:
 
 ## Verdict：`RESOLVED_CANDIDATE_A`
 
-**論文核心數字的重建鏈完整，且已用 byte-identical 證明。**
+**Frozen binary 的 solver 源碼身分與重編證據鏈已解決；論文科學數字本輪只做 authority byte replay，沒有從版本控制全量重算。**
 
-先前 `20260805/handoff_manifest.json` 標記的 `not_proven_byte_reproducible` 現已可解除；
+先前 `20260805/handoff_manifest.json` 對 **frozen binary solver-source identity** 標記的
+`not_proven_byte_reproducible` 可以用本次 5/5 object 裁定取代；這不解除science rerun或production gate。
 `20260801_權威資料與過期來源登錄_01.md` §3 登錄的 LongLineage 側 SHA **有誤**，更正見 §4。
 
 ---
@@ -117,7 +118,9 @@ Candidate B 相對 A 的差異是新增 `options.seed_incumbent` —— 用 cert
 
 ---
 
-## 5. 完整重建指令
+## 5. Frozen binary 源碼取得與重編骨架（非 science rerun）
+
+> 本節只說明如何取得已裁定的源碼並沿用 frozen build tree 的編譯旗標重編 solver objects。它不包含 TiB/local data plane、全 7 datasets 的輸入固定、完整執行命令與 science-output 重算，因此不是「完整重建指令」。
 
 ```bash
 # ① InterSubMod 側 CLI（已 tracked，sha256 629fc309…，mtime 07-24 16:48）
@@ -130,7 +133,7 @@ git -C /big7_disk/liaoyoyo2001/LongLineage archive b979760 | tar -x -C <TMP>
 # ③ 用原始旗標編譯（見 §2）
 ```
 
-時序一致性佐證：CLI 源碼 mtime 16:48 → binary mtime 16:50，相隔 2 分鐘，合理。
+時序一致性參考：CLI 源碼 mtime 16:48 → binary mtime 16:50，相隔 2 分鐘；mtime 只是輔助線索，不是 provenance authority。
 
 **永久凍結副本**：`/bip7_disk/liaoyoyo2001/_frozen/exact_ps_topology_af_20260724/`（見 P1.3 產出的 bundle receipt）
 
@@ -170,9 +173,9 @@ solver 的輸入型別只有 `pattern_raox`、`base_qualities`、`multiplicity`
 
 ### 同時必須誠實記載
 
-LongLineage 自身狀態：`release_attestation = NOT_READY`、P0–P8 九個 gate 全開、0 個 VERIFIED、
-formal topology 端點在全 autosome 上輸出 **0 units**（見
-`InterSubMod/docs/handoff/20260806_LongLineage充分性稽核與路線裁決_01.md`）。
+LongLineage 自身仍為 `research preview / non-production`；現行 blocker set 中 P3/P4/P5/P7/P8 皆為
+`BLOCKED`，production `run` 仍 intentionally blocked。歷史 formal topology 端點的 0-unit 紀錄只能從已標示
+`HISTORICAL / SUPERSEDED` 的 2026-08-06 快照理解，不可當現行 phase ledger。
 
 這不影響上述論述 —— frozen binary 用的是 solver **模組本身**，不是 LongLineage 的 pipeline 端點。
 
@@ -182,9 +185,9 @@ formal topology 端點在全 autosome 上輸出 **0 units**（見
 
 | 先前狀態 | 現在 |
 |---|---|
-| `not_proven_byte_reproducible` | **5/5 模組 byte-identical，已證明** |
+| solver-source `not_proven_byte_reproducible` | **5/5 solver object byte-identical，只解決 source identity，非 science rerun** |
 | solver 源碼未進版本控制 | 已 commit（LL `9ad976b`／`6ce62b2`） |
 | 登錄的 SHA 指向錯誤版本 | 已更正並記錄成因 |
 | 「引用鐵則 vs 事實」無人處理 | 已定案，附實測依據 |
 
-**論文核心數字現在可以從版本控制完整重建。** 這是本次交接整理中風險最高、也最有價值的一項。
+**現在可防守的結論是：frozen binary 所用 solver 源碼身分已解決，5/5 模組重編為 byte-identical；19 筆 frozen authority artifact 也已做 SHA-256 replay。**這不等於已從 Git checkout 加 local data plane 全量重算論文數字，也不是 production reproducibility PASS。

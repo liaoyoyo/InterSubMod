@@ -398,6 +398,10 @@ research/**/*_trace.[0-9]*
 !research/20260813_complete_research_handoff/receipts/*.json
 !research/20260813_complete_research_handoff/receipts/*.tsv
 !research/20260813_complete_research_handoff/release_freeze_manifest.json
+# 2026-08-13 bounded public-claim registry and generated validation receipts.
+!research/20260813_public_docs_p0_correction/*.json
+!research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json
+!research/20260813_public_docs_p0_correction/github_about_evidence/*.json
 # ⚠ receipt*.json 刻意「不」放行（2026-08-06 用戶決策）：
 #   實測 research/ 下 308 個 receipt 共 106.8 MB、86 個 >200KB，
 #   分類後幾乎全是 QA/審查/測試失敗輸出（audit_notes/ 136、*.failed.*/ 83、

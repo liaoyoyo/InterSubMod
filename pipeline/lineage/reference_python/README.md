@@ -1,4 +1,10 @@
-# lineage 管線的 Python 參考實作（已被 C++ 取代，保留作對照）
+# SUPERSEDED／HISTORICAL — lineage Python 參考原型
+
+> **不可作為執行入口。** 這些原型只保留 source-origin／歷史 parity provenance。
+> LongLineage private public-preview candidate `b9aaa12` 仍為 **NOT_READY／non-production**，
+> P3/P4/P5/P7/P8 `BLOCKED`；「當時 parity」不是 current、跨資料集或 release 驗證。
+> 現行操作入口請看 [`QUICKSTART.md`](../../../QUICKSTART.md) 與
+> [`完整交接索引`](../../../docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md)。
 
 這三個檔是 LongLineage 三支 C++ 工具改寫前的原型。**它們不在任何生產路徑上**，
 保留的唯一理由是：C++ 版本當初是以它們為基準逐位元比對驗證的，
@@ -26,13 +32,5 @@ LongLineage 的 `scripts/ci/check_source_boundaries.sh` 規定 **`.py` 只能出
 - 逐位元一致性是**當時**驗證的結果（含輸出列順序），不是持續保證。
 - 這些檔案不再維護，也不應該被拿來跑生產資料。
 
-實際執行請用 LongLineage：
-
-```bash
-cd LongLineage
-bash scripts/run_sample.sh --sample <SAMPLE> \
-     --partition-root <PARTITION>/chromosomes \
-     --topology <TOPOLOGY>/<SAMPLE>.topology.jsonl \
-     --sidecar  <SIDECAR>/<SAMPLE>.read_tags.tsv.gz \
-     --in-bam <BAM> --out-root <OUT> --threads 16
-```
+本檔不再提供可複製的 LongLineage command。任何 private-preview 實跑須先由 capability matrix
+確認 revision、具名 blocker set 與資料授權，並使用該 revision 自帶的 fail-closed驗收；不得用本原型當 production parity 證據。

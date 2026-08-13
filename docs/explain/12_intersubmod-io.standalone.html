@@ -4,6 +4,14 @@
 <!--
   doc_type: explain_component_ism   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   data_sources: scratchpad/collect_ism_cli.json, collect_ism_pipeline.json, collect_ism_outputs.json
   驗證: 所有 CLI 選項對照 include/utils/ArgParser.hpp 與 include/core/Config.hpp 逐行核對；
         3 條範例指令全部實跑 exit 0；所有輸出檔 header 與範例行皆為實際 head 磁碟檔案所得
@@ -87,6 +95,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 
 <div class="topbar"><div class="in">
@@ -107,7 +149,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="kicker">部件分冊 · 第 12 頁 · InterSubMod（inter_sub_mod）</div>
   <h1>InterSubMod 吃什麼、做什麼、吐什麼</h1>
   <p class="lede">
-    這是目前<b>真正跑得動、也真正產出論文核心數字</b>的那支程式。
+    這是目前<b>可編譯、可執行，並產出 per-region 甲基化矩陣與統計輸出</b>的程式。
+    七資料集 exact-PS 漏斗與候選拓樸數字來自另一條 research <code>exact_ps_topology_af</code> C++ solver + Python runner 流程，<b>不是</b> <code>inter_sub_mod</code> 本體輸出。
     本頁把它的 3 個必填輸入、8 個處理階段、17 種輸出檔案全部攤開，
     每個檔案都附<b>實際 head 出來的 header 與資料行</b>。
   </p>
@@ -123,18 +166,19 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p style="margin-top:10px;font-size:.95rem">
     <b>為什麼要這樣做：</b>一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在<b>單一分子</b>上
     同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，
-    因此能用 <b>read 層級</b>（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
+    因此能在 <b>read 層級</b>（而非樣本層級）描述距離與 algorithmic clustering，並檢驗指定 mutation／haplotype label 是否與 read-distance variation 或 cluster assignment 關聯；這不證明 unsupervised cluster truth、cellular group 或因果。
   </p>
   <p style="margin-top:10px">
     <span class="badge b-pass">實測可跑</span>
-    最小指令 <b>2.9 秒</b>完成、exit 0；含 normal BAM 與 LOH 標註的完整版本也 exit 0。
+    具名的 2026-08-06 內部 HCC1395 單點 receipt 記錄 <b>2.9 秒、exit 0</b>；含 normal BAM 與 LOH
+    標註的同一內部資料組合也 exit 0。這是特定機器、輸入與 commit 的歷史收據，<b>不是一般 runtime 承諾</b>。
   </p>
 </div>
 
 <div class="takeaway dead">
   <span class="lab"><span class="dot">●</span> 用之前一定要知道的一件事</span>
-  目前 <code>build/bin/inter_sub_mod</code> 這個執行檔是 <b>STALE 的</b> ——
-  有 5 個原始碼檔的修改時間比它還新。<b>跑之前請先重新編譯</b>，否則你跑的不是現在的程式碼。
+  Git 只發布原始碼與可重建契約，<b>不把 build output 當成受版控的發布物</b>。先 checkout release manifest
+  指定的 immutable commit，再用 repo 外的新 build 目錄編譯；執行檔 inventory 應由該次 build receipt 動態記錄。
 </div>
 
 <!-- ═══════════ 1 輸入 ═══════════ -->
@@ -303,21 +347,21 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
         <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
         <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
-        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
-        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
+        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不證明 unsupervised cluster existence/truth</text>
+        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">PERMANOVA／gating 也只測指定 association；PERMANOVA 須合讀 PERMDISP</text>
 
         <!-- 右側：四檢定 -->
         <rect x="706" y="482" width="248" height="154" rx="6" fill="#fff" stroke="#B06A16" stroke-width="1.1"/>
         <text x="716" y="500" font-size="10" font-weight="700" fill="#B06A16">四類檢定各問不同問題</text>
         <text x="716" y="518" font-size="9.5" font-weight="700" fill="#6b4310">Global</text>
-        <text x="716" y="531" font-size="9" fill="#5C5A54">分群結果與生物標籤有關聯嗎</text>
+        <text x="716" y="531" font-size="9" fill="#5C5A54">algorithmic cluster × 指定 label 有關聯嗎</text>
         <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
-        <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
+        <text x="716" y="562" font-size="9" fill="#5C5A54">哪個 algorithmic cluster 富集指定 label</text>
         <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
-        <text x="716" y="593" font-size="9" fill="#5C5A54">群在距離空間真的分開了嗎</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">指定 label 的 read-distance variation 在置換 null 下顯著嗎</text>
         <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
-        <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
-        <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>
+        <text x="716" y="624" font-size="9" fill="#5C5A54">直接使用預先指定 label；結果仍是 association</text>
+        <text x="716" y="634" font-size="9" fill="#5C5A54">不是 cluster truth、cellular group 或因果</text>
 
         <!-- 左側註記 -->
         <rect x="12" y="226" width="228" height="66" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.1"/>
@@ -420,11 +464,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <pre class="out"><code>RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 0,chr1,877772,G,C,46,17,2.990000e-01,0.0000,3.065000e-01,0.0000,...</code></pre>
       <div class="takeaway dead" style="font-size:.95rem">
-        <span class="lab"><span class="dot">●</span> 欄數會隨 binary 版本改變，而且檔案裡沒有版本欄位</span>
-        磁碟上實測到的欄數有 <b>59 / 114 / 117 / 157 / 180</b> 五種，而目前原始碼是 <b>193</b> 欄。
+        <span class="lab"><span class="dot">●</span> 欄數會隨 binary 版本改變；現有欄位只有 component schema，沒有 whole-file layout version</span>
+        磁碟上歷史實測到的欄數有 <b>59 / 114 / 117 / 157 / 180</b> 五種，而 frozen release baseline <code>ddd8909a</code> 的 source header 是 <b>199</b> 欄；歷史 <code>73afaeac-dirty</code> audit 不是 release source。
         意思是<b>不同時期跑出來的結果，欄位位置是錯開的</b>。
         任何用固定欄號（而非欄名）解析的下游腳本，<b>會靜默讀到錯的欄位</b>。
-        <b>務必用欄名讀，並記錄產生該檔的 binary 版本。</b>
+        現行欄位含 <code>VerificationSchemaVersion=2</code> 與 <code>RegionStratificationSchemaVersion=1</code>，但兩者都不是整檔 layout version；<b>務必用欄名讀，並記錄 producer commit。</b>
       </div>
     </div>
   </details>
@@ -433,7 +477,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <thead><tr><th style="width:26%">其他 run 層檔案</th><th style="width:74%">內容</th></tr></thead>
     <tbody>
       <tr><td><code>significance_statistics.txt</code></td><td>一頁摘要：總共處理幾個 region、多少個顯著、各染色體分別多少。實測開頭 <code>=== Significance Analysis Statistics ===</code>、<code>Total Regions Processed: 1982</code>。</td></tr>
-      <tr><td><code>run.log</code></td><td>這次跑用了什麼輸入與參數，開頭是 <code>--- Configuration ---</code> 區塊。<b>這是回溯任何一份輸出「怎麼來的」唯一可靠依據</b>，不要刪。</td></tr>
+      <tr><td><code>run.log</code></td><td>這次跑用了什麼輸入與參數，開頭是 <code>--- Configuration ---</code> 區塊。它是 provenance 的<b>必要但不充分</b>證據：仍須搭配 producer commit、site profile／tool hash、輸入與輸出 checksum、schema 與 command receipt；不要單靠 log 就宣稱可重現。</td></tr>
       <tr><td><code>subclone_structure.txt</code></td><td>跨 region 的分組摘要（分幾群、平均 ASM、LOH 比例）。只在部分 run 出現。</td></tr>
       <tr><td><code>label_first_metrics.tsv</code></td><td>36 欄，label-first 路線的精簡指標表，用 <code>chr:pos:ref:alt</code> 當鍵。只在 canonical 配對輸出見到。</td></tr>
     </tbody>
@@ -449,24 +493,31 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <!-- ═══════════ 4 指令 ═══════════ -->
 <section id="s4">
-  <h3><span class="num">04</span>怎麼跑 — 三條可直接複製的指令</h3>
-  <p class="sub">以下指令<b>本輪全部實際執行過</b>，exit code 皆為 0。路徑都是磁碟上真實存在的檔案。</p>
+  <h3><span class="num">04</span>怎麼跑 — 三種可攜參數組合</h3>
+  <p class="sub">先以 release manifest 的 immutable commit 建立 repo 外 clean build，再用 site profile 定位合法資料。下方結果來自具名內部 HCC1395 receipt；不是任意機器或輸入的固定 runtime／數值承諾。本機絕對路徑只登錄在 machine registry，不寫進公開主命令。</p>
 
-  <h4 class="mini">① 最小可跑 — 驗證環境與執行檔正常（約 3 秒）</h4>
+  <h4 class="mini">① 最小可跑 — 驗證環境與執行檔正常（runtime 依環境而異）</h4>
   <p>先從 VCF 抽出單一個突變，只給三個必填參數：</p>
-  <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的 VCF</span>
-SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
-grep '^#' $V &gt; $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
+  <pre class="cmd"><code><span class="c"># 先把角括號 placeholder 換成自己的路徑；site profile 不進 Git</span>
+REPO_ROOT="&lt;REPO_ROOT&gt;"
+DATA_ROOT="&lt;DATA_ROOT&gt;"
+BUILD_ROOT="&lt;CLEAN_BUILD_ROOT&gt;"
+SITE_PROFILE="&lt;SITE_PROFILE&gt;"
+"$REPO_ROOT/scripts/site/doctor" --profile "$SITE_PROFILE" --mode real-preflight
+
+<span class="c"># 準備一個只含第一筆 biallelic SNV 的 smoke-test VCF</span>
+SP="${TMPDIR:-/tmp}/ism_demo" &amp;&amp; mkdir -p "$SP"
+V="$DATA_ROOT/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+bcftools view -h "$V" &gt; "$SP/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$V" | head -n 1 &gt;&gt; "$SP/one_snv.vcf"
 
 <span class="c"># 跑</span>
-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min</code></pre>
-  <p><b>預期輸出</b>（實跑結果）：</p>
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --output-dir "$SP/out_min"</code></pre>
+  <p><b>具名內部 HCC1395 receipt</b>（僅說明曾觀測到的輸出形狀）：</p>
   <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
 Total reads processed: 85
 Forward strand (+): 40 / Reverse strand (-): 45
@@ -474,11 +525,11 @@ Total CpG sites found: 11
 Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pre>
 
   <h4 class="mini">② 典型分析 — 指定執行緒、視窗、兩種距離指標</h4>
-  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_typical \
+  <pre class="cmd"><code>"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --output-dir "$SP/out_typical" \
   --window-size 1000 \
   --threads 8 \
   --distance-metric BERNOULLI \
@@ -498,13 +549,13 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
   </div>
 
   <h4 class="mini">③ 完整配對分析 — 加上正常組織與 LOH 標註</h4>
-  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --normal-bam /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --loh-bed    /big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed \
-  --output-dir $SP/out_full \
+  <pre class="cmd"><code>"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --normal-bam "$DATA_ROOT/bam/HCC1395/normal.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --loh-bed    "$DATA_ROOT/loh/HCC1395/tumor_phased_LOH.bed" \
+  --output-dir "$SP/out_full" \
   --window-size 1000 --threads 8 \
   --distance-metric BERNOULLI --distance-metric NHD</code></pre>
   <p><b>怎麼確認它真的用到了 normal 與 LOH</b>（實跑結果）：</p>
@@ -532,8 +583,8 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
       <tr>
         <td><span class="dot">●</span></td>
         <td><b><code>significance_summary.csv</code> 跨 run 欄數不一致</b></td>
-        <td>實測 59/114/117/157/180 五種，原始碼 193，<b>且無版本欄位</b>。
-            用固定欄號解析的腳本會靜默錯位。<b>一律用欄名讀。</b></td>
+        <td>歷史實測有 59/114/117/157/180 欄；frozen release baseline <code>ddd8909a</code> 的 source header 為 <b>199 欄</b>。
+            其中第 187 欄 <code>VerificationSchemaVersion=2</code>，第 196 欄 <code>RegionStratificationSchemaVersion=1</code>；它們是元件 schema，尚非單一的 whole-file layout version。用固定欄號解析仍可能靜默錯位，<b>一律用欄名讀。</b></td>
       </tr>
       <tr>
         <td><span class="badge b-warn">中</span></td>
@@ -561,7 +612,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
         <td><span class="badge b-info">低</span></td>
         <td><b>群數最少一定是 2</b></td>
         <td>輪廓係數從 k=2 開始掃，所以 <code>optimal_k</code> 永遠不會是 1 ——
-            <b>它不回答「有沒有結構」</b>。要看有沒有結構請看 PERMANOVA 與 gating 欄位。</td>
+            <b>它不證明 unsupervised cluster existence/truth</b>。PERMANOVA 只測指定 label 與 read-distance variation／centroid separation 在置換 null 下的 association，且須與 PERMDISP 合讀；Fisher／Cramér's V 只測 label association，均不證明 cellular group 或因果。</td>
       </tr>
       <tr>
         <td><span class="badge b-info">低</span></td>
@@ -590,7 +641,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
   <ul>
     <li><b>CLI 選項</b>：<code>--help</code> 實跑輸出，逐行對照 <code>include/utils/ArgParser.hpp</code>
         與 <code>include/core/Config.hpp</code>。兩個「文件 vs 程式碼」落差均以<b>原始碼行號 + 執行期輸出雙重確認</b>。</li>
-    <li><b>三條範例指令</b>：全部實際執行，exit code 皆 0，輸出檔案逐一讀回核對。</li>
+    <li><b>三條參數組合</b>：2026-08-06 具名內部 HCC1395 receipt 記錄 exit code 皆 0，並逐一讀回輸出；公開主命令已改為 repo／data／build／site-profile 變數，不把內部絕對路徑或 runtime 當成一般承諾。</li>
     <li><b>輸出檔格式</b>：所有 header 與資料行皆為<b>實際 head 磁碟檔案</b>所得，非照文件抄寫。</li>
     <li><b>內部流程</b>：20 個階段逐一標註原始碼位置，本輪機械重驗行號有效性 100% 通過。</li>
   </ul>

@@ -59,6 +59,14 @@
 | 實作紀錄 | [Implementation notes](implementation-notes.md) | 決策、偏離、折衷、驗證事件與發布阻塞 |
 | 包內證據 | [Evidence manifest](evidence/EVIDENCE_MANIFEST.json) | authority、denominator、replay、preflight、claims、hygiene與LongLineage safety的SHA-256 |
 
+### 歷史交接快照 crosswalk
+
+| 歷史快照 | 現行判讀 |
+|---|---|
+| [2026-08-05 系統交接與驗收](../20260805_系統交接與驗收_01/README.md) | `HISTORICAL / SUPERSEDED`；只供追蹤當日資料／程式／輸出判斷，不可引用為 current gate。 |
+| [2026-08-06 LongLineage 充分性稽核](../20260806_LongLineage充分性稽核與路線裁決_01.md) | `HISTORICAL / SUPERSEDED`；現行以 candidate `b9aaa12`、private safety stack 與 P3/P4/P5/P7/P8 blocker set 為準。 |
+| [2026-08-06 兩 repo 端到端盤點](../20260806_兩repo端到端串接可行性盤點_01.md) | `HISTORICAL / SUPERSEDED`；現行 I/O 與 capability boundary 以本包「軟體輸入輸出與研究流程」為準。 |
+
 ## 固定狀態
 
 | 項目 | 固定值／狀態 |
@@ -69,7 +77,7 @@
 | Excluded LongLineage work | `9ad976b`、`6ce62b2` 與未提交修改；另開科研 PR |
 | Authority scope | 7 technical datasets／6 biological IDs／chr1-22 |
 | Frozen byte replay | 19 MATCH／0 missing／0 mismatch |
-| Public-claim audit | 初始58/158有問題、34 P0；完整working stack內33/33 local P0 guards ready，第34筆C108為GitHub About external-only且仍blocked。該source patch屬後續`public-claim-corrections` PR，本data-governance PR不可單獨宣稱source-ready。完整registry仍有25 `UNVERIFIED`，live publication未驗收 |
+| Public-claim audit | 初始58/158有問題、34 P0；完整working stack內33/33 local P0 guards ready，第34筆`C108` GitHub About已由live re-fetch取得bounded live `CONFIRMED_WITH_LIMITS`。完整registry現為69 `CONFIRMED`、69 `CONFIRMED_WITH_LIMITS`、20 `UNVERIFIED`；default branch、Wiki與Pages尚未發布並重抓，因此publication/release仍`BLOCKED`。 |
 | LongLineage readiness | P3/P4/P5/P7/P8 `BLOCKED`；production `run` intentionally blocked |
 | bip7 | local data preflight已取得 receipt；仍須合併後 fresh-clone全鏈驗收 |
 | bip8 | 尚無在 bip8 hostname 上取得的 receipt；`BIP8_DATA_PREFLIGHT_BLOCKED` |
@@ -100,8 +108,8 @@ Artifact registry共有20筆`FINAL_FOR_SCOPE`：其中19筆是frozen science/sou
 | Synthetic E2E | **DEMO PASS** | bip7由portable commit `fb806d9b` clean clone重播，驗199欄、12 read leaves與binary/output SHA-256；不得取代science |
 | bip7 fresh-clone | **BLOCKED** | real-data paths存在但4個local checksum locator缺失；完整 fresh-clone receipt待補 |
 | bip8 fresh-clone | **BLOCKED** | 尚未在 hostname=bip8執行 |
-| 158 claims/source | **BLOCKED** | 完整working stack的33/33 local P0 guards PASS，第34筆C108 external-only BLOCKED，排定由後續`public-claim-corrections` PR處理；69 confirmed、64 confirmed-with-limits、25 unverified，Wiki／Pages／About live驗證未閉合 |
-| GitHub live surfaces | **BLOCKED** | main／Wiki／Pages／About尚未綁定同一 release commit |
+| 158 claims/source | **BLOCKED** | 完整working stack的33/33 local P0 guards PASS；第34筆`C108` About已bounded live `CONFIRMED_WITH_LIMITS`。Registry為69 confirmed、69 confirmed-with-limits、20 unverified；P1/P2 source closure與default branch／Wiki／Pages live驗證未閉合 |
+| GitHub live surfaces | **BLOCKED** | About `C108`已bounded live確認；main／Wiki／Pages尚未綁定同一 release commit |
 | LongLineage public preview | **BLOCKED** | private-first三層draft PR已建立；source/license/history blockers仍在，repo目前為private |
 | Tag/GitHub Release | **NO-GO** | 上述任一 blocking gate存在即不得發布 |
 

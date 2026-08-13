@@ -13,14 +13,15 @@
 
 # InterSubMod 文檔庫
 
-> 🟢 **Canonical root（2026-08-01）**：研究真值在 `/big7_disk/liaoyoyo2001/InterSubMod`；`/big8_disk/...` 是三月快照。exact-PS×HP strict read-linkage L1 已 7/7 完成（W=85,621）；其後續 recurrence-allowed candidate analysis 有 98,955 final groups、71,955 read-AF ranked units 與 exact topology census，但 cellular clone count、CN/LOH-aware parent→child 與全樣本 biological tree 仍未建立。`research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 是 historical pre-strict candidate census，不能當成最新 strict 結果。
+> 🟢 **Canonical root（science authority 2026-08-01；handoff snapshot 2026-08-13）**：研究真值在 `/big7_disk/liaoyoyo2001/InterSubMod`；`/big8_disk/...` 是三月快照。08-13 snapshot 是最新導航／治理入口，但不改寫 08-01 frozen authority 日期。exact-PS×HP strict read-linkage L1 已 7/7 完成（W=85,621）；其後續 recurrence-allowed candidate analysis 有 98,955 final groups、71,955 read-AF ranked units 與 exact topology census，但 cellular clone count、CN/LOH-aware parent→child 與全樣本 biological tree 仍未建立。`research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 是 historical pre-strict candidate census，不能當成最新 strict 結果。
 
 ## 快速導航
 
 ### 常用入口
 
 - [當前目標](CURRENT_FOCUS.md)
-- [**2026-08-01 Exact-PS×HP／read-AF／CNV AI 交接入口**](handoff/README.md) ← 最新 authority manifest、單一樹決策、分母與過期來源登錄
+- [**2026-08-13 完整研究資料與軟體交接 snapshot**](handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md) ← 新人／AI、資料治理、軟體 I/O、bip7/bip8 與 release gates 第一入口；尚非 release-ready
+- [**Handoff bundles 索引**](handoff/README.md) ← 08-13 navigation + 08-01 frozen science authority
 - [**Exact-PS 全 7 資料集最終 HTML observation**](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260801_exact_ps_observation_report/all7_v1/report.standalone.html) ← 13/13 authority hashes、responsive/no-JS/A4 QA PASS；CN/LOH=`NOT_INTEGRATED`
 - [**HTML builder／finalizer／QA 重生說明**](../research/20260801_exact_ps_observation_report/00_INDEX.md) ← Python 最後輸出階段與 fail-closed release 契約
 - [**Exact-PS strict read-linkage 全資料集報告與完成層級稽核**](../research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/) ← L1 7/7；strict topology與clone/fusion 0/7
@@ -147,18 +148,22 @@ scripts/analysis/check_ai_agent_readiness.sh
 
 → **[實驗總索引](experiments/INDEX.md)**：所有已嘗試方向的成功/失敗/建議後續
 
-主要研究主題（依時間軸）：
+> ⚠️ **HISTORICAL／SUPERSEDED chronology**：下列是當時的工作狀態索引，不是 current
+> claim registry，也不能繞過 2026-08-13 handoff 的 authority／superseded crosswalk。沒有在本索引
+> 重驗 scope、denominator、producer 與 hash 的數字不得直接引用。
+
+主要研究主題（依時間軸；歷史標籤）：
 - 甲基化解析與 CIGAR 座標映射（2025-11）✅ 已完成
 - 距離計算、聚類分析、Bernoulli 度量（2025-11 ~ 2025-12）✅ 已完成
-- 統計顯著性分析（Fisher / PERMANOVA / Cramér's V）（2025-12 ~ 2026-01）✅ 已驗證
-- TP/FP 特徵富集分析與 F1 最佳化（2026-01）✅ F1=0.8481
+- 統計顯著性分析（Fisher / PERMANOVA / Cramér's V）（2025-12 ~ 2026-01）— 歷史實作／測試里程碑；不代表 current full-scope science validation
+- TP/FP 特徵富集分析與 F1 最佳化（2026-01）— historical F1=0.8481；本索引未重驗其 scope、denominator 或 producer，不得當 current baseline
 - Subsample 混樣甲基化偏差分析（2026-02 ~ 2026-03）❌ NEGATIVE — tumor-normal 組織差異混淆
 - Purity-Aware 策略驗證（2026-02 ~ 2026-03）❌ NEGATIVE — subsample 無法模擬純度效應
 - 方法學審查 closeout 與突破方向 roadmap（2026-03-24）✅ 已收斂
-- Phase 1A ML Read Classification（2026-03-25 ~ 2026-03-28）✅ paired-pure delta F1=+0.0112 已鎖定
+- Phase 1A ML Read Classification（2026-03-25 ~ 2026-03-28）— historical paired-pure delta F1=+0.0112，屬 marginal observation、非最終結論
 - 系統性觀察 O1-O15 + 因果鏈驗證（2026-03-31 ~ 2026-04-06）✅ ISM 定位轉向 characterization
-- Self-Phasing 循環依賴確認與 PON-Only 修正（2026-04-02 ~ 2026-04-06）✅ 62% LOH 消失確認
-- Phase 2 A-D 程式碼實作（2026-04-12 ~ 2026-04-13）✅ Normal BAM + LOH + Subclone 架構完成
+- Self-Phasing 循環依賴與 PON-Only 修正（2026-04-02 ~ 2026-04-06）— historical「62% LOH 消失」觀察；本索引缺其分母／口徑，不得升格為 current confirmed rate
+- Phase 2 A-D 程式碼實作（2026-04-12 ~ 2026-04-13）— code-structure milestone（Normal BAM／LOH／historical Subclone-named module），不等於 cellular-subclone architecture 或 science validation 完成
 - Phase 2 全量驗證與分析（2026-04 ~）⏳ 進行中
 
 ## 研究啟動入口

@@ -7,6 +7,14 @@
 <!--
   doc_type: explain_page (method-concept)  id: 06_ism-subclone-pipeline-concept  version: v1  created: 2026-06-15
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-06-15
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   renders: Part B of InterSubMod/docs/paper_focus/02_paper_framework/20260615_chr2_subclone_case_and_method_concept_01.md
   companion_to: 04_subclone-reconstruction-chr2-18M.standalone.html, 05_subclone-correction-audit-chr2-18M.standalone.html
   AUTHORITATIVE SoT: 20260615_chr2_subclone_case_and_method_concept_01.md (Part B) + 20260615_chr2_18M_subclone_independent_verdict_02.md
@@ -93,6 +101,40 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 .phase{font-family:var(--mono);font-size:.7rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
 @media(max-width:720px){}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 </head>
 <body>
@@ -110,21 +152,21 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <div class="wrap">
 
 <header class="hero">
-  <div class="kicker">解釋頁 06 · 方法構想 · 從案例萃取的 ISM subclone pipeline</div>
-  <h1>ISM 怎麼系統化地分析 subclone？</h1>
-  <p class="lede">把 chr2:18M 案例「手做能成立」的流程，萃取成<strong>可系統化的 ISM subclone 分析方法構想</strong> — 9 個步驟、每步的判準與護欄、3 條防呆、以及 ISM 真正的方法增值（<strong>用 matched-normal 把 subclone 甲基與既存 ASM 拆開</strong>）。<strong>這是構想基礎（proof-of-concept），不是已實作的自動化模組。</strong></p>
+  <div class="kicker">解釋頁 06 · 方法構想 · 局部分子狀態候選 pipeline</div>
+  <h1>ISM 怎麼系統化分析局部 mutation-state candidates？</h1>
+  <p class="lede">把 chr2:18M 案例的 read-level 分析萃取成 9 步候選流程：建立局部 mutation states、標記 homopolymer artifact、描述分組後甲基關聯，並用 matched-normal screen 標記已偵測的 ASM confound。<strong>它不能把 screen-negative 證成 acquired，也不是已實作或已驗證的 cellular-subclone 重建器。</strong></p>
 </header>
 
 <div class="bluf">
   <h2>L0 核心構想（B0）</h2>
-  <p>在同一條長 read 上<span class="key">聯合觀測 somatic allele + haplotag + native 5mC</span>，於 <strong>LOH-constrained + somatic-haplotag-conditioned</strong> 框架下，用<strong>多點 read linkage</strong> 定義 regional molecular states，再用 <strong>normal-anchored 甲基拆解</strong>把 tumor-acquired subclone 甲基與既存 germline ASM 分開 → 輸出<strong>有不確定性標記的 regional subclone characterization</strong>（非完整 phylogeny）。</p>
-  <p class="pi">▸ <b>給教授一句話：</b>這個 pipeline 不是「找到甲基差就宣稱 subclone」；它的<b>方法核心是誠實拆解</b> — 先用 read linkage 的<b>互斥/共現</b>定義 lineage（非 VAF）、用 <b>homopolymer guard</b> 擋定序假象、用 <b>matched-normal ASM 控制</b>把「既存 ASM」從「tumor-acquired subclone 甲基」中扣掉、最後只畫<b>有直接證據</b>的樹邊（其餘虛線標 inference）。</p>
+  <p>在同一條長 read 上<span class="key">聯合觀測 candidate allele + haplotag + native 5mC</span>，於 <strong>LOH-annotation-compatible + somatic-haplotag-conditioned</strong> 框架下，用<strong>多點 read linkage</strong> 定義 regional molecular-state candidates，再用 <strong>normal-anchored 甲基 screen</strong>標記既存 germline ASM confound → 輸出<strong>有不確定性的區域分子狀態 characterization</strong>（非 cellular clone / 完整 phylogeny）。SEQC2 註記與 HP imbalance 不等於 allele-specific CN 機制定案；甲基只作分組後 association，不建立 topology edge。</p>
+  <p class="pi">▸ <b>給教授一句話：</b>這個 pipeline 不是「找到甲基差就宣稱 subclone」；它先用 read linkage 的<b>互斥/共現</b>建立候選分子狀態、用 <b>homopolymer guard</b> 擋定序假象，再用 <b>matched-normal ASM screen</b>區分「已偵測到既存 ASM」與「tumor-associated、normal-ASM-screen-negative 甲基關聯」。後者仍不證明 acquired 或 cellular subclone。</p>
 </div>
 
 <div class="ironclad">
   <b>⚠ 定位：這是「構想基礎」，不是已交付的自動化模組</b>
   <ol>
-    <li>9 步流程目前是<b>個案手做驗證可成立</b>（chr2 單位點 + BRCA2 單位點，L2）；系統化（自動化 + 標準化判準）是 <b>handoff B2</b> 的目標，屬 future work。</li>
+    <li>9 步流程目前是<b>個案手做驗證可成立</b>（chr2 單一區域案例含 6 sSNV + BRCA2 單 locus，L2）；系統化（自動化 + 標準化判準）是 <b>handoff B2</b> 的目標，屬 future work。</li>
     <li>每步的「判準/閾值」來自<b>案例落地值</b>（如互斥 0 個 <code>11</code>、cross-basecaller 過 FDR、pos4 20bp poly-T mask），可作標準化起點，但須跨樣本再校準。</li>
   </ol>
 </div>
@@ -132,10 +174,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ============ §1 流程圖 ============ -->
 <section id="flow">
   <h3><span class="num">①</span> 9 步 pipeline 一圖看懂（四個階段）</h3>
-  <p class="sub">輸入 → 譜系 → 甲基（含 ASM 控制）→ 輸出。紅框 = 防呆護欄所在步驟。</p>
+  <p class="sub">輸入 → 局部 mutation states → 甲基關聯（含 ASM screen）→ 候選輸出。紅框 = 防呆護欄所在步驟。</p>
 
   <figure>
-    <div class="figtitle">圖 1 · ISM subclone 分析 pipeline（9 步 / 4 階段）</div>
+    <div class="figtitle">圖 1 · regional molecular-state candidate 分析 pipeline（9 步 / 4 階段）</div>
     <svg viewBox="0 0 960 560" role="img" aria-label="9 步 pipeline 流程圖">
       <!-- phase bands -->
       <rect x="10" y="40" width="230" height="500" rx="10" fill="#E2ECF3" opacity="0.4"/>
@@ -143,7 +185,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <rect x="486" y="40" width="230" height="500" rx="10" fill="#E4F0EA" opacity="0.4"/>
       <rect x="724" y="40" width="226" height="500" rx="10" fill="#F6EBD8" opacity="0.4"/>
       <text x="125" y="30" text-anchor="middle" class="phase" fill="#2F6690" font-size="12" font-weight="800">階段 I · 輸入</text>
-      <text x="363" y="30" text-anchor="middle" class="phase" fill="#5B3FA0" font-size="12" font-weight="800">階段 II · 譜系</text>
+      <text x="363" y="30" text-anchor="middle" class="phase" fill="#5B3FA0" font-size="12" font-weight="800">階段 II · mutation states</text>
       <text x="601" y="30" text-anchor="middle" class="phase" fill="#2F7D5B" font-size="12" font-weight="800">階段 III · 甲基</text>
       <text x="837" y="30" text-anchor="middle" class="phase" fill="#B06A16" font-size="12" font-weight="800">階段 IV · 輸出</text>
 
@@ -160,17 +202,17 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <rect x="28" y="156" width="194" height="70" rx="8" fill="#fff" stroke="#2F6690" stroke-width="1.5"/>
         <circle cx="48" cy="176" r="11" fill="#2F6690"/><text x="48" y="180" text-anchor="middle" fill="#fff" font-weight="800">2</text>
         <text x="66" y="174" font-weight="700">LOH context</text>
-        <text x="36" y="196" font-size="9.5" fill="#5C5A54">CNV/LOH BED + HP imbalance</text>
+        <text x="36" y="196" font-size="9.5" fill="#5C5A54">LOH BED annotation + HP imbalance</text>
         <text x="36" y="210" font-size="9.5" fill="#5C5A54">案例 98.3% / 99.6% · normal ALT=0</text>
-        <text x="36" y="222" font-size="9" fill="#2F6690">前提：LOH（非 LOH 區另論）</text>
+        <text x="36" y="222" font-size="9" fill="#2F6690">context 相容；allele-specific CN 未整合</text>
       </g>
 
       <!-- Phase II -->
       <g font-size="11">
         <rect x="266" y="64" width="194" height="74" rx="8" fill="#fff" stroke="#5B3FA0" stroke-width="1.5"/>
         <circle cx="286" cy="84" r="11" fill="#5B3FA0"/><text x="286" y="88" text-anchor="middle" fill="#fff" font-weight="800">3</text>
-        <text x="304" y="82" font-weight="700">互斥 linkage 分群</text>
-        <text x="274" y="104" font-size="9.5" fill="#5C5A54">00/10/01/11；0 個「11」=分叉</text>
+        <text x="304" y="82" font-weight="700">linkage compatibility</text>
+        <text x="274" y="104" font-size="9.5" fill="#5C5A54">00/10/01/11；0 observed「11」=互斥 pattern</text>
         <text x="274" y="118" font-size="9.5" fill="#5C5A54">高「11」=同 state</text>
         <text x="274" y="132" font-size="9" fill="#5B3FA0">護欄：跨距不足→標「不可判」</text>
 
@@ -195,7 +237,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="542" y="164" font-weight="700">normal-HP ASM 控制 🛡</text>
         <text x="512" y="184" font-size="9.5" fill="#5C5A54">normal HP1-vs-HP2 顯著→confounded</text>
         <text x="512" y="198" font-size="9" fill="#9A3B3B">confound: 3.3/3.4/3.5/4.1</text>
-        <text x="512" y="212" font-size="9" fill="#2F7D5B">乾淨: 2.1/2.2/3.1/3.2/5.1/5.2</text>
+        <text x="512" y="212" font-size="9" fill="#2F7D5B">normal-ASM-screen-negative: 2.1/2.2/3.1/3.2/5.1/5.2</text>
 
         <rect x="504" y="240" width="194" height="64" rx="8" fill="#fff" stroke="#2F7D5B" stroke-width="1.5"/>
         <circle cx="524" cy="260" r="11" fill="#2F7D5B"/><text x="524" y="264" text-anchor="middle" fill="#fff" font-weight="800">7</text>
@@ -208,21 +250,21 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <g font-size="11">
         <rect x="742" y="64" width="190" height="78" rx="8" fill="#fff" stroke="#B06A16" stroke-width="1.5"/>
         <circle cx="762" cy="84" r="11" fill="#B06A16"/><text x="762" y="88" text-anchor="middle" fill="#fff" font-weight="800">8</text>
-        <text x="780" y="82" font-weight="700">建可防守樹</text>
-        <text x="750" y="102" font-size="9.5" fill="#5C5A54">parsimony；direct nesting 才排序</text>
-        <text x="750" y="116" font-size="9.5" fill="#5C5A54">無 bridge→虛線 methylation-bridged</text>
-        <text x="750" y="132" font-size="9" fill="#9A3B3B">VAF 不可排 siblings（LOH 扭曲）</text>
+        <text x="780" y="82" font-weight="700">建非時間相容圖</text>
+        <text x="750" y="102" font-size="9.5" fill="#5C5A54">conditional pattern；不定向、不排序</text>
+        <text x="750" y="116" font-size="9.5" fill="#5C5A54">無 direct bridge → block relation unresolved</text>
+        <text x="750" y="132" font-size="9" fill="#9A3B3B">甲基 association 不新增 topology edge</text>
 
         <rect x="742" y="160" width="190" height="70" rx="8" fill="#fff" stroke="#B06A16" stroke-width="1.5"/>
         <circle cx="762" cy="180" r="11" fill="#B06A16"/><text x="762" y="184" text-anchor="middle" fill="#fff" font-weight="800">9</text>
         <text x="780" y="178" font-weight="700">誠實 tier</text>
-        <text x="750" y="198" font-size="9.5" fill="#5C5A54">regional/operational · L2 · 單位點</text>
+        <text x="750" y="198" font-size="9.5" fill="#5C5A54">regional/operational · L2 · 單一區域案例</text>
         <text x="750" y="212" font-size="9" fill="#9A3B3B">禁「confirmed N-subclone」</text>
         <text x="750" y="225" font-size="9" fill="#B06A16">用 verdict_02 用語</text>
 
         <!-- output -->
         <rect x="742" y="250" width="190" height="60" rx="8" fill="#2F7D5B"/>
-        <text x="837" y="274" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">regional subclone</text>
+        <text x="837" y="274" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">regional state candidates</text>
         <text x="837" y="292" text-anchor="middle" fill="#E4F0EA" font-size="10">characterization + 不確定性標記</text>
       </g>
 
@@ -239,11 +281,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <text x="48" y="366" font-size="13" font-weight="800" fill="#9A3B3B">🛡 3 條防呆（案例抓出的過度宣稱根因 → 系統化必內建）</text>
       <g font-size="11">
         <text x="48" y="396" font-weight="700" fill="#5e2424">① homopolymer artifact（步 4）</text>
-        <text x="48" y="414" fill="#5C5A54">variant 後接 homopolymer → 多 allele call（G/T/DEL）是 ONT jitter 非多 subclone。</text>
-        <text x="48" y="430" fill="#5C5A54">案例 pos4 20bp poly-T → 「5 群」收斂為 ≥3 lineage。</text>
+        <text x="48" y="414" fill="#5C5A54">variant 後接 homopolymer → G/T/DEL 三態標 uncertain，不能當多個 subclone。</text>
+        <text x="48" y="430" fill="#5C5A54">案例 pos4 20bp poly-T → 「5 群」撤回；歷史約 3 只屬特定 merge rule labels。</text>
         <text x="48" y="456" font-weight="700" fill="#5e2424">② VAF 不可排序 siblings（步 8）</text>
-        <text x="48" y="474" fill="#5C5A54">LOH 扭曲局部 VAF（案例 pos5 局部 0.31 vs 全基因組 0.05）；互斥 siblings 不可由 VAF 排 parent/child。</text>
-        <text x="48" y="490" fill="#5C5A54">→ 順序只在 nested genotype 觀察到時成立（案例僅 (3)→(5)）。</text>
+        <text x="48" y="474" fill="#5C5A54">LOH 註記區的 CN/純度機制未解；案例 pos5 局部 0.31 vs 全基因組 0.05。</text>
+        <text x="48" y="490" fill="#5C5A54">→ conditional containment 只約束相容模型，不確認 parent/child、方向或順序。</text>
         <text x="48" y="514" font-weight="700" fill="#5e2424">③ coverage 假象（步 8）</text>
         <text x="490" y="514" fill="#5C5A54">缺跨多點 all-REF read ≠ ancestral allele 消失（read-length 限制）；root 是 parsimony 推論非觀測。</text>
       </g>
@@ -261,14 +303,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <thead><tr><th style="width:42px">步</th><th style="width:150px">做什麼</th><th>判準 / 閾值（案例落地）</th><th>護欄</th></tr></thead>
     <tbody>
       <tr><td class="imp">1</td><td>萃取 read×sSNV×5mC 矩陣</td><td>unique primary、MAPQ≥20、BQ≥10；MM/ML 解碼 5mC 映回 ref；數字先落 JSON</td><td>dedup（案例 340→280）</td></tr>
-      <tr><td class="imp">2</td><td>LOH context</td><td>SEQC2 CNV/LOH BED + HP imbalance（案例 98.3%/99.6%）；matched-normal ALT=0</td><td>LOH 為前提；非 LOH 區另論</td></tr>
-      <tr><td class="imp">3</td><td>lineage by 互斥 linkage</td><td>00/10/01/11，要求跨位點 read；互斥（0 <code>11</code>）=分叉，共現（高 <code>11</code>）=同 state</td><td>跨距不足 → 標「不可判」非互斥</td></tr>
-      <tr style="background:#FBF1F1"><td class="imp">4 🛡</td><td>artifact guard</td><td>homopolymer context check（案例 pos4 後 20bp poly-T → G/T/DEL 合併為單一 altered state）</td><td>ONT homopolymer/strand-bias 必查；單 strand call 不算群</td></tr>
+      <tr><td class="imp">2</td><td>LOH context</td><td>SEQC2 LOH BED annotation + HP imbalance（案例 98.3%/99.6%）；matched-normal ALT=0</td><td>只判 context-compatible；未整合 allele-specific CN，不能判 CN-loss vs cnLOH、機制或 retained parent</td></tr>
+      <tr><td class="imp">3</td><td>mutation-state linkage</td><td>00/10/01/11，要求跨位點 read；0 observed <code>11</code> 只支持互斥 compatibility pattern，共現支持同分子 state，但都須保留 coverage/error/recurrence 不確定性</td><td>跨距不足 → 關係標 <code>UNRESOLVED</code></td></tr>
+      <tr style="background:#FBF1F1"><td class="imp">4 🛡</td><td>artifact guard</td><td>homopolymer context check（案例 pos4 <code>C&gt;G</code> 為 truth-evaluable TP；鄰接 20bp poly-T 的 G/T/DEL 三態標 homopolymer-uncertain，不拆三群）</td><td>ONT homopolymer/strand-bias 必查；單 strand call 不算群</td></tr>
       <tr><td class="imp">5</td><td>甲基判別 per allele anchor</td><td>Mann-Whitney + <b>BH-FDR</b>；<b>要求 cross-basecaller 同方向 + 過 FDR</b></td><td>單 basecaller n=1 不可解；distal 未複製 → 排除</td></tr>
-      <tr style="background:#FBF1F1"><td class="imp">6 🛡</td><td>normal-HP ASM control</td><td>normal HP1-vs-HP2 顯著者（案例 3.3/3.4/3.5/4.1）標 confounded；normal HP 無差異者（2.1/2.2/3.1/3.2/5.x）=乾淨 tumor-associated</td><td><b>不可把所有甲基差歸 subclone</b></td></tr>
+      <tr style="background:#FBF1F1"><td class="imp">6 🛡</td><td>normal-HP ASM screen</td><td>normal HP1-vs-HP2 顯著者（案例 3.3/3.4/3.5/4.1）標 confounded；其餘稱 tumor-associated、normal-ASM-screen-negative</td><td><b>screen-negative 不證明 acquired/clone</b></td></tr>
       <tr><td class="imp">7</td><td>tumor/normal differential cross-check</td><td>all-read tumor vs normal MW FDR；同方向跨 basecaller</td><td>all-read 差混 composition/LOH/ASM → 須 allele+normal-HP conditioned 再拆</td></tr>
-      <tr><td class="imp">8</td><td>建可防守樹</td><td>parsimony；direct nesting 才排序（案例 (3)→(5)）；無直接 bridge → 虛線 methylation-bridged；root=hypothesis</td><td>共現不可排序；VAF <b>不可</b>排 siblings</td></tr>
-      <tr><td class="imp">9</td><td>誠實 tier</td><td>regional/operational subclonal；標 L2/單位點；演化順序未證除非 nesting</td><td>用 verdict_02 語；禁「confirmed N-subclone」</td></tr>
+      <tr><td class="imp">8</td><td>建非時間 compatibility graph</td><td>read-level conditional pattern 只約束相容模型（案例 (3)/(5)），不確認方向或取得次序；無 direct bridge → block 關係保持 unresolved；甲基 association 不補 link、common node 或方向</td><td>共現／absence／VAF 均<b>不可</b>單獨判定 parent-child</td></tr>
+      <tr><td class="imp">9</td><td>誠實 tier</td><td>regional molecular-state candidates；標 L2/單一區域案例；nesting 亦只支持 provisional model</td><td>禁「confirmed N-subclone」</td></tr>
     </tbody>
   </table>
   </div>
@@ -281,20 +323,20 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <div class="guard">
     <h4><span class="no">防呆 1</span>homopolymer artifact</h4>
-    <p>variant 後接 homopolymer → 多 allele call（G/T/DEL）是 ONT jitter，<b>不是</b>多個 subclone。<b>必查 context</b>。</p>
-    <div class="case"><b>案例：</b>pos4(18,096,269) 後接 <code>20bp poly-T</code> → 原「5 群」收斂為 <b>≥3 lineage</b>（G/T/DEL 合併為單一 pos4-altered state；HKU G4/T13/DEL10/REF21、DORADO G6/T15/DEL7/REF29）。</div>
+    <p>variant 後接 homopolymer → 多 allele call（G/T/DEL）須標 <b>homopolymer-uncertain</b>，不能直接當多個 subclone。<b>必查 context</b>。</p>
+    <div class="case"><b>案例：</b>pos4(18,096,269) 後接 <code>20bp poly-T</code> → 原「5 群」撤回。歷史 merge rule 所稱「約 3」只是 operational labels；block L/R unresolved，不是 biological lower bound、完整 candidate count 或 clone 數。</div>
   </div>
 
   <div class="guard">
     <h4><span class="no">防呆 2</span>VAF 不可排序 siblings</h4>
-    <p>LOH 區<u>局部 VAF 被扭曲</u>；互斥 siblings 不可由 VAF 排 parent/child → <b>順序只在 nested genotype 觀察到時成立</b>。</p>
-    <div class="case"><b>案例：</b>pos5 局部 VAF <code>0.31</code> vs 全基因組 <code>0.05</code> → VAF 排序撤回；演化順序只有 <code>(3)→(5)</code> 有 direct nesting 支持。</div>
+    <p>此區有 LOH annotation + HP imbalance，但 allele-specific CN、純度與機制未整合；局部 VAF 不可用來排 parent/child。<b>nested read pattern 只能約束相容的局部模型，不能單獨確認方向或突變順序</b>。</p>
+    <div class="case"><b>案例：</b>pos5 局部 VAF <code>0.31</code> vs 全基因組 <code>0.05</code> → VAF 排序撤回；<code>(5)C</code> 僅在帶 <code>(3)A</code> 的 shared-coverage reads 中出現，是無方向的 conditional containment pattern。</div>
   </div>
 
   <div class="guard">
     <h4><span class="no">防呆 3</span>coverage 假象</h4>
     <p>缺「跨多點 all-REF read」<b>≠</b> ancestral allele 消失（read-length 限制）；root 是 parsimony 推論<b>非觀測</b>。</p>
-    <div class="case"><b>案例：</b>「無 ancestral REF read」撤回 — ≥2 點全 REF 有 17 條、≥3 點 4 條，ancestral read 確實存在；缺跨 ≥4 點是覆蓋稀。</div>
+    <div class="case"><b>案例：</b>「無 ancestral REF read」撤回 — BQ20 all-REF local patterns 在 ≥2 點為 HKU 17 / DORADO 15，≥3 點為 HKU 4 / DORADO 0；這不證明已觀測祖先細胞，缺跨 ≥4 點仍是覆蓋限制。</div>
   </div>
 </section>
 
@@ -309,9 +351,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <!-- problem -->
       <rect x="20" y="24" width="400" height="80" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/>
       <text x="36" y="48" font-size="12" font-weight="700" fill="#5e2424">問題</text>
-      <text x="36" y="68" font-size="10.5" fill="#5C5A54">LOH 已丟 HP1 → 無「丟失 allele」可對照。</text>
-      <text x="36" y="84" font-size="10.5" fill="#5C5A54">「LOH 前既存 germline-ASM 被保留再被 somatic 切分」</text>
-      <text x="36" y="98" font-size="10.5" fill="#9A3B3B" font-weight="700">無法形式排除 → 甲基差不能直接當 subclone。</text>
+      <text x="36" y="68" font-size="10.5" fill="#5C5A54">LOH annotation + HP imbalance；allele-specific CN 未整合。</text>
+      <text x="36" y="84" font-size="10.5" fill="#5C5A54">不能判 CN-loss vs cnLOH、機制或哪個 parental copy 保留。</text>
+      <text x="36" y="98" font-size="10.5" fill="#9A3B3B" font-weight="700">因此甲基差只作 association，不能直接當 subclone 或 topology edge。</text>
       <!-- arrow -->
       <line x1="430" y1="64" x2="478" y2="64" stroke="#5C5A54" stroke-width="2" marker-end="url(#ah2)"/>
       <defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5C5A54"/></marker></defs>
@@ -319,7 +361,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <rect x="486" y="24" width="394" height="80" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
       <text x="502" y="48" font-size="12" font-weight="700" fill="#1f4f3a">ISM 解法：matched-normal HP1-vs-HP2 當 filter</text>
       <text x="502" y="68" font-size="10.5" fill="#5C5A54">normal 已有 ASM 的 CpG → 保守排除（confounded）</text>
-      <text x="502" y="84" font-size="10.5" fill="#5C5A54">normal 無 ASM 的 CpG → 留為乾淨 tumor-acquired</text>
+      <text x="502" y="84" font-size="10.5" fill="#5C5A54">normal ASM screen 陰性 → 留為 tumor-associated 候選</text>
       <text x="502" y="98" font-size="10.5" fill="#2F7D5B" font-weight="700">= C2 normal-anchored cis/ASM control 的具體展現</text>
       <!-- result split -->
       <rect x="120" y="138" width="320" height="64" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/>
@@ -327,14 +369,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <text x="280" y="182" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" fill="#9A3B3B">3.3 · 3.4 · 3.5 · 4.1</text>
       <text x="280" y="196" text-anchor="middle" font-size="9" fill="#5C5A54">normal HP1/HP2 已顯著差 → 保守排除</text>
       <rect x="460" y="138" width="320" height="64" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
-      <text x="620" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#1f4f3a">✔ 乾淨 tumor-acquired subclone 甲基</text>
+      <text x="620" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#1f4f3a">✔ tumor-associated、normal-ASM-screen-negative</text>
       <text x="620" y="182" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" fill="#2F7D5B">2.1 · 2.2 · 3.1 · 3.2 · 5.1 · 5.2</text>
-      <text x="620" y="196" text-anchor="middle" font-size="9" fill="#5C5A54">normal 無 HP 差異 + 跨 basecaller 過 FDR（最強 3.1/3.2）</text>
+      <text x="620" y="196" text-anchor="middle" font-size="9" fill="#5C5A54">未證明 acquired / clone；最強關聯 3.1/3.2</text>
     </svg>
-    <figcaption><b>怎麼讀：</b>LOH 讓「既存 ASM vs 新生 subclone 甲基」無法靠丟失 allele 區分；ISM 改用 matched-normal 的 HP1-vs-HP2 把既存 ASM 標出來、保守排除。<b>來源：</b>Part B B3 + Part A A5（ASM-control 表，引自 <code>independent_audit.md</code>）。</figcaption>
+    <figcaption><b>怎麼讀：</b>SEQC2 LOH annotation + HP imbalance 只界定相容 context；沒有 allele-specific CN，不能推導 CN-loss、cnLOH、事件機制或 parental-copy retention。matched-normal HP1-vs-HP2 screen 可標出已偵測的 ASM confound；screen 陰性仍不證明甲基化為後天取得或 cellular-subclone-specific，且甲基不能橋接 topology edge。<b>來源：</b>Part B B3 + Part A A5（ASM-control 表，引自 <code>independent_audit.md</code>）。</figcaption>
   </figure>
 
-  <div class="so"><b>核心訊息（這就是研究的方法價值）：</b>此區同時有 <b>normal haplotype ASM</b> 與 <b>tumor-acquired subclone 甲基</b> — ISM 的價值是<u>用 matched-normal 把兩者拆開</u>（normal 已有 ASM 的 CpG 保守排除，只留乾淨子集），<b>而非把所有甲基差都歸 subclone</b>。subclone-甲基真實存在，但僅限<b>無 germline-ASM 的 CpG 子集</b>。</div>
+  <div class="so"><b>核心訊息（這就是研究的方法價值）：</b>此區同時有 <b>normal haplotype ASM</b> 與 <b>tumor-associated 甲基關聯</b> — ISM 的價值是<u>用 matched-normal 標記已偵測的 ASM confound</u>，<b>而非把所有甲基差都歸 subclone</b>。normal-ASM-screen-negative 子集與遺傳分組相容，但不證明甲基化是後天取得或來自某個 cellular subclone。</div>
 </section>
 
 <!-- ============ §5 系統化路徑 ============ -->
@@ -343,7 +385,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">目前是個案手做 L2；要升 validated 需要把 9 步自動化 + 標準化判準 + 跨樣本複製。</p>
 
   <div class="takeaway pass"><span class="lab">現況 → 目標</span>
-    <b>現在：</b>個案手做 <span class="badge tier">L2</span>（chr2 單位點 + BRCA2 單位點）。<b>升 validated 需：</b>① B1 九步<b>自動化</b>成 ISM 模組（read→molecular-state assignment + ASM-control + tree-with-uncertainty）；② <b>標準化判準</b>（互斥閾值、FDR、cross-basecaller 複製、homopolymer mask、ASM-control gate）；③ 第二 LOH 位點/第二樣本（破單位點）；④ 第二 caller/pipeline（破 DORADO=同細胞株技術重現非獨立病人）。
+    <b>現在：</b>個案手做 <span class="badge tier">L2</span>（chr2 單一區域案例含 6 sSNV + BRCA2 單 locus）。<b>升 validated 需：</b>① B1 九步<b>自動化</b>成 ISM 模組（read→molecular-state assignment + ASM-control + non-temporal compatibility graph with unresolved relations）；② <b>標準化判準</b>（互斥閾值、FDR、cross-basecaller 複製、homopolymer mask、ASM-control gate）；③ 第二 LOH 區域案例/第二樣本（破單一區域案例限制）；④ 第二 caller/pipeline（破 DORADO=同細胞株技術重現非獨立病人）。
   </div>
 
   <table>

@@ -1,12 +1,16 @@
-# InterSubMod 的前置步驟與執行流程
+# SUPERSEDED／HISTORICAL — InterSubMod × LongLineage 早期整合草案
 
-> 本目錄**只有說明，沒有程式**。
-> 產生輸入 BAM 的實作在 **LongLineage**，不屬於 InterSubMod。
+> **不可作為新人執行入口。** 本檔保留早期 feature-preview 介面與 tag 語意作 provenance；
+> 現行入口是 [`docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md`](../docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md)
+> 與 [`QUICKSTART.md`](../QUICKSTART.md)。LongLineage private baseline/main snapshot `5daf50f`
+> 沒有 tagged-BAM writer；private public-preview candidate `b9aaa12` 雖包含
+> `longlineage-tag-bam`，仍為 **NOT_READY／non-production**，P3/P4/P5/P7/P8 均 `BLOCKED`。
+> Feature presence 不等於 supported workflow，production `run` 仍刻意 fail closed。
 
 ## 這份文件回答什麼
 
-InterSubMod 分析「甲基化 × read 標籤」的關聯。要跑它，你的 BAM 必須帶上
-lineage 標籤。這份文件說明那些標籤是什麼、從哪來、怎麼準備。
+InterSubMod 分析「甲基化 × read 標籤」的 association。核心流程不要求 lineage tags；
+本檔只解釋 private preview 曾提出的 optional tag contract，不證明該整合流程可公開重跑。
 
 ---
 
@@ -15,10 +19,10 @@ lineage 標籤。這份文件說明那些標籤是什麼、從哪來、怎麼準
 | 必要 | 說明 |
 |---|---|
 | `MM` / `ML` tag | 甲基化呼叫（dorado 的 `C+m?`）。**沒有它 ISM 無法做任何甲基分析** |
-| `HP:Z` | 單倍型標籤（九態：`1`/`2`/`1-1`/`2-1`/`3`） |
+| `HP:Z` | LongPhase-S 可能出現 `. / 1 / 2 / 3 / 4 / 1-1 / 2-1 / 1-2 / 2-2`；frozen baseline `ddd8909a` 的 ISM 有效 HP 分組只辨識 `1/2/1-1/2-1/3` 與 `0/unphased`，`4/1-2/2-2` 落 `HP_OTHER`／被 HP 檢定排除。實跑前必做 HP value census。 |
 | 座標排序 + `.bai` | 一般 BAM 要求 |
 
-| 可選（啟用 lineage 軸才需要） | 說明 |
+| 歷史 preview 可選欄位（尚非 supported public workflow） | 說明 |
 |---|---|
 | `lc:Z` | lineage component（unit_id） |
 | `lu:Z` | lineage block（block_id） |
@@ -31,47 +35,25 @@ lineage 標籤。這份文件說明那些標籤是什麼、從哪來、怎麼準
 
 ---
 
-## 2. 帶標籤的 BAM 從哪來
+## 2. Tagged-BAM 的 revision-scoped 狀態
 
-由 **LongLineage** 產生（`/big7_disk/liaoyoyo2001/LongLineage`）：
-
-```bash
-cd /big7_disk/liaoyoyo2001/LongLineage
-/usr/bin/cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-/usr/bin/cmake --build build -j16
-
-LONGLINEAGE_BUILD=$PWD/build bash scripts/run_sample.sh \
-    --sample HCC1395 \
-    --in-bam  <已 haplotag 的 BAM 或 raw BAM> \
-    --out-root <輸出目錄> \
-    --threads 16
-```
-
-產出：
+以下是 private candidate `b9aaa12` 的**預覽 artifact 名稱**，不是 production contract：
 ```
 <輸出目錄>/paths/*.unit_lineage_paths.tsv.gz          階層路徑 + 突變順序
 <輸出目錄>/assign/*.read_lineage_assignments.tsv.gz   read → block 指派
-<輸出目錄>/bam/*.lineage_tagged.bam                   ← 這就是 ISM 的輸入
+<輸出目錄>/bam/*.lineage_tagged.bam                   preview-only tagged BAM
 ```
 
-⚠ 詳細規格見 `LongLineage/docs/lineage/`（9 份文件，含 `HIERARCHICAL_TAG_SPEC.md`
-與 `KNOWN_ISSUES.md`）。
+不得依此段自行執行 private repo 或宣稱輸出已驗證；請先查交接包的 capability matrix、
+blocker set 與 site preflight。若 P3/P4/P5/P7/P8 任一仍 blocked，這條 chain 就不能升格為 supported。
 
 ---
 
-## 3. 執行 InterSubMod
+## 3. InterSubMod 的 supported 執行路徑
 
-```bash
-cd /big7_disk/liaoyoyo2001/InterSubMod
-./build/bin/inter_sub_mod \
-    -t <輸出目錄>/bam/HCC1395.chr1.lineage_tagged.bam \
-    -r <reference.fa> \
-    -v <PASS.vcf.gz> \
-    -o <ISM 輸出目錄> \
-    --group-by-tag HP,ALT,lv \
-    --require-tag-status U \
-    -j 16 -w 5000
-```
+Supported core smoke／site-profile 命令只維護於 `QUICKSTART.md` 與 handoff package；
+目前只把 HP/ALT 與 read-level methylation association 列為 supported。`lv/lc/lu` 整合屬
+private preview，不能從本歷史檔複製命令執行。
 
 ### 兩個 lineage 相關參數
 
@@ -95,18 +77,10 @@ cd /big7_disk/liaoyoyo2001/InterSubMod
 
 ---
 
-## 4. 整合觀察報告（HTML）
+## 4. 整合觀察報告（HTML；歷史構想）
 
-由 LongLineage 的呈現層產生，**不在 InterSubMod**：
-
-```bash
-python3 /big7_disk/liaoyoyo2001/LongLineage/presentation/build_lineage_report.py \
-    --out-root <LongLineage 輸出目錄> --sample HCC1395 \
-    --ism-summary <ISM 輸出目錄>/.../significance_summary.csv \
-    --output HCC1395.report.html
-```
-
-缺任何輸入時，對應面板會標示「不可用 + 原因」，其餘照常產出。
+早期草案曾規劃由 LongLineage presentation 整合；它未被本 handoff 驗證為 public supported
+workflow。公開 HTML 是 validated資料的呈現層，不重算 science；可用頁面與 receipt 請從 handoff index 導航。
 
 ---
 
@@ -114,8 +88,8 @@ python3 /big7_disk/liaoyoyo2001/LongLineage/presentation/build_lineage_report.py
 
 | 專案 | 職責 | 甲基資料 |
 |---|---|---|
-| **LongLineage** | 純遺傳 read linkage → 拓撲 → tagged BAM | **不需要** |
+| **LongLineage private preview** | read linkage／candidate reconstruction；tagged-BAM 只存在 candidate revision | **不需要** |
 | **InterSubMod** | 依 BAM 標籤做甲基關聯分析 | **必要** |
 | **LongLineage/presentation** | 整合兩者輸出產 HTML | 可缺（降級） |
 
-⇒ 甲基不一定有，所以 LongLineage 是基礎層；InterSubMod 是可選的加值分析。
+⇒ 兩條 provenance chain 必須分開驗證；不得因 private candidate 有某個檔名，就宣稱完整鏈已 supported 或 production-ready。

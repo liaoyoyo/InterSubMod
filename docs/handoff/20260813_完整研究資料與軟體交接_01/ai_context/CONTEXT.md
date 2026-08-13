@@ -52,7 +52,7 @@
 
 - InterSubMod include baseline：`ddd8909a838318d8a77969313e9561c8ff9d01c2`。
 - InterSubMod exclude：`73afaeac`、2026-08-13 drilldown/CNV dirty work；標`IN_PROGRESS/PARTIAL`。
-- LongLineage preview include：`b9aaa12`。
+- LongLineage preview include：`b9aaa12`；該 immutable candidate 的 frozen baseline為47/47 tests。後續private safety stack `f60b5f3`為49/49 foundation PASS，但不是preview baseline，不能把49歸給`b9aaa12`。
 - LongLineage exclude：`9ad976b`、`6ce62b2`、dirty work。
 - LongLineage production `run` intentionally returns`KernelBlocked` exit 6；P3/P4/P5/P7/P8 BLOCKED。
 
@@ -90,10 +90,10 @@
 
 ## 目前阻塞
 
-- 158 public claims中33/33 local P0 guards已PASS；第34筆P0 C108為GitHub About external-only且仍blocked。另25 claims仍`UNVERIFIED`，Wiki/Pages/About等live publication gate未閉合。
+- 158 public claims中33/33 local P0 guards已PASS；第34筆P0 `C108` GitHub About已由live re-fetch取得bounded live `CONFIRMED_WITH_LIMITS`。Registry現為69 `CONFIRMED`、69 `CONFIRMED_WITH_LIMITS`、20 `UNVERIFIED`；P1/P2、default branch、Wiki與Pages仍未閉合，publication/release維持`BLOCKED`。
 - bip8 host-local receipt缺失。
 - full-history secret scan工具/gate未閉合。
-- LongLineage foundation 49/49 tests已PASS，但4 source rows、21 source-license rows、11 dependency license determinations與7 history findings仍blocked；repository目前private，曾公開暴露不能視為未發生。
+- LongLineage後續private safety stack `f60b5f3` foundation 49/49 tests已PASS（`b9aaa12` frozen baseline是47/47），但4 source rows、21 source-license rows、11 dependency license determinations與7 history findings仍blocked；repository目前private，曾公開暴露不能視為未發生。
 - tag／GitHub Release不得建立。
 
 本context只負責避免誤解；真正數字與狀態以registries及receipts為準。
