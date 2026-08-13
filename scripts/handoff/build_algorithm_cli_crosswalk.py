@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
+import re
 import subprocess
 from collections import Counter
 from pathlib import Path
@@ -18,6 +20,8 @@ CLAIM_INVENTORY_RELATIVE = "research/20260812_intersubmod_github_public_docs_ful
 GUARD_RELATIVE = "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json"
 OUTPUT = PACKAGE / "evidence/algorithm_cli_claim_crosswalk.json"
 VALIDATOR = "scripts/handoff/validate_algorithm_cli_crosswalk.py"
+ASSESSED_GIT_COMMIT = "e83437ab9775d2cd3e27eb4e57f89f7d38126023"
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 EXPECTED_COLUMNS = [
     "claim_id",
     "public_claim",
@@ -419,7 +423,17 @@ POLICY = {
 }
 
 
-def build() -> dict[str, object]:
+def build(assessed_git_commit: str = ASSESSED_GIT_COMMIT) -> dict[str, object]:
+    if not COMMIT_RE.fullmatch(assessed_git_commit):
+        raise ValueError("assessed_git_commit must be a full lowercase Git SHA")
+    commit_probe = subprocess.run(
+        ["git", "-C", str(ROOT), "cat-file", "-e", f"{assessed_git_commit}^{{commit}}"],
+        capture_output=True,
+        text=True,
+    )
+    if commit_probe.returncode != 0:
+        raise ValueError(f"assessed_git_commit is unavailable: {assessed_git_commit}")
+
     matrix_path = ROOT / MATRIX_RELATIVE
     claim_inventory_path = ROOT / CLAIM_INVENTORY_RELATIVE
     guard_path = ROOT / GUARD_RELATIVE
@@ -468,9 +482,7 @@ def build() -> dict[str, object]:
     correction_counts = Counter(record["source_correction"]["status"] for record in records)
     guard_counts = Counter(record["guard"]["status"] for record in records)
     evidence_counts = Counter(record["evidence"]["status"] for record in records)
-    commit = subprocess.run(
-        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
-    ).stdout.strip()
+    commit = assessed_git_commit
     matrix_binding = {"path": MATRIX_RELATIVE, "sha256": sha256_file(matrix_path), "rows": len(matrix_rows)}
     claim_inventory_binding = {
         "path": CLAIM_INVENTORY_RELATIVE,
@@ -528,8 +540,15 @@ def build() -> dict[str, object]:
     }
 
 
-def main() -> int:
-    output = build()
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--assessed-git-commit",
+        default=ASSESSED_GIT_COMMIT,
+        help="immutable source commit whose bound inputs are being assessed",
+    )
+    arguments = parser.parse_args(argv)
+    output = build(arguments.assessed_git_commit)
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "output": str(OUTPUT.relative_to(ROOT)),

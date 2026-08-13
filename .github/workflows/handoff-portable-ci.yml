@@ -49,6 +49,8 @@ jobs:
             samtools
           python -m venv .venv
           .venv/bin/python -m pip install --require-hashes --requirement requirements-ci.lock
+          .venv/bin/python -m pip install --require-hashes --requirement requirements-docs-qa.lock
+          .venv/bin/python -m playwright install --with-deps chromium
           printf '%s\n' "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Record the CI environment

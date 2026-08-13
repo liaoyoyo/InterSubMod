@@ -4891,6 +4891,40 @@
       "type": "PYTHON"
     },
     {
+      "absolute_path_token_count": 1,
+      "classification": "REPRODUCIBLE_LEGACY",
+      "git_mode": "100755",
+      "known_limits": [
+        "REPRODUCIBLE_LEGACY does not mean broken; it means bip7/bip8 portable support is not promised.",
+        "Dependencies, side effects, and scientific validity require workflow-specific review before reuse.",
+        "Lexical scan found 1 literal POSIX absolute-path token(s); review their runtime role."
+      ],
+      "path": "scripts/handoff/build_algorithm_cli_crosswalk.py",
+      "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
+      "sha256": "1e27a347e0ebe13827852f3581ee9dd56eb358e771511150c15e1a0b5fba6ffa",
+      "shebang": "#!/usr/bin/env python3",
+      "size_bytes": 38289,
+      "suffix": ".py",
+      "type": "PYTHON"
+    },
+    {
+      "absolute_path_token_count": 1,
+      "classification": "REPRODUCIBLE_LEGACY",
+      "git_mode": "100755",
+      "known_limits": [
+        "REPRODUCIBLE_LEGACY does not mean broken; it means bip7/bip8 portable support is not promised.",
+        "Dependencies, side effects, and scientific validity require workflow-specific review before reuse.",
+        "Lexical scan found 1 literal POSIX absolute-path token(s); review their runtime role."
+      ],
+      "path": "scripts/handoff/build_large_asset_registry.py",
+      "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
+      "sha256": "7fafde6d841ed89ce4203e7abf05fcf36ab7e96de07373779b645b1203df0a00",
+      "shebang": "#!/usr/bin/env python3",
+      "size_bytes": 5899,
+      "suffix": ".py",
+      "type": "PYTHON"
+    },
+    {
       "absolute_path_token_count": 17,
       "classification": "SUPPORTED",
       "git_mode": "100755",
@@ -4901,9 +4935,9 @@
       ],
       "path": "scripts/handoff/build_registries.py",
       "reason": "Reviewed public handoff registry builder with explicit authority and storage-root inputs.",
-      "sha256": "d71ba12de993607a4992a198ac60679af6935077943776fe9a4a90d456d03d6c",
+      "sha256": "25711149349a49305f92115e94723fe3bcfd2e892e858aaa6430f4c0f2c44b53",
       "shebang": "#!/usr/bin/env python3",
-      "size_bytes": 53231,
+      "size_bytes": 53835,
       "suffix": ".py",
       "type": "PYTHON"
     },
@@ -5011,6 +5045,23 @@
     },
     {
       "absolute_path_token_count": 1,
+      "classification": "REPRODUCIBLE_LEGACY",
+      "git_mode": "100755",
+      "known_limits": [
+        "REPRODUCIBLE_LEGACY does not mean broken; it means bip7/bip8 portable support is not promised.",
+        "Dependencies, side effects, and scientific validity require workflow-specific review before reuse.",
+        "Lexical scan found 1 literal POSIX absolute-path token(s); review their runtime role."
+      ],
+      "path": "scripts/handoff/validate_algorithm_cli_crosswalk.py",
+      "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
+      "sha256": "b9b0a13eb9fb48648b5470171dc2fe0de029eb9abd91b40b3fefa168750fa422",
+      "shebang": "#!/usr/bin/env python3",
+      "size_bytes": 23335,
+      "suffix": ".py",
+      "type": "PYTHON"
+    },
+    {
+      "absolute_path_token_count": 1,
       "classification": "SUPPORTED",
       "git_mode": "100644",
       "known_limits": [
@@ -5020,9 +5071,26 @@
       ],
       "path": "scripts/handoff/validate_handoff_package.py",
       "reason": "Reviewed public fail-closed validator for the bounded handoff package contract.",
-      "sha256": "132bcb89d418d03469f276b8e4c9eadcc3ed9975489a66c6bd203b7bd936884b",
+      "sha256": "e2b5b23e441add8c9292306778bd998d797eb0fa3bedd528222582214bf9a647",
       "shebang": "#!/usr/bin/env python3",
-      "size_bytes": 45782,
+      "size_bytes": 46302,
+      "suffix": ".py",
+      "type": "PYTHON"
+    },
+    {
+      "absolute_path_token_count": 1,
+      "classification": "REPRODUCIBLE_LEGACY",
+      "git_mode": "100755",
+      "known_limits": [
+        "REPRODUCIBLE_LEGACY does not mean broken; it means bip7/bip8 portable support is not promised.",
+        "Dependencies, side effects, and scientific validity require workflow-specific review before reuse.",
+        "Lexical scan found 1 literal POSIX absolute-path token(s); review their runtime role."
+      ],
+      "path": "scripts/handoff/validate_reader_acceptance.py",
+      "reason": "Git-tracked workflow material retained for reproducibility, but outside the bounded bip7/bip8 portable public support allowlist.",
+      "sha256": "d36f35664fdf9be85b99bcf386bb0e6c79fc9a5ca455cc2a432b367d303824a6",
+      "shebang": "#!/usr/bin/env python3",
+      "size_bytes": 28059,
       "suffix": ".py",
       "type": "PYTHON"
     },
@@ -7341,7 +7409,7 @@
   "records_hash": {
     "algorithm": "sha256",
     "canonicalization": "UTF-8 canonical JSON of records; generated_at excluded",
-    "value": "f90d226a72bc8a4599d0f235097ee853b92c2c1ea09333451fbcb55cceb39d20"
+    "value": "907a83977b2839bbe66fdc40818baa145e89f552b59b41d3e915e3af95f733ca"
   },
   "registry_type": "git_tracked_workflow_governance",
   "schema_version": "1.0.0",
@@ -7352,29 +7420,29 @@
     "untracked_files_used": false
   },
   "summary": {
-    "absolute_path_token_total": 4269,
+    "absolute_path_token_total": 4273,
     "by_classification": {
       "ARCHIVED": 5,
-      "REPRODUCIBLE_LEGACY": 408,
+      "REPRODUCIBLE_LEGACY": 412,
       "SUPPORTED": 18
     },
     "by_type": {
       "JAVASCRIPT": 9,
       "JSON_DATA": 1,
       "MARKDOWN": 3,
-      "PYTHON": 301,
+      "PYTHON": 305,
       "SHELL": 111,
       "STYLESHEET": 1,
       "SYSTEMD_UNIT": 2,
       "TABULAR_DATA": 2,
       "YAML_DATA": 1
     },
-    "legacy_or_archived_records": 413,
-    "total_records": 431
+    "legacy_or_archived_records": 417,
+    "total_records": 435
   },
   "tree_content_hash": {
     "algorithm": "sha256",
     "canonicalization": "sorted(path NUL git_mode NUL size_bytes NUL sha256 NUL LF)",
-    "value": "307bc1bee008ee0a5b8e90cab8c1c09323bdb4e954404a21635dfa0d42dcd93a"
+    "value": "7f946484300bde8b0059f5fcc5778e99d6d20c00dd1330e77b50983210bad7de"
   }
 }
