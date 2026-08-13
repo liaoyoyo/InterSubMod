@@ -1,7 +1,7 @@
 {
   "manifest_type": "research_handoff_embedded_evidence",
   "schema_version": "1.0.0",
-  "verified_at": "2026-08-13T14:00:00+08:00",
+  "verified_at": "2026-08-13T22:19:46+08:00",
   "copy_policy": "Files marked EXACT_COPY are byte-identical package-local copies of the listed source. SUMMARY files hash-bind their full source receipt.",
   "records": [
     {
@@ -163,6 +163,28 @@
       "source_path": "Derived from the immutable 2026-08-12 35-row algorithm_cli_matrix.tsv and commit-pinned 2026-08-13 source snapshot",
       "evidence_status": "VALIDATED_DERIVED",
       "scope": "FULL",
+      "finality": "FINAL_FOR_SCOPE"
+    },
+    {
+      "evidence_id": "reader_acceptance_20260813",
+      "path": "evidence/reader_acceptance_receipt.json",
+      "sha256": "1bfc74aa99decbcb5e75c6ff13d7c20d2d470af47e809f9736bc5ca1e91a43de",
+      "size_bytes": 14472,
+      "copy_status": "NEW_PACKAGE_RECEIPT",
+      "source_path": "Independent no-prior-conversation reader evaluation of the 15-file package core at b690b4bc174fcef9d40b68875745f1c74a9c2d11",
+      "evidence_status": "VALIDATED_DERIVED",
+      "scope": "FULL",
+      "finality": "FINAL_FOR_SCOPE"
+    },
+    {
+      "evidence_id": "bip7_tiny_e2e_7c7fbd6f",
+      "path": "evidence/bip7_tiny_e2e_7c7fbd6f.json",
+      "sha256": "900e92522fbc351338a36b73c7745480ba45ef60e4e1eb2527ad102c441539bc",
+      "size_bytes": 2409,
+      "copy_status": "EXACT_COPY",
+      "source_path": "InterSubMod/research/20260813_complete_research_handoff/receipts/bip7_tiny_e2e_7c7fbd6f.json",
+      "evidence_status": "VALIDATED_DERIVED",
+      "scope": "DEMO",
       "finality": "FINAL_FOR_SCOPE"
     },
     {

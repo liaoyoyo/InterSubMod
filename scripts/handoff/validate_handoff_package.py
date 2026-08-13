@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -79,6 +80,30 @@ def load_json(path: Path) -> Any:
         return json.load(handle)
 
 
+def parse_aware_timestamp(value: object, label: str) -> datetime:
+    require(isinstance(value, str) and value, f"{label} must be a non-empty ISO-8601 timestamp")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ContractError(f"{label} is not a valid ISO-8601 timestamp: {value!r}") from error
+    require(parsed.tzinfo is not None, f"{label} must include an explicit timezone offset")
+    return parsed
+
+
+def iter_embedded_timestamps(value: Any, path: str = "$"):
+    """Yield timestamp-like provenance fields from a parsed evidence receipt."""
+
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            nested_path = f"{path}.{key}"
+            if key.endswith("_at") and isinstance(nested, str) and "T" in nested:
+                yield nested_path, nested
+            yield from iter_embedded_timestamps(nested, nested_path)
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            yield from iter_embedded_timestamps(nested, f"{path}[{index}]")
+
+
 def package_path(package_root: Path, relative: str, label: str, *, base: Path | None = None) -> Path:
     require(isinstance(relative, str) and relative.strip() != "", f"{label} must be a non-empty path")
     candidate = ((base or package_root) / relative).resolve()
@@ -131,6 +156,8 @@ def check_json_parse(package_root: Path) -> dict[str, Any]:
 
 def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
     manifest = load_json(package_root / "evidence/EVIDENCE_MANIFEST.json")
+    manifest_verified_at_raw = manifest.get("verified_at")
+    manifest_verified_at = parse_aware_timestamp(manifest_verified_at_raw, "EVIDENCE_MANIFEST verified_at")
     records = manifest.get("records")
     require(isinstance(records, list) and records, "EVIDENCE_MANIFEST records must be a non-empty list")
     evidence_ids = [row.get("evidence_id") for row in records if isinstance(row, dict)]
@@ -144,6 +171,9 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
     external_source_not_mounted = 0
     size_bound_count = 0
     required_size_bound = {"public_claim_validation_20260813", "full_claim_registry_20260813"}
+    temporal_fields_checked = 0
+    latest_embedded_at: datetime | None = None
+    latest_embedded_source: str | None = None
     for row in records:
         evidence_id = row["evidence_id"]
         if "evidence_status" in row:
@@ -160,6 +190,22 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
             )
         path = package_path(package_root, row.get("path"), f"evidence {evidence_id} path")
         require(path.is_file(), f"evidence path does not exist: {row.get('path')}")
+        if path.suffix.lower() == ".json":
+            payload = load_json(path)
+            for timestamp_path, raw_timestamp in iter_embedded_timestamps(payload):
+                embedded_at = parse_aware_timestamp(
+                    raw_timestamp,
+                    f"embedded evidence timestamp {evidence_id}:{timestamp_path}",
+                )
+                temporal_fields_checked += 1
+                require(
+                    embedded_at <= manifest_verified_at,
+                    "EVIDENCE_MANIFEST verified_at precedes embedded evidence timestamp: "
+                    f"{evidence_id}:{timestamp_path}={raw_timestamp}",
+                )
+                if latest_embedded_at is None or embedded_at > latest_embedded_at:
+                    latest_embedded_at = embedded_at
+                    latest_embedded_source = f"{evidence_id}:{timestamp_path}"
         if "size_bytes" in row or evidence_id in required_size_bound:
             expected_size = row.get("size_bytes")
             require(
@@ -212,6 +258,13 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
         require(evidence_id in by_id, f"missing sampled tagged BAM evidence record: {evidence_id}")
         actual = tuple(by_id[evidence_id].get(key) for key in ("evidence_status", "scope", "finality"))
         require(actual == expected, f"sampled tagged BAM evidence contract drifted for {evidence_id}: {actual!r}")
+    reader_id = "reader_acceptance_20260813"
+    require(reader_id in by_id, "fresh-reader acceptance evidence record is missing")
+    reader_contract = tuple(by_id[reader_id].get(key) for key in ("evidence_status", "scope", "finality"))
+    require(
+        reader_contract == ("VALIDATED_DERIVED", "FULL", "FINAL_FOR_SCOPE"),
+        f"fresh-reader acceptance evidence contract drifted: {reader_contract!r}",
+    )
     return {
         "records": len(records),
         "sha256_bound_records": sha256_bound_count,
@@ -221,6 +274,14 @@ def check_evidence_manifest(package_root: Path) -> dict[str, Any]:
         "size_bound_records": size_bound_count,
         "missing": 0,
         "hash_mismatch": 0,
+        "reader_acceptance_records": 1,
+        "manifest_verified_at": manifest_verified_at_raw,
+        "temporal_fields_checked": temporal_fields_checked,
+        "latest_embedded_at_utc": (
+            latest_embedded_at.astimezone(timezone.utc).isoformat() if latest_embedded_at is not None else None
+        ),
+        "latest_embedded_source": latest_embedded_source,
+        "temporal_order_validated": True,
     }
 
 
@@ -814,6 +875,88 @@ def check_reader_contract(package_root: Path) -> dict[str, Any]:
     }
 
 
+def check_reader_acceptance_receipt(package_root: Path) -> dict[str, Any]:
+    receipt = package_root / "evidence/reader_acceptance_receipt.json"
+    require(receipt.is_file(), "fresh-reader acceptance receipt is missing")
+    validator_path = repository_root() / "scripts/handoff/validate_reader_acceptance.py"
+    spec = importlib.util.spec_from_file_location("handoff_reader_acceptance_validator", validator_path)
+    require(spec is not None and spec.loader is not None, "cannot load fresh-reader acceptance validator")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    errors, summary = module.validate(
+        receipt,
+        package_root,
+        require_head=False,
+        source_repo=repository_root(),
+    )
+    require(not errors, "fresh-reader acceptance receipt failed: " + "; ".join(errors))
+    require(summary.get("verdict") == "PASS", "fresh-reader acceptance verdict is not PASS")
+    return summary
+
+
+def check_tiny_e2e_receipt(package_root: Path) -> dict[str, Any]:
+    receipt = load_json(package_root / "evidence/bip7_tiny_e2e_7c7fbd6f.json")
+    require(receipt.get("schema_name") == "intersubmod.bip7_tiny_e2e_summary_receipt", "tiny E2E schema_name differs")
+    require(receipt.get("schema_version") == "1.0.0", "tiny E2E schema_version differs")
+    require(receipt.get("hostname") == "bip7", "tiny E2E hostname is not bip7")
+    require(receipt.get("scope") == "DEMO", "tiny E2E scope must remain DEMO")
+    require(receipt.get("evidence_status") == "VALIDATED_DERIVED", "tiny E2E evidence_status differs")
+    require(receipt.get("finality") == "FINAL_FOR_SCOPE", "tiny E2E finality differs")
+    require(receipt.get("machine_acceptance") is False, "tiny E2E cannot satisfy machine acceptance")
+    require(receipt.get("overall_release_gate") == "NOT_EVALUATED", "tiny E2E cannot promote the release gate")
+    require(receipt.get("exit_code") == 0, "tiny E2E process exit is not zero")
+    ceiling = receipt.get("claim_ceiling")
+    require(
+        isinstance(ceiling, str) and "DEMO" in ceiling and "no biological" in ceiling,
+        "tiny E2E claim ceiling is missing DEMO/no-biological bounds",
+    )
+    checkout = receipt.get("source_checkout")
+    require(isinstance(checkout, dict), "tiny E2E source_checkout is missing")
+    commit = checkout.get("resolved_commit")
+    require(
+        isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None,
+        "tiny E2E resolved commit is invalid",
+    )
+    require(checkout.get("requested_revision") == commit, "tiny E2E requested/resolved revisions differ")
+    require(checkout.get("clean") is True and checkout.get("status_line_count") == 0, "tiny E2E checkout was not clean")
+    results = receipt.get("results")
+    require(isinstance(results, dict), "tiny E2E results are missing")
+    expected_results = {
+        "all_pass": True,
+        "clean_clone_e2e_pass": True,
+        "summary_column_count": 199,
+        "summary_row_count": 1,
+        "tree_leaf_count": 12,
+        "valid_pairs": 66,
+        "invalid_pairs": 0,
+        "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage",
+    }
+    require(results == expected_results, f"tiny E2E result contract differs: {results!r}")
+    hashes = receipt.get("hashes")
+    required_hashes = {
+        "binary_sha256",
+        "significance_summary_sha256",
+        "tree_newick_sha256",
+        "run_command_sha256",
+        "full_ephemeral_receipt_sha256",
+    }
+    require(isinstance(hashes, dict) and set(hashes) == required_hashes, "tiny E2E hash set differs")
+    require(
+        all(isinstance(value, str) and SHA256_RE.fullmatch(value) for value in hashes.values()),
+        "tiny E2E contains an invalid SHA-256",
+    )
+    return {
+        "commit": commit,
+        "scope": "DEMO",
+        "columns": 199,
+        "rows": 1,
+        "read_leaves": 12,
+        "valid_pairs": 66,
+        "machine_acceptance": False,
+        "overall_release_gate": "NOT_EVALUATED",
+    }
+
+
 CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("markdown_links", check_markdown_links),
     ("json_parse", check_json_parse),
@@ -827,6 +970,8 @@ CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("authority_replay", check_authority_replay),
     ("release_gate_text", check_release_gate_text),
     ("reader_contract", check_reader_contract),
+    ("reader_acceptance_receipt", check_reader_acceptance_receipt),
+    ("tiny_e2e_receipt", check_tiny_e2e_receipt),
 )
 
 

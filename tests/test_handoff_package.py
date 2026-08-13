@@ -38,7 +38,7 @@ class HandoffPackageValidationTest(unittest.TestCase):
 
     def test_complete_package_passes_all_gates(self):
         self.assertTrue(self.valid_receipt["pass"], self.valid_receipt)
-        self.assertEqual(self.valid_receipt["tally"], {"PASS": 13, "FAIL": 0})
+        self.assertEqual(self.valid_receipt["tally"], {"PASS": 15, "FAIL": 0})
 
     def test_receipt_exposes_required_counts(self):
         by_id = {row["check_id"]: row for row in self.valid_receipt["checks"]}
@@ -66,6 +66,39 @@ class HandoffPackageValidationTest(unittest.TestCase):
         )
         self.assertEqual(by_id["claim_registries"]["details"]["claims"], 158)
         self.assertEqual(by_id["authority_replay"]["details"]["match"], 19)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["questions"], 6)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["prohibited_promotions"], 8)
+        self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["source_files"], 15)
+        self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["columns"], 199)
+        self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["read_leaves"], 12)
+        self.assertFalse(by_id["tiny_e2e_receipt"]["details"]["machine_acceptance"])
+        self.assertTrue(by_id["evidence_manifest"]["details"]["temporal_order_validated"])
+        self.assertEqual(
+            by_id["evidence_manifest"]["details"]["latest_embedded_source"],
+            "bip7_tiny_e2e_7c7fbd6f:$.verified_at",
+        )
+
+    def test_tiny_e2e_receipt_cannot_promote_machine_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            path = package / "evidence/bip7_tiny_e2e_7c7fbd6f.json"
+            tiny = json.loads(path.read_text(encoding="utf-8"))
+            tiny["machine_acceptance"] = True
+            path.write_text(json.dumps(tiny, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "tiny_e2e_receipt")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
+
+    def test_reader_acceptance_receipt_semantic_drift_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            path = package / "evidence/reader_acceptance_receipt.json"
+            reader = json.loads(path.read_text(encoding="utf-8"))
+            reader["questions"][0]["answer"] = "See the documentation for details."
+            path.write_text(json.dumps(reader, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "reader_acceptance_receipt")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
 
     def test_broken_markdown_link_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -106,6 +139,17 @@ class HandoffPackageValidationTest(unittest.TestCase):
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
             receipt = MODULE.validate_package(package)
             self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+
+    def test_evidence_manifest_verified_at_cannot_precede_embedded_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            manifest_path = package / "evidence/EVIDENCE_MANIFEST.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["verified_at"] = "2026-08-13T21:00:00+08:00"
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "evidence_manifest")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
 
     def test_public_claim_evidence_size_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

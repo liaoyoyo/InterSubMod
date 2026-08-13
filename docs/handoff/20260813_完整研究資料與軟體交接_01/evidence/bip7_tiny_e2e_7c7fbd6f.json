@@ -1,0 +1,46 @@
+{
+  "schema_name": "intersubmod.bip7_tiny_e2e_summary_receipt",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T13:58:11.700462+00:00",
+  "hostname": "bip7",
+  "scope": "DEMO",
+  "evidence_status": "VALIDATED_DERIVED",
+  "finality": "FINAL_FOR_SCOPE",
+  "machine_acceptance": false,
+  "overall_release_gate": "NOT_EVALUATED",
+  "claim_ceiling": "Clean-clone DEMO I/O and schema reproducibility only; no biological or real-data validation",
+  "source_checkout": {
+    "source_repository": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+    "requested_revision": "7c7fbd6f54acf94bd6c2db7e3f55c6c8543c9f93",
+    "resolved_commit": "7c7fbd6f54acf94bd6c2db7e3f55c6c8543c9f93",
+    "clean": true,
+    "status_line_count": 0
+  },
+  "command": "InterSubMod/scripts/handoff/run_tiny_public_e2e.sh --source-repository /big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813 --revision 7c7fbd6f54acf94bd6c2db7e3f55c6c8543c9f93 --work-dir /tmp/ism-final-e2e.fsyWHg/run --jobs 2",
+  "exit_code": 0,
+  "results": {
+    "all_pass": true,
+    "clean_clone_e2e_pass": true,
+    "summary_column_count": 199,
+    "summary_row_count": 1,
+    "tree_leaf_count": 12,
+    "valid_pairs": 66,
+    "invalid_pairs": 0,
+    "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage"
+  },
+  "hashes": {
+    "binary_sha256": "df3b6ba27dd9f4949d1c2243c7493bc38d0b0f6c10b8ef39a6b20238b0b68919",
+    "significance_summary_sha256": "9412bf098e033e1df241e22366230e4092d26d26af9432b6b195d5079e1d03ab",
+    "tree_newick_sha256": "7c2483ecb138da6e570f89bad7b32b3757020a58845da573090eba4e82d952b7",
+    "run_command_sha256": "b0bcad62c69a5ea0e817603f3adcd968c7e4cb90bd6a5531133de7dfcf0751d2",
+    "full_ephemeral_receipt_sha256": "d20594eb15a5b897a2d80d026c1585bf35920a5a08f5e4533b2fae527ff554ad"
+  },
+  "full_receipt_local_path": "/tmp/ism-final-e2e.fsyWHg/run/tiny_public_e2e_receipt.json",
+  "known_limits": [
+    "The fixture is synthetic and scope=DEMO.",
+    "This receipt does not satisfy the bip7 real-data read-only preflight gate.",
+    "This receipt does not satisfy any bip8 host-local gate.",
+    "The tested commit precedes this summary receipt by design; final release acceptance must use an external or CI receipt bound to the release commit.",
+    "The full receipt and runtime logs remain local; this summary preserves the tested commit, exact result, semantics, and key hashes."
+  ]
+}
