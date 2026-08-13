@@ -1,0 +1,1034 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/schemas/gate-acceptance-receipt.schema.json",
+  "title": "InterSubMod evidence-bearing acceptance gate receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_type",
+    "gate_id",
+    "source_commit",
+    "generated_at",
+    "scope",
+    "execution",
+    "details",
+    "result",
+    "overall_pass",
+    "blocking_gates"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "receipt_type": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+_acceptance$"
+    },
+    "gate_id": {
+      "enum": [
+        "registry_and_handoff_package",
+        "clean_release_build",
+        "ctest_complete",
+        "python_tests_complete",
+        "tiny_synthetic_e2e",
+        "bip7_fresh_clone_acceptance",
+        "bip8_fresh_clone_acceptance",
+        "html_browser_qa_84",
+        "docs_claim_link_validation",
+        "public_claim_registry_158",
+        "github_publication_commit_alignment",
+        "github_branch_protection_required_ci",
+        "full_history_secret_scan",
+        "release_asset_sha256_roundtrip",
+        "reader_ai_six_question_acceptance",
+        "intersubmod_project_license_confirmation"
+      ]
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "const": "FULL"
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "tool",
+        "version",
+        "command",
+        "log_uri",
+        "log_sha256",
+        "exit_code"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "COMMAND",
+            "GITHUB_API",
+            "READER_AGENT"
+          ]
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "log_uri": {
+          "type": "string",
+          "pattern": "^release-assets/[A-Za-z0-9._-]+$"
+        },
+        "log_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "exit_code": {
+          "const": 0
+        }
+      }
+    },
+    "details": {
+      "type": "object"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "checks",
+        "failures"
+      ],
+      "properties": {
+        "status": {
+          "const": "PASS"
+        },
+        "checks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "failures": {
+          "const": 0
+        }
+      }
+    },
+    "overall_pass": {
+      "const": true
+    },
+    "blocking_gates": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostname",
+        "mount_type",
+        "tool_hashes"
+      ],
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mount_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tool_hashes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "github": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_url",
+        "api_endpoint",
+        "raw_api_response",
+        "response_sha256"
+      ],
+      "properties": {
+        "repository_url": {
+          "const": "https://github.com/liaoyoyo/InterSubMod"
+        },
+        "api_endpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw_api_response": {
+          "type": "string",
+          "minLength": 2
+        },
+        "response_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "registry_and_handoff_package"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "registry_records",
+              "schema_errors",
+              "package_errors"
+            ],
+            "properties": {
+              "registry_records": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "schema_errors": {
+                "const": 0
+              },
+              "package_errors": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "clean_release_build"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "build_type",
+              "configure_exit",
+              "build_exit"
+            ],
+            "properties": {
+              "build_type": {
+                "const": "Release"
+              },
+              "configure_exit": {
+                "const": 0
+              },
+              "build_exit": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "ctest_complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "discovery_command",
+              "tests_total",
+              "tests_passed",
+              "tests_failed"
+            ],
+            "properties": {
+              "discovery_command": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tests_total": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "tests_passed": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "tests_failed": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "python_tests_complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "python_version",
+              "requirements_lock_sha256",
+              "tests_total",
+              "tests_passed",
+              "tests_failed"
+            ],
+            "properties": {
+              "python_version": {
+                "type": "string",
+                "pattern": "^3\\.10(?:\\.|$)"
+              },
+              "requirements_lock_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "tests_total": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "tests_passed": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "tests_failed": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "tiny_synthetic_e2e"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "plan_exit",
+              "plan_side_effects",
+              "run_exit",
+              "schema_valid",
+              "hash_valid"
+            ],
+            "properties": {
+              "plan_exit": {
+                "const": 0
+              },
+              "plan_side_effects": {
+                "const": 0
+              },
+              "run_exit": {
+                "const": 0
+              },
+              "schema_valid": {
+                "const": true
+              },
+              "hash_valid": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "bip7_fresh_clone_acceptance"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fresh_clone",
+              "clone_exit",
+              "build_exit",
+              "ctest_exit",
+              "python_tests_exit",
+              "synthetic_smoke_exit",
+              "real_data_preflight_exit",
+              "real_data_read_only"
+            ],
+            "properties": {
+              "fresh_clone": {
+                "const": true
+              },
+              "clone_exit": {
+                "const": 0
+              },
+              "build_exit": {
+                "const": 0
+              },
+              "ctest_exit": {
+                "const": 0
+              },
+              "python_tests_exit": {
+                "const": 0
+              },
+              "synthetic_smoke_exit": {
+                "const": 0
+              },
+              "real_data_preflight_exit": {
+                "const": 0
+              },
+              "real_data_read_only": {
+                "const": true
+              }
+            }
+          }
+        },
+        "required": [
+          "host"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "bip8_fresh_clone_acceptance"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fresh_clone",
+              "clone_exit",
+              "build_exit",
+              "ctest_exit",
+              "python_tests_exit",
+              "synthetic_smoke_exit",
+              "real_data_preflight_exit",
+              "real_data_read_only"
+            ],
+            "properties": {
+              "fresh_clone": {
+                "const": true
+              },
+              "clone_exit": {
+                "const": 0
+              },
+              "build_exit": {
+                "const": 0
+              },
+              "ctest_exit": {
+                "const": 0
+              },
+              "python_tests_exit": {
+                "const": 0
+              },
+              "synthetic_smoke_exit": {
+                "const": 0
+              },
+              "real_data_preflight_exit": {
+                "const": 0
+              },
+              "real_data_read_only": {
+                "const": true
+              }
+            }
+          }
+        },
+        "required": [
+          "host"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "html_browser_qa_84"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "checks_total",
+              "checks_passed",
+              "checks_failed",
+              "desktop",
+              "mobile",
+              "no_js",
+              "print",
+              "xml_svg_parse",
+              "external_requests"
+            ],
+            "properties": {
+              "checks_total": {
+                "const": 84
+              },
+              "checks_passed": {
+                "const": 84
+              },
+              "checks_failed": {
+                "const": 0
+              },
+              "desktop": {
+                "const": true
+              },
+              "mobile": {
+                "const": true
+              },
+              "no_js": {
+                "const": true
+              },
+              "print": {
+                "const": true
+              },
+              "xml_svg_parse": {
+                "const": true
+              },
+              "external_requests": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "docs_claim_link_validation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "markdown_link_errors",
+              "source_path_errors",
+              "claim_id_errors",
+              "superseded_current_index_refs"
+            ],
+            "properties": {
+              "markdown_link_errors": {
+                "const": 0
+              },
+              "source_path_errors": {
+                "const": 0
+              },
+              "claim_id_errors": {
+                "const": 0
+              },
+              "superseded_current_index_refs": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "public_claim_registry_158"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rows_total",
+              "confirmed",
+              "confirmed_with_limits",
+              "unverified",
+              "invalid_rows",
+              "p0_unresolved"
+            ],
+            "properties": {
+              "rows_total": {
+                "const": 158
+              },
+              "confirmed": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "confirmed_with_limits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unverified": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "invalid_rows": {
+                "const": 0
+              },
+              "p0_unresolved": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "github_publication_commit_alignment"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "GITHUB_API"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "main_commit",
+              "wiki_commit",
+              "pages_commit",
+              "readme_zh_http_status"
+            ],
+            "properties": {
+              "main_commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "wiki_commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "pages_commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "readme_zh_http_status": {
+                "const": 200
+              }
+            }
+          }
+        },
+        "required": [
+          "github"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "github_branch_protection_required_ci"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "GITHUB_API"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "branch",
+              "protected",
+              "required_ci",
+              "enforcement"
+            ],
+            "properties": {
+              "branch": {
+                "const": "main"
+              },
+              "protected": {
+                "const": true
+              },
+              "required_ci": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "enforcement": {
+                "const": true
+              }
+            }
+          }
+        },
+        "required": [
+          "github"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "full_history_secret_scan"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "scope",
+              "findings",
+              "report_sha256"
+            ],
+            "properties": {
+              "scope": {
+                "const": "FULL_HISTORY"
+              },
+              "findings": {
+                "const": 0
+              },
+              "report_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "release_asset_sha256_roundtrip"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "COMMAND"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "assets_expected",
+              "assets_downloaded",
+              "hash_matches",
+              "http_200_count"
+            ],
+            "properties": {
+              "assets_expected": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "assets_downloaded": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "hash_matches": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "http_200_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "reader_ai_six_question_acceptance"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "READER_AGENT"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "detailed_receipt_path",
+              "detailed_receipt_sha256",
+              "schema_path",
+              "validator_path",
+              "questions_total",
+              "questions_passed",
+              "promotions_total",
+              "promotions_passed",
+              "validator_exit"
+            ],
+            "properties": {
+              "detailed_receipt_path": {
+                "const": "docs/handoff/20260813_完整研究資料與軟體交接_01/evidence/reader_acceptance_receipt.json"
+              },
+              "detailed_receipt_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "schema_path": {
+                "const": "docs/handoff/20260813_完整研究資料與軟體交接_01/schemas/reader-acceptance.schema.json"
+              },
+              "validator_path": {
+                "const": "scripts/handoff/validate_reader_acceptance.py"
+              },
+              "questions_total": {
+                "const": 6
+              },
+              "questions_passed": {
+                "const": 6
+              },
+              "promotions_total": {
+                "const": 8
+              },
+              "promotions_passed": {
+                "const": 8
+              },
+              "validator_exit": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_id": {
+            "const": "intersubmod_project_license_confirmation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "kind": {
+                "const": "GITHUB_API"
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "authority_kind",
+              "maintainer_login",
+              "spdx_expression",
+              "approval_url",
+              "approval_commit",
+              "api_endpoint",
+              "raw_api_response",
+              "response_sha256"
+            ],
+            "properties": {
+              "authority_kind": {
+                "const": "GITHUB_REPOSITORY_OWNER_APPROVED_PR"
+              },
+              "maintainer_login": {
+                "const": "liaoyoyo"
+              },
+              "spdx_expression": {
+                "enum": [
+                  "GPL-3.0-only",
+                  "GPL-3.0-or-later"
+                ]
+              },
+              "approval_url": {
+                "type": "string",
+                "pattern": "^https://github\\.com/liaoyoyo/InterSubMod/pull/[1-9][0-9]*$"
+              },
+              "approval_commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "api_endpoint": {
+                "type": "string",
+                "pattern": "^https://api\\.github\\.com/repos/liaoyoyo/InterSubMod/pulls/[1-9][0-9]*/reviews$"
+              },
+              "raw_api_response": {
+                "type": "string",
+                "minLength": 2
+              },
+              "response_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
