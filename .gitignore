@@ -154,6 +154,11 @@ preview/
 .codex
 # Claude Code scheduled task lock (transient runtime state)
 .claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Machine-specific site profiles contain local paths and host-specific hashes.
+config/site-profile.local.json
+config/sites/*.local.json
 # image-vision-check intermediate JSON (per-run instruction file)
 examples/phase1_demo/demo_topic/figures/_check_instructions.json
 

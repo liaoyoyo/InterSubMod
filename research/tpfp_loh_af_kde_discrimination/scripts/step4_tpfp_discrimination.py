@@ -1,1 +1,1 @@
-/big7_disk/liaoyoyo2001/InterSubMod/research/ng_kde_rescaling/scripts/step4_tpfp_discrimination.py
+../../ng_kde_rescaling/scripts/step4_tpfp_discrimination.py
