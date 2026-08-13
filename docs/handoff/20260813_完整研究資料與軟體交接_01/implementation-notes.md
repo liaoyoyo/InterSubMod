@@ -44,6 +44,7 @@
 | Reader acceptance contract | Draft 2020-12 schema＋15-file dual hash binding＋negative tests | 26/26 PASS（含34個回答語意與23個禁止升格語意） | contract PASS；真正fresh-agent receipt仍待source commit固定 |
 | Package validator | `/tmp/ism-handoff-py310/bin/python scripts/handoff/validate_handoff_package.py <PACKAGE_ROOT>` | 13/13 PASS；20 evidence records、0 missing/hash mismatch | local package structure PASS；release gates仍blocked |
 | LongLineage clean foundation | clean clone `f60b5f3` configure/build/check_all | 49/49 CTest、no-network、FOUNDATION_PASS | foundation PASS；release blockers remain |
+| LongLineage private docs closure | clean `0805bd5`；只含CHANGELOG、CURRENT_FOCUS與archived task receipt | fresh build exit 0、CTest 49/49、production `run`為預期`KernelBlocked` exit 6；worktree clean、未push/tag/release | engineering boundary PASS；`b9aaa12`仍是public-preview candidate，公開gate仍BLOCKED |
 | LongLineage strict public gate | immutable audit base from safety receipt | expected exit 1；5 blocker classes | safe FAIL；keep private |
 
 ## 偏離與更正
@@ -53,6 +54,7 @@
 - [偏離] `InterSubMod_big7_runbook`廣泛搜尋仍找不到。Registry標`MISSING_SOURCE/HISTORICAL`，reconstructed index不可冒充原件。
 - [偏離] LongLineage在稽核期間兩度被觀察為`PUBLIC`並收回`PRIVATE`。目前private不能證明暴露期間沒有clone/download；事件保留於safety receipt。
 - [偏離] LongLineage PR #6最初以moving `origin/main`作history base，hosted CI 5 jobs fail。已改讀safety receipt的immutable `5daf50f…`，新版9/9 hosted checks PASS。
+- [偏離] Unified machine-path registry一度仍記錄LongLineage preview `f60b5f3`且dirty=3。等docs-only closure `0805bd5`完成後，已在InterSubMod clean `15a6493b`時重建：兩個release worktree皆clean，LongLineage HEAD=`0805bd5`；這是`last_seen_at`操作快照，不把`0805bd5`升格為public candidate。
 - [偏離] 一次full CTest誤用只build governance target的build dir，造成多個`Not Run`；該次明確作廢，不列PASS/FAIL證據。正式clean-clone full build後重跑49/49 PASS。
 - [偏離] `EVIDENCE_MANIFEST.json`曾漏登3個tagged-BAM sampled-identity檔，且frozen-binary adjudication保留舊SHA。已補回baseline／replay manifest／replay receipt的`HISTORICAL|VALIDATED_DERIVED + PARTIAL + NON_FINAL`契約，並以現行exact-copy SHA重新綁定；package validator回到13/13 PASS。
 - [偏離] Frozen binary adjudication曾把5/5 solver module byte identity與19/19 authority replay寫成「論文核心數字可從版本控制完整重建」。已改為binary/source identity與重編骨架；TiB/local data plane的science未全量重算。
