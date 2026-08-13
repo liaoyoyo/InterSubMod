@@ -61,10 +61,10 @@ from scripts.lib.verification_schema_contract import (  # noqa: E402
 )
 
 # ── Output Paths ──────────────────────────────────────────────────────────
-BASE_DIR = Path("/big7_disk/liaoyoyo2001/InterSubMod/research/loh_investigation")
-FIG_DIR = ensure_dir(BASE_DIR / "figures")
-DATA_DIR = ensure_dir(BASE_DIR / "data")
-REPORT_DIR = ensure_dir(BASE_DIR / "reports")
+BASE_DIR = REPO_ROOT / "research" / "loh_investigation"
+FIG_DIR = BASE_DIR / "figures"
+DATA_DIR = BASE_DIR / "data"
+REPORT_DIR = BASE_DIR / "reports"
 
 PREFIX = "o15_p2"
 
@@ -1468,6 +1468,9 @@ def main():
     print("=" * 70)
     print("O15 Phase 2: Cross-Sample LOH Zone Metrics Analysis")
     print("=" * 70)
+
+    for output_dir in (FIG_DIR, DATA_DIR, REPORT_DIR):
+        ensure_dir(output_dir)
 
     setup_plot_style()
 

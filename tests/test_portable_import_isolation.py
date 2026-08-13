@@ -74,3 +74,52 @@ raise SystemExit(1 if outside_modules or foreign_repo_entries else 0)
     payload = json.loads(completed.stdout)
     assert completed.returncode == 0, completed.stderr or payload
     assert payload == {"foreign_repo_entries": [], "outside_modules": {}}
+
+
+def test_o15b_import_is_checkout_relative_and_side_effect_free() -> None:
+    probe = r"""
+import importlib
+import json
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1]).resolve()
+common = importlib.import_module("scripts.analysis.observation_common")
+original_ensure_dir = common.ensure_dir
+
+def forbid_import_time_directory_creation(path):
+    raise AssertionError(f"import attempted to create output directory: {path}")
+
+common.ensure_dir = forbid_import_time_directory_creation
+try:
+    module = importlib.import_module(
+        "scripts.analysis.build_observation_O15b_loh_zone_metrics_cross_sample"
+    )
+finally:
+    common.ensure_dir = original_ensure_dir
+
+paths = {
+    name: str(getattr(module, name).resolve())
+    for name in ("BASE_DIR", "FIG_DIR", "DATA_DIR", "REPORT_DIR")
+}
+outside = {
+    name: path
+    for name, path in paths.items()
+    if not Path(path).is_relative_to(repo)
+}
+print(json.dumps({"outside_paths": outside, "paths": paths}, sort_keys=True))
+raise SystemExit(1 if outside else 0)
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", probe, str(REPO_ROOT)],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    payload = json.loads(completed.stdout)
+    assert completed.returncode == 0, completed.stderr or payload
+    assert payload["outside_paths"] == {}
+    assert payload["paths"]["BASE_DIR"] == str(
+        REPO_ROOT / "research" / "loh_investigation"
+    )
