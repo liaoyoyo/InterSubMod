@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>InterSubMod／LongLineage 完整研究交接總覽｜2026-08-13</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #536171;
+      --paper: #f7f8fa;
+      --panel: #ffffff;
+      --line: #d8dee7;
+      --accent: #0b6e75;
+      --accent-soft: #dff3f2;
+      --warn: #8a4b08;
+      --warn-soft: #fff1d6;
+      --danger: #9c2f32;
+      --danger-soft: #fde7e7;
+      --pass: #17633b;
+      --pass-soft: #e1f3e8;
+      --shadow: 0 8px 24px rgba(23, 33, 43, 0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.62;
+    }
+    a { color: var(--accent); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #e0a61b; outline-offset: 3px; }
+    .skip-link {
+      position: absolute; left: 1rem; top: -5rem; z-index: 20;
+      padding: 0.7rem 1rem; color: #fff; background: #111; border-radius: 8px;
+    }
+    .skip-link:focus { top: 1rem; }
+    .ribbon {
+      padding: 0.7rem 1rem;
+      color: #fff;
+      background: var(--danger);
+      font-weight: 750;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+    header {
+      padding: 3rem clamp(1rem, 5vw, 5rem) 2.4rem;
+      color: #f8ffff;
+      background: linear-gradient(132deg, #12313d, #0b6e75 72%, #178a82);
+    }
+    header .eyebrow { margin: 0 0 0.6rem; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { max-width: 1050px; margin: 0; font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1.08; }
+    header .lede { max-width: 920px; margin: 1.1rem 0 0; font-size: clamp(1rem, 2vw, 1.28rem); }
+    .status-row { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 1.4rem; }
+    .pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.36rem 0.72rem; border-radius: 999px; font-size: 0.86rem; font-weight: 750; }
+    header .pill { color: #fff; border: 1px solid rgba(255,255,255,0.55); background: rgba(0,0,0,0.16); }
+    .layout { display: grid; grid-template-columns: minmax(210px, 260px) minmax(0, 1fr); gap: 1.5rem; max-width: 1500px; margin: 0 auto; padding: 1.5rem; }
+    nav { position: sticky; top: 1rem; align-self: start; padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
+    nav strong { display: block; margin-bottom: 0.55rem; }
+    nav ol { margin: 0; padding-left: 1.2rem; }
+    nav li + li { margin-top: 0.35rem; }
+    main { min-width: 0; }
+    section, details.card { margin: 0 0 1.25rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
+    section { padding: clamp(1rem, 3vw, 2rem); }
+    details.card { padding: 0; }
+    details.card > summary { cursor: pointer; padding: 1rem 1.3rem; font-weight: 800; }
+    details.card > div { padding: 0 1.3rem 1.3rem; }
+    h2 { margin: 0 0 0.8rem; font-size: clamp(1.45rem, 3vw, 2.1rem); }
+    h3 { margin: 1.4rem 0 0.45rem; }
+    .kicker { margin: 0 0 0.4rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; }
+    .callout { padding: 0.9rem 1rem; border-left: 5px solid var(--accent); background: var(--accent-soft); }
+    .callout.danger { border-color: var(--danger); background: var(--danger-soft); }
+    .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; }
+    .metric { padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg, #fff, #f7fafb); }
+    .metric .value { display: block; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 850; line-height: 1.1; color: var(--accent); }
+    .metric .label { display: block; margin-top: 0.35rem; color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+    th, td { padding: 0.72rem 0.75rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #eef2f5; font-weight: 800; }
+    tr:last-child td { border-bottom: 0; }
+    .state { white-space: nowrap; font-weight: 800; }
+    .pass { color: var(--pass); }
+    .blocked { color: var(--danger); }
+    .limited { color: var(--warn); }
+    .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; align-items: stretch; }
+    .flow article { position: relative; padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfd; }
+    .flow article:not(:last-child)::after { content: "→"; position: absolute; right: -0.62rem; top: 43%; z-index: 2; color: var(--accent); font-size: 1.5rem; font-weight: 900; }
+    code { padding: 0.08em 0.3em; border-radius: 5px; background: #edf1f4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+    pre { overflow: auto; padding: 1rem; border-radius: 10px; color: #e7f8f7; background: #142d36; }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .small { color: var(--muted); font-size: 0.88rem; }
+    footer { padding: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); background: var(--panel); }
+    footer p { max-width: 1200px; margin: 0.35rem auto; }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      nav { position: static; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: 1fr 1fr; }
+      .flow article::after { display: none; }
+    }
+    @media (max-width: 560px) {
+      header { padding: 2.2rem 1rem 1.8rem; }
+      .layout { padding: 0.75rem; }
+      .grid, .flow { grid-template-columns: 1fr; }
+      th, td { padding: 0.58rem; }
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink:#e9f0f5; --muted:#b6c1cb; --paper:#10171d; --panel:#172129; --line:#34434e; --accent:#6fd4ce; --accent-soft:#123a3b; --warn-soft:#3d2d12; --danger-soft:#3d1f22; --pass-soft:#153525; }
+      .metric, .flow article { background: #1a252d; }
+      th { background: #22313b; }
+      code { background: #27343d; }
+    }
+    @media print {
+      :root { --paper:#fff; --panel:#fff; --ink:#000; --muted:#333; --line:#bbb; }
+      .ribbon { color:#000; background:#fff; border:3px solid #000; }
+      header { color:#000; background:#fff; border-bottom:2px solid #000; padding:1rem 0; }
+      .layout { display:block; max-width:none; padding:0; }
+      nav { display:none; }
+      section, details.card { break-inside:avoid; box-shadow:none; }
+      details.card > div { display:block !important; }
+      a { color:#000; text-decoration:none; }
+      .flow article::after { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="ribbon" role="status">RESEARCH HANDOFF SNAPSHOT · RELEASE BLOCKED · 非 production release</div>
+  <header>
+    <p class="eyebrow">InterSubMod / LongLineage · 2026-08-13</p>
+    <h1>完整研究資料、流程與軟體交接總覽</h1>
+    <p class="lede">可供新人與 AI 在 bip7／bip8 理解研究、追溯資料、執行 synthetic smoke 與規劃後續工作；目前不允許把候選分子結構升格成 cellular lineage，也不允許建立 release tag。</p>
+    <div class="status-row" aria-label="核心狀態">
+      <span class="pill">7 technical datasets</span>
+      <span class="pill">6 biological IDs</span>
+      <span class="pill">chr1–22</span>
+      <span class="pill">19/19 frozen bytes MATCH</span>
+      <span class="pill">P3/P4/P5/P7/P8 BLOCKED</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="本頁目錄">
+      <strong>總覽索引</strong>
+      <ol>
+        <li><a href="#verdict">目前判定</a></li>
+        <li><a href="#authority">科學權威</a></li>
+        <li><a href="#flow">軟體與資料流</a></li>
+        <li><a href="#inventory">資料盤點</a></li>
+        <li><a href="#finality">Finality 規則</a></li>
+        <li><a href="#machines">bip7／bip8</a></li>
+        <li><a href="#verification">驗證 Gate</a></li>
+        <li><a href="#continue">繼續研究</a></li>
+        <li><a href="#sources">來源索引</a></li>
+      </ol>
+    </nav>
+
+    <main id="main">
+      <section id="verdict">
+        <p class="kicker">SCQA + Claim–Evidence–Verdict</p>
+        <h2>可交接研究；不可宣稱 production 或 biological lineage</h2>
+        <div class="callout danger"><strong>核心 verdict：</strong>frozen evidence 可以 byte replay，registry 可以追溯，但雙機、公開面、LongLineage license/source-origin、CN/LOH 與 cellular truth 尚未閉合。因此 tag／Release／public preview 都維持 blocked。</div>
+        <div class="grid" style="margin-top:1rem">
+          <div class="metric"><span class="value">0</span><span class="label">confirmed cellular subclone</span></div>
+          <div class="metric"><span class="value">0</span><span class="label">confirmed linear ancestry</span></div>
+          <div class="metric"><span class="value">19/19</span><span class="label">authority SHA-256 replay MATCH</span></div>
+          <div class="metric"><span class="value">88.2579%</span><span class="label">model-conditional graph shape；非 accuracy/prevalence</span></div>
+        </div>
+      </section>
+
+      <details class="card" id="authority" open>
+        <summary>科學權威、分母與 claim ceiling</summary>
+        <div>
+          <p>唯一數值權威是 2026-08-01 frozen <a href="evidence/authority_manifest.json">authority manifest</a> 與 <a href="evidence/denominator_registry.tsv">denominator registry</a> 的包內 exact copies。HTML 只呈現已登錄值，不重算 science。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Claim</th><th>Evidence</th><th>可安全解讀</th></tr></thead>
+            <tbody>
+              <tr><td>469,849 dataset-records → 255,752 strict components</td><td>Frozen linkage authority</td><td>read-linkage grain；不是 cells 或 clones</td></tr>
+              <tr><td>98,955 final groups</td><td>Bounded local grouping</td><td>一個 component 可拆多 group；不是 subclone 數</td></tr>
+              <tr><td>71,955 ranked complete units</td><td>Frozen read-AF ranking denominator</td><td>model-conditioned candidate units</td></tr>
+              <tr><td>63,506 / 71,955 = 88.2579%</td><td>Rooted-unlabeled signature census</td><td>graph-shape frequency；非 biological correctness</td></tr>
+              <tr><td>Methyl formal / evaluable / robust = 1,045 / 811 / 3</td><td>Frozen methyl receipts</td><td>pattern-conditioned association only</td></tr>
+              <tr><td>CN/LOH</td><td>Known-limit registry</td><td><span class="state blocked">NOT INTEGRATED</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </details>
+
+      <section id="flow">
+        <p class="kicker">兩條 provenance chain，四個責任層</p>
+        <h2>軟體輸入／輸出與用途</h2>
+        <div class="flow">
+          <article><h3>1 · LongPhase-S / TO</h3><p><strong>輸入：</strong>BAM/VCF/reference。</p><p><strong>輸出：</strong>HP/PS、phased/recalibrated VCF、tagged reads/BAM。</p><p class="small">外部工具行為以 KB / paper 為準；不可由本專案報告反推。</p></article>
+          <article><h3>2 · exact-PS / LongLineage</h3><p><strong>輸入：</strong>exact PS×HP endpoints、read observations、candidate records。</p><p><strong>輸出：</strong>read assignments、candidate mutation-state families、bounded topology records。</p><p class="small">Feature candidate <code>b9aaa12</code>；不是 cellular lineage truth。</p></article>
+          <article><h3>3 · InterSubMod</h3><p><strong>輸入：</strong>tagged tumor BAM、reference、somatic VCF。</p><p><strong>輸出：</strong>per-region methylation、read distance、read clustering、statistics、<code>tree.nwk</code>。</p><p class="small"><code>tree.nwk</code> 是 methylation-distance read dendrogram。</p></article>
+          <article><h3>4 · Python / HTML</h3><p><strong>輸入：</strong>validated summary/receipt/registry。</p><p><strong>輸出：</strong>圖表與 standalone HTML。</p><p class="small">Presentation only；不得重新定義分母或暗中重算 science。</p></article>
+        </div>
+        <div class="callout warn" style="margin-top:1rem"><strong>避免混線：</strong>LongPhase 的 HP/PS tagging、LongLineage 的 candidate reconstruction、InterSubMod 的 read methylation clustering 是不同 provenance chain；不能用同一個「lineage」字樣把它們視為同一種結果。</div>
+      </section>
+
+      <section id="inventory">
+        <p class="kicker">Comprehensive inventory</p>
+        <h2>資料與 run 的實體盤點</h2>
+        <div class="grid">
+          <div class="metric"><span class="value">51</span><span class="label">physical run directories：35 current + 16 pending archive</span></div>
+          <div class="metric"><span class="value">18</span><span class="label">logical manifest rows；19 是含 header 的檔案行數</span></div>
+          <div class="metric"><span class="value">36</span><span class="label">artifact registry rows；20 FINAL_FOR_SCOPE</span></div>
+          <div class="metric"><span class="value">14</span><span class="label">paired tagged BAM；3,709,322,840,333 bytes</span></div>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem"><table>
+          <thead><tr><th>盤點項</th><th>結果</th><th>解釋</th></tr></thead>
+          <tbody>
+            <tr><td>Current canonical</td><td>35 physical dirs</td><td>9 與 logical manifest 合併；26 是舊 manifest 未登錄的 current physical runs</td></tr>
+            <tr><td>Pending archive</td><td>16 physical dirs</td><td>9 與 logical manifest 合併；另有 7 archive extras</td></tr>
+            <tr><td>Tagged BAM</td><td>14, exact stat/mtime</td><td><span class="state limited">PARTIAL / NON_FINAL / PRE-FIX</span>；本輪不讀 TiB payload 計 SHA</td></tr>
+            <tr><td>Machine paths</td><td>16 rows</td><td>13 PRESENT、2 NFS-visible-not-host-verified、1 MISSING</td></tr>
+            <tr><td>Legacy runbook</td><td><span class="state blocked">MISSING_SOURCE</span></td><td>找不到原件；只有 reconstructed index，不假裝原件存在</td></tr>
+          </tbody>
+        </table></div>
+        <p class="small">完整 machine-readable 內容：<a href="registries/run_registry.json">run registry</a>、<a href="registries/artifact_registry.json">artifact registry</a>、<a href="registries/machine_path_registry.json">machine paths</a>、<a href="registries/storage_root_manifest.json">storage roots</a>。</p>
+      </section>
+
+      <details class="card" id="finality" open>
+        <summary>如何判斷 final，而不是看資料夾名稱猜</summary>
+        <div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>欄位</th><th>可引用條件</th><th>限制</th></tr></thead>
+            <tbody>
+              <tr><td><code>evidence_status</code></td><td><code>AUTHORITY</code> 或明示 <code>VALIDATED_DERIVED</code></td><td><code>PARTIAL/HISTORICAL/IN_PROGRESS</code> 不得升格</td></tr>
+              <tr><td><code>scope</code></td><td><code>FULL</code> 且範圍與問題一致</td><td><code>DEMO</code> 只驗介面；<code>PARTIAL</code> 不可外推</td></tr>
+              <tr><td><code>finality</code></td><td><code>FINAL_FOR_SCOPE</code></td><td>只代表指定 scope 固定，不代表 biological truth 或 production</td></tr>
+              <tr><td>Provenance</td><td>producer、commit、inputs、schema、hash、limits 完整</td><td>mtime 只能作 fallback；不能重建真實 run 時序</td></tr>
+              <tr><td>Supersession</td><td>current index 不引用 superseded artifact</td><td>immutable authority 的後續更正用 append-only crosswalk</td></tr>
+            </tbody>
+          </table></div>
+          <p><a href="registries/authority_superseded_crosswalk.json">Authority／superseded crosswalk</a>記錄 frozen bytes 與後續角色更正，避免覆寫 2026-08-01 SoT。</p>
+        </div>
+      </details>
+
+      <section id="machines">
+        <p class="kicker">Site profile + doctor + plan</p>
+        <h2>bip7／bip8 可攜執行狀態</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>主機</th><th>實際證據</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>bip7</td><td>hostname=bip7；data/tool paths 可見，samtools/bcftools hash MATCH；4 個 local data checksum locator 缺失</td><td><span class="state blocked">BIP7_DATA_PREFLIGHT_BLOCKED</span></td></tr>
+            <tr><td>bip8</td><td>只從 bip7 看見 NFS mount；沒有 hostname=bip8 的 fresh-clone receipt</td><td><span class="state blocked">BIP8_DATA_PREFLIGHT_BLOCKED</span></td></tr>
+          </tbody>
+        </table></div>
+        <pre><code>scripts/site/bootstrap --template config/site-profile.example.json \
+  --output config/site-profile.local.json \
+  --site-id "$(hostname)-handoff" \
+  --expected-hostname "$(hostname)" \
+  --project-root "$PWD"
+scripts/site/doctor --profile /absolute/site-profile.json --mode real-preflight
+scripts/pipeline/run_benchmark.sh --site-profile /absolute/site-profile.json \
+  --sample HCC1395 --plan
+scripts/handoff/run_tiny_public_e2e.sh --repo-root "$PWD" --jobs 4</code></pre>
+        <p class="small"><code>--plan</code> 不得建立 output/log；synthetic fixture 是 DEMO smoke，不是 science validation。</p>
+      </section>
+
+      <section id="verification">
+        <p class="kicker">Fail closed</p>
+        <h2>截至本 snapshot 的 Gate</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Gate</th><th>狀態</th><th>證據／未決</th></tr></thead>
+          <tbody>
+            <tr><td>Frozen authority replay</td><td class="state pass">PASS</td><td>19 MATCH / 0 missing / 0 mismatch</td></tr>
+            <tr><td>Repo hygiene</td><td class="state pass">PASS</td><td>isolated HEAD：0 broken/absolute symlink、0 tracked local settings</td></tr>
+            <tr><td>Unified registries</td><td class="state pass">PASS</td><td>6 schemas、51 run rows、36 artifacts、11/11 unit tests</td></tr>
+            <tr><td>Tiny synthetic E2E</td><td class="state limited">DEMO PASS / CLEAN STACK PENDING</td><td>199 columns、12 read leaves、fail-closed negative；須於 portable commit clean clone重播</td></tr>
+            <tr><td>InterSubMod clean build + full tests</td><td class="state limited">PENDING</td><td>需在完整 stacked commit動態產生 CTest/Python receipt</td></tr>
+            <tr><td>Public claims</td><td class="state blocked">BLOCKED</td><td>33/33 local P0 guards ready；第34筆C108為GitHub About external-only blocked；158 registry仍有25 UNVERIFIED</td></tr>
+            <tr><td>LongLineage preview</td><td class="state blocked">KEEP PRIVATE</td><td>4 unresolved source rows、21 license mappings pending、11 dependency NOASSERTION、7 history findings；P3/P4/P5/P7/P8 blocked</td></tr>
+            <tr><td>bip7 / bip8 acceptance</td><td class="state blocked">BLOCKED</td><td>兩台都未取得完整 host-local acceptance receipts</td></tr>
+            <tr><td>Tag / GitHub Release</td><td class="state blocked">NO-GO</td><td>不得建立 <code>research-handoff-2026.08.1</code></td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <details class="card" id="continue" open>
+        <summary>新人如何安全地繼續研究</summary>
+        <div>
+          <ol>
+            <li>從 <a href="00_INDEX.md">交接索引</a>與 <a href="ai_context/CONTEXT.md">AI context</a>確認問題、scope 與 claim ceiling。</li>
+            <li>只選 artifact registry 中非 superseded 的輸入；記錄 logical ID 與 machine location，不複製大型 BAM/VCF 到 Git。</li>
+            <li>新 cycle 前跑 pre-decision audit，固定 producer commit、input SHA、denominator、full/subset scope、停止條件與預期 receipt。</li>
+            <li>先跑 site doctor、<code>--plan</code>與 synthetic smoke；real-data 流程維持 read-only preflight，直到主機 receipt PASS。</li>
+            <li>任何新 science 建立新 authority bundle；不得改寫 2026-08-01 frozen authority。</li>
+            <li>CNV/drilldown、LongLineage post-<code>b9aaa12</code> 工作各自走後續科研 PR，不混入本 snapshot。</li>
+          </ol>
+        </div>
+      </details>
+
+      <section id="sources">
+        <p class="kicker">可追溯入口</p>
+        <h2>交接包內的 Source of Truth</h2>
+        <ul>
+          <li><a href="00_INDEX.md">主 Markdown 索引</a></li>
+          <li><a href="20260813_研究結論時間與Finality_01.md">研究結論、時間與 finality</a></li>
+          <li><a href="20260813_軟體輸入輸出與研究流程_01.md">軟體 I/O 與 provenance chain</a></li>
+          <li><a href="20260813_bip7_bip8操作與驗證_01.md">bip7／bip8 操作與驗證</a></li>
+          <li><a href="registries/registry_build_receipt.json">Registry build receipt</a></li>
+          <li><a href="evidence/authority_replay_receipt.json">Authority replay receipt</a></li>
+          <li><a href="evidence/EVIDENCE_MANIFEST.json">Embedded evidence manifest</a></li>
+        </ul>
+        <div class="callout"><strong>閱讀原則：</strong>若文字敘述與 machine-readable registry／frozen authority 衝突，以 frozen authority、append-only adjudication 與最新驗證 receipt 為準；衝突本身必須登錄，不得靜默選一個版本。</div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p><strong>Provenance：</strong>直接由已驗證的 Markdown、JSON registry 與 receipts 手工編排；未使用 Markdown-to-HTML converter，未重算 science，無外部 runtime resource。</p>
+    <p><strong>Baseline：</strong>InterSubMod <code>ddd8909a838318d8a77969313e9561c8ff9d01c2</code>；LongLineage candidate <code>b9aaa12a11fa00606bd174dabd0f172a5d112359</code>。Generated/verified snapshot date: 2026-08-13 Asia/Taipei。</p>
+    <p><strong>Partial flag：</strong>inventory 是 comprehensive；TiB science rerun、雙機 acceptance、live publication 與 production release 不在已通過範圍。</p>
+  </footer>
+</body>
+</html>

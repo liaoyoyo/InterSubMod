@@ -1,0 +1,48 @@
+{
+  "crosswalks": [
+    {
+      "adjudicated_statement": "PROVEN_BYTE_IDENTICAL_AGAINST_LL_b979760 for 5/5 solver modules",
+      "adjudication_path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/provenance/20260813_frozen_binary_source_adjudication_01.md",
+      "adjudication_package_path": "../evidence/frozen_binary_source_adjudication.md",
+      "adjudication_sha256": "3c85d15de0f069c3277ba317689f4bc574bf93c296cd181d32109e7c5c40fbb9",
+      "authority_statement": "relationship_to_current_dirty_sources=not_proven_byte_reproducible",
+      "claim_ceiling": "Source/build identity correction only; frozen scientific numbers and authority bytes remain unchanged.",
+      "crosswalk_id": "frozen_binary_source_adjudication_20260813",
+      "evidence_status": "VALIDATED_DERIVED",
+      "receipt_path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/provenance/20260813_frozen_binary_bundle_receipt.json",
+      "receipt_package_path": "../evidence/frozen_binary_bundle_receipt.json",
+      "receipt_sha256": "521de4f3aed075172eccc3e8a4d6b777e509de38b61448f87ecb8671744c833f",
+      "relationship": "SUPERSEDES_STATUS_NOT_BYTES",
+      "subject_artifact_id": "authority.frozen_binary"
+    },
+    {
+      "adjudicated_statement": "Later 2026-07-26 worktree bytes; rejected as source truth for the 2026-07-24 frozen binary.",
+      "authority_statement": "Bytes registered in the 2026-08-01 19-item replay.",
+      "claim_ceiling": "Keep hash replay semantics; never connect source_snapshot_4 to authority.frozen_binary as producer input.",
+      "crosswalk_id": "source_snapshot_4_role_rejection_20260813",
+      "evidence_status": "INVALIDATED",
+      "relationship": "ROLE_INVALIDATED_BYTES_RETAINED",
+      "replacement_source": "LongLineage b979760 obligation_bnb plus the five byte-identical solver modules enumerated in the adjudication receipt",
+      "subject_artifact_id": "authority.source_snapshot_4"
+    },
+    {
+      "adjudicated_statement": "18 logical rows, 19 TSV lines, 35 current physical directories, 51 including pending archive.",
+      "authority_statement": "Historical prose called the manifest a 19-run index.",
+      "claim_ceiling": "Filesystem and registry counting only; not scientific run finality.",
+      "crosswalk_id": "canonical_run_count_reconciliation_20260813",
+      "evidence_status": "VALIDATED_DERIVED",
+      "relationship": "SUPERSEDED_COUNT_SEMANTICS",
+      "subject_artifact_id": "claim.invalidated_canonical_19_runs"
+    }
+  ],
+  "immutable_authority": {
+    "as_of_date": "2026-08-01",
+    "mutation_policy": "IMMUTABLE_APPEND_ONLY_CORRECTIONS",
+    "path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json",
+    "package_path": "../evidence/authority_manifest.json",
+    "sha256": "a88afc589206b7b3dab4d17c1d7b02a6cf20b125d847409649577c02abf0bfa0"
+  },
+  "registry_type": "authority_superseded_crosswalk",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T11:21:47+08:00"
+}

@@ -1,0 +1,70 @@
+<!--
+建立時間: 2026-08-13 14:00 +08:00
+目標: 逐步記錄完整研究交接包實作中的決策、偏離、折衷、驗證與未決事項
+處理範圍: InterSubMod research handoff snapshot + LongLineage private research preview
+關聯檔案:
+  - InterSubMod/research/20260813_complete_research_handoff/implementation-notes.md
+  - InterSubMod/docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md
+  - InterSubMod/docs/handoff/20260813_完整研究資料與軟體交接_01/registries/registry_build_receipt.json
+驗證方式: Step→Verify；所有 PASS 必須對應 command、exit code、receipt或remote check
+證據等級: engineering/research-governance record；不新增 science claim
+狀態: IN_PROGRESS / RELEASE_BLOCKED
+-->
+
+# 完整研究交接 Implementation Notes
+
+用 Claim–Evidence–Verdict：**交接包已閉合 frozen authority、repo hygiene、統一 registry 與 LongLineage private-first safety foundation；雙機、InterSubMod完整stack驗收、live publication與production release仍未閉合。**
+
+## 設計決定
+
+- [決策] 任務固定為 `(B) Comprehensive validation + (D) External handoff`；本輪交付是`research handoff snapshot`，不是production release。
+- [決策] InterSubMod release基準固定`ddd8909a838318d8a77969313e9561c8ff9d01c2`；`73afaeac`與08-13 CNV/drilldown只登錄為`PARTIAL/IN_PROGRESS`。
+- [決策] LongLineage candidate固定`b9aaa12a11fa00606bd174dabd0f172a5d112359`；post-candidate science不混入三個public-safety PR。
+- [決策] 2026-08-01 authority manifest與denominator registry保持immutable；後續來源角色更正採append-only crosswalk。
+- [決策] 所有final判定只由registry欄位與provenance作出；禁止依資料夾名稱、mtime或HTML視覺猜測。
+- [決策] Tiny fixture固定為`DEMO`，只能驗clone/build/run/schema；不寫入scientific evidence ledger。
+- [決策] LongLineage在source/license/history blockers歸零前維持`PRIVATE`，不建立tag或GitHub Release。
+
+## 已完成驗證
+
+| 項目 | 輸入／命令 | 實際輸出 | Verdict |
+|---|---|---|---|
+| Authority replay | `scripts/handoff/replay_authority.py`，輸入2026-08-01 authority | `expected=19, match=19, missing=0, mismatch=0` | PASS；bytes only |
+| Repo hygiene | audit→archive-first cleanup→isolated HEAD scan | 0 broken/absolute symlink、0 tracked local settings | PASS |
+| Unified registry | `python3 scripts/handoff/build_registries.py ...` | 51 physical runs、36 artifacts、16 machine paths、11 storage roots；6/6 schemas | PASS |
+| Registry tests | `python3 -m unittest tests.test_handoff_registries -v` | 11/11 PASS | PASS |
+| Tiny synthetic E2E | isolated Release binary＋12-read fixture | 199 header/data columns、12 tree leaves、66/66 valid pairs | DEMO PASS；clean stack待重播 |
+| bip7 doctor | `scripts/site/doctor ... --mode real-preflight` | exit 5；4 local checksum locator missing | `BIP7_DATA_PREFLIGHT_BLOCKED` |
+| bip8 | 尚無hostname=bip8 receipt | NFS view only | `BIP8_DATA_PREFLIGHT_BLOCKED` |
+| Public claims | 158-row validator | 69 CONFIRMED、64 CONFIRMED_WITH_LIMITS、25 UNVERIFIED；33/33 local P0 guards ready，C108 external-only blocked | local source guards partial PASS；publication blocked |
+| LongLineage clean foundation | clean clone `f60b5f3` configure/build/check_all | 49/49 CTest、no-network、FOUNDATION_PASS | foundation PASS；release blockers remain |
+| LongLineage strict public gate | immutable audit base from safety receipt | expected exit 1；5 blocker classes | safe FAIL；keep private |
+
+## 偏離與更正
+
+- [偏離] 舊master manifest的「19」其實是1 header＋18 data rows；physical inventory為35 current＋16 pending archive。已改為logical metadata合併physical record，不發明第19個run。
+- [偏離] 舊manifest的`tagged_bam_ready=false`與實體storage不一致。Targeted stat確認14 BAM／3,709,322,840,333 bytes，但因pre-fix/truth-aware歷史與本輪未讀TiB SHA，仍固定`PARTIAL/NON_FINAL`。
+- [偏離] `InterSubMod_big7_runbook`廣泛搜尋仍找不到。Registry標`MISSING_SOURCE/HISTORICAL`，reconstructed index不可冒充原件。
+- [偏離] LongLineage在稽核期間兩度被觀察為`PUBLIC`並收回`PRIVATE`。目前private不能證明暴露期間沒有clone/download；事件保留於safety receipt。
+- [偏離] LongLineage PR #6最初以moving `origin/main`作history base，hosted CI 5 jobs fail。已改讀safety receipt的immutable `5daf50f…`，新版9/9 hosted checks PASS。
+- [偏離] 一次full CTest誤用只build governance target的build dir，造成多個`Not Run`；該次明確作廢，不列PASS/FAIL證據。正式clean-clone full build後重跑49/49 PASS。
+
+## 折衷
+
+- [折衷] 本輪不讀取3.7 TB tagged BAM計完整SHA；保存exact path、bytes、mtime、生成責任與`NON_FINAL`，避免把storage inventory冒充byte authority。
+- [折衷] 不重跑TiB級science；以19/19 frozen byte replay、clean build、synthetic E2E與雙機preflight作工程可重現性。這不等同scientific recomputation。
+- [折衷] Meeting原始PPTX/PDF/media不直接塞入Regular Git；只有決策、結論與figure provenance整理稿才可進Git，其餘依finality進Release或local archive。
+
+## 未決與發布阻塞
+
+- [未決] InterSubMod完整stack的clean build、動態CTest suite count、full Python tests與fresh-clone tiny E2E receipt。
+- [未決] bip7補齊4個data checksum locators並完成host-local fresh clone acceptance。
+- [未決] bip8必須在`hostname=bip8`重新clone/build/test/smoke/preflight。
+- [未決] 25個`UNVERIFIED` public claims、GitHub About、Wiki、Pages與default中文README的live publication一致性。
+- [未決] LongLineage 4 unresolved source rows、21 source-license reviews、11 dependency license determinations與7 history findings。
+- [未決] InterSubMod branch protection／required CI、full-history secret scan與Release assets round-trip SHA。
+- [未決] CN/LOH integration、cell barcode／orthogonal clone truth；未完成前`confirmed cellular subclone=0`、`confirmed linear ancestry=0`。
+
+## 發布判定
+
+`RELEASE_BLOCKED`。不得建立`research-handoff-2026.08.1` tag／GitHub Release，也不得把LongLineage切為public。只有所有阻塞項各自有immutable receipt且aggregate acceptance在同一commit重播PASS，才可重新評估。

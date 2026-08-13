@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterSubMod machine path registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_type", "verified_at", "actual_host", "claim_ceiling", "records"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "registry_type": {"const": "machine_path_registry"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "actual_host": {"type": "string", "minLength": 1},
+    "claim_ceiling": {"type": "string", "minLength": 1},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path_id", "semantic_role", "path", "expected_machine", "observed_from_host", "last_seen_at", "observation_status", "entry_type", "size_bytes", "mtime", "mount", "git_state", "known_limits"],
+        "properties": {
+          "path_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+          "semantic_role": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "pattern": "^/"},
+          "expected_machine": {"type": "string", "minLength": 1},
+          "observed_from_host": {"type": "string", "minLength": 1},
+          "last_seen_at": {"type": "string", "format": "date-time"},
+          "observation_status": {"enum": ["PRESENT", "MISSING", "NFS_VISIBLE_NOT_HOST_VERIFIED", "BLOCKED_TIMEOUT"]},
+          "entry_type": {"enum": ["DIRECTORY", "FILE", "MISSING"]},
+          "size_bytes": {"type": ["integer", "null"], "minimum": 0},
+          "mtime": {"type": ["string", "null"], "format": "date-time"},
+          "mount": {"type": ["object", "null"]},
+          "git_state": {"type": ["object", "null"]},
+          "known_limits": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }
+      }
+    }
+  }
+}

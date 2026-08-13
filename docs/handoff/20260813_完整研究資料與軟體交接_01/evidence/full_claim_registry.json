@@ -1,0 +1,3447 @@
+{
+  "schema_version": 1,
+  "registry_id": "intersubmod-public-claims-remediation-20260813",
+  "generated_at": "2026-08-13T00:00:00+08:00",
+  "task_type": [
+    "B_COMPREHENSIVE_VALIDATION",
+    "D_EXTERNAL_HANDOFF"
+  ],
+  "source_inventory": "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+  "source_inventory_sha256": "d5d8794c2467ac6ac466711f91890666f3dbc571d9b3e27b07ba5f10d642ddbc",
+  "allowed_current_verdicts": [
+    "CONFIRMED",
+    "CONFIRMED_WITH_LIMITS",
+    "UNVERIFIED"
+  ],
+  "status_semantics": {
+    "inventory_proposition": "The proposition observed in the immutable 2026-08-12 audit; it may be the false wording that triggered remediation.",
+    "remediated_claim": "The bounded corrected claim to which current_verdict applies; null means source remediation is still open.",
+    "source_status": "State of the checked-in source; it does not describe GitHub live bytes.",
+    "live_status": "State obtained by re-fetching the published surface; local edits cannot change it.",
+    "SOURCE_READY": "All declared local P0 anchors pass, but publication remains unverified."
+  },
+  "gates": {
+    "P0_SOURCE_READY": {
+      "status": "PASS",
+      "reason": "33 local P0 claims pass fail-closed source guards; C108 is external-only."
+    },
+    "SOURCE_READY": {
+      "status": "BLOCKED",
+      "reason": "P1/P2 source edits still require dedicated guards/evidence closure; GitHub About remains open."
+    },
+    "PUBLICATION_READY": {
+      "status": "BLOCKED",
+      "reason": "Default branch, Wiki, Pages and About have not been published and re-fetched."
+    },
+    "RELEASE_READY": {
+      "status": "BLOCKED",
+      "reason": "Publication gate and broader research-handoff release gates remain open."
+    }
+  },
+  "counts": {
+    "claims": 158,
+    "by_priority": {
+      "P0": 34,
+      "P1": 20,
+      "P2": 35,
+      "P3": 69
+    },
+    "by_current_verdict": {
+      "CONFIRMED": 69,
+      "CONFIRMED_WITH_LIMITS": 64,
+      "UNVERIFIED": 25
+    },
+    "by_source_status": {
+      "EXTERNAL_ONLY_BLOCKED": 1,
+      "FROZEN_CONFIRMED_WITH_LIMITS": 31,
+      "FROZEN_EVIDENCE_CONFIRMED": 69,
+      "SOURCE_EDITED_REVIEW_REQUIRED": 24,
+      "SOURCE_READY": 33
+    }
+  },
+  "claims": [
+    {
+      "claim_id": "C001",
+      "category": "scope",
+      "inventory_proposition": "Canonical exact-PS scope is 7 datasets representing 6 biological samples over chr1-22.",
+      "remediated_claim": "Canonical exact-PS scope is 7 datasets representing 6 biological samples over chr1-22.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L67|A004:L61|W001:L73|W002:L191|P011:L564",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:15-61",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C002",
+      "category": "method",
+      "inventory_proposition": "The canonical reconstruction backbone is somatic mutation co-occurrence on physical molecules; methylation is not permitted to move topology edges.",
+      "remediated_claim": "The canonical reconstruction backbone is somatic mutation co-occurrence on physical molecules; methylation is not permitted to move topology edges.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L39-55|A004:L36-50|W001:L31-45|W002:L150-174|P011:L483-524",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:63-97",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C003",
+      "category": "methylation",
+      "inventory_proposition": "The frozen methylation layer has 1,045 formal units, 811 evaluable units and 3 robust associations, i.e. 3/811=0.3699%.",
+      "remediated_claim": "The frozen methylation layer has 1,045 formal units, 811 evaluable units and 3 robust associations, i.e. 3/811=0.3699%.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L57-59|A004:L52-53|W001:L47-49|W002:L233|P011:L626-632",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:18-20",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C004",
+      "category": "provenance",
+      "inventory_proposition": "The all-seven canonical exact-PS result is frozen as of 2026-08-01.",
+      "remediated_claim": "The all-seven canonical exact-PS result is frozen as of 2026-08-01.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L67|A004:L61|W001:L73|P011:L564",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:5-13",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C005",
+      "category": "funnel",
+      "inventory_proposition": "The canonical all-seven input contains 469,849 sSNV dataset-records.",
+      "remediated_claim": "The canonical all-seven input contains 469,849 sSNV dataset-records.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L74|A004:L67|W001:L75|W002:L197|P011:L573",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:2",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C006",
+      "category": "funnel",
+      "inventory_proposition": "The strict endpoint read-linkage graph contains 255,752 connected components.",
+      "remediated_claim": "The strict endpoint read-linkage graph contains 255,752 connected components.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W002:L200|P011:L579",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:3",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C007",
+      "category": "funnel",
+      "inventory_proposition": "The strict-component census contains 170,131 k=1 components.",
+      "remediated_claim": "The strict-component census contains 170,131 k=1 components.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L75|A004:L68|W001:L79|W002:L200|P011:L580",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:4",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C008",
+      "category": "funnel",
+      "inventory_proposition": "170,131/255,752 strict components equals 66.5219%.",
+      "remediated_claim": "170,131/255,752 strict components equals 66.5219%.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L75|A004:L68|W002:L200|P011:L580",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:4",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C009",
+      "category": "funnel",
+      "inventory_proposition": "There are 85,621 strict read-linked k>=2 components before bounded partitioning.",
+      "remediated_claim": "There are 85,621 strict read-linked k>=2 components before bounded partitioning.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W002:L201|P011:L581",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:5",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C010",
+      "category": "funnel",
+      "inventory_proposition": "Bounded partitioning produces 98,955 final local topology groups.",
+      "remediated_claim": "Bounded partitioning produces 98,955 final local topology groups.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A004:L63|W002:L202|P011:L582",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:6",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C011",
+      "category": "funnel",
+      "inventory_proposition": "13,014 final groups have no active ALT.",
+      "remediated_claim": "13,014 final groups have no active ALT.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L70|A004:L63|W002:L203|P011:L583",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:7",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C012",
+      "category": "funnel",
+      "inventory_proposition": "85,941 final groups are mutation-bearing analysis units.",
+      "remediated_claim": "85,941 final groups are mutation-bearing analysis units.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L76|A004:L69|W002:L204|P011:L584",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:8",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C013",
+      "category": "funnel",
+      "inventory_proposition": "75,224 mutation-bearing units have a completely enumerated minimum candidate family.",
+      "remediated_claim": "75,224 mutation-bearing units have a completely enumerated minimum candidate family.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A004:L63|W002:L205|P011:L585",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:9",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C014",
+      "category": "funnel",
+      "inventory_proposition": "10,717 mutation-bearing units abstain at the search-node resource guard.",
+      "remediated_claim": "10,717 mutation-bearing units abstain at the search-node resource guard.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L77|A004:L70|W002:L206|P011:L586",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:10",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C015",
+      "category": "funnel",
+      "inventory_proposition": "10,717/85,941 resource abstentions equal 12.4702%.",
+      "remediated_claim": "10,717/85,941 resource abstentions equal 12.4702%.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L77|A004:L70|W002:L206|P011:L586",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:10",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C016",
+      "category": "funnel",
+      "inventory_proposition": "71,955 complete-family units are rankable under the frozen read-AF rule.",
+      "remediated_claim": "71,955 complete-family units are rankable under the frozen read-AF rule.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L78|A004:L71|W001:L79|W002:L207|P011:L587",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:11",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C017",
+      "category": "funnel",
+      "inventory_proposition": "3,224 complete-family units have a zero read-AF denominator.",
+      "remediated_claim": "3,224 complete-family units have a zero read-AF denominator.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A004:L63|W002:L208|P011:L588",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:12",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C018",
+      "category": "funnel",
+      "inventory_proposition": "45 complete-family units abstain from AF ranking because every minimum set requires recurrence.",
+      "remediated_claim": "45 complete-family units abstain from AF ranking because every minimum set requires recurrence.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A004:L63|W002:L209|P011:L589",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:13",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C019",
+      "category": "funnel",
+      "inventory_proposition": "39,648 ranked units have an exact-arithmetic unique best tree.",
+      "remediated_claim": "39,648 ranked units have an exact-arithmetic unique best tree.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69|A004:L63|W002:L212|P011:L592",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:14",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C020",
+      "category": "funnel",
+      "inventory_proposition": "23,858 ranked units tie among labeled trees but share one rooted-unlabeled topology.",
+      "remediated_claim": "23,858 ranked units tie among labeled trees but share one rooted-unlabeled topology.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69|A004:L63|W002:L213|P011:L593",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:15",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C021",
+      "category": "funnel",
+      "inventory_proposition": "8,449 ranked units tie across rooted-unlabeled topologies.",
+      "remediated_claim": "8,449 ranked units tie across rooted-unlabeled topologies.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A004:L63|W002:L214|P011:L594",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:16",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C022",
+      "category": "funnel",
+      "inventory_proposition": "63,506 ranked units resolve to one rooted-unlabeled topology signature.",
+      "remediated_claim": "63,506 ranked units resolve to one rooted-unlabeled topology signature.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L69-70|A003:L79|A004:L63|A004:L72|W002:L215|P011:L595",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:17",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C023",
+      "category": "funnel",
+      "inventory_proposition": "63,506/71,955 equals 88.2579% of ranked-complete units.",
+      "remediated_claim": "63,506/71,955 equals 88.2579% of ranked-complete units.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L79|A004:L72|W001:L78-80|W002:L215|P011:L595",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:17",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C024",
+      "category": "claim_boundary",
+      "inventory_proposition": "The current evidence confirms zero cellular subclones.",
+      "remediated_claim": "The current evidence confirms zero cellular subclones.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L80|A003:L109|A004:L73|A004:L100|W001:L81-89|W002:L238|P011:L618",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C025",
+      "category": "provenance",
+      "inventory_proposition": "The canonical cohort receipt and all7_summary record technical_all_pass=true and validation_evidence_eligible=false.",
+      "remediated_claim": "The canonical cohort receipt and all7_summary record technical_all_pass=true and validation_evidence_eligible=false.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L91-94|A004:L83-85|W002:L22|P000:L236|P011:L147",
+      "evidence": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/cohort_receipt.json; /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/summary/all7_summary.json",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C026",
+      "category": "claim_boundary",
+      "inventory_proposition": "The machine-readable claim boundary permits local read-compatible candidate structures and forbids confirmed clones, biological ancestry, true whole-sample phylogeny, corrected CCF, posterior and methylation-rescored topology.",
+      "remediated_claim": "The machine-readable claim boundary permits local read-compatible candidate structures and forbids confirmed clones, biological ancestry, true whole-sample phylogeny, corrected CCF, posterior and methylation-rescored topology.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L97-116|A004:L87-107|W001:L81-89|W002:L228-243|P011:L607-630",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C027",
+      "category": "model",
+      "inventory_proposition": "The frozen mutation model is recurrence-allowed, upward Hamming-1 and is not strict perfect phylogeny.",
+      "remediated_claim": "The frozen mutation model is recurrence-allowed, upward Hamming-1 and is not strict perfect phylogeny.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L102|A004:L93|W002:L220|P011:L601",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:63-76",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C028",
+      "category": "model",
+      "inventory_proposition": "Read-AF is a deterministic model-conditional ordering heuristic without CN/LOH correction.",
+      "remediated_claim": "Read-AF is a deterministic model-conditional ordering heuristic without CN/LOH correction.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L103|A004:L94|W002:L222|P011:L603",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:74-76",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C029",
+      "category": "scope",
+      "inventory_proposition": "HCC1395 and HCC1395_DORADO are two technical pipelines for one biological cell line.",
+      "remediated_claim": "HCC1395 and HCC1395_DORADO are two technical pipelines for one biological cell line.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L67|A003:L114|A004:L61|A004:L105|W001:L73|W002:L191|P005:L150",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:15-26",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C030",
+      "category": "software_status",
+      "inventory_proposition": "Copy-number is NOT_INTEGRATED in the current main analysis.",
+      "remediated_claim": "Copy-number is NOT_INTEGRATED in the current main analysis.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L280|A004:L265|W002:L127|W005:L13|P011:L280|P014:L132-133",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:87-95",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/System-Overview.md",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C031",
+      "category": "longlineage",
+      "inventory_proposition": "The frozen HCC1395 LongLineage dataset-gate emits zero topology units.",
+      "remediated_claim": "The frozen HCC1395 LongLineage dataset-gate emits zero topology units.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L138-159|A004:L129-149|W004:L60-91|W002:L130|P013:L194-289",
+      "evidence": "LongLineage/docs/reports/20260720_HCC1395完整科學運算與parity報告_01.json; production_claim_allowed=false",
+      "minimum_rewrite": "State the exact HCC1395-only frozen dataset-gate scope; do not generalize zero topology units to every real-data run.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C032",
+      "category": "longlineage",
+      "inventory_proposition": "The documented HCC1395 LongLineage funnel starts from 79,687 frozen autosomal sites.",
+      "remediated_claim": "The documented HCC1395 LongLineage funnel starts from 79,687 frozen autosomal sites.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L153-154|A004:L144-145|W004:L60|P013:L200-215",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C033",
+      "category": "longlineage",
+      "inventory_proposition": "78,629 of those sites are M1-evaluable.",
+      "remediated_claim": "78,629 of those sites are M1-evaluable.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-69|P013:L203-220",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C034",
+      "category": "longlineage",
+      "inventory_proposition": "12,851 sites pass the LongLineage methylation-stability gate.",
+      "remediated_claim": "12,851 sites pass the LongLineage methylation-stability gate.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-69|P013:L204-205|P013:L275-280",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C035",
+      "category": "longlineage",
+      "inventory_proposition": "Only 5 of the 12,851 stable sites pass the next eligibility gate.",
+      "remediated_claim": "Only 5 of the 12,851 stable sites pass the next eligibility gate.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-69|P013:L204-205|P013:L275",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C036",
+      "category": "longlineage",
+      "inventory_proposition": "12,815 LongLineage M2 failures are information-insufficient, not demonstrated artifacts.",
+      "remediated_claim": "12,815 LongLineage M2 failures are information-insufficient, not demonstrated artifacts.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-92|P013:L204-206|P013:L275-280",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C037",
+      "category": "longlineage",
+      "inventory_proposition": "Only 31 LongLineage M2 sites are classified as definitively unsuitable.",
+      "remediated_claim": "Only 31 LongLineage M2 sites are classified as definitively unsuitable.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-92|P013:L204-206|P013:L275-280",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C038",
+      "category": "longlineage",
+      "inventory_proposition": "The frozen LongLineage co-occurrence artifact has 134,278 rows, of which 134,276 are blocked upstream.",
+      "remediated_claim": "The frozen LongLineage co-occurrence artifact has 134,278 rows, of which 134,276 are blocked upstream.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-92|P013:L205-206",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C039",
+      "category": "longlineage",
+      "inventory_proposition": "The frozen LongLineage joint-feature gate passes zero sites and outputs zero topology units.",
+      "remediated_claim": "The frozen LongLineage joint-feature gate passes zero sites and outputs zero topology units.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W004:L60-92|P013:L205-206|P013:L284-289",
+      "evidence": "LongLineage frozen HCC1395 dataset-gate receipt cited in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C040",
+      "category": "longlineage",
+      "inventory_proposition": "longlineage-query, longlineage-export-legacy and longlineage-evaluate are unimplemented shells.",
+      "remediated_claim": "longlineage-query, longlineage-export-legacy and longlineage-evaluate are unimplemented shells.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L158-159|A004:L148-149|W004:L42-55|P013:L180-188",
+      "evidence": "LongLineage build linkage and binary/source inspection recorded in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C041",
+      "category": "longlineage",
+      "inventory_proposition": "LongLineage run and probe return KernelBlocked by design.",
+      "remediated_claim": "LongLineage run and probe return KernelBlocked by design.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L137|A004:L128|W002:L128|W004:L29-42|P013:L143-179",
+      "evidence": "LongLineage CLI/source inspection recorded in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C042",
+      "category": "longlineage",
+      "inventory_proposition": "LongLineage dataset-gate is hard-coded to the HCC1395 identity and exact record counts.",
+      "remediated_claim": "LongLineage dataset-gate is hard-coded to the HCC1395 identity and exact record counts.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L136|A004:L127|W004:L132|P013:L352-358",
+      "evidence": "LongLineage gate source inspection recorded in P013",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/wiki/LongLineage-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C043",
+      "category": "software_status",
+      "inventory_proposition": "Public documentation says neither InterSubMod nor LongLineage can write tagged BAM output.",
+      "remediated_claim": "Correction contract: State the version boundary: InterSubMod does not write BAM; LongLineage feature b9aaa12 has tagged-BAM output, while public main 5daf50f does not.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L139|A004:L130|W002:L131|W005:L145-151|P014:L343-350",
+      "evidence": "LongLineage remote feature b9aaa12 clean build contains longlineage-tag-bam; remote main 5daf50f does not",
+      "minimum_rewrite": "State the version boundary: InterSubMod does not write BAM; LongLineage feature b9aaa12 has tagged-BAM output, while public main 5daf50f does not.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/System-Overview.md",
+        "docs/wiki/Upstream-and-Data.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 5,
+      "external_actions": [
+        "Publish corrected README, Wiki and Pages sources, then verify the version boundary in the live artifacts."
+      ]
+    },
+    {
+      "claim_id": "C044",
+      "category": "software_status",
+      "inventory_proposition": "No single script currently spans both InterSubMod and LongLineage engines.",
+      "remediated_claim": "No single script currently spans both InterSubMod and LongLineage engines.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L140|A004:L131|W002:L132|P011:L325",
+      "evidence": "Repository entry-point inventory recorded in P011",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C045",
+      "category": "upstream",
+      "inventory_proposition": "All seven frozen HP/PS sidecars passed their production receipts.",
+      "remediated_claim": "All seven frozen HP/PS sidecars passed their production receipts.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L133|A004:L124|W005:L21-24|P014:L138-143",
+      "evidence": "InterSubMod/docs/CURRENT_FOCUS.md:303; sidecar aggregate receipts",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C046",
+      "category": "upstream",
+      "inventory_proposition": "The seven compressed sidecars total 5.83 GiB in the frozen snapshot.",
+      "remediated_claim": "The seven compressed sidecars total 5.83 GiB in the frozen snapshot.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L238-242|A004:L224-228|W005:L22|P014:L140",
+      "evidence": "Sidecar file-size inventory cited in P014",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C047",
+      "category": "upstream",
+      "inventory_proposition": "The corresponding seven tagged BAM estimates total 1.67 TiB in the frozen snapshot.",
+      "remediated_claim": "Proposed source correction under review: Publish the seven tagged-BAM paths, exact byte sizes, compression state, hashes and sum; do not substitute current raw BAM sizes.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "UNVERIFIABLE",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L238-242|A004:L224-228|W002:L38|W005:L23|P014:L141",
+      "evidence": "No committed per-tagged-BAM byte registry or replayable receipt was found; current raw BAM total is 1.76384 TiB but is a different object",
+      "minimum_rewrite": "Publish the seven tagged-BAM paths, exact byte sizes, compression state, hashes and sum; do not substitute current raw BAM sizes.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/System-Overview.md",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C048",
+      "category": "upstream",
+      "inventory_proposition": "5.83 GiB versus 1.67 TiB is approximately a 287-fold storage reduction.",
+      "remediated_claim": "Proposed source correction under review: Recompute from exact byte receipts; with the displayed rounded TiB/GiB values the ratio is 293.34×, not 287×.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L238-242|A004:L224-228|W005:L24|P014:L142",
+      "evidence": "Unit-consistent arithmetic gives 1.67*1024/5.83=293.34; exact current raw-BAM/sidecar ratio is 309.99 but is a different comparison",
+      "minimum_rewrite": "Recompute from exact byte receipts; with the displayed rounded TiB/GiB values the ratio is 293.34×, not 287×.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C049",
+      "category": "interface",
+      "inventory_proposition": "The HP/PS sidecar has nine fields per read.",
+      "remediated_claim": "The HP/PS sidecar has nine fields per read.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L240|A004:L225|W005:L27-35|P014:L221-253",
+      "evidence": "Sidecar header and schema shown in P014",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C050",
+      "category": "interface",
+      "inventory_proposition": "InterSubMod parses BAM MM/ML modification tags and requires them for methylation-bearing reads.",
+      "remediated_claim": "InterSubMod parses BAM MM/ML modification tags and requires them for methylation-bearing reads.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L24|A003:L260|A004:L246|A006:L29-32|W003:L49-78|P003:L183-360|P012:L119-126",
+      "evidence": "InterSubMod/src/core/MethylationParser.cpp; InterSubMod/include/core/Config.hpp",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "README_PROJECT_SUMMARY.md",
+        "docs/explain/03_methylation-read-filter.standalone.html",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C051",
+      "category": "software",
+      "inventory_proposition": "InterSubMod is built as a C++17/OpenMP analysis engine.",
+      "remediated_claim": "InterSubMod is built as a C++17/OpenMP analysis engine.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L23|A003:L34|A003:L256|A004:L31|A004:L242|A006:L8|W003:L16|P012:L107-121",
+      "evidence": "InterSubMod/CMakeLists.txt; InterSubMod/src and include",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "README_PROJECT_SUMMARY.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C052",
+      "category": "configuration",
+      "inventory_proposition": "Runtime thread default is 16 even though help text says Default: 1.",
+      "remediated_claim": "Runtime thread default is 16 even though help text says Default: 1.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L192-193|A004:L181-182|W003:L43|W007:L110|P012:L195-207|P016:L207",
+      "evidence": "InterSubMod/include/core/Config.hpp; InterSubMod/include/utils/ArgParser.hpp",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/wiki/How-to-Run.md",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C053",
+      "category": "configuration",
+      "inventory_proposition": "With no explicit metric, argument parsing clears the Config BERNOULLI initializer and uses NHD.",
+      "remediated_claim": "With no explicit metric, argument parsing clears the Config BERNOULLI initializer and uses NHD.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L194-195|A004:L183-184|W003:L44|W007:L111|P012:L195-211|P016:L208",
+      "evidence": "InterSubMod/include/utils/ArgParser.hpp:86-93; InterSubMod/include/core/Config.hpp:39-40",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/wiki/How-to-Run.md",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C054",
+      "category": "configuration",
+      "inventory_proposition": "The effective CLI minimum common CpG coverage is C_min=3.",
+      "remediated_claim": "The effective CLI minimum common CpG coverage is C_min=3.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W003:L78|P003:L415|P003:L468|P012:L297",
+      "evidence": "InterSubMod/include/core/Config.hpp:37; InterSubMod/include/utils/ArgParser.hpp:92-93",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/03_methylation-read-filter.standalone.html",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C055",
+      "category": "configuration",
+      "inventory_proposition": "The engine implements NHD, L1, L2, CORR, JACCARD and BERNOULLI distance metrics.",
+      "remediated_claim": "The engine implements NHD, L1, L2, CORR, JACCARD and BERNOULLI distance metrics.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L21|A006:L34-38|W003:L78|P003:L435-471|P012:L297",
+      "evidence": "InterSubMod/src/core/DistanceMatrix.cpp:313-344",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README_PROJECT_SUMMARY.md",
+        "docs/explain/03_methylation-read-filter.standalone.html",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C056",
+      "category": "configuration",
+      "inventory_proposition": "min_site_coverage=5 is declared but not wired into current matrix construction.",
+      "remediated_claim": "min_site_coverage=5 is declared but not wired into current matrix construction.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P003:L425|P003:L578",
+      "evidence": "InterSubMod/include/core/Config.hpp:36; no consumer in InterSubMod/src or include",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/03_methylation-read-filter.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C057",
+      "category": "output_semantics",
+      "inventory_proposition": "tree.nwk is a read-level methylation dendrogram, not a cellular clone phylogeny.",
+      "remediated_claim": "tree.nwk is a read-level methylation dendrogram, not a cellular clone phylogeny.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L196-198|A004:L185-186|W003:L184|P010:L148|P012:L466-468",
+      "evidence": "InterSubMod tree/clustering implementation and leaf IDs",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C058",
+      "category": "output_semantics",
+      "inventory_proposition": "methylation.csv binds rows to reads positionally and does not carry a checked read-name key.",
+      "remediated_claim": "methylation.csv binds rows to reads positionally and does not carry a checked read-name key.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L200-203|A004:L188-191|W003:L164|P012:L442-446",
+      "evidence": "InterSubMod/src/io/RegionWriter.cpp and actual output headers cited in P012",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ]
+    },
+    {
+      "claim_id": "C059",
+      "category": "output_semantics",
+      "inventory_proposition": "Public documentation says the current significance_summary.csv has 193 columns and no schema-version fields.",
+      "remediated_claim": "Correction contract: Document 199 columns for commit 73afaea and both component schema fields; add a single whole-file layout version if consumers need one.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L202-203|A004:L190-191|W003:L299|P012:L548-560",
+      "evidence": "Fresh current runtime and source header have 199 columns; column 187 VerificationSchemaVersion=2 and column 196 RegionStratificationSchemaVersion=1",
+      "minimum_rewrite": "Document 199 columns for commit 73afaea and both component schema fields; add a single whole-file layout version if consumers need one.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 4,
+      "external_actions": [
+        "Publish corrected source and re-fetch the live README, Wiki and Pages schema statements."
+      ]
+    },
+    {
+      "claim_id": "C060",
+      "category": "output_semantics",
+      "inventory_proposition": "The specified 20260314 HCC1395 canonical significance_summary.csv has 59 columns.",
+      "remediated_claim": "The specified 20260314 HCC1395 canonical significance_summary.csv has 59 columns.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L513|P002:L149|P002:L297|P002:L581",
+      "evidence": "InterSubMod/docs/explain/_planning/04_number_resolution.md:13-22",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C061",
+      "category": "statistics",
+      "inventory_proposition": "PERMANOVA uses 99 permutations in the production override while the library configuration default is 999.",
+      "remediated_claim": "PERMANOVA uses 99 permutations in the production override while the library configuration default is 999.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L513|P002:L581|P009:L198",
+      "evidence": "InterSubMod/docs/explain/_planning/04_number_resolution.md:24-31",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C062",
+      "category": "statistics",
+      "inventory_proposition": "A 99-permutation add-one grid has minimum attainable p approximately 0.01.",
+      "remediated_claim": "A 99-permutation add-one grid has minimum attainable p approximately 0.01.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P002:L581|P009:L198",
+      "evidence": "InterSubMod/docs/explain/_planning/04_number_resolution.md:24-31",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C063",
+      "category": "statistics",
+      "inventory_proposition": "PERMDISP uses a coarse three-level lookup rather than a calibrated continuous p-value.",
+      "remediated_claim": "PERMDISP uses a coarse three-level lookup rather than a calibrated continuous p-value.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P009:L202-205",
+      "evidence": "InterSubMod/src/core/StructureTest.cpp:262-296",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C064",
+      "category": "statistics",
+      "inventory_proposition": "The chi_square_p output is a placeholder copied from Fisher p, not an independently computed chi-square p-value.",
+      "remediated_claim": "The chi_square_p output is a placeholder copied from Fisher p, not an independently computed chi-square p-value.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P009:L231-232",
+      "evidence": "InterSubMod/src/core/GlobalTest.cpp:121-124",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C065",
+      "category": "statistics",
+      "inventory_proposition": "The legacy Significant gate does not use PERMANOVA.",
+      "remediated_claim": "The legacy Significant gate does not use PERMANOVA.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P009:L208-211|P009:L224-226",
+      "evidence": "InterSubMod/src/core/SignificanceAnalyzer.cpp:307-311",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C066",
+      "category": "statistics",
+      "inventory_proposition": "The Cramer's-V reliability gate sets V to zero when more than 20% of expected cells are below five.",
+      "remediated_claim": "The Cramer's-V reliability gate sets V to zero when more than 20% of expected cells are below five.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L411-416|P002:L269-273|P009:L228-230",
+      "evidence": "InterSubMod/src/core/RegionProcessor.cpp:1745-1749",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C067",
+      "category": "upstream",
+      "inventory_proposition": "The documented paired pipeline uses ClairS tumor-normal calls as its somatic VCF source.",
+      "remediated_claim": "The documented paired pipeline uses ClairS tumor-normal calls as its somatic VCF source.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L32|A004:L29|W005:L12|P014:L128-129",
+      "evidence": "InterSubMod public workflow and input manifests",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C068",
+      "category": "upstream",
+      "inventory_proposition": "SAVANA supplies CNA segments, but those segments are not connected to canonical ordering or CCF.",
+      "remediated_claim": "SAVANA supplies CNA segments, but those segments are not connected to canonical ordering or CCF.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L32|A004:L29|W005:L14|P014:L132-133",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:87-95",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C069",
+      "category": "interface",
+      "inventory_proposition": "HP tags occur as both string and integer encodings, including 1-1/2-1/3 mappings.",
+      "remediated_claim": "HP tags occur as both string and integer encodings, including 1-1/2-1/3 mappings.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W005:L102-110|P014:L304-311",
+      "evidence": "Sidecar/BAM tag audit recorded in P014",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C070",
+      "category": "claim_boundary",
+      "inventory_proposition": "Somatic 1-1/2-1 HP labels are read-group labels defined using somatic evidence and are not confirmed clones.",
+      "remediated_claim": "Somatic 1-1/2-1 HP labels are read-group labels defined using somatic evidence and are not confirmed clones.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W005:L111-119|P014:L315-323",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:39-49",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C071",
+      "category": "upstream",
+      "inventory_proposition": "The LongPhase-S producer is a custom modified version whose warning behavior changes low-quality-site handling.",
+      "remediated_claim": "The LongPhase-S producer is a custom modified version whose warning behavior changes low-quality-site handling.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W005:L136-142|P014:L329-336",
+      "evidence": "Frozen sidecar receipts and producer notes cited in P014",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C072",
+      "category": "software_status",
+      "inventory_proposition": "The InterSubMod repository contains no BAM-writing API use; its BAM opens are read-only.",
+      "remediated_claim": "The InterSubMod repository contains no BAM-writing API use; its BAM opens are read-only.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W005:L145-151|P014:L346-350",
+      "evidence": "Static source scan recorded in P014",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C073",
+      "category": "reporting",
+      "inventory_proposition": "The workstation generator exits with code 3 when a required metric is missing.",
+      "remediated_claim": "The workstation generator exits with code 3 when a required metric is missing.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L246-248|A004:L232-234|W006:L82-90|P015:L211-260",
+      "evidence": "Minimal missing-metric run recorded in P015 footer",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ]
+    },
+    {
+      "claim_id": "C074",
+      "category": "documentation",
+      "inventory_proposition": "GitHub Pages deploys 17 standalone HTML pages and all 17 returned HTTP 200 with bytes matching deploy commit fbdf7c7.",
+      "remediated_claim": "GitHub Pages deploys 17 standalone HTML pages and all 17 returned HTTP 200 with bytes matching deploy commit fbdf7c7.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P3",
+      "inventory_verdict": "CONFIRMED",
+      "current_verdict": "CONFIRMED",
+      "source_status": "FROZEN_EVIDENCE_CONFIRMED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L211-212|A004:L199|W001:L98|P000|P001|P002|P003|P004|P005|P006|P007|P008|P009|P010|P011|P012|P013|P014|P015|P016",
+      "evidence": "InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/source_scope.tsv",
+      "minimum_rewrite": "KEEP",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/03_methylation-read-filter.standalone.html",
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/06_ism-subclone-pipeline-concept.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+        "docs/explain/09_three-stats-division-of-labor.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/explain/13_longlineage-io.standalone.html",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C075",
+      "category": "identifiability",
+      "inventory_proposition": "Recovering joint structure from marginal VAF alone is non-identifiable under the stated marginal-only inverse problem.",
+      "remediated_claim": "Recovering joint structure from marginal VAF alone is non-identifiable under the stated marginal-only inverse problem.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L11-13|A004:L10-12|W001:L23-25|P011:L136-142",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:51-76",
+      "minimum_rewrite": "Add “from marginal VAF alone, without linkage or additional model assumptions”; do not generalize to every short-read design.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C076",
+      "category": "observation",
+      "inventory_proposition": "A long read directly observes mutation co-occurrence on one physical molecule.",
+      "remediated_claim": "A long read directly observes mutation co-occurrence on one physical molecule.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L13-15|A004:L11-13|W001:L25-27|P008:L189-238|P011:L139-142",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "End the direct-observation claim at physical-molecule co-occurrence; cellular lineage remains inference.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C077",
+      "category": "methylation",
+      "inventory_proposition": "With the available single-bulk measurements, germline ASM, LOH unmasking, copy dosage and lineage-associated methylation are not fully separable.",
+      "remediated_claim": "With the available single-bulk measurements, germline ASM, LOH unmasking, copy dosage and lineage-associated methylation are not fully separable.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L46-50|A004:L42-46|W001:L33-39|P011:L490-506",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:39-49",
+      "minimum_rewrite": "Say “not identifiable from this measurement set without additional assumptions or orthogonal data.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C078",
+      "category": "method",
+      "inventory_proposition": "Somatic molecular co-occurrence is non-circular with respect to methylation labels.",
+      "remediated_claim": "Somatic molecular co-occurrence is non-circular with respect to methylation labels.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L52-55|A004:L48-50|W001:L40-45|P011:L510-524",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:63-97",
+      "minimum_rewrite": "Qualify as local exact-PS×HP molecular evidence, not cellular identity.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C079",
+      "category": "methylation",
+      "inventory_proposition": "In the frozen exact-PS design, methylation is computed after the genetic candidate structure and cannot re-rank an edge.",
+      "remediated_claim": "In the frozen exact-PS design, methylation is computed after the genetic candidate structure and cannot re-rank an edge.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L52-55|A004:L48-50|W001:L40-45|P011:L510-524",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:74-95",
+      "minimum_rewrite": "Name the frozen exact-PS path; older pages describe legacy pipelines with different behavior.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C080",
+      "category": "model",
+      "inventory_proposition": "One rooted-unlabeled topology is a mathematical result conditional on ranked-complete families and the frozen recurrence-allowed model.",
+      "remediated_claim": "One rooted-unlabeled topology is a mathematical result conditional on ranked-complete families and the frozen recurrence-allowed model.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L79-85|A004:L72-77|W001:L78-80|W002:L212-226|P011:L590-606",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:14-17",
+      "minimum_rewrite": "Always retain denominator=71,955, model, and “not biological prevalence.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C081",
+      "category": "claim_boundary",
+      "inventory_proposition": "The canonical structure claims are local and read-linked.",
+      "remediated_claim": "The canonical structure claims are local and read-linked.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L100-105|A004:L91-96|W002:L232-243|P011:L607-630",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "Use “local recurrence-allowed minimum mutation-state candidate arborescences.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C082",
+      "category": "identifiability",
+      "inventory_proposition": "The current single-bulk cohort can characterize molecular states but cannot confirm cellular clones.",
+      "remediated_claim": "The current single-bulk cohort can characterize molecular states but cannot confirm cellular clones.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L119-121|A004:L110-112|W001:L89|W002:L245-252|P011:L632-638",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:39-49",
+      "minimum_rewrite": "Tie statement to current bulk data and current evidence ladder.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C083",
+      "category": "identifiability",
+      "inventory_proposition": "Breaking the current cellular-identification ceiling requires orthogonal information such as single-cell, colony, spatial, multi-region or longitudinal data.",
+      "remediated_claim": "Breaking the current cellular-identification ceiling requires orthogonal information such as single-cell, colony, spatial, multi-region or longitudinal data.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L119-121|A004:L110-112|W001:L89|P011:L632-638",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:48-49",
+      "minimum_rewrite": "Say “requires additional orthogonal information under the current observation model,” not a universal impossibility theorem.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C084",
+      "category": "model",
+      "inventory_proposition": "Internal nodes are inferred states rather than directly observed cell populations.",
+      "remediated_claim": "Internal nodes are inferred states rather than directly observed cell populations.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L121|A004:L112|W002:L249|P011:L636",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:87-97",
+      "minimum_rewrite": "Keep inferred label and explicitly deny cellular identity.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C085",
+      "category": "funnel",
+      "inventory_proposition": "The 88.26% statistic does not mean 88% of tumor evolutionary history is solved.",
+      "remediated_claim": "The 88.26% statistic does not mean 88% of tumor evolutionary history is solved.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L82-85|A004:L75-77|W001:L78-80|W002:L217-226|P011:L597-606",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:17",
+      "minimum_rewrite": "Retain the ranked-only denominator and graph-statistic interpretation.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C086",
+      "category": "model",
+      "inventory_proposition": "The exact topology census is exact only within the frozen candidate family and model contract.",
+      "remediated_claim": "The exact topology census is exact only within the frozen candidate family and model contract.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L104|A004:L95|W002:L224|P011:L605",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:63-97",
+      "minimum_rewrite": "Add “model-conditional; not an exact biological tumor tree.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C087",
+      "category": "software_status",
+      "inventory_proposition": "All frozen technical checks passed for the cited release artifacts.",
+      "remediated_claim": "All frozen technical checks passed for the cited release artifacts.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L91-94|A004:L83-85|W002:L22|P000:L236|P011:L147",
+      "evidence": "canonical cohort_receipt.json and all7_summary.json",
+      "minimum_rewrite": "Name artifact SHA/date; do not imply every later source revision was tested.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C088",
+      "category": "performance",
+      "inventory_proposition": "A cited minimal InterSubMod locus run completed in about 2.9 seconds with exit 0.",
+      "remediated_claim": "A cited minimal InterSubMod locus run completed in about 2.9 seconds with exit 0.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L131|A004:L122|W002:L81|W003:L16|W007:L98|P000:L271|P012:L130|P016:L198",
+      "evidence": "2026-08-06 execution log summarized in P016 footer",
+      "minimum_rewrite": "State hardware, input locus, commit and date; do not present as general runtime.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/How-to-Run.md",
+        "docs/wiki/InterSubMod-Engine.md",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C089",
+      "category": "storage",
+      "inventory_proposition": "The 5.83-GiB/1.67-TiB/287× comparison is a fully verified frozen seven-dataset storage snapshot.",
+      "remediated_claim": "Proposed source correction under review: Split the claim: keep exact sidecar bytes; mark tagged-BAM total unverified until a receipt exists; compute the ratio from exact bytes.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L238-242|A004:L224-228|W002:L38|W005:L22-24|P014:L138-143",
+      "evidence": "Sidecar total is reproducible, tagged-BAM total lacks a committed registry, and the displayed-unit ratio is 293.34× rather than 287×",
+      "minimum_rewrite": "Split the claim: keep exact sidecar bytes; mark tagged-BAM total unverified until a receipt exists; compute the ratio from exact bytes.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/System-Overview.md",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C090",
+      "category": "storage",
+      "inventory_proposition": "Sequence and quality strings account for more than 99% of the omitted tagged-BAM payload and 0% of useful downstream information.",
+      "remediated_claim": "Proposed source correction under review: Use “SEQ/QUAL are omitted by the current nine-field sidecar contract” until a reproducible byte decomposition is published.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "UNVERIFIABLE",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L240-242|A004:L226-228|W005:L36|P014:L257-270",
+      "evidence": "No field-level BAM byte census or utility audit was found",
+      "minimum_rewrite": "Use “SEQ/QUAL are omitted by the current nine-field sidecar contract” until a reproducible byte decomposition is published.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C091",
+      "category": "interface",
+      "inventory_proposition": "The nine-column sidecar retains the fields required by the frozen downstream contract.",
+      "remediated_claim": "The nine-column sidecar retains the fields required by the frozen downstream contract.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W005:L36|P014:L221-270",
+      "evidence": "Sidecar schema and consumer contract cited in P014",
+      "minimum_rewrite": "Say “100% of fields required by the frozen contract,” not 100% of potentially useful BAM information.",
+      "targets": [
+        "docs/explain/14_upstream-data.standalone.html",
+        "docs/wiki/Upstream-and-Data.md"
+      ]
+    },
+    {
+      "claim_id": "C092",
+      "category": "observation",
+      "inventory_proposition": "A sequenced ONT read represents one DNA molecule sampled from one chromosome copy in a cell.",
+      "remediated_claim": "A sequenced ONT read represents one DNA molecule sampled from one chromosome copy in a cell.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L189-238",
+      "evidence": "ONT sequencing unit plus current read-level contract",
+      "minimum_rewrite": "Add that cell identity/barcode is not observed and multiple molecules cannot automatically be paired to one cell.",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C093",
+      "category": "case_study",
+      "inventory_proposition": "The chr2:18M data support at least three regional molecular-state candidates in HCC1395.",
+      "remediated_claim": "The chr2:18M data support at least three regional molecular-state candidates in HCC1395.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L159-181|P004:L566|P005:L133-150|P007:L297",
+      "evidence": "InterSubMod/docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md",
+      "minimum_rewrite": "Keep “regional molecular states; single sample/locus; not cellular clone truth.”",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C094",
+      "category": "case_study",
+      "inventory_proposition": "The chr2:18M interval overlaps SEQC2 LOH and shows 98-99.6% HP imbalance.",
+      "remediated_claim": "The chr2:18M interval overlaps SEQC2 LOH and shows 98-99.6% HP imbalance.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L258-262|P005:L139|P005:L163|P007:L297|P010:L157-163",
+      "evidence": "independent_audit.json and SEQC2 LOH BED cited in P005",
+      "minimum_rewrite": "Describe as regional LOH evidence; do not infer every read difference is somatic.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C095",
+      "category": "case_study",
+      "inventory_proposition": "No strict alpha/beta co-occurrence violation was observed in the measured chr2 read tables.",
+      "remediated_claim": "No strict alpha/beta co-occurrence violation was observed in the measured chr2 read tables.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L474|P005:L198-205|P007:L297|P010:L162-188",
+      "evidence": "independent_audit.json linkage tables cited in P005",
+      "minimum_rewrite": "Say “0 observed under strict definition and available coverage,” not universal zero.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C096",
+      "category": "case_study",
+      "inventory_proposition": "pos5 is nested within pos3 in the observed chr2 reads, with direct support HKU=4 and DORADO=2.",
+      "remediated_claim": "pos5 is nested within pos3 in the observed chr2 reads, with direct support HKU=4 and DORADO=2.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L474-497|P005:L167|P005:L201|P007:L297|P010:L184-188",
+      "evidence": "independent_audit.json linkage tables cited in P005",
+      "minimum_rewrite": "Keep “provisional nesting candidate”; do not claim unique ancestry.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C097",
+      "category": "case_study",
+      "inventory_proposition": "Six chr2 CpGs lack detected normal HP difference and are compatible with tumor-associated methylation.",
+      "remediated_claim": "Six chr2 CpGs lack detected normal HP difference and are compatible with tumor-associated methylation.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L599|P005:L137|P005:L223-230|P007:L235-243|P010:L349",
+      "evidence": "independent_audit.json methyl table and matched-normal test cited in P005",
+      "minimum_rewrite": "Use “tumor-associated/normal-ASM-screen-negative,” not “tumor-acquired.”",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C098",
+      "category": "case_study",
+      "inventory_proposition": "CpGs 3.1 and 3.2 show cross-basecaller methylation coherence in the same HCC1395 biological sample.",
+      "remediated_claim": "CpGs 3.1 and 3.2 show cross-basecaller methylation coherence in the same HCC1395 biological sample.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L599|P005:L218-230|P007:L235-243|P010:L185",
+      "evidence": "independent_audit.json methyl table cited in P005",
+      "minimum_rewrite": "Call it technical cross-basecaller replication, not biological replication.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C099",
+      "category": "replication",
+      "inventory_proposition": "HCC1395_DORADO is a technical/data replication, not an independent biological replicate.",
+      "remediated_claim": "HCC1395_DORADO is a technical/data replication, not an independent biological replicate.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L114|A004:L105|P005:L150|P007:L297",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:15-26",
+      "minimum_rewrite": "Always report biological n=1 for that comparison.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C100",
+      "category": "case_study",
+      "inventory_proposition": "The displayed chr2 CCF values are approximate transforms of SEQC2 consensus TVAF.",
+      "remediated_claim": "The displayed chr2 CCF values are approximate transforms of SEQC2 consensus TVAF.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P007:L253-255|P010:L168-175",
+      "evidence": "chr2_18M_seqc2_concordance.tsv and P007 figure caption",
+      "minimum_rewrite": "Label “approximate, case-specific, noncanonical”; do not treat as current CN/LOH-corrected CCF.",
+      "targets": [
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C101",
+      "category": "case_study",
+      "inventory_proposition": "The matched-normal screen classifies six CpGs as clean-by-test and four as germline-ASM-confounded.",
+      "remediated_claim": "The matched-normal screen classifies six CpGs as clean-by-test and four as germline-ASM-confounded.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P005:L137|P005:L215-249|P007:L235-243|P010:L349",
+      "evidence": "independent_audit.json methyl rows cited in P005",
+      "minimum_rewrite": "Describe the classification criterion; absence of detected normal ASM is not proof of acquisition.",
+      "targets": [
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C102",
+      "category": "case_study",
+      "inventory_proposition": "Matched normal lacks the expected six somatic ALT alleles but contains occasional other non-reference error calls.",
+      "remediated_claim": "Matched normal lacks the expected six somatic ALT alleles but contains occasional other non-reference error calls.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P005:L183-187|P007:L297",
+      "evidence": "independent_audit.json normal base counts cited in P005",
+      "minimum_rewrite": "Use the exact sentence from P005:L186-187.",
+      "targets": [
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C103",
+      "category": "statistics",
+      "inventory_proposition": "Allele PERMANOVA p=0.001 at three chr2 anchors supports label-associated methylation structure.",
+      "remediated_claim": "Allele PERMANOVA p=0.001 at three chr2 anchors supports label-associated methylation structure.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P010:L141|P010:L198-230",
+      "evidence": "Three significance.json files cited in P010",
+      "minimum_rewrite": "Call it label-first association; it is not hard proof of a cellular subclone.",
+      "targets": [
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C104",
+      "category": "method",
+      "inventory_proposition": "The HP-axis compares somatic-tag subdivisions within a germline haplotype and can reduce copy/haplotype confounding.",
+      "remediated_claim": "The HP-axis compares somatic-tag subdivisions within a germline haplotype and can reduce copy/haplotype confounding.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L483-505|P002:L238-264",
+      "evidence": "InterSubMod public method and claim-contract-v5 evidence ladder",
+      "minimum_rewrite": "Replace “unique somatic-controlled axis” with “preferred axis under correct HP labels; still requires controls.”",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C105",
+      "category": "code_quality",
+      "inventory_proposition": "At deploy commit fbdf7c7, 182 Python files contained the ism-review-infra worktree path.",
+      "remediated_claim": "At deploy commit fbdf7c7, 182 Python files contained the ism-review-infra worktree path.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W006:L123-129|P015:L320-326",
+      "evidence": "git grep -IlF '.claude/worktrees/ism-review-infra' fbdf7c7 -- '*.py' => 182",
+      "minimum_rewrite": "Add commit, search pattern and corpus definition; do not imply all 182 are production entry points.",
+      "targets": [
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ]
+    },
+    {
+      "claim_id": "C106",
+      "category": "literature",
+      "inventory_proposition": "Martin-Trujillo et al. found copy number explained most imprinted-DMR methylation variation in the studied cancer cell lines.",
+      "remediated_claim": "Martin-Trujillo et al. found copy number explained most imprinted-DMR methylation variation in the studied cancer cell lines.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "CONFIRMED_WITH_LIMITS",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "FROZEN_CONFIRMED_WITH_LIMITS",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L308|P002:L264|P002:L434",
+      "evidence": "Martin-Trujillo et al., Nature Communications 2017, DOI 10.1038/s41467-017-00639-9",
+      "minimum_rewrite": "Restrict 82-92% to the paper's imprinted-DMR/cell-line/tissue-specific estimates; do not generalize to all apparent ASM.",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C107",
+      "category": "framing",
+      "inventory_proposition": "The feature README headline says “subclonal reconstruction” although the current release only supports local mutation-state candidate arborescences.",
+      "remediated_claim": "Correction contract: Replace headline with “Local mutation-state candidate reconstruction from single-molecule sSNV co-occurrence.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L3|A004:L3|W008:L3-6",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "Replace headline with “Local mutation-state candidate reconstruction from single-molecule sSNV co-occurrence.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/wiki/_Sidebar.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 3,
+      "external_actions": [
+        "Merge the bounded headline to the default branch and publish the Wiki mirror."
+      ]
+    },
+    {
+      "claim_id": "C108",
+      "category": "framing",
+      "inventory_proposition": "GitHub About advertises somatic variant validation and subclone resolution beyond the current claim boundary.",
+      "remediated_claim": "Proposed correction, not live: Use “read-level integration and local mutation-state candidate analysis; methylation association.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "EXTERNAL_ONLY_BLOCKED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A001",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "Use “read-level integration and local mutation-state candidate analysis; methylation association.”",
+      "targets": [
+        "EXTERNAL:GitHub About"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 0,
+      "external_actions": [
+        "Edit GitHub About to: read-level integration and local mutation-state candidate analysis; methylation association.",
+        "Re-fetch the repository page and record the live description before closing C108."
+      ]
+    },
+    {
+      "claim_id": "C109",
+      "category": "identifiability",
+      "inventory_proposition": "The README/Wiki phrase turns “same cell lineage?” into a direct observation rather than an inference.",
+      "remediated_claim": "Correction contract: Change to “same physical molecule is directly observed; cellular co-membership/lineage remains model-dependent inference.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L13-15|A004:L11-13|W001:L25-27|P011:L139-142",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:39-49",
+      "minimum_rewrite": "Change to “same physical molecule is directly observed; cellular co-membership/lineage remains model-dependent inference.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 4,
+      "external_actions": [
+        "Publish corrected README, Wiki and Pages wording, then verify each live occurrence."
+      ]
+    },
+    {
+      "claim_id": "C110",
+      "category": "identifiability",
+      "inventory_proposition": "The blanket statement that short-read reconstruction is “provably non-identifiable/mathematically proven unsolvable” omits its marginal-only assumptions.",
+      "remediated_claim": "Proposed source correction under review: Add “from per-locus marginal VAF alone and without linkage/extra assumptions”; cite the exact identifiability result.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L11-13|A004:L10-12|W001:L23-25|P011:L136-140",
+      "evidence": "No theorem/model citation is supplied; current authority defines a narrower observation model",
+      "minimum_rewrite": "Add “from per-locus marginal VAF alone and without linkage/extra assumptions”; cite the exact identifiability result.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C111",
+      "category": "identifiability",
+      "inventory_proposition": "“A single bulk sample cannot separate the four methylation causes” is written as universal rather than conditional on available measurements and assumptions.",
+      "remediated_claim": "Proposed source correction under review: Write “not identifiable from the current single-bulk measurement set without orthogonal data or additional assumptions.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L46-50|A004:L42-46|W001:L33-39|P011:L490-506",
+      "evidence": "InterSubMod/research/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/claim-contract-v5.md:39-49",
+      "minimum_rewrite": "Write “not identifiable from the current single-bulk measurement set without orthogonal data or additional assumptions.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ]
+    },
+    {
+      "claim_id": "C112",
+      "category": "terminology",
+      "inventory_proposition": "Public pages often call the output a tree/reconstruction without repeating recurrence-allowed, candidate, local and model-conditional qualifiers.",
+      "remediated_claim": "Correction contract: Standardize on “local recurrence-allowed minimum mutation-state candidate arborescence/topology.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L3|A003:L79|A004:L3|W001:L78|W002:L212-226|P000:L348-395|P004:L159-181",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:63-97",
+      "minimum_rewrite": "Standardize on “local recurrence-allowed minimum mutation-state candidate arborescence/topology.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/System-Overview.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 6,
+      "external_actions": [
+        "Publish the standardized candidate terminology across all public planes and re-scan live bytes."
+      ]
+    },
+    {
+      "claim_id": "C113",
+      "category": "denominator",
+      "inventory_proposition": "The table label “single sites with no co-occurrence partner” hides that 170,131 is a strict-component count, not a dataset-record count.",
+      "remediated_claim": "Correction contract: Use “k=1 strict read-linkage components: 170,131/255,752 (66.52%).”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L74-76|A004:L67-69|W001:L75-79",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv:2-5",
+      "minimum_rewrite": "Use “k=1 strict read-linkage components: 170,131/255,752 (66.52%).”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/wiki/Home.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 3,
+      "external_actions": [
+        "Publish and verify the corrected component-grain denominator labels."
+      ]
+    },
+    {
+      "claim_id": "C114",
+      "category": "provenance",
+      "inventory_proposition": "“Canonical output literally records” the two eligibility flags does not name which canonical artifacts contain them.",
+      "remediated_claim": "Proposed source correction under review: Name “canonical cohort_receipt.json and summary/all7_summary.json (not authority_manifest top-level).”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L91-94|A004:L83-85|W002:L22|P000:L236|P011:L147",
+      "evidence": "cohort_receipt.json and summary/all7_summary.json have the fields; authority_manifest top-level does not",
+      "minimum_rewrite": "Name “canonical cohort_receipt.json and summary/all7_summary.json (not authority_manifest top-level).”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/System-Overview.md"
+      ]
+    },
+    {
+      "claim_id": "C115",
+      "category": "documentation",
+      "inventory_proposition": "The feature README says Wiki and Pages are both generated from docs/explain as one source, but Wiki files are manually derived/published and can drift.",
+      "remediated_claim": "Proposed source correction under review: Say “docs/explain is the editorial upstream; Wiki is a manually synchronized derivative.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L223-227|A004:L210-213",
+      "evidence": "docs/wiki/README.md:14-23,84-101",
+      "minimum_rewrite": "Say “docs/explain is the editorial upstream; Wiki is a manually synchronized derivative.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md"
+      ]
+    },
+    {
+      "claim_id": "C116",
+      "category": "documentation",
+      "inventory_proposition": "The “29 hand-drawn inline SVG diagrams” count has no published counting definition; the deployed HTML contains 37 svg elements.",
+      "remediated_claim": "Proposed source correction under review: Either say “37 inline SVG elements” or define and publish the 29-semantic-diagram inventory.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L225-227|A004:L211-213",
+      "evidence": "rg -o '<svg[ >]' at deploy fbdf7c7 => 37 elements",
+      "minimum_rewrite": "Either say “37 inline SVG elements” or define and publish the 29-semantic-diagram inventory.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md"
+      ]
+    },
+    {
+      "claim_id": "C117",
+      "category": "research_governance",
+      "inventory_proposition": "“Filter DEAD; never/never again reopen” is more absolute than current governance, which permits redesigned F1/TO/filter experiments.",
+      "remediated_claim": "Proposed source correction under review: Use “the tested formulation is concluded negative; reopening requires a materially new hypothesis and pre-decision audit.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P000:L187-190|P001:L179-181|P002:L164|P003:L494-580",
+      "evidence": "InterSubMod/AGENTS.md:70-78; InterSubMod/docs/CURRENT_FOCUS.md:420-476",
+      "minimum_rewrite": "Use “the tested formulation is concluded negative; reopening requires a materially new hypothesis and pre-decision audit.”",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/03_methylation-read-filter.standalone.html",
+        "docs/explain/index.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C118",
+      "category": "framing",
+      "inventory_proposition": "Calling the historical negative results “bulletproof/four bulletproof negatives” overstates evidence strength and freezes a dated narrative.",
+      "remediated_claim": "Proposed source correction under review: Use “multiple convergent negative tests for the evaluated formulation,” with scope/date.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P000:L180-190|P000:L298-320|P002:L384",
+      "evidence": "Historical filter evidence plus current AGENTS.md research-scope rule",
+      "minimum_rewrite": "Use “multiple convergent negative tests for the evaluated formulation,” with scope/date.",
+      "targets": [
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/index.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C119",
+      "category": "caller_accuracy",
+      "inventory_proposition": "The glossary says paired ClairS can “precisely separate” somatic and germline calls.",
+      "remediated_claim": "Proposed source correction under review: Use “paired tumor-normal calling generally improves separation but remains imperfect and must be benchmarked.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L284",
+      "evidence": "No caller is error-free; project truth benchmarking contains TP/FP/FN and confidence intervals",
+      "minimum_rewrite": "Use “paired tumor-normal calling generally improves separation but remains imperfect and must be benchmarked.”",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C120",
+      "category": "statistics",
+      "inventory_proposition": "The normal-anchored heuristic labels results “true cis” although the 1.8×drift+0.02 rule is not a validated causal test.",
+      "remediated_claim": "Proposed source correction under review: Use “cis-compatible/copy-screen-negative under this heuristic,” with formula and single-sample limit.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L500-503|P002:L260-264|P002:L499-527",
+      "evidence": "InterSubMod/docs/explain/_planning/00_盤點_各任務敘述與邏輯.md:101-104; HCC1395-only evidence",
+      "minimum_rewrite": "Use “cis-compatible/copy-screen-negative under this heuristic,” with formula and single-sample limit.",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C121",
+      "category": "statistics",
+      "inventory_proposition": "“Latent true structure” treats gated-V=0 plus significant PERMANOVA as truth.",
+      "remediated_claim": "Proposed source correction under review: Use “PERMANOVA-positive candidate structure missed by the V reliability gate.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L411-416|P002:L269-273|P002:L536-554",
+      "evidence": "PERMANOVA is label/centroid association and is dispersion-sensitive; P009:L219-220",
+      "minimum_rewrite": "Use “PERMANOVA-positive candidate structure missed by the V reliability gate.”",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C122",
+      "category": "statistics",
+      "inventory_proposition": "The teaching page says p “controls truth” and V “controls strength.”",
+      "remediated_claim": "Proposed source correction under review: Use “p measures incompatibility with the specified null; V summarizes association magnitude.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P009:L218",
+      "evidence": "P-values do not estimate truth probability; V is effect size under a contingency-table definition",
+      "minimum_rewrite": "Use “p measures incompatibility with the specified null; V summarizes association magnitude.”",
+      "targets": [
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C123",
+      "category": "statistics",
+      "inventory_proposition": "The teaching page says PERMANOVA determines whether grouping itself “is valid/established.”",
+      "remediated_claim": "Proposed source correction under review: Use “tests label-associated centroid separation; interpret with PERMDISP and design limits.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P002:L248-251|P009:L219",
+      "evidence": "P009:L220 itself notes dispersion confounding; PERMANOVA does not validate biological groups",
+      "minimum_rewrite": "Use “tests label-associated centroid separation; interpret with PERMDISP and design limits.”",
+      "targets": [
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/09_three-stats-division-of-labor.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C124",
+      "category": "case_study",
+      "inventory_proposition": "Three allele-PERMANOVA p=0.001 results are called “hard evidence” that methylation corroborates a somatic/subclone axis.",
+      "remediated_claim": "Correction contract: Use “strong locus-specific allele-associated methylation evidence; not independent clone validation.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P010:L141",
+      "evidence": "Three label-first tests from one biological sample; InterSubMod claim ceiling forbids clone confirmation",
+      "minimum_rewrite": "Use “strong locus-specific allele-associated methylation evidence; not independent clone validation.”",
+      "targets": [
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 10 and verify that the live case study no longer calls three p-values clone-confirming hard evidence."
+      ]
+    },
+    {
+      "claim_id": "C125",
+      "category": "causality",
+      "inventory_proposition": "Pages call normal-ASM-screen-negative CpGs “tumor-acquired subclone methylation.”",
+      "remediated_claim": "Correction contract: Replace with “tumor-associated, normal-ASM-screen-negative methylation.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L172|P006:L120-121|P006:L322-337|P010:L285|P010:L349",
+      "evidence": "P005:L137,L249 and claim-contract-v5 show acquisition/clone identity is not established",
+      "minimum_rewrite": "Replace with “tumor-associated, normal-ASM-screen-negative methylation.”",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/06_ism-subclone-pipeline-concept.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 4,
+      "external_actions": [
+        "Publish pages 04, 06 and 10 and verify the live causal wording."
+      ]
+    },
+    {
+      "claim_id": "C126",
+      "category": "causality",
+      "inventory_proposition": "A concept page says subclone methylation “truly exists” in the clean subset.",
+      "remediated_claim": "Correction contract: Use “the subset is compatible with lineage-associated methylation under current controls.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P006:L337",
+      "evidence": "Absence of detected normal HP difference does not establish acquisition or cellular subclone origin",
+      "minimum_rewrite": "Use “the subset is compatible with lineage-associated methylation under current controls.”",
+      "targets": [
+        "docs/explain/06_ism-subclone-pipeline-concept.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 06 and verify the compatibility-only wording in the live page."
+      ]
+    },
+    {
+      "claim_id": "C127",
+      "category": "terminology",
+      "inventory_proposition": "Several case pages use “regional subclonal states” where the current ceiling permits only regional molecular/mutation-state candidates.",
+      "remediated_claim": "Correction contract: Replace with “regional molecular-state candidates” except when explicitly quoting the historical L2 case verdict.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L159-181|P005:L135-150|P005:L164|P006:L120|P007:L101-104",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "Replace with “regional molecular-state candidates” except when explicitly quoting the historical L2 case verdict.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+        "docs/explain/06_ism-subclone-pipeline-concept.standalone.html",
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 5,
+      "external_actions": [
+        "Publish pages 04-07 and re-fetch every regional-state occurrence."
+      ]
+    },
+    {
+      "claim_id": "C128",
+      "category": "ccf",
+      "inventory_proposition": "The judgment workstation labels an approximate SEQC2-TVAF-derived CCF gradient as external corroboration of subclone structure.",
+      "remediated_claim": "Correction contract: Label “historical case-specific approximate TVAF transform; noncanonical and not clone corroboration.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P007:L253-255|P007:L297",
+      "evidence": "Canonical authority forbids CN/LOH-corrected CCF and biological clone claims; displayed formula is approximate",
+      "minimum_rewrite": "Label “historical case-specific approximate TVAF transform; noncanonical and not clone corroboration.”",
+      "targets": [
+        "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish page 07 and verify both visible label and embedded workstation data on the live page."
+      ]
+    },
+    {
+      "claim_id": "C129",
+      "category": "observation",
+      "inventory_proposition": "The logic page equates a long read with a tumor cell's chromosome without explaining loss of cell identity.",
+      "remediated_claim": "Correction contract: Say “a read samples one molecule from a chromosome copy, but the originating cell is unbarcoded and unknown.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L189-238",
+      "evidence": "Current claim contract stops at molecular/read-level evidence before L1 cellular support",
+      "minimum_rewrite": "Say “a read samples one molecule from a chromosome copy, but the originating cell is unbarcoded and unknown.”",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 08 and verify the molecule-versus-cell distinction in live bytes."
+      ]
+    },
+    {
+      "claim_id": "C130",
+      "category": "independence",
+      "inventory_proposition": "The chr2 methylation signal is repeatedly called independent/orthogonal confirmation of the same subclone split.",
+      "remediated_claim": "Correction contract: Use “bounded concordant association after genetic grouping,” not independent confirmation.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L141|P008:L154|P008:L172|P008:L387|P008:L681|P010:L366",
+      "evidence": "Methyl groups are conditioned on mutation-defined labels and share sample/reads; authority allows association only",
+      "minimum_rewrite": "Use “bounded concordant association after genetic grouping,” not independent confirmation.",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish pages 08 and 10 and verify association-only wording in live artifacts."
+      ]
+    },
+    {
+      "claim_id": "C131",
+      "category": "tagging",
+      "inventory_proposition": "The logic page promises a “correct tag” despite no per-read ground truth or quantified rescue evaluation.",
+      "remediated_claim": "Correction contract: Use “candidate molecular-state label with uncertainty”; separate observed genetic tagging from unvalidated methyl rescue.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L589-635",
+      "evidence": "P008:L173 and L635 admit rescue is unquantified; claim-contract-v5 requires orthogonal cellular evidence",
+      "minimum_rewrite": "Use “candidate molecular-state label with uncertainty”; separate observed genetic tagging from unvalidated methyl rescue.",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 08 and verify that observed tagging is separated from the unvalidated rescue hypothesis."
+      ]
+    },
+    {
+      "claim_id": "C132",
+      "category": "novelty",
+      "inventory_proposition": "The method pages imply first/unique originality for the combination without a current systematic head-to-head literature audit on the public page.",
+      "remediated_claim": "Proposed source correction under review: Use “project-specific combination; novelty and comparative advantage require cited systematic review/benchmark.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P002:L378|P002:L423-434|P005:L342-344",
+      "evidence": "InterSubMod/docs/explain/_planning/00_盤點_各任務敘述與邏輯.md:183-238 records missing head-to-head validation",
+      "minimum_rewrite": "Use “project-specific combination; novelty and comparative advantage require cited systematic review/benchmark.”",
+      "targets": [
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C133",
+      "category": "reporting",
+      "inventory_proposition": "The report generator is said to make fabrication structurally impossible.",
+      "remediated_claim": "Proposed source correction under review: Use “prevents silent rendering of declared required metrics; does not guarantee scientific correctness.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L246-248|A004:L232-234|W006:L82-90|P015:L226-260",
+      "evidence": "Exit-3 only guards declared required fields; it cannot validate truth, denominator, source correctness or omitted optional fields",
+      "minimum_rewrite": "Use “prevents silent rendering of declared required metrics; does not guarantee scientific correctness.”",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ]
+    },
+    {
+      "claim_id": "C134",
+      "category": "provenance",
+      "inventory_proposition": "The feature README claims every number, command and file format was verified on 2026-08-06 although several counts and commands are already wrong or nonportable.",
+      "remediated_claim": "Correction contract: Replace with an artifact-level verification table including commit, command, environment, date, scope and known failures.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "NEEDS_CORRECTION",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L273-278|A004:L259-263",
+      "evidence": "C145-C151; public inputs missing; fresh 270/39 test run",
+      "minimum_rewrite": "Replace with an artifact-level verification table including commit, command, environment, date, scope and known failures.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Merge the artifact-level ledger to main and verify the live README tables."
+      ]
+    },
+    {
+      "claim_id": "C135",
+      "category": "capability",
+      "inventory_proposition": "Default main README says integrating methylation, somatic variants and haplotypes resolves intratumoral subclonal structure.",
+      "remediated_claim": "Correction contract: Replace default README with the bounded feature README after correcting C107-C134.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L3",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:78-97",
+      "minimum_rewrite": "Replace default README with the bounded feature README after correcting C107-C134.",
+      "targets": [
+        "README.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Merge the corrected bounded README to the default branch; the stale live main README remains unresolved until then."
+      ]
+    },
+    {
+      "claim_id": "C136",
+      "category": "capability",
+      "inventory_proposition": "Default main README says read-level methylation patterns distinguish different cell populations.",
+      "remediated_claim": "Correction contract: Replace with “methylation provides pattern-conditioned association after genetic candidate structure is fixed.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L20",
+      "evidence": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json:76,87-95",
+      "minimum_rewrite": "Replace with “methylation provides pattern-conditioned association after genetic candidate structure is fixed.”",
+      "targets": [
+        "README.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Merge corrected methylation scope to the default branch and verify the live landing README."
+      ]
+    },
+    {
+      "claim_id": "C137",
+      "category": "capability",
+      "inventory_proposition": "Default main README says InterSubMod automatically generates distance and cluster heatmaps.",
+      "remediated_claim": "Correction contract: Say “downstream Python tools can generate heatmaps; the C++ binary does not do so automatically.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L22",
+      "evidence": "A005:L109-110 states manual core emits data only; C++ run emits no PNG",
+      "minimum_rewrite": "Say “downstream Python tools can generate heatmaps; the C++ binary does not do so automatically.”",
+      "targets": [
+        "README.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Merge corrected summary and quick-start behavior to main and verify the live files."
+      ]
+    },
+    {
+      "claim_id": "C138",
+      "category": "reproducibility",
+      "inventory_proposition": "Default README/Quick Start presents run_vcf_all_snv.sh as a public-clone standard command, but the script is hard-coded to internal /big7 and /big8 inputs.",
+      "remediated_claim": "Correction contract: Mark internal-only and require explicit BAM/FASTA/VCF arguments, or ship a tracked tiny fixture and portable wrapper.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A002:L28-36|A005:L31-55",
+      "evidence": "InterSubMod/scripts/run_vcf_all_snv.sh:41-79 at main; required external paths are not in Git",
+      "minimum_rewrite": "Mark internal-only and require explicit BAM/FASTA/VCF arguments, or ship a tracked tiny fixture and portable wrapper.",
+      "targets": [
+        "QUICKSTART.md",
+        "README.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Merge the internal-only boundary and tracked synthetic DEMO fixture to main; re-fetch the live README before claiming synthetic-smoke reproducibility. Do not promote DEMO to real-data science validation."
+      ]
+    },
+    {
+      "claim_id": "C139",
+      "category": "workflow",
+      "inventory_proposition": "Project Summary says a one-click script spans raw BAM through final visualization.",
+      "remediated_claim": "Correction contract: Separate internal orchestration from portable public workflow and list required external assets.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A006:L15-18",
+      "evidence": "The advertised script depends on untracked internal paths and the C++ program alone does not render plots",
+      "minimum_rewrite": "Separate internal orchestration from portable public workflow and list required external assets.",
+      "targets": [
+        "README_PROJECT_SUMMARY.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Merge the corrected project summary to main and verify the live first-hop document."
+      ]
+    },
+    {
+      "claim_id": "C140",
+      "category": "interpretation",
+      "inventory_proposition": "Project Summary says cluster heatmaps intuitively display subclone groups.",
+      "remediated_claim": "Correction contract: Say “display read-level methylation clusters; these are not cellular subclones.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A006:L40-43",
+      "evidence": "Current claim boundary forbids treating methylation read clusters as cellular clones",
+      "minimum_rewrite": "Say “display read-level methylation clusters; these are not cellular subclones.”",
+      "targets": [
+        "README_PROJECT_SUMMARY.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Merge the corrected heatmap interpretation to main and verify the live summary."
+      ]
+    },
+    {
+      "claim_id": "C141",
+      "category": "documentation",
+      "inventory_proposition": "The public project is described as having bilingual default-branch READMEs, but README.zh-TW.md returns 404 on main.",
+      "remediated_claim": "Correction contract: Merge corrected README.md and README.zh-TW.md to main atomically.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L5|A004:L5|M001",
+      "evidence": "git cat-file on main@635437a for README.zh-TW.md fails; raw endpoint HTTP 404",
+      "minimum_rewrite": "Merge corrected README.md and README.zh-TW.md to main atomically.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Merge README.md and README.zh-TW.md to main atomically, then verify both raw endpoints return HTTP 200."
+      ]
+    },
+    {
+      "claim_id": "C142",
+      "category": "denominator",
+      "inventory_proposition": "Feature README/Wiki says two thirds of all mutations were lost as isolated single sites.",
+      "remediated_claim": "Correction contract: Say “66.52% of strict components were k=1”; never attach that rate to all mutations.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L82-85|A004:L75-77|W001:L79|P011:L590",
+      "evidence": "170,131/469,849=36.21%; 66.52% uses strict components 255,752, not all dataset-records",
+      "minimum_rewrite": "Say “66.52% of strict components were k=1”; never attach that rate to all mutations.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/11_system-map-overview.standalone.html",
+        "docs/wiki/Home.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 4,
+      "external_actions": [
+        "Publish all denominator corrections and verify the live percentages retain their explicit grains."
+      ]
+    },
+    {
+      "claim_id": "C143",
+      "category": "configuration",
+      "inventory_proposition": "Methylation/filter page says production default distance is BERNOULLI.",
+      "remediated_claim": "Correction contract: Replace all “production default BERNOULLI” text with “effective no-argument default NHD; BERNOULLI only when explicitly requested.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P003:L361|P003:L434-471",
+      "evidence": "InterSubMod/include/utils/ArgParser.hpp clears defaults and fills NHD; P012:L195-211",
+      "minimum_rewrite": "Replace all “production default BERNOULLI” text with “effective no-argument default NHD; BERNOULLI only when explicitly requested.”",
+      "targets": [
+        "docs/explain/03_methylation-read-filter.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 03 and verify the live effective-default statement."
+      ]
+    },
+    {
+      "claim_id": "C144",
+      "category": "configuration",
+      "inventory_proposition": "Glossary/core pages also state production actually uses BERNOULLI.",
+      "remediated_claim": "Correction contract: Synchronize pages 01-03 to the verified NHD default and distinguish Config initializer from effective CLI behavior.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P001:L389|P002:L453",
+      "evidence": "InterSubMod/include/utils/ArgParser.hpp; P012:L195-211",
+      "minimum_rewrite": "Synchronize pages 01-03 to the verified NHD default and distinguish Config initializer from effective CLI behavior.",
+      "targets": [
+        "docs/explain/01_background-glossary.standalone.html",
+        "docs/explain/02_ism-core.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish pages 01-02 and verify consistency with page 03 in live bytes."
+      ]
+    },
+    {
+      "claim_id": "C145",
+      "category": "tests",
+      "inventory_proposition": "README/Wiki/Pages report 265 tests in 38 suites as the current expected result.",
+      "remediated_claim": "Proposed source correction under review: Update to 270/39 with commit/date, or avoid hard-coding and show a command-derived expected pattern.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L132|A003:L175-176|A004:L123|A004:L164-165|W001:L65|W007:L48-49|P000:L271|P016:L144-145|P016:L354",
+      "evidence": "Fresh clean build on 2026-08-12: GoogleTest 270 tests/39 suites; CTest 270/270",
+      "minimum_rewrite": "Update to 270/39 with commit/date, or avoid hard-coding and show a command-derived expected pattern.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/explain/index.standalone.html",
+        "docs/wiki/Home.md",
+        "docs/wiki/How-to-Run.md"
+      ]
+    },
+    {
+      "claim_id": "C146",
+      "category": "code_inventory",
+      "inventory_proposition": "Analysis page reports 2,144 Python files at deploy commit.",
+      "remediated_claim": "Proposed source correction under review: Change to 2,147 for fbdf7c7 and publish the exact counting command.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W006:L10|W006:L42|P015:L124|P015:L156",
+      "evidence": "git ls-tree -r --name-only fbdf7c7 | rg '\\.py$' => 2,147",
+      "minimum_rewrite": "Change to 2,147 for fbdf7c7 and publish the exact counting command.",
+      "targets": [
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ]
+    },
+    {
+      "claim_id": "C147",
+      "category": "code_inventory",
+      "inventory_proposition": "Analysis page says scripts/ contains 268 Python files at deploy commit.",
+      "remediated_claim": "Proposed source correction under review: Change to 291 for fbdf7c7 and state whether generated/test files are included.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W006:L137|P015:L341",
+      "evidence": "git ls-tree -r --name-only fbdf7c7 scripts | rg '\\.py$' => 291",
+      "minimum_rewrite": "Change to 291 for fbdf7c7 and state whether generated/test files are included.",
+      "targets": [
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ]
+    },
+    {
+      "claim_id": "C148",
+      "category": "verification",
+      "inventory_proposition": "verify_pipeline_numbers.py is said to recompute every number in the methods documentation.",
+      "remediated_claim": "Correction contract: Say exactly which metrics/artifact versions it verifies; add separate validators for other claim families.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W006:L22-30|W006:L42|P015:L132-144|P015:L162-164|P016:L247",
+      "evidence": "Its shown output covers the historical 35,332-site pipeline and does not recompute the 20260724 exact-PS, LongLineage, storage, code-count or test claims",
+      "minimum_rewrite": "Say exactly which metrics/artifact versions it verifies; add separate validators for other claim families.",
+      "targets": [
+        "docs/explain/15_python-html-layer.standalone.html",
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/wiki/Analysis-and-Presentation.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 3,
+      "external_actions": [
+        "Publish Wiki and Pages validator scope corrections and verify live occurrences."
+      ]
+    },
+    {
+      "claim_id": "C149",
+      "category": "reproducibility",
+      "inventory_proposition": "How-to says a reader can go from clone/build to a first analysis result in about 10 minutes using tracked example paths.",
+      "remediated_claim": "Correction contract: Label internal-only or publish a tiny licensed fixture plus download/checksum instructions and portable paths.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "W007:L6|W007:L72-105|P016:L105-220",
+      "evidence": "data/bam/HCC1395/tumor.bam, data/ref/hg38.fa and one_snv.vcf are absent from public Git objects",
+      "minimum_rewrite": "Label internal-only or publish a tiny licensed fixture plus download/checksum instructions and portable paths.",
+      "targets": [
+        "docs/explain/16_how-to-run.standalone.html",
+        "docs/wiki/How-to-Run.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 3,
+      "external_actions": [
+        "Publish the tracked synthetic fixture and corrected quick-start surfaces, re-fetch live bytes and receipt, and keep the result DEMO-only. Real-data reproducibility remains a separate preflight."
+      ]
+    },
+    {
+      "claim_id": "C150",
+      "category": "provenance",
+      "inventory_proposition": "The blanket statement that every public number/command/file format was executed and verified is false at the locked public versions.",
+      "remediated_claim": "Correction contract: Replace blanket assurance with per-claim evidence receipts and explicit UNVERIFIED/INTERNAL_ONLY flags.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A003:L273-278|A004:L259-263",
+      "evidence": "C141-C149 demonstrate missing endpoint, stale counts and non-runnable public commands",
+      "minimum_rewrite": "Replace blanket assurance with per-claim evidence receipts and explicit UNVERIFIED/INTERNAL_ONLY flags.",
+      "targets": [
+        "README.md",
+        "README.zh-TW.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Merge per-artifact receipts to main and independently publish/recheck Wiki and Pages before changing public status."
+      ]
+    },
+    {
+      "claim_id": "C151",
+      "category": "architecture",
+      "inventory_proposition": "InterSubMod I/O page says inter_sub_mod is the program that produces the paper's core exact-PS numbers.",
+      "remediated_claim": "Correction contract: Say inter_sub_mod produces per-region methylation/statistics; the exact-PS funnel comes from the research solver pipeline.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P012:L107-112|W003:L16",
+      "evidence": "The 20260724 core funnel is produced by the separate research exact_ps_topology_af C++ solver plus Python runners; authority_manifest artifacts identify that path",
+      "minimum_rewrite": "Say inter_sub_mod produces per-region methylation/statistics; the exact-PS funnel comes from the research solver pipeline.",
+      "targets": [
+        "docs/explain/12_intersubmod-io.standalone.html",
+        "docs/wiki/InterSubMod-Engine.md"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish Wiki/page 12 architecture corrections and verify the live distinction between pipelines."
+      ]
+    },
+    {
+      "claim_id": "C152",
+      "category": "causality",
+      "inventory_proposition": "The chr2 logic says LOH makes every read difference necessarily somatic and not sequencing error.",
+      "remediated_claim": "Correction contract: Say LOH removes the simple two-parent-haplotype explanation but sequencing error, CN, stochastic methylation and other alternatives remain.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L261|P004:L388|P008:L154|P008:L292",
+      "evidence": "P005:L183-187 and P005:L245-251 document normal error calls and homopolymer G/T/DEL artifacts",
+      "minimum_rewrite": "Say LOH removes the simple two-parent-haplotype explanation but sequencing error, CN, stochastic methylation and other alternatives remain.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish pages 04 and 08 and verify that alternatives remain visible in live text and diagrams."
+      ]
+    },
+    {
+      "claim_id": "C153",
+      "category": "phylogeny",
+      "inventory_proposition": "The logic page says zero observed alpha/beta co-occurrence can only be explained by sister branches.",
+      "remediated_claim": "Correction contract: Use “compatible with an alpha/beta branching candidate under parsimony; not uniquely identified.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L292|P008:L366",
+      "evidence": "Authority model permits recurrence and incomplete coverage; P005:L210 says blocks lack a direct genetic bridge",
+      "minimum_rewrite": "Use “compatible with an alpha/beta branching candidate under parsimony; not uniquely identified.”",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 08 and verify the live parsimony language is candidate-only and non-unique."
+      ]
+    },
+    {
+      "claim_id": "C154",
+      "category": "function",
+      "inventory_proposition": "The logic page says methylation tells which genes a subclone has shut off.",
+      "remediated_claim": "Correction contract: Say “describes local methylation state; functional gene regulation would require expression/functional data.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P008:L174|P008:L683",
+      "evidence": "No expression assay or gene-regulatory causal validation is present in the case evidence",
+      "minimum_rewrite": "Say “describes local methylation state; functional gene regulation would require expression/functional data.”",
+      "targets": [
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 1,
+      "external_actions": [
+        "Publish page 08 and verify the live functional claim requires expression/functional data."
+      ]
+    },
+    {
+      "claim_id": "C155",
+      "category": "tagging",
+      "inventory_proposition": "The logic page says methylation rescues genetically untagged reads and yields the correct final tag.",
+      "remediated_claim": "Correction contract: Move to “unvalidated future hypothesis”; do not show rescued/correct tags as observed output.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P0",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "CONFIRMED_WITH_LIMITS",
+      "source_status": "SOURCE_READY",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P004:L513|P008:L173|P008:L589-635|P008:L682-686",
+      "evidence": "P008 itself says per-read rescue is unquantified; claim-contract-v5 has no cellular tag truth before L1",
+      "minimum_rewrite": "Move to “unvalidated future hypothesis”; do not show rescued/correct tags as observed output.",
+      "targets": [
+        "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+        "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html"
+      ],
+      "p0_guard_registry": "scripts/p0_claim_registry.json",
+      "p0_local_check_count": 2,
+      "external_actions": [
+        "Publish pages 04 and 08 and verify live text/figures do not present methylation rescue or correct tags as observed output."
+      ]
+    },
+    {
+      "claim_id": "C156",
+      "category": "case_study",
+      "inventory_proposition": "Capability page says normal reads at all six chr2 points are all REF.",
+      "remediated_claim": "Proposed source correction under review: Use “matched normal showed none of the six expected ALT alleles; occasional other non-reference error calls occurred.”",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "CONTRADICTED",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P010:L183-186",
+      "evidence": "P005:L186-187 shows no expected somatic ALT but occasional DEL/T errors; independent_audit.json contains those counts",
+      "minimum_rewrite": "Use “matched normal showed none of the six expected ALT alleles; occasional other non-reference error calls occurred.”",
+      "targets": [
+        "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+      ]
+    },
+    {
+      "claim_id": "C157",
+      "category": "performance",
+      "inventory_proposition": "Project Summary claims linear speedup on 32 cores and average region processing below 300 ms.",
+      "remediated_claim": "Proposed source correction under review: Remove until a reproducible benchmark artifact exists, or add hardware, commit, inputs, repetitions, distribution and scaling curve.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P1",
+      "inventory_verdict": "UNVERIFIABLE",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "A006:L79-83",
+      "evidence": "No locked benchmark log, hardware specification, dataset distribution or scaling curve was found in the audited evidence",
+      "minimum_rewrite": "Remove until a reproducible benchmark artifact exists, or add hardware, commit, inputs, repetitions, distribution and scaling curve.",
+      "targets": [
+        "README_PROJECT_SUMMARY.md"
+      ]
+    },
+    {
+      "claim_id": "C158",
+      "category": "novelty",
+      "inventory_proposition": "Public method wording implies the specific method combination is first/unique relative to external tools.",
+      "remediated_claim": "Proposed source correction under review: Use “to our knowledge” only with dated systematic search; otherwise describe components without priority claim.",
+      "verdict_applies_to": "remediated_claim",
+      "priority": "P2",
+      "inventory_verdict": "UNVERIFIABLE",
+      "current_verdict": "UNVERIFIED",
+      "source_status": "SOURCE_EDITED_REVIEW_REQUIRED",
+      "live_status": "UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT",
+      "occurrences": "P002:L378|P002:L423-434|P005:L342-344",
+      "evidence": "Public pages lack a systematic current literature search and matched head-to-head benchmark; planning file marks comparison pending",
+      "minimum_rewrite": "Use “to our knowledge” only with dated systematic search; otherwise describe components without priority claim.",
+      "targets": [
+        "docs/explain/02_ism-core.standalone.html",
+        "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html"
+      ]
+    }
+  ]
+}
