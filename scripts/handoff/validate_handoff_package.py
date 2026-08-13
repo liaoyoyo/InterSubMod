@@ -842,6 +842,69 @@ def check_reader_acceptance_receipt(package_root: Path) -> dict[str, Any]:
     return summary
 
 
+def check_tiny_e2e_receipt(package_root: Path) -> dict[str, Any]:
+    receipt = load_json(package_root / "evidence/bip7_tiny_e2e_7c7fbd6f.json")
+    require(receipt.get("schema_name") == "intersubmod.bip7_tiny_e2e_summary_receipt", "tiny E2E schema_name differs")
+    require(receipt.get("schema_version") == "1.0.0", "tiny E2E schema_version differs")
+    require(receipt.get("hostname") == "bip7", "tiny E2E hostname is not bip7")
+    require(receipt.get("scope") == "DEMO", "tiny E2E scope must remain DEMO")
+    require(receipt.get("evidence_status") == "VALIDATED_DERIVED", "tiny E2E evidence_status differs")
+    require(receipt.get("finality") == "FINAL_FOR_SCOPE", "tiny E2E finality differs")
+    require(receipt.get("machine_acceptance") is False, "tiny E2E cannot satisfy machine acceptance")
+    require(receipt.get("overall_release_gate") == "NOT_EVALUATED", "tiny E2E cannot promote the release gate")
+    require(receipt.get("exit_code") == 0, "tiny E2E process exit is not zero")
+    ceiling = receipt.get("claim_ceiling")
+    require(
+        isinstance(ceiling, str) and "DEMO" in ceiling and "no biological" in ceiling,
+        "tiny E2E claim ceiling is missing DEMO/no-biological bounds",
+    )
+    checkout = receipt.get("source_checkout")
+    require(isinstance(checkout, dict), "tiny E2E source_checkout is missing")
+    commit = checkout.get("resolved_commit")
+    require(
+        isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None,
+        "tiny E2E resolved commit is invalid",
+    )
+    require(checkout.get("requested_revision") == commit, "tiny E2E requested/resolved revisions differ")
+    require(checkout.get("clean") is True and checkout.get("status_line_count") == 0, "tiny E2E checkout was not clean")
+    results = receipt.get("results")
+    require(isinstance(results, dict), "tiny E2E results are missing")
+    expected_results = {
+        "all_pass": True,
+        "clean_clone_e2e_pass": True,
+        "summary_column_count": 199,
+        "summary_row_count": 1,
+        "tree_leaf_count": 12,
+        "valid_pairs": 66,
+        "invalid_pairs": 0,
+        "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage",
+    }
+    require(results == expected_results, f"tiny E2E result contract differs: {results!r}")
+    hashes = receipt.get("hashes")
+    required_hashes = {
+        "binary_sha256",
+        "significance_summary_sha256",
+        "tree_newick_sha256",
+        "run_command_sha256",
+        "full_ephemeral_receipt_sha256",
+    }
+    require(isinstance(hashes, dict) and set(hashes) == required_hashes, "tiny E2E hash set differs")
+    require(
+        all(isinstance(value, str) and SHA256_RE.fullmatch(value) for value in hashes.values()),
+        "tiny E2E contains an invalid SHA-256",
+    )
+    return {
+        "commit": commit,
+        "scope": "DEMO",
+        "columns": 199,
+        "rows": 1,
+        "read_leaves": 12,
+        "valid_pairs": 66,
+        "machine_acceptance": False,
+        "overall_release_gate": "NOT_EVALUATED",
+    }
+
+
 CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("markdown_links", check_markdown_links),
     ("json_parse", check_json_parse),
@@ -856,6 +919,7 @@ CHECKS: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
     ("release_gate_text", check_release_gate_text),
     ("reader_contract", check_reader_contract),
     ("reader_acceptance_receipt", check_reader_acceptance_receipt),
+    ("tiny_e2e_receipt", check_tiny_e2e_receipt),
 )
 
 

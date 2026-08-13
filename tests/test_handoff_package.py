@@ -38,7 +38,7 @@ class HandoffPackageValidationTest(unittest.TestCase):
 
     def test_complete_package_passes_all_gates(self):
         self.assertTrue(self.valid_receipt["pass"], self.valid_receipt)
-        self.assertEqual(self.valid_receipt["tally"], {"PASS": 14, "FAIL": 0})
+        self.assertEqual(self.valid_receipt["tally"], {"PASS": 15, "FAIL": 0})
 
     def test_receipt_exposes_required_counts(self):
         by_id = {row["check_id"]: row for row in self.valid_receipt["checks"]}
@@ -69,6 +69,20 @@ class HandoffPackageValidationTest(unittest.TestCase):
         self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["questions"], 6)
         self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["prohibited_promotions"], 8)
         self.assertEqual(by_id["reader_acceptance_receipt"]["details"]["source_files"], 15)
+        self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["columns"], 199)
+        self.assertEqual(by_id["tiny_e2e_receipt"]["details"]["read_leaves"], 12)
+        self.assertFalse(by_id["tiny_e2e_receipt"]["details"]["machine_acceptance"])
+
+    def test_tiny_e2e_receipt_cannot_promote_machine_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            path = package / "evidence/bip7_tiny_e2e_7c7fbd6f.json"
+            tiny = json.loads(path.read_text(encoding="utf-8"))
+            tiny["machine_acceptance"] = True
+            path.write_text(json.dumps(tiny, ensure_ascii=False) + "\n", encoding="utf-8")
+            receipt = MODULE.validate_package(package)
+            self.assertEqual(self.failed_check(receipt, "tiny_e2e_receipt")["status"], "FAIL")
+            self.assertFalse(receipt["pass"])
 
     def test_reader_acceptance_receipt_semantic_drift_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

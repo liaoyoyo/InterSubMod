@@ -37,14 +37,14 @@
 | Large-asset data plane | `git ls-tree` baseline 102 files／569,107,308 bytes；archive-first移出唯一>50 MiB HTML | archived HTML 69,606,961 bytes SHA `36548d...c14`；現行registry 101 files／499,500,347 bytes | `LARGE_ASSET_MIGRATION_BLOCKED`；GitHub Release URL尚不存在 |
 | Unified registry | `python3 scripts/handoff/build_registries.py ...` | 51 physical runs、36 artifacts、16 machine paths、11 storage roots；6/6 schemas | PASS |
 | Registry tests | `/tmp/ism-handoff-py310/bin/python -m pytest -q tests/test_handoff_registries.py` | 12/12 PASS | PASS |
-| Tiny synthetic E2E | isolated Release binary＋12-read fixture | 199 header/data columns、12 tree leaves、66/66 valid pairs | DEMO PASS；clean stack待重播 |
+| Tiny synthetic E2E | clean clone `7c7fbd6f`＋isolated Release binary＋12-read fixture | exit 0；199 header/data columns、12 tree leaves、66/66 valid pairs；summary/full-receipt hashes固定 | DEMO PASS；不是real-data、machine acceptance或release gate |
 | bip7 doctor | `scripts/site/doctor ... --mode real-preflight` | exit 5；4 local checksum locator missing | `BIP7_DATA_PREFLIGHT_BLOCKED` |
 | bip8 | 尚無hostname=bip8 receipt | NFS view only | `BIP8_DATA_PREFLIGHT_BLOCKED` |
 | Public claims | 158-row validator＋GitHub About live re-fetch | 69 CONFIRMED、69 CONFIRMED_WITH_LIMITS、20 UNVERIFIED；33/33 local P0 guards ready，`C108`為bounded live `CONFIRMED_WITH_LIMITS` | P0 source/About bounded gate PASS；P1/P2與publication/release仍blocked |
 | Public HTML browser QA | Chromium，21頁×desktop/mobile/no-JS/print | 84/84 PASS；0 overflow、0 page/console error、0 external request | local source QA PASS；不是live Pages證據 |
 | Algorithm／CLI crosswalk | 35-row immutable matrix＋commit/hash-bound source inspection | 35/35 rows；6 CONFIRMED、27 CONFIRMED_WITH_LIMITS、2 UNVERIFIED；validator 0 error | static asset-ready PASS；不是aggregate publication/release PASS |
 | Reader acceptance contract | Draft 2020-12 schema＋15-file dual hash binding＋negative tests＋無前情 fresh agent | 6/6 questions、8/8 anti-promotion、15/15 current/tested-commit hashes，receipt validator PASS | reader comprehension PASS；不是science、host或publication驗證 |
-| Package validator | `/tmp/ism-handoff-py310/bin/python scripts/handoff/validate_handoff_package.py <PACKAGE_ROOT>` | 14/14 PASS；reader receipt納入fail-closed check；22 evidence records | local package structure PASS；release gates仍blocked |
+| Package validator | `/tmp/ism-handoff-py310/bin/python scripts/handoff/validate_handoff_package.py <PACKAGE_ROOT>` | 15/15 PASS；reader與tiny E2E receipts均納入fail-closed checks；23 evidence records、0 missing/hash mismatch | local package structure PASS；release gates仍blocked |
 | LongLineage clean foundation | clean clone `f60b5f3` configure/build/check_all | 49/49 CTest、no-network、FOUNDATION_PASS | foundation PASS；release blockers remain |
 | LongLineage private docs closure | clean `0805bd5`；只含CHANGELOG、CURRENT_FOCUS與archived task receipt | fresh build exit 0、CTest 49/49、production `run`為預期`KernelBlocked` exit 6；worktree clean、未push/tag/release | engineering boundary PASS；`b9aaa12`仍是public-preview candidate，公開gate仍BLOCKED |
 | LongLineage strict public gate | immutable audit base from safety receipt | expected exit 1；5 blocker classes | safe FAIL；keep private |
@@ -72,7 +72,7 @@
 
 ## 未決與發布阻塞
 
-- [未決] InterSubMod clean build、動態CTest 270/270與official Python 325/325已通過；仍待目前最終commit的fresh-clone tiny E2E receipt。
+- [完成] InterSubMod clean build、動態CTest 270/270、official Python 325/325與commit `7c7fbd6f` fresh-clone tiny E2E均通過；eventual release commit仍須由外部／CI receipt自行綁定，避免receipt-in-commit自我參照。
 - [完成] 無對話背景 fresh-agent reader receipt 已在固定15檔範圍通過：6問、8個禁止升格、15/15 current/tested-commit SHA一致；claim ceiling僅為reader comprehension。
 - [未決] 101個tracked >1 MiB資產仍須逐筆producer、finality、license與Release target裁定；目前只有唯一>50 MiB HTML完成local archive-first保存，尚無Release upload/refetch SHA。
 - [未決] bip7補齊4個data checksum locators並完成host-local fresh clone acceptance。
