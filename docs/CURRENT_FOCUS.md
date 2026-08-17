@@ -1,6 +1,7 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-08-13（公開資訊全面校正：158 claim families 完整分級；58 個問題依 P0/P1/P2 完成 disposition；GitHub/Pages 本地來源校正與 17 頁瀏覽器 QA 完成；About 已 live 解決，default main/Wiki/Pages 仍待發布；CCU 僅產生唯讀清單）
+更新時間: 2026-08-17（兩 repo 分支收斂：LongLineage main=develop=583e03e／ctest 49/49，InterSubMod 合併六階段交接堆疊解除 main 的 CI 死鎖／270-270 tests／tiny e2e PASS；LongLineage 已公開但其 release gate 仍 FAIL 5 項，屬誠實揭露；兩組刻意不合併的分支理由已落檔）
+前次更新: 2026-08-13（公開資訊全面校正：158 claim families 完整分級；58 個問題依 P0/P1/P2 完成 disposition；GitHub/Pages 本地來源校正與 17 頁瀏覽器 QA 完成；About 已 live 解決，default main/Wiki/Pages 仍待發布；CCU 僅產生唯讀清單）
 狀態: in_progress（全sSNV正式release與Read-linked Hypercube M2兩條Task-B）+ validated（下方明示之已驗證結果）
 資料來源:
   - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md
@@ -19,6 +20,76 @@
 -->
 
 # 當前目標
+
+## 2026-08-17 — 兩 repo 分支收斂：InterSubMod 與 LongLineage 皆已把最新內容送上 main
+
+> **本輪性質**：版本控制與對外交付層。**未改動任何科學結論、canonical 數值或 C++ 邏輯**；
+> 科學層權威仍為 20260801 的 `authority_manifest.json`。
+
+### 現在的權威版本（新 session 從這裡開始）
+
+| repo | main | 驗證 |
+|---|---|---|
+| **LongLineage** | `583e03e`（= develop） | build exit 0、**ctest 49/49** |
+| **InterSubMod** | 見下方 develop 同步狀態 | build OK、**270/270 tests**、tiny e2e PASS |
+
+兩者皆為 **public**（無認證 `git ls-remote` 實測可讀）。
+
+### 解除了一個死鎖：main 先前無法用任何正常方式更新
+
+InterSubMod 的 `main` 分支保護要求名為 `Clean build and portable handoff validation` 的
+status check，而產生它的 `.github/workflows/handoff-portable-ci.yml` **只存在於未合併的
+`agent/research-handoff-*` 分支上** —— main 因此停在 2026-08-06、落後 42 個 commit。
+
+合併那條堆疊（六條分支嚴格巢狀，合最外層 `release-metadata` 即取得全部 28 commit /
+174 新檔案）同時解決了死鎖與一批先前被列為「缺項」的東西：
+`CITATION.cff`／`CONTRIBUTING.md`／`SECURITY.md`／`CHANGELOG.md`、
+`config/site-profile.{example,schema}.json`（站點路徑外部化 + `contig_contract` 明訂
+染色體命名）、`scripts/site/{doctor,site_profile.py}`、`requirements-ci.lock`、
+`tests/fixtures/tiny_public/`（可跑的 tiny e2e）、以及 57 檔的
+`docs/handoff/20260813_完整研究資料與軟體交接_01/`（含 `ai_context/CONTEXT.md`、
+`READER_ACCEPTANCE_PROMPT.md`、10+ JSON schema）。
+
+**衝突處置以該堆疊的宣稱用語為準**（使用者裁決）：`88.2579%`（非 88.26%）、
+`inter_sub_mod` 標為 `⚠️ historical dirty audit 通過`（非 `✅ 可跑`）、
+非循環性限定於「不使用甲基化衍生標籤」且仍依賴上游 variant calling／alignment／
+basecalling／haplotag 假設。
+
+### 🔴 LongLineage 已公開，但其自身的 release gate 仍 FAIL
+
+`scripts/ci/check_public_preview_gate.sh HEAD` 有 **5 個未結案 blocker**：授權審查未結案、
+4 筆 `NO_GO` 來源對應、21 筆授權未核准、11 個相依項 `NOASSERTION`、歷史中 4 個 blob
+含開發機絕對路徑（**現行工作樹為 0**）。已逐條寫進其公開 README，屬**誠實揭露**。
+定位：**可讀、可建置、可跑測試；不可當作已完成授權清算的釋出版重新散布。**
+這 5 項需維護者的授權裁決，不是技術問題。
+
+### 兩組刻意不合併的分支，理由已落檔
+
+- InterSubMod 5 條（`archive/*-legacy-202603`、`refactor/phase1-safety{,-pr}`、
+  `fix/HP_string_output`）與 develop **無共同祖先**（5/5 實測），屬 2026-03-22 git
+  re-init 前歷史。
+- LongLineage 1 條 `docs/cpp-output-efficiency-validation` 是過期分支：會引入第 8 個
+  含私有路徑的歷史 blob，且其 `qa_static_report.py` 移除了 main 已有的 h1 可見性檢查
+  與 portable artifact 判定 → 合併會讓 main 退步；其三份稽核文件皆已在 main 上（3/3 確認）。
+
+完整裁決 → [`docs/provenance/20260817_兩repo分支收斂裁決_01.md`](provenance/20260817_兩repo分支收斂裁決_01.md)
+
+### 兩個引擎怎麼一起用（先前兩邊 README 都沒說）
+
+主資料流**單向**：`LongLineage tag-bam`（寫 `lc/lu/lv/ls` BAM aux tag）→ `inter_sub_mod`。
+**InterSubMod 沒有 LongLineage 也跑得起來** —— lineage 軸被跳過而非併成單一群組
+（`include/core/Stats.hpp`）。反方向的 `regional_crosswalk` 是驗證 crosswalk，**不是相依**。
+兩邊 README 現已互相交叉引用；版本漂移由
+`scripts/handoff/check_companion_version.py` 以 README 內的
+`<!-- companion-version: ... -->` 標記機械偵測（一致 exit 0／漂移 exit 1／缺標記 exit 1）。
+
+### 順帶記錄的一個 parser 限制
+
+`src/core/MethylationParser.cpp` 比對的是**字面 `"C+m?"`**。MM 標籤若為 `C+m.` 或裸 `C+m`，
+會得到 `exit 0` 但 `Total CpG sites found: 0` —— 程式正常結束、不報錯、甲基化全部讀不到。
+排查指令與說明已寫入 `tests/fixtures/tiny_public/README.md`。
+
+---
 
 ## 2026-08-13 — 公開資訊全面校正（目前公開文件狀態權威）
 

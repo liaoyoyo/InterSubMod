@@ -1,9 +1,14 @@
 name: Deploy docs to GitHub Pages
 
 # 為什麼不用 legacy 的「branch + /docs」模式：
-#   docs/ 在 develop 上是 627 MB / 2,986 檔（含 66 MB 的 HTML 與多個 20-28 MB 的
-#   JSON/CSV 研究衍生資料）。把整個 docs/ 當站台根目錄會讓 Pages 建置直接失敗
-#   （2026-08-06 實測 errored）。這個 workflow 只打包真正要給人看的部分（約 3 MB）。
+#   2026-08-06 實測，把整個 docs/ 當站台根目錄會讓 Pages 建置直接 errored ——
+#   當時 docs/ 在 develop 上是 627 MB / 2,986 檔（含 66 MB 的單一 HTML 與多個
+#   20-28 MB 的 JSON/CSV 研究衍生資料）。
+#   2026-08-17 更新：commit 95d420f6 已把 412 MB 資料資產 git rm --cached
+#   （檔案留磁碟，見 docs/standards/20260813_最終與中間產物分類準則_01.md），
+#   docs/ 的 tracked 體積降為 224.9 MB / 2,351 檔。仍遠超 Pages 的實用上限，
+#   所以本 workflow 的「只打包要給人看的部分」策略不變。
+#   這個 workflow 只打包解釋中心與展示圖，約 3 MB。
 
 on:
   push:
