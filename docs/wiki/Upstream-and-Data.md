@@ -13,15 +13,15 @@
 |---|---|---|
 | **甲基化訊號**<br>`MM`／`ML` tag | Dorado basecaller | 這條 read 上每個 CpG 有沒有甲基化、機率多高。**資料進來時就已經在 BAM 裡了。** |
 | **體細胞突變清單**<br>VCF | ClairS（配對模式） | 哪些位置是腫瘤才有、正常組織沒有的突變。 |
-| **單倍型標籤**<br>`HP`／`PS` | LongPhase-S | 這條 read 來自父源還是母源那一套染色體。**存成 sidecar 檔案，不存回 BAM。** |
+| **單倍型標籤**<br>`HP`／`PS` | LongPhase-S | 這條 read 來自父源還是母源那一套染色體。**本交接的 frozen FIFO workflow 抽成 sidecar，該次 run 不新增落地 BAM；歷史 PRE-FIX workflows 曾落地 tagged BAM。** |
 | **拷貝數**<br>CN 區段 | SAVANA（僅 cna） | 哪些區段被複製或缺失。⚠️ **目前狀態是 `NOT_INTEGRATED`，尚未接入主線。** |
 
 | 指標 | 數值 |
 |---|---|
 | ✅ 樣本 sidecar 全部生產完成 | **7 / 7** |
-| 7 樣本 sidecar 總量（壓縮後） | **6,256,168,164 bytes（5.83 GiB）** |
-| ⚠️ 7 個 tagged BAM 的總量 | **UNVERIFIED**：缺 path／exact bytes／hash／compression receipt |
-| sidecar 方案節省的倍數 | **不報告**：沒有兩端 exact-byte receipts |
+| 7 technical datasets／6 biological IDs 的 sidecar 總量（壓縮後） | **5.83 GiB** |
+| 7 `paired_full` + 7 `paired_pileup` PRE-FIX tagged BAM | `paired_full` = **1,840,983,466,353 bytes（1.67436 TiB）**；14 個總計 **3,709,322,840,333 bytes**。Paths/bytes/mtimes 與 sampled set identity known；full-file hashes/provenance correspondence 未閉合，全為 `PARTIAL`/`NON_FINAL` |
+| 7 `paired_full` stat bytes ÷ 7 sidecar stat bytes | **294.2669×**；僅為跨世代 storage-footprint quotient，不是因果 compression/reduction、byte-equivalent replacement 或 frozen authority；舊 287× 錯誤 |
 
 ---
 
@@ -29,13 +29,11 @@
 
 從原始訊號到兩支 C++ 吃得下的東西。步驟 ① 通常在資料交付時就已完成。
 
-![upstream-toolchain](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/upstream-toolchain.png)
+![upstream-toolchain](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/upstream-toolchain.png)
 
-> **圖 1 · 上游前處理鏈，以及為什麼 tagged BAM 從不落地**
+> **圖 1 · 上游前處理鏈，以及 FIFO 如何避免該次 run 新增落地 BAM**
 >
-> **這個設計是本系統最值得學習的工程決定之一** —— 它把「目前九欄契約需要什麼資訊」
-> 與「完整 BAM 容器還帶了什麼」分開；本頁只確認 sidecar bytes，不宣稱未量測的縮減倍率
-> 或下游資訊保留率。
+> sidecar 把「下游 frozen contract 要求的欄位」與 BAM 容器分開；可說保留該九欄 contract 所需欄位，不能說保留所有可能有用資訊。7 個 paired_full 與 7 個 sidecar 的 exact stat bytes quotient 是 294.2669×，只代表跨世代 footprint；不是壓縮率或內容等價，舊 287× 無效。
 
 ### 八個步驟逐項
 
@@ -46,7 +44,7 @@
 | ③ ClairS 體細胞突變 | 腫瘤 + 正常配對比較 | `134,122` 筆 |
 | ④ VCF 正規化 | 只改一個欄位型別，不動任何 FILTER | 守恆稽核：進出筆數必須相同 |
 | ⑤ **LongPhase-S — 這裡產生 `HP` / `PS` 標籤** | 以 germline 單倍型為骨架，判斷每條 read 屬於 HP1 還是 HP2；若該 read 同時帶體細胞變異，再細分成 `1-1` / `2-1`（germline 骨架上的體細胞支系）或 `3` | 🔴 執行參數：12 執行緒、MAPQ ≥ 20、標記補充比對、輸出體細胞 VCF |
-| ⑥ **關鍵設計：tagged BAM 寫進「具名管道」，從不寫到磁碟** | 見下方展開 | ✅ |
+| ⑥ **FIFO mode：tagged BAM 寫進具名管道，避免該次 run 新增落地 BAM** | 見下方展開 | ✅ |
 | ⑦ FILTER 雙向重校正稽核 | 比對正規化前後的 VCF，逐位點統計狀態轉移；並確認除 FILTER 外其他欄位未被改動 | ⚠️ 見下方 §03 — 這裡有個容易算錯的地方 |
 | ⑧ SAVANA 拷貝數 | 在雜合位點數等位比例，擬合純度與倍性；刻意只跑 `cna` 子命令 | 🔴 跑完整流程會吃到 400–488 GB 記憶體近乎 OOM |
 
@@ -55,25 +53,28 @@
 ```text
 LongPhase-S 寫出                具名管道          另一程序邊讀邊抽              sidecar TSV
 tagged BAM 串流       ───►       .fifo      ───►  每條 read 抽 9 個欄位   ───►   5.83 GiB
-（若落地 = 每樣本上百 GB）                        CIGAR 只存 8 位元組摘要        （7 樣本合計）
+（若落地 = 每 technical dataset 上百 GB）                 CIGAR 只存 8 位元組摘要        （7 technical datasets 合計）
 ```
 
-- 跑完後工作目錄裡只剩一個空的管道檔 —— BAM 本體一個位元組都沒留在磁碟上。
+- 這個 FIFO mode 可讓該次 run 不新增落地 BAM；不代表歷史 canonical 從未有 tagged BAM。
 - 接著驗證：列數必須等於比對數、不得有未知的 `HP` 值、座標必須仍然有序，任一不過就中止。
 
 ### 為什麼要大費周章用管道，而不是存 tagged BAM？
 
-- 七個 current sidecars 的 exact sum 是 **6,256,168,164 bytes（5.83 GiB）**；這是可重播的檔案統計。
-- 先前的 **1.67 TiB** tagged-BAM estimate 沒有逐檔 registry，因此不能拿來計算倍率；current raw BAM total 是不同物件，也不能替代。
-- 現行 sidecar contract 只保留九欄，不保留 `SEQ`／`QUAL`；尚無 field-level BAM byte census
-  或 downstream utility audit，因此不宣稱它們占 `>99%` 或有 `0%` 用途。
+- frozen sidecar 為 **5.83 GiB**（壓縮後）／13.98 GiB（未壓縮）。
+- 2026-08-13 盤點識別 7 個 PRE-FIX `paired_full` BAM，exact paths/bytes/mtimes 合計 **1,840,983,466,353 bytes（1.67436 TiB）**；另有 7 個 `paired_pileup`，14 個總計 **3,709,322,840,333 bytes**。
+- 7 個 historical `paired_full` 有 sampled-content identity set SHA-256，但不是 7 個 full-file SHA-256；producer/generation correspondence 仍未逐檔閉合，故保持 `PARTIAL`/`NON_FINAL`。
+- `paired_full` exact stat bytes ÷ 7 sidecar exact stat bytes（6,256,168,164）= **294.2669×**；這只是跨世代 footprint quotient，不是壓縮效果，舊 287× 錯誤。
+- SEQ/QUAL未納入九欄 sidecar contract；在可重現 byte decomposition 前，不宣稱其占比 >99%或用途為0%。
 - ⚠️ 代價：無法直接用 IGV 之類的工具看標籤（見下方 §04）。
 
 ---
 
-## 02 · sidecar 長什麼樣 — 全系統的樞紐檔案
+## 02 · sidecar 長什麼樣 — exact-PS／LongLineage 的 commit-scoped contract
 
-這是唯一被兩支 C++ 程式的原始碼**寫死成相同格式**的檔案。
+InterSubMod 從 BAM aux tags 讀 HP/PS；exact-PS／LongLineage 使用 sidecar。兩者是平行
+provenance contracts，**不是**兩支引擎直接串接的執行期介面。LongLineage preview 的
+tagged-BAM writer 只可在明示 branch/commit 下宣稱，不能由這份 sidecar 推成 supported E2E。
 
 ```text
 #CHROM	START0	END0	QNAME	FLAG	MAPQ	CIGAR_B2	HP	PS
@@ -86,7 +87,7 @@ tagged BAM 串流       ───►       .fifo      ───►  每條 read 
 | `HP` | 單倍型標籤。值域：`1`／`2`（germline）、`1-1`／`2-1`（帶體細胞變異的支系）、`3`、`.`（未定相）。 |
 | `PS` | 定相組編號 —— 同一組內的單倍型標籤才可互相比較。 |
 
-### 7 個樣本的實際規模
+### 7 個 technical datasets／6 個 biological IDs 的實際規模
 
 | 資料集 | sidecar 列數 | 備註 |
 |---|---|---|
@@ -141,7 +142,7 @@ LongPhase-S 不只把「原本不合格」的位點救回來，**也會把原本
 
 > **現況**
 >
-> `inter_sub_mod` 沒有 BAM writer。LongLineage 則必須標明版本：**public main `5daf50f`** 沒有 tagged-BAM writer，但 **feature `b9aaa12`** 已含 `longlineage-tag-bam`。因此不能再概括成「兩支程式都做不到」。現存生產檔案究竟由 LongPhase-S 或哪個 LongLineage revision 產生，必須依 dataset provenance／receipt 判定。
+> `inter_sub_mod` 沒有 BAM writer。LongLineage 則必須標明版本：private baseline/main snapshot **`5daf50f`** 沒有 tagged-BAM writer，但 private public-preview candidate **`b9aaa12`** 已含 `longlineage-tag-bam`。Candidate 仍是 `NOT_READY`／non-production，`P3/P4/P5/P7/P8` BLOCKED，能力尚未發布。現存生產檔案究竟由 LongPhase-S 或哪個 revision 產生，必須依 dataset provenance／receipt 判定。
 
 ✅ **好消息是技術上完全可行**，因為比對用的鍵是確定性的正向計算：
 
@@ -149,17 +150,16 @@ LongPhase-S 不只把「原本不合格」的位點救回來，**也會把原本
 - LongLineage 的 `read_id` 是它的 **SHA-256 雜湊**
 - 所以讀 BAM 時對每條 read 名重算一次雜湊就能對上，**不需要任何反查表**
 
-若使用 public main `5daf50f`，可行做法仍是獨立匯出工具（讀凍結結果 + 原始 BAM，重算雜湊做比對）；若評估 feature `b9aaa12` 的 `longlineage-tag-bam`，必須另做該 revision 的 schema、provenance 與輸出驗證，不能把 feature 能力回填到 public main。
+若以 private baseline `5daf50f` 行為作參考，可行做法仍是獨立匯出工具（讀凍結結果 + 原始 BAM，重算雜湊做比對）；若評估 candidate `b9aaa12` 的 `longlineage-tag-bam`，必須另做該 revision 的 schema、provenance 與輸出驗證，不能把 candidate 能力寫成已公開或 production 可用。
 
-🔴 ● **仍須先做容量規劃**：在產生 tagged BAM 前，應由實際輸入、輸出 compression 與
-目標區間估算空間；目前沒有可引用的七檔 exact-byte registry。實務上可先針對感興趣區間產生子集。
+🔴 ● **磁碟規劃仍是 blocker**：14 個 PRE-FIX BAM 合計 3,709,322,840,333 bytes，但全檔 hash、byte decomposition、generation correspondence 與 production eligibility 都未驗。實務上建議只針對感興趣區間產生子集。
 
 ---
 
 ## 本頁的驗證方式
 
 - **sidecar 格式**：實際 zcat 取得表頭與資料行，與 LongLineage 原始碼中的常數逐位元組比對一致。
-- **7 樣本狀態**：實際讀取生產狀態表，7/7 皆為 PASS。
+- **cohort 狀態**：實際讀取生產狀態表，7/7 technical datasets 皆為 PASS；對應 6 個 biological IDs。
 - **FILTER 轉移數**：取自稽核 JSON，並驗算 4,592 − 5,528 = −936 與前後總數相符。
 - **磁碟數字**：實際檔案位元組數加總。
 

@@ -4,7 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ISM 分群三統計分工 — Cramér's V / Fisher / PERMANOVA</title>
-<!-- provenance-verified: 所有 file:line 與行為由 4 個 fresh-context reader 親讀 C++ 原始碼核出（branch research/subclonal-reconstruction-202606），見頁尾資料來源 -->
+<!--
+  provenance-verified: 所有 file:line 與行為由 4 個 fresh-context reader 親讀 C++ 原始碼核出（branch research/subclonal-reconstruction-202606），見頁尾資料來源
+  source_created_at: UNKNOWN
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
+-->
 <style>
   :root{
     --bg:#0b1222; --card:#121d33; --card2:#0f1830; --ink:#e7edf7; --mut:#9fb0cc;
@@ -43,6 +53,40 @@
   .key{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);margin:6px 0 0}
   .key span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
   .key .ka::before{background:var(--A)} .key .kb::before{background:var(--B)} .key .kw::before{background:var(--warn)}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 <style>
 /* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
@@ -135,25 +179,25 @@ pre code{display:block;white-space:pre;word-break:normal}
     <!-- Fisher -->
     <rect x="60" y="288" width="380" height="78" rx="10" fill="#121d33" stroke="#3a4f7a"/>
     <text x="74" y="312" fill="#60a5fa" font-size="14" font-weight="700">Fisher 精確檢定 (FFH, Monte-Carlo) → p</text>
-    <text x="74" y="332" fill="#e7edf7" font-size="12.5">「觀察到的吻合，與<tspan font-weight="700">指定 null 有多不相容</tspan>？」</text>
-    <text x="74" y="350" fill="#9fb0cc" font-size="11.5">洗牌幾千次；p = null 下至少同樣極端的比例，不是真假機率</text>
+    <text x="74" y="332" fill="#e7edf7" font-size="12.5">「分群與二元標籤的<tspan font-weight="700">association 是否偏離 null</tspan>？」</text>
+    <text x="74" y="350" fill="#9fb0cc" font-size="11.5">洗牌幾千次，比實際更極端的比例 = p；越小越不像運氣</text>
 
     <!-- Cramér's V -->
     <rect x="60" y="372" width="380" height="78" rx="10" fill="#121d33" stroke="#3a4f7a"/>
     <text x="74" y="396" fill="#60a5fa" font-size="14" font-weight="700">Cramér's V (0~1)</text>
-    <text x="74" y="416" fill="#e7edf7" font-size="12.5">「分群與標籤的<tspan font-weight="700">關聯幅度</tspan>多大？」（效應量）</text>
-    <text x="74" y="434" fill="#9fb0cc" font-size="11.5">由卡方算出；表太稀疏 (Cochran) → 不可靠則歸 0</text>
+    <text x="74" y="416" fill="#e7edf7" font-size="12.5">「這個 association 的摘要量<tspan font-weight="700">有多大</tspan>？」（效應量）</text>
+    <text x="74" y="434" fill="#9fb0cc" font-size="11.5">由卡方算 raw V；Cochran 不可靠時僅 summary 投影為 0</text>
 
     <!-- PERMANOVA -->
     <rect x="600" y="288" width="380" height="78" rx="10" fill="#0f1f1c" stroke="#2a5b54"/>
     <text x="614" y="312" fill="#14b8a6" font-size="14" font-weight="700">PERMANOVA → pseudo-F + p</text>
-    <text x="614" y="332" fill="#e7edf7" font-size="12.5">「指定標籤的<tspan font-weight="700">群心是否分離</tspan>？」</text>
-    <text x="614" y="350" fill="#9fb0cc" font-size="11.5">洗標籤檢驗 centroid separation；仍需 dispersion/設計檢查</text>
+    <text x="614" y="332" fill="#e7edf7" font-size="12.5">「指定 label 是否對應<tspan font-weight="700">距離重心分離</tspan>？」</text>
+    <text x="614" y="350" fill="#9fb0cc" font-size="11.5">洗標籤，看 組間距離 ≫ 組內距離 (StructureTest.cpp:141-201)</text>
 
     <!-- PERMDISP -->
     <rect x="600" y="372" width="380" height="78" rx="10" fill="#0f1f1c" stroke="#2a5b54"/>
     <text x="614" y="396" fill="#14b8a6" font-size="14" font-weight="700">PERMDISP 散度側檢</text>
-    <text x="614" y="416" fill="#e7edf7" font-size="12.5">「會不會只是<tspan font-weight="700">某組比較散</tspan>，不是真的位移？」</text>
+    <text x="614" y="416" fill="#e7edf7" font-size="12.5">「centroid effect 是否混有<tspan font-weight="700">組內離散度差異</tspan>？」</text>
     <text x="614" y="434" fill="#9fb0cc" font-size="11.5">significant PERMANOVA 的 confound 警示 (dispersion_warning)</text>
 
     <!-- merge to gate -->
@@ -165,11 +209,11 @@ pre code{display:block;white-space:pre;word-break:normal}
 
     <!-- gate box -->
     <rect x="300" y="500" width="440" height="120" rx="12" fill="#1d1a0e" stroke="#fbbf24"/>
-    <text x="520" y="524" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">② 合併 → 舊閘 Significant / VerificationClass</text>
+    <text x="520" y="524" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">② historical v1 provenance gate（非 current verdict）</text>
     <text x="520" y="546" text-anchor="middle" fill="#e7edf7" font-size="12">雙門檻：Fisher <tspan font-weight="700">p≤0.1</tspan> 且 <tspan font-weight="700">V≥0.1</tspan>（GlobalTest.cpp:138-143）</text>
     <text x="520" y="565" text-anchor="middle" fill="#e7edf7" font-size="12">Significant = passed_gating &amp; GlobalP≤0.05 &amp; V≥0.1 &amp; reads≥20</text>
     <text x="520" y="583" text-anchor="middle" fill="#9fb0cc" font-size="11">GlobalP = ALT/HP/HP-family 三個 Fisher p 取最小</text>
-    <text x="520" y="606" text-anchor="middle" fill="#f87171" font-size="11.5" font-weight="700">⚠ 舊閘只聽路線 A（Fisher 表）— PERMANOVA 沒進這個判定</text>
+    <text x="520" y="606" text-anchor="middle" fill="#f87171" font-size="11.5" font-weight="700">⚠ 只保留為 legacy evidence-path input；current 用 Verification schema-v2</text>
 
     <!-- note: PERMANOVA gated by passed_gate -->
     <text x="790" y="474" text-anchor="middle" fill="#6f86ad" font-size="10.5">PERMANOVA 只在 passed_gate 才跑</text>
@@ -179,15 +223,19 @@ pre code{display:block;white-space:pre;word-break:normal}
     <rect x="60" y="500" width="210" height="120" rx="10" fill="#0c1326" stroke="#2a3b5e"/>
     <text x="70" y="520" fill="#cfe" font-size="12" font-weight="700">看圖重點</text>
     <circle cx="80" cy="540" r="5" fill="#60a5fa"/><text x="92" y="544" fill="#bdd7ff" font-size="11">A：看「分群 vs 標籤」對齊</text>
-    <circle cx="80" cy="562" r="5" fill="#14b8a6"/><text x="92" y="566" fill="#9cefe0" font-size="11">B：看標籤關聯的 centroid separation</text>
-    <circle cx="80" cy="584" r="5" fill="#fbbf24"/><text x="92" y="588" fill="#fde68a" font-size="11">黃：最終判定</text>
+    <circle cx="80" cy="562" r="5" fill="#14b8a6"/><text x="92" y="566" fill="#9cefe0" font-size="11">B：看指定 label 的距離重心分離</text>
+    <circle cx="80" cy="584" r="5" fill="#fbbf24"/><text x="92" y="588" fill="#fde68a" font-size="11">黃：historical v1 gate</text>
     <text x="70" y="608" fill="#9fb0cc" font-size="10.5">虛線=有算但未進舊閘</text>
   </svg>
-  <div class="cap">圖：同一個 region 的甲基化矩陣分兩條路 — 路線 A 的 Fisher p 量與指定 null 的不相容性、Cramér's V 量關聯幅度；路線 B 的 PERMANOVA 量標籤關聯的 centroid separation，需配合 PERMDISP 與設計限制。</div>
+  <div class="cap">圖：同一個 region 的甲基化矩陣分兩條路 — 路線 A（對照表）由 Fisher+Cramér's V 摘要分群與二元標籤的 association，路線 B（距離矩陣）由 PERMANOVA 檢驗指定 label 與 read-distance variation／centroid separation 的 association；兩者都不證明 truth、因果或無監督 clusters 已形成不同 read 雲。</div>
   <div class="key">
     <span class="ka">路線 A：Fisher · Cramér's V</span>
     <span class="kb">路線 B：PERMANOVA · PERMDISP</span>
-    <span class="kw">合併判定（舊閘只用 A）</span>
+    <span class="kw">historical v1（current v2 另行合併 A/B）</span>
+  </div>
+
+  <div class="warnbox" style="background:rgba(20,184,166,.07);border-color:#17675f">
+    <b>Current Verification schema-v2：</b>舊 Fisher/Cramér's V 四類只保留在 <code>verification_class_legacy</code> 作 provenance input。current decision tree 另納入 label-PERMANOVA，並用 PERMDISP 分出 clean location shift 與 dispersion-confounded structure；<code>Significant</code> 是 <code>verification_significant</code> 的 boolean projection，已取代 obsolete Fisher-only gate（<code>RegionProcessor.cpp:1817-1862,2026-2032</code>）。這仍是 association evidence classification，不是 cellular truth。
   </div>
   </div>
 
@@ -203,15 +251,15 @@ pre code{display:block;white-space:pre;word-break:normal}
     </tr>
     <tr>
       <td><b>Fisher (FFH)</b></td>
-      <td>觀察統計與指定 null 有多不相容？</td>
-      <td>R×C Fisher-Freeman-Halton，Monte-Carlo 固定邊際洗牌（2000–10000 次，Wilson CI 提早停）；p = null 下得到至少同樣極端統計量的比例，不是 hypothesis 為真的機率</td>
+      <td>二元標籤 association 是否偏離 null？</td>
+      <td>cluster×二元標籤的 R×2 Fisher-Freeman-Halton（兩群時為 2×2），Monte-Carlo 固定邊際洗牌（2000–10000 次，Wilson CI 提早停）；p = 比實際更極端的比例，不判定 truth 或 causality</td>
       <td><code>FisherExact.cpp:259-320</code> · <code>GlobalTest.cpp:73-132</code></td>
     </tr>
     <tr>
       <td><b>Cramér's V</b></td>
-      <td>分群與標籤的關聯幅度（0~1）</td>
-      <td>由 Pearson 卡方算 V=√(χ²/(n·(min_dim−1)))；Cochran 可靠性：≥80% 細胞期望≥5 才採信，否則 V=0</td>
-      <td><code>MathUtils.cpp:154-207</code> · 可靠性 <code>:185-200</code></td>
+      <td>對齊有多強（0~1）</td>
+      <td>由 Pearson 卡方算 raw V=√(χ²/(n·(min_dim−1)))；Cochran 可靠性：≥80% 細胞期望≥5 才採信，否則 reliability=false 且 summary V=0；legacy gate／JSON 仍讀 raw V</td>
+      <td><code>MathUtils.cpp:154-207</code> · summary projection <code>RegionProcessor.cpp</code></td>
     </tr>
     <tr>
       <td><b>路線 B 距離矩陣</b></td>
@@ -221,48 +269,58 @@ pre code{display:block;white-space:pre;word-break:normal}
     </tr>
     <tr>
       <td><b>PERMANOVA</b></td>
-      <td>指定 labeling 的 centroid 是否分離？</td>
-      <td>pseudo-F = (組間SS/(k−1))÷(組內SS/(N−k))；洗標籤 99~999 次得 p。它檢驗 label-associated centroid separation；dispersion 不同或設計 confound 也可產生顯著結果</td>
+      <td>指定 label 是否對應 read-distance centroid separation？</td>
+      <td>pseudo-F = (組間SS/(k−1))÷(組內SS/(N−k))；現行 release baseline 洗標籤 999 次得 p（p-floor 0.001）。分群、HP、ALT 三種 labeling 各跑一次；結果只檢驗指定 labeling 與距離 variation／centroid separation 的 association，不證明 unsupervised clusters 或 reads 真的分雲</td>
       <td><code>StructureTest.cpp:141-201</code> · <code>SignificanceAnalyzer.cpp:99-131,301-304</code></td>
     </tr>
     <tr>
       <td><b>PERMDISP</b></td>
       <td>某組是否只是比較散</td>
-      <td>各 read 到組心 RMS 距離做單因子 ANOVA；P 是粗略 3 級查表（非真 p），落 dispersion_warning</td>
-      <td><code>StructureTest.cpp:262-296</code></td>
+      <td>各 read 到組心 RMS 距離做單因子 ANOVA；current core 以 F-distribution upper-tail 解析 p 判定 <code>dispersion_warning</code>。historical 3-bucket lookup 已被取代</td>
+      <td><code>StructureTest.cpp:378-472</code></td>
     </tr>
     <tr>
-      <td><b>雙門檻 + 舊閘</b></td>
-      <td>最終 pass/fail 與分類</td>
-      <td>passed_gate=(Fisher p≤0.1 且 V≥0.1)；Significant = passed_gating &amp; GlobalP≤0.05 &amp; V≥0.1 &amp; reads≥20；GlobalP=三軸 Fisher p 取最小</td>
-      <td><code>GlobalTest.cpp:138-143</code> · <code>RegionProcessor.cpp:1153-1156</code> · <code>SignificanceAnalyzer.cpp:90</code></td>
+      <td><b>historical v1 雙門檻</b></td>
+      <td>legacy provenance class（非 current final pass/fail）</td>
+      <td>passed_gate=(Fisher p≤0.1 且 V≥0.1)；舊 Significant 式與 GlobalP=min(Fisher axes) 只用來解釋 <code>verification_class_legacy</code></td>
+      <td><code>GlobalTest.cpp:138-143</code> · <code>SignificanceAnalyzer.cpp</code></td>
+    </tr>
+    <tr>
+      <td><b>current Verification v2</b></td>
+      <td>current evidence class + Significant</td>
+      <td>合併 legacy evidence path、Δβ、HP-AUC、within-HP、label-PERMANOVA 與 PERMDISP clean/dispersion axes；<code>Significant=verification_significant</code></td>
+      <td><code>RegionProcessor.cpp:1817-1862,2026-2032</code></td>
     </tr>
   </table>
 
   <!-- ============ WHY THREE ============ -->
   <h2>為何要三個、不是一個</h2>
   <ul class="why">
-    <li><b>只有 p 不夠</b>：reads 一多，很小的差異也可顯著→ 加 Cramér's V 看關聯幅度。所以是<b>雙門檻</b>：p 表示與指定 null 的不相容性，V 表示關聯幅度；都不是「真假機率」。</li>
-    <li><b>Fisher/V 只看「分群 vs 標籤」</b>：若候選結構對不上 ALT/HP 標籤會漏 → PERMANOVA 直接用距離矩陣檢驗標籤關聯的 centroid separation；不能略過 PERMDISP 或設計限制就升格為真實分群。</li>
+    <li><b>只有 p 不夠</b>：p 衡量資料與指定 null 的不相容程度，不控制「真假」；Cramér's V 摘要 association magnitude，也不控制真值。雙門檻是工程 gate，不是 truth oracle。</li>
+    <li><b>Fisher/V 只看「分群 vs 標籤」</b>：PERMANOVA 在距離矩陣上測試 label-associated centroid separation；須與 PERMDISP 及設計限制一起解讀，不提供 unsupervised cluster existence proof。</li>
     <li><b>PERMANOVA 會被「某組比較散」騙</b>（看似分開、其實只是離散度不同）→ PERMDISP 側檢標記這種假象。</li>
   </ul>
 
   <!-- ============ CAVEATS ============ -->
-  <h2>三個你該知道的真相（已對原始碼核實）</h2>
+  <h2>三個你該知道的真相（revision-scoped 源碼核實）</h2>
   <div class="warnbox">
-    <b>① 舊閘 Significant 根本沒用 PERMANOVA。</b> verdict 只聽 Fisher 那張表（<code>SignificanceAnalyzer.cpp:309-311</code>）；「PERMANOVA 顯著但 Fisher p&gt;0.05」的 region 會被打成 Weak/Noise — 即 06-16 FN1 audit 那件事。圖中以<b>虛線</b>表示 PERMANOVA「有算但未進舊閘」。
+    <b>① historical v1 舊閘 Significant 沒用 PERMANOVA；current v2 已替換。</b>舊 <code>SignificanceAnalyzer</code> 只聽 Fisher 那張表，所以「PERMANOVA 顯著但 Fisher p&gt;0.05」曾被打成 Weak/Noise；這也是 v2 納入 clean label-PERMANOVA/PERMDISP axes 的原因。圖中虛線只解釋 historical gate，不是 current decision。
   </div>
   <div class="warnbox">
-    <b>② Cramér's V 在表太稀疏時被強制歸 0。</b> Cochran：期望&lt;5 的格子佔比&gt;20% → 不可靠 → V=0（<code>RegionProcessor.cpp:1745-1749</code>）；因此 762 MISSED / 487 gate-to-0 只能稱「PERMANOVA-positive candidate structure missed by the V reliability gate」，不是真實關聯證明。
+    <b>② Cramér's V 的 raw、reliability 與 summary 是三個口徑。</b> Cochran：期望&lt;5 的格子佔比&gt;20% → <code>cramers_v_reliable=false</code>；<code>MathUtils.cpp::cramers_v</code> 仍回傳 raw V，<code>RegionProcessor.cpp</code> 的 summary projection 才寫 0，而 legacy <code>GlobalTest::passed_gate</code> 仍直接讀 raw V。這表示 summary 不足以判讀，不能把歸零當作真偽判定（762 MISSED / 487 僅是歷史分析口徑的候選計數）。
   </div>
   <div class="warnbox">
     <b>③ <code>chi_square_p</code> 是佔位符</b>（直接 = Fisher p，<code>GlobalTest.cpp:122-124</code>），沒有獨立的卡方 p；卡方統計量只用來算 V。
   </div>
   <div class="warnbox" style="background:rgba(96,165,250,.07);border-color:#2a4670">
-    <b style="color:#bdd7ff">補充（與工作站欄位有關）：</b> memory/CURRENT_FOCUS 記的加權式
-    <code>StrengthScore = 0.30·HP_AUC + 0.25·|Δβ| + 0.25·CramersV + 0.20·−log10 GlobalP</code>
-    <b>不在目前 checked-out branch 原始碼</b>；它在 develop binary（<code>inter_sub_mod_develop</code>，即產生工作站資料那顆）。現 branch 的兩個合成分是
-    <code>heuristic_score</code>(−log10p + 2·V) 與 <code>quality_score</code>(100 − QC 罰分)。工作站數字無誤，但別把該公式當「現 branch 程式碼」引用。
+    <b style="color:#bdd7ff">補充（current source 的工作站欄位）：</b>目前 release-candidate source 會輸出
+    <code>StrengthScore</code>、<code>StrengthGrade</code> 與五個可重加權 component：
+    <code>StrengthStruct</code>、<code>StrengthTumor</code>、<code>StrengthSomatic</code>、<code>StrengthAssoc</code>、<code>StrengthGermline</code>。
+    實作為五個 [0,1] sub-score 的<b>等權平均</b>：
+    <code>clamp((HP_AUC_All−0.5)/0.5)</code>、通過 within-HP gate 時的 <code>clamp(WithinHP_BestSil/0.5)</code>、
+    <code>clamp(|SomaticResidualDbeta|/0.3)</code>、<code>clamp(CramersV)</code>、<code>clamp(|GermlineAsmDbeta|/0.3)</code>；
+    等級門檻 A/B/C/D/E = ≥0.50/≥0.35/≥0.22/≥0.12/其餘（<code>RegionProcessor.cpp:1756-1785, 1896-1964</code>）。
+    舊的 <code>0.30/0.25/0.25/0.20</code> 加權式只屬 historical formula，不是 current implementation。StrengthScore 只供 association-strength 排序；<b>不是機率、生物正確率、clone 或 lineage 驗證</b>。
   </div>
 
   <div class="foot">

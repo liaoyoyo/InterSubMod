@@ -7,7 +7,9 @@ import argparse
 import csv
 import html
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -48,16 +50,37 @@ def normalize_document(path: Path) -> str:
     raw = path.read_text(encoding="utf-8")
     decoded = html.unescape(raw)
     without_tags = re.sub(r"<[^>]+>", " ", decoded)
-    return re.sub(r"\s+", " ", without_tags).strip()
+    # Presentation markup must not let a false claim bypass semantic guards.
+    # Remove Markdown emphasis/code delimiters while retaining underscores in
+    # identifiers such as significance_summary.csv.
+    without_markdown_markup = without_tags.replace("`", "").replace("*", "")
+    without_markdown_markup = without_markdown_markup.replace("~~", "")
+    return re.sub(r"\s+", " ", without_markdown_markup).strip()
 
 
 def load_inventory_p0(repo_root: Path, source: str) -> set[str]:
-    path = repo_root / source
-    if not path.is_file():
-        raise FileNotFoundError(f"source inventory does not exist: {path}")
+    path = resolve_repo_relative_file(repo_root, source, "source inventory")
     with path.open(encoding="utf-8", newline="") as handle:
         rows = csv.DictReader(handle, delimiter="\t")
         return {row["claim_id"] for row in rows if row.get("priority") == "P0"}
+
+
+def resolve_repo_relative_file(repo_root: Path, value: str, label: str) -> Path:
+    """Resolve one declared input without allowing absolute or parent escapes."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{label} must be a non-empty repo-relative path")
+    relative = Path(value)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"{label} must be repo-relative without '..': {value}")
+    resolved_root = repo_root.resolve()
+    resolved = (resolved_root / relative).resolve()
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(f"{label} escapes repository root: {value}") from exc
+    if not resolved.is_file() or resolved.is_symlink():
+        raise FileNotFoundError(f"{label} is not a non-symlink regular file: {value}")
+    return resolved
 
 
 def validate_regex(pattern: str, where: str, errors: list[str]) -> re.Pattern[str] | None:
@@ -66,6 +89,273 @@ def validate_regex(pattern: str, where: str, errors: list[str]) -> re.Pattern[st
     except re.error as exc:
         errors.append(f"{where}: invalid regex {pattern!r}: {exc}")
         return None
+
+
+def expand_rule_targets(
+    rule: dict[str, Any], repo_root: Path, location: str, errors: list[str]
+) -> list[Path]:
+    """Resolve an explicitly bounded target list without permitting paths outside the repo."""
+    resolved: set[Path] = set()
+    targets = rule.get("targets", [])
+    target_globs = rule.get("target_globs", [])
+    if not isinstance(targets, list) or not all(isinstance(item, str) and item.strip() for item in targets):
+        errors.append(f"{location}: targets must be a string list")
+        targets = []
+    if not isinstance(target_globs, list) or not all(
+        isinstance(item, str) and item.strip() for item in target_globs
+    ):
+        errors.append(f"{location}: target_globs must be a string list")
+        target_globs = []
+    if not targets and not target_globs:
+        errors.append(f"{location}: at least one target or target_glob is required")
+        return []
+
+    def accept(path: Path, source: str) -> None:
+        try:
+            path.relative_to(repo_root)
+        except ValueError:
+            errors.append(f"{location}: target escapes repository root: {source}")
+            return
+        if not path.is_file():
+            errors.append(f"{location}: target is not a regular file: {source}")
+            return
+        resolved.add(path)
+
+    for target in targets:
+        candidate = Path(target)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            errors.append(f"{location}: target must be repo-relative without '..': {target}")
+            continue
+        accept((repo_root / candidate).resolve(), target)
+    for pattern in target_globs:
+        candidate = Path(pattern)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            errors.append(f"{location}: glob must be repo-relative without '..': {pattern}")
+            continue
+        matches = [path.resolve() for path in repo_root.glob(pattern) if path.is_file()]
+        if not matches:
+            errors.append(f"{location}: target_glob matched no files: {pattern}")
+            continue
+        for path in matches:
+            accept(path, pattern)
+    return sorted(resolved)
+
+
+def validate_pattern_list(value: Any, location: str, errors: list[str], *, required: bool) -> list[str]:
+    if not isinstance(value, list) or (required and not value):
+        errors.append(f"{location}: must be {'a non-empty' if required else 'a'} regex list")
+        return []
+    patterns: list[str] = []
+    for index, pattern in enumerate(value):
+        if not isinstance(pattern, str) or not pattern:
+            errors.append(f"{location}[{index}]: must be a non-empty regex")
+            continue
+        if validate_regex(pattern, f"{location}[{index}]", errors) is not None:
+            patterns.append(pattern)
+    return patterns
+
+
+def validate_cross_document_guards(
+    registry: dict[str, Any], repo_root: Path
+) -> tuple[list[str], dict[str, Any]]:
+    """Validate the registry-owned cross-document and repository shipment contract."""
+    errors: list[str] = []
+    contract = registry.get("cross_document_guards")
+    if not isinstance(contract, dict):
+        return ["cross_document_guards must be an object"], {}
+
+    public_globs = contract.get("public_source_globs")
+    public_paths = expand_rule_targets(
+        {"target_globs": public_globs}, repo_root, "cross_document_guards.public_source_globs", errors
+    )
+    raw_cache: dict[Path, str] = {}
+    normalized_cache: dict[Path, str] = {}
+
+    def text_for(path: Path, view: str) -> str:
+        if view == "raw":
+            if path not in raw_cache:
+                raw_cache[path] = path.read_text(encoding="utf-8")
+            return raw_cache[path]
+        if view != "normalized":
+            errors.append(f"unsupported content view {view!r}; expected raw or normalized")
+        if path not in normalized_cache:
+            normalized_cache[path] = normalize_document(path)
+        return normalized_cache[path]
+
+    checked_documents = 0
+    required_anchors = 0
+    forbidden_anchors = 0
+    context_occurrences = 0
+    guard_ids: list[str] = []
+
+    for group_name in ("document_rules", "corpus_rules"):
+        rules = contract.get(group_name)
+        if not isinstance(rules, list) or not rules:
+            errors.append(f"cross_document_guards.{group_name} must be a non-empty list")
+            continue
+        for index, rule in enumerate(rules):
+            location = f"cross_document_guards.{group_name}[{index}]"
+            if not isinstance(rule, dict):
+                errors.append(f"{location}: rule must be an object")
+                continue
+            guard_id = rule.get("guard_id")
+            if not isinstance(guard_id, str) or not guard_id.strip():
+                errors.append(f"{location}: guard_id must be a non-empty string")
+                guard_id = location
+            guard_ids.append(guard_id)
+            paths = expand_rule_targets(rule, repo_root, location, errors)
+            required = validate_pattern_list(
+                rule.get("required_all", []), f"{location}.required_all", errors, required=group_name == "document_rules"
+            )
+            forbidden = validate_pattern_list(
+                rule.get("forbidden_any", []), f"{location}.forbidden_any", errors, required=True
+            )
+            view = rule.get("view", "normalized")
+            for path in paths:
+                checked_documents += 1
+                text = text_for(path, view)
+                relative = path.relative_to(repo_root)
+                for pattern in required:
+                    required_anchors += 1
+                    if re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE) is None:
+                        errors.append(f"{guard_id}: {relative} missing required cross-document anchor {pattern!r}")
+                for pattern in forbidden:
+                    forbidden_anchors += 1
+                    if re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE) is not None:
+                        errors.append(f"{guard_id}: {relative} matched forbidden cross-document claim {pattern!r}")
+
+    context_rules = contract.get("context_rules")
+    if not isinstance(context_rules, list) or not context_rules:
+        errors.append("cross_document_guards.context_rules must be a non-empty list")
+        context_rules = []
+    for index, rule in enumerate(context_rules):
+        location = f"cross_document_guards.context_rules[{index}]"
+        if not isinstance(rule, dict):
+            errors.append(f"{location}: rule must be an object")
+            continue
+        guard_id = rule.get("guard_id")
+        if not isinstance(guard_id, str) or not guard_id.strip():
+            errors.append(f"{location}: guard_id must be a non-empty string")
+            guard_id = location
+        guard_ids.append(guard_id)
+        paths = expand_rule_targets(rule, repo_root, location, errors)
+        anchor_value = rule.get("anchor_pattern")
+        if not isinstance(anchor_value, str) or not anchor_value:
+            errors.append(f"{location}.anchor_pattern must be a non-empty regex")
+            continue
+        anchor = validate_regex(anchor_value, f"{location}.anchor_pattern", errors)
+        required = validate_pattern_list(
+            rule.get("required_all"), f"{location}.required_all", errors, required=True
+        )
+        skip_patterns = validate_pattern_list(
+            rule.get("skip_if_any", []), f"{location}.skip_if_any", errors, required=False
+        )
+        window_chars = rule.get("window_chars")
+        if not isinstance(window_chars, int) or not 50 <= window_chars <= 5000:
+            errors.append(f"{location}.window_chars must be an integer from 50 to 5000")
+            continue
+        minimum_occurrences = rule.get("minimum_occurrences", 0)
+        if not isinstance(minimum_occurrences, int) or minimum_occurrences < 0:
+            errors.append(f"{location}.minimum_occurrences must be a non-negative integer")
+            continue
+        if anchor is None:
+            continue
+        rule_occurrences = 0
+        for path in paths:
+            text = text_for(path, rule.get("view", "normalized"))
+            relative = path.relative_to(repo_root)
+            for match in anchor.finditer(text):
+                rule_occurrences += 1
+                context_occurrences += 1
+                context = text[max(0, match.start() - window_chars) : min(len(text), match.end() + window_chars)]
+                if any(re.search(pattern, context, flags=re.IGNORECASE | re.MULTILINE) for pattern in skip_patterns):
+                    continue
+                for pattern in required:
+                    required_anchors += 1
+                    if re.search(pattern, context, flags=re.IGNORECASE | re.MULTILINE) is None:
+                        errors.append(
+                            f"{guard_id}: {relative} occurrence lacks nearby semantic anchor {pattern!r}"
+                        )
+        if rule_occurrences < minimum_occurrences:
+            errors.append(
+                f"{guard_id}: anchor_pattern matched {rule_occurrences}; minimum is {minimum_occurrences}"
+            )
+
+    duplicate_guard_ids = sorted({item for item in guard_ids if guard_ids.count(item) > 1})
+    if duplicate_guard_ids:
+        errors.append("duplicate cross-document guard IDs: " + ", ".join(duplicate_guard_ids))
+
+    required_paths = contract.get("required_tracked_paths")
+    executable_paths = contract.get("required_executable_paths")
+    if not isinstance(required_paths, list) or not required_paths or not all(
+        isinstance(item, str) and item.strip() for item in required_paths
+    ):
+        errors.append("cross_document_guards.required_tracked_paths must be a non-empty string list")
+        required_paths = []
+    if not isinstance(executable_paths, list) or not all(
+        isinstance(item, str) and item.strip() for item in executable_paths
+    ):
+        errors.append("cross_document_guards.required_executable_paths must be a string list")
+        executable_paths = []
+    if not set(executable_paths).issubset(set(required_paths)):
+        errors.append("required_executable_paths must be a subset of required_tracked_paths")
+
+    tracked_paths = 0
+    for relative in required_paths:
+        candidate = Path(relative)
+        location = f"cross_document_guards.required_tracked_paths[{relative}]"
+        if candidate.is_absolute() or ".." in candidate.parts:
+            errors.append(f"{location}: path must be repo-relative without '..'")
+            continue
+        path = repo_root / candidate
+        if not path.is_file() or path.is_symlink():
+            errors.append(f"{location}: shipped fixture must be a non-symlink regular file")
+            continue
+        result = subprocess.run(
+            ["git", "ls-files", "--stage", "--", relative],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        rows = [line.split(maxsplit=3) for line in result.stdout.splitlines() if line.strip()]
+        stage_zero = [row for row in rows if len(row) == 4 and row[2] == "0" and row[3] == relative]
+        if result.returncode != 0 or len(stage_zero) != 1:
+            errors.append(f"{location}: path is not exactly one stage-0 Git index entry")
+            continue
+        mode = stage_zero[0][0]
+        index_oid = stage_zero[0][1]
+        if mode not in {"100644", "100755"}:
+            errors.append(f"{location}: unsupported Git mode {mode}; regular file required")
+            continue
+        working_oid = subprocess.run(
+            ["git", "hash-object", "--", relative],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if working_oid.returncode != 0 or working_oid.stdout.strip() != index_oid:
+            errors.append(f"{location}: working fixture bytes differ from the stage-0 Git blob")
+            continue
+        tracked_paths += 1
+        if relative in executable_paths and (mode != "100755" or not os.access(path, os.X_OK)):
+            errors.append(f"{location}: documented entrypoint must be tracked executable mode 100755")
+
+    summary = {
+        "guard_contract": "scripts/p0_claim_registry.json",
+        "public_source_files": len(public_paths),
+        "guard_ids": len(guard_ids),
+        "checked_documents": checked_documents,
+        "required_anchors": required_anchors,
+        "forbidden_anchors": forbidden_anchors,
+        "context_occurrences": context_occurrences,
+        "required_tracked_paths": len(required_paths),
+        "tracked_regular_paths": tracked_paths,
+        "errors": len(errors),
+        "verdict": "PASS" if not errors else "FAIL",
+    }
+    return errors, summary
 
 
 def validate_registry(registry: dict[str, Any], repo_root: Path) -> tuple[list[str], dict[str, Any]]:
@@ -159,9 +449,10 @@ def validate_registry(registry: dict[str, Any], repo_root: Path) -> tuple[list[s
                 errors.append(f"{location}: forbidden_any must be non-empty")
                 forbidden = []
 
-            path = repo_root / target
-            if not path.is_file():
-                errors.append(f"{location}: target does not exist: {path}")
+            try:
+                path = resolve_repo_relative_file(repo_root, target, f"{location}.target")
+            except (ValueError, FileNotFoundError) as exc:
+                errors.append(str(exc))
                 continue
             checked_targets += 1
             if path not in document_cache:
@@ -186,6 +477,9 @@ def validate_registry(registry: dict[str, Any], repo_root: Path) -> tuple[list[s
                 if regex is not None and regex.search(text) is not None:
                     errors.append(f"{location}: residual forbidden claim matched {pattern!r}")
 
+    cross_errors, cross_summary = validate_cross_document_guards(registry, repo_root)
+    errors.extend(f"cross-document guard: {item}" for item in cross_errors)
+
     summary = {
         "inventory_p0": len(inventory_ids),
         "registry_p0": len(registry_ids),
@@ -199,6 +493,7 @@ def validate_registry(registry: dict[str, Any], repo_root: Path) -> tuple[list[s
         "external_actions": external_actions,
         "external_public_surfaces": len(locked_surfaces),
         "unique_documents": len(document_cache),
+        "cross_document_guard": cross_summary,
         "errors": len(errors),
         "verdict": "PASS" if not errors else "FAIL",
     }

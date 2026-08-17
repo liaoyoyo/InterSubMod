@@ -71,6 +71,7 @@ file(MAKE_DIRECTORY ${JEMALLOC_LIB_DIR})
 # Download and build jemalloc statically
 ExternalProject_Add(jemalloc_external
     URL https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
+    URL_HASH SHA256=2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
     PREFIX ${JEMALLOC_PREFIX}
     # Configure: disable shared, enable static, no prefix (replace system malloc)
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-shared --enable-static --with-jemalloc-prefix= 
@@ -103,6 +104,7 @@ include(FetchContent)
 FetchContent_Declare(
   eigen3
   URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+  URL_HASH SHA256=8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72
 )
 # Disable Eigen3 tests and docs to avoid Fortran compiler requirement
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
@@ -192,6 +194,7 @@ include(FetchContent)
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+  URL_HASH SHA256=1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)

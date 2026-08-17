@@ -7,8 +7,16 @@
 <!--
   doc_type: explain_howto   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
-  驗證: 本頁每條指令均於 2026-08-06 內部環境實際執行並記錄 exit code 與輸出；
-        2026-08-13 在 working-tree HEAD 95d420f6f397 執行既有 run_tests：270 tests / 39 suites 全過、exit 0；未做 clean-checkout rebuild
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
+  驗證: 本頁每條指令均於 2026-08-06 實際執行並記錄 exit code 與輸出；
+        test/suite count 由該 commit 的實際輸出動態取得；驗收為 0 failure、exit 0
 -->
 <style>
 :root{
@@ -87,6 +95,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 </head>
 <body>
@@ -107,10 +149,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <div class="wrap">
 <header class="hero">
   <div class="kicker">操作手冊 · 第 16 頁 · 公開可重現性邊界已標示</div>
-  <h1>從零到第一個結果：公開步驟與內部 smoke test</h1>
+  <h1>從零到 synthetic smoke：公開步驟與真實資料邊界</h1>
   <p class="lede">
     本頁保存 <b>2026-08-05/06 的內部機器執行收據</b>；不是任何人 clone 公開 GitHub 後都能在 10 分鐘完成的承諾。
-    編譯與測試指令可從 repo 嘗試，但 Step 4 使用的 HCC1395 BAM、hg38 FASTA 與 VCF <b>未包含在公開 Git objects</b>，因此目前公開讀者無法照原指令重現第一個分析結果。
+    tracked tiny synthetic fixture 可驗證 clone→build→run→schema；但 HCC1395 BAM、hg38 FASTA 與 VCF <b>未包含在公開 Git objects</b>，因此 synthetic PASS不能升格成真實資料或生物結果重現。
   </p>
 </header>
 
@@ -120,44 +162,59 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 </div>
 
 <div class="takeaway info">
-  <span class="lab">開始之前：先確認你自己的機器狀態</span>
-  CPU、記憶體與磁碟餘量會隨主機與時間改變；不要沿用本頁的歷史環境數字。
-  跑全基因組分析前應實際檢查資源並保存 command receipt，大型輸出可能快速耗盡磁碟。
+  <span class="lab">公開重現狀態：SYNTHETIC_SMOKE_SUPPORTED / REAL_DATA_PREFLIGHT_REQUIRED</span>
+  `tests/fixtures/tiny_public/`追蹤 synthetic FASTA/VCF/SAM與schema；runner建立BAM/index及receipt。
+  這只驗證軟體接線，scope固定為<b>DEMO</b>。真實資料仍需使用者自備、授權、index與site preflight。
+</div>
+
+<div class="takeaway info">
+  <span class="lab">開始之前：先確認機器狀態</span>
+  執行時間與容量都依硬體、mount 與輸入而異。跑真實資料前，先以 site profile／doctor 確認 CPU、
+  <code>$DATA_ROOT</code> mount、可用容量、輸入索引與 tool hash；本頁不承諾固定 runtime。
 </div>
 
 <!-- ═══ Step 1 ═══ -->
 <section id="s1">
-  <div class="step"><div class="n">1</div><div class="t">從宣告版本編譯 C++</div></div>
+  <div class="step"><div class="n">1</div><div class="t">編譯 C++（runtime 依環境而異）</div></div>
   <p class="sub" style="margin-left:48px">
-    <span class="dot">●</span> <b>一定要先做這步。</b>mtime 不能證明既有 binary 對應哪個 source；請從宣告的 commit 重建並記錄 binary hash、toolchain 與退出碼。
+    <span class="dot">●</span> <b>一定要先做這步。</b>Git 不發布受版控的 build output；請依 release manifest checkout immutable commit，再在 repo 外 clean build。
   </p>
 
-  <pre class="cmd"><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+  <pre class="cmd"><code>git clone https://github.com/liaoyoyo/InterSubMod.git
+cd InterSubMod
+HANDOFF_COMMIT="&lt;IMMUTABLE_HANDOFF_COMMIT_SHA&gt;"
+git checkout --detach "$HANDOFF_COMMIT"
+test "$(git rev-parse HEAD)" = "$HANDOFF_COMMIT"
+test -z "$(git status --porcelain)"
 
-<span class="c"># 設定並編譯（Release 模式）</span>
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)</code></pre>
+REPO_ROOT="$(pwd -P)"
+BUILD_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/ism-build.XXXXXXXX")"
+<span class="c"># repo 外的全新 Release build；不產生受版控 build output</span>
+cmake -S "$REPO_ROOT" -B "$BUILD_ROOT" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$BUILD_ROOT" -j$(nproc)
+test -z "$(git -C "$REPO_ROOT" status --porcelain)"</code></pre>
 
-  <p><b>2026-08-06 的內部 build 曾產生下列 6 個執行檔</b>；未來版本應以實際 <code>ls build/bin/</code> 輸出為準：</p>
-  <pre class="out"><code>$ ls build/bin/
-exact_ps_partition   inter_sub_mod   run_tests
-test_phase1_2        test_phase3     test_phase4_5</code></pre>
+  <p><b>執行檔數量與名稱是 commit-specific</b>；由該次 clean-build receipt 動態保存，不手抄固定六個：</p>
+  <pre class="out"><code>find "$BUILD_ROOT/bin" -maxdepth 1 -type f -perm -u+x -printf '%f\n' | sort
+test -x "$BUILD_ROOT/bin/inter_sub_mod"
+test -x "$BUILD_ROOT/bin/run_tests"</code></pre>
 </section>
 
 <!-- ═══ Step 2 ═══ -->
 <section id="s2">
-  <div class="step"><div class="n">2</div><div class="t">確認編譯結果通過測試</div></div>
+  <div class="step"><div class="n">2</div><div class="t">確認編譯結果是好的（不宣稱固定 runtime）</div></div>
 
-  <pre class="cmd"><code>./build/bin/run_tests</code></pre>
+  <pre class="cmd"><code>"$BUILD_ROOT/bin/run_tests"
+ctest --test-dir "$BUILD_ROOT" --output-on-failure</code></pre>
 
-  <p><b>2026-08-13 對 workspace 既有 test binary 的 command-derived 輸出</b>（不是 clean-checkout build certification，也不把耗時當 benchmark）：</p>
-  <pre class="out"><code>[==========] 270 tests from 39 test suites ran. (7039 ms total)
-[  PASSED  ] 270 tests.
+  <p><b>本輪實跑的真實輸出</b>：</p>
+  <pre class="out"><code>[==========] &lt;N&gt; tests from &lt;S&gt; test suites ran.
+[  PASSED  ] &lt;N&gt; tests.
 
 $ echo $?
 0</code></pre>
   <p>
-    <span class="badge b-pass">270 / 270 通過</span>
+    <span class="badge b-pass">動態 N/N 通過，0 failure</span>
     如果這裡有任何失敗，<b>先不要往下走</b> —— 後面跑出來的數字都不可信。
   </p>
 </section>
@@ -166,55 +223,65 @@ $ echo $?
 <section id="s3">
   <div class="step"><div class="n">3</div><div class="t">準備 Python 環境</div></div>
 
-  <pre class="cmd"><code><span class="c"># 安裝依賴（清單於 2026-08-05 依實測環境補齊）</span>
-pip install -r requirements.txt</code></pre>
+  <pre class="cmd"><code><span class="c"># 建立與 hosted acceptance 相同的 hash-locked Python 3.10 環境</span>
+PYTHON_ENV="$(mktemp -d "${TMPDIR:-/tmp}/ism-python.XXXXXXXX")/venv"
+python3.10 -m venv "$PYTHON_ENV"
+"$PYTHON_ENV/bin/python" -m pip install --require-hashes \
+  --requirement "$REPO_ROOT/requirements-ci.lock"
+export PATH="$PYTHON_ENV/bin:$PATH"</code></pre>
 
   <div class="takeaway dead">
-    <span class="lab"><span class="dot">●</span> 這裡有一個一定會踩到的坑</span>
-    這台機器上有<b>兩個 Python</b>：
+    <span class="lab"><span class="dot">●</span> Python 版本是 hard requirement</span>
+    Public acceptance workflow 與 hash-locked CI 使用 <b>Python 3.10</b>：
     <div class="table-wrap" style="font-weight:400;margin-top:10px"><table>
       <thead><tr><th style="width:34%">指令</th><th style="width:16%">版本</th><th style="width:50%">用途</th></tr></thead>
       <tbody>
-        <tr><td><code>python3</code></td><td class="mono">3.9.12</td><td>預設，大部分腳本可用</td></tr>
-        <tr><td><code>/usr/bin/python3.10</code></td><td class="mono">3.10.12</td>
-            <td><b>嚴格區域切割相關腳本必須用這個</b></td></tr>
+        <tr><td><code>python3.10</code></td><td class="mono">3.10</td><td>site tooling、portable workflow、fixture validation 與嚴格區域切割</td></tr>
       </tbody>
     </table></div>
     <div style="font-weight:400;font-size:.92rem;margin-top:8px">
-      用錯版本時，程式會在 import 階段就崩，<b>而且錯誤訊息指向 dataclass 而不是版本</b> ——
-      看起來像程式壞了，其實只是 Python 版本不對。
+      先跑 <code>python3.10 --version</code>；缺少 3.10 應 fail closed，不把 import/dataclass 錯誤誤判成研究程式缺陷。
+      一般研究繪圖可另依 <code>requirements.txt</code> 建環境，但那不是 handoff acceptance receipt 的環境。
     </div>
   </div>
 </section>
 
 <!-- ═══ Step 4 ═══ -->
 <section id="s4">
-  <div class="step"><div class="n">4</div><div class="t">內部限定：單位點 smoke test</div></div>
-  <p class="sub" style="margin-left:48px"><span class="badge b-dead">INTERNAL-ONLY</span> 下列三個輸入路徑未隨公開 GitHub 發布；只有已取得內部資料與授權的環境才能執行。</p>
+  <div class="step"><div class="n">4</div><div class="t">Public tiny synthetic E2E（DEMO）</div></div>
+  <p class="sub" style="margin-left:48px"><span class="badge b-info">DEMO</span>
+    tracked synthetic FASTA／VCF／SAM會在新暫存目錄轉成BAM/index，完成build→run→schema validation。
+    這不是生物資料、benchmark或science validation。</p>
 
-<pre class="cmd"><code><span class="c"># 準備一個只含單一突變的小 VCF</span>
-SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
+  <pre class="cmd"><code>"$REPO_ROOT/scripts/handoff/run_tiny_public_e2e.sh" --repo-root "$REPO_ROOT" --jobs 4</code></pre>
+  <pre class="out"><code>TINY_E2E_RESULT {"all_pass": true, ...,
+  "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage"}</code></pre>
+  <p><b>驗收：</b>exit 0、<code>all_pass=true</code>；scope固定為 DEMO，不寫入science validation ledger。</p>
 
-<span class="c"># internal preflight：公開 clone 目前會在這裡停止</span>
-test -r "$V" &amp;&amp; \
-test -r data/bam/HCC1395/tumor.bam &amp;&amp; test -r data/bam/HCC1395/tumor.bam.bai &amp;&amp; \
-test -r data/ref/hg38.fa &amp;&amp; test -r data/ref/hg38.fa.fai || {
-  echo "Missing internal fixture; public smoke test is not yet reproducible" &gt;&amp;2
-  exit 2
-}
+  <h4 class="mini">進階：自備／內部真實資料（internal-data example）</h4>
+  <p class="sub"><span class="badge b-dead">INTERNAL-ONLY</span> 下列三個輸入路徑未隨公開 GitHub 發布；
+    只有已取得資料與授權的環境才能執行；歷史 HCC1395 receipt 不是一般 runtime promise。</p>
 
-grep '^#' $V &gt; $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
+<pre class="cmd"><code><span class="c"># 將 placeholder 換成本機 profile；絕對路徑只維護於 untracked machine profile／registry</span>
+SITE_PROFILE="&lt;SITE_PROFILE&gt;"
+"$REPO_ROOT/scripts/site/doctor" --profile "$SITE_PROFILE" --mode real-preflight
+eval "$("$REPO_ROOT/scripts/site/site_profile.py" shell \
+  --profile "$SITE_PROFILE" --sample HCC1395)"
+SP="${TMPDIR:-/tmp}/ism_demo" &amp;&amp; mkdir -p "$SP"
+
+<span class="c"># 準備只含第一筆 biallelic SNV 的 smoke-test VCF</span>
+bcftools view -h "$SOMATIC_VCF" &gt; "$SP/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$SOMATIC_VCF" | head -n 1 &gt;&gt; "$SP/one_snv.vcf"
+test "$(bcftools view -H "$SP/one_snv.vcf" | wc -l)" -eq 1
 
 <span class="c"># 跑（只給三個必填參數）</span>
-./build/bin/inter_sub_mod \
-  --tumor-bam  data/bam/HCC1395/tumor.bam \
-  --reference  data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min</code></pre>
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$TUMOR_BAM" \
+  --reference  "$REFERENCE" \
+  --vcf        "$SP/one_snv.vcf" \
+  --output-dir "$SP/out_min"</code></pre>
 
-  <p><b>2026-08-06 內部環境的歷史實跑輸出</b>（不是公開 fixture 的驗收值；缺完整 commit／hardware／repetition receipt，故不報 runtime benchmark）：</p>
+  <p><b>2026-08-06 內部環境的歷史實跑輸出</b>（只屬具名輸入 receipt，不作 runtime 驗收值）：</p>
   <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
 Total reads processed: 85
 Forward strand (+): 40 / Reverse strand (-): 45
@@ -224,8 +291,14 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
   <div class="takeaway">
     <span class="lab">兩個預設值和說明文件不一樣，先知道比較好</span>
     <b><code>--threads</code></b> 說明寫預設 1，<b>實際是 16</b>（資源估算會差 16 倍）。<br>
-    <b><code>--distance-metric</code></b> 宣告預設 BERNOULLI，<b>實際會被覆寫成 NHD</b>。
-    <span class="muted">想要哪個就明確指定，不要靠預設。</span>
+    未指定 <b><code>--distance-metric</code></b> 時 effective CLI default 是 <b>NHD</b>；明示 NHD、
+    BERNOULLI 或重複多值都會保留。多值時只有第一個 metric 驅動 clustering，後續只多輸出
+    distance matrix，因此順序會改變 tree／cluster。
+  </div>
+
+  <div class="takeaway warn">
+    <span class="lab">公開 fixture 契約已追蹤；CI 必須持續驗證</span>
+    <code>tests/fixtures/tiny_public/</code> 已固定 synthetic reference contig／座標、VCF header、MM/ML 與 HP/PS tag 條件、schema 與授權；runner 在暫存目錄建立 BAM/index。每次仍須由 exact-commit clean clone 保存 exit code、stdout 摘要、輸入／輸出 checksum，且 receipt 固定標為 DEMO／synthetic smoke，不能升格 science validation。
   </div>
 
   <div class="takeaway warn">
@@ -282,7 +355,7 @@ python3 verify_pipeline_numbers.py</code></pre>
     <div class="figtitle">圖 1 · 六個步驟與各自的驗收點</div>
     <svg viewBox="0 0 900 330" role="img" aria-labelledby="h1t h1d" xmlns="http://www.w3.org/2000/svg">
       <title id="h1t">操作六步驟流程</title>
-      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、內部單點試跑、檢視輸出、驗證歷史 35,332-site 文件；單點試跑需要公開 Git objects 中不存在的內部資料，不能作為公開重現承諾。</desc>
+      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、tracked tiny DEMO 試跑、檢視輸出、驗證歷史 35,332-site 文件；tiny fixture 存在於 Git，但 synthetic smoke 只驗證接線，不是 science validation。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -290,25 +363,25 @@ python3 verify_pipeline_numbers.py</code></pre>
         <rect x="18" y="30" width="128" height="66" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
         <text x="82" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">1 編譯</text>
         <text x="82" y="70" text-anchor="middle" font-size="9" fill="#2F6690">cmake + build</text>
-        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">耗時依環境而異</text>
+        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">依環境而異</text>
         <path d="M150,63 L176,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="182" y="30" width="128" height="66" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
         <text x="246" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">2 跑測試</text>
         <text x="246" y="70" text-anchor="middle" font-size="9" fill="#1f4f3a">run_tests</text>
-        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">以退出碼驗收</text>
+        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">0 failure</text>
         <path d="M314,63 L340,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="346" y="30" width="128" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
         <text x="410" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B06A16">3 Python 依賴</text>
-        <text x="410" y="70" text-anchor="middle" font-size="9" fill="#6b4310">requirements.txt</text>
-        <text x="410" y="85" text-anchor="middle" font-size="8.5" fill="#9A3B3B">注意兩個 python 版本</text>
+        <text x="410" y="70" text-anchor="middle" font-size="9" fill="#6b4310">requirements-ci.lock</text>
+        <text x="410" y="85" text-anchor="middle" font-size="8.5" fill="#9A3B3B">Python 3.10 + hashes</text>
         <path d="M478,63 L504,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="510" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
-        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 內部試跑</text>
-        <text x="574" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">inter_sub_mod</text>
-        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#9A3B3B">公開缺 fixture</text>
+        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 tiny DEMO</text>
+        <text x="574" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">tracked fixture</text>
+        <text x="574" y="85" text-anchor="middle" font-size="8.5" fill="#9A3B3B">synthetic smoke only</text>
         <path d="M642,63 L668,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="674" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
@@ -324,10 +397,10 @@ python3 verify_pipeline_numbers.py</code></pre>
         <!-- 驗收欄 -->
         <rect x="18" y="200" width="784" height="112" rx="8" fill="#FAF9F5" stroke="#E3DACC" stroke-width="1.4"/>
         <text x="36" y="222" font-size="11.5" font-weight="800" fill="#5C5A54">每一步的驗收條件（不過就停下來，別往下走）</text>
-        <text x="36" y="244" font-size="10" fill="#1c1b19">1 編譯 → <tspan font-family="ui-monospace,monospace">build/bin/</tspan> 下出現 6 個執行檔</text>
-        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">2026-08-13 snapshot：270 / 39、exit 0</tspan></text>
+        <text x="36" y="244" font-size="10" fill="#1c1b19">1 編譯 → clean-build receipt 動態記錄 executable inventory</text>
+        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">動態 N/N、0 failure、退出碼 0</tspan></text>
         <text x="36" y="280" font-size="10" fill="#1c1b19">3 依賴 → <tspan font-family="ui-monospace,monospace">import pysam</tspan> 不報錯</text>
-        <text x="430" y="244" font-size="10" fill="#1c1b19">4 內部試跑 → 先通過輸入 preflight；公開 clone 預期停止</text>
+        <text x="430" y="244" font-size="10" fill="#1c1b19">4 tiny DEMO → fixture PASS；只驗接線，非科學驗證</text>
         <text x="430" y="262" font-size="10" fill="#1c1b19">5 輸出 → region 目錄下有 methylation 與 distance</text>
         <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 只涵蓋歷史 35,332-site 受管數字</text>
         <text x="36" y="302" font-size="9.5" fill="#9A3B3B">任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。</text>
@@ -373,19 +446,18 @@ python3 verify_pipeline_numbers.py</code></pre>
 <footer class="prov">
   <h4>本頁的驗證方式</h4>
   <ul>
-    <li><b>測試套件</b>：2026-08-13 在 HEAD <code>95d420f6f397</code> 對 workspace 現有 <code>build/bin/run_tests</code> 實跑 →
-        <b>270 tests / 39 suites 全過，7039 ms，退出碼 0</b>。
-        <span class="muted">（這是 command-derived observation；本輪未從乾淨 checkout 重建 binary。）</span></li>
-    <li><b>單點試跑</b>：2026-08-06 在含內部 HCC1395 BAM/reference/VCF 的機器執行、退出碼 0；輸入未在公開 Git objects，且缺完整 commit／hardware／repetition receipt，故不是 public-clone reproduction 或效能 benchmark。</li>
-    <li><b>環境資訊</b>：CPU、磁碟與 Python 狀態是 host/time-specific，執行者須重新量測，不沿用歷史數字。</li>
-    <li><b>執行檔清單</b>：2026-08-06 由 <code>ls build/bin/</code> 取得；未來版本以 fresh command output 為準。</li>
+    <li><b>測試套件</b>：2026-08-06 具名內部 receipt 曾實跑 <code>run_tests</code>；fresh clone 應從 <code>$BUILD_ROOT/bin/run_tests</code> 執行 →
+        test/suite count 由該 commit 的實際輸出與 release receipt動態產生；驗收為
+        <b>0 failure，退出碼 0</b>，文件不手抄固定數字。</li>
+    <li><b>單點試跑</b>：2026-08-06 在含內部 HCC1395 BAM/reference/VCF 的機器執行，退出碼 0；這些輸入未在公開 Git objects，故不是 public-clone reproduction，也不提供 runtime promise。</li>
+    <li><b>環境條件</b>：由 site doctor 在每次驗收動態記錄 CPU、mount、容量、Python ≥ 3.10 與 tool hash，不抄成固定讀者預期。</li>
+    <li><b>執行檔 inventory</b>：數量與名稱依 immutable commit 決定，由 clean-build receipt 動態列出；只硬性檢查本流程需要的 <code>inter_sub_mod</code> 與 <code>run_tests</code>。</li>
   </ul>
   <h4 style="margin-top:16px">誠實標註</h4>
   <ul>
-    <li>本頁的編譯指令<b>未在本輪從零重跑</b>（現有 build 目錄已存在）；
-        該流程於 2026-08-05 曾以全新目錄驗證通過。</li>
+    <li>2026-08-05 的全新目錄 build 是<b>具名歷史 receipt</b>；目前 handoff 必須對 release manifest 指定 commit 另做 repo 外 clean build，舊 build 不可代替。</li>
     <li><b>全基因組全量跑法未實跑</b> —— 屬長時間計算，且需先確認磁碟餘量。</li>
-    <li><b>公開重現未完成</b> —— 缺可散布的最小 BAM/BAI、FASTA/FAI、VCF fixture 與 checksum/CI receipt；本頁不再承諾 clone 後 10 分鐘可得分析結果。</li>
+    <li><b>Synthetic smoke可公開重現；real-data science未隨repo發布</b> —— tiny fixture只證明接線與schema，不是生物validation、benchmark或10分鐘science-result承諾。</li>
   </ul>
   <p style="margin-top:14px">
     <b>路徑</b>：<code>InterSubMod/docs/explain/16_how-to-run.standalone.html</code> ·

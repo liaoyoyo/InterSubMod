@@ -9,7 +9,15 @@
   page: 10_ism-cpp-vs-chr2-subclone-capability
   built_utc: 2026-06-23
   repo_head: 9098f11   branch: research/subclonal-reconstruction-202606
-  scope: PARTIAL — chr2:18M HCC1395 單位點 × 單樣本；對照「ISM C++ as-built」vs「chr2 subclone 敘述」
+  source_created_at: 2026-06-23
+  source_commit: 9098f11
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
+  scope: PARTIAL — chr2:18M 單一區域案例 × HCC1395 1 biological sample；3 loci 有 historical ISM artifacts；對照「ISM C++ as-built」vs「chr2 subclone 敘述」
   data_sources:
     - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json (pysam 案例 evidence artifact, build b761336, L2；其中 CCF 欄為歷史 TVAF 近似轉換)
     - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md
@@ -110,6 +118,40 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media(max-width:760px){.split{grid-template-columns:1fr}.lcol,.half{width:auto}}
 .warnote{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-left:5px solid var(--c-warn);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.88rem;margin:var(--sp-3) 0}
 .warnote b{color:var(--c-warn)}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 <style>
 /* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
@@ -151,13 +193,13 @@ pre code{display:block;white-space:pre;word-break:normal}
 <header class="hero">
   <div class="kicker">解釋中心 · 頁 10 · 能力 vs 敘述 gap</div>
   <h1>ISM C++ 的數據與敘述，能解釋 chr2:18M subclone 的哪些部分？</h1>
-  <p class="lede">把使用者手動觀察、再用 pysam 驗證的 <strong>chr2:18M subclone 重建敘述</strong>，逐項對照<strong>「最新 ISM C++ as-built 在同一批位點實際算出什麼」</strong>。誠實界定：<strong>哪些 ISM 撐得起（characterize 半邊）、哪些 ISM 根本沒有（reconstruct 骨幹半邊）、為什麼，以及模組命名的 over-claim 風險。</strong></p>
+  <p class="lede">把使用者手動觀察、再用 pysam 驗證的 <strong>chr2:18M subclone 重建敘述</strong>，逐項對照<strong>「2026-03-14 historical canonical ISM artifact 在這些位點留下什麼」</strong>，並另以 current release-baseline source inspection 說明現行能力。誠實界定：<strong>哪些 ISM 撐得起（characterize 半邊）、哪些 ISM 根本沒有（reconstruct 骨幹半邊）、為什麼，以及模組命名的 over-claim 風險。</strong></p>
 </header>
 
 <!-- ============ BLUF ============ -->
 <div class="bluf">
   <h2>L0 一眼結論</h2>
-  <p><span class="key">ISM C++ 足夠描述這個案例的「單位點 allele-associated 甲基」半邊，但解釋不了「跨位點重建」半邊。</span> chr2:18M 敘述裡的 α/β-like 狀態、互斥 linkage 與 α-vs-β 甲基數字，<strong>不是 ISM C++ 算的，是 pysam 自訂腳本算的</strong>。ISM C++ 另以同一生物樣本、同一批位點做 label-first 檢定；它輸出的是「單位點 ALT/REF-associated 甲基結構」，不是獨立 biological replicate，也不是「跨位點 lineage 重建」。</p>
+  <p><span class="key">ISM C++ 足夠描述這個案例的「單位點 allele-associated 甲基」半邊，但解釋不了「跨位點重建」半邊。</span> chr2:18M 敘述裡的 pos3=A、block L、block R、互斥 linkage 與 pos3-conditioned 甲基數字，<strong>不是 ISM C++ 算的，是 pysam 自訂腳本算的</strong>。block L / block R 無跨距 read，關係 unresolved；甲基 association 不能把它們合併。ISM C++ 另以同一生物樣本、同一批位點做 label-first 檢定；它輸出的是「單位點 ALT/REF-associated 甲基結構」，不是獨立 biological replicate，也不是「跨位點 lineage 重建」。</p>
   <p class="pi">▸ <b>給 PI 一句話：</b>ISM 在 chr2 三個 sSNV 得到 allele PERMANOVA <b>p=0.001 ×3</b>，是<strong>強的位點特異 allele-associated methylation evidence</strong>；三次檢定來自同一生物樣本，且甲基分組由 ALT/REF 標籤條件化，不能當作獨立 clone validation 或「硬證據」。ISM 沒有多-sSNV read linkage、clone tree 或 corrected CCF；重建骨幹不在 <code>SubcloneAnalyzer</code>（它只是 4-bucket 跨區分類器）。</p>
 </div>
 
@@ -166,7 +208,7 @@ pre code{display:block;white-space:pre;word-break:normal}
   <ol>
     <li>ISM 的 <code>SubcloneAnalyzer</code> <b>不是 subclone 重建器</b>——是把全基因組 ≥50 個 region 依 ASM 特徵塞進 4 個固定桶的 if/else（<code>SubcloneAnalyzer.cpp:100-128</code>）。沒有 read linkage、沒有樹、沒有 CCF、沒碰任何 SNV。</li>
     <li>ISM 的 <code>TreeStructure</code> <b>不是腫瘤演化樹</b>——是 read×read 甲基距離的 dendrogram（葉=read，邊=甲基距離），沒有祖先-後代、沒有 CCF。</li>
-    <li>ISM 的 <code>"Subclone"</code> verification_class = 「cluster 結構顯著<b>但</b>標籤不顯著」（<code>SignificanceAnalyzer.cpp:307-340</code>）＝正是 cis-ASM／double-dip <b>候選旗標</b>，不是被確認的 subclone。</li>
+    <li>historical <code>verification_class_legacy="Subclone"</code> = 「cluster 結構顯著<b>但</b>標籤不顯著」（<code>SignificanceAnalyzer.cpp:307-340</code>），只是 cis-ASM／double-dip <b>候選旗標</b>，不是被確認的 subclone。current Verification schema-v2 另納入 PERMANOVA/PERMDISP axes。</li>
     <li>ISM 實測在 chr2 的顯著訊號全在 <b>a-priori allele 軸</b>（label-first），<b>unsupervised cluster PERMANOVA 三位點全 invalid</b>。「無監督切群＝subclone」在此<b>不成立</b>。</li>
   </ol>
 </div>
@@ -174,25 +216,25 @@ pre code{display:block;white-space:pre;word-break:normal}
 <!-- ============ 1. chr2 例子是什麼 ============ -->
 <section id="case">
   <h3><span class="num">1</span> 先講清楚：chr2:18M subclone 例子是什麼 <span class="badge tier">案例 L2</span></h3>
-  <p class="sub">HCC1395 乳癌細胞株，<code>chr2:18,068,480–18,108,828</code>（~40 kb，2p24.2，KCNS3 intron，落在 SEQC2-confirmed LOH 區 <code>chr2:16,146,119–22,100,000</code>）。使用者手動 IGV 觀察「LOH→多群 read」假說，再用 <strong>pysam 逐 read 萃取</strong> 6 個 somatic SNV 的 base + HP/PS + MM/ML 甲基，對照 SEQC2 truth + DORADO 跨 basecaller 技術重現 + 第二輪計算複核；兩套 basecaller 仍來自同一生物樣本。</p>
+  <p class="sub">HCC1395 乳癌細胞株，<code>chr2:18,068,480–18,108,828</code>（~40 kb，2p24.2，KCNS3 intron，落在 SEQC2 LOH-annotated interval <code>chr2:16,146,119–22,100,000</code>，且有 HP2-dominant imbalance）。使用者手動 IGV 觀察「LOH context→多群 read」假說，再用 <strong>pysam 逐 read 萃取</strong> 6 個 candidate sequence-variant loci 的 base + HP/PS + MM/ML 甲基，對照 SEQC2 truth + DORADO 跨 basecaller 技術重現 + 第二輪計算複核；其中 5 個位點為 truth-evaluable TP、1 個為 truth-unevaluable tumor-associated candidate。未整合 allele-specific CN，不能判定 CN-loss、cnLOH、事件機制或 retained parental copy。</p>
 
   <div class="kpis">
-    <div class="kpi pass"><div class="v">6</div><div class="k">somatic SNV（5 TP + 1 落 HC 空隙）</div></div>
-    <div class="kpi info"><div class="v">98.3% / 99.6%</div><div class="k">LOH 主單倍型占比（HKU / DORADO）</div></div>
+    <div class="kpi pass"><div class="v">6</div><div class="k">candidate loci（5 truth-evaluable TP + 1 落 HC 空隙、truth-unevaluable）</div></div>
+    <div class="kpi info"><div class="v">98.3% / 99.6%</div><div class="k">HP2-dominant imbalance（HKU / DORADO；與 LOH context 相容，非 CN 機制定案）</div></div>
     <div class="kpi pass"><div class="v">0</div><div class="k">α/β 互斥 linkage 違反 read（strict）</div></div>
-    <div class="kpi warn"><div class="v">L2</div><div class="k">證據天花板（單位點×單樣本×單 pipeline）</div></div>
+    <div class="kpi warn"><div class="v">L2</div><div class="k">證據天花板（單一區域案例×單 biological sample×兩 technical datasets）</div></div>
   </div>
 
-  <h4 class="mini">6 個 somatic SNV 與其角色（pysam + SEQC2，<span class="tag-l l2">L2</span>）</h4>
+  <h4 class="mini">6 個 candidate sequence-variant loci 與其 local-state 角色（pysam + SEQC2，<span class="tag-l l2">L2</span>）</h4>
   <table>
     <thead><tr><th>#</th><th>座標</th><th>變異</th><th>SEQC2</th><th>歷史 TVAF 近似轉換*</th><th>候選分子狀態角色</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td><code>18,068,480</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.814</td><td>beta-left block</td></tr>
-      <tr><td>2</td><td><code>18,072,546</code></td><td>G&gt;C</td><td>TP HighConf</td><td>0.786</td><td>beta-left block</td></tr>
-      <tr><td>3</td><td><code>18,086,020</code></td><td>G&gt;A</td><td class="verdict v-part">落 HC 空隙</td><td>—</td><td>α-branch pivot（truth-unevaluable）</td></tr>
-      <tr><td>4</td><td><code>18,096,269</code></td><td>C&gt;G</td><td>TP MedConf</td><td>0.489</td><td>beta-right（後接 20bp poly-T，G/T/DEL = homopolymer jitter）</td></tr>
-      <tr><td>5</td><td><code>18,099,697</code></td><td>G&gt;C</td><td>TP</td><td>0.097</td><td>α-1 nested（subclonal-minor，低 VAF）</td></tr>
-      <tr><td>6</td><td><code>18,108,828</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.772</td><td>beta-right block</td></tr>
+      <tr><td>1</td><td><code>18,068,480</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.814</td><td>unresolved block L</td></tr>
+      <tr><td>2</td><td><code>18,072,546</code></td><td>G&gt;C</td><td>TP HighConf</td><td>0.786</td><td>unresolved block L</td></tr>
+      <tr><td>3</td><td><code>18,086,020</code></td><td>G&gt;A</td><td class="verdict v-part">落 HC 空隙</td><td>—</td><td>α local-state pivot candidate（truth-unevaluable）</td></tr>
+      <tr><td>4</td><td><code>18,096,269</code></td><td>C&gt;G</td><td>TP MedConf</td><td>0.489</td><td>unresolved block R（<code>C&gt;G</code> truth-evaluable TP；鄰接 20bp poly-T 的 G/T/DEL 三態 homopolymer-uncertain）</td></tr>
+      <tr><td>5</td><td><code>18,099,697</code></td><td>G&gt;C</td><td>TP</td><td>0.097</td><td>α-1 read-level 條件包含 candidate（低 observed VAF；不證 cellular subclone）</td></tr>
+      <tr><td>6</td><td><code>18,108,828</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.772</td><td>unresolved block R</td></tr>
     </tbody>
   </table>
   <p class="muted">* 此欄為 case-specific 的歷史近似轉換，未校正 copy number、LOH 與 purity；不是 canonical corrected CCF，也不是 cellular-clone corroboration。</p>
@@ -201,22 +243,22 @@ pre code{display:block;white-space:pre;word-break:normal}
   <table>
     <thead><tr><th class="lcol">Claim</th><th>已驗證內容</th><th>裁決</th></tr></thead>
     <tbody>
-      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor allele 有兩 basecaller 技術重現；matched normal 未觀察到六個預期 somatic ALT，但偶有其他 non-reference error calls</td><td class="verdict v-ok">✔ 有界確認</td></tr>
-      <tr><td><b>B</b> read linkage 定義 α/β-like states</td><td>在 strict 定義與現有覆蓋下，α(pos3=A) 與 β-like(pos1G/2C/6G) 為 0 observed co-alt；(3)A 與 (5)C 呈巢狀；相容於約 3 種 local mutation-state candidates，非唯一 cellular lineage tree</td><td class="verdict v-part">⚠ 候選模型</td></tr>
+      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor/normal allele 兩 basecaller 重現；matched normal 未見六個預期 ALT，但有偶發其他 non-reference error calls</td><td class="verdict v-ok">✔ 有界確認</td></tr>
+      <tr><td><b>B</b> read linkage 定義 local-state candidates</td><td>在 strict operational union 與現有覆蓋下，pos3=A 與 pos1G/2C/6G markers 為 0 observed co-alt；現有覆蓋 reads 中 (5)C 只與 (3)A 同現。(1)(2) block L 與 (4)(6) block R 無跨距 read，關係 unresolved；甲基 association 不能橋接或合併。absence 不證唯一 cellular lineage、parent-child 或取得順序</td><td class="verdict v-part">⚠ 候選模型</td></tr>
       <tr><td><b>C</b> 遺傳分組後甲基差異</td><td>10 候選 CpG；normal-ASM-screen-negative 子集 <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code>，最強技術重現 <code>{3.1,3.2}</code>（如 3.2 HKU α0.97/β0.14 q=4.1e-5、DORADO 1.00/0.006 q=2.4e-5）</td><td class="verdict v-part">⚠ 有界關聯</td></tr>
-      <tr><td><b>D</b> LOH + normal expected-ALT screen</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 無六個預期 ALT，但有少數其他 non-reference errors</td><td class="verdict v-ok">✔ 有界確認</td></tr>
-      <tr><td><b>E</b> 候選拓樸 + 順序</td><td>parsimony 下有相容候選；(3)/(5) 的巢狀觀測支持 provisional ordering，其餘不可排，且整體非唯一可識別</td><td class="verdict v-part">⚠ 觀測 L2 / 模型 L3</td></tr>
+      <tr><td><b>D</b> LOH context + matched-normal screen</td><td>SEQC2 LOH annotation + HP1-low imbalance 1.7%（4/236，HP2 label 占 98.3%）方向相容；matched normal 未見六個預期 ALT。未整合 allele-specific CN，不能判定 CN-loss vs cnLOH、機制或 retained parent</td><td class="verdict v-part">⚠ context-compatible</td></tr>
+      <tr><td><b>E</b> 非時間 compatibility graph</td><td>read-level 共現／互斥與 (3)/(5) 條件包含 pattern 只約束非時間、非唯一的 local-state compatibility graph。same-read、absence、VAF 或甲基 association 都不能判定 parent-child、取得順序、common node、cellular lineage 或 block L/R 關係</td><td class="verdict v-part">⚠ 觀測 L2 / 模型 L3</td></tr>
       <tr><td><b>F</b> pos3 不可由 SEQC2 判成 FP</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩份 normal reads 未觀察到 A；但位點落 SEQC2 HC 空隙，外部 truth 不可評估</td><td class="verdict v-part">⚠ 腫瘤相關候選</td></tr>
     </tbody>
   </table>
-  <p class="muted">依目前 claim ceiling，可防守用語是 <em>"local LOH-constrained mutation-state candidates with bounded, mutation-conditioned methylation association"</em>；不是 confirmed cellular-subclone reconstruction。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
+  <p class="muted">依目前 claim ceiling，可防守用語是 <em>"local, LOH-annotation-compatible mutation-state candidates with bounded, mutation-conditioned methylation association"</em>；不是 confirmed cellular-subclone reconstruction。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
 
-  <div class="warnote">⚠ <b>關鍵前提</b>：上述 A–F 的數字，全部來自 <code>pysam</code> 自訂腳本（<code>extract_locus_matrix.py</code> + <code>analyze_matrix.py</code> → <code>independent_audit.json</code>，build commit <code>b761336</code>），<b>不是 ISM C++ 算的</b>。下一節看 ISM C++ 在同一批位點實際算了什麼。</div>
+  <div class="warnote">⚠ <b>關鍵前提</b>：上述 A–F 的數字，全部來自 <code>pysam</code> 自訂腳本（<code>extract_locus_matrix.py</code> + <code>analyze_matrix.py</code> → <code>independent_audit.json</code>，build commit <code>b761336</code>），<b>不是 ISM C++ 算的</b>。下一節只讀回 2026-03-14 historical canonical artifact；其 producer commit 未有獨立 receipt，不能當 current-source rerun。</div>
 </section>
 
 <!-- ============ 2. ISM C++ 實際算了什麼 ============ -->
 <section id="ism">
-  <h3><span class="num">2</span> ISM C++ as-built 在這些位點實際算出什麼 <span class="badge b-info">本 session 親讀 significance.json</span></h3>
+  <h3><span class="num">2</span> 2026-03-14 historical canonical ISM artifact 在這些位點留下什麼 <span class="badge b-info">artifact read-back</span></h3>
   <p class="sub">好消息：ISM C++ binary <strong>確實在 chr2:18M 的 sSNV anchor 上跑過</strong>（canonical paired_full TP 批次，<code>20260314_..._complete_matrix</code>）。每個 somatic SNV ±5000bp 是一個獨立 region，輸出 <code>metadata.txt / reads.tsv / methylation.csv / distance/&lt;METRIC&gt;/matrix.csv / clustering/{tree.nwk, significance.json}</code>。以下是<strong>三個 sSNV region 的 ISM 實測統計</strong>（本 session 由 <code>significance.json</code> 讀回）。</p>
 
   <figure>
@@ -254,7 +296,7 @@ pre code{display:block;white-space:pre;word-break:normal}
     </table>
     <figcaption>
       <b>讀法（3 件事）：</b>
-      ① <b>allele PERMANOVA 三位點皆為 p=0.001</b>（F=12–24）→ 在同一 HCC1395 生物樣本中，ISM 的 read×read 距離 + label-first 檢定支持「ALT 與 REF 標籤相關的甲基結構差異」。這是三個 locus-specific tests，不是三個獨立 biological replicates；<code>dispersion_p=1.0</code> 來自目前較弱的 dispersion 守門，不能寫成完全排除離散度假象。
+      ① <b>allele PERMANOVA 三位點皆為 p=0.001</b>（F=12–24）→ 在同一 HCC1395 生物樣本中，historical artifact 的 read×read 距離 + label-first 檢定支持「ALT 與 REF 標籤相關的甲基結構差異」。這是三個 locus-specific tests，不是三個獨立 biological replicates；<code>dispersion_p=1.0</code> 是該 historical producer 的輸出，不能套用 current analytic F-tail 語意，也不能寫成完全排除離散度假象。
       ② <b>cluster PERMANOVA（unsupervised）三位點全 invalid</b> → ISM 的「無監督切群結構」檢定在此<b>無有效結論</b>；訊號完全靠 a-priori allele 標籤，不靠盲切。
       ③ ISM 的 allele call（REF21/ALT15 等）與 pysam（#1 C22/G16）<b>幾乎吻合</b> = 兩條 pipeline 交叉驗證 per-read base calling 一致。
       <br><b>來源：</b><code>output/canonical/HCC1395/paired_full/20260314_..._complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/.../clustering/significance.json</code>（本 session Read）。
@@ -265,7 +307,7 @@ pre code{display:block;white-space:pre;word-break:normal}
   <div class="flow1">
     每 read → [甲基 read×CpG 矩陣] → read×read 距離(NHD/BERNOULLI) → UPGMA 樹 → 切 k∈[2,6] 群<br>
     ↘ 軸A <b>cluster-first</b>：群 × {ALT/REF, HP} Fisher-FFH 列聯表（<code>GlobalTest.cpp</code>）<br>
-    ↘ 軸B <b>label-first</b>：依 a-priori {HP, ALT/REF, Tumor/Normal} 分組 → 甲基距離 PERMANOVA（<code>LabelTest.cpp</code>，<b>非循環</b>）
+    ↘ 軸B <b>label-first</b>：依 a-priori {HP, ALT/REF, Tumor/Normal} 分組 → 甲基距離 PERMANOVA（<code>LabelTest.cpp</code>；只對 methylation-derived labels 而言非循環，仍依賴 variant calling／basecalling／alignment／haplotag assumptions，且不建立 cellular identity）
   </div>
   <p class="muted">⤷ chr2 的顯著結果全落在<b>軸 B 的 allele 維度</b>（label-first，ALT vs REF）。這也是 ISM 唯一能跟 chr2 敘述對上的單元 —— 但它是<b>單位點</b>的 allele-甲基關聯，不是跨位點 lineage。<a href="09_three-stats-division-of-labor.standalone.html">三統計分工細節 → 頁 09</a>。</p>
 </section>
@@ -285,20 +327,20 @@ pre code{display:block;white-space:pre;word-break:normal}
         <td>有逐 read allele，但 ISM 一次只看<b>一個</b> SNV anchor；reads.tsv <b>無 PS 欄</b> → 無法串多 SNV（<code>ReadParser.cpp:167-261</code>、<code>RegionWriter.cpp:151</code>）</td>
       </tr>
       <tr>
-        <td><b>B</b>　互斥 linkage 定 α/β lineage<br><span class="muted">（重建骨幹）</span></td>
-        <td><b>無</b>。每 somatic SNV 獨立成 region；無 cross-SNV read linkage 引擎；唯一跨位點構造 <code>SubcloneAnalyzer</code> 是特徵向量分桶，非 read 共享</td>
+        <td><b>B</b>　互斥 linkage 定 local-state candidates<br><span class="muted">（block L / block R 關係 unresolved）</span></td>
+        <td><b>無</b>。每 candidate sequence-variant locus 獨立成 region；無 cross-SNV read linkage 引擎；唯一跨位點構造 <code>SubcloneAnalyzer</code> 是特徵向量分桶，非 read 共享</td>
         <td class="verdict v-no">✘ 缺少</td>
-        <td>骨幹（多 sSNV 在同 read 共現定 lineage）<b>不在 ISM C++</b>；由 pysam linkage 00/10/01/11 做（<code>main.cpp</code> 每 SNV 獨立、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
+        <td>多 sSNV 在同 read 的共現／互斥 candidate table <b>不在 ISM C++</b>；由 pysam linkage 00/10/01/11 做，且不能單獨確認 lineage（<code>main.cpp</code> 每 SNV 獨立、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
       </tr>
       <tr>
-        <td><b>C</b>　甲基把兩 lineage 分開</td>
+        <td><b>C</b>　甲基與兩 local-state labels 的 association</td>
         <td>read×read 甲基距離 → 群 + <b>label-first allele/HP PERMANOVA</b>；<b>實測 allele PERMANOVA p=0.001 跨 3 位點複製</b></td>
         <td class="verdict v-ok">✔ 合理<br><span class="muted">(單位點/allele 軸)</span></td>
         <td>ISM 直接把 read 依 ALT/REF 分組測甲基距離（<code>LabelTest.cpp:307,86-133</code>、<code>StructureTest.cpp:153-201</code>）。但這是<b>單位點 allele-甲基</b>，且未在 allele 軸跑 cis-control（見下節）</td>
       </tr>
       <tr>
-        <td><b>D</b>　LOH context + normal=REF</td>
-        <td>外部 LOH BED overlap + <code>hp_ratio</code> 失衡 heuristic；實測同位點 HP 失衡 34:2</td>
+        <td><b>D</b>　LOH annotation-compatible context + normal=REF</td>
+        <td>外部 LOH BED overlap + <code>hp_ratio</code> 失衡 heuristic；實測同位點 HP 失衡 34:2。未整合 allele-specific CN，不能判定 CN-loss/cnLOH、機制或 retained parent</td>
         <td class="verdict v-part">⚠ 合理<br><span class="muted">(註記非重建)</span></td>
         <td>ISM 把 LOH 當<b>輸入註記</b>，不自己 call LOH、不建 CN model、不 phasing（<code>LohBedAnnotator.cpp:73,88</code>）</td>
       </tr>
@@ -309,13 +351,13 @@ pre code{display:block;white-space:pre;word-break:normal}
         <td>概念有實作但軸是 <b>HP1-family vs HP2-family（germline 軸）</b>；somatic-skewed 常見情況退化為 germline-only、sig=false（<code>RegionProcessor.cpp:976,985-992,890-893</code>、<code>PerCpgAsm.cpp:228</code>）</td>
       </tr>
       <tr>
-        <td><b>E</b>　樹拓樸 + 演化順序 + CCF</td>
+        <td><b>E</b>　非時間 compatibility graph / 演化順序 / CCF</td>
         <td><b>無 clone tree</b>。<code>TreeStructure</code> 是 read×read 甲基距離 dendrogram；<code>SubcloneAnalyzer</code> 是 4-bucket 跨區分類；<b>grep CCF = 0 hits</b></td>
         <td class="verdict v-no">✘ 缺少</td>
         <td>葉=read、邊=甲基距離，無祖先-後代、無 CCF、無跨位點 lineage（<code>TreeStructure.cpp</code>、<code>SubcloneAnalyzer.cpp:100-128</code>）</td>
       </tr>
       <tr>
-        <td><b>F</b>　pos3 truth-gap somatic 驗證</td>
+        <td><b>F</b>　pos3 truth-gap 的 truth-evaluable／unevaluable 分類</td>
         <td><b>無</b>。ISM 不比對 SEQC2 truth、不做 strand/mapQ artifact 統計</td>
         <td class="verdict v-no">✘ 缺少</td>
         <td>屬 pysam 逐 read 統計 + SEQC2 HC.bed 比對（<code>seqc2_subclone_concordance.py</code>）</td>
@@ -337,9 +379,9 @@ pre code{display:block;white-space:pre;word-break:normal}
     <div class="col dead">
       <h5>✘ ISM C++ 缺少 ——「reconstruct」骨幹半邊</h5>
       <ul>
-        <li><b>B</b> 多 sSNV read linkage 定 α/β lineage（骨幹）</li>
+        <li><b>B</b> 多 sSNV read linkage 建 local-state candidate table（block L / block R 關係 unresolved）</li>
         <li><b>E</b> clone tree / 演化順序 / CCF</li>
-        <li><b>F</b> SEQC2 truth-gap somatic 驗證</li>
+        <li><b>F</b> SEQC2 truth-gap 的 truth-evaluable／unevaluable 分類</li>
         <li>homopolymer / VAF-排序 / coverage 三防呆護欄</li>
       </ul>
       <p class="muted">＝重建骨幹由 <b>genetic haplotag + pysam linkage + SEQC2</b> 做，<b>不在</b> ISM C++、也<b>不由甲基驅動</b>。</p>
@@ -358,10 +400,10 @@ pre code{display:block;white-space:pre;word-break:normal}
     <p class="muted">→ 對外請說「per-region ASM signature 分類」，<b>不要</b>說「ISM 重建了 N 個 subclone」。</p>
   </div></details>
 
-  <details class="card"><summary>陷阱 2　<code>"Subclone"</code> verification_class 是「結構顯著但標籤不顯著」= cis-ASM 候選旗標 <span class="badge b-dead">over-claim</span></summary>
+  <details class="card"><summary>陷阱 2　historical <code>verification_class_legacy="Subclone"</code> 是舊的 cis-ASM 候選旗標 <span class="badge b-dead">over-claim</span></summary>
   <div class="body">
-    <p>每 region 的 verdict（<code>SignificanceAnalyzer.cpp:307-340</code>）：cluster_significant ∧ label_significant → <b>Strong</b>；cluster_significant ∧ <b>¬</b>label_significant → <b>"Subclone"</b>；¬cluster ∧ label → Weak；else Noise。<br>注意「Subclone」是<b>用標籤關聯的「缺席」定義的</b>——意思是「甲基把 read 切成有結構的群，但這結構<b>對不上</b>任何 a-priori 標籤（HP/allele/tumor）」。這正是專案反覆警告的 <b>cis-ASM / double-dip artifact</b>：read 內甲基自相關就能切出群。所以一個 region 被標 "Subclone"＝<b>需要進一步查的候選</b>，<b>不是</b>被確認的 subclone。</p>
-    <p class="muted">補強：cluster_significant 的一半其實是 <b>Fisher-FFH</b>（固定邊際 hypergeometric null，<b>無</b> read 非獨立／over-dispersion 校正，<code>FisherExact.cpp:259-315</code>），不是 PERMANOVA p；而擋離散度假象的 <code>check_dispersion</code> 的 p 是<b>硬編查表</b>（<code>StructureTest.cpp:292</code>）非真 PERMDISP → 守門偏弱。</p>
+    <p>historical v1 verdict（<code>SignificanceAnalyzer.cpp:307-340</code>）：cluster_significant ∧ label_significant → <b>Strong</b>；cluster_significant ∧ <b>¬</b>label_significant → <b>"Subclone"</b>；¬cluster ∧ label → Weak；else Noise。這個值現只保留在 <code>verification_class_legacy</code> 作 evidence-path provenance；current Verification schema-v2 會另納入 label-PERMANOVA 與 PERMDISP clean/dispersion axes（<code>RegionProcessor.cpp:1817-1862</code>）。<br>注意 historical「Subclone」是<b>用標籤關聯的「缺席」定義的</b>——意思是「甲基把 read 切成有結構的群，但這結構<b>對上</b>不了任何 a-priori 標籤（HP/allele/tumor）」。所以不論 legacy 或 v2，都只是<b>需要進一步查的 association candidate</b>，<b>不是</b>被確認的 subclone。</p>
+    <p class="muted">補強：cluster_significant 的一半其實是 <b>Fisher-FFH</b>（固定邊際 hypergeometric null，<b>無</b> read 非獨立／over-dispersion 校正，<code>FisherExact.cpp:259-315</code>），不是 PERMANOVA p。current <code>check_dispersion</code> 已用 F-distribution upper-tail 解析 p（<code>StructureTest.cpp:378-472</code>）取代 historical 3-bucket lookup；仍只能標記 dispersion warning，不會把 association 升格成 cluster truth。</p>
   </div></details>
 
   <details class="card"><summary>陷阱 3　allele PERMANOVA p=0.001 很漂亮，但 allele 軸最易被 cis-ASM 污染 <span class="badge b-warn">baseline-dependence</span></summary>
@@ -381,10 +423,10 @@ pre code{display:block;white-space:pre;word-break:normal}
   </div>
 
   <div class="takeaway dead"><span class="lab">不足 ✘</span>
-    ISM C++ <b>不足以解釋「重建骨幹」半邊</b>：多 sSNV read linkage 定 α/β lineage（claim B）、clone tree／演化順序／CCF（claim E）、truth-gap somatic 驗證（claim F）—— 這些是 <b>pysam 自訂腳本 + genetic haplotag + SEQC2</b> 做的，<b>不在 ISM C++</b>。ISM 的 <code>SubcloneAnalyzer</code>／<code>TreeStructure</code>／<code>"Subclone"</code> class 名實不符，不能拿來宣稱重建。
+    ISM C++ <b>不足以解釋「重建骨幹」半邊</b>：多 sSNV read linkage 的 local mutation-state candidate table（claim B）、非時間 compatibility relation／順序／CCF（claim E）、truth-gap 的 truth-evaluable／unevaluable 分類（claim F）—— 這些是 <b>pysam 自訂腳本 + genetic haplotag + SEQC2</b> 做的，<b>不在 ISM C++</b>。即使有 same-read、absence、VAF 或甲基 pattern，也不能確認 parent-child、取得順序、common node、block L/R 合併、cellular lineage 或 cellular subclone；ISM 的 <code>SubcloneAnalyzer</code>／<code>TreeStructure</code>／<code>"Subclone"</code> class 名實不符，不能拿來宣稱重建。
   </div>
 
-  <p><b>合理的分工：</b><span class="key">genetic read linkage 提供局部 mutation-state candidates；甲基負責 characterize 分組後關聯，非 driver、非 filter、非獨立重建</span>。ISM 的角色是在 allele/HP/LOH 標籤條件化後描述甲基，而不是從零重建 cellular subclone。對外應把直接觀測、模型推論與甲基關聯分層陳述，不能把同一樣本、同一批 reads 的兩種量測寫成獨立確認。</p>
+  <p><b>合理的分工：</b><span class="key">genetic read linkage 提供局部 mutation-state candidates；甲基負責 characterize 分組後關聯，非 driver、非 filter、非獨立重建</span>。ISM 的角色是在 allele/HP/LOH 標籤條件化後描述甲基，而不是從零重建 cellular subclone。對外應把直接觀測、模型推論與甲基關聯分層陳述，不能把同一樣本／同源 technical data 中的兩種量測寫成獨立確認；read-set identity 若無 receipt 也不能假設完全相同。</p>
 
   <h4 class="mini">一句話對外口徑（可直接用）</h4>
   <div class="flow1" style="border-style:solid;border-color:var(--c-pass);text-align:left">
@@ -396,7 +438,7 @@ pre code{display:block;white-space:pre;word-break:normal}
     <li><b>cross-SNV read linkage 引擎</b>：reads.tsv 加 PS 欄／or 多 anchor 同 read 共現表（補 claim B 骨幹）。</li>
     <li><b>allele 軸 cis-control</b>：在 region-level allele PERMANOVA 加 normal-HP1-vs-HP2 screen，標記可觀察的 cis/germline-ASM confound（現只在 pysam；screen-negative 不等於 acquired）。</li>
     <li><b>模組正名</b>：<code>SubcloneAnalyzer</code>→「per-region ASM-signature stratifier」；<code>"Subclone"</code> class→「unlabeled-structure candidate」；避免 over-claim。</li>
-    <li><b>第二 LOH 位點／第二樣本（COLO829）</b>：破單位點 L2 天花板（升 ★4）。</li>
+    <li><b>第二 LOH 區域案例／第二樣本（COLO829）</b>：突破單一區域案例的 L2 天花板（升 ★4）。</li>
   </ol>
   <p class="muted">完整 9 步系統化構想見 <a href="06_ism-subclone-pipeline-concept.standalone.html">頁 06（pipeline 構想，非已實作）</a>。</p>
 
@@ -417,7 +459,7 @@ pre code{display:block;white-space:pre;word-break:normal}
   <p><b>推論層</b>（<span class="tag-l l3">L3</span>）：「allele PERMANOVA 可能是 cis-ASM 非 subclone」「ISM 缺重建是正確分工」為解讀，依 normal-HP 控制 + 主軸定位支持，非單一實測。</p>
   <ul>
     <li><b>核心發現</b>：chr2 subclone 敘述的骨幹數字（A/B/E/F）= pysam，不在 ISM C++；ISM 撐 characterize 半邊（C/C′/D + 實測 allele PERMANOVA）。</li>
-    <li><b>scope</b>：PARTIAL — chr2:18M HCC1395 單位點 × 單樣本；ISM 只跑了該區 TP 集的 sSNV（#1/#2/#5 有 significance.json）。</li>
+    <li><b>scope</b>：PARTIAL — chr2:18M 單一區域案例 × HCC1395 1 biological sample；3 loci（#1/#2/#5）有 historical ISM <code>significance.json</code> artifacts。</li>
     <li><b>對齊 memory</b>：<code>project_chr2_18m_subclone_locus_verification</code>、<code>project_decisionflow_5state_classification_wg</code>（state③ label-first 非循環）、<code>feedback_asm_allele_axis_baseline_confound</code>、<code>feedback_baseline_dependence_not_result</code>。</li>
   </ul>
   <p style="margin-top:var(--sp-3)">repo HEAD <code>9098f11</code> · branch <code>research/subclonal-reconstruction-202606</code> · 本頁建於 2026-06-23 · 撰寫與分析分屬不同 batch（§13.0）</p>

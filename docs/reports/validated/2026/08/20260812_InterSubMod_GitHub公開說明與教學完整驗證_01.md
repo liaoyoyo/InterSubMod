@@ -22,7 +22,7 @@ framework: SCQA + Claim-Evidence-Verdict
 
 用 SCQA + Claim–Evidence–Verdict：**完整驗證完成 — InterSubMod 158 組去重公開主張中，58 組有實質問題或缺乏可驗證證據；現行 CCU 教學站雖已修掉部分舊問題，仍保留可直接反駁的工具敘述與分子→細胞升格，因此整體只能「有條件通過、需重大修訂」（影響：高，信心：高）。**
 
-> **整體裁決：CONDITIONAL PASS — MAJOR REVISION REQUIRED**  
+> **整體裁決：CONDITIONAL PASS — MAJOR REVISION REQUIRED**
 > 工程核心可建置、270/270 tests 通過，許多數值也可精確重算；但工程 PASS 不能替代 cellular subclone／lineage 真值。公開入口目前混合不同 commit、錯誤分母、不可攜命令與超出證據上限的生物敘述。
 
 ## 1. 30 秒結論
@@ -126,96 +126,96 @@ confirmed cellular clone、biological lineage、whole-sample phylogeny、functio
 
 ### 4.1 Public source of truth 與 claim ceiling
 
-- [ ] **C107／C108：首頁與 About 的 “subclonal reconstruction/resolution” 超過現行輸出。**  
-  證據：authority 只允許 local recurrence-allowed mutation-state candidate，沒有 cellular truth。  
-  修正：標題改為「single-molecule sSNV co-occurrence 的局部 mutation-state candidate reconstruction」；About 改為「read-level integration、local candidate analysis、methylation association」。  
+- [ ] **C107／C108：首頁與 About 的 “subclonal reconstruction/resolution” 超過現行輸出。**
+  證據：authority 只允許 local recurrence-allowed mutation-state candidate，沒有 cellular truth。
+  修正：標題改為「single-molecule sSNV co-occurrence 的局部 mutation-state candidate reconstruction」；About 改為「read-level integration、local candidate analysis、methylation association」。
   驗收：GitHub About、default README、feature README、Wiki 首頁、Pages 首頁使用同一 claim ceiling。
 
-- [ ] **C109／C112：same molecule 被寫成 same lineage，candidate topology 被簡稱為 tree/reconstruction。**  
-  推論：molecule ID 不帶 cell barcode；tree 是指定觀測模型與 loss 下的 candidate。  
-  修正：所有首次出現處使用「直接觀測同分子共現；cellular co-membership/lineage 仍是模型推論」及「local recurrence-allowed minimum mutation-state candidate arborescence」。  
+- [ ] **C109／C112：same molecule 被寫成 same lineage，candidate topology 被簡稱為 tree/reconstruction。**
+  推論：molecule ID 不帶 cell barcode；tree 是指定觀測模型與 loss 下的 candidate。
+  修正：所有首次出現處使用「直接觀測同分子共現；cellular co-membership/lineage 仍是模型推論」及「local recurrence-allowed minimum mutation-state candidate arborescence」。
   驗收：全文搜尋 `cell lineage`、`clone tree`、`subclone`，每處要麼有獨立 truth，要麼明示 candidate／local／model-conditional。
 
-- [ ] **C124–C131：chr2 教學把 allele association、normal-screen-negative methylation、approximate TVAF 與 rescue 升格成 clone confirmation。**  
-  證據：新鮮重算確認局部分子共現，但沒有 cell truth；methyl groups 由 genetic label 條件化，不是獨立證據。  
-  修正：`hard evidence`→`strong locus-specific association`、`tumor-acquired`→`tumor-associated/normal-ASM-screen-negative`、`subclone state`→`regional molecular-state candidate`、`correct tag`→`unvalidated future hypothesis`。  
+- [ ] **C124–C131：chr2 教學把 allele association、normal-screen-negative methylation、approximate TVAF 與 rescue 升格成 clone confirmation。**
+  證據：新鮮重算確認局部分子共現，但沒有 cell truth；methyl groups 由 genetic label 條件化，不是獨立證據。
+  修正：`hard evidence`→`strong locus-specific association`、`tumor-acquired`→`tumor-associated/normal-ASM-screen-negative`、`subclone state`→`regional molecular-state candidate`、`correct tag`→`unvalidated future hypothesis`。
   驗收：頁面 04–08 不再把 association 稱為 orthogonal cellular confirmation。
 
-- [ ] **C135／C136／C140：default main 與 Project Summary 仍聲稱已解析 cellular subclones。**  
-  反證：authority 的 biological claim counts 為 0；read clustering 不是 cell clustering。  
-  修正：先修 feature 文案，再把 bounded README 原子合併到 main；cluster heatmap 改稱 read-level methylation clusters。  
+- [ ] **C135／C136／C140：default main 與 Project Summary 仍聲稱已解析 cellular subclones。**
+  反證：authority 的 biological claim counts 為 0；read clustering 不是 cell clustering。
+  修正：先修 feature 文案，再把 bounded README 原子合併到 main；cluster heatmap 改稱 read-level methylation clusters。
   驗收：新訪客只讀 default branch 也不會得到「已確認 cellular clones」的結論。
 
 ### 4.2 Denominator、schema 與 algorithm contract
 
-- [ ] **C113／C142：170,131 的母體被錯寫成全部 mutations。**  
-  反證：`170,131/255,752=66.5219%` 是 k=1 strict components；`170,131/469,849=36.2097%`；current positional singletons 是 `50,432/469,849=10.7337%`。  
-  修正：「k=1 strict read-linkage components：170,131/255,752（66.52%）」；禁止稱為「約三分之二的所有 mutations」。  
+- [ ] **C113／C142：170,131 的母體被錯寫成全部 mutations。**
+  反證：`170,131/255,752=66.5219%` 是 k=1 strict components；`170,131/469,849=36.2097%`；current positional singletons 是 `50,432/469,849=10.7337%`。
+  修正：「k=1 strict read-linkage components：170,131/255,752（66.52%）」；禁止稱為「約三分之二的所有 mutations」。
   驗收：數字旁固定顯示 numerator、denominator、unit/grain 與 artifact ID。
 
-- [ ] **C059：`significance_summary.csv` 不是 193 columns／無 schema。**  
-  反證：current runtime/source header 為 199 columns；包含 `VerificationSchemaVersion=2` 與 `RegionStratificationSchemaVersion=1`。  
-  修正：版本釘到 `73afaea` 並寫 199；若需要 whole-file schema，另加單一 layout version。  
+- [ ] **C059：`significance_summary.csv` 不是 193 columns／無 schema。**
+  反證：current runtime/source header 為 199 columns；包含 `VerificationSchemaVersion=2` 與 `RegionStratificationSchemaVersion=1`。
+  修正：版本釘到 `73afaea` 並寫 199；若需要 whole-file schema，另加單一 layout version。
   驗收：文件數字由 header test 自動產生，不手抄。
 
-- [ ] **C143／C144：effective default 不是 BERNOULLI。**  
-  反證：ArgParser 會清除／重建 distance list；help 與 fresh minimal run 均顯示 NHD。  
-  修正：「no-argument effective default=NHD；BERNOULLI 僅在明示指定時使用」；另註 Config initializer 不等於 CLI effective default。  
+- [ ] **C143／C144：effective default 不是 BERNOULLI。**
+  反證：ArgParser 會清除／重建 distance list；help 與 fresh minimal run 均顯示 NHD。
+  修正：「no-argument effective default=NHD；BERNOULLI 僅在明示指定時使用」；另註 Config initializer 不等於 CLI effective default。
   驗收：01–03、Wiki、README 與 `--help` 一致。
 
-- [ ] **C151：`inter_sub_mod` 不是 exact-PS 核心 funnel 的產生器。**  
-  反證：core funnel 來自獨立 research exact-PS topology/AF solver 與 runners；`inter_sub_mod` 產 per-region methylation/statistics。  
-  修正：公開 I/O 圖分開兩條 provenance chain。  
+- [ ] **C151：`inter_sub_mod` 不是 exact-PS 核心 funnel 的產生器。**
+  反證：core funnel 來自獨立 research exact-PS topology/AF solver 與 runners；`inter_sub_mod` 產 per-region methylation/statistics。
+  修正：公開 I/O 圖分開兩條 provenance chain。
   驗收：每個數字都可追到實際 executable/script、command、input、output。
 
 ### 4.3 Public reproducibility 與 anti-fabrication
 
-- [ ] **C134／C150：『每個數字、命令、格式都已驗證』的 blanket assurance 不成立。**  
-  反證：測試數、Python file counts、schema、distance default、quickstart 與 storage claim 已出現矛盾。  
-  修正：改為 per-claim receipt table，欄位至少含 commit、command、environment、input、output、date、scope、known failures。  
+- [ ] **C134／C150：『每個數字、命令、格式都已驗證』的 blanket assurance 不成立。**
+  反證：測試數、Python file counts、schema、distance default、quickstart 與 storage claim 已出現矛盾。
+  修正：改為 per-claim receipt table，欄位至少含 commit、command、environment、input、output、date、scope、known failures。
   驗收：文件 CI 讀 receipt，不允許沒有 artifact ID 的精確數字。
 
-- [ ] **C133：report generator 不能讓 fabrication『結構上不可能』。**  
-  反證：它能阻擋宣告為 required 的缺值，但 `CV=999999` 或不存在的 source 仍可被渲染；它不驗證科學正確性、分母或被省略欄位。  
-  修正：「防止 declared required metrics 被靜默省略；不保證 claim truth」。  
+- [ ] **C133：report generator 不能讓 fabrication『結構上不可能』。**
+  反證：它能阻擋宣告為 required 的缺值，但 `CV=999999` 或不存在的 source 仍可被渲染；它不驗證科學正確性、分母或被省略欄位。
+  修正：「防止 declared required metrics 被靜默省略；不保證 claim truth」。
   驗收：加入 range、source existence、hash、denominator 與 schema validators。
 
-- [ ] **C138／C139／C149：公開 quickstart 不是 fresh clone 10 分鐘可跑。**  
-  反證：BAM、FASTA、VCF 與 `one_snv.vcf` 4/4 必要 inputs 不在 Git；script 依賴 `/big7`、`/big8` 私有路徑。  
-  修正：明標 `INTERNAL_ONLY`，或發布可授權 tiny fixture、checksum/download step 與全參數 portable wrapper。  
+- [ ] **C138／C139／C149：公開 quickstart 不是 fresh clone 10 分鐘可跑。**
+  反證：BAM、FASTA、VCF 與 `one_snv.vcf` 4/4 必要 inputs 不在 Git；script 依賴 `/big7`、`/big8` 私有路徑。
+  修正：明標 `INTERNAL_ONLY`，或發布可授權 tiny fixture、checksum/download step 與全參數 portable wrapper。
   驗收：空白環境 clone→build→fixture run exit 0，CI 保存 stdout 與 outputs hash。
 
-- [ ] **C141：default branch 的中文 README 404。**  
-  修正：英文與繁中 corrected README 同一 PR 原子合併。  
+- [ ] **C141：default branch 的中文 README 404。**
+  修正：英文與繁中 corrected README 同一 PR 原子合併。
   驗收：兩個 raw endpoints HTTP 200，互相連結，claim-registry CI 均通過。
 
-- [ ] **C148：`verify_pipeline_numbers.py` 沒有重算所有公開數字。**  
-  反證：現行 validator 只涵蓋歷史 35,332-site pipeline，沒有重算 exact-PS、LongLineage、storage、code count、test count。  
-  修正：把 validator scope 寫清楚，依 claim family 增設 validator。  
+- [ ] **C148：`verify_pipeline_numbers.py` 沒有重算所有公開數字。**
+  反證：現行 validator 只涵蓋歷史 35,332-site pipeline，沒有重算 exact-PS、LongLineage、storage、code count、test count。
+  修正：把 validator scope 寫清楚，依 claim family 增設 validator。
   驗收：158-row inventory 中每一個精確 numeric claim 具有 validator ID 或 `UNVERIFIED` 標誌。
 
 ### 4.4 chr2:18M 的邏輯反證
 
-- [ ] **C152：LOH 不能推出每個 read difference 必為 somatic、也不能排除 sequencing error。**  
-  證據：matched normal 沒有六個預期 ALT，但仍有少量其他 DEL/T errors；pos4 有 G/T/DEL ambiguity。  
-  修正：「LOH 排除簡單的 two-parent-haplotype explanation；error、CN、stochastic methylation 等替代解釋仍需檢查」。  
+- [ ] **C152：LOH 不能推出每個 read difference 必為 somatic、也不能排除 sequencing error。**
+  證據：matched normal 沒有六個預期 ALT，但仍有少量其他 DEL/T errors；pos4 有 G/T/DEL ambiguity。
+  修正：「LOH 排除簡單的 two-parent-haplotype explanation；error、CN、stochastic methylation 等替代解釋仍需檢查」。
   驗收：logic page 顯示 competing-explanation table。
 
-- [ ] **C153：α/β zero observed co-occurrence 不是 sister branches 的唯一解。**  
-  推論：finite coverage、block 間無 genetic bridge、recurrence allowance 及 missingness 都可能產生相同觀測。  
-  修正：「在 parsimony 下與 α/β branching candidate 相容；非唯一識別」。  
+- [ ] **C153：α/β zero observed co-occurrence 不是 sister branches 的唯一解。**
+  推論：finite coverage、block 間無 genetic bridge、recurrence allowance 及 missingness 都可能產生相同觀測。
+  修正：「在 parsimony 下與 α/β branching candidate 相容；非唯一識別」。
   驗收：頁面同時列 support、counterexample 與 non-identifiability caveat。
 
-- [ ] **C154／C155：methylation 不能直接說明基因被關閉，也尚未證明能 rescue 正確 tag。**  
-  反證：沒有 expression/functional assay，亦無 per-read tag truth 或 quantified rescue benchmark。  
-  修正：前者限於 local methylation state；後者移到 unvalidated future hypothesis。  
+- [ ] **C154／C155：methylation 不能直接說明基因被關閉，也尚未證明能 rescue 正確 tag。**
+  反證：沒有 expression/functional assay，亦無 per-read tag truth 或 quantified rescue benchmark。
+  修正：前者限於 local methylation state；後者移到 unvalidated future hypothesis。
   驗收：沒有 observed-result 圖把 predicted/rescued tag 畫成 ground truth。
 
 ### 4.5 版本邊界
 
-- [ ] **C043：『InterSubMod 與 LongLineage 都不能寫 tagged BAM』已被 branch-specific source 反駁。**  
-  證據：InterSubMod 不寫 BAM；LongLineage feature `b9aaa12` 有 `longlineage-tag-bam`，public main `5daf50f` 沒有。  
-  修正：句子必須釘 repo、branch/commit 與 binary。  
+- [ ] **C043：『InterSubMod 與 LongLineage 都不能寫 tagged BAM』已被 branch-specific source 反駁。**
+  證據：InterSubMod 不寫 BAM；LongLineage feature `b9aaa12` 有 `longlineage-tag-bam`，public main `5daf50f` 沒有。
+  修正：句子必須釘 repo、branch/commit 與 binary。
   驗收：feature 與 main 的 capability matrix 分列。
 
 ## 5. P1/P2 修正與補證據清單：24 組
@@ -360,22 +360,22 @@ M6/M7 的外部工具判定先查 [`longphase-s.md`](/big8_disk/liaoyoyo2001/kno
 
 ### P0 — 沒有這些資料，不得宣稱 cellular clone／lineage
 
-1. **Allele-specific CN/LOH + purity + multiplicity + CCF table**  
+1. **Allele-specific CN/LOH + purity + multiplicity + CCF table**
    每個候選 locus/block 需有 caller、version、segment、confidence、normal contamination、purity/ploidy、multiplicity 與 CCF uncertainty；目前 coverage proxy 不等於 allele-specific CN correction。
 
-2. **獨立 cellular truth**  
+2. **獨立 cellular truth**
    優先次序：single-cell DNA／joint DNA-methylation、single-cell-derived colonies、spatial/multi-region、longitudinal樣本。至少能把 read-level state 對回 cell population，且不能只用同一 bulk reads 派生的 label。
 
-3. **Known-truth simulations／mixtures**  
+3. **Known-truth simulations／mixtures**
    模擬或實體 mixtures 必須預先固定 clone genotype、tree、frequency、CN、LOH、coverage、MM/ML error，並報 topology、frequency、abstention、calibration，而不是只報能否生成一棵 tree。
 
-4. **Biological replication**  
+4. **Biological replication**
    HCC1395 與 Dorado 是同一 cell line technical pair；需不同 biological samples 中重現同類 pattern，預先固定 feature、gate 與方向。
 
-5. **Per-read tag truth 與 rescue benchmark**  
+5. **Per-read tag truth 與 rescue benchmark**
    若要宣稱 methylation rescue/correct tag，需有 truth labels、coverage strata、confusion matrix、abstention、calibration、false-rescue rate 與 held-out validation。
 
-6. **Expression／functional assay**  
+6. **Expression／functional assay**
    在沒有 RNA、chromatin、perturbation 或功能性證據前，只能描述 methylation state，不得說哪個基因已被 clone 關閉。
 
 ### P0 — 公開重現性資料
@@ -415,15 +415,15 @@ M6/M7 的外部工具判定先查 [`longphase-s.md`](/big8_disk/liaoyoyo2001/kno
 
 ## 13. 建議發布順序與驗收 Gate
 
-1. **先修主入口**：GitHub About、default README EN/ZH、Wiki Home、Pages index。  
+1. **先修主入口**：GitHub About、default README EN/ZH、Wiki Home、Pages index。
    → 驗證：四面 commit/version manifest 一致；所有 cellular claim 經 claim-ceiling linter。
-2. **再修可機械反駁項**：denominator、199-column schema、NHD default、test/file counts、quickstart、storage arithmetic。  
+2. **再修可機械反駁項**：denominator、199-column schema、NHD default、test/file counts、quickstart、storage arithmetic。
    → 驗證：CI 從 artifact 自動產數，禁止手抄。
-3. **再修 chr2 教學因果語氣**：LOH、α/β、methylation、rescue、gene silencing。  
+3. **再修 chr2 教學因果語氣**：LOH、α/β、methylation、rescue、gene silencing。
    → 驗證：每一節都有 observation／inference／alternative／missing truth 四欄。
-4. **補公開 fixture 與 receipt registry**。  
+4. **補公開 fixture 與 receipt registry**。
    → 驗證：全新 clone 在無 `/big7`、`/big8` 的環境完成 build＋smoke，exit 0。
-5. **取得 P0 科學資料後再升格**。  
+5. **取得 P0 科學資料後再升格**。
    → 驗證：CN/LOH/purity-aware、independent cellular truth、跨 biological sample、pre-registered held-out benchmark 全部通過；未通過前維持 molecular-state candidate 用語。
 
 ## 14. 限制與反證條件

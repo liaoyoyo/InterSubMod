@@ -13,17 +13,13 @@
 
 給它一個**腫瘤 BAM**、一份**參考基因組**、一份**體細胞突變清單（VCF）**，它會對每個突變位點開一個視窗，把**跨過該位點的每一條 read** 的甲基化狀態排成矩陣，算 read 兩兩之間的距離、做階層分群與統計檢定，全部落成檔案。
 
-**為什麼要這樣做：** 一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在**單一分子**上同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，因此能用 **read 層級**（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
+**為什麼要這樣做：** 一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在**單一分子**上同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，因此能在 **read 層級**（而非樣本層級）描述距離與 algorithmic clustering，並檢驗指定 mutation／haplotype label 是否與 read-distance variation 或 cluster assignment 關聯。這不證明 unsupervised cluster truth、cellular group 或因果。
 
-✅ **曾以內部 HCC1395 單位點 smoke input 實測可跑** — 最小指令 exit 0；含 normal BAM
-與 LOH 標註的內部版本也 exit 0。原收據沒有在本頁完整釘定 hardware、input locus、commit
-與 date，因此不把秒數當成一般 runtime。
+✅ **具名內部 receipt 曾跑通** — 2026-08-06 HCC1395 單點輸入記錄 **2.9 秒、exit 0**；含 normal BAM 與 LOH 標註的同一內部組合也 exit 0。這只屬特定機器、輸入與 commit，**不是一般 runtime 承諾**。
 
 > 🔴 **用之前一定要知道的一件事**
 >
-> 不要用檔案 mtime 或工作目錄裡「現有 binary」的瞬時狀態作公開事實。每次 build/run 都應
-> 記錄 source commit、dirty diff、binary SHA-256、compiler、build command 與執行日期；
-> 無法對齊 source/binary identity 時先重新編譯，並把該 run 標為非 release authority。
+> Git 不發布受版控的 build output。請依 release manifest checkout immutable commit，並在 repo 外的新 build 目錄 clean build；不要沿用 clone 內既有 `build/`，執行檔 inventory 由該次 receipt 動態保存。
 
 ---
 
@@ -37,17 +33,18 @@
 | `--reference`<br>`-r` | **必填** | 參考基因組序列。用來**找出視窗內所有 CpG 的位置**（要先有序列才知道哪裡是 CG），也用來決定染色體長度以裁切視窗邊界。 | 🔴 **`.fai` 索引缺失是 Hard error**，程式會直接停。<br>實測：`data/ref/hg38.fa` → GRCh38（3.14 GB）。 |
 | `--vcf`<br>`-v` | **必填** | 體細胞突變清單。**每一筆記錄 = 一個分析區域**。VCF 裡有幾個突變，就會產生幾個 region 目錄。 | 🔴 **VCF 的檔名會變成輸出目錄的第一層**（取 stem）。<br>實測：`filtered_snv_tp.vcf.gz` = 1.15 MB。 |
 | `--normal-bam`<br>`-n` | 選填 | 配對正常組織。**給了它才會有**：germline 甲基化基準線、腫瘤對正常的殘差、跨區域分層。不給的話這些欄位一律是 `NOT_APPLICABLE_TUMOR_ONLY`。 | 正常 read 是用**整個視窗**抓（不是點抓），因為它們貢獻的是甲基化基準而非突變判讀。<br>原始碼註解明文：**不要把 normal 的 HP 硬改成 0**。 |
-| `--loh-bed` | 選填 | 雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，讓後續分析可以把 LOH 區域分層看待。 | 只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>實測檔案 1,094 行，載入時印 `Loaded 1094 LOH regions`。 |
+| `--loh-bed` | 選填 | 雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，讓後續分析可以把 LOH 區域分層看待。 | LOH BED 僅供 annotation／stratification；CN/LOH 未整合進 frozen candidate reconstruction，也沒有 CN/LOH-corrected inference。只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>實測檔案 1,094 行，載入時印 `Loaded 1094 LOH regions`。 |
 
 <details>
-<summary>全部 29 個 CLI 選項的預設值 — 以及<b>兩個文件與程式碼不符的陷阱</b></summary>
+<summary>frozen release baseline <code>ddd8909a</code> 的 29-option census — 以及<b>兩個文件與程式碼不符的陷阱</b></summary>
 
+這個 29-option 數量是 `ddd8909a` 的 **branch-scoped** source census，不是穩定 API。
 本輪把 `--help` 的每一行都對照 `ArgParser.hpp` 與 `Config.hpp` 逐一比對。大部分一致，但有**兩個**會讓你算錯資源或拿到非預期結果：
 
 | 選項 | help 說的 | 實際的 | 後果 |
 |---|---|---|---|
 | `--threads` / `-j` | `Default: 1` | **實際是 16**<br>（`Config.hpp:43`） | 不給這個旗標時，程式會用 16 條執行緒。**資源估算會整整差 16 倍**。實跑不帶旗標時 Configuration 印 `Threads: 16`。 |
-| `--distance-metric` | 宣告預設 `BERNOULLI`<br>（`Config.hpp:40`） | **實際是 NHD**<br>（`ArgParser.hpp:86,168`） | ArgParser 會**無條件清空**宣告的預設值再填入 NHD，所以 `Config.hpp` 的初值不可能存活。不明講就會拿到 NHD，且只產生 `distance/NHD/` 目錄。 |
+| `--distance-metric` | `Config.hpp` initializer 是 `BERNOULLI` | **未指定時的 effective CLI default 是 NHD**<br>（`ArgParser.hpp:86,181-193`） | parser 以 CLI list 取代 initializer；明示 NHD、BERNOULLI 或重複多值都會保留。多值時只有第一個 metric 驅動 clustering，後續 metric 只輸出額外 distance matrix，因此順序會改變 tree／cluster。 |
 
 **其餘經比對確認一致的預設值**：`--window-size 1000`、`--min-mapq 20`、`--min-read-length 1000`、`--min-base-quality 20`、`--min-common-coverage 3`、`--nan-distance-strategy SKIP`、`--methyl-high 0.8`、`--methyl-low 0.2`、`--output-dir output`、`--log-level info`。
 
@@ -63,7 +60,7 @@
 
 程式內部共 20 個細部步驟，下圖濃縮成 8 個關鍵階段。每個階段標了實際生效的參數。
 
-![ism-internal-pipeline](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/ism-internal-pipeline.png)
+![ism-internal-pipeline](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/a34b0cb96a8ef247c5a6f423d46b2920c7e541aa/docs/images/ism-internal-pipeline.png)
 
 > **圖 1 · InterSubMod 內部處理鏈**（每個方框下方是實際生效的參數，非文件宣稱值）
 >
@@ -82,7 +79,7 @@
 | ⑤ | 解析甲基化 → read × CpG 矩陣 | MM 標記說「第幾個 C 有修飾」，ML 說「機率多高」（0–255 → 0–1）。<br>只取 5mC；反股 read 需反向掃描；並用參考序列驗證確實是 CpG。<br>欄位 = 所有 read 提到的 CpG 聯集（不是交集），沒觀測到填 `-1`。 |
 | ⑥ | 二值化（注意是三分不是二分） | 機率 ≥ 0.8 判為甲基化(1)；≤ 0.2 判為未甲基化(0)。<br>🔴 **夾在 0.2～0.8 中間的曖昧值直接丟棄，與「沒觀測」共用 `-1` 編碼**。 |
 | ⑦ | read × read 距離矩陣 | 只用兩條 read 都有觀測的 CpG；共同覆蓋 < 3 個就判為無效對。<br>6 種距離可選：NHD（預設）· L1 · L2 · CORR · JACCARD · BERNOULLI。<br>建樹前會先剔除含缺失值的 read（否則階層分群會當掉）。 |
-| ⑧ | 建樹 → 決定群數 → 四類統計檢定 | 階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分。<br>🔴 **群數最少是 2 — 它不回答「到底有沒有結構」**。<br>有沒有結構要看 PERMANOVA 與 gating，不是看 k。 |
+| ⑧ | 建樹 → 決定群數 → 四類統計檢定 | 階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分。<br>🔴 **群數最少是 2 — 它不證明 unsupervised cluster existence/truth**。<br>PERMANOVA／gating 也只測指定 association；PERMANOVA 須合讀 PERMDISP。 |
 
 ### HP 標籤實測值域（6 種）
 
@@ -97,10 +94,10 @@
 
 | 檢定 | 它在問什麼 |
 |---|---|
-| **Global** | 分群結果與生物標籤有關聯嗎 |
-| **Local** | 哪一群特別富集某個標籤 |
-| **Structure** | 群在距離空間真的分開了嗎 |
-| **Label** | 直接拿已知標籤切，避開先分群再檢定的循環論證 |
+| **Global** | algorithmic cluster × 指定 label 是否有 association；Fisher／Cramér's V 不判定 cluster 或 label 真值 |
+| **Local** | 哪個 algorithmic cluster 富集指定 label；仍只屬 association |
+| **Structure** | 指定 label 與 read-distance variation／centroid separation 在置換 null 下是否有 association；須合讀 PERMDISP |
+| **Label** | 直接使用預先指定 label；避免先分群再檢定，但仍不證明 cluster truth、cellular group 或因果 |
 
 ### 兩則設計註記
 
@@ -197,20 +194,15 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 
 > 🔴 **欄數會隨 producing binary 版本改變，且仍沒有單一 whole-file layout version**
 >
-> Historical files 實測到 **59 / 114 / 117 / 157 / 180** 欄；tracked core `73afaeac` 的
-> 2026-08-12 runtime/source header 是 **199 欄**，包含第 187 欄
-> `VerificationSchemaVersion=2` 與第 196 欄 `RegionStratificationSchemaVersion=1`。
-> 這兩欄是 component-level schema fields，不代表存在單一 whole-file layout version。
-> 不同 producing versions 的欄位位置會錯開；下游必須用欄名、檢查 schema 欄，並記錄
-> source/binary identity，不能把 199 概括成所有未來版本的永恆 current。
+> 歷史磁碟輸出實測到 **59 / 114 / 117 / 157 / 180** 五種欄數；frozen release baseline `ddd8909a` 的 source header 是 **199 欄**。歷史 `73afaeac-dirty` runtime audit 與 baseline 的 C++／CMake inputs byte-equivalent，但不是 release source。現行檔案雖含 component-level schema 欄，仍沒有單一 whole-file layout version。不同時期的欄位位置會錯開，固定欄號解析可能靜默讀錯；**務必用欄名讀，並記錄 producer commit。**
 
 </details>
 
 | 其他 run 層檔案 | 內容 |
 |---|---|
 | `significance_statistics.txt` | 一頁摘要：總共處理幾個 region、多少個顯著、各染色體分別多少。實測開頭 `=== Significance Analysis Statistics ===`、`Total Regions Processed: 1982`。 |
-| `run.log` | 這次跑用了什麼輸入與參數，開頭是 `--- Configuration ---` 區塊。**這是回溯任何一份輸出「怎麼來的」唯一可靠依據**，不要刪。 |
-| `subclone_structure.txt` | 跨 region 的分組摘要（分幾群、平均 ASM、LOH 比例）。只在部分 run 出現。 |
+| `run.log` | 這次跑用了什麼輸入與參數，開頭是 `--- Configuration ---` 區塊。它是 provenance 的**必要但不充分**證據：仍須搭配 producer commit、site profile／tool hash、輸入與輸出 checksum、schema 與 command receipt；不要單靠 log 宣稱可重現。 |
+| `subclone_structure.txt` | **Legacy-named deprecation／region-stratification artifact**；不是 inferred cellular subclones。只在部分 run 出現，檔名不得當作 biological claim。 |
 | `label_first_metrics.tsv` | 36 欄，label-first 路線的精簡指標表，用 `chr:pos:ref:alt` 當鍵。只在 canonical 配對輸出見到。 |
 
 > ⚠️ **文件與實際不符的一處**
@@ -221,28 +213,31 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 
 ## 04 · 怎麼跑 — 三種參數組合（需自行提供資料）
 
-三種組合曾在 2026-08-06 內部 HCC1395 資料上實跑、exit code 皆為 0；public repo 不含該 BAM／FASTA／VCF。以下改用可攜式變數，讀者必須先替換成自己合法取得的絕對路徑。
+三種組合曾在 2026-08-06 內部 HCC1395 資料上實跑、exit code 皆為 0；public repo 不含該 BAM／FASTA／VCF。以下使用 repo 外 clean build 與 site-profile 變數；機器絕對路徑只維護於 untracked machine profile／registry。
 
-### ① 最小可跑 — 驗證環境與執行檔正常
+### ① 最小可跑 — 驗證環境與執行檔正常（runtime 依環境而異）
 
 先從 VCF 抽出單一個突變，只給三個必填參數：
 
 ```bash
-# 使用者提供的外部輸入
-ISM_TUMOR_BAM=/absolute/path/to/tumor.bam
-ISM_REFERENCE=/absolute/path/to/reference.fa
-ISM_INPUT_VCF=/absolute/path/to/somatic.vcf.gz
-ISM_DEMO_DIR=/tmp/ism_demo
+# release manifest 指定 commit 的 repo root、repo 外 build、untracked machine profile
+REPO_ROOT="<REPO_ROOT>"
+BUILD_ROOT="<CLEAN_BUILD_ROOT>"
+SITE_PROFILE="<SITE_PROFILE>"
+"$REPO_ROOT/scripts/site/doctor" --profile "$SITE_PROFILE" --mode real-preflight
+eval "$("$REPO_ROOT/scripts/site/site_profile.py" shell \
+  --profile "$SITE_PROFILE" --sample HCC1395)"
+ISM_DEMO_DIR="${TMPDIR:-/tmp}/ism_demo"
 mkdir -p "$ISM_DEMO_DIR"
 
 # 準備只含第一筆 biallelic SNV 的 smoke-test VCF
-bcftools view -h "$ISM_INPUT_VCF" > "$ISM_DEMO_DIR/one_snv.vcf"
-bcftools view -m2 -M2 -v snps -H "$ISM_INPUT_VCF" | head -n 1 >> "$ISM_DEMO_DIR/one_snv.vcf"
+bcftools view -h "$SOMATIC_VCF" > "$ISM_DEMO_DIR/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$SOMATIC_VCF" | head -n 1 >> "$ISM_DEMO_DIR/one_snv.vcf"
 
 # 跑
-./build/bin/inter_sub_mod \
-  --tumor-bam  "$ISM_TUMOR_BAM" \
-  --reference  "$ISM_REFERENCE" \
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$TUMOR_BAM" \
+  --reference  "$REFERENCE" \
   --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
   --output-dir "$ISM_DEMO_DIR/out_min"
 ```
@@ -260,9 +255,9 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127
 ### ② 典型分析 — 指定執行緒、視窗、兩種距離指標
 
 ```bash
-./build/bin/inter_sub_mod \
-  --tumor-bam  "$ISM_TUMOR_BAM" \
-  --reference  "$ISM_REFERENCE" \
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$TUMOR_BAM" \
+  --reference  "$REFERENCE" \
   --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
   --output-dir "$ISM_DEMO_DIR/out_typical" \
   --window-size 1000 \
@@ -283,13 +278,12 @@ Configuration 區塊會印 `Threads: 8` 與 `Distance Metrics: BERNOULLI, NHD`�
 ### ③ 完整配對分析 — 加上正常組織與 LOH 標註
 
 ```bash
-ISM_NORMAL_BAM=/absolute/path/to/normal.bam
-ISM_LOH_BED=/absolute/path/to/loh.bed
+ISM_LOH_BED="<DATA_ROOT>/loh/HCC1395/tumor_phased_LOH.bed"
 
-./build/bin/inter_sub_mod \
-  --tumor-bam  "$ISM_TUMOR_BAM" \
-  --normal-bam "$ISM_NORMAL_BAM" \
-  --reference  "$ISM_REFERENCE" \
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$TUMOR_BAM" \
+  --normal-bam "$NORMAL_BAM" \
+  --reference  "$REFERENCE" \
   --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
   --loh-bed    "$ISM_LOH_BED" \
   --output-dir "$ISM_DEMO_DIR/out_full" \
@@ -316,12 +310,12 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
 | 嚴重 | 問題 | 會怎麼咬你 |
 |---|---|---|
 | 🔴 | **甲基化與 read 靠隱含列序綁定** | `methylation.csv` 首欄是列號不是 read 名，唯一的綁定在程式內部。任何過濾或重排不同步 → **甲基化配到別條 read 的單倍型，無任何 assert 會抓到**。 |
-| 🔴 | **`significance_summary.csv` 跨 run 欄數不一致** | 歷史實測有 59/114/117/157/180 欄；tracked core `73afaeac` 的 2026-08-12 runtime/source header 是 **199 欄**。該版本含兩個 component-level schema 欄：第 187 欄 `VerificationSchemaVersion=2`、第 196 欄 `RegionStratificationSchemaVersion=1`，但仍沒有單一 whole-file layout version。用固定欄號解析會靜默錯位；**一律用欄名並檢查兩個 schema 欄**。199 是版本快照，不是所有未來版本的固定欄數。 |
+| 🔴 | **`significance_summary.csv` 跨 run 欄數不一致** | 歷史實測有 59/114/117/157/180 欄；frozen release baseline `ddd8909a` 的 source header 是 **199 欄**。目前含兩個 component-level schema 欄：第 187 欄 `VerificationSchemaVersion=2`、第 196 欄 `RegionStratificationSchemaVersion=1`，但仍沒有單一 whole-file layout version。用固定欄號解析會靜默錯位；**一律用欄名並檢查兩個 schema 欄**。若下游需要整檔相容性，仍須新增 whole-file layout version。 |
 | ⚠️ 中 | **二值化門檻有三套** | 主線 0.8/0.2 三分法、另一模組硬寫死 0.5 二分法、Python 端 128/255。同一個 CpG 因為走哪條路而甲基化判定不同，**跨模組數字不可比**。 |
 | ⚠️ 中 | **`linkage_matrix.csv` 其實是 TSV** | 副檔名與分隔符不符。`pandas.read_csv` 預設逗號 → 整列變單欄，**不會報錯**。 |
 | ⚠️ 中 | **`--threads` 預設是 16 不是 1** | help 寫 Default: 1，實際 `Config.hpp` 是 16。**資源估算差 16 倍**，在共用機器上平行跑多個 job 時會嚴重超載。 |
-| ⚠️ 中 | **`--distance-metric` 宣告值會被清掉** | Config 宣告 BERNOULLI，但參數解析會無條件清空再填 NHD。**不明講就是 NHD。** |
-| ℹ️ 低 | **群數最少一定是 2** | 輪廓係數從 k=2 開始掃，所以 `optimal_k` 永遠不會是 1 —— **它不回答「有沒有結構」**。要看有沒有結構請看 PERMANOVA 與 gating 欄位。 |
+| ⚠️ 中 | **`--distance-metric` 的 initializer 不是 CLI default；多值順序有語意** | 未指定時是 NHD；明示 selection 會保留。多值時只有第一個 metric 驅動 clustering，後續只輸出額外 matrix，因此改變順序可能改變 tree／cluster。 |
+| ℹ️ 低 | **群數最少一定是 2** | 輪廓係數從 k=2 開始掃，所以 `optimal_k` 永遠不會是 1 —— **它不證明 unsupervised cluster existence/truth**。PERMANOVA 只測指定 label 與 read-distance variation／centroid separation 在置換 null 下的 association，且須與 PERMDISP 合讀；Fisher／Cramér's V 只測 label association，均不證明 cellular group 或因果。 |
 | ℹ️ 低 | **`--help` 回傳 exit code 1** | help 與參數錯誤共用同一條 return 路徑。CI smoke test 會誤判失敗。 |
 | ℹ️ 低 | **三個設定是死的** | `min_site_coverage`／`pmd_gating`／`pmd_bed_path` 在 `Config.hpp` 以外零引用。**不可在方法學章節宣稱本方法有 PMD gating 或最小位點覆蓋度過濾。** |
 
@@ -339,7 +333,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
 ## 本頁的驗證方式
 
 - **CLI 選項**：`--help` 實跑輸出，逐行對照 `include/utils/ArgParser.hpp` 與 `include/core/Config.hpp`。兩個「文件 vs 程式碼」落差均以**原始碼行號 + 執行期輸出雙重確認**。
-- **三條範例指令**：全部實際執行，exit code 皆 0，輸出檔案逐一讀回核對。
+- **三種參數組合**：2026-08-06 具名內部 HCC1395 receipt 記錄 exit code 皆 0，並逐一讀回輸出；公開主命令已改為 repo／data／build／site-profile 變數，不把內部絕對路徑或 runtime 當成一般承諾。
 - **輸出檔格式**：所有 header 與資料行皆為**實際 head 磁碟檔案**所得，非照文件抄寫。
 - **內部流程**：20 個階段逐一標註原始碼位置，本輪機械重驗行號有效性 100% 通過。
 

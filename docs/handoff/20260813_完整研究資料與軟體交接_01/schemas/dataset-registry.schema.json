@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterSubMod dataset registry",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["technical_dataset_id", "biological_id", "platform", "genome_build", "scope", "authority_status", "known_limits"],
+    "properties": {
+      "technical_dataset_id": {"type": "string", "minLength": 1},
+      "biological_id": {"type": "string", "minLength": 1},
+      "platform": {"type": "string", "minLength": 1},
+      "genome_build": {"const": "GRCh38"},
+      "scope": {"const": "chr1-22"},
+      "authority_status": {"const": "AUTHORITY_SCOPE_MEMBER"},
+      "known_limits": {"type": "array", "items": {"type": "string"}}
+    }
+  }
+}

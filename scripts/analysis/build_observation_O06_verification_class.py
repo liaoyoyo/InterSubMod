@@ -15,14 +15,17 @@ from __future__ import annotations
 import argparse
 import sys
 import warnings
+from pathlib import Path
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-sys.path.insert(0, "/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis")
-from observation_common import *
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from pathlib import Path
+from scripts.analysis.observation_common import *  # noqa: E402,F403
+
 from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
@@ -31,10 +34,6 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats as sp_stats
 from sklearn.metrics import cohen_kappa_score
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.lib.verification_schema_contract import (  # noqa: E402
     CURRENT_CLASSES_V2,

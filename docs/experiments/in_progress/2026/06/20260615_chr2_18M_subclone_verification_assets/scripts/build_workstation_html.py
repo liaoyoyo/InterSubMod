@@ -3,7 +3,7 @@
 """
 Build the chr2:18M HCC1395 molecular-state candidate JUDGMENT WORKSTATION.
 
-Design (CLAUDE.md §13-A "由構造防捏造"):
+Design (required-field omission guard):
   - EVERY metric is pulled from independent_audit.json / concordance.tsv by key path.
   - req() raises if a REQUIRED metric is missing -> the build REFUSES rather than
     silently rendering a dash (this is exactly the bug that froze in page-04 Fig4).
@@ -16,19 +16,27 @@ Design (CLAUDE.md §13-A "由構造防捏造"):
 Sources (machine-deterministic; re-run independent_subclone_audit.py = byte-identical):
   independent_audit.json   -> all read-level metrics
   chr2_18M_seqc2_concordance.tsv -> SEQC2 TVAF + historical approximate transform
-Narrative (qualitative rulings) transcribed from verdict_02 WITH file:line citations.
+Narrative rulings are bounded to the current claim ceiling and retain verdict_02
+file:line citations; historical lineage-shaped labels are not emitted verbatim.
 
 Run:
   python3 build_workstation_html.py
+  python3 build_workstation_html.py --html-only
+
+Revision provenance:
+  - A dirty generator or data source is always rendered as UNCOMMITTED_CANDIDATE.
+  - --source-commit is accepted only for a clean checkout whose HEAD is that exact
+    40-hex commit. It cannot be used to relabel dirty content as committed.
+  - published_at remains null until a separate publication workflow records it.
 Outputs:
   <assets>/display/workstation_data.json
   InterSubMod/docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html
 """
-import json, os, subprocess, sys, html, datetime
+import argparse, datetime, hashlib, html, json, os, re, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.dirname(HERE)                       # ...verification_assets
-DATA = os.path.join(ASSETS, "data")
+DEFAULT_DATA = os.path.join(ASSETS, "data")
 DISPLAY = os.path.join(ASSETS, "display")
 REPO = os.path.abspath(os.path.join(ASSETS, "..", "..", "..", "..", "..", ".."))  # InterSubMod
 EXPLAIN = os.path.join(REPO, "docs", "explain")
@@ -38,13 +46,45 @@ JSON_OUT = os.path.join(DISPLAY, "workstation_data.json")
 AUDIT_REL = "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json"
 VERDICT_REL = "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md"
 CONC_REL = "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv"
+GENERATOR_REL = "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py"
+
+# Preserve the identity of the original producer separately from later revisions.
+ORIGINAL_PRODUCER = {
+    "name": "InterSubMod Research",
+    "commit": "ea26e06cac860bd66727dec55ad84646c25456c5",
+    "source_created_at": "2026-06-16T19:27:44+08:00",
+}
+REVISION_INPUTS = [GENERATOR_REL, AUDIT_REL, VERDICT_REL, CONC_REL]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source-commit",
+        help="Exact 40-hex commit containing this clean generator and all source inputs.",
+    )
+    parser.add_argument(
+        "--html-only",
+        action="store_true",
+        help="Regenerate only page 07; leave workstation_data.json and page-04 Fig4 untouched.",
+    )
+    parser.add_argument(
+        "--data-dir",
+        default=DEFAULT_DATA,
+        help="Directory containing independent_audit.json and chr2_18M_seqc2_concordance.tsv.",
+    )
+    return parser.parse_args()
+
+
+ARGS = parse_args()
+DATA = os.path.abspath(ARGS.data_dir)
 
 # ----------------------------------------------------------------------------- helpers
 class MissingMetric(RuntimeError):
     pass
 
 def req(value, name):
-    """REFUSE the build if a required metric is missing (§13-A)."""
+    """Refuse the build if a required, schema-listed metric is missing."""
     if value is None:
         raise MissingMetric(f"REQUIRED metric missing -> refuse to render: {name}")
     return value
@@ -73,9 +113,9 @@ def fq(x):
 def esc(s):
     return html.escape(str(s))
 
-def git_short_head():
+def git_full_head():
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=REPO).decode().strip()
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO).decode().strip()
     except Exception:
         return "UNKNOWN"
 
@@ -84,6 +124,102 @@ def git_branch():
         return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO).decode().strip()
     except Exception:
         return "UNKNOWN"
+
+
+def dirty_revision_inputs():
+    """Return tracked/untracked source paths that differ from HEAD."""
+    try:
+        out = subprocess.check_output(
+            ["git", "status", "--porcelain=v1", "--", *REVISION_INPUTS],
+            cwd=REPO,
+        ).decode()
+    except Exception:
+        return ["UNKNOWN_GIT_STATUS"]
+    dirty = []
+    for line in out.splitlines():
+        if line:
+            dirty.append(line[3:])
+    return dirty
+
+
+def git_tracked(path):
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "--", path],
+            cwd=REPO,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
+def resolve_revision_provenance():
+    base_commit = git_full_head()
+    dirty_inputs = dirty_revision_inputs()
+    unversioned_inputs = []
+    for logical_name, physical_path in (
+        (AUDIT_REL, os.path.join(DATA, "independent_audit.json")),
+        (CONC_REL, os.path.join(DATA, "chr2_18M_seqc2_concordance.tsv")),
+    ):
+        if os.path.abspath(physical_path) != os.path.join(REPO, logical_name) or not git_tracked(logical_name):
+            unversioned_inputs.append(os.path.abspath(physical_path))
+    requested = ARGS.source_commit
+    if requested:
+        if not re.fullmatch(r"[0-9a-fA-F]{40}", requested):
+            raise ValueError("--source-commit must be an exact 40-hex commit")
+        requested = requested.lower()
+        if dirty_inputs:
+            raise RuntimeError(
+                "--source-commit refused: revision inputs are dirty: " + ", ".join(dirty_inputs)
+            )
+        if unversioned_inputs:
+            raise RuntimeError(
+                "--source-commit refused: source inputs are not versioned by that commit: "
+                + ", ".join(unversioned_inputs)
+            )
+        if base_commit != requested:
+            raise RuntimeError(
+                f"--source-commit refused: checkout HEAD is {base_commit}, not {requested}"
+            )
+        revision_state = "COMMITTED_SOURCE"
+        source_commit = requested
+    elif dirty_inputs or unversioned_inputs:
+        revision_state = "UNCOMMITTED_CANDIDATE"
+        source_commit = None
+    else:
+        revision_state = "COMMITTED_SOURCE"
+        source_commit = base_commit
+    return {
+        "original_producer": ORIGINAL_PRODUCER,
+        "revision_state": revision_state,
+        "source_commit": source_commit,
+        "base_commit": base_commit,
+        "branch": git_branch(),
+        "dirty_revision_inputs": dirty_inputs,
+        "unversioned_source_inputs": unversioned_inputs,
+        "data_dir": DATA,
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_verified_at": "2026-08-13",
+        "verification_commit": None,
+        "verification_receipt": "research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json",
+        "published_at": None,
+        "science_recomputed": False,
+        "claim_ceiling_note": "本輪只校正公開敘述與呈現，未重算 science；不得把文件驗證升格為科學結果重驗。",
+    }
+
+
+PROVENANCE = resolve_revision_provenance()
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for block in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 # ----------------------------------------------------------------------------- load
 with open(os.path.join(DATA, "independent_audit.json"), encoding="utf-8") as fh:
@@ -101,6 +237,16 @@ def load_concordance():
     return rows
 CONC = load_concordance()
 
+INPUT_PATHS = {
+    "audit_json": os.path.join(DATA, "independent_audit.json"),
+    "verdict_02": os.path.join(REPO, VERDICT_REL),
+    "concordance_tsv": os.path.join(DATA, "chr2_18M_seqc2_concordance.tsv"),
+}
+PROVENANCE["input_files"] = {
+    key: {"machine_path": path, "sha256": sha256_file(path)}
+    for key, path in INPUT_PATHS.items()
+}
+
 SAMPLES = AUD["samples"]
 HKU_T = SAMPLES["HKU_T"]
 HKU_N = SAMPLES["HKU_N"]
@@ -112,7 +258,13 @@ SNV = AUD["snvs"]
 CPGC = AUD["cpg_c_positions"]
 
 # ----------------------------------------------------------------------------- extract sSNV
-ROLE = {  # lineage role transcribed from concordance.tsv our_label column (data-bound below)
+ROLE = {
+    "1": "beta-like local marker set A",
+    "2": "beta-like local marker set A",
+    "3": "alpha local read-state label（HC gap）",
+    "4": "beta-like local marker set B（homopolymer-uncertain）",
+    "5": "alpha+(5) nested-read pattern（low VAF；非方向）",
+    "6": "beta-like local marker set B",
 }
 CONC_BY_POS = {r["pos1"]: r for r in CONC}
 
@@ -141,7 +293,8 @@ for k in ["1", "2", "3", "4", "5", "6"]:
         "seqc2_status": req(st.get("status"), f"site[{k}].status"),
         "in_hc": st.get("in_hc"),
         "truth_records": st.get("truth_records", []),
-        "role": conc.get("our_label", "NA"),
+        # Do not expose lineage-shaped historical source labels as current findings.
+        "role": ROLE[k],
         "tvaf": conc.get("tvaf", "."),
         "ccf": conc.get("ccf_est", "."),
         # The source column stores a historical, case-specific TVAF transform.
@@ -179,10 +332,11 @@ LINK_LABEL = {
     "E3_vs_E5": "(3)A vs (5)C", "E3_vs_E4ANY": "(3)A vs (4)alt", "E3_vs_E6": "(3)A vs (6)G",
     "E4ANY_vs_E6": "(4)alt vs (6)G", "E5_vs_E6": "(5)C vs (6)G",
 }
-LINK_READ = {  # interpretation transcribed from verdict_02 lines 140-147
-    "E1_vs_E2": "同支 (co-occur)", "E1_vs_E3": "互斥", "E2_vs_E3": "互斥",
-    "E3_vs_E5": "(5)C 巢狀於 (3)A", "E3_vs_E4ANY": "主要互斥", "E3_vs_E6": "互斥",
-    "E4ANY_vs_E6": "同 state", "E5_vs_E6": "alpha-1 與 beta 互斥",
+LINK_READ = {  # Bounded read-level interpretation of the observed 00/10/01/11 counts.
+    "E1_vs_E2": "同一 read 共現", "E1_vs_E3": "本 read 集合未觀測共同 ALT", "E2_vs_E3": "本 read 集合未觀測共同 ALT",
+    "E3_vs_E5": "(5)C 僅見於 (3)A-bearing shared-coverage reads（局部 nesting；非次序）",
+    "E3_vs_E4ANY": "主要未觀測共同 ALT", "E3_vs_E6": "本 read 集合未觀測共同 ALT",
+    "E4ANY_vs_E6": "同一 read-state 共現", "E5_vs_E6": "本 read 集合未觀測共同 ALT（非 lineage）",
 }
 def link_rows():
     out = []
@@ -244,24 +398,25 @@ POS4 = {"hku": pos4(HKU_T), "dor": pos4(DOR_T)}
 
 # ----------------------------------------------------------------------------- narrative (verdict_02, cited)
 RULINGS = [
-    ("1", "發生 LOH", "確認", "confirm", "SEQC2 LOH BED + HKU/DORADO HP imbalance 一致", "verdict_02:267"),
-    ("2", "存在區域分子狀態分支", "支持・有界", "bounded", "可稱 regional molecular-state candidates；非 biological clone truth", "verdict_02:268"),
+    ("1", "此區與 SEQC2 LOH 標註相符", "支持・有界", "bounded", "SEQC2 LOH BED 涵蓋此區，且 HKU/DORADO tumor tagged reads 呈 HP2 imbalance；本頁未獨立確認 LOH 機制、allele-specific CN 或單親保留", "verdict_02:267"),
+    ("2", "存在局部 read-level 分子狀態候選", "支持・有界", "bounded", "可稱 local molecular-state candidates；非 biological clone truth，亦非 lineage", "verdict_02:268"),
     ("3", "HP2 沒抽到／突變到不見", "否定", "negated", "HP2 是主體；all-REF 短 linkage reads 存在；完整 read 缺失是 coverage", "verdict_02:269"),
-    ("4", "(1)(2)(3)(6) 先突變", "不成立・需重寫", "rewrite", "(3) 與 (1)(2)(6) 互斥，不能是同一 trunk；只可稱不同早期 branch-defining candidates", "verdict_02:270"),
-    ("5", "(5) 將群一群二分開", "支持 (provisional)", "provisional", "(5)C 對 (3)A 呈 perfect nesting；direct support HKU 4 / DORADO 2", "verdict_02:271"),
+    ("4", "(1)(2)(3)(6) 先突變", "不成立・需重寫", "rewrite", "read-level 共現／未共現不足以建立 trunk、先後或 ancestry；僅支持互斥的 local read-state candidates", "verdict_02:270"),
+    ("5", "(5) 是否呈現 (3)A-conditioned 局部 pattern", "支持 (provisional)", "provisional", "在有共同覆蓋的 reads 中，(5)C 僅與 (3)A 共現；HKU 4 / DORADO 2。這是局部 nesting pattern，不代表 parent/child 或發生次序", "verdict_02:271"),
     ("6", "(4) 多突變造成三群", "否定", "negated", "合併為 pos4-altered beta-like state；G/T/DEL 為 homopolymer-uncertain", "verdict_02:272"),
 ]
 RETRACTIONS = [
-    ("「5 群 / 5 subclone」→ 約 3 種 regional molecular-state candidates（非 clone 數）", "(4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；保守合併為 alpha / provisional alpha-1 / beta-like 三種 local state candidates", "verdict_02:49-59"),
-    ("「VAF 排序突變」撤回", "局部 VAF 受 LOH/CN/純度影響；alpha/beta-like 分支關係不是唯一可識別，且不能由 VAF 排 parent/child；(4)(6) 共現不可排序", "verdict_02:154"),
-    ("「無 ancestral REF read / HP2 突變到不見」撤回", "HKU 有 17 條 reads 在 ≥2 已覆蓋 SNV 全為 REF；ancestral C-G-G reads 存在；root 是 parsimony 推論非觀測完整 read", "verdict_02:128-132"),
+    ("「5 群 / 5 subclone」", "(4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；本頁僅保留 alpha、alpha+(5) nested-read pattern、beta-like 等操作性 local-state labels，不能換算為 clone 數", "verdict_02:49-59"),
+    ("「VAF 排序突變」", "局部 VAF 受 CN/LOH/純度/multiplicity 影響；不能由 VAF 或局部共現 pattern 排 parent/child、先後或 ancestry；(4)(6) 共現亦不可排序", "verdict_02:154"),
+    ("「無 ancestral REF read / HP2 突變到不見」", "HKU 有 17 條 reads 在 ≥2 已覆蓋 SNV 全為 REF；這只證明 all-REF local read patterns 存在，不代表已觀測 ancestor；任何 root 仍是未確認的 parsimony 假說", "verdict_02:128-132"),
 ]
-FINAL_DEFENSIBLE = "在 SEQC2-confirmed LOH 區中，多個 somatic allele linkage 支持局部 regional molecular-state candidates；(3)A → (5)C 是 provisional nesting candidate。甲基只支持 mutation-defined 分組後的有界關聯與跨 basecaller 技術重現，不確認 cellular subclone、完整演化順序或因果。"
-FINAL_PAPER = "Local LOH-constrained molecular-state candidates with bounded, mutation-conditioned methylation association."
+FINAL_DEFENSIBLE = "在 SEQC2 LOH-annotated 區域中，read-level allele linkage 支持局部 molecular-state candidates；在 shared-coverage reads 內，(5)C 只於 (3)A-bearing reads 觀測到，屬 provisional nesting pattern，不代表 parent/child 或發生次序。甲基只支持 mutation-defined 分組後的有界關聯與跨 basecaller 技術重現，不確認 cellular subclone、linear ancestry、完整演化順序或因果。"
+FINAL_PAPER = "Local read-level molecular-state candidates in a SEQC2 LOH-annotated interval with bounded, mutation-conditioned methylation association."
 FINAL_NOT = "Confirmed five-subclone evolutionary reconstruction."
+CLAIM_CEILING = "confirmed cellular subclone = 0；confirmed linear ancestry = 0。alpha / beta 等皆為本區域的操作性 read-state labels。"
 CAVEATS = [
-    ("整體 tier = L2", "單位點 × 單樣本 × 單 pipeline；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ★4 需 COLO829 等第二樣本）。", "verdict_02:314 / critical_audit_03"),
-    ("pos3 (3) 落 SEQC2 HC 空隙", "out-of-HC truth-unevaluable，非 SEQC2 FP；樹的 alpha-pivot 只能靠內部 read linkage，外部無真值可確認。", "verdict_02:81-91"),
+    ("整體 tier = L2", "單一區域案例 × 單一 biological sample × 兩個 technical datasets；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ★4 需 COLO829 等第二樣本）。", "verdict_02:314 / critical_audit_03"),
+    ("pos3 (3) 落 SEQC2 HC 空隙", "out-of-HC truth-unevaluable，不能由此頁判為 SEQC2 FP 或 TP；alpha 操作性標籤只靠內部 read linkage，外部無真值可確認。", "verdict_02:81-91"),
     ("甲基 confound 未完全形式排除", "3.3/3.4/3.5/4.1 在 matched-normal 已有顯著 germline ASM；其餘只能稱 tumor-associated、normal-ASM-screen-negative，不能據此證明 acquired 或 cellular-subclone-specific。", "verdict_02:205-225"),
     ("「0 違反」僅 strict 定義", "broadened pos4-beta 在 DORADO 有 1 條 discordant read；多組遠距 pair 無跨距 read，故「0 observed」非強 cross-data 複製。", "critical_audit_03 High-2"),
     ("DORADO normal 未 tag", "germline-ASM confound 檢定僅靠 HKU normal；confound 側未跨 basecaller 複製。", "independent_audit.md:244-257"),
@@ -277,17 +432,24 @@ CONFLICTS = [
 
 # ----------------------------------------------------------------------------- data.json
 BUILD = {
-    "commit": git_short_head(),
-    "branch": git_branch(),
-    "built_utc": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    # commit means the exact committed source revision, never merely the checkout base.
+    "commit": PROVENANCE["source_commit"],
+    "base_commit": PROVENANCE["base_commit"],
+    "branch": PROVENANCE["branch"],
+    "revision_state": PROVENANCE["revision_state"],
+    "built_utc": PROVENANCE["generated_at"],
+    "published_at": PROVENANCE["published_at"],
     "tier": "L2",
-    "scope": "PARTIAL — chr2:18,066,481–18,110,828 單位點 × HCC1395 單樣本 × HKU+DORADO",
+    "scope": "PARTIAL — chr2:18,066,481–18,110,828 單一 region/case（6 sSNV）× 1 biological sample × 2 technical datasets（HKU+DORADO）",
 }
 DATAJSON = {
     "build": BUILD,
+    "provenance": PROVENANCE,
     "region": AUD["region"],
     "ccf_semantics": "historical_case_specific_approximate_tvaf_transform_noncanonical_not_clone_corroboration",
     "methyl_class_semantics": "legacy_CLEAN_means_normal_ASM_screen_negative_not_acquired_or_clone_specific",
+    "role_semantics": "historical_operational_labels_not_confirmed_cellular_lineage",
+    "claim_ceiling": CLAIM_CEILING,
     "sources": {"audit_json": AUDIT_REL, "verdict_02": VERDICT_REL, "concordance_tsv": CONC_REL},
     "snv_cards": snv_cards,
     "loh": loh,
@@ -302,9 +464,6 @@ DATAJSON = {
     "caveats": [dict(zip(["title", "body", "src"], c)) for c in CAVEATS],
     "conflicts": [dict(zip(["metric", "reportA", "authoritative", "src"], c)) for c in CONFLICTS],
 }
-os.makedirs(DISPLAY, exist_ok=True)
-with open(JSON_OUT, "w", encoding="utf-8") as fh:
-    json.dump(DATAJSON, fh, ensure_ascii=False, indent=2)
 
 # ----------------------------------------------------------------------------- SVG figures (data-bound)
 def meth_color(v):
@@ -405,29 +564,30 @@ def ccf_bar_svg():
     return "".join(out)
 
 def tree_svg():
-    """Defensible candidate tree (verdict_02 §九). Hand-laid topology, labels from data."""
+    """Non-temporal local read-state candidate graph; not a lineage tree."""
     return """
 <svg viewBox="0 0 760 300" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="candidate-tree-title candidate-tree-desc">
-<title id="candidate-tree-title">可防守的局部分子狀態候選圖</title>
-<desc id="candidate-tree-desc">非唯一、recurrence-allowed 的分子狀態候選；不代表已確認的 cellular clone 或 lineage tree。</desc>
+<title id="candidate-tree-title">有界的局部 read-state 候選圖</title>
+<desc id="candidate-tree-desc">無方向、非時間、非唯一的 read-level 共現圖；不代表已確認的 cellular clone、parent-child 或 lineage tree。</desc>
 <rect width="760" height="300" fill="#16161d"/>
-<text x="380" y="26" fill="#9aa" font-size="11" text-anchor="middle">root = parsimony / contamination-aware 假說（非完整 spanning read 觀測）</text>
-<circle cx="380" cy="48" r="7" fill="#888"/><text x="380" y="42" fill="#bbb" font-size="10" text-anchor="middle">all-REF ancestor</text>
-<line x1="380" y1="55" x2="200" y2="100" stroke="#7fd1c4" stroke-width="2"/>
-<line x1="380" y1="55" x2="560" y2="100" stroke="#e0a96d" stroke-width="2"/>
-<circle cx="200" cy="110" r="7" fill="#7fd1c4"/><text x="200" y="100" fill="#7fd1c4" font-size="12" text-anchor="middle" font-weight="600">alpha: (3) G&gt;A</text>
-<line x1="200" y1="117" x2="200" y2="165" stroke="#7fd1c4" stroke-width="2"/>
-<circle cx="200" cy="175" r="7" fill="#7fd1c4"/><text x="200" y="196" fill="#9fe3d6" font-size="11" text-anchor="middle">alpha-1: + (5) G&gt;C</text>
-<text x="200" y="210" fill="#789" font-size="9" text-anchor="middle">nested (3)A→(5)C 直接支持</text>
-<circle cx="560" cy="110" r="7" fill="#e0a96d"/><text x="560" y="100" fill="#e0a96d" font-size="12" text-anchor="middle" font-weight="600">beta-like program</text>
-<line x1="560" y1="117" x2="480" y2="160" stroke="#e0a96d" stroke-width="2"/>
-<line x1="560" y1="117" x2="640" y2="160" stroke="#e0a96d" stroke-width="2"/>
-<text x="470" y="178" fill="#f2d6ad" font-size="11" text-anchor="middle">left: (1)C&gt;G + (2)G&gt;C</text>
-<text x="650" y="178" fill="#f2d6ad" font-size="11" text-anchor="middle">right: (4) C&gt;G* + (6)C&gt;G</text>
-<line x1="470" y1="188" x2="650" y2="188" stroke="#b06ad8" stroke-width="2" stroke-dasharray="6 5"/>
-<text x="560" y="204" fill="#c79fe0" font-size="9" text-anchor="middle">left↔right：互斥 + 甲基 coherence（缺直接 genetic bridge → 虛線）</text>
-<text x="650" y="220" fill="#789" font-size="9" text-anchor="middle">(4) = G/T/DEL homopolymer-jitter，合併一 state</text>
-<text x="380" y="270" fill="#9aa" font-size="10" text-anchor="middle">(4)(6) 共現不可排序；完整六點單一路徑 read 幾乎不存在 → 不畫成確認 phylogeny</text>
+<text x="380" y="26" fill="#9aa" font-size="11" text-anchor="middle">layout 僅整理局部 read 共現／未共現；線段無方向，不編碼先後或 ancestry</text>
+<rect x="270" y="42" width="220" height="36" rx="8" fill="#252530" stroke="#777"/>
+<text x="380" y="64" fill="#ddd" font-size="11" text-anchor="middle">all-REF local read pattern（非 ancestor）</text>
+<line x1="380" y1="78" x2="200" y2="112" stroke="#666" stroke-width="1.5" stroke-dasharray="5 5"/>
+<line x1="380" y1="78" x2="560" y2="112" stroke="#666" stroke-width="1.5" stroke-dasharray="5 5"/>
+<circle cx="200" cy="120" r="7" fill="#7fd1c4"/><text x="200" y="106" fill="#7fd1c4" font-size="12" text-anchor="middle" font-weight="600">alpha label: (3) G&gt;A</text>
+<line x1="200" y1="127" x2="200" y2="171" stroke="#7fd1c4" stroke-width="2" stroke-dasharray="4 3"/>
+<circle cx="200" cy="180" r="7" fill="#7fd1c4"/><text x="200" y="201" fill="#9fe3d6" font-size="11" text-anchor="middle">alpha+(5) nested-read pattern</text>
+<text x="200" y="217" fill="#789" font-size="9" text-anchor="middle">subset pattern；非 parent/child，非時間箭頭</text>
+<circle cx="560" cy="120" r="7" fill="#e0a96d"/><text x="560" y="106" fill="#e0a96d" font-size="12" text-anchor="middle" font-weight="600">beta-like operational label</text>
+<line x1="560" y1="127" x2="480" y2="166" stroke="#e0a96d" stroke-width="2"/>
+<line x1="560" y1="127" x2="640" y2="166" stroke="#e0a96d" stroke-width="2"/>
+<text x="470" y="184" fill="#f2d6ad" font-size="11" text-anchor="middle">(1)C&gt;G + (2)G&gt;C</text>
+<text x="650" y="184" fill="#f2d6ad" font-size="11" text-anchor="middle">(4) C&gt;G* + (6)C&gt;G</text>
+<line x1="470" y1="194" x2="650" y2="194" stroke="#b06ad8" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="560" y="211" fill="#c79fe0" font-size="9" text-anchor="middle">兩 local patterns 缺直接 spanning-read bridge；關係未定</text>
+<text x="650" y="228" fill="#789" font-size="9" text-anchor="middle">(4) G/T/DEL 合併為 homopolymer-uncertain state</text>
+<text x="380" y="270" fill="#9aa" font-size="10" text-anchor="middle">confirmed cellular subclone = 0；confirmed linear ancestry = 0</text>
 </svg>
 """
 
@@ -435,7 +595,7 @@ def tree_svg():
 def fig4_page04_svg():
     """Re-render page-04 Fig4 in its 4-column (HKU a/b, DORADO a/b) teaching style,
     but FULLY data-bound from independent_audit.json. No dash-on-missing: a required
-    cell that is missing would render a loud marker (§13-A). Class = computed."""
+    cell that is missing would render a loud marker. Class = computed."""
     rh = 30; y0 = 56
     H = y0 + rh * len(methyl_rows) + 60
     xs = {"ha": (215, 250), "hb": (295, 330), "da": (435, 470), "db": (515, 550)}
@@ -459,7 +619,7 @@ def fig4_page04_svg():
         for key, val in [("ha", r["hku_a"]), ("hb", r["hku_b"]), ("da", r["dor_a"]), ("db", r["dor_b"])]:
             rx, tx = xs[key]
             if not isnum(val):
-                # §13-A: never silently dash — render an explicit small-n / NA marker
+                # Never silently dash a required value; render an explicit small-n / NA marker.
                 out.append(f'<rect x="{rx}" y="{ry+2}" width="70" height="24" fill="#2b2b30" stroke="#555"/>'
                            f'<text x="{tx}" y="{ry+18}" fill="#caa">NA</text>')
             else:
@@ -492,6 +652,7 @@ CSS = """
 :root{--bg:#0f0f14;--panel:#16161d;--panel2:#1c1c25;--ink:#e8e8ef;--mut:#9aa;--line:#2a2a36;
 --teal:#7fd1c4;--amber:#e0a96d;--red:#e07a7a;--green:#7fc98a;--blue:#6aa6d8;--gold:#f2c94c;}
 *{box-sizing:border-box}
+html,body{max-width:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",
 "Noto Sans CJK TC","PingFang TC",Roboto,sans-serif;line-height:1.6;font-size:15px}
 .wrap{display:grid;grid-template-columns:210px 1fr;max-width:1240px;margin:0 auto}
@@ -518,18 +679,20 @@ border-radius:12px;padding:16px 18px;margin:10px 0}
 border-radius:0 8px 8px 0;margin:8px 0}
 .vnot{border-left:3px solid var(--red);padding:6px 12px;color:#f2cccc;background:#201313;
 border-radius:0 8px 8px 0;margin:8px 0}
-.grid{display:grid;gap:12px}
-.cards{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.grid{display:grid;gap:12px;min-width:0}
+.grid>*{min-width:0}
+.cards{grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .card.gap{border-color:#5a3a3a}.card h4{margin:.1em 0 .4em;font-size:15px}
-.kv{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:2px 0;border-bottom:1px dotted #24242e}
-.kv .k{color:var(--mut)}.kv .v{text-align:right;font-variant-numeric:tabular-nums}
-table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+.kv{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;font-size:13px;padding:2px 0;border-bottom:1px dotted #24242e}
+.kv>*{min-width:0;overflow-wrap:anywhere}.kv .k{color:var(--mut)}.kv .v{text-align:right;font-variant-numeric:tabular-nums}
+table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
 th,td{border:1px solid var(--line);padding:5px 8px;text-align:center;font-variant-numeric:tabular-nums}
 th{background:var(--panel2);color:var(--mut);font-weight:600}
 td.l,th.l{text-align:left}
 .conf{background:#2a1d1d}.clean{background:#1d2a20}.strong{outline:2px solid var(--gold);outline-offset:-2px}
-.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+.fig{max-width:100%;overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+.fig figure{margin:0;min-width:0}.fig svg{display:block;max-width:100%;height:auto}
 .fig figcaption{color:var(--mut);font-size:12px;margin-top:6px}
 details.cav{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 12px;margin:6px 0}
 details.cav summary{cursor:pointer;font-weight:600;color:var(--amber)}
@@ -542,10 +705,11 @@ padding:3px 9px;cursor:pointer;font-size:12px}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .bar button{background:var(--teal);color:#08110f;border:none;border-radius:7px;padding:6px 12px;
 font-weight:600;cursor:pointer}.bar button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.sub,.note,footer,code{overflow-wrap:anywhere;word-break:break-word}
 .note{color:var(--mut);font-size:12.5px}
 footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
 code{background:#22222c;padding:1px 5px;border-radius:4px;font-size:12.5px}
-@media(max-width:820px){.wrap{grid-template-columns:1fr}nav.toc{display:none}}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}nav.toc{display:none}main{padding:16px 12px}.grid[style]{grid-template-columns:1fr!important}}
 """
 
 def src_badge(s):
@@ -562,7 +726,9 @@ VK = {"confirm": ("#234a32", "#9fe3b0"), "bounded": ("#234a4a", "#9fe3e0"),
       "provisional": ("#3a3a23", "#e8e08a")}
 
 def build_html():
-    head = git_short_head()
+    source_commit = PROVENANCE["source_commit"]
+    base_short = PROVENANCE["base_commit"][:12] if PROVENANCE["base_commit"] != "UNKNOWN" else "UNKNOWN"
+    build_label = source_commit[:12] if source_commit else f"UNCOMMITTED_CANDIDATE atop {base_short}"
     # ----- sSNV cards
     cards = []
     for c in snv_cards:
@@ -571,7 +737,7 @@ def build_html():
 <div class="card{gapcls}" data-snv="{c['idx']}">
   <h4>({c['idx']}) chr2:{c['pos']:,} <span class="note">{esc(c['ref'])}&gt;{esc(c['alt'])}</span></h4>
   <div>{status_badge(c['seqc2_status'])}</div>
-  <div class="kv"><span class="k">譜系角色</span><span class="v">{esc(c['role'])}</span></div>
+  <div class="kv"><span class="k">歷史操作性標籤（非譜系）</span><span class="v">{esc(c['role'])}</span></div>
   <div class="kv"><span class="k">SEQC2 TVAF / 歷史近似轉換</span><span class="v">{esc(c['tvaf'])} / {esc(c['ccf'])} <span class="note">{esc('非 canonical CCF；不作 clone 判定' if c['ccf'] not in ('.', '', 'n/a') else 'n/a')}</span></span></div>
   <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">{esc(c['hku_t_bq20'])}</span></div>
   <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">{esc(c['dor_t_bq20'])}</span></div>
@@ -617,14 +783,18 @@ def build_html():
 
     loh_hku = loh["hku"]; loh_dor = loh["dorado"]
     hkanc = loh["hku_anchor"]; danc = loh["dor_anchor"]
+    input_receipts = " · ".join(
+        f"{name}: {meta['machine_path']} sha256={meta['sha256']}"
+        for name, meta in PROVENANCE["input_files"].items()
+    )
 
     body = f"""
 <header class="hd">
   <h1>🔬 chr2:18M 分子狀態候選 — 判讀工作站 <span class="badge b-tier">tier L2</span> <span class="badge b-partial">PARTIAL</span></h1>
   <div class="sub">HCC1395 · {esc(AUD['region'])} · 6 sSNV × 10 CpG · HKU(5mCG_5hmCG haplotag) + DORADO cross-basecaller ·
-  權威 SoT = <code>independent_audit.json</code> + <code>verdict_02</code> · build <code>{esc(head)}</code></div>
+  權威 SoT = <code>independent_audit.json</code> + <code>verdict_02</code> · revision <code>{esc(build_label)}</code></div>
   <div class="sub" style="margin-top:6px">
-    每個數字皆由 generator 從來源檔注入（§13-A 由構造防捏造，缺必填值即 refuse）；
+    規格所列 metric 由 generator 從來源檔注入，缺必填值即 refuse；
     hover <span class="b-src">⌖ 來源</span> 看出處。下方 sSNV 卡可記你的判讀，右上匯出 JSON/CSV。
   </div>
 </header>
@@ -632,6 +802,7 @@ def build_html():
 <div class="verdict">
   <h3 style="margin-top:0">最終可防守結論（verdict_02 §最終裁決）</h3>
   <div class="vquote">{esc(FINAL_DEFENSIBLE)}</div>
+  <div class="vnot">Claim ceiling：{esc(CLAIM_CEILING)}</div>
   <div class="kv"><span class="k">適合論文用語</span><span class="v" style="color:var(--teal)">{esc(FINAL_PAPER)}</span></div>
   <div class="vnot">✗ 不適合：{esc(FINAL_NOT)}</div>
 </div>
@@ -641,39 +812,40 @@ def build_html():
 來源 <span class="b-src">⌖ independent_audit.json: snvs/benchmark_context/allele_counts_bq20</span> + <span class="b-src">⌖ concordance.tsv</span>。</p>
 <div class="grid cards">{''.join(cards)}</div>
 
-<h2 id="backbone">② α / β 骨幹（互斥分叉）</h2>
+<h2 id="backbone">② α / β-strict 操作性 read-state labels</h2>
 <div class="grid cards">
-  <div class="card"><h4>lineage anchor counts</h4>
+  <div class="card"><h4>operational read-state counts</h4>
     <div class="kv"><span class="k">HKU α(pos3=A) / β-strict</span><span class="v">{hkanc['alpha_pos3_A']} / {hkanc['beta_strict_E1_or_E2_or_E6']}</span></div>
     <div class="kv"><span class="k">HKU α∧β 違反 read</span><span class="v" style="color:var(--green)">{hkanc['alpha_and_beta_strict_violation']}</span></div>
     <div class="kv"><span class="k">DORADO α / β-strict</span><span class="v">{danc['alpha_pos3_A']} / {danc['beta_strict_E1_or_E2_or_E6']}</span></div>
     <div class="kv"><span class="k">DORADO α∧β 違反 read</span><span class="v" style="color:var(--green)">{danc['alpha_and_beta_strict_violation']}</span></div>
-    <div class="note">⌖ independent_audit.json: samples.*.lineage_anchor_counts</div>
+    <div class="note">⌖ independent_audit.json: samples.*.lineage_anchor_counts（source key 為歷史命名；此頁不作 lineage claim）</div>
   </div>
   <div class="card"><h4>判讀</h4>
-    <div class="note">α = (3)A；β-strict = (1)G∨(2)C∨(6)G。兩 basecaller <b>0 strict 違反</b>。
-    ⚠ 僅 strict 定義；broadened pos4-β 在 DORADO 有 1 discordant（見限制）。</div></div>
+    <div class="note">α = (3)A；β-strict = (1)G∨(2)C∨(6)G。於已評估 reads、此 strict 定義下，兩 basecaller 均觀測到 <b>0 strict 違反</b>。
+    ⚠ 這不是 lineage 證明；broadened pos4-β 在 DORADO 有 1 discordant（見限制）。</div></div>
 </div>
 <h3>read-level linkage（00/10/01/11；11=兩事件同 read）</h3>
 <table><thead><tr><th class="l">事件組合</th><th>HKU</th><th>DORADO</th><th class="l">判讀</th></tr></thead>
 <tbody>{lrows}</tbody></table>
 <p class="note">⌖ independent_audit.json: samples.{{HKU_T,DORADO_TAGGED_T}}.linkage_bq10 · 對照 verdict_02:140-147</p>
 
-<h2 id="loh">③ LOH（單親保留）</h2>
+<h2 id="loh">③ SEQC2 LOH 區域標註 + tumor HP-tag imbalance</h2>
 <div class="grid cards">
   <div class="card"><h4>HKU tumor HP</h4>
-    <div class="kv"><span class="k">HP2-parent</span><span class="v">{loh_hku['HP2']}</span></div>
-    <div class="kv"><span class="k">HP1-parent</span><span class="v">{loh_hku['HP1']}（{fpct(loh_hku['HP1_pct'],1)}）</span></div>
+    <div class="kv"><span class="k">HP2-tag</span><span class="v">{loh_hku['HP2']}</span></div>
+    <div class="kv"><span class="k">HP1-tag</span><span class="v">{loh_hku['HP1']}（{fpct(loh_hku['HP1_pct'],1)}）</span></div>
     <div class="kv"><span class="k">HP2 佔 tagged</span><span class="v" style="color:var(--teal)">{fpct(loh_hku['HP2_pct'],1)}</span></div></div>
   <div class="card"><h4>DORADO tumor HP</h4>
-    <div class="kv"><span class="k">HP2-parent</span><span class="v">{loh_dor['HP2']}</span></div>
-    <div class="kv"><span class="k">HP1-parent</span><span class="v">{loh_dor['HP1']}</span></div>
+    <div class="kv"><span class="k">HP2-tag</span><span class="v">{loh_dor['HP2']}</span></div>
+    <div class="kv"><span class="k">HP1-tag</span><span class="v">{loh_dor['HP1']}</span></div>
     <div class="kv"><span class="k">HP2 佔 tagged</span><span class="v" style="color:var(--teal)">{fpct(loh_dor['HP2_pct'],1)}</span></div></div>
   <div class="card"><h4>外部 / normal</h4>
     <div class="kv"><span class="k">SEQC2 LOH BED</span><span class="v"><span class="badge b-loh">{esc(loh['loh_interval'])}</span></span></div>
     <div class="kv"><span class="k">normal pos3 (A/G)</span><span class="v">0 / 18（100% REF）</span></div>
     <div class="note">all-REF 短 linkage read 存在（HKU ≥2pt={loh['hku_allref']['2']['all_ref']}）→「HP2 突變到不見」否定</div></div>
 </div>
+<p class="note">有界裁決：SEQC2 BED 標記此區為 LOH，且兩個 tumor tagged-read 集合皆呈 HP2 imbalance；本頁未整合 allele-specific CN，也不由此獨立確認 LOH 機制或「單親保留」。</p>
 
 <h2 id="methyl">④ 甲基化三組（這是最容易誤讀的地方）</h2>
 <p class="note">tumor α(pos3=A) vs β(pos3=G) 每 CpG meanM；右側 normal HP1/HP2 = matched-normal germline ASM。
@@ -696,8 +868,8 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
 <table><thead><tr><th class="l">CpG</th><th>HKU α/β</th><th>HKU FDR</th><th>DOR α/β</th><th>DOR FDR</th>
 <th>normal HP1/HP2</th><th>normal FDR</th><th>分類</th><th>DOR✓</th></tr></thead><tbody>{''.join(mrows)}</tbody></table>
 
-<h2 id="pos4">⑤ pos4 為何不是三個 subclone</h2>
-<p class="note">chr2:18,096,269 後接 ~20bp poly-T homopolymer → ONT 產生 G/T/DEL 混合 call（平台 jitter，非三 subclone）。</p>
+<h2 id="pos4">⑤ pos4 G/T/DEL 為何不足以支持三個 cellular subclone</h2>
+<p class="note">chr2:18,096,269 鄰接約 20 bp poly-T homopolymer；觀測到的 G/T/DEL 混合 calls 與 homopolymer-associated calling uncertainty 相容，不能當作三個 cellular subclone 的證據。</p>
 <table><thead><tr><th>Dataset</th><th>REF C</th><th>G</th><th>T</th><th>DEL</th></tr></thead><tbody>
 <tr><td class="l">HKU BQ20</td><td>{p4['hku']['REF_C']}</td><td>{p4['hku']['G']}</td><td>{p4['hku']['T']}</td><td>{p4['hku']['DEL']}</td></tr>
 <tr><td class="l">DORADO BQ20</td><td>{p4['dor']['REF_C']}</td><td>{p4['dor']['G']}</td><td>{p4['dor']['T']}</td><td>{p4['dor']['DEL']}</td></tr>
@@ -707,8 +879,8 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
 <h2 id="ccf">⑥ 歷史、案例特定的 TVAF 近似轉換（非 canonical CCF）</h2>
 <div class="fig"><figure>{ccf_bar_svg()}<figcaption>圖 5 · 這些值是早期以 SEQC2 consensus TVAF 套入簡化式的案例特定近似轉換。現行 canonical 分析未整合 allele-specific CN、LOH、purity、multiplicity，因此本圖<b>不是 CN/LOH-corrected CCF，不能作 clone 結構佐證或 clonal/minor 分類</b>。in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。</figcaption></figure></div>
 
-<h2 id="tree">⑦ 可防守候選樹 + 6 推論裁決</h2>
-<div class="fig"><figure>{tree_svg()}<figcaption>圖6 · 可防守候選樹（verdict_02 §九）。虛線=甲基 bridge（缺直接 genetic link）。</figcaption></figure></div>
+<h2 id="tree">⑦ 有界 local read-state candidate graph + 6 推論裁決</h2>
+<div class="fig"><figure>{tree_svg()}<figcaption>圖6 · 非時間、無方向的 local read-state candidate graph。圖形只整理共現／未共現與資料缺口；不代表 cellular clone、parent-child 或 linear ancestry。</figcaption></figure></div>
 <table><thead><tr><th>#</th><th class="l">推論</th><th>裁決</th><th class="l">修正版 / 依據</th></tr></thead><tbody>{''.join(rule_rows)}</tbody></table>
 <h3>3 處過度宣稱已撤回</h3><ul>{retr}</ul>
 
@@ -718,10 +890,21 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
 <table><thead><tr><th class="l">指標</th><th>報告A（已過時）</th><th>權威值</th><th class="l">來源</th></tr></thead><tbody>{crows}</tbody></table>
 
 <footer>
-  <b>Provenance</b> · build commit <code>{esc(head)}</code> · branch <code>{esc(git_branch())}</code> · 產生器
+  <b>Provenance</b> · revision state <code>{esc(PROVENANCE['revision_state'])}</code> · source commit
+  <code>{esc(PROVENANCE['source_commit']) if PROVENANCE['source_commit'] else 'null'}</code> · base commit
+  <code>{esc(PROVENANCE['base_commit'])}</code> · branch <code>{esc(PROVENANCE['branch'])}</code> · 產生器
   <code>build_workstation_html.py</code> · 資料 <code>workstation_data.json</code><br>
+  original producer: <code>{esc(ORIGINAL_PRODUCER['name'])}</code> · original commit
+  <code>{esc(ORIGINAL_PRODUCER['commit'])}</code> · source_created_at
+  <code>{esc(ORIGINAL_PRODUCER['source_created_at'])}</code><br>
+  generated_at: <code>{esc(PROVENANCE['generated_at'])}</code> · published_at: <code>null</code> ·
+  dirty revision inputs: <code>{esc(', '.join(PROVENANCE['dirty_revision_inputs']) or 'none')}</code><br>
+  last_verified_at: <code>{esc(PROVENANCE['last_verified_at'])}</code> · verification_commit: <code>null</code> ·
+  verification_receipt: <code>{esc(PROVENANCE['verification_receipt'])}</code><br>
+  science_recomputed: <code>false</code> · {esc(PROVENANCE['claim_ceiling_note'])}<br>
+  input receipts: <code>{esc(input_receipts)}</code><br>
   來源檔：<code>{esc(AUDIT_REL)}</code> · <code>{esc(VERDICT_REL)}</code> · <code>{esc(CONC_REL)}</code><br>
-  scope: {esc(BUILD['scope'])}。所有 metric 由 JSON/TSV 注入；qualitative 裁決轉錄自 verdict_02 並標 file:line。
+  scope: {esc(BUILD['scope'])}。生成器規格列出的數值欄位由 JSON/TSV 注入；qualitative 裁決經有界改寫並標 verdict_02 file:line。
   cross-basecaller = 技術重現非獨立 biological replicate（tier 封頂 L2）。
 </footer>
 """
@@ -729,10 +912,24 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
     page = f"""<!DOCTYPE html>
 <!--
   07 chr2:18M molecular-state candidate JUDGMENT WORKSTATION (generated, do not hand-edit)
-  build: {esc(head)} / {esc(git_branch())} / {BUILD['built_utc']}
-  regenerate: python3 .../verification_assets/scripts/build_workstation_html.py
+  revision_state: {esc(PROVENANCE['revision_state'])}
+  source_commit: {esc(PROVENANCE['source_commit']) if PROVENANCE['source_commit'] else 'null'}
+  base_commit: {esc(PROVENANCE['base_commit'])}
+  branch: {esc(PROVENANCE['branch'])}
+  original_producer: {esc(ORIGINAL_PRODUCER['name'])} @ {esc(ORIGINAL_PRODUCER['commit'])}
+  source_created_at: {esc(ORIGINAL_PRODUCER['source_created_at'])}
+  generated_at: {BUILD['built_utc']}
+  last_verified_at: {esc(PROVENANCE['last_verified_at'])}
+  verification_commit: null
+  verification_receipt: {esc(PROVENANCE['verification_receipt'])}
+  published_at: null
+  science_recomputed: false
+  claim_ceiling_note: {esc(PROVENANCE['claim_ceiling_note'])}
+  regenerate: python3 .../verification_assets/scripts/build_workstation_html.py --html-only
   data_sources: {AUDIT_REL} ; {VERDICT_REL} ; {CONC_REL}
-  provenance-verified: 所有 metric 由 independent_audit.json/concordance.tsv 注入；§13-A refuse-on-missing
+  machine_data_dir: {esc(PROVENANCE['data_dir'])}
+  input_receipts: {esc(input_receipts)}
+  required-field-policy: 規格列出的數值欄位由 independent_audit.json/concordance.tsv 注入；缺必填值即 refuse
 -->
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -747,14 +944,14 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
     <button class="ghost" onclick="exportCSV()">⤓ CSV</button>
   </div>
   <a href="#snv">① 6 sSNV 證據卡</a>
-  <a href="#backbone">② α/β 骨幹</a>
-  <a href="#loh">③ LOH</a>
+  <a href="#backbone">② α/β read-state labels</a>
+  <a href="#loh">③ LOH annotation + HP imbalance</a>
   <a href="#methyl">④ 甲基三組</a>
   <a href="#pos4">⑤ pos4 homopolymer</a>
   <a href="#ccf">⑥ 歷史 TVAF 近似轉換</a>
-  <a href="#tree">⑦ 候選樹 + 裁決</a>
+  <a href="#tree">⑦ candidate graph + 裁決</a>
   <a href="#limit">⑧ 限制 + 校正</a>
-  <div class="note" style="padding:10px 8px">tier L2 · PARTIAL<br>build {esc(head)}</div>
+  <div class="note" style="padding:10px 8px">tier L2 · PARTIAL<br>{esc(build_label)}</div>
 </nav>
 <main>{body}</main>
 </div>
@@ -811,14 +1008,24 @@ os.makedirs(EXPLAIN, exist_ok=True)
 with open(HTML_OUT, "w", encoding="utf-8") as fh:
     fh.write(html_doc)
 
-# data-bound Fig4 fragment for page-04 injection
-FIG4_OUT = os.path.join(DISPLAY, "fig4_corrected.svg")
-with open(FIG4_OUT, "w", encoding="utf-8") as fh:
-    fh.write(fig4_page04_svg())
+if not ARGS.html_only:
+    os.makedirs(DISPLAY, exist_ok=True)
+    with open(JSON_OUT, "w", encoding="utf-8") as fh:
+        json.dump(DATAJSON, fh, ensure_ascii=False, indent=2)
 
-print("[ok] data.json ->", os.path.relpath(JSON_OUT, REPO))
+    # data-bound Fig4 fragment for page-04 injection
+    FIG4_OUT = os.path.join(DISPLAY, "fig4_corrected.svg")
+    with open(FIG4_OUT, "w", encoding="utf-8") as fh:
+        fh.write(fig4_page04_svg())
+
 print("[ok] html      ->", os.path.relpath(HTML_OUT, REPO))
-print("[ok] fig4 svg  ->", os.path.relpath(FIG4_OUT, REPO))
+if ARGS.html_only:
+    print("[skip] --html-only: workstation_data.json and fig4_corrected.svg unchanged")
+else:
+    print("[ok] data.json ->", os.path.relpath(JSON_OUT, REPO))
+    print("[ok] fig4 svg  ->", os.path.relpath(FIG4_OUT, REPO))
+print(f"[provenance] state={PROVENANCE['revision_state']} source_commit={PROVENANCE['source_commit']} "
+      f"base_commit={PROVENANCE['base_commit']} published_at={PROVENANCE['published_at']}")
 print(f"[classify] clean={clean_set}")
 print(f"[classify] confounded={conf_set}")
 print(f"[classify] dorado_replicate={repl_set}")

@@ -18,7 +18,7 @@ related_examples:
 
 # 敘述節點型錄 + 概念子頁模板 taxonomy
 
-> **這份是什麼**：把 10 條研究線盤點裡所有 `reusable_nodes` 去重、抽象成一套**可複用的敘述積木（node catalog）**，再定一個**固定的概念子頁骨架（page template）**，讓後續每個 `docs/explain/<concept>.standalone.html` 都用「組合節點」產生，而非每頁重寫。目標：一致、好懂、低認知負擔、防捏造。
+> **這份是什麼**：把 10 條研究線盤點裡所有 `reusable_nodes` 去重、抽象成一套**可複用的敘述積木（node catalog）**，再定一個**固定的概念子頁骨架（page template）**，讓後續每個 `docs/explain/<concept>.standalone.html` 都用「組合節點」產生，而非每頁重寫。目標：一致、好懂、低認知負擔，並防止 spec 已宣告的必填值被靜默省略；模板本身不驗證來源真實或科學解讀。
 >
 > **怎麼用**（給實作子頁的 AI / 人）：① 查 §2 node catalog 挑需要的節點 → ② 照 §3 page template 把節點按固定順序排 → ③ 套 §4 一致性規則（分層/標記/term/provenance）→ ④ 照 §5 建置順序決定先做哪頁。
 
@@ -40,7 +40,7 @@ related_examples:
 |------|------|---------|
 | **複用優先** | 10 條線的 `reusable_nodes` 高度重疊（NEGATIVE 卡出現 6 次、confound 警告 6 次、HP-axis/ALLELE-axis 定義出現 4 次、5-stage SVG 出現 3 次）→ 抽成單一 node，多頁引用同一 anchor，改一次同步全部。 | 盤點 JSON 去重統計（§2 表） |
 | **分層揭露** | 同一頁服務「掃一眼就走」與「要鑽到源碼行號」兩種讀者 → L0 平鋪、L2-L3 折疊。 | `feedback_reports_need_layered_disclosure`；既有 G6 三層 HTML |
-| **構造防捏造** | 數據比較表 / claim card / key_data 一律「從盤點 JSON 的 `value` + `source_path` 注入」，缺 source 直接留 `{{待查}}` 不杜撰。 | CLAUDE.md §13-A（template+data 注入）、§13.0 |
+| **必填欄位 fail-closed** | 數據比較表 / claim card / key_data 一律從盤點 JSON 的 `value` + `source_path` 注入；缺已宣告 source 則留 `{{待查}}`。這不涵蓋未宣告欄位，也不保證來源或科學解讀正確。 | CLAUDE.md §13-A（template+data 注入）、§13.0 |
 | **誠實邊界先行** | 本專案核心張力是「存在 ≠ 可判別 / 可說明 ≠ 可解釋有證據」→ NEGATIVE 卡與 confound 警告是一等公民節點，不是附註。 | main-axis / negatives / asm-* 三線一致 |
 | **既有資產不重造** | `fig1_ism_5stage.svg`、`fig5_axisC_vs_axisA.svg`、`fig2_single_locus_pipeline.svg` 已存在 → SVG primitive 節點直接 `<img>` 嵌入或 inline，不重畫。 | `docs/paper_focus/04_figures/` 實測 |
 
@@ -134,7 +134,7 @@ related_examples:
   | 🟡 P-caveat / S | `P-caveat` `S` | 方法存疑 / 二次紀錄；引用前查口徑 |
   | 🔵 framing | （無 tier 的定位句） | 立場敘述，非硬數字 |
   | 🔴 F | （已捏造，不應出現） | 一旦發現即下架 |
-- **🔴 構造防捏造**：表格一律 `value` + `source_path` 從盤點 `key_data[]` 注入；無 source 的格留 `{{待查}}`。
+- **🔴 必填欄位 fail-closed**：表格的已宣告欄位由 `value` + `source_path` 從盤點 `key_data[]` 注入；無 source 的格留 `{{待查}}`。此機制不驗證未宣告資料、來源內容或科學結論。
 
 #### `N-CONF` — confound 警告節點
 
@@ -362,7 +362,7 @@ related_examples:
 |---|------|------|
 | 1 | explain vs concepts 關係 | ✅ **並存**：explain = 去時間戳 canonical 教學層 / concepts = 歷史快照（不動）|
 | 2 | SVG 生成方式 | ✅ 風格探針階段**手繪 inline schematic**（快、可即時迭代圖例）；風格鎖定後再批量生 `_assets/svg/` primitive |
-| 3 | PERMANOVA 99 vs 999 | ✅ **定案**：生產 99（`RegionProcessor.cpp:1573` 覆寫）/ 庫預設 999（`StructureTest.hpp:26`）。significance.csv = **59 欄**（非 117，實測）。見 `04_number_resolution.md` |
+| 3 | PERMANOVA 99 vs 999 | ✅ **revision-scoped 定案**：historical `9098f11` StructureTest production=99、label-first/default=999；frozen release baseline `ddd8909a` research path=999（p-floor 0.001）、summary header=199 欄。`73afaeac-dirty` 僅是 C++/CMake inputs byte-equivalent 的 historical `IN_PROGRESS/PARTIAL` audit，不是 release source。significance summary historical=59 欄。見 `04_number_resolution.md` |
 | 4 | term home 頁 | ✅ 名詞地基頁 = 全站 term SoT（28 核心詞 + anchor）；他頁首現連回，不重複定義 |
 | 5 | 兩套分級 | 🟢P/🟡S（provenance）與 ⭐tier（成熟度）並用，badge 對齊盤點 `key_data[].tier`；L1-L5 留給未來 claim card |
 

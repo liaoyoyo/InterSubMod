@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/config/site-profile.schema.json",
+  "title": "InterSubMod site profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "site_id",
+    "expected_hostname",
+    "project_root",
+    "data_roots",
+    "reference",
+    "tools",
+    "datasets"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.1.0"},
+    "site_id": {"type": "string", "minLength": 1},
+    "expected_hostname": {"type": "string", "minLength": 1},
+    "project_root": {"$ref": "#/$defs/absolutePath"},
+    "data_roots": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/absolutePath"},
+      "required": ["primary", "output"]
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["genome_build", "contig_contract", "fasta", "indexes"],
+      "properties": {
+        "genome_build": {"type": "string", "minLength": 1},
+        "contig_contract": {"$ref": "#/$defs/contigContract"},
+        "fasta": {"$ref": "#/$defs/fileSpec"},
+        "indexes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/fileSpec"}
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "required": ["samtools", "bcftools", "longphase_s", "intersubmod"],
+      "additionalProperties": false,
+      "properties": {
+        "samtools": {"$ref": "#/$defs/requiredToolSpec"},
+        "bcftools": {"$ref": "#/$defs/requiredToolSpec"},
+        "longphase_s": {"$ref": "#/$defs/requiredToolSpec"},
+        "intersubmod": {"$ref": "#/$defs/requiredToolSpec"}
+      }
+    },
+    "datasets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/datasetSpec"}
+    }
+  },
+  "$defs": {
+    "absolutePath": {
+      "type": "string",
+      "pattern": "^/",
+      "not": {"pattern": "^/<"}
+    },
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "contigContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["naming", "scope", "required_contigs"],
+      "properties": {
+        "naming": {"enum": ["CHR_PREFIXED", "NO_CHR_PREFIX"]},
+        "scope": {"const": "AUTOSOMES_1_22"},
+        "required_contigs": {
+          "type": "array",
+          "minItems": 22,
+          "maxItems": 22,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "fileSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "checksum_policy"],
+      "properties": {
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "checksum_policy": {"enum": ["EXPECTED_SHA256", "LOCATOR_ONLY", "SIZE_ONLY", "EXISTENCE_ONLY"]},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "checksum_uri": {"type": "string", "minLength": 1},
+        "size_bytes": {"type": "integer", "minimum": 1}
+      },
+      "allOf": [
+        {"if": {"properties": {"checksum_policy": {"const": "EXPECTED_SHA256"}}}, "then": {"required": ["sha256"]}},
+        {"if": {"properties": {"checksum_policy": {"const": "LOCATOR_ONLY"}}}, "then": {"required": ["checksum_uri"]}},
+        {"if": {"properties": {"checksum_policy": {"const": "SIZE_ONLY"}}}, "then": {"required": ["size_bytes"]}}
+      ]
+    },
+    "toolSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "checksum_policy"],
+      "properties": {
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "checksum_policy": {"enum": ["EXPECTED_SHA256", "LOCATOR_ONLY", "SIZE_ONLY", "EXISTENCE_ONLY"]},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "checksum_uri": {"type": "string", "minLength": 1},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "required": {"type": "boolean"}
+      },
+      "allOf": [
+        {"if": {"properties": {"checksum_policy": {"const": "EXPECTED_SHA256"}}}, "then": {"required": ["sha256"]}},
+        {"if": {"properties": {"checksum_policy": {"const": "LOCATOR_ONLY"}}}, "then": {"required": ["checksum_uri"]}},
+        {"if": {"properties": {"checksum_policy": {"const": "SIZE_ONLY"}}}, "then": {"required": ["size_bytes"]}}
+      ]
+    },
+    "directorySpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {"path": {"$ref": "#/$defs/absolutePath"}}
+    },
+    "requiredToolSpec": {
+      "allOf": [
+        {"$ref": "#/$defs/toolSpec"},
+        {
+          "required": ["required"],
+          "properties": {
+            "required": {"const": true},
+            "checksum_policy": {"enum": ["EXPECTED_SHA256", "LOCATOR_ONLY", "SIZE_ONLY"]}
+          }
+        }
+      ]
+    },
+    "datasetSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["biological_id", "technical_dataset_id", "genome_build", "platform_label", "truth_set_label", "truth_total", "inputs"],
+      "properties": {
+        "biological_id": {"type": "string", "minLength": 1},
+        "technical_dataset_id": {"type": "string", "minLength": 1},
+        "genome_build": {"type": "string", "minLength": 1},
+        "platform_label": {"type": "string", "minLength": 1},
+        "truth_set_label": {"type": "string", "minLength": 1},
+        "truth_total": {"type": "integer", "minimum": 1},
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tumor_bam", "tumor_bam_index", "normal_bam", "normal_bam_index",
+            "somatic_vcf", "somatic_vcf_pileup",
+            "somatic_vcf_indel", "to_somatic_vcf", "to_somatic_vcf_pileup",
+            "to_somatic_vcf_indel", "germline_phased_dir", "truth_vcf", "truth_bed"
+          ],
+          "properties": {
+            "tumor_bam": {"$ref": "#/$defs/fileSpec"},
+            "tumor_bam_index": {"$ref": "#/$defs/fileSpec"},
+            "normal_bam": {"$ref": "#/$defs/fileSpec"},
+            "normal_bam_index": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf_index": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf_pileup": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf_pileup_index": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf_indel": {"$ref": "#/$defs/fileSpec"},
+            "somatic_vcf_indel_index": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf_index": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf_pileup": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf_pileup_index": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf_indel": {"$ref": "#/$defs/fileSpec"},
+            "to_somatic_vcf_indel_index": {"$ref": "#/$defs/fileSpec"},
+            "germline_phased_dir": {"$ref": "#/$defs/directorySpec"},
+            "truth_vcf": {"$ref": "#/$defs/fileSpec"},
+            "truth_vcf_index": {"$ref": "#/$defs/fileSpec"},
+            "truth_bed": {"$ref": "#/$defs/fileSpec"}
+          }
+        }
+      }
+    }
+  }
+}

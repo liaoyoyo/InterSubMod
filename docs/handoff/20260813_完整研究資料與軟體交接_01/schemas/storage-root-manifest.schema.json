@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterSubMod storage root immediate-child manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_type", "verified_at", "scan_contract", "records"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "registry_type": {"const": "storage_root_immediate_child_manifest"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "scan_contract": {"type": "string", "minLength": 1},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["root_id", "path", "observation_status", "last_seen_at", "immediate_child_count", "recursive_size_bytes", "size_measurement_status", "size_blocker", "immediate_children"],
+        "properties": {
+          "root_id": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "pattern": "^/"},
+          "observation_status": {"enum": ["PRESENT", "MISSING", "NFS_VISIBLE_NOT_HOST_VERIFIED", "BLOCKED_TIMEOUT"]},
+          "last_seen_at": {"type": "string", "format": "date-time"},
+          "immediate_child_count": {"type": ["integer", "null"], "minimum": 0},
+          "recursive_size_bytes": {"type": ["integer", "null"], "minimum": 0},
+          "size_measurement_status": {"enum": ["NOT_ATTEMPTED_TIB_SCALE_SAFETY", "NOT_APPLICABLE", "MEASURED", "BLOCKED_TIMEOUT", "BLOCKED_SAFETY_BOUND", "BLOCKED_IO_ERROR"]},
+          "size_blocker": {"type": ["string", "null"]},
+          "immediate_children": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "path", "entry_type", "size_bytes", "mtime"],
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "path": {"type": "string", "pattern": "^/"},
+                "entry_type": {"enum": ["DIRECTORY", "FILE", "SYMLINK"]},
+                "size_bytes": {"type": ["integer", "null"], "minimum": 0},
+                "mtime": {"type": "string", "format": "date-time"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

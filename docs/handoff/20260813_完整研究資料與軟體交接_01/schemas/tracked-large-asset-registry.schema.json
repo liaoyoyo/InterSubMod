@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/schemas/tracked-large-asset-registry.schema.json",
+  "title": "Tracked large-asset registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "verified_at", "source_git_head", "source_state", "threshold_bytes_exclusive", "summary", "policy", "assets"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "source_git_head": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_state": {"enum": ["COMMIT_PINNED", "WORKTREE_HASH_BOUND_PENDING_COMMIT"]},
+    "threshold_bytes_exclusive": {"type": "integer", "minimum": 1},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tracked_assets_over_threshold", "total_size_bytes", "tracked_assets_over_50_mib", "verdict"],
+      "properties": {
+        "tracked_assets_over_threshold": {"type": "integer", "minimum": 0},
+        "total_size_bytes": {"type": "integer", "minimum": 0},
+        "tracked_assets_over_50_mib": {"type": "integer", "minimum": 0},
+        "verdict": {"enum": ["PASS", "LARGE_ASSET_MIGRATION_BLOCKED"]}
+      }
+    },
+    "policy": {"type": "object"},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact_id", "artifact_type", "producer_commit", "scope", "evidence_status", "finality", "availability", "size_bytes", "sha256", "license", "claim_ceiling", "public_uri", "policy_target", "migration_status"],
+        "properties": {
+          "artifact_id": {"type": "string"},
+          "artifact_type": {"type": "string"},
+          "producer_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "scope": {"enum": ["FULL", "PARTIAL", "DEMO"]},
+          "evidence_status": {"enum": ["AUTHORITY", "VALIDATED_DERIVED", "PARTIAL", "HISTORICAL", "INVALIDATED", "IN_PROGRESS"]},
+          "finality": {"enum": ["FINAL_FOR_SCOPE", "NON_FINAL", "SUPERSEDED"]},
+          "availability": {"enum": ["GIT", "GITHUB_RELEASE", "LOCAL_CANONICAL", "EXTERNAL_SOURCE", "MISSING"]},
+          "size_bytes": {"type": "integer", "minimum": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "license": {"type": "string"},
+          "claim_ceiling": {"type": "string"},
+          "public_uri": {"type": "string"},
+          "policy_target": {"type": "string"},
+          "migration_status": {"type": "string"}
+        }
+      }
+    }
+  }
+}

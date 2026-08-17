@@ -1,0 +1,43 @@
+{
+  "registry_type": "claim_registry_snapshot_pointer",
+  "schema_version": "1.0.0",
+  "snapshot_id": "intersubmod-public-claims-remediation-20260813",
+  "records_uri": "../evidence/full_claim_registry.json",
+  "records_sha256": "938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5",
+  "records_count": 158,
+  "materialization": {
+    "validated_working_stack": "PASS",
+    "source_patch_delivery": "PUBLIC_CLAIM_CORRECTIONS_WORKING_STACK_VALIDATED",
+    "standalone_data_governance_pr_source_ready": false,
+    "known_limit": "The synchronized evidence describes the validated public-claim-corrections working stack. P0_SOURCE_READY is PASS; P1/P2 closure plus default-branch, Wiki and Pages publication checks keep SOURCE_READY, PUBLICATION_READY and RELEASE_READY BLOCKED."
+  },
+  "counts": {
+    "by_priority": {
+      "P0": 34,
+      "P1": 20,
+      "P2": 35,
+      "P3": 69
+    },
+    "by_current_verdict": {
+      "CONFIRMED": 69,
+      "CONFIRMED_WITH_LIMITS": 69,
+      "UNVERIFIED": 20
+    },
+    "by_source_status": {
+      "EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS": 1,
+      "FROZEN_CONFIRMED_WITH_LIMITS": 32,
+      "FROZEN_EVIDENCE_CONFIRMED": 69,
+      "SOURCE_EDITED_REVIEW_REQUIRED": 20,
+      "SOURCE_READY": 33,
+      "VALIDATED_DERIVED_WITH_LIMITS": 3
+    }
+  },
+  "gates": {
+    "P0_SOURCE_READY": "PASS",
+    "SOURCE_READY": "BLOCKED",
+    "PUBLICATION_READY": "BLOCKED",
+    "RELEASE_READY": "BLOCKED"
+  },
+  "claim_ceiling": "This pointer summarizes and hash-binds the full 158-row registry. Resolve records_uri for per-claim evidence; no gate other than P0_SOURCE_READY is passed.",
+  "verified_at": "2026-08-13T20:38:49+08:00"
+}

@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "site_doctor",
+  "verified_at": "2026-08-13T11:19:54+08:00",
+  "site_id": "bip7-path-preflight-20260813",
+  "hostname": "bip7",
+  "expected_hostname": "bip7",
+  "hostname_match": true,
+  "mode": "real-data-read-only-preflight",
+  "mounts": {
+    "knowledge": {
+      "target": "/big8_disk",
+      "source": "140.123.104.246:/big8_disk",
+      "fstype": "nfs4",
+      "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246"
+    },
+    "output": {
+      "target": "/big7_disk",
+      "source": "/dev/sdc1",
+      "fstype": "ext4",
+      "options": "rw,relatime"
+    },
+    "primary": {
+      "target": "/big8_disk",
+      "source": "140.123.104.246:/big8_disk",
+      "fstype": "nfs4",
+      "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246"
+    }
+  },
+  "checks": [
+    {
+      "label": "project_root",
+      "path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+      "exists": true,
+      "status": "PRESENT",
+      "mount": {
+        "target": "/big7_disk",
+        "source": "/dev/sdc1",
+        "fstype": "ext4",
+        "options": "rw,relatime"
+      }
+    },
+    {
+      "label": "data_root:knowledge",
+      "path": "/big8_disk/liaoyoyo2001/Knowledge",
+      "exists": true,
+      "status": "PRESENT",
+      "mount": {
+        "target": "/big8_disk",
+        "source": "140.123.104.246:/big8_disk",
+        "fstype": "nfs4",
+        "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246"
+      }
+    },
+    {
+      "label": "data_root:output",
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output",
+      "exists": true,
+      "status": "PRESENT",
+      "mount": {
+        "target": "/big7_disk",
+        "source": "/dev/sdc1",
+        "fstype": "ext4",
+        "options": "rw,relatime"
+      }
+    },
+    {
+      "label": "data_root:primary",
+      "path": "/big8_disk/data",
+      "exists": true,
+      "status": "PRESENT",
+      "mount": {
+        "target": "/big8_disk",
+        "source": "140.123.104.246:/big8_disk",
+        "fstype": "nfs4",
+        "options": "rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=140.123.104.107,local_lock=none,addr=140.123.104.246"
+      }
+    },
+    {
+      "label": "tool:bcftools",
+      "path": "/usr/bin/bcftools",
+      "exists": true,
+      "executable": true,
+      "size_bytes": 1024752,
+      "checksum_policy": "EXPECTED_SHA256",
+      "checksum_uri": null,
+      "expected_sha256": "d006ee249f30301d9c58ff453d886591769e1ae6d93557c9d04ffd008f7dcba6",
+      "actual_sha256": "d006ee249f30301d9c58ff453d886591769e1ae6d93557c9d04ffd008f7dcba6",
+      "status": "MATCH"
+    },
+    {
+      "label": "tool:intersubmod",
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod",
+      "exists": true,
+      "executable": true,
+      "size_bytes": 7112560,
+      "checksum_policy": "SIZE_ONLY",
+      "checksum_uri": null,
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "PRESENT"
+    },
+    {
+      "label": "tool:longphase_s",
+      "path": "/big8_disk/liaoyoyo2001/Knowledge/codebase/longphase-s/longphase-s",
+      "exists": true,
+      "executable": true,
+      "size_bytes": 32860600,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "CHECKSUM_LOCATOR_PRESENT"
+    },
+    {
+      "label": "tool:samtools",
+      "path": "/usr/local/bin/samtools",
+      "exists": true,
+      "executable": true,
+      "size_bytes": 2899192,
+      "checksum_policy": "EXPECTED_SHA256",
+      "checksum_uri": null,
+      "expected_sha256": "b13ec3fdf13b783c608b3296b5102764933dd19fb4cc198e8cfd88709879ee7f",
+      "actual_sha256": "b13ec3fdf13b783c608b3296b5102764933dd19fb4cc198e8cfd88709879ee7f",
+      "status": "MATCH"
+    },
+    {
+      "label": "reference:fasta",
+      "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 3144230986,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.sha256",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "CHECKSUM_LOCATOR_MISSING"
+    },
+    {
+      "label": "reference:index:1",
+      "path": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta.fai",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 7804,
+      "checksum_policy": "SIZE_ONLY",
+      "checksum_uri": null,
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "PRESENT"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:normal_bam",
+      "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 149449607869,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.sha256",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "CHECKSUM_LOCATOR_MISSING"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:normal_bam_index",
+      "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam.bai",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 56121584,
+      "checksum_policy": "SIZE_ONLY",
+      "checksum_uri": null,
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "PRESENT"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:somatic_vcf",
+      "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 4343192,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz.sha256",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "CHECKSUM_LOCATOR_MISSING"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:truth_bed",
+      "path": "/big8_disk/data/HCC1395/SEQC2/High-Confidence_Regions_v1.2.bed",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 16879606,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "EXTERNAL_CHECKSUM_LOCATOR_DECLARED"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:truth_vcf",
+      "path": "/big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 4818105,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/seqc/Somatic_Mutation_WG/release/v1.2/",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "EXTERNAL_CHECKSUM_LOCATOR_DECLARED"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:tumor_bam",
+      "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 292055926761,
+      "checksum_policy": "LOCATOR_ONLY",
+      "checksum_uri": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.sha256",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "CHECKSUM_LOCATOR_MISSING"
+    },
+    {
+      "label": "dataset:HCC1395_ONT_5kHz:tumor_bam_index",
+      "path": "/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395.bam.bai",
+      "exists": true,
+      "executable": false,
+      "size_bytes": 119741784,
+      "checksum_policy": "SIZE_ONLY",
+      "checksum_uri": null,
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "status": "PRESENT"
+    }
+  ],
+  "tally": {
+    "CHECKSUM_LOCATOR_MISSING": 4,
+    "CHECKSUM_LOCATOR_PRESENT": 1,
+    "EXTERNAL_CHECKSUM_LOCATOR_DECLARED": 2,
+    "MATCH": 2,
+    "PRESENT": 8
+  },
+  "pass": false,
+  "claim_ceiling": "Read-only path/index/tool-integrity preflight; no scientific computation and no independent-host claim unless hostname matches."
+}

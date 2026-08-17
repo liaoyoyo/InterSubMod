@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: >-
+  InterSubMod is currently a non-clinical, non-production research handoff
+  snapshot, not a release-ready clinical or lineage-calling product. Cite the
+  exact immutable commit you used. No DOI, versioned release, or verified
+  individual author list is assigned yet. A GPL-3.0 license text is present,
+  but the project-level SPDX choice still requires maintainer confirmation.
+title: InterSubMod
+type: software
+authors:
+  - name: InterSubMod contributors
+abstract: >-
+  InterSubMod computes per-region methylation, distance, read clustering, and
+  statistics from phased Oxford Nanopore research inputs. Exact-PS candidate
+  reconstruction and LongLineage are separate, versioned provenance chains;
+  they are not functions of the inter_sub_mod executable. The frozen
+  2026-08-01 authority supports zero confirmed cellular subclones and zero
+  confirmed linear ancestry relationships. Methylation is association-only.
+  Allele-specific copy number, copy-neutral LOH, purity, and multiplicity are
+  not integrated into the frozen candidate reconstruction; optional --loh-bed
+  input is stratification/annotation only and does not produce CN/LOH-corrected
+  cellular inference. The 88.2579 percent value is a model-conditional
+  graph-shape statistic, not biological accuracy or prevalence. LongLineage
+  remains a non-production research-preview candidate with P3/P4/P5/P7/P8
+  BLOCKED.
+repository-code: https://github.com/liaoyoyo/InterSubMod
+url: https://github.com/liaoyoyo/InterSubMod
+keywords:
+  - Oxford Nanopore sequencing
+  - somatic variant co-occurrence
+  - methylation association
+  - candidate mutation-state reconstruction
+  - research handoff

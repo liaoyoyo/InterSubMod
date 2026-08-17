@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "handoff_id": "research-handoff-2026.08.1-candidate",
+  "delivery_level": "research_handoff_snapshot",
+  "release_ready": false,
+  "publication_state": "BLOCKED_PENDING_GATES",
+  "created_at": "2026-08-13T10:40:00+08:00",
+  "baselines": {
+    "intersubmod": {
+      "repository": "https://github.com/liaoyoyo/InterSubMod.git",
+      "commit": "ddd8909a838318d8a77969313e9561c8ff9d01c2",
+      "branch_at_remote": "feat/lineage-tag-methylation-axes",
+      "worktree": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+      "initial_clean_observation": {
+        "observed_at": "2026-08-13T10:20:00+08:00",
+        "tracked_files": 6953,
+        "missing_tracked_files": 0,
+        "dirty_entries": 0
+      }
+    },
+    "longlineage": {
+      "repository": "https://github.com/liaoyoyo/LongLineage.git",
+      "commit": "b9aaa12a11fa00606bd174dabd0f172a5d112359",
+      "branch": "agent/public-preview-license-audit-20260813",
+      "worktree": "/big7_disk/liaoyoyo2001/worktrees/ll-preview-20260813",
+      "initial_clean_observation": {
+        "observed_at": "2026-08-13T10:20:00+08:00",
+        "tracked_files": 447,
+        "missing_tracked_files": 0,
+        "dirty_entries": 0
+      }
+    }
+  },
+  "included_sources": [
+    {
+      "commit": "f2f266d27bb4752c4aeefbac2b11c084b67a318c",
+      "scope": "2026-08-12 public-document claim audit report and standalone companion"
+    },
+    {
+      "commit": "5dc9c9192e6672c36689b0a32406490beee23fa4",
+      "scope": "Only research/20260812_intersubmod_github_public_docs_full_validation; CNV and drilldown paths excluded"
+    },
+    {
+      "commit": "5eac30ea51b951fdcac2f33b2af9a306fe049b9c",
+      "scope": "Frozen binary source adjudication and receipt only"
+    },
+    {
+      "commit": "94f1e1af59f65a481bd9f208599667cff4ac5aa9",
+      "scope": "LongLineage sufficiency and route adjudication document only"
+    }
+  ],
+  "excluded_work": [
+    {
+      "identity": "73afaeac",
+      "status": "PARTIAL",
+      "reason": "2026-08-13 active observation work; explicitly excluded from the snapshot"
+    },
+    {
+      "identity": "research/20260813_hcc1395_drilldown_validation",
+      "status": "IN_PROGRESS",
+      "reason": "Active drilldown research; register only, never import into this snapshot"
+    },
+    {
+      "identity": "research/20260810_cnv_confound_seqc2_savana_audit",
+      "status": "IN_PROGRESS",
+      "reason": "Active CNV/CCF research; register only, never import into this snapshot"
+    },
+    {
+      "identity": "9ad976b",
+      "status": "EXCLUDED_LONGLINEAGE_FOLLOWUP",
+      "reason": "Post-candidate source-state commit; separate scientific PR"
+    },
+    {
+      "identity": "6ce62b2",
+      "status": "EXCLUDED_LONGLINEAGE_FOLLOWUP",
+      "reason": "Post-candidate tag-BAM index commit; separate scientific PR"
+    }
+  ],
+  "authority_contract": {
+    "manifest": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json",
+    "denominator_registry": "InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv",
+    "expected_hash_records": 19,
+    "claim_ceiling": {
+      "confirmed_cellular_subclone": 0,
+      "confirmed_linear_ancestry": 0,
+      "methylation": "association_only",
+      "copy_number_loh": "NOT_INTEGRATED",
+      "model_conditional_graph_shape_percent": 88.2579
+    }
+  },
+  "publication_blocks": [
+    "INTERSUBMOD_RELEASE_GATES_NOT_COMPLETE",
+    "PUBLIC_CLAIM_P0_NOT_CLOSED",
+    "BIP8_INDEPENDENT_RECEIPT_MISSING",
+    "LONGLINEAGE_VISIBILITY_INCIDENT_UNRESOLVED",
+    "LONGLINEAGE_LICENSE_SOURCE_ORIGIN_NOT_PASSED",
+    "LONGLINEAGE_P8_NOT_VERIFIED"
+  ]
+}

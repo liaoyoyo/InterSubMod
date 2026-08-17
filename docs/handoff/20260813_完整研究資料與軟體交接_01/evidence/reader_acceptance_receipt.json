@@ -1,0 +1,229 @@
+{
+  "schema_name": "intersubmod.reader_acceptance_receipt",
+  "schema_version": "2.0.0",
+  "receipt_id": "intersubmod-reader-acceptance-20260813",
+  "evaluated_at": "2026-08-13T21:24:35+08:00",
+  "tested_git_commit": "b690b4bc174fcef9d40b68875745f1c74a9c2d11",
+  "evaluator_context": "NO_PRIOR_CONVERSATION_PACKAGE_ONLY",
+  "evaluator_id": "codex-fresh-reader-b690",
+  "package_source_manifest": [
+    {
+      "path": "00_INDEX.md",
+      "sha256": "07f8e01c5e6bfd6cb70c9458e7e1225200e92805281c5cd7a4aa93b499d932ef"
+    },
+    {
+      "path": "20260813_研究結論時間與Finality_01.md",
+      "sha256": "75ad360ef9047fbddae26165cf3e6b2c2e755c2592c5f2f20c2fd15be38a9d3d"
+    },
+    {
+      "path": "20260813_軟體輸入輸出與研究流程_01.md",
+      "sha256": "a8564ab8194e17a7bb7935fb2d1f20fb99ab2f4f14dbe6d18342a0d77121a9e7"
+    },
+    {
+      "path": "20260813_bip7_bip8操作與驗證_01.md",
+      "sha256": "a857bc061b32950f23478d9bf1482741047a82263e04f68d627da52e695e0205"
+    },
+    {
+      "path": "ai_context/CONTEXT.md",
+      "sha256": "52ed0dbba2625ebe344730f129e9cb053c6648200af89f24ac18bcf4e0f90b02"
+    },
+    {
+      "path": "ai_context/READER_ACCEPTANCE_PROMPT.md",
+      "sha256": "d0c499d92b794b282113c18372b63ada7fd1cdcfa61442b872139d98b6ce6751"
+    },
+    {
+      "path": "schemas/reader-acceptance.schema.json",
+      "sha256": "d1b763f12c808521b2b923f992412c3b73ba12d56600c97e69e8c4f9404026fa"
+    },
+    {
+      "path": "registries/artifact_registry.json",
+      "sha256": "89b6b828e0d88bae4012954662a75bec2ebf111e36d052e0889b2ef1eaa78d6b"
+    },
+    {
+      "path": "registries/authority_superseded_crosswalk.json",
+      "sha256": "eeedc7e8c8a194ffcfb1a7ec6fc63a1367966ac7e4259b2af48bbe8f8b72d043"
+    },
+    {
+      "path": "registries/claim_registry.json",
+      "sha256": "534dc8339b1bb337ea81486bc671c663f97364de33720d0729f42612b8ebfeee"
+    },
+    {
+      "path": "registries/machine_path_registry.json",
+      "sha256": "f5961b5b8465257e003c99856b3056513fd458f43cd3d95781f1c84cb7cdbd96"
+    },
+    {
+      "path": "evidence/authority_manifest.json",
+      "sha256": "a88afc589206b7b3dab4d17c1d7b02a6cf20b125d847409649577c02abf0bfa0"
+    },
+    {
+      "path": "evidence/denominator_registry.tsv",
+      "sha256": "a41f726cbf66f22b7e95ddb44216a08bf480d12961758ebd5b1ab6e3e61db6a4"
+    },
+    {
+      "path": "evidence/authority_replay_receipt.json",
+      "sha256": "1fb9b1466baea9c2fe06b3f5947a6a00ee54db10d35beff2dafc9e9d9e8a0678"
+    },
+    {
+      "path": "evidence/longlineage_capability_matrix.md",
+      "sha256": "5b8d8961d88ec39b82558d5514f75d7c16ed2c3ea92af089a5ce70561e62066c"
+    }
+  ],
+  "questions": [
+    {
+      "question_id": "Q_PROJECT",
+      "status": "PASS",
+      "answer": "這是截至 2026-08-13 的 ONT long-read 癌症研究交接快照（research handoff snapshot）：研究 sSNV read linkage、candidate mutation-state reconstruction 與 read-level methylation association。它交接的是可稽核的分子／read-level 候選結構與資料治理，不是 production release，也不是 cellular-lineage caller。",
+      "evidence_paths": [
+        "00_INDEX.md",
+        "20260813_軟體輸入輸出與研究流程_01.md"
+      ],
+      "limits": [
+        "本包允許解讀研究 snapshot，但不得把候選 mutation-state 或 read cluster 升格成已驗證 cellular lineage。",
+        "交接包的可讀性與 frozen evidence 可重播性不等於 production-ready。"
+      ]
+    },
+    {
+      "question_id": "Q_CONCLUSION",
+      "status": "PASS",
+      "answer": "目前結論上限是 confirmed cellular subclone = 0、confirmed linear ancestry = 0；methylation association only，不能用來選 edge、建立 clone 或作獨立 clone validation。CN/LOH 未整合進 frozen candidate reconstruction；equivalently, CN/LOH is NOT INTEGRATED into the frozen reconstruction。Allele-specific CNV、cnLOH、subclonal CNA、multiplicity、purity 與 copy loss 均未納入，因此沒有 CN/LOH-corrected inference；InterSubMod 的 optional LOH BED 只供 annotation／stratification。88.2579% = 63,506 / 71,955，單位是 ranked complete units 中在 frozen AF-ranking 下的一種 rooted-unlabeled signature；88.2579% is a model-conditional graph shape, not accuracy and not prevalence。",
+      "evidence_paths": [
+        "20260813_研究結論時間與Finality_01.md",
+        "evidence/denominator_registry.tsv"
+      ],
+      "limits": [
+        "71,955 是通過 recurrence screen 且 read-AF 可用的 ranked-complete denominator，不能外推到所有 groups、cells 或病人。",
+        "association、graph shape 與局部 read linkage 都沒有 orthogonal cellular truth，故不能宣稱 biological clone 或 ancestry。"
+      ]
+    },
+    {
+      "question_id": "Q_FINALITY",
+      "status": "PASS",
+      "answer": "Finality 必須逐筆讀 artifact registry：evidence_status 說明證據的來源／強度類別，scope 說明適用範圍，finality 的 FINAL_FOR_SCOPE 只表示該明示 scope 內已固定，而 supersedes 記錄哪個舊狀態、角色或 artifact 已被取代，避免把 SUPERSEDED 項目當 current。Science/source-byte final 需同時具備 AUTHORITY + FULL + FINAL_FOR_SCOPE、producer 與 SHA-256；另有一筆 VALIDATED_DERIVED + FINAL_FOR_SCOPE 只對 append-only provenance adjudication final，不增加 science authority。FINAL_FOR_SCOPE is final only within its explicitly stated scope；it is not production-ready and not whole-research final。",
+      "evidence_paths": [
+        "20260813_研究結論時間與Finality_01.md",
+        "registries/artifact_registry.json",
+        "registries/authority_superseded_crosswalk.json"
+      ],
+      "limits": [
+        "檔名含 final、目錄位置、mtime、HTML 標題或最新 commit 都不能取代 evidence_status、finality、scope 與 supersedes 的 registry 判讀。",
+        "VALIDATED_DERIVED 的 source-identity correction 只修正 provenance 關係，不改寫 frozen scientific bytes 或結論。"
+      ]
+    },
+    {
+      "question_id": "Q_SOFTWARE_ROLES",
+      "status": "PASS",
+      "answer": "資料流有兩條平行 provenance chains。第一條由 LongPhase-S/TO 產生 HP/PS、phased/recalibrated VCF 與 tagged BAM：S 處理 paired tumor-normal，TO 處理 tumor-only 的 phasing 與 LOH/HI context。第二條由 exact-PS/LongLineage 使用 exact PS × primary HP read assignments 產生 candidate families、local graph shapes、abstains 與 read assignments。與此平行，InterSubMod 從經驗證的 tagged BAM + FASTA + caller/LongPhase VCF 產生 per-region methylation、read-read distance、read dendrogram、read clustering 與 statistics；LongLineage JSON/TSV 並沒有受支援的直接轉換可冒充 InterSubMod 的 --vcf。Commit-pinned Python research solver 可以是 science producer，但必須有 input、commit、command、schema、scope、denominator 與 hash receipt；validator、publication builder 與 HTML presenter 只驗證／呈現 validated data，不重算 science。",
+      "evidence_paths": [
+        "20260813_軟體輸入輸出與研究流程_01.md",
+        "evidence/longlineage_capability_matrix.md"
+      ],
+      "limits": [
+        "HP tag、candidate family、read assignment 與 InterSubMod tree.nwk 的 read dendrogram 都不是 cell barcode、clone tree 或 confirmed ancestry。",
+        "角色由 producer receipt 決定而不是由 Python、C++ 或 HTML 的語言／格式名稱決定。"
+      ]
+    },
+    {
+      "question_id": "Q_MACHINES",
+      "status": "PASS",
+      "answer": "bip7 目前只有 bounded local preflight：路徑、本體與部分 tool hash 可觀察，但四個 local checksum locators 缺失，所以 real-data preflight 與合併後 fresh-clone 全鏈仍有 blocker，狀態是 BIP7_DATA_PREFLIGHT_BLOCKED。bip8 沒有在 hostname=bip8 取得的 host-local receipt；由 bip7 經 NFS 看見 /big8_disk 或 /bip8_disk 不能證明 bip8 的 clone/build/runtime，故維持 BIP8_DATA_PREFLIGHT_BLOCKED。每台主機都須以同一 immutable commit 各自 fresh clone，依序至少完成 doctor → clean build/test → synthetic smoke，再做 real-data read-only preflight；一台主機的 receipt 不能取代另一台。",
+      "evidence_paths": [
+        "20260813_bip7_bip8操作與驗證_01.md",
+        "registries/machine_path_registry.json"
+      ],
+      "limits": [
+        "SIZE_ONLY、PRESENT 或 NFS_VISIBLE_NOT_HOST_VERIFIED 都不是 input identity 或 host-local execution PASS。",
+        "本 handoff 不授權 TiB 級 full science rerun；full benchmark 仍受 host doctor、input、資源與 scope gates 約束。"
+      ]
+    },
+    {
+      "question_id": "Q_VERIFY_CONTINUE",
+      "status": "PASS",
+      "answer": "Frozen authority 的 byte/hash replay 是 19/19 MATCH、0 missing、0 mismatch；19/19 authority byte/hash replay MATCH is not a full science rerun，也不是重算 98,955 groups。後續驗證要同時跑 registry schema/uniqueness validation，檢查 artifact ID、scope、hash、superseded 關係與 claim registry，並尊重仍為 BLOCKED 的 publication、release 與 machine gates；P0_SOURCE_READY 單獨 PASS 不能替代 SOURCE_READY、PUBLICATION_READY 或 RELEASE_READY。開新 research cycle 前先做 pre-decision audit，固定 source commit、input hash、scope、denominator 與 stop rule，再產生新 authority 而非改寫 snapshot。此驗收的 current HEAD SHA 與 tested-commit SHA 均為 b690b4bc174fcef9d40b68875745f1c74a9c2d11。",
+      "evidence_paths": [
+        "00_INDEX.md",
+        "evidence/authority_replay_receipt.json",
+        "registries/claim_registry.json"
+      ],
+      "limits": [
+        "19/19 是 frozen byte-integrity receipt，不涵蓋 clean-source scientific recomputation、bip8 host acceptance 或 live publication。",
+        "158-row claim registry 仍有 20 UNVERIFIED，default branch、Wiki、Pages 與 release gates 未閉合。"
+      ]
+    }
+  ],
+  "prohibited_promotions": [
+    {
+      "check_id": "NO_CELLULAR_PROMOTION",
+      "status": "PASS",
+      "explanation": "confirmed cellular subclones = 0；candidate/read groups are not cellular truth。具體而言，exact-PS/LongLineage candidate families、read assignments、bounded groups 與 InterSubMod read clusters 都是分子／read-level construct，不能在缺 cell barcode 或 orthogonal validation 時改稱 clone。",
+      "evidence_paths": [
+        "20260813_研究結論時間與Finality_01.md",
+        "evidence/authority_manifest.json"
+      ]
+    },
+    {
+      "check_id": "NO_ANCESTRY_PROMOTION",
+      "status": "PASS",
+      "explanation": "confirmed linear ancestry = 0；graph shape/read dendrogram/local block are not ancestry。這些結構只描述局部候選／相似性，沒有 bridging evidence 與 union re-solve，不能拼成 whole-sample ancestry 或宣稱 A→B cellular ancestor。",
+      "evidence_paths": [
+        "20260813_研究結論時間與Finality_01.md",
+        "20260813_軟體輸入輸出與研究流程_01.md"
+      ]
+    },
+    {
+      "check_id": "NO_882579_ACCURACY_OR_PREVALENCE",
+      "status": "PASS",
+      "explanation": "88.2579% = 63,506 / 71,955 ranked complete units，在 frozen read-AF score 下只代表 one rooted-unlabeled、model-conditional graph shape；它 not accuracy、not prevalence，也不是 biological correctness、clone fraction 或所有 groups 的 topology prevalence。",
+      "evidence_paths": [
+        "20260813_研究結論時間與Finality_01.md",
+        "evidence/denominator_registry.tsv"
+      ]
+    },
+    {
+      "check_id": "NO_TECHNICAL_DATASET_AS_BIOLOGICAL_REPLICATE",
+      "status": "PASS",
+      "explanation": "7 technical datasets、6 biological IDs；7 technical datasets are not 7 biological replicates。HCC1395 與 HCC1395_DORADO 是同一 biological cell line 經不同 technical pipelines 的兩個 dataset，因此不能當兩個獨立生物複本。",
+      "evidence_paths": [
+        "00_INDEX.md",
+        "evidence/authority_manifest.json"
+      ]
+    },
+    {
+      "check_id": "NO_FEATURE_AS_MAIN",
+      "status": "PASS",
+      "explanation": "LongLineage b9aaa12 只是 research preview/non-production candidate；feature is not main/release。lineage-paths、read-assign 與 tag-bam 是 feature-candidate 能力，不能描述成 origin/main 或 production run 的一般能力。P3/P4/P5/P7/P8 BLOCKED，production run 仍 intentionally KernelBlocked exit 6。",
+      "evidence_paths": [
+        "20260813_軟體輸入輸出與研究流程_01.md",
+        "evidence/longlineage_capability_matrix.md"
+      ]
+    },
+    {
+      "check_id": "NO_LOCAL_AS_LIVE_PUBLISHED",
+      "status": "PASS",
+      "explanation": "Local source is not live publication；local source corrected 或 validated working stack 都不等於已發布。目前只有 bounded GitHub About re-fetch，default branch/main、Wiki 與 Pages 仍 BLOCKED，publication/release 也仍 BLOCKED。必須實際 publish 後從各 live surface re-fetch 並綁同一 commit/hash，才能改變 verdict。",
+      "evidence_paths": [
+        "00_INDEX.md",
+        "registries/claim_registry.json"
+      ]
+    },
+    {
+      "check_id": "NO_BIP7_AS_BIP8",
+      "status": "PASS",
+      "explanation": "bip7 receipt 不能代表 bip8；bip8 目前 BLOCKED，因為 package 沒有 hostname=bip8 的 host-local receipt。bip7 對 bip8 storage 的 NFS visibility 只證明 remote export 可見，不能取代 bip8 自己的 doctor、build/test、synthetic smoke 與 preflight。",
+      "evidence_paths": [
+        "20260813_bip7_bip8操作與驗證_01.md",
+        "registries/machine_path_registry.json"
+      ]
+    },
+    {
+      "check_id": "NO_PYTHON_ROLE_CONFLATION",
+      "status": "PASS",
+      "explanation": "A commit-pinned Python research solver can be a science producer only when it carries a complete input、producer commit、command、schema、scope、denominator 與 output hash receipt。The presenter does not recompute science。Validator/publication builder/HTML only validates and displays already validated JSON/TSV，且不得補 missing 為 0 或偷換 denominator。程式語言不是角色判定依據。",
+      "evidence_paths": [
+        "20260813_軟體輸入輸出與研究流程_01.md",
+        "ai_context/CONTEXT.md"
+      ]
+    }
+  ],
+  "verdict": "PASS",
+  "claim_ceiling": "Reader comprehension only; not scientific validation, host acceptance, or publication proof."
+}

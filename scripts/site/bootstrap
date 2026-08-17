@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Create an explicit local site profile without modifying repository settings."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import platform
+import sys
+from pathlib import Path
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--template", type=Path, default=REPOSITORY_ROOT / "config" / "site-profile.example.json"
+    )
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--site-id", default=f"{platform.node()}-local")
+    parser.add_argument("--expected-hostname", default=platform.node())
+    parser.add_argument("--project-root", type=Path, default=REPOSITORY_ROOT)
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    if args.output.exists():
+        print(f"[ERROR] refusing to overwrite: {args.output}", file=sys.stderr)
+        return 4
+    profile = json.loads(args.template.read_text(encoding="utf-8"))
+    profile["site_id"] = args.site_id
+    profile["expected_hostname"] = args.expected_hostname
+    profile["project_root"] = str(args.project_root.resolve())
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[INPUT] template={args.template.resolve()}")
+    print(f"[OUTPUT] site_profile={args.output.resolve()}")
+    print("[RESULT] profile_created=true; edit checksums and machine-specific paths before doctor")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

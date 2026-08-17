@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 工作站生成器的拒絕渲染設計（必填指標缺失時 fail-closed；不驗證科學真實性）
-     來源: docs/explain/15_python-html-layer.standalone.html (svg #1)
-     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+<!-- 工作站生成器的拒絕渲染設計（防止規格所列必填欄位被靜默省略）
+     source: docs/explain/15_python-html-layer.standalone.html (svg #1)
+     source_document_sha256: cb9276fc89227a9814e89ebcc6288848d18e33210b6dc559073f1044b37ed75f
+     inline_svg_sha256: 922148593226cb895f1c06034e307d89b830cdc247b57ecf04078c1fe5efb43b
+     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 900 300" role="img" aria-labelledby="p1t p1d" xmlns="http://www.w3.org/2000/svg">
       <title id="p1t">工作站生成器的拒絕渲染機制</title>
       <desc id="p1d">生成器讀取宣告式 spec，逐項檢查每個項目是否具備 spec 宣告的必填指標；
       若齊全則渲染出互動 HTML，若缺少任一必填指標則以退出碼 3 拒絕渲染，
-      而不是填入破折號或空白。這個 guard 可防止「已宣告必填 metric 缺失卻靜默渲染」，但不驗證數值真實性、方法適切性或科學結論。</desc>
+      而不是填入破折號或空白；此機制不保證數值來源或科學解讀正確。</desc>
   <rect x="0" y="0" width="900" height="300" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="w1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -41,6 +43,6 @@
         <rect x="20" y="212" width="858" height="70" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="40" y="234" font-size="11.5" font-weight="800" fill="#B06A16">為什麼要這樣設計</text>
         <text x="40" y="253" font-size="10.5" fill="#6b4310">如果缺資料時填一個破折號，報告看起來仍然完整，讀的人不會發現那一格其實沒有依據。</text>
-        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">它防止缺少已宣告必填 metric 時靜默渲染；不保證數值或科學解讀正確。</text>
+        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">阻止已宣告必填欄位被靜默省略；不保證數值來源或科學解讀正確。</text>
       </g>
     </svg>

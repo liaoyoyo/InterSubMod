@@ -1,0 +1,410 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/schemas/research-handoff-release-manifest.schema.json",
+  "title": "InterSubMod research handoff release manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_type",
+    "delivery_level",
+    "clinical_use",
+    "production_use",
+    "release_status",
+    "release_ready",
+    "intended_tag",
+    "generated_at",
+    "source",
+    "authority",
+    "project_license",
+    "longlineage",
+    "blockers",
+    "approval_receipts",
+    "assets",
+    "asset_count",
+    "checksum_sidecar"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "manifest_type": {"const": "research_handoff_release_manifest"},
+    "delivery_level": {"const": "research_handoff_snapshot"},
+    "clinical_use": {"const": false},
+    "production_use": {"const": false},
+    "release_status": {
+      "enum": ["BLOCKED", "APPROVED_RESEARCH_HANDOFF"]
+    },
+    "release_ready": {"type": "boolean"},
+    "intended_tag": {
+      "type": "string",
+      "pattern": "^research-handoff-[0-9]{4}\\.[0-9]{2}\\.[0-9]+$"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_url",
+        "commit",
+        "tree",
+        "requested_revision",
+        "clean_worktree_observed"
+      ],
+      "properties": {
+        "repository_url": {"type": "string", "format": "uri"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "requested_revision": {"type": "string", "minLength": 1},
+        "clean_worktree_observed": {"const": true}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_path",
+        "manifest_sha256",
+        "denominator_registry_path",
+        "denominator_registry_sha256",
+        "as_of_date",
+        "scope",
+        "claim_ceiling"
+      ],
+      "properties": {
+        "manifest_path": {"type": "string", "minLength": 1},
+        "manifest_sha256": {
+          "const": "a88afc589206b7b3dab4d17c1d7b02a6cf20b125d847409649577c02abf0bfa0"
+        },
+        "denominator_registry_path": {"type": "string", "minLength": 1},
+        "denominator_registry_sha256": {
+          "const": "a41f726cbf66f22b7e95ddb44216a08bf480d12961758ebd5b1ab6e3e61db6a4"
+        },
+        "as_of_date": {"const": "2026-08-01"},
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["technical_datasets", "biological_ids", "chromosomes"],
+          "properties": {
+            "technical_datasets": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "biological_ids": {"type": "integer", "minimum": 1},
+            "chromosomes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "pattern": "^chr([1-9]|1[0-9]|2[0-2])$"}
+            }
+          }
+        },
+        "claim_ceiling": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "confirmed_cellular_subclone",
+            "confirmed_linear_ancestry",
+            "methylation",
+            "copy_number_loh",
+            "model_conditional_graph_shape_percent",
+            "interpretation"
+          ],
+          "properties": {
+            "confirmed_cellular_subclone": {"const": 0},
+            "confirmed_linear_ancestry": {"const": 0},
+            "methylation": {"const": "association_only"},
+            "copy_number_loh": {"const": "NOT_INTEGRATED"},
+            "model_conditional_graph_shape_percent": {"const": 88.2579},
+            "interpretation": {
+              "const": "Model-conditional graph shape; not biological accuracy or prevalence."
+            }
+          }
+        }
+      }
+    },
+    "project_license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "spdx_expression", "authority_observation"],
+      "properties": {
+        "status": {"enum": ["NEEDS_MAINTAINER_CONFIRMATION", "CONFIRMED"]},
+        "spdx_expression": {
+          "oneOf": [
+            {"type": "null"},
+            {"enum": ["GPL-3.0-only", "GPL-3.0-or-later"]}
+          ]
+        },
+        "authority_observation": {
+          "enum": [
+            "GPL-3.0 license text present; project-level SPDX choice requires maintainer confirmation.",
+            "GPL-3.0 license text present; project-level SPDX choice is maintainer-confirmed and synchronized."
+          ]
+        }
+      }
+    },
+    "longlineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_commit",
+        "delivery_level",
+        "preview_status",
+        "preview_safety_status",
+        "safety_receipt",
+        "production_ready",
+        "phase_gate_interpretation",
+        "gates"
+      ],
+      "properties": {
+        "candidate_commit": {"const": "b9aaa12a11fa00606bd174dabd0f172a5d112359"},
+        "delivery_level": {"const": "research_preview_non_production"},
+        "preview_status": {"enum": ["NOT_READY", "RESEARCH_PREVIEW_SAFETY_VERIFIED"]},
+        "preview_safety_status": {"enum": ["BLOCKED", "VERIFIED"]},
+        "safety_receipt": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/receipt"}
+          ]
+        },
+        "production_ready": {"const": false},
+        "phase_gate_interpretation": {
+          "const": "Expected research-preview ceiling; not InterSubMod handoff blockers and never production approval."
+        },
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["P3", "P4", "P5", "P7", "P8"],
+          "properties": {
+            "P3": {"const": "BLOCKED"},
+            "P4": {"const": "BLOCKED"},
+            "P5": {"const": "BLOCKED"},
+            "P7": {"const": "BLOCKED"},
+            "P8": {"const": "BLOCKED"}
+          }
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Z0-9_]+$"}
+    },
+    "approval_receipts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/receipt"
+      }
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "asset_count": {"type": "integer", "minimum": 1},
+    "checksum_sidecar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "filename", "manifest_filename", "line_count", "coverage"],
+      "properties": {
+        "algorithm": {"const": "SHA-256"},
+        "filename": {"type": "string", "minLength": 1},
+        "manifest_filename": {"type": "string", "minLength": 1},
+        "line_count": {"type": "integer", "minimum": 1},
+        "coverage": {
+          "const": "release manifest plus declared assets; checksum sidecar self-hash intentionally excluded"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["published_path", "sha256"],
+      "properties": {
+        "published_path": {"type": "string", "pattern": "^release-assets/[^/]+$"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "publication_channel",
+        "published_path",
+        "size_bytes",
+        "sha256"
+      ],
+      "properties": {
+        "asset_id": {"type": "string", "pattern": "^[A-Za-z0-9._/-]+$"},
+        "publication_channel": {"enum": ["GIT", "GITHUB_RELEASE"]},
+        "published_path": {"type": "string", "minLength": 1},
+        "repository_path": {"type": "string", "minLength": 1},
+        "git_blob": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "git_mode": {"enum": ["100644", "100755"]},
+        "release_source_name": {"type": "string", "minLength": 1},
+        "registry_artifact_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._/-]+$"
+        },
+        "gate_evidence_receipt": {"const": true},
+        "gate_execution_log": {"const": true},
+        "gate_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "execution_log_uri": {
+          "type": "string",
+          "pattern": "^release-assets/[^/]+$"
+        },
+        "execution_log_sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "oneOf": [
+        {
+          "properties": {"publication_channel": {"const": "GIT"}},
+          "required": ["repository_path", "git_blob", "git_mode"],
+          "not": {"required": ["release_source_name"]}
+        },
+        {
+          "properties": {"publication_channel": {"const": "GITHUB_RELEASE"}},
+          "required": ["release_source_name"],
+          "not": {
+            "anyOf": [
+              {"required": ["repository_path"]},
+              {"required": ["git_blob"]},
+              {"required": ["git_mode"]}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"release_status": {"const": "BLOCKED"}}},
+      "then": {
+        "properties": {
+          "release_ready": {"const": false},
+          "blockers": {"minItems": 1},
+          "approval_receipts": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"release_status": {"const": "APPROVED_RESEARCH_HANDOFF"}}},
+      "then": {
+        "properties": {
+          "release_ready": {"const": true},
+          "blockers": {"maxItems": 0},
+          "approval_receipts": {"minItems": 1},
+          "project_license": {
+            "properties": {
+              "status": {"const": "CONFIRMED"},
+              "spdx_expression": {
+                "enum": ["GPL-3.0-only", "GPL-3.0-or-later"]
+              }
+            }
+          },
+          "longlineage": {
+            "properties": {
+              "preview_status": {"const": "RESEARCH_PREVIEW_SAFETY_VERIFIED"},
+              "preview_safety_status": {"const": "VERIFIED"},
+              "safety_receipt": {"$ref": "#/$defs/receipt"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "project_license": {
+            "properties": {"status": {"const": "NEEDS_MAINTAINER_CONFIRMATION"}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "project_license": {
+            "properties": {
+              "spdx_expression": {"type": "null"},
+              "authority_observation": {
+                "const": "GPL-3.0 license text present; project-level SPDX choice requires maintainer confirmation."
+              }
+            }
+          },
+          "blockers": {
+            "contains": {"const": "INTERSUBMOD_PROJECT_LICENSE_CONFIRMATION_REQUIRED"}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "project_license": {
+            "properties": {"status": {"const": "CONFIRMED"}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "project_license": {
+            "properties": {
+              "spdx_expression": {
+                "enum": ["GPL-3.0-only", "GPL-3.0-or-later"]
+              },
+              "authority_observation": {
+                "const": "GPL-3.0 license text present; project-level SPDX choice is maintainer-confirmed and synchronized."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "longlineage": {
+            "properties": {"preview_safety_status": {"const": "BLOCKED"}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "longlineage": {
+            "properties": {
+              "preview_status": {"const": "NOT_READY"},
+              "safety_receipt": {"type": "null"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "longlineage": {
+            "properties": {"preview_safety_status": {"const": "VERIFIED"}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "longlineage": {
+            "properties": {
+              "preview_status": {"const": "RESEARCH_PREVIEW_SAFETY_VERIFIED"},
+              "safety_receipt": {"$ref": "#/$defs/receipt"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

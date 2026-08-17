@@ -1,8 +1,10 @@
 # InterSubMod Python Dependencies
 # Install with: pip install -r requirements.txt
 #
-# 版本下限取自 2026-08-05 實測環境（Python 3.9.12,
-# /bip7_disk/liaoyoyo2001/miniconda3/bin/python3）。
+# Python >=3.10 is required.  Current source and tests use PEP 604 unions and
+# dataclass(slots=True), which Python 3.9 cannot import.
+# Scientific dependency lower bounds originate from the 2026-08-05 bip7
+# environment audit; portable CI resolves them through requirements-ci.lock.
 # 本檔為「直接依賴」清單；完整傳遞依賴的精確鎖定請另跑 `pip freeze`。
 
 # --- Core scientific computing ---
@@ -29,11 +31,10 @@ lxml>=6.0.2
 PyYAML>=6.0.3
 
 # --- Testing ---
-# ⚠ 2026-08-05 實測：pytest 在當前環境「尚未安裝」，
-#   但 143 個 Python 測試檔中有 63 個（44%）是 pytest 風格，缺它無法執行。
-#   安裝後請重跑完整測試並更新交接驗收 receipt。
+# pytest 是 portable CI 的必要直接依賴；測試數與 suite 數必須在當次
+# clean checkout 動態產生，不在 dependency manifest 手抄。
 pytest>=7.0
+jsonschema>=4.23,<5
 
 # --- Optional ---
-# jsonschema            # report schema 驗證；亦可改用系統 CLI /usr/bin/jsonschema
 # matplotlib-cjk-fonts  # CJK 字型支援（本專案已改用 scripts/lib/plot_setup.py 處理）

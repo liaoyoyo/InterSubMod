@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- InterSubMod 內部八階段處理鏈
-     來源: docs/explain/12_intersubmod-io.standalone.html (svg #1)
-     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+     source: docs/explain/12_intersubmod-io.standalone.html (svg #1)
+     source_document_sha256: 15ee1b84b656b1c3a29af3d11562bc039645119812b6f4758a0d9e99547cd868
+     inline_svg_sha256: befc7f4d6b1b09435594b196601137a27c0384d58ee3c9805bde9f90e3f51cac
+     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 960 700" role="img" aria-labelledby="g1t g1d" xmlns="http://www.w3.org/2000/svg">
       <title id="g1t">InterSubMod 內部八階段處理鏈</title>
       <desc id="g1d">從 VCF 載入突變錨點開始，依序為：以突變為中心開視窗、從 BAM 抓取 read、
@@ -71,23 +73,23 @@
 
         <!-- S8 -->
         <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
-        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ read-level methylation dendrogram → 群數 → 統計</text>
-        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）；非 cellular phylogeny；輪廓係數掃 k=2..6</text>
-        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
-        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
+        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
+        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
+        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不證明 unsupervised cluster existence/truth</text>
+        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">PERMANOVA／gating 也只測指定 association；PERMANOVA 須合讀 PERMDISP</text>
 
         <!-- 右側：四檢定 -->
         <rect x="706" y="482" width="248" height="154" rx="6" fill="#fff" stroke="#B06A16" stroke-width="1.1"/>
         <text x="716" y="500" font-size="10" font-weight="700" fill="#B06A16">四類檢定各問不同問題</text>
         <text x="716" y="518" font-size="9.5" font-weight="700" fill="#6b4310">Global</text>
-        <text x="716" y="531" font-size="9" fill="#5C5A54">分群結果與生物標籤有關聯嗎</text>
+        <text x="716" y="531" font-size="9" fill="#5C5A54">algorithmic cluster × 指定 label 有關聯嗎</text>
         <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
-        <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
+        <text x="716" y="562" font-size="9" fill="#5C5A54">哪個 algorithmic cluster 富集指定 label</text>
         <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
-        <text x="716" y="593" font-size="9" fill="#5C5A54">標籤關聯 centroid separation 是否與 null 不相容</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">指定 label 的 read-distance variation 在置換 null 下顯著嗎</text>
         <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
-        <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
-        <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>
+        <text x="716" y="624" font-size="9" fill="#5C5A54">直接使用預先指定 label；結果仍是 association</text>
+        <text x="716" y="634" font-size="9" fill="#5C5A54">不是 cluster truth、cellular group 或因果</text>
 
         <!-- 左側註記 -->
         <rect x="12" y="226" width="228" height="66" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.1"/>

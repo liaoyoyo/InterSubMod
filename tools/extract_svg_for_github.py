@@ -1,139 +1,429 @@
 #!/usr/bin/env python3
-"""把解釋頁內嵌的手刻 SVG 抽成獨立檔，供 GitHub README / Wiki 使用。
+"""Extract selected inline SVG figures from the public explanation pages.
 
-為什麼需要這支：
-  - GitHub README 不吃內嵌 <style>，但吃 <img src="*.svg">；
-    本專案的 SVG 全部用 presentation attributes（fill="#xxx" 直接寫在元素上），
-    因此 GitHub 的 SVG sanitizer 不會破壞它們。
-  - GitHub 有暗色模式，而這些 SVG 是淺色設計且原本沒有底色 —— 在暗色模式下
-    深色文字會直接看不見。抽出時一律補一塊與頁面同色的背景 rect。
-  - 檢視者的系統若缺中文字型，SVG 會顯示豆腐字；因此同時渲染一份 PNG
-    （字型在本機已驗證正確）供 README 引用，SVG 留檔供編輯與論文使用。
+The default source and output directories are resolved from this script's Git
+checkout, never from the caller's current directory or a hard-coded machine
+path.  ``--source-dir`` and ``--output-dir`` accept either repo-relative or
+absolute paths.  Rendering happens in an automatically cleaned temporary
+directory under the selected output directory and each result is replaced
+atomically only after SVG and PNG validation succeeds.
 
-用法: python3 tools/extract_svg_for_github.py
-輸出: docs/images/<name>.svg + <name>.png
+Examples:
+
+    python3 tools/extract_svg_for_github.py --names architecture-overview
+    python3 tools/extract_svg_for_github.py \
+        --source-dir docs/explain --output-dir docs/images \
+        --names architecture-overview methylation-circularity
+    python3 tools/extract_svg_for_github.py --verify-only --names funnel-7samples
 """
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
 import os
 import re
-import subprocess
-import sys
+import tempfile
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
 
-ROOT = "/big7_disk/liaoyoyo2001/InterSubMod"
-SRC = os.path.join(ROOT, "docs", "explain")
-OUT = os.path.join(ROOT, "docs", "images")
-BG = "#FAF9F5"          # 與解釋頁 --c-bg 相同
-SCRATCH = "/tmp/claude-1067/-big7-disk-liaoyoyo2001-InterSubMod/64a5bba6-e59f-4d9c-989b-9885a695e7bf/scratchpad"
 
-# (來源檔, 該檔第幾個 svg, 輸出檔名, 用途說明)
-PLAN = [
-    ("11_system-map-overview.standalone.html", 1, "architecture-overview",
-     "五層系統全景：資料 → 上游工具 → 兩支 C++ → Python → HTML"),
-    ("11_system-map-overview.standalone.html", 2, "methylation-circularity",
-     "為什麼甲基化不能用來重建譜系（cis-ASM 循環）"),
-    ("11_system-map-overview.standalone.html", 3, "funnel-7samples",
-     "全 7 樣本 funnel：469,849 個突變如何流失到 63,506 個單一拓撲"),
-    ("12_intersubmod-io.standalone.html", 1, "ism-internal-pipeline",
-     "InterSubMod 內部八階段處理鏈"),
-    ("13_longlineage-io.standalone.html", 1, "longlineage-funnel",
-     "LongLineage 位點流失漏斗（為什麼輸出 0 棵樹）"),
-    ("14_upstream-data.standalone.html", 1, "upstream-toolchain",
-     "上游前處理鏈與 sidecar 串流設計"),
-    ("15_python-html-layer.standalone.html", 1, "workstation-refuse-design",
-     "工作站生成器的拒絕渲染設計（必填指標缺失時 fail-closed；不驗證科學真實性）"),
-    ("16_how-to-run.standalone.html", 1, "howto-six-steps",
-     "操作六步驟與各自的驗收點"),
-]
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_SOURCE_DIR = REPO_ROOT / "docs" / "explain"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "docs" / "images"
+BACKGROUND = "#FAF9F5"
+SVG_RE = re.compile(r"<svg\b.*?</svg>", re.DOTALL | re.IGNORECASE)
+CSS_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+CSS_URL_RE = re.compile(
+    r"url\s*\(\s*(?:(?P<quote>['\"])(?P<quoted>.*?)"
+    r"(?P=quote)|(?P<unquoted>[^)]*?))\s*\)",
+    re.IGNORECASE | re.DOTALL,
+)
+ALLOWED_RENDER_REQUEST_SCHEMES = {"about", "blob", "data", "file"}
 
-SVG_RE = re.compile(r"<svg\b.*?</svg>", re.S)
+
+@dataclass(frozen=True)
+class Figure:
+    source_file: str
+    svg_index: int
+    output_name: str
+    caption: str
+
+
+FIGURES = (
+    Figure(
+        "11_system-map-overview.standalone.html",
+        1,
+        "architecture-overview",
+        "五層系統全景：資料 → 上游工具 → 兩支 C++ → Python → HTML",
+    ),
+    Figure(
+        "11_system-map-overview.standalone.html",
+        2,
+        "methylation-circularity",
+        "為什麼甲基化不能用來重建譜系（cis-ASM 循環）",
+    ),
+    Figure(
+        "11_system-map-overview.standalone.html",
+        3,
+        "funnel-7samples",
+        "7 technical datasets／6 biological IDs funnel：候選位點依可排序性與圖形狀態分層",
+    ),
+    Figure(
+        "12_intersubmod-io.standalone.html",
+        1,
+        "ism-internal-pipeline",
+        "InterSubMod 內部八階段處理鏈",
+    ),
+    Figure(
+        "13_longlineage-io.standalone.html",
+        1,
+        "longlineage-funnel",
+        "LongLineage 位點流失漏斗（目前不形成已確認細胞譜系）",
+    ),
+    Figure(
+        "14_upstream-data.standalone.html",
+        1,
+        "upstream-toolchain",
+        "上游前處理鏈與 sidecar 串流設計",
+    ),
+    Figure(
+        "15_python-html-layer.standalone.html",
+        1,
+        "workstation-refuse-design",
+        "工作站生成器的拒絕渲染設計（防止規格所列必填欄位被靜默省略）",
+    ),
+    Figure(
+        "16_how-to-run.standalone.html",
+        1,
+        "howto-six-steps",
+        "操作六步驟與各自的驗收點",
+    ),
+)
+
+
+def sha256_bytes(payload: bytes) -> str:
+    return hashlib.sha256(payload).hexdigest()
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def resolve_from_repo(value: str | Path) -> Path:
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    return path.resolve()
+
+
+def display_path(path: Path) -> str:
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def parse_view_box(svg: str) -> tuple[float, float, float, float]:
+    root = ET.fromstring(svg)
+    raw = root.attrib.get("viewBox")
+    if raw is None:
+        raise ValueError("SVG root has no viewBox; aspect ratio cannot be verified")
+    values = [float(value) for value in re.split(r"[\s,]+", raw.strip()) if value]
+    if len(values) != 4 or values[2] <= 0 or values[3] <= 0:
+        raise ValueError(f"invalid SVG viewBox: {raw!r}")
+    return values[0], values[1], values[2], values[3]
+
+
+def validate_css_resource_references(css: str, location: str) -> None:
+    """Allow local SVG fragment references but reject imported resources."""
+    without_comments = CSS_COMMENT_RE.sub("", css)
+    if re.search(r"@\s*import\b", without_comments, flags=re.IGNORECASE):
+        raise ValueError(f"unsafe CSS @import in {location}")
+
+    url_openings = list(re.finditer(r"url\s*\(", without_comments, flags=re.IGNORECASE))
+    url_matches = list(CSS_URL_RE.finditer(without_comments))
+    if len(url_matches) != len(url_openings):
+        raise ValueError(f"malformed or unsupported CSS url() in {location}")
+
+    for match in url_matches:
+        value = (match.group("quoted") if match.group("quote") else match.group("unquoted") or "").strip()
+        if re.fullmatch(r"#[A-Za-z_][A-Za-z0-9_.:-]*", value) is None:
+            raise ValueError(
+                f"unsafe non-fragment CSS url() in {location}: {value!r}"
+            )
+
+
+def validate_svg_security(svg: str) -> None:
+    """Reject active or remotely loaded SVG content before browser rendering."""
+    root = ET.fromstring(svg)
+    for element in root.iter():
+        local_name = element.tag.rsplit("}", 1)[-1].lower()
+        if local_name in {"script", "foreignobject"}:
+            raise ValueError(f"unsafe SVG element: {local_name}")
+        if local_name == "style":
+            validate_css_resource_references(
+                "".join(element.itertext()), "<style> element"
+            )
+        for raw_name, raw_value in element.attrib.items():
+            attr_name = raw_name.rsplit("}", 1)[-1].lower()
+            value = raw_value.strip().lower()
+            if attr_name.startswith("on"):
+                raise ValueError(f"unsafe SVG event attribute: {attr_name}")
+            if attr_name == "href" and value and not value.startswith("#"):
+                raise ValueError(f"unsafe non-fragment SVG href: {raw_value!r}")
+            if attr_name == "style" or re.search(
+                r"url\s*\(", raw_value, flags=re.IGNORECASE
+            ):
+                validate_css_resource_references(
+                    raw_value, f"{local_name}[{attr_name}]"
+                )
 
 
 def add_background(svg: str) -> str:
-    """在最底層插入背景色塊，避免 GitHub 暗色模式下深色文字看不見。"""
-    m = re.search(r'viewBox="([\d.\s\-]+)"', svg)
-    if not m:
-        return svg
-    parts = m.group(1).split()
-    w, h = parts[2], parts[3]
-    rect = f'<rect x="0" y="0" width="{w}" height="{h}" fill="{BG}"/>'
-    # 插在 <desc>/<title> 之後、第一個繪圖元素之前
+    """Insert an opaque background while retaining the source viewBox."""
+    x, y, width, height = parse_view_box(svg)
+    rect = (
+        f'<rect x="{x:g}" y="{y:g}" width="{width:g}" height="{height:g}" '
+        f'fill="{BACKGROUND}"/>'
+    )
     for anchor in ("</desc>", "</title>"):
         if anchor in svg:
-            i = svg.index(anchor) + len(anchor)
-            return svg[:i] + "\n  " + rect + svg[i:]
-    i = svg.index(">") + 1        # 沒有 title/desc 就緊接 <svg ...> 之後
-    return svg[:i] + "\n  " + rect + svg[i:]
+            offset = svg.index(anchor) + len(anchor)
+            return f"{svg[:offset]}\n  {rect}{svg[offset:]}"
+    offset = svg.index(">") + 1
+    return f"{svg[:offset]}\n  {rect}{svg[offset:]}"
 
 
-def render_png(svg_path: str, png_path: str, width: int) -> bool:
-    """用 playwright 渲染，確保字型與本機驗證過的解釋頁一致。"""
-    html = os.path.join(SCRATCH, "_svg_render.html")
-    svg = open(svg_path, encoding="utf-8").read()
-    # 去掉 XML 宣告，讓它能直接嵌進 HTML
-    svg = re.sub(r"<\?xml[^>]*\?>\s*", "", svg)
-    open(html, "w", encoding="utf-8").write(
-        '<meta charset="utf-8"><style>'
-        'html,body{margin:0;padding:0;background:%s}'
-        'svg{display:block;width:%dpx;height:auto}'
-        '</style>%s' % (BG, width, svg))
-    subprocess.run(
-        [sys.executable, os.path.join(ROOT, "tools", "render_html_shot.py"),
-         html, "-o", png_path, "--width", str(width), "--full"],
-        capture_output=True, text=True, timeout=180)
-    if not os.path.exists(png_path):
-        return False
-    trim(png_path)
-    return True
+def extract_inline_svg(source_path: Path, svg_index: int) -> tuple[str, bytes]:
+    source_bytes = source_path.read_bytes()
+    blocks = SVG_RE.findall(source_bytes.decode("utf-8"))
+    if len(blocks) < svg_index:
+        raise ValueError(
+            f"{display_path(source_path)} contains {len(blocks)} SVG blocks; "
+            f"cannot select #{svg_index}"
+        )
+    return blocks[svg_index - 1], source_bytes
 
 
-def trim(png_path: str, pad: int = 12) -> None:
-    """裁掉與背景同色的外框留白 —— --full 會抓整頁高度，SVG 下方常留一大片空白。"""
-    try:
-        from PIL import Image, ImageChops
-    except ImportError:
-        return
-    im = Image.open(png_path).convert("RGB")
-    bg = Image.new("RGB", im.size, tuple(int(BG[i:i + 2], 16) for i in (1, 3, 5)))
-    box = ImageChops.difference(im, bg).getbbox()
-    if not box:
-        return
-    l, t, r, b = box
-    l, t = max(0, l - pad), max(0, t - pad)
-    r, b = min(im.size[0], r + pad), min(im.size[1], b + pad)
-    im.crop((l, t, r, b)).save(png_path)
+def build_svg_document(figure: Figure, source_path: Path) -> tuple[str, dict[str, str]]:
+    inline_svg, source_bytes = extract_inline_svg(source_path, figure.svg_index)
+    validate_svg_security(inline_svg)
+    svg = add_background(inline_svg)
+    opening_tag = svg.split(">", 1)[0]
+    if "xmlns=" not in opening_tag:
+        svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"', 1)
+    source_sha256 = sha256_bytes(source_bytes)
+    inline_sha256 = sha256_bytes(inline_svg.encode("utf-8"))
+    source_label = display_path(source_path)
+    document = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f"<!-- {figure.caption}\n"
+        f"     source: {source_label} (svg #{figure.svg_index})\n"
+        f"     source_document_sha256: {source_sha256}\n"
+        f"     inline_svg_sha256: {inline_sha256}\n"
+        "     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->\n"
+        f"{svg}\n"
+    )
+    ET.fromstring(document)
+    return document, {
+        "source": source_label,
+        "source_document_sha256": source_sha256,
+        "inline_svg_sha256": inline_sha256,
+    }
 
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    manifest = []
-    for src, idx, name, caption in PLAN:
-        path = os.path.join(SRC, src)
-        blocks = SVG_RE.findall(open(path, encoding="utf-8").read())
-        if len(blocks) < idx:
-            print("  [SKIP] %s 只有 %d 個 svg，取不到 #%d" % (src, len(blocks), idx))
-            continue
-        svg = add_background(blocks[idx - 1])
-        if "xmlns=" not in svg.split(">")[0]:
-            svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"', 1)
-        svg_out = os.path.join(OUT, name + ".svg")
-        open(svg_out, "w", encoding="utf-8").write(
-            '<?xml version="1.0" encoding="UTF-8"?>\n'
-            "<!-- %s\n     來源: docs/explain/%s (svg #%d)\n"
-            "     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->\n"
-            % (caption, src, idx) + svg + "\n")
+def render_png(svg_document: str, png_path: Path) -> tuple[int, int]:
+    """Render only the SVG element at the exact viewBox aspect ratio."""
+    from PIL import Image
+    from playwright.sync_api import sync_playwright
 
-        vb = re.search(r'viewBox="[\d.\s\-]*?\s([\d.]+)\s([\d.]+)"', svg)
-        w = int(float(vb.group(1))) if vb else 900
-        png_out = os.path.join(OUT, name + ".png")
-        ok = render_png(svg_out, png_out, min(max(w, 700), 1100))
-        size_svg = os.path.getsize(svg_out)
-        size_png = os.path.getsize(png_out) if ok else 0
-        print("  %-28s svg %6.1f KB | png %s" %
-              (name, size_svg / 1024, ("%6.1f KB" % (size_png / 1024)) if ok else "FAILED"))
-        manifest.append((name, caption, size_svg, size_png))
+    _, _, view_width, view_height = parse_view_box(svg_document)
+    pixel_width = min(max(round(view_width), 700), 1100)
+    pixel_height = round(pixel_width * view_height / view_width)
+    inline_svg = re.sub(r"<\?xml[^>]*\?>\s*", "", svg_document, count=1)
+    markup = (
+        '<!doctype html><meta charset="utf-8">'
+        "<style>html,body{margin:0;padding:0;background:"
+        f"{BACKGROUND};width:{pixel_width}px;height:{pixel_height}px;overflow:hidden}}"
+        f"svg{{display:block;width:{pixel_width}px!important;height:{pixel_height}px!important}}</style>"
+        f"{inline_svg}"
+    )
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(
+                viewport={"width": pixel_width, "height": pixel_height},
+                device_scale_factor=1,
+            )
+            disallowed_requests: list[str] = []
 
-    print("\n共產出 %d 組" % len(manifest))
-    return manifest
+            def record_request(request: object) -> None:
+                url = str(getattr(request, "url", ""))
+                scheme = url.split(":", 1)[0].lower() if ":" in url else ""
+                if scheme not in ALLOWED_RENDER_REQUEST_SCHEMES:
+                    disallowed_requests.append(url)
+
+            def block_disallowed_route(route: object) -> None:
+                request = getattr(route, "request")
+                url = str(getattr(request, "url", ""))
+                scheme = url.split(":", 1)[0].lower() if ":" in url else ""
+                if scheme not in ALLOWED_RENDER_REQUEST_SCHEMES:
+                    getattr(route, "abort")("blockedbyclient")
+                else:
+                    getattr(route, "continue_")()
+
+            page.on("request", record_request)
+            page.route("**/*", block_disallowed_route)
+            page.set_content(markup, wait_until="load")
+            page.evaluate("document.fonts.ready")
+            if disallowed_requests:
+                attempted = ", ".join(sorted(set(disallowed_requests))[:5])
+                raise ValueError(
+                    "SVG rendering attempted a disallowed external request: "
+                    f"{attempted}"
+                )
+            locator = page.locator("svg")
+            box = locator.bounding_box()
+            if box is None or round(box["width"]) != pixel_width or round(box["height"]) != pixel_height:
+                raise ValueError(f"rendered SVG bounds do not preserve viewBox ratio: {box}")
+            locator.screenshot(path=str(png_path), animations="disabled")
+        finally:
+            browser.close()
+    with Image.open(png_path) as image:
+        image.verify()
+    with Image.open(png_path) as image:
+        if image.format != "PNG" or image.size != (pixel_width, pixel_height):
+            raise ValueError(
+                f"invalid PNG output: format={image.format}, size={image.size}, "
+                f"expected={(pixel_width, pixel_height)}"
+            )
+    return pixel_width, pixel_height
+
+
+def selected_figures(names: Iterable[str] | None) -> list[Figure]:
+    by_name = {figure.output_name: figure for figure in FIGURES}
+    if not names:
+        return list(FIGURES)
+    unknown = sorted(set(names) - set(by_name))
+    if unknown:
+        raise ValueError(f"unknown figure name(s): {', '.join(unknown)}")
+    return [by_name[name] for name in names]
+
+
+def process_figure(
+    figure: Figure,
+    source_dir: Path,
+    output_dir: Path,
+    temp_dir: Path,
+    verify_only: bool,
+) -> dict[str, object]:
+    source_path = source_dir / figure.source_file
+    svg_path = output_dir / f"{figure.output_name}.svg"
+    png_path = output_dir / f"{figure.output_name}.png"
+    if not source_path.is_file():
+        raise FileNotFoundError(f"source HTML not found: {source_path}")
+
+    svg_document, provenance = build_svg_document(figure, source_path)
+    temporary_svg = temp_dir / svg_path.name
+    temporary_png = temp_dir / png_path.name
+    temporary_svg.write_text(svg_document, encoding="utf-8")
+    dimensions = render_png(svg_document, temporary_png)
+    expected_svg_sha256 = sha256_file(temporary_svg)
+    expected_png_sha256 = sha256_file(temporary_png)
+
+    if verify_only:
+        if not svg_path.is_file() or not png_path.is_file():
+            raise FileNotFoundError(f"generated pair missing: {svg_path}, {png_path}")
+        actual_svg_sha256 = sha256_file(svg_path)
+        actual_png_sha256 = sha256_file(png_path)
+        if actual_svg_sha256 != expected_svg_sha256 or actual_png_sha256 != expected_png_sha256:
+            raise ValueError(
+                f"generated pair is stale for {figure.output_name}: "
+                f"svg={actual_svg_sha256 == expected_svg_sha256}, "
+                f"png={actual_png_sha256 == expected_png_sha256}"
+            )
+    else:
+        os.replace(temporary_svg, svg_path)
+        os.replace(temporary_png, png_path)
+        actual_svg_sha256 = sha256_file(svg_path)
+        actual_png_sha256 = sha256_file(png_path)
+
+    return {
+        "name": figure.output_name,
+        **provenance,
+        "svg_path": display_path(svg_path),
+        "svg_sha256": actual_svg_sha256,
+        "png_path": display_path(png_path),
+        "png_sha256": actual_png_sha256,
+        "png_dimensions": list(dimensions),
+        "status": "VERIFIED" if verify_only else "GENERATED_AND_VERIFIED",
+    }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source-dir",
+        default=str(DEFAULT_SOURCE_DIR),
+        help="source HTML directory; relative paths resolve from the current checkout",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=str(DEFAULT_OUTPUT_DIR),
+        help="SVG/PNG output directory; relative paths resolve from the current checkout",
+    )
+    parser.add_argument(
+        "--names",
+        nargs="+",
+        choices=[figure.output_name for figure in FIGURES],
+        help="one or more output names (default: all configured figures)",
+    )
+    parser.add_argument(
+        "--verify-only",
+        action="store_true",
+        help="regenerate in a temporary directory and compare hashes without changing outputs",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    source_dir = resolve_from_repo(args.source_dir)
+    output_dir = resolve_from_repo(args.output_dir)
+    if not source_dir.is_dir():
+        raise FileNotFoundError(f"source directory not found: {source_dir}")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    figures = selected_figures(args.names)
+    records: list[dict[str, object]] = []
+    with tempfile.TemporaryDirectory(prefix=".extract-svg-", dir=output_dir) as temporary:
+        temp_dir = Path(temporary)
+        for figure in figures:
+            records.append(
+                process_figure(figure, source_dir, output_dir, temp_dir, args.verify_only)
+            )
+    print(
+        json.dumps(
+            {
+                "source_dir": display_path(source_dir),
+                "output_dir": display_path(output_dir),
+                "mode": "VERIFY_ONLY" if args.verify_only else "GENERATE",
+                "count": len(records),
+                "figures": records,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

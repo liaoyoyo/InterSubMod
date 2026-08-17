@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "handoff_package_validation",
+  "generated_at": "2026-08-13T04:27:18.288200+00:00",
+  "package_root": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/handoff/20260813_完整研究資料與軟體交接_01",
+  "pass": true,
+  "tally": {
+    "PASS": 13,
+    "FAIL": 0
+  },
+  "checks": [
+    {
+      "check_id": "package_root",
+      "status": "PASS",
+      "details": {
+        "path": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/docs/handoff/20260813_完整研究資料與軟體交接_01"
+      }
+    },
+    {
+      "check_id": "markdown_links",
+      "status": "PASS",
+      "details": {
+        "markdown_files": 10,
+        "relative_links_checked": 35,
+        "missing": 0
+      }
+    },
+    {
+      "check_id": "json_parse",
+      "status": "PASS",
+      "details": {
+        "json_files": 28,
+        "parse_errors": 0
+      }
+    },
+    {
+      "check_id": "evidence_manifest",
+      "status": "PASS",
+      "details": {
+        "records": 16,
+        "sha256_bound_records": 15,
+        "summary_hash_bound": 1,
+        "missing": 0,
+        "hash_mismatch": 0
+      }
+    },
+    {
+      "check_id": "dataset_registry",
+      "status": "PASS",
+      "details": {
+        "technical_datasets": 7,
+        "biological_samples": 6
+      }
+    },
+    {
+      "check_id": "run_registry",
+      "status": "PASS",
+      "details": {
+        "physical_runs": 51,
+        "unique_physical_run_ids": 51,
+        "unique_physical_paths": 51
+      }
+    },
+    {
+      "check_id": "artifact_registry",
+      "status": "PASS",
+      "details": {
+        "artifacts": 36,
+        "unique_artifact_ids": 36,
+        "final_for_scope": 20,
+        "science_authority_final": 19,
+        "provenance_only_validated_derived_final": 1,
+        "tagged_bam_partial_non_final": 14
+      }
+    },
+    {
+      "check_id": "claim_registries",
+      "status": "PASS",
+      "details": {
+        "claims": 158,
+        "unique_claim_ids": 158,
+        "sha256_match": true,
+        "release_gates": {
+          "P0_SOURCE_READY": "PASS",
+          "SOURCE_READY": "BLOCKED",
+          "PUBLICATION_READY": "BLOCKED",
+          "RELEASE_READY": "BLOCKED"
+        }
+      }
+    },
+    {
+      "check_id": "site_profile_join",
+      "status": "PASS",
+      "details": {
+        "profile": "machine_profiles/bip7.path-preflight.json",
+        "profile_datasets": 1,
+        "technical_dataset_id_joins": 1,
+        "object_key_alias_joins": 1
+      }
+    },
+    {
+      "check_id": "standalone_html",
+      "status": "PASS",
+      "details": {
+        "standalone_html_files": 1,
+        "parse_errors": 0,
+        "external_runtime_resources": 0
+      }
+    },
+    {
+      "check_id": "authority_replay",
+      "status": "PASS",
+      "details": {
+        "records": 19,
+        "match": 19,
+        "missing": 0,
+        "hash_mismatch": 0
+      }
+    },
+    {
+      "check_id": "release_gate_text",
+      "status": "PASS",
+      "details": {
+        "document": "00_INDEX.md",
+        "required_release_gate_fragments": 5
+      }
+    },
+    {
+      "check_id": "reader_contract",
+      "status": "PASS",
+      "details": {
+        "p0_local_guards": 33,
+        "p0_external_only_blocked": 1,
+        "bootstrap_interface": "--template/--output",
+        "registry_paths_prefixed": 3,
+        "package_local_crosswalk_evidence": 3,
+        "raw_authority_payload_policy": "LOCAL_DATA_PLANE"
+      }
+    }
+  ]
+}

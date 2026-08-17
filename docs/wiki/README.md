@@ -30,11 +30,12 @@ Wiki 本身是一個獨立的 git repo（`InterSubMod.wiki.git`），內容不�
 Wiki 的圖片是用 **raw URL** 引用主 repo 的檔案：
 
 ```
-https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/<name>.png
+https://raw.githubusercontent.com/liaoyoyo/InterSubMod/<IMMUTABLE_40HEX_SOURCE_COMMIT>/docs/images/<name>.png
 ```
 
-**所以 `docs/images/` 必須先被推到 `develop` 分支，圖才會顯示。**
-如果你要用別的分支，記得同步改掉 `Home.md` 與各頁面裡的 URL 分支名。
+**所以 `docs/images/` 必須先存在於同一個 immutable source commit，圖才會顯示。**
+禁止以會移動的 `main`／`develop` branch 名稱發布；Wiki source receipt 必須記錄同一個
+40-hex source commit 與 claim-registry hash。
 
 `.gitignore` 原本有 `*.png` 全域忽略，已加入例外規則
 （`!docs/images/*.png`、`!docs/images/*.svg`）讓這些展示圖能入版控。
@@ -54,39 +55,19 @@ GitHub 的 Wiki repo **要先在網頁上建立第一個頁面才會存在**，�
 ### 每次發布（建議用腳本）
 
 ```bash
-bash scripts/publish_wiki.sh          # 預覽會改什麼，不推送
-bash scripts/publish_wiki.sh --push   # 確認後實際發布
+bash scripts/publish_wiki.sh \
+  --source-commit <IMMUTABLE_40HEX_SOURCE_COMMIT> \
+  --dry-run \
+  --receipt /tmp/intersubmod-wiki-receipt.json
+
+# 只有 release candidate 的 publication gate 全部通過後，才可另加 --push。
 ```
 
-腳本會先擋掉最常見的失敗：**引用的圖還沒推到 `develop`**（那會讓 Wiki 全是破圖），
-以及 **wiki repo 尚未初始化**（會告訴你去哪裡點「Create the first page」）。
+腳本必須從指定 commit materialize `docs/wiki/`，並擋掉最常見的失敗：source commit
+不是 40-hex／圖片不在同一 commit／claim receipt 不一致／Wiki repo 尚未初始化。
 
-<details>
-<summary>手動步驟（腳本壞掉時的備援）</summary>
-
-```bash
-cd /big7_disk/liaoyoyo2001/InterSubMod
-
-# 1. 確認圖片已在遠端（否則 Wiki 會是破圖）
-git ls-tree --name-only origin/develop docs/images/ | head
-
-# 2. clone wiki repo 到暫存目錄
-rm -rf /tmp/ism-wiki
-git clone https://github.com/liaoyoyo/InterSubMod.wiki.git /tmp/ism-wiki
-
-# 3. 複製頁面（含側邊欄）
-cp docs/wiki/*.md /tmp/ism-wiki/
-rm -f /tmp/ism-wiki/README.md          # 本說明檔不要進 Wiki
-
-# 4. 檢查再推
-cd /tmp/ism-wiki
-git status
-git add -A
-git commit -m "docs(wiki): sync from docs/wiki/ (source: docs/explain/)"
-git push
-```
-
-</details>
+不提供從 dirty worktree 手動複製的發布備援；若腳本失敗，應修復腳本或維持
+`publication_state=BLOCKED`，不可繞過 source-commit 與 receipt gate。
 
 推完後到 `https://github.com/liaoyoyo/InterSubMod/wiki` 確認：
 **每一頁的圖都有顯示**、側邊欄有出現、頁面之間的連結都能點。

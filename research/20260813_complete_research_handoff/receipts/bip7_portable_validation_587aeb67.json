@@ -1,0 +1,61 @@
+{
+  "schema_name": "intersubmod.portable_validation_summary_receipt",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T05:37:00+00:00",
+  "hostname": "bip7",
+  "scope": "DEMO_AND_SOFTWARE_TESTS",
+  "evidence_status": "VALIDATED_DERIVED",
+  "machine_acceptance": false,
+  "publication_state": "BLOCKED",
+  "claim_ceiling": "Clean-checkout software build, tests, import isolation, and synthetic I/O/schema reproducibility only; no real-data or biological validation",
+  "tested_source": {
+    "repository": "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813",
+    "commit": "587aeb676823d9d3f9f96c68ae2048528b3b412e",
+    "clean": true
+  },
+  "commands": [
+    "InterSubMod/scripts/handoff/run_tiny_public_e2e.sh --source-repository /big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813 --revision 587aeb676823d9d3f9f96c68ae2048528b3b412e --work-dir /tmp/ism-pr4-final-parent-06loYp/run --jobs 2",
+    "cmake --build /tmp/ism-pr4-final-parent-06loYp/run/build --parallel 2",
+    "ctest --test-dir /tmp/ism-pr4-final-parent-06loYp/run/build --output-on-failure --no-tests=error --parallel 2",
+    "cd /tmp/ism-pr4-final-parent-06loYp/run/checkout && /tmp/ism-handoff-py310/bin/python -m pytest tests -q"
+  ],
+  "exit_codes": {
+    "tiny_e2e": 0,
+    "build_all": 0,
+    "ctest": 0,
+    "pytest": 0
+  },
+  "results": {
+    "tiny_all_pass": true,
+    "tiny_clean_clone_e2e_pass": true,
+    "summary_column_count": 199,
+    "tree_leaf_count": 12,
+    "tree_semantics": "read_dendrogram_from_methylation_distance_not_cellular_lineage",
+    "ctest_passed": 270,
+    "ctest_failed": 0,
+    "pytest_passed": 223,
+    "pytest_subtests_passed": 8,
+    "pytest_warnings": 43,
+    "foreign_original_repo_warning_path_present": false
+  },
+  "hashes": {
+    "binary_sha256": "da3b1bb530763e5e5ec8cac74b8de4bffe2966a43a5b97cc862ec705ba81f356",
+    "tiny_full_receipt_sha256": "a5e5a8874fe2b3696bb616001ad35328a2268c1bf5de492f2adcb042d7a9d8b1",
+    "build_all_log_sha256": "6c57009491089bbac02c83731c0dc52dbb140632ab623e619c6b2df7894353ad",
+    "ctest_log_sha256": "9f2712fa21ce04718be2196e2bae0fa0f4dbcec46b673473822d454644181747",
+    "pytest_log_sha256": "019f331ee31688971337a149dd0c9487b71ee0b4b0ae064a48752b113625d8f8"
+  },
+  "ephemeral_paths": {
+    "tiny_full_receipt": "/tmp/ism-pr4-final-parent-06loYp/run/tiny_public_e2e_receipt.json",
+    "build_all_log": "/tmp/ism-pr4-final-parent-06loYp/build-all.log",
+    "ctest_log": "/tmp/ism-pr4-final-parent-06loYp/ctest.log",
+    "pytest_log": "/tmp/ism-pr4-final-parent-06loYp/pytest.log"
+  },
+  "known_limits": [
+    "The exact CTest and pytest counts are observations of the tested commit, not static release promises.",
+    "The synthetic fixture is DEMO scope and cannot support biological claims.",
+    "This receipt does not satisfy bip7 real-data preflight because four local checksum locators remain missing.",
+    "This receipt does not satisfy bip8 host-local acceptance.",
+    "The commit containing this receipt is intentionally later than tested_source.commit; GitHub-hosted CI must validate the final PR head."
+  ]
+}

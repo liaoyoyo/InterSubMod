@@ -1,0 +1,16 @@
+{
+  "registry_type": "dataset_alias_registry",
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-13T14:00:00+08:00",
+  "aliases": [
+    {
+      "site_profile_key": "HCC1395_ONT_5kHz",
+      "technical_dataset_id": "HCC1395",
+      "biological_id": "HCC1395",
+      "platform": "ONT_5kHz",
+      "authority_membership": "AUTHORITY_SCOPE_MEMBER",
+      "known_limits": "The site profile key is a local operator-facing alias. Registry joins and scientific denominators must use technical_dataset_id=HCC1395."
+    }
+  ],
+  "join_contract": "Join site-profile datasets to dataset_registry.json using each record's technical_dataset_id field, never the datasets object key."
+}

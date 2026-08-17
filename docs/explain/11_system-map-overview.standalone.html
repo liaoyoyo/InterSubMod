@@ -7,10 +7,18 @@
 <!--
   doc_type: explain_system_map   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   受眾: 指導教授 + 實驗室同學（第一次接觸這套系統的人）
   data_sources: scratchpad/collect_{ism_cli,ism_pipeline,ism_outputs,ll_cli_status,
                 ll_science_flow,ll_artifacts,upstream_tools,python_html_layer,science_goal}.json
-  驗證: 334 個 source_ref(檔案:行號) + 111 個路徑宣稱，本輪全部機械重驗，0 捏造、0 行號越界
+  歷史自述: 334 個 source_ref + 111 個路徑曾被記為 0 缺失／0 越界；因缺 commit-pinned inventory/receipt，ALG-023 目前為 UNVERIFIED
 -->
 <style>
 :root{
@@ -103,6 +111,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 </head>
 <body>
@@ -136,7 +178,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     這套系統要解決的問題是：<b>從 bulk 長讀長資料建立可審核的局部突變狀態候選結構，並標出哪些證據仍不足以確認細胞譜系</b>。
   </p>
   <p style="margin-top:12px">
-    若只使用短讀長所給的<b>各位點 marginal VAF</b>，不加 linkage 或額外模型假設，多種突變組合可產生相同觀察，因而不可識別（non-identifiable）；這不是對所有 short-read 整合方法的無條件不可能宣告。
+    傳統做法用短讀長測序，只能看到每個位點各自的變異頻率；若只靠 per-locus marginal VAF、且沒有 linkage 或額外模型假設，此逆問題不可識別。
     本系統改用 <b>ONT 長讀長</b>：一條 DNA 分子動輒數萬鹼基，可以<b>同時跨過好幾個突變位點</b>，
     於是「這兩個突變在不在同一條實驗取樣到的物理分子上」成為<b>直接觀測</b>；它們是否來自同一細胞群、以及譜系關係，仍是受模型與輔助資料限制的推論。
   </p>
@@ -148,9 +190,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <div class="takeaway pass">
   <span class="lab">本系統最值得注意的設計</span>
-  它在<b>機器欄位的層級</b>把「技術跑通」和「科學可用」分開：canonical 輸出裡
-  <code>technical_all_pass = true</code> 但 <code>validation_evidence_eligible = false</code>。
-  這兩個 flag 記在 canonical <code>cohort_receipt.json</code> 與 <code>summary/all7_summary.json</code>（不在 <code>authority_manifest.json</code> 頂層）。2026-08-13 的命令實測為 270 tests / 39 suites 全過，但該批結果仍<b>不具 validation-evidence eligibility</b>。
+  它在<b>機器欄位的層級</b>把「技術跑通」和「科學可用」分開：canonical <code>cohort_receipt.json</code>
+  承載 <code>technical_all_pass = true</code>，而 <code>summary/all7_summary.json</code> 承載
+  <code>validation_evidence_eligible = false</code>。Frozen cohort receipts 的具名 checks 對其引用的 frozen artifacts
+  通過；這不是 current-source certification，也不是 production／release gate PASS，因此這批結果<b>還不能當作驗證證據</b>。
   這種「不確定就明講不確定」的紀律，貫穿整份設計。
 </div>
 
@@ -168,10 +211,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <div class="figtitle">圖 1 · 五層全景與資料流</div>
     <svg viewBox="0 0 980 620" role="img" aria-labelledby="f1t f1d" xmlns="http://www.w3.org/2000/svg">
       <title id="f1t">五層系統全景圖</title>
-      <desc id="f1d">由下而上分為原始資料層、上游工具層、中介契約層、兩支 C++ 主程式層、Python 分析與 HTML 呈現層。
-      原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤並存成 sidecar TSV；
-      InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入，前者可跑，後者只有 dataset-gate 子命令可跑；
-      輸出再由 Python 層算成統計與圖，最後生成離線可開的 HTML 工作站。</desc>
+      <desc id="f1d">由下而上分為原始資料層、上游工具層、read-label representation、兩支 C++ 主程式層、Python producer 與 validator/HTML 呈現層。
+      原始 ONT BAM 經 Dorado 產生甲基化標記、ClairS 產生體細胞突變清單、LongPhase-S 產生單倍型標籤；InterSubMod 從 BAM aux tags 讀 HP/PS，exact-PS/LongLineage 使用 sidecar，兩者不是直接 runtime interface；
+      InterSubMod 與 LongLineage 兩支程式各自讀取這些輸入；前者可由 exact checkout clean build，後者在 private candidate b9aaa12 可跑 preflight，且 frozen HCC1395 receipt 由 dataset-gate 產生 research artifacts，run/probe 仍 BLOCKED；
+      commit-pinned Python research solver 可作有獨立 receipt 的 science producer；validator/builders 與 HTML 只呈現 validated data，不暗中重算 science。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
 
         <!-- 層 1 原始資料 -->
@@ -210,15 +253,15 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="726" y="166" font-size="10.5" fill="#5C5A54">前三個是必要輸入的生產者。</text>
         <text x="726" y="182" font-size="10.5" fill="#B06A16">SAVANA 的 CN 結果尚未接進主線。</text>
 
-        <!-- 層 3 中介契約 -->
-        <text x="14" y="238" font-size="12" font-weight="700" fill="#5C5A54">③ 中介契約 — 兩支程式唯一 byte-level 一致的介面</text>
+        <!-- 層 3 read-label representations -->
+        <text x="14" y="238" font-size="12" font-weight="700" fill="#5C5A54">③ Read-label representations — BAM tags 與 sidecar 平行、非直接 runtime interface</text>
         <rect x="14" y="246" width="952" height="60" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
         <text x="30" y="268" font-size="12" font-weight="700" fill="#5B3FA0">HP/PS sidecar TSV（.tsv.gz + .tbi 索引）</text>
         <text x="30" y="285" font-family="ui-monospace,Menlo,monospace" font-size="9.5" fill="#3f2c70">#CHROM  START0  END0  QNAME  FLAG  MAPQ  CIGAR_B2  HP  PS</text>
-        <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
+        <text x="30" y="299" font-size="10" fill="#5C5A54">exact-PS/LongLineage 用 sidecar；InterSubMod 從 BAM aux tags 讀 HP/PS，不直接讀 sidecar。</text>
         <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
         <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
-        <text x="654" y="287" font-size="10" fill="#3f2c70">7 sidecars = 6,256,168,164 B；tagged-BAM 總量尚無收據</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 paired_full = 1.674 TiB；sampled-only；NON_FINAL</text>
 
         <!-- 層 4 兩支 C++ -->
         <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
@@ -229,7 +272,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
         <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
         <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
-        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 內部單點命令 exit 0（非 public fixture）</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">ddd8909a 釘選 census：29 options（branch-scoped）· clean build receipt exit 0</text>
         <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
         <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
         <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>
@@ -238,29 +281,29 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="512" y="366" font-size="13" font-weight="800" fill="#B06A16">LongLineage（longlineage）</text>
         <rect x="856" y="352" width="96" height="18" rx="9" fill="#B06A16"/>
         <text x="904" y="365" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">部分可跑</text>
-        <text x="512" y="385" font-size="10.5" fill="#6b4310">工業化重寫版（clean-room，不是 fork）。強制 fail-closed：</text>
-        <text x="512" y="399" font-size="10.5" fill="#6b4310">每個輸出都有 schema 與 SHA-256 收據，證據不足就拒絕出結果。</text>
+        <text x="512" y="385" font-size="10.5" fill="#6b4310">PRIVATE research-preview candidate；origin/license/dependency audit pending。</text>
+        <text x="512" y="399" font-size="10.5" fill="#6b4310">NOT_READY / non-production；P3/P4/P5/P7/P8 BLOCKED。</text>
         <text x="512" y="418" font-size="10.5" font-weight="700" fill="#6b4310">輸出粒度：per-read（每條 read 一列）</text>
-        <text x="512" y="437" font-size="10" fill="#9A3B3B">run / probe 子命令被鎖 · 只有 dataset-gate 能出科學結果</text>
+        <text x="512" y="437" font-size="10" fill="#9A3B3B">b9aaa12 candidate：run/probe 被鎖；HCC1395 frozen dataset-gate 有 artifacts</text>
         <rect x="510" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#B06A16" stroke-width="1"/>
         <text x="522" y="462" font-size="9.5" fill="#6b4310">吃：8 角色 manifest（BAM + VCF + sidecar + reference）</text>
         <text x="522" y="475" font-size="9.5" fill="#6b4310">吐：site_reads · methyl_calls · cooccurrence_* · topology_unit</text>
 
-        <!-- 層 5 Python / HTML -->
-        <text x="14" y="524" font-size="12" font-weight="700" fill="#5C5A54">⑤ Python 分析層 → HTML 呈現層</text>
+        <!-- 層 5 Python producers / presentation -->
+        <text x="14" y="524" font-size="12" font-weight="700" fill="#5C5A54">⑤ Python science producer vs validator／HTML presentation</text>
         <rect x="14" y="532" width="952" height="72" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
         <rect x="28" y="544" width="230" height="48" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
-        <text x="143" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">Python 分析腳本</text>
-        <text x="143" y="575" text-anchor="middle" font-size="9.5" fill="#2F6690">共現骨幹建構 · 分層樹枚舉</text>
-        <text x="143" y="588" text-anchor="middle" font-size="9.5" fill="#2F6690">funnel 普查 · 熱圖繪製</text>
+        <text x="143" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">Commit-pinned research solver</text>
+        <text x="143" y="575" text-anchor="middle" font-size="9.5" fill="#2F6690">共現骨幹 · candidate family</text>
+        <text x="143" y="588" text-anchor="middle" font-size="9.5" fill="#2F6690">獨立 input/command/schema/hash receipt</text>
         <rect x="268" y="544" width="230" height="48" rx="5" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.2"/>
-        <text x="383" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">standalone HTML 工作站</text>
-        <text x="383" y="575" text-anchor="middle" font-size="9.5" fill="#2F7D5B">離線可開 · 逐項人工判讀</text>
-        <text x="383" y="588" text-anchor="middle" font-size="9.5" fill="#2F7D5B">缺必填值就拒絕渲染</text>
+        <text x="383" y="561" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">Validator · builder · HTML</text>
+        <text x="383" y="575" text-anchor="middle" font-size="9.5" fill="#2F7D5B">validated data · 明示分母</text>
+        <text x="383" y="588" text-anchor="middle" font-size="9.5" fill="#2F7D5B">缺值拒絕渲染 · 不重算 science</text>
         <rect x="508" y="544" width="442" height="48" rx="5" fill="#fff" stroke="#E3DACC"/>
-        <text x="522" y="561" font-size="10.5" fill="#5C5A54">這層是「人真正看的東西」。C++ 只吐檔案，Python 把它變成</text>
-        <text x="522" y="575" font-size="10.5" fill="#5C5A54">可以用眼睛檢查的圖與表，並把人工判讀結果存回 localStorage 匯出。</text>
-        <text x="522" y="588" font-size="10" fill="#B06A16">⚠ 這層目前最碎片化，見「分析與呈現層」分冊</text>
+        <text x="522" y="561" font-size="10.5" fill="#5C5A54">Python 是語言，不是 evidence tier：solver 與 presenter 必須分開登錄。</text>
+        <text x="522" y="575" font-size="10.5" fill="#5C5A54">HTML 只能呈現 validated artifact；localStorage 判讀不能取代 producer receipt。</text>
+        <text x="522" y="588" font-size="10" fill="#B06A16">⚠ 未釘選 producer/receipt 的 Python 結果不得升格 authority</text>
 
         <!-- 箭頭 -->
         <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
@@ -274,9 +317,15 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       </g>
     </svg>
     <figcaption>
-      <b>怎麼讀這張圖：</b>由下往上是資料流方向。第 ③ 層的 sidecar TSV 是全系統的<b>樞紐</b> ——
-      它是唯一被兩支 C++ 程式的原始碼<b>寫死成相同格式</b>的檔案，也是把「一條 read 屬於哪個單倍型」這件事持久化的地方。
-      <br><b>數字出處：</b>2026-08-13 以 <code>stat -L</code> 量得 HCC1395 tumor BAM 為 <b>283,071,595,503 bytes（283.072 GB decimal；263.631 GiB）</b>；40,859,727 列 sidecar 為既有逐列收據。7 份壓縮 sidecar 總量為 <b>6,256,168,164 bytes（5.826510641724 GiB）</b>。歷史 tagged-BAM 總量 claim 沒有已提交的 per-file receipt，故不引用總量或節省倍率。
+      <b>怎麼讀這張圖：</b>由下往上是資料流方向。InterSubMod 從 BAM aux tags 讀 HP/PS；
+      exact-PS／LongLineage 使用 sidecar。兩者是 commit-scoped 平行 provenance contracts，
+      <b>不是</b>兩支引擎直接串接的執行期介面；tagged-BAM writer 另依 feature/preview commit 判讀。
+      <br><b>數字出處：</b>292 GB tumor BAM 與 40,859,727 列 sidecar 皆為具名歷史量測。2026-08-13 另盤點
+      14 個 PRE-FIX canonical tagged BAM（7 <code>paired_full</code>＋7 <code>paired_pileup</code>）合計
+      3,709,322,840,333 bytes。7 個 <code>paired_full</code> 的 exact paths/bytes/mtimes 合計
+      1,840,983,466,353 bytes（1.6743647 TiB），且 2026-08-13 重播 2026-07-11 首／中／尾 1 MiB sampled-identity receipt 為 7/7 MATCH。
+      但未計算 full-file SHA-256，也未證明與現行 7 sidecar 的 producer revision／內容等價，因此仍是 <code>PARTIAL/NON_FINAL</code>。
+      exact stat bytes quotient 為 294.2669×，只可稱跨世代 storage-footprint comparison；不是因果壓縮率或 frozen authority，舊 287× 無效。
     </figcaption>
   </figure>
 </section>
@@ -289,9 +338,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="table-wrap"><table>
     <thead><tr><th style="width:14%"></th><th style="width:43%">InterSubMod（ISM）</th><th style="width:43%">LongLineage（LL）</th></tr></thead>
     <tbody>
-      <tr><td><b>定位</b></td><td>研究原型：C++ 核心 ＋ 大量 Python 探索腳本</td><td>工業化重寫：truth-isolated、fail-closed</td></tr>
+      <tr><td><b>定位</b></td><td>研究原型：C++ 核心 ＋ 大量 Python 探索腳本</td><td>PRIVATE research-preview candidate：truth-isolated、fail-closed；source-origin／license／dependency audit pending</td></tr>
       <tr><td><b>git 起源</b></td><td class="mono">71ce312e</td><td class="mono">7a8f75e8 — <b>完全不同的根 commit</b></td></tr>
-      <tr><td><b>血緣</b></td><td>—</td><td><b>clean-room 重建，不是 fork</b>。靠 <code>ORIGIN.md</code> 的 21 條對照與 17 條 authority 把 ISM 的某個 commit 釘死當規格</td></tr>
+      <tr><td><b>血緣</b></td><td>—</td><td><code>ORIGIN.md</code> 記錄 21 條 source mapping 與 17 條 authority；在 origin/license gate 完成前，不把 clean-room／可公開來源當成已驗證結論</td></tr>
       <tr><td><b>輸出粒度</b></td><td><b>per-region</b>（每個 SNV 位點一包）</td><td><b>per-read</b>（每條 read 一列）</td></tr>
       <tr><td><b>單倍型來源</b></td><td>直接從 BAM 的 aux tag 讀</td><td><b>明文禁止讀 BAM tag</b>，只認 sidecar TSV</td></tr>
       <tr><td><b>對「甲基化能不能參與重建」的立場</b></td><td><span class="badge b-dead">絕不參與</span> 只做事後關聯描述</td><td><span class="badge b-warn">是必要關卡</span> 甲基化分不出群的位點不會有拓撲解</td></tr>
@@ -318,8 +367,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>inter_sub_mod</b><br><span class="muted">ISM 主程式</span></td>
         <td><span class="badge b-pass">可跑</span></td>
-        <td>內部單點指令在 2026-08-06 實測 exit 0；輸入未收入公開 Git objects，故執行時間不作 public/reproducible benchmark。含 normal BAM ＋ LOH BED 的版本亦為內部輸入測試。
-            ⚠ 原始碼與 binary 的 mtime 不能證明版本身分；正式使用前應從宣告 commit 重編，並記錄 toolchain、binary hash、測試輸出與退出碼。</td>
+        <td>build output <b>不入版控</b>；fresh clone 必須從 exact checkout 在 clean build directory 建置。具名 internal fixture 曾有單次 <b>2.9 秒、exit 0</b> receipt，僅限該硬體／commit／輸入，不是讀者 runtime promise；含 normal BAM＋LOH BED 的 internal receipt 亦不可替代 clean-clone 驗收。</td>
       </tr>
       <tr>
         <td><b>longlineage preflight</b></td>
@@ -329,21 +377,21 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>longlineage dataset-gate</b></td>
         <td><span class="badge b-warn">限制</span></td>
-        <td>目前可執行科學核心的 <b>HCC1395-only frozen <code>dataset-gate</code> 路徑</b>，在該資料上產出 8 個 artifact。
+        <td>在 <code>b9aaa12</code> candidate 的 frozen HCC1395 receipt 中，這是唯一觀察到能產生 research artifacts 的介面，該次產出 8 個 artifact。
             <span style="color:var(--c-dead);font-weight:800">●</span> 但 <b>樣本名稱硬寫死在原始碼裡</b> —— 換一個樣本就會失敗，必須改 C++ 重新編譯。</td>
       </tr>
       <tr>
         <td><b>longlineage run / probe</b></td>
         <td><span class="badge b-dead">被鎖</span></td>
-        <td>即使所有閘門都通過，仍被無條件擋下（KernelBlocked, exit 6）。
-            <b>關鍵區辨：這不是「程式沒寫」</b> —— M1／M2／topology 的核心都已實作，也被 dataset-gate 實際執行過。
-            被鎖的原因是<b>對照驗證（parity）的證據還不存在</b>。</td>
+        <td><code>run</code>/<code>probe</code> 仍無條件回 <code>KernelBlocked</code> (exit 6)。
+            <code>release_attestation.json</code> 的 P3/P4/P5 與 phase ledger／public-safety receipt 的 P7/P8 具名 gates 尚未通過，涵蓋 parity／validation、source-origin、license、dependency 與 release-safety。
+            部分 M1／M2／topology kernels 曾由具名 dataset-gate 執行，不等於全部核心、production entry 或公開資格完成；整體仍為 <code>NOT_READY</code>/non-production。</td>
       </tr>
       <tr>
         <td><b>longlineage 的 topology 產出</b></td>
         <td><span class="badge b-dead">目前為 0</span></td>
-        <td>HCC1395-only frozen <code>dataset-gate</code> 的全 autosome 實跑：79,687 個位點 → 通過甲基化關卡的只剩 <b>5 個</b> → 最終拓撲單元 <b>0 個</b>。
-            134,278 個配對中有 134,276 個被標記為不合格。repo 自己的決策紀錄也承認這點。</td>
+        <td><code>b9aaa12</code> candidate 的 frozen HCC1395 dataset-gate receipt：79,687 個位點 → 通過甲基化關卡的只剩 <b>5 個</b> → mutation-state candidate topology units <b>0 個</b>。
+            134,278 個配對中有 134,276 個被標記為不合格；此單一 receipt 不可外推其他 revision、dataset 或 run。</td>
       </tr>
       <tr>
         <td><b>longlineage-query / export-legacy</b></td>
@@ -351,20 +399,20 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <td>仍是 fail-closed 的空殼。</td>
       </tr>
       <tr>
-        <td><b>ISM 研究性候選樹枚舉器</b><br><span class="muted">Python + C++；model-conditional</span></td>
+        <td><b>research exact-PS candidate solver</b><br><span class="muted">獨立 Python + C++ 路徑；不是 <code>inter_sub_mod</code></span></td>
         <td><span class="badge b-pass">可跑</span></td>
-        <td>這才是目前<b>實際產出論文核心數字</b>的路徑，7 個樣本全跑完（見下方 §5 的 funnel）。</td>
+        <td>這是產出 frozen exact-PS candidate funnel 的路徑；已覆蓋 7 個 technical datasets／6 個 biological IDs（見下方 §5）。它不把 model-selected candidate shape 升格成細胞譜系。</td>
       </tr>
       <tr>
-        <td><b>7 個樣本的 sidecar 資料</b></td>
+        <td><b>7 個 technical datasets 的 sidecar 資料</b></td>
         <td><span class="badge b-pass">齊全</span></td>
         <td>實測 <code>run_status.tsv</code> 顯示 <b>7/7 全部 PASS</b>，可立即使用。</td>
       </tr>
       <tr>
         <td><b>輸出帶標籤的 BAM</b></td>
         <td><span class="badge b-warn">版本相依</span></td>
-        <td>InterSubMod <b>沒有寫 BAM 的能力</b>。LongLineage 公開 main <code>5daf50f</code> 也沒有；但 feature <code>b9aaa12</code> 已含 <code>longlineage-tag-bam</code>。
-            必須指定 commit，不可再寫成跨版本的「兩支都做不到」。</td>
+        <td>InterSubMod <b>沒有寫 BAM 的能力</b>。LongLineage private baseline/main snapshot <code>5daf50f</code> 也沒有；private public-preview candidate <code>b9aaa12</code> 已含 <code>longlineage-tag-bam</code>。
+            這只是 revision-scoped、尚未發布的 <code>NOT_READY</code> 能力；不可寫成公開或 production 可用。</td>
       </tr>
       <tr>
         <td><b>兩支程式串起來跑</b></td>
@@ -377,8 +425,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="ironclad">
     <b>給教授看的三句重點</b>
     <ol>
-      <li><b>能跑的那條線，是 InterSubMod ＋ 它的 Python 研究性候選樹枚舉器</b>，不是 LongLineage 主線。論文核心的 model-conditional 候選數字出自前者。</li>
-      <li><b>LongLineage 被鎖的原因是「證據不足」不是「程式沒寫」</b> —— 這是它刻意的 fail-closed 設計，不是 bug。</li>
+      <li><b>可作本次研究交接重現的主線，是 InterSubMod ＋ 獨立 research solver</b>；LongLineage 仍是 PRIVATE/NOT_READY preview candidate。兩者的數字與 receipt 不可混用。</li>
+      <li><b>LongLineage 的 <code>P3/P4/P5/P7/P8</code> 具名 gates 尚未通過</b>：部分 kernels 的具名 dataset-gate receipt 不能取代 parity／validation、source-origin／license／dependency 與 release-safety。</li>
       <li><b>沒有一條打通兩支程式的路</b>。零件很齊、契約很嚴，但接縫還沒建。</li>
     </ol>
   </div>
@@ -400,7 +448,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <title id="f2t">甲基化循環論證示意</title>
       <desc id="f2d">左側顯示一個位點觀察到兩群不同甲基化模式的 read，右側列出四種可能成因：
       germline 等位特異性甲基化、雜合性缺失導致的解遮蔽、拷貝數增益的劑量效應、以及真正的亞群譜系差異。
-      目前單一 bulk measurement set 在沒有 orthogonal data 或額外假設時不可識別這四者，因此不能單用甲基分群確認細胞亞群。</desc>
+      在目前 single-bulk 測量集合下，若無 orthogonal data 或額外假設，這四者不可識別；因此不能用甲基化分群獨立確認亞群。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
 
         <text x="450" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#9A3B3B">
@@ -451,47 +499,51 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="632" y="144" font-size="10.5" fill="#7a3030">但要排除 ①②③，就得先知道</text>
         <text x="632" y="160" font-size="10.5" fill="#7a3030">哪些 read 屬於哪個亞群 ——</text>
         <text x="632" y="182" font-size="11" font-weight="700" fill="#9A3B3B">這正是待證明的結論。</text>
-        <text x="632" y="204" font-size="10" fill="#5C5A54">需 orthogonal data 或明確額外假設才能打破。</text>
+        <text x="632" y="198" font-size="9.5" fill="#5C5A54">
+          <tspan x="632" dy="0">目前 single-bulk measurements</tspan>
+          <tspan x="632" dy="13">加現有假設，無法識別四種成因。</tspan>
+        </text>
 
         <!-- 底部解方 -->
         <rect x="20" y="252" width="864" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
         <text x="36" y="274" font-size="12" font-weight="800" fill="#2F7D5B">✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹</text>
-        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。</text>
-        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">遺傳 read-linkage 先定義 model-conditional 候選結構；甲基只事後描述關聯，不重排候選邊。</text>
+        <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個候選 allele = 物理分子連鎖；只在不使用甲基化衍生標籤下非循環。</text>
+        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">仍依賴 variant calling、alignment、basecalling 與 haplotag 假設；不是 assumption-free truth。</text>
+        <text x="36" y="321" font-size="10.5" fill="#1f4f3a">甲基化被隔離在主線之外：遺傳候選結構先固定，甲基只在事後做關聯描述，改不動邊。</text>
       </g>
     </svg>
     <figcaption>
       <b>這個設計的代價與收穫：</b>代價是甲基化這個資訊量很大的軸被降級成輔助；
-      收穫是重建結果<b>不會被審稿人以循環論證擊倒</b>。
-      實際數字上，甲基化輔助層共 1,045 個正式單元、811 個可評估、
-      最終只有 <b>3 個</b>（0.37%）達到穩健關聯 —— 這也印證了把它當骨幹會很危險。
+      收穫是避免「用甲基定義群、再用甲基驗證群」這一項可預見的循環論證批評；這不代表已通過外部同儕審查。
+      實際數字上，在 frozen formal family 中，甲基化輔助層共 1,045 個正式單元、811 個可評估、
+      最終只有 <b>3 個</b>（0.37%）達到該定義下的 robust pattern-conditioned association。這是現行設計不把該 formal family 當骨幹的一個理由，不是所有 methylation signal／backbone design 的總檢定。
     </figcaption>
   </figure>
 </section>
 
 <!-- ════════════════ 5 ════════════════ -->
 <section id="s5">
-  <h3><span class="num">05</span>實際跑出來長什麼樣？—— 全 7 樣本 funnel</h3>
+  <h3><span class="num">05</span>實際跑出來長什麼樣？—— 7 technical datasets／6 biological IDs funnel</h3>
   <p class="sub">
-    這是目前的 canonical 結果（2026-08-01 凍結，7 個樣本、chr1–22）。
+    這是目前的 canonical 結果（2026-08-01 凍結，7 個 technical datasets／6 個 biological IDs、chr1–22）。
     每一層的數字都能在 <code>denominator_registry.tsv</code> 或 <code>all7_summary.json</code> 裡查到。
   </p>
 
   <div class="kpis">
-    <div class="kpi info"><div class="v">469,849</div><div class="k">sSNV 資料列（全 7 樣本）</div></div>
-    <div class="kpi warn"><div class="v">66.5%</div><div class="k">單點無共現，無法建樹</div></div>
-    <div class="kpi pass"><div class="v">71,955</div><div class="k">有拓撲解且可排序的單元</div></div>
+    <div class="kpi info"><div class="v">469,849</div><div class="k">sSNV dataset records（7 technical datasets）</div></div>
+    <div class="kpi warn"><div class="v">66.5219%</div><div class="k">170,131／255,752 <code>k=1</code> strict components；非 dataset-record 比例</div></div>
+    <div class="kpi pass"><div class="v">71,955</div><div class="k">可由 frozen read-AF model 排序的 candidate units</div></div>
     <div class="kpi dead"><div class="v">0</div><div class="k">confirmed 細胞亞群</div></div>
   </div>
 
   <figure>
-    <div class="figtitle">圖 3 · 從 469,849 個突變到 63,506 個單一拓撲：每一層流失到哪裡去了</div>
+    <div class="figtitle">圖 3 · 從 469,849 筆 dataset records 到 63,506 筆 model-assigned candidate-shape records</div>
     <svg viewBox="0 0 940 560" role="img" aria-labelledby="f3t f3d" xmlns="http://www.w3.org/2000/svg">
-      <title id="f3t">七樣本 funnel 分流圖</title>
-      <desc id="f3d">從 469,849 筆 dataset records 開始，經 strict read-linked component 建構得到 255,752 個成分；170,131 個 k=1 成分占 strict-component 分母 66.52%，若改用 dataset-record 分母則為 36.21%，兩種口徑不可混用；
+      <title id="f3t">七 technical-dataset candidate funnel 分流圖</title>
+      <desc id="f3d">從 469,849 筆 dataset records 開始，經 strict read-linked component 建構得到 255,752 個成分；170,131 個 k=1 成分占 strict-component 分母 66.5219%。component census 無法推得 isolated dataset-record percentage；
       k 大於等於 2 者經有界切分成為 98,955 個分析單元，扣掉無突變者剩 85,941 個帶突變單元；
       其中 12.47% 因搜尋資源上限而放棄，75,224 個完成候選家族枚舉；再扣除分母為零與遞迴篩選者，
-      71,955 個可依指定 read-AF heuristic 排序；39,648 個在該模型/目標函數下有單一勝出候選樹、23,858 個的並列候選共用 rooted-unlabeled 形狀、8,449 個候選跨不同形狀。這些都不是 cellular phylogeny truth。</desc>
+      71,955 個可排序；frozen model 中 39,648 筆有單一最高分 candidate、23,858 筆雖有並列 candidate 但共享 rooted-unlabeled shape signature、8,449 筆 candidate shape 未解。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker>
@@ -500,7 +552,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <!-- L1 -->
         <rect x="250" y="14" width="440" height="40" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
-        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">sSNV 資料列（7 樣本 · chr1–22）</text>
+        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">sSNV dataset records（7 technical datasets · chr1–22）</text>
         <text x="470" y="48" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">469,849</text>
         <path d="M470,56 L470,76" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
 
@@ -512,9 +564,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <!-- 流失 1 -->
         <path d="M690,98 L760,98" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
         <rect x="766" y="76" width="166" height="50" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
-        <text x="849" y="92" text-anchor="middle" font-size="9.5" fill="#6b4310">k=1 單點，無共現可用</text>
-        <text x="849" y="108" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" font-weight="700" fill="#B06A16">170,131 / 255,752 = 66.52%</text>
-        <text x="849" y="119" text-anchor="middle" font-size="8.5" fill="#6b4310">對 469,849 records 則為 36.21%</text>
+        <text x="849" y="85" text-anchor="middle" font-size="7.8" font-weight="700" fill="#6b4310">k=1 strict components</text>
+        <text x="849" y="95" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7.5" font-weight="700" fill="#B06A16">170,131 / 255,752</text>
+        <text x="849" y="105" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7.5" font-weight="700" fill="#B06A16">= 66.5219%</text>
+        <text x="849" y="115" text-anchor="middle" font-size="7.2" fill="#6b4310">不可換成 dataset-record 分母</text>
+        <text x="849" y="123" text-anchor="middle" font-size="7" fill="#6b4310">無 isolated-record 比例；非生物正確率</text>
 
         <!-- L3 -->
         <rect x="250" y="142" width="440" height="40" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
@@ -536,7 +590,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <!-- L5 -->
         <rect x="250" y="270" width="440" height="40" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
-        <text x="470" y="288" text-anchor="middle" font-size="12" fill="#2F7D5B">候選樹家族 <tspan font-weight="700">完整枚舉完成</tspan></text>
+        <text x="470" y="288" text-anchor="middle" font-size="12" fill="#2F7D5B">候選結構家族 <tspan font-weight="700">完整枚舉完成</tspan></text>
         <text x="470" y="304" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">75,224（87.53%）</text>
         <path d="M470,312 L470,332" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <path d="M690,290 L760,290" stroke="#9A3B3B" stroke-width="1.8" marker-end="url(#ar3r)" fill="none"/>
@@ -562,14 +616,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <path d="M760,396 L760,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
 
         <rect x="60" y="418" width="240" height="62" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
-        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">模型下單一勝出候選</text>
+        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">frozen model 單一最高分 candidate</text>
         <text x="180" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">39,648（55.10%）</text>
-        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">指定 read-AF heuristic 下勝出</text>
+        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">data-record 層級；非生物真值</text>
 
         <rect x="350" y="418" width="240" height="62" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.6"/>
-        <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列，但樹形相同</text>
+        <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列 candidates，共享 shape signature</text>
         <text x="470" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">23,858（33.16%）</text>
-        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">模型下共用形狀；標籤並列</text>
+        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">frozen model/data-record 層級</text>
 
         <rect x="640" y="418" width="240" height="62" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="760" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#B06A16">並列且跨不同樹形</text>
@@ -581,18 +635,18 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <path d="M470,482 L470,498" stroke="#2F7D5B" stroke-width="1.6" fill="none"/>
         <path d="M470,498 L470,512" stroke="#2F7D5B" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <rect x="230" y="516" width="480" height="38" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="2"/>
-        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">模型下單一 rooted-unlabeled 候選形狀 = 39,648 + 23,858</text>
-        <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.26%</text>
+        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">單一 rooted-unlabeled candidate-shape signature = 39,648 + 23,858</text>
+        <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.2579%</text>
       </g>
     </svg>
     <figcaption>
       <b>算術自洽性已驗證：</b>39,648 + 23,858 = 63,506；+ 8,449 = 71,955；+ 3,224 + 45 = 75,224；
       + 10,717 = 85,941；+ 13,014 = 98,955。每一層加總都對得起來。
       <br>
-      <b><span style="color:var(--c-dead);font-weight:800">●</span> 最常被誤引的數字就是那個 88.26%。</b>它的正確讀法是：
-      「在<b>已可依指定 heuristic 排序的 71,955 個單元中</b>，有 88.26% 在模型下共用單一 rooted-unlabeled 候選形狀」——
+      <b><span style="color:var(--c-dead);font-weight:800">●</span> 最常被誤引的數字就是 88.2579%。</b>它的正確讀法是：
+      「在<b>已經可排序的 71,955 個 candidate units 中</b>，frozen model 對 63,506 個（88.2579%）指派單一 rooted-unlabeled candidate-shape signature」——
       這是 <b>model-conditional 的圖形統計</b>，<b>不是</b>「腫瘤裡 88% 的演化關係已經解出來了」。
-      分母不是全部突變。圖中的 170,131 個 k=1 是 <b>170,131 / 255,752 strict read-linked components = 66.52%</b>；若以最上游 <b>469,849 dataset records</b> 作比較分母則為 <b>36.21%</b>，兩者回答不同問題、不可互換。後續另有 12.47% 的資源上限放棄。
+      分母不是全部突變。圖中的 170,131 個 k=1 是 <b>170,131 / 255,752 strict read-linked components = 66.5219%</b>；component census 無法推得 isolated dataset-record percentage，不能改除以最上游 469,849 dataset records。後續另有 12.47% 的資源上限放棄。
     </figcaption>
   </figure>
 
@@ -600,8 +654,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <span class="lab"><span style="color:var(--c-dead);font-weight:800">●</span> 排序器同時也是篩選器 — 一個容易被忽略的細節</span>
     read-AF 不只用來「排序」候選樹，它在同分的候選集合裡<b>取最大值並丟掉其餘</b>，
     因此它實際上也<b>改變了候選集合本身</b>（實測丟棄 30.03%）。
-    後果：<b>純 parsimony（不靠 AF）的單一拓撲率只能說是一個區間，不能報單一數字</b>。
-    ⚠ 本輪查證發現：該區間的上界 88.26% 有 registry 佐證，
+    後果：<b>純 parsimony（不靠 AF）的單一 candidate-shape 比率只能說是一個區間，不能報單一數字</b>。
+    ⚠ 本輪查證發現：該區間的上界 88.2579% 有 registry 佐證，
     但下界 64.89% <b>在本 repo 內未 grep 到原始出處</b>，僅存在於工作記憶索引 ——
     對外引用前必須先補上出處。
   </div>
@@ -637,7 +691,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </div>
   </div>
 
-  <h4 class="mini">已測 formulation 的 NEGATIVE 結論與重啟條件</h4>
+  <h4 class="mini">已測為 negative／blocked 的方向（新假說須重新稽核）</h4>
   <div class="table-wrap"><table>
     <thead><tr><th style="width:34%">方向</th><th style="width:66%">為什麼不行</th></tr></thead>
     <tbody>
@@ -650,7 +704,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td><b>甲基化非監督分群確認亞群</b></td>
         <td>單一位點的四種成因不可拆（見 §4），屬已判 NEGATIVE 的 tumor-only double-dip。</td></tr>
       <tr><td><b>甲基化當變異 TP/FP 過濾器</b></td>
-        <td>當時範圍的已測 formulation 在多個測試呈 NEGATIVE；只有實質新假說且通過 pre-decision audit 才重啟。</td></tr>
+        <td>已測 formulation concluded negative；重開須 materially new hypothesis + pre-decision audit。</td></tr>
       <tr><td><b>用舊的 50 kb 鄰近取代嚴格 read linkage</b></td>
         <td>幾何鄰近不等於同分子連鎖。已被 read-linked 方法取代。</td></tr>
     </tbody>
@@ -658,8 +712,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <div class="takeaway">
     <span class="lab">證據等級的天花板</span>
-    <b>在目前單一 bulk measurement set 且不加 orthogonal data / 額外假設時，只能 characterize，不能確認 cellular clone/lineage</b>，因此封頂 ★3。
-    single-cell、multi-region 或其他正交證據可改變可識別性；Steiner 節點維持 <code>inferred</code>。
+    在目前單一 bulk observation／model 且未整合 CN／LOH 的條件下，<b>不能確認 cellular
+    subclone 或 linear ancestry</b>，因此目前封頂 ★3。single-cell、multi-region、orthogonal
+    CN／purity 等額外獨立證據可能提高識別性；不宣稱只有某一種 assay 可行。Steiner 節點會被
+    誠實標成 <code>inferred</code>。
   </div>
 </section>
 
@@ -671,19 +727,19 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="grid2">
     <div class="pcard ok">
       <h4>ISM 部件與輸入輸出 <span class="badge b-pass">可跑</span></h4>
-      <p class="oneline">主程式的 29 個選項、內部 8 個處理階段、每個輸出檔的真實欄位與範例行。</p>
+      <p class="oneline"><code>ddd8909a</code> 的釘選 29-option census（branch-scoped）、內部 8 個處理階段、每個輸出檔的真實欄位與範例行。</p>
       <div class="io">吃 → tumor BAM + reference + somatic VCF<br>吐 → methylation.csv · distance_matrix · tree.nwk</div>
       <a class="go" href="12_intersubmod-io.standalone.html">進入 ISM 分冊 →</a>
     </div>
     <div class="pcard lim">
       <h4>LongLineage 部件與契約 <span class="badge b-warn">部分可跑</span></h4>
-      <p class="oneline">4 個子命令的真實狀態、M1→M2→topology 科學鏈、artifact schema 與 read_id 的算法。</p>
+      <p class="oneline">Private candidate <code>b9aaa12</code> 的 4 個子命令狀態、frozen HCC1395 M1→M2→candidate-topology 鏈、artifact schema 與 read_id 算法。</p>
       <div class="io">吃 → 8 角色 manifest<br>吐 → site_reads · cooccurrence_* · topology_unit</div>
       <a class="go" href="13_longlineage-io.standalone.html">進入 LL 分冊 →</a>
     </div>
     <div class="pcard ok">
       <h4>上游工具鏈與資料 <span class="badge b-pass">齊全</span></h4>
-      <p class="oneline">sSNV / HP-PS / 甲基化 / CN 各自從哪個工具來、7 個樣本的實體資料在哪。</p>
+      <p class="oneline">sSNV / HP-PS / 甲基化 / CN 各自從哪個工具來、7 個 technical datasets（6 biological IDs）的實體資料在哪。</p>
       <div class="io">Dorado · ClairS · LongPhase-S · SAVANA · sidecar TSV</div>
       <a class="go" href="14_upstream-data.standalone.html">進入上游分冊 →</a>
     </div>
@@ -715,17 +771,18 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     （9 個維度並行，每個維度獨立收集後再做對抗式驗證）。
   </p>
   <ul>
-    <li><b>驗證覆蓋</b>：334 個「檔案:行號」宣稱 + 111 個路徑宣稱，全部經機械重驗
-        —— <b>0 個捏造、0 個行號越界</b>；28 個初判找不到者，經修正路徑寫法後 100% 定位到實體檔案。</li>
+    <li><b>歷史自述、目前 UNVERIFIED（ALG-023）</b>：2026-08-06 文件曾記錄 334 個 source refs
+        ＋111 個 paths 為 0 missing／0 out-of-bounds；公開 repo 缺 commit-pinned inventory、commands、
+        hashes 與 replay receipt，因此不可當成 current blanket guarantee。</li>
     <li><b>可跑狀態</b>：所有標示「可跑」的部件，均為本輪<b>實際執行並檢查 exit code</b>的結果。</li>
     <li><b>科學數字</b>：funnel 各層取自 <code>denominator_registry.tsv</code> 與
         <code>all7_summary.json</code>（2026-08-01 凍結的 canonical 輸出），並已驗證各層加總自洽。</li>
   </ul>
   <h4 style="margin-top:16px">已知的資料缺口（誠實標註）</h4>
   <ul>
-    <li>「純 parsimony 單一拓撲率」的<b>下界 64.89%</b> 在 repo 內未找到原始出處，
-        對外引用前需補齊；上界 88.26% 有 registry 佐證。</li>
-    <li>LongLineage 7 樣本的總執行時間與記憶體上界<b>無實測證據</b>，
+    <li>「純 parsimony 單一 candidate-shape 比率」的<b>下界 64.89%</b> 在 repo 內未找到原始出處，
+        對外引用前需補齊；上界 88.2579% 有 registry 佐證。</li>
+    <li>LongLineage 7 technical datasets／6 biological IDs cohort 的總執行時間與記憶體上界<b>無實測證據</b>，
         且其文件明文禁止由單樣本外推。</li>
     <li>拷貝數（CN／LOH）目前狀態為 <code>NOT_INTEGRATED</code>，尚未接入主線。</li>
   </ul>

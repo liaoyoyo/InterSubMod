@@ -3,10 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LongLineage 部件 — 契約、科學鏈、以及為什麼它現在輸出 0 棵樹</title>
+<title>LongLineage 部件 — PRIVATE research preview、契約與 frozen HCC1395 receipt</title>
 <!--
   doc_type: explain_component_ll   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   data_sources: scratchpad/collect_ll_cli_status.json, collect_ll_science_flow.json, collect_ll_artifacts.json
   驗證: subcommand 狀態實跑取 exit code；funnel 數字取自 20260720 parity 報告 JSON 並驗算加總；
         artifact 列數為實際 semantic_digests.tsv 與檔案大小
@@ -97,6 +105,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 </head>
 <body>
@@ -117,19 +159,28 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <div class="wrap">
 <header class="hero">
   <div class="kicker">部件分冊 · 第 13 頁 · LongLineage</div>
-  <h1>LongLineage：契約很嚴、程式都在，但目前輸出 0 棵樹</h1>
+  <h1>LongLineage：PRIVATE research preview；frozen HCC1395 receipt 為 0 個 candidate topology units</h1>
   <p class="lede">
-    這是同一套科學想法的<b>工業化重寫版</b>。它的設計品質很高（每個輸出都有 schema 與 SHA-256 收據），
-    但目前主線被鎖住，而且在真實資料上的拓撲產出是 <b>0</b>。
-    本頁解釋<b>為什麼</b>是 0 —— 這不是 bug，理解原因比理解程式碼更重要。
+    這是 <b>PRIVATE research-preview candidate</b>；source-origin、license 與 dependency audit 尚待完成，
+    因此不能先宣稱 clean-room 或已適合公開。Immutable candidate 為 <code>b9aaa12</code>，狀態
+    <code>NOT_READY</code>/non-production，<code>P3/P4/P5/P7/P8</code> 仍 <b>BLOCKED</b>。
+    本頁的「0」只指該 revision 的 frozen HCC1395 dataset-gate receipt，不外推其他資料或 run。
   </p>
 </header>
+
+<div class="takeaway dead">
+  <span class="lab">Release boundary（2026-08-13 research handoff snapshot）</span>
+  Repository 目前為 <b>PRIVATE</b>；<code>b9aaa12</code> 是 public-preview candidate、不是已公開版本。
+  Production <code>run</code> 刻意 fail-closed，尚無 production tag 或 GitHub Release。
+  <code>5daf50f</code> 只作 private baseline/main capability snapshot。
+</div>
 
 <div class="bluf">
   <h2>一句話</h2>
   <p>
-    LongLineage 把 ONT 資料算成「<b>哪些體細胞突變共同出現在同一條 read 上</b>」的證據表，
-    再用<b>最少隱藏節點的超立方體</b>解出這些突變之間的譜系關係。
+    LongLineage 把 ONT 資料算成「<b>哪些 candidate somatic variants 共同出現在同一條 read 上</b>」的證據表，
+    再用<b>最少隱藏節點的超立方體</b>建立 local、recurrence-allowed、model-conditional mutation-state candidate topology。
+    Same-read 共現是 molecule-level evidence；cellular clone/subclone 與 biological lineage 未被確認。
   </p>
   <p style="margin-top:10px;font-size:.95rem">
     <b>它與 InterSubMod 的根本差異</b>：ISM 輸出是 <b>per-region</b>（每個位點一包結果），
@@ -147,8 +198,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <!-- ═══════════ 1 ═══════════ -->
 <section id="s1">
-  <h3><span class="num">01</span>四個子命令，只有一個能出科學結果</h3>
-  <p class="sub">下表的狀態都是本輪<b>實跑取得 exit code</b> 或讀原始碼確認的。</p>
+  <h3><span class="num">01</span>四個子命令：frozen HCC1395 receipt 中只有 dataset-gate 產生 research artifacts</h3>
+  <p class="sub">下表限定 private candidate <code>b9aaa12</code> 與具名 frozen HCC1395 receipt；狀態由該次 exit code 或對應 source inspection 取得，不外推其他 revision/dataset。</p>
 
   <div class="table-wrap"><table>
     <thead><tr><th style="width:18%">子命令</th><th style="width:12%">狀態</th><th style="width:70%">實測依據</th></tr></thead>
@@ -156,7 +207,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td><code>preflight</code></td><td><span class="badge b-pass">可跑</span></td>
           <td>驗證 8 個角色的 manifest 完整性。</td></tr>
       <tr><td><code>dataset-gate</code></td><td><span class="badge b-warn">可跑但綁死</span></td>
-          <td>目前可執行科學核心的 <b>HCC1395-only frozen <code>dataset-gate</code></b>；該資料實跑產出 8 個 artifact，不代表一般化 production path。</td></tr>
+          <td>在該 frozen HCC1395 receipt 中，唯一觀察到能產生 research artifacts 的介面；該次產出 8 個 artifact，不等於 production science validation。</td></tr>
       <tr><td><code>run</code></td><td><span class="badge b-dead">被鎖</span></td>
           <td>回 <code>KernelBlocked</code>（exit 6）。實測 <code>message="release attestation is NOT_READY"</code>。</td></tr>
       <tr><td><code>probe</code></td><td><span class="badge b-dead">被鎖</span></td>
@@ -174,10 +225,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <div class="takeaway info">
     <span class="lab">但請注意這個關鍵區辨</span>
-    <b>「BLOCKED」指的是「對照驗證的證據不存在」，不是「程式碼沒寫」。</b>
-    M1／M2／topology 的計算核心<b>都已經實作完成</b>，而且被 <code>dataset-gate</code> 實際執行過。
-    這是刻意的 fail-closed 設計 —— 在證明結果與參考實作一致之前，拒絕讓任何人拿它當正式結論。
-    <span class="muted">（目前 4 條 blocker：M1 對照未驗證、M2 共現對照未驗證、拓撲對照未驗證、拓撲排序未驗證。）</span>
+    <b><code>P3/P4/P5/P7/P8</code> 具名 gates 尚未通過</b>，涵蓋 parity／validation、
+    source-origin、license、dependency 與 release-safety。部分 M1／M2／topology kernels 曾被
+    具名 <code>dataset-gate</code> receipt 執行，但不等於全部核心路徑、production entry、
+    生物驗證或公開 redistribution 資格完成。
+    <span class="muted">（整體仍是 <code>NOT_READY</code>／non-production。）</span>
   </div>
 
   <h4 class="mini">周邊工具的真實狀態</h4>
@@ -192,6 +244,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     但 HCC1395 那個 run 的狀態是 <code>VALIDATED_FROZEN_DATASET_GATE</code> ——
     實測回 exit 8 拒絕。<b>要讀資料目前只能自己 zcat。</b>
   </p>
+  <p>
+    tagged-BAM 也有 revision boundary：private baseline/main snapshot <code>5daf50f</code> 沒有 writer；
+    private public-preview candidate <code>b9aaa12</code> 含 <code>longlineage-tag-bam</code>，但尚未發布，不能視為 production capability。
+  </p>
 </section>
 
 <!-- ═══════════ 2 ═══════════ -->
@@ -202,7 +258,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </p>
 
   <figure>
-    <div class="figtitle">圖 1 · HCC1395-only frozen dataset-gate：79,687 個位點如何流失到 0</div>
+    <div class="figtitle">圖 1 · candidate b9aaa12 的 frozen HCC1395 dataset-gate receipt：79,687 個位點如何流失到 0 candidate units</div>
     <svg viewBox="0 0 940 610" role="img" aria-labelledby="l1t l1d" xmlns="http://www.w3.org/2000/svg">
       <title id="l1t">LongLineage 位點流失漏斗</title>
       <desc id="l1d">此圖僅描述 HCC1395-only frozen dataset-gate，非全樣本或 production 驗證。從 79,687 個凍結的體細胞突變位點開始，78,629 個可評估，
@@ -287,7 +343,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </figure>
 
   <div class="takeaway dead">
-    <span class="lab"><span class="dot">●</span> 「LongLineage 能算出樹」目前沒有 run 層級的實證</span>
+    <span class="lab"><span class="dot">●</span> candidate b9aaa12 尚無非空 candidate topology 的 run-level evidence</span>
     現存三個完整科學 run 的拓撲輸出檔<b>都是 28 bytes</b>（僅檔案結尾標記，零筆資料）。
     如果直接拿 LL 當「已經算出亞群樹」的證據，會落空。
     <br><span class="muted">真正跑出區域樹的是另一條 descriptive-only 的相容路徑，
@@ -413,7 +469,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <ul>
     <li>本頁所有 funnel 數字<b>僅來自 HCC1395 這一個樣本</b>。
         LongLineage 的文件<b>明文禁止由單樣本外推</b>到其他樣本。</li>
-    <li>7 樣本的總執行時間與記憶體上界<b>無任何實測證據</b>；
+    <li>7 technical datasets／6 biological IDs cohort 的總執行時間與記憶體上界<b>無任何實測證據</b>；
         最大樣本（BAM 為 HCC1395 的 1.62 倍）完全沒有跑過。</li>
     <li>本輪在磁碟上<b>找不到部分 artifact 的實體檔案</b>（以搜尋確認），
         相關列數取自 run 的摘要檔而非直接讀檔。</li>

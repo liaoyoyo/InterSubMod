@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 全 7 樣本 funnel：469,849 個突變如何流失到 63,506 個單一拓撲
-     來源: docs/explain/11_system-map-overview.standalone.html (svg #3)
-     由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
+<!-- 7 technical datasets／6 biological IDs funnel：候選位點依可排序性與圖形狀態分層
+     source: docs/explain/11_system-map-overview.standalone.html (svg #3)
+     source_document_sha256: 82f5e4358b0f8a9de0417a8901f5bb5072c152325247835a922522d9a34752e8
+     inline_svg_sha256: 41493abb18f99a46c5e2059f2bc99e8c80744b4f300da1af24432515dce6971e
+     generated_by: tools/extract_svg_for_github.py; do not edit directly. -->
 <svg viewBox="0 0 940 560" role="img" aria-labelledby="f3t f3d" xmlns="http://www.w3.org/2000/svg">
-      <title id="f3t">七樣本 funnel 分流圖</title>
-      <desc id="f3d">從 469,849 筆 dataset records 開始，經 strict read-linked component 建構得到 255,752 個成分；170,131 個 k=1 成分占 strict-component 分母 66.52%，若改用 dataset-record 分母則為 36.21%，兩種口徑不可混用；
+      <title id="f3t">七 technical-dataset candidate funnel 分流圖</title>
+      <desc id="f3d">從 469,849 筆 dataset records 開始，經 strict read-linked component 建構得到 255,752 個成分；170,131 個 k=1 成分占 strict-component 分母 66.5219%。component census 無法推得 isolated dataset-record percentage；
       k 大於等於 2 者經有界切分成為 98,955 個分析單元，扣掉無突變者剩 85,941 個帶突變單元；
       其中 12.47% 因搜尋資源上限而放棄，75,224 個完成候選家族枚舉；再扣除分母為零與遞迴篩選者，
-      71,955 個可依指定 read-AF heuristic 排序；39,648 個在該模型/目標函數下有單一勝出候選樹、23,858 個的並列候選共用 rooted-unlabeled 形狀、8,449 個候選跨不同形狀。這些都不是 cellular phylogeny truth。</desc>
+      71,955 個可排序；frozen model 中 39,648 筆有單一最高分 candidate、23,858 筆雖有並列 candidate 但共享 rooted-unlabeled shape signature、8,449 筆 candidate shape 未解。</desc>
   <rect x="0" y="0" width="940" height="560" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
@@ -17,7 +19,7 @@
 
         <!-- L1 -->
         <rect x="250" y="14" width="440" height="40" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.5"/>
-        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">sSNV 資料列（7 樣本 · chr1–22）</text>
+        <text x="470" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2F6690">sSNV dataset records（7 technical datasets · chr1–22）</text>
         <text x="470" y="48" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">469,849</text>
         <path d="M470,56 L470,76" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
 
@@ -29,9 +31,11 @@
         <!-- 流失 1 -->
         <path d="M690,98 L760,98" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
         <rect x="766" y="76" width="166" height="50" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
-        <text x="849" y="92" text-anchor="middle" font-size="9.5" fill="#6b4310">k=1 單點，無共現可用</text>
-        <text x="849" y="108" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" font-weight="700" fill="#B06A16">170,131 / 255,752 = 66.52%</text>
-        <text x="849" y="119" text-anchor="middle" font-size="8.5" fill="#6b4310">對 469,849 records 則為 36.21%</text>
+        <text x="849" y="85" text-anchor="middle" font-size="7.8" font-weight="700" fill="#6b4310">k=1 strict components</text>
+        <text x="849" y="95" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7.5" font-weight="700" fill="#B06A16">170,131 / 255,752</text>
+        <text x="849" y="105" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7.5" font-weight="700" fill="#B06A16">= 66.5219%</text>
+        <text x="849" y="115" text-anchor="middle" font-size="7.2" fill="#6b4310">不可換成 dataset-record 分母</text>
+        <text x="849" y="123" text-anchor="middle" font-size="7" fill="#6b4310">無 isolated-record 比例；非生物正確率</text>
 
         <!-- L3 -->
         <rect x="250" y="142" width="440" height="40" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
@@ -53,7 +57,7 @@
 
         <!-- L5 -->
         <rect x="250" y="270" width="440" height="40" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
-        <text x="470" y="288" text-anchor="middle" font-size="12" fill="#2F7D5B">候選樹家族 <tspan font-weight="700">完整枚舉完成</tspan></text>
+        <text x="470" y="288" text-anchor="middle" font-size="12" fill="#2F7D5B">候選結構家族 <tspan font-weight="700">完整枚舉完成</tspan></text>
         <text x="470" y="304" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">75,224（87.53%）</text>
         <path d="M470,312 L470,332" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <path d="M690,290 L760,290" stroke="#9A3B3B" stroke-width="1.8" marker-end="url(#ar3r)" fill="none"/>
@@ -79,14 +83,14 @@
         <path d="M760,396 L760,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
 
         <rect x="60" y="418" width="240" height="62" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
-        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">模型下單一勝出候選</text>
+        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">frozen model 單一最高分 candidate</text>
         <text x="180" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">39,648（55.10%）</text>
-        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">指定 read-AF heuristic 下勝出</text>
+        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">data-record 層級；非生物真值</text>
 
         <rect x="350" y="418" width="240" height="62" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.6"/>
-        <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列，但樹形相同</text>
+        <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列 candidates，共享 shape signature</text>
         <text x="470" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">23,858（33.16%）</text>
-        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">模型下共用形狀；標籤並列</text>
+        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">frozen model/data-record 層級</text>
 
         <rect x="640" y="418" width="240" height="62" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="760" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#B06A16">並列且跨不同樹形</text>
@@ -98,7 +102,7 @@
         <path d="M470,482 L470,498" stroke="#2F7D5B" stroke-width="1.6" fill="none"/>
         <path d="M470,498 L470,512" stroke="#2F7D5B" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <rect x="230" y="516" width="480" height="38" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="2"/>
-        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">模型下單一 rooted-unlabeled 候選形狀 = 39,648 + 23,858</text>
-        <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.26%</text>
+        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">單一 rooted-unlabeled candidate-shape signature = 39,648 + 23,858</text>
+        <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.2579%</text>
       </g>
     </svg>

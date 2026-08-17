@@ -1,0 +1,129 @@
+{
+  "schema_name": "intersubmod.public_claim_validation_receipt",
+  "schema_version": "2.0.0",
+  "created_at": "2026-08-13T20:38:49+08:00",
+  "task_type": [
+    "B_COMPREHENSIVE_VALIDATION",
+    "D_EXTERNAL_HANDOFF"
+  ],
+  "scope": "LOCAL_SOURCE_PLUS_C108_LIVE_RECEIPT_PLUS_CHROMIUM_QA",
+  "verdict": "PASS",
+  "publication_status": "BLOCKED_DEFAULT_BRANCH_WIKI_PAGES_NOT_PUBLISHED_OR_REFETCHED__ABOUT_C108_CONFIRMED",
+  "release_status": "BLOCKED",
+  "runner": {
+    "path": "research/20260813_public_docs_p0_correction/scripts/run_claim_validation.py",
+    "sha256": "859ec965a1bebc7e35344babb56596474fb8d62aef5de04186867a9b9fe11779",
+    "python": "3.10.12"
+  },
+  "commands": [
+    {
+      "command": [
+        "/tmp/ism-handoff-py310/bin/python",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/build_claim_remediation_registry.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"schema_name\": \"intersubmod.public_claim_remediation_build_receipt\",\n  \"schema_version\": \"2.0.0\",\n  \"receipt_id\": \"intersubmod-public-claims-remediation-build-20260813\",\n  \"generated_at\": \"2026-08-13T00:00:00+08:00\",\n  \"output\": {\n    \"path\": \"research/20260813_public_docs_p0_correction/claim_remediation_registry.json\",\n    \"sha256\": \"938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5\",\n    \"schema_name\": \"intersubmod.public_claim_remediation_registry\",\n    \"schema_version\": \"2.0.0\",\n    \"registry_id\": \"intersubmod-public-claims-remediation-20260813\"\n  },\n  \"source_inventory\": {\n    \"path\": \"research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv\",\n    \"sha256\": \"d5d8794c2467ac6ac466711f91890666f3dbc571d9b3e27b07ba5f10d642ddbc\"\n  },\n  \"source_scope\": {\n    \"path\": \"research/20260812_intersubmod_github_public_docs_full_validation/source_scope.tsv\",\n    \"sha256\": \"dfdc7fa9441f4b97eda6caf4f8048bca98b4a3a5949d7b8136674a03d2cef96f\"\n  },\n  \"p0_guard\": {\n    \"path\": \"research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json\",\n    \"sha256\": \"f9f03ab14047493db3b1fa27e13a270560f5f67f8a8f40c77902cd40cd3b3dfc\",\n    \"validation_summary\": {\n      \"inventory_p0\": 34,\n      \"registry_p0\": 34,\n      \"local_claims\": 33,\n      \"external_only_claims\": 1,\n      \"checked_target_rules\": 77,\n      \"required_anchors\": 160,\n      \"forbidden_anchors\": 93,\n      \"external_actions\": 35,\n      \"external_public_surfaces\": 4,\n      \"unique_documents\": 27,\n      \"cross_document_guard\": {\n        \"guard_contract\": \"scripts/p0_claim_registry.json\",\n        \"public_source_files\": 34,\n        \"guard_ids\": 42,\n        \"checked_documents\": 500,\n        \"required_anchors\": 285,\n        \"forbidden_anchors\": 1217,\n        \"context_occurrences\": 54,\n        \"required_tracked_paths\": 8,\n        \"tracked_regular_paths\": 8,\n        \"errors\": 0,\n        \"verdict\": \"PASS\"\n      },\n      \"errors\": 0,\n      \"verdict\": \"PASS\"\n    }\n  },\n  \"github_about\": {\n    \"path\": \"research/20260813_public_docs_p0_correction/github_about_c108_receipt.json\",\n    \"sha256\": \"0cfe40131bdf0f6a61538af75d7debd52f6b3cee895371be920be80d7debf0c6\",\n    \"semantic_status\": \"PASS\"\n  },\n  \"manifests\": {\n    \"public_sources\": {\n      \"sha256\": \"25f0766feefa0541354540142cabad852ef460288f9dd244389b17d749363636\",\n      \"files\": 34\n    },\n    \"github_about_snapshots\": {\n      \"sha256\": \"3b5240e6899df128ec2db881fb51e5561204aa404e1216ee1be2360636d7e7f4\",\n      \"files\": 3\n    }\n  },\n  \"allowed_current_verdicts\": [\n    \"CONFIRMED\",\n    \"CONFIRMED_WITH_LIMITS\",\n    \"UNVERIFIED\"\n  ],\n  \"counts\": {\n    \"claims\": 158,\n    \"by_priority\": {\n      \"P0\": 34,\n      \"P1\": 20,\n      \"P2\": 35,\n      \"P3\": 69\n    },\n    \"by_current_verdict\": {\n      \"CONFIRMED\": 69,\n      \"CONFIRMED_WITH_LIMITS\": 69,\n      \"UNVERIFIED\": 20\n    },\n    \"by_source_status\": {\n      \"EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS\": 1,\n      \"FROZEN_CONFIRMED_WITH_LIMITS\": 32,\n      \"FROZEN_EVIDENCE_CONFIRMED\": 69,\n      \"SOURCE_EDITED_REVIEW_REQUIRED\": 20,\n      \"SOURCE_READY\": 33,\n      \"VALIDATED_DERIVED_WITH_LIMITS\": 3\n    }\n  },\n  \"gates\": {\n    \"P0_SOURCE_READY\": {\n      \"status\": \"PASS\",\n      \"reason\": \"33 local P0 claims pass fail-closed source guards; C108 About was updated and re-fetched with a bounded receipt.\"\n    },\n    \"SOURCE_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"P1/P2 source edits still require dedicated guards/evidence closure.\"\n    },\n    \"PUBLICATION_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"Default branch, Wiki and Pages have not been published and re-fetched; About C108 alone is confirmed.\"\n    },\n    \"RELEASE_READY\": {\n      \"status\": \"BLOCKED\",\n      \"reason\": \"Publication gate and broader research-handoff release gates remain open.\"\n    }\n  }\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "/tmp/ism-handoff-py310/bin/python",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/validate_public_p0_claims.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"checked_target_rules\": 77,\n  \"cross_document_guard\": {\n    \"checked_documents\": 500,\n    \"context_occurrences\": 54,\n    \"errors\": 0,\n    \"forbidden_anchors\": 1217,\n    \"guard_contract\": \"scripts/p0_claim_registry.json\",\n    \"guard_ids\": 42,\n    \"public_source_files\": 34,\n    \"required_anchors\": 285,\n    \"required_tracked_paths\": 8,\n    \"tracked_regular_paths\": 8,\n    \"verdict\": \"PASS\"\n  },\n  \"errors\": 0,\n  \"external_actions\": 35,\n  \"external_only_claims\": 1,\n  \"external_public_surfaces\": 4,\n  \"forbidden_anchors\": 93,\n  \"inventory_p0\": 34,\n  \"local_claims\": 33,\n  \"registry_p0\": 34,\n  \"required_anchors\": 160,\n  \"unique_documents\": 27,\n  \"verdict\": \"PASS\"\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "/tmp/ism-handoff-py310/bin/python",
+        "/big7_disk/liaoyoyo2001/worktrees/ism-handoff-20260813/research/20260813_public_docs_p0_correction/scripts/validate_claim_remediation_registry.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"claims\": 158,\n  \"current_verdicts\": {\n    \"CONFIRMED\": 69,\n    \"CONFIRMED_WITH_LIMITS\": 69,\n    \"UNVERIFIED\": 20\n  },\n  \"denominator_checks\": 7,\n  \"errors\": 0,\n  \"github_about_receipt_sha256\": \"0cfe40131bdf0f6a61538af75d7debd52f6b3cee895371be920be80d7debf0c6\",\n  \"github_about_snapshot_files\": 3,\n  \"p0_guard\": {\n    \"checked_target_rules\": 77,\n    \"cross_document_guard\": {\n      \"checked_documents\": 500,\n      \"context_occurrences\": 54,\n      \"errors\": 0,\n      \"forbidden_anchors\": 1217,\n      \"guard_contract\": \"scripts/p0_claim_registry.json\",\n      \"guard_ids\": 42,\n      \"public_source_files\": 34,\n      \"required_anchors\": 285,\n      \"required_tracked_paths\": 8,\n      \"tracked_regular_paths\": 8,\n      \"verdict\": \"PASS\"\n    },\n    \"errors\": 0,\n    \"external_actions\": 35,\n    \"external_only_claims\": 1,\n    \"external_public_surfaces\": 4,\n    \"forbidden_anchors\": 93,\n    \"inventory_p0\": 34,\n    \"local_claims\": 33,\n    \"registry_p0\": 34,\n    \"required_anchors\": 160,\n    \"unique_documents\": 27,\n    \"verdict\": \"PASS\"\n  },\n  \"public_source_files\": 34,\n  \"source_statuses\": {\n    \"EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS\": 1,\n    \"FROZEN_CONFIRMED_WITH_LIMITS\": 32,\n    \"FROZEN_EVIDENCE_CONFIRMED\": 69,\n    \"SOURCE_EDITED_REVIEW_REQUIRED\": 20,\n    \"SOURCE_READY\": 33,\n    \"VALIDATED_DERIVED_WITH_LIMITS\": 3\n  },\n  \"tiny_fixture_paths\": 8,\n  \"unique_claim_ids\": 158,\n  \"verdict\": \"PASS\"\n}\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "/tmp/ism-handoff-py310/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "research/20260813_public_docs_p0_correction/tests"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "...................................................   [100%]\n51 passed, 19 subtests passed in 66.64s (0:01:06)\n",
+      "stderr_tail": ""
+    }
+  ],
+  "claim_registry_contract": {
+    "registry": "research/20260813_public_docs_p0_correction/claim_remediation_registry.json",
+    "build_receipt": "research/20260813_public_docs_p0_correction/claim_remediation_build_receipt.json",
+    "registry_sha256": "938e47bba9b9d717d2cf49f2b6261c33e66a01b174b518ab65c1ea6c63566ff5",
+    "public_source_files": 34,
+    "errors": [],
+    "verdict": "PASS"
+  },
+  "html_source_checks": {
+    "expected_files": 21,
+    "files": 21,
+    "paths": [
+      "docs/explain/01_background-glossary.standalone.html",
+      "docs/explain/02_ism-core.standalone.html",
+      "docs/explain/03_methylation-read-filter.standalone.html",
+      "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+      "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+      "docs/explain/06_ism-subclone-pipeline-concept.standalone.html",
+      "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html",
+      "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+      "docs/explain/09_three-stats-division-of-labor.standalone.html",
+      "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html",
+      "docs/explain/11_system-map-overview.standalone.html",
+      "docs/explain/12_intersubmod-io.standalone.html",
+      "docs/explain/13_longlineage-io.standalone.html",
+      "docs/explain/14_upstream-data.standalone.html",
+      "docs/explain/15_python-html-layer.standalone.html",
+      "docs/explain/16_how-to-run.standalone.html",
+      "docs/explain/index.standalone.html",
+      "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_完整研究交接總覽_01.standalone.html",
+      "docs/handoff/20260805_系統交接與驗收_01/00_交接總覽與驗收.standalone.html",
+      "docs/handoff/20260805_系統交接與驗收_01/05_repo整理與可觀察性盤點.standalone.html",
+      "docs/handoff/20260806_兩repo端到端串接可行性盤點_01.standalone.html"
+    ],
+    "inline_svg_elements": 49,
+    "xml_svg_parse_errors": [],
+    "external_runtime_resources_declared": [],
+    "verdict": "PASS"
+  },
+  "browser_qa_contract": {
+    "receipt": "research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json",
+    "receipt_sha256": "d405e8c81cdde71125f7e176eecd1d5954688334c0c677088fb353822b399acc",
+    "html_files": 21,
+    "standalone_svg_files": 21,
+    "browser_cases": 84,
+    "browser_case_modes": {
+      "desktop": 21,
+      "mobile": 21,
+      "no_js": 21,
+      "print": 21
+    },
+    "errors": [],
+    "verdict": "PASS"
+  },
+  "authority_chain": {
+    "policy_input": "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json",
+    "builder": "research/20260813_public_docs_p0_correction/scripts/build_claim_remediation_registry.py",
+    "generated_registry": "research/20260813_public_docs_p0_correction/claim_remediation_registry.json",
+    "build_receipt": "research/20260813_public_docs_p0_correction/claim_remediation_build_receipt.json",
+    "browser_receipt": "research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json",
+    "rebuild_executed_first": true,
+    "browser_qa_executed_first": false
+  },
+  "claim_ceiling": {
+    "confirmed_cellular_subclone": 0,
+    "confirmed_linear_ancestry": 0,
+    "methylation": "ASSOCIATION_ONLY",
+    "cn_loh": "NOT_INTEGRATED",
+    "graph_shape_88_2579_percent": "MODEL_CONDITIONAL_NOT_BIOLOGICAL_PREVALENCE"
+  }
+}

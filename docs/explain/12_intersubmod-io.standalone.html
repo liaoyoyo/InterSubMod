@@ -7,6 +7,14 @@
 <!--
   doc_type: explain_component_ism   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   data_sources: scratchpad/collect_ism_cli.json, collect_ism_pipeline.json, collect_ism_outputs.json
   驗證: 所有 CLI 選項對照 include/utils/ArgParser.hpp 與 include/core/Config.hpp 逐行核對；
         3 條範例指令全部實跑 exit 0；所有輸出檔 header 與範例行皆為實際 head 磁碟檔案所得
@@ -90,6 +98,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 </head>
 <body>
@@ -129,17 +171,19 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p style="margin-top:10px;font-size:.95rem">
     <b>為什麼要這樣做：</b>一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在<b>單一分子</b>上
     同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，
-    因此能用 <b>read 層級</b>（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
+    因此能在 <b>read 層級</b>（而非樣本層級）描述距離與 algorithmic clustering，並檢驗指定 mutation／haplotype label 是否與 read-distance variation 或 cluster assignment 關聯；這不證明 unsupervised cluster truth、cellular group 或因果。
   </p>
   <p style="margin-top:10px">
-    <span class="badge b-pass">內部 smoke test 曾 exit 0</span>
-    最小指令與含 normal BAM／LOH 標註的版本都曾在內部資料環境完成；因缺可公開 fixture 與完整 hardware／commit／repetition receipt，本頁不把該次耗時當成可泛化 benchmark。
+    <span class="badge b-pass">實測可跑</span>
+    具名的 2026-08-06 內部 HCC1395 單點 receipt 記錄 <b>2.9 秒、exit 0</b>；含 normal BAM 與 LOH
+    標註的同一內部資料組合也 exit 0。這是特定機器、輸入與 commit 的歷史收據，<b>不是一般 runtime 承諾</b>。
   </p>
 </div>
 
-<div class="takeaway info">
-  <span class="lab">用之前一定要知道的一件事</span>
-  原始碼與執行檔的修改時間不足以證明 binary 身分。要把輸出連回特定版本，應從宣告的 commit 重新編譯，記錄 toolchain、build command、binary hash 與測試退出碼；本頁既有內部 binary 不作 clean-checkout release certification。
+<div class="takeaway dead">
+  <span class="lab"><span class="dot">●</span> 用之前一定要知道的一件事</span>
+  Git 只發布原始碼與可重建契約，<b>不把 build output 當成受版控的發布物</b>。先 checkout release manifest
+  指定的 immutable commit，再用 repo 外的新 build 目錄編譯；執行檔 inventory 應由該次 build receipt 動態記錄。
 </div>
 
 <!-- ═══════════ 1 輸入 ═══════════ -->
@@ -189,7 +233,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <td><code>--loh-bed</code></td>
         <td>選填</td>
         <td>雜合性缺失（LOH）區間標註。用來在結果表填三個 LOH 相關欄位，
-            讓後續分析可以把 LOH 區域分層看待。</td>
+            讓後續分析可以把 LOH 區域分層看待。LOH BED 僅供 annotation／stratification；
+            CN/LOH 未整合進 frozen candidate reconstruction，也沒有 CN/LOH-corrected inference。</td>
         <td>只硬性要求前 3 欄，第 4 欄之後整行當註解字串。<br>
             實測檔案 1,094 行，載入時印 <code>Loaded 1094 LOH regions</code>。</td>
       </tr>
@@ -197,9 +242,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </table></div>
 
   <details class="card">
-    <summary>全部 29 個 CLI 選項的預設值 — 以及 <b>兩個文件與程式碼不符的陷阱</b></summary>
+    <summary>frozen release baseline <code>ddd8909a</code> 的 29-option census — 以及 <b>兩個文件與程式碼不符的陷阱</b></summary>
     <div class="body">
-      <p>本輪把 <code>--help</code> 的每一行都對照 <code>ArgParser.hpp</code> 與 <code>Config.hpp</code> 逐一比對。
+      <p>這個 29-option 數量是 <code>ddd8909a</code> 的 <b>branch-scoped</b> source census，不是穩定 API。
+         本輪把 <code>--help</code> 的每一行都對照 <code>ArgParser.hpp</code> 與 <code>Config.hpp</code> 逐一比對。
          大部分一致，但有<b>兩個</b>會讓你算錯資源或拿到非預期結果：</p>
       <div class="table-wrap"><table>
         <thead><tr><th style="width:20%">選項</th><th style="width:22%">help 說的</th><th style="width:22%">實際的</th><th style="width:36%">後果</th></tr></thead>
@@ -210,10 +256,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
               <td>不給這個旗標時，程式會用 16 條執行緒。
                   <b>資源估算會整整差 16 倍</b>。實跑不帶旗標時 Configuration 印 <code>Threads: 16</code>。</td></tr>
           <tr><td><code>--distance-metric</code></td>
-              <td>宣告預設 <code>BERNOULLI</code><br><span class="muted">Config.hpp:40</span></td>
-              <td><b>實際是 NHD</b><br><span class="muted">ArgParser.hpp:86,168</span></td>
-              <td>ArgParser 會<b>無條件清空</b>宣告的預設值再填入 NHD，
-                  所以 Config.hpp 的初值不可能存活。不明講就會拿到 NHD，且只產生 <code>distance/NHD/</code> 目錄。</td></tr>
+              <td><code>Config.hpp</code> initializer 是 <code>BERNOULLI</code></td>
+              <td><b>未指定時 effective CLI default 是 NHD</b><br><span class="muted">ArgParser.hpp:86,181-193</span></td>
+              <td>parser 以 CLI list 取代 initializer；明示 NHD、BERNOULLI 或重複多值都會保留。
+                  多值時只有第一個 metric 驅動 clustering，後續只輸出額外 matrix，因此順序會改變 tree／cluster。</td></tr>
         </tbody>
       </table></div>
       <p style="margin-top:12px"><b>其餘經比對確認一致的預設值</b>：
@@ -306,23 +352,23 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <!-- S8 -->
         <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
-        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ read-level methylation dendrogram → 群數 → 統計</text>
-        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）；非 cellular phylogeny；輪廓係數掃 k=2..6</text>
-        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
-        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
+        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
+        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
+        <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不證明 unsupervised cluster existence/truth</text>
+        <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">PERMANOVA／gating 也只測指定 association；PERMANOVA 須合讀 PERMDISP</text>
 
         <!-- 右側：四檢定 -->
         <rect x="706" y="482" width="248" height="154" rx="6" fill="#fff" stroke="#B06A16" stroke-width="1.1"/>
         <text x="716" y="500" font-size="10" font-weight="700" fill="#B06A16">四類檢定各問不同問題</text>
         <text x="716" y="518" font-size="9.5" font-weight="700" fill="#6b4310">Global</text>
-        <text x="716" y="531" font-size="9" fill="#5C5A54">分群結果與生物標籤有關聯嗎</text>
+        <text x="716" y="531" font-size="9" fill="#5C5A54">algorithmic cluster × 指定 label 有關聯嗎</text>
         <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
-        <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
+        <text x="716" y="562" font-size="9" fill="#5C5A54">哪個 algorithmic cluster 富集指定 label</text>
         <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
-        <text x="716" y="593" font-size="9" fill="#5C5A54">標籤關聯 centroid separation 是否與 null 不相容</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">指定 label 的 read-distance variation 在置換 null 下顯著嗎</text>
         <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
-        <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
-        <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>
+        <text x="716" y="624" font-size="9" fill="#5C5A54">直接使用預先指定 label；結果仍是 association</text>
+        <text x="716" y="634" font-size="9" fill="#5C5A54">不是 cluster truth、cellular group 或因果</text>
 
         <!-- 左側註記 -->
         <rect x="12" y="226" width="228" height="66" rx="6" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.1"/>
@@ -425,11 +471,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <pre class="out"><code>RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 0,chr1,877772,G,C,46,17,2.990000e-01,0.0000,3.065000e-01,0.0000,...</code></pre>
       <div class="takeaway dead" style="font-size:.95rem">
-        <span class="lab"><span class="dot">●</span> 欄數會隨 binary 版本改變，而且檔案裡沒有版本欄位</span>
-        磁碟上實測到的欄數有 <b>59 / 114 / 117 / 157 / 180</b> 五種，而目前原始碼是 <b>193</b> 欄。
+        <span class="lab"><span class="dot">●</span> 欄數會隨 binary 版本改變；現有欄位只有 component schema，沒有 whole-file layout version</span>
+        磁碟上歷史實測到的欄數有 <b>59 / 114 / 117 / 157 / 180</b> 五種，而 frozen release baseline <code>ddd8909a</code> 的 source header 是 <b>199</b> 欄；歷史 <code>73afaeac-dirty</code> audit 不是 release source。
         意思是<b>不同時期跑出來的結果，欄位位置是錯開的</b>。
         任何用固定欄號（而非欄名）解析的下游腳本，<b>會靜默讀到錯的欄位</b>。
-        <b>務必用欄名讀，並記錄產生該檔的 binary 版本。</b>
+        現行欄位含 <code>VerificationSchemaVersion=2</code> 與 <code>RegionStratificationSchemaVersion=1</code>，但兩者都不是整檔 layout version；<b>務必用欄名讀，並記錄 producer commit。</b>
       </div>
     </div>
   </details>
@@ -438,8 +484,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <thead><tr><th style="width:26%">其他 run 層檔案</th><th style="width:74%">內容</th></tr></thead>
     <tbody>
       <tr><td><code>significance_statistics.txt</code></td><td>一頁摘要：總共處理幾個 region、多少個顯著、各染色體分別多少。實測開頭 <code>=== Significance Analysis Statistics ===</code>、<code>Total Regions Processed: 1982</code>。</td></tr>
-      <tr><td><code>run.log</code></td><td>這次跑用了什麼輸入與參數，開頭是 <code>--- Configuration ---</code> 區塊。<b>這是回溯任何一份輸出「怎麼來的」唯一可靠依據</b>，不要刪。</td></tr>
-      <tr><td><code>subclone_structure.txt</code></td><td>跨 region 的分組摘要（分幾群、平均 ASM、LOH 比例）。只在部分 run 出現。</td></tr>
+      <tr><td><code>run.log</code></td><td>這次跑用了什麼輸入與參數，開頭是 <code>--- Configuration ---</code> 區塊。它是 provenance 的<b>必要但不充分</b>證據：仍須搭配 producer commit、site profile／tool hash、輸入與輸出 checksum、schema 與 command receipt；不要單靠 log 就宣稱可重現。</td></tr>
+      <tr><td><code>subclone_structure.txt</code></td><td><b>Legacy-named deprecation／region-stratification artifact</b>；不是 inferred cellular subclones。只在部分 run 出現，檔名不得當作 biological claim。</td></tr>
       <tr><td><code>label_first_metrics.tsv</code></td><td>36 欄，label-first 路線的精簡指標表，用 <code>chr:pos:ref:alt</code> 當鍵。只在 canonical 配對輸出見到。</td></tr>
     </tbody>
   </table></div>
@@ -454,24 +500,31 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <!-- ═══════════ 4 指令 ═══════════ -->
 <section id="s4">
-  <h3><span class="num">04</span>怎麼跑 — 三條可直接複製的指令</h3>
-  <p class="sub">以下指令曾在 2026-08-06 的內部環境執行並記錄 exit code 0；所列 BAM／reference／VCF 路徑未包含在公開 Git objects，不能視為 public-clone reproduction。</p>
+  <h3><span class="num">04</span>怎麼跑 — 三種可攜參數組合</h3>
+  <p class="sub">先以 release manifest 的 immutable commit 建立 repo 外 clean build，再用 site profile 定位合法資料。下方結果來自具名內部 HCC1395 receipt；不是任意機器或輸入的固定 runtime／數值承諾。本機絕對路徑只登錄在 machine registry，不寫進公開主命令。</p>
 
-  <h4 class="mini">① 內部限定的最小 smoke test — 驗證環境與執行檔</h4>
+  <h4 class="mini">① 最小可跑 — 驗證環境與執行檔正常（runtime 依環境而異）</h4>
   <p>先從 VCF 抽出單一個突變，只給三個必填參數：</p>
-  <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的 VCF</span>
-SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
-grep '^#' $V &gt; $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
+  <pre class="cmd"><code><span class="c"># 先把角括號 placeholder 換成自己的路徑；site profile 不進 Git</span>
+REPO_ROOT="&lt;REPO_ROOT&gt;"
+DATA_ROOT="&lt;DATA_ROOT&gt;"
+BUILD_ROOT="&lt;CLEAN_BUILD_ROOT&gt;"
+SITE_PROFILE="&lt;SITE_PROFILE&gt;"
+"$REPO_ROOT/scripts/site/doctor" --profile "$SITE_PROFILE" --mode real-preflight
+
+<span class="c"># 準備一個只含第一筆 biallelic SNV 的 smoke-test VCF</span>
+SP="${TMPDIR:-/tmp}/ism_demo" &amp;&amp; mkdir -p "$SP"
+V="$DATA_ROOT/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+bcftools view -h "$V" &gt; "$SP/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$V" | head -n 1 &gt;&gt; "$SP/one_snv.vcf"
 
 <span class="c"># 跑</span>
-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min</code></pre>
-  <p><b>預期輸出</b>（實跑結果）：</p>
+"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --output-dir "$SP/out_min"</code></pre>
+  <p><b>具名內部 HCC1395 receipt</b>（僅說明曾觀測到的輸出形狀）：</p>
   <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
 Total reads processed: 85
 Forward strand (+): 40 / Reverse strand (-): 45
@@ -479,11 +532,11 @@ Total CpG sites found: 11
 Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pre>
 
   <h4 class="mini">② 典型分析 — 指定執行緒、視窗、兩種距離指標</h4>
-  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_typical \
+  <pre class="cmd"><code>"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --output-dir "$SP/out_typical" \
   --window-size 1000 \
   --threads 8 \
   --distance-metric BERNOULLI \
@@ -494,6 +547,7 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
   <p>
     Configuration 區塊會印 <code>Threads: 8</code> 與 <code>Distance Metrics: BERNOULLI, NHD</code>，
     每個 region 目錄下會同時出現 <code>distance/BERNOULLI/</code> 與 <code>distance/NHD/</code> 兩個子目錄。
+    <b>只有第一個 BERNOULLI 驅動 clustering；NHD 在這個順序只是額外 matrix。</b>對調順序可能改變 tree／cluster。
   </p>
   <div class="takeaway" style="font-size:.95rem">
     <span class="lab">要跑全基因組時</span>
@@ -503,13 +557,13 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
   </div>
 
   <h4 class="mini">③ 完整配對分析 — 加上正常組織與 LOH 標註</h4>
-  <pre class="cmd"><code>/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --normal-bam /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --loh-bed    /big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed \
-  --output-dir $SP/out_full \
+  <pre class="cmd"><code>"$BUILD_ROOT/bin/inter_sub_mod" \
+  --tumor-bam  "$DATA_ROOT/bam/HCC1395/tumor.bam" \
+  --normal-bam "$DATA_ROOT/bam/HCC1395/normal.bam" \
+  --reference  "$DATA_ROOT/ref/hg38.fa" \
+  --vcf        "$SP/one_snv.vcf" \
+  --loh-bed    "$DATA_ROOT/loh/HCC1395/tumor_phased_LOH.bed" \
+  --output-dir "$SP/out_full" \
   --window-size 1000 --threads 8 \
   --distance-metric BERNOULLI --distance-metric NHD</code></pre>
   <p><b>怎麼確認它真的用到了 normal 與 LOH</b>（實跑結果）：</p>
@@ -537,7 +591,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
       <tr>
         <td><span class="dot">●</span></td>
         <td><b><code>significance_summary.csv</code> 跨 run 欄數不一致</b></td>
-        <td>歷史實測有 59/114/117/157/180 欄；新鮮 runtime + source header（commit <code>73afaea</code>）為 <b>199 欄</b>。
+        <td>歷史實測有 59/114/117/157/180 欄；frozen release baseline <code>ddd8909a</code> 的 source header 為 <b>199 欄</b>。
             其中第 187 欄 <code>VerificationSchemaVersion=2</code>，第 196 欄 <code>RegionStratificationSchemaVersion=1</code>；它們是元件 schema，尚非單一的 whole-file layout version。用固定欄號解析仍可能靜默錯位，<b>一律用欄名讀。</b></td>
       </tr>
       <tr>
@@ -559,14 +613,15 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
       </tr>
       <tr>
         <td><span class="badge b-warn">中</span></td>
-        <td><b><code>--distance-metric</code> 宣告值會被清掉</b></td>
-        <td>Config 宣告 BERNOULLI，但參數解析會無條件清空再填 NHD。<b>不明講就是 NHD。</b></td>
+        <td><b><code>--distance-metric</code> 的 initializer 不是 CLI default；多值順序有語意</b></td>
+        <td>未指定時是 NHD；明示 selection 會保留。多值時只有第一個 metric 驅動 clustering，
+            後續只輸出額外 matrix，因此順序可能改變 tree／cluster。</td>
       </tr>
       <tr>
         <td><span class="badge b-info">低</span></td>
         <td><b>群數最少一定是 2</b></td>
         <td>輪廓係數從 k=2 開始掃，所以 <code>optimal_k</code> 永遠不會是 1 ——
-            <b>它不回答「有沒有結構」</b>。要看有沒有結構請看 PERMANOVA 與 gating 欄位。</td>
+            <b>它不證明 unsupervised cluster existence/truth</b>。PERMANOVA 只測指定 label 與 read-distance variation／centroid separation 在置換 null 下的 association，且須與 PERMDISP 合讀；Fisher／Cramér's V 只測 label association，均不證明 cellular group 或因果。</td>
       </tr>
       <tr>
         <td><span class="badge b-info">低</span></td>
@@ -595,7 +650,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
   <ul>
     <li><b>CLI 選項</b>：<code>--help</code> 實跑輸出，逐行對照 <code>include/utils/ArgParser.hpp</code>
         與 <code>include/core/Config.hpp</code>。兩個「文件 vs 程式碼」落差均以<b>原始碼行號 + 執行期輸出雙重確認</b>。</li>
-    <li><b>三條範例指令</b>：全部實際執行，exit code 皆 0，輸出檔案逐一讀回核對。</li>
+    <li><b>三條參數組合</b>：2026-08-06 具名內部 HCC1395 receipt 記錄 exit code 皆 0，並逐一讀回輸出；公開主命令已改為 repo／data／build／site-profile 變數，不把內部絕對路徑或 runtime 當成一般承諾。</li>
     <li><b>輸出檔格式</b>：所有 header 與資料行皆為<b>實際 head 磁碟檔案</b>所得，非照文件抄寫。</li>
     <li><b>內部流程</b>：20 個階段逐一標註原始碼位置，本輪機械重驗行號有效性 100% 通過。</li>
   </ul>

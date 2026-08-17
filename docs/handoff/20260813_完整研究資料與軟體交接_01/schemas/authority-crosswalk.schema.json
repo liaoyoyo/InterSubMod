@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterSubMod immutable authority append-only crosswalk",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_type", "verified_at", "immutable_authority", "crosswalks"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "registry_type": {"const": "authority_superseded_crosswalk"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "immutable_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "package_path", "sha256", "as_of_date", "mutation_policy"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^/"},
+        "package_path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "as_of_date": {"type": "string", "format": "date"},
+        "mutation_policy": {"const": "IMMUTABLE_APPEND_ONLY_CORRECTIONS"}
+      }
+    },
+    "crosswalks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["crosswalk_id", "subject_artifact_id", "authority_statement", "adjudicated_statement", "relationship", "evidence_status", "claim_ceiling"],
+        "properties": {
+          "crosswalk_id": {"type": "string", "minLength": 1},
+          "subject_artifact_id": {"type": "string", "minLength": 1},
+          "authority_statement": {"type": "string", "minLength": 1},
+          "adjudicated_statement": {"type": "string", "minLength": 1},
+          "relationship": {"enum": ["SUPERSEDES_STATUS_NOT_BYTES", "ROLE_INVALIDATED_BYTES_RETAINED", "SUPERSEDED_COUNT_SEMANTICS"]},
+          "evidence_status": {"enum": ["VALIDATED_DERIVED", "INVALIDATED"]},
+          "claim_ceiling": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

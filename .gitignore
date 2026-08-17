@@ -154,6 +154,11 @@ preview/
 .codex
 # Claude Code scheduled task lock (transient runtime state)
 .claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Machine-specific site profiles contain local paths and host-specific hashes.
+config/site-profile.local.json
+config/sites/*.local.json
 # image-vision-check intermediate JSON (per-run instruction file)
 examples/phase1_demo/demo_topic/figures/_check_instructions.json
 
@@ -397,13 +402,21 @@ research/**/*_trace.[0-9]*
 !research/**/manifest.json
 !research/**/schemas/*.json
 !research/**/*.standalone.html
-# Machine-readable contract for the bounded 2026-08-13 public-doc P0 correction guard.
+# 2026-08-12 public-claim audit is release-gate evidence, not a regenerable
+# analysis payload.  Keep its bounded (<1 MiB/file) evidence matrix and QA
+# receipt available to fresh clones; artifact_checksums.sha256 authenticates
+# every allowlisted file.
+!research/20260812_intersubmod_github_public_docs_full_validation/*.tsv
+!research/20260812_intersubmod_github_public_docs_full_validation/chr2_18M_independent_audit_fresh.json
+!research/20260812_intersubmod_github_public_docs_full_validation/html_qa/qa_receipt.json
+# 2026-08-13 handoff: frozen-authority replay receipts are small release evidence.
+!research/20260813_complete_research_handoff/receipts/*.json
+!research/20260813_complete_research_handoff/receipts/*.tsv
+!research/20260813_complete_research_handoff/release_freeze_manifest.json
+# 2026-08-13 bounded public-claim registry and generated validation receipts.
+!research/20260813_public_docs_p0_correction/*.json
 !research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json
-# 2026-08-13 InterSubMod public-surface refresh: small canonical contracts and final QA only.
-!research/20260813_intersubmod_public_surfaces_refresh/scripts/p1_p2_claim_registry.json
-!research/20260813_intersubmod_public_surfaces_refresh/pages_structural_qa.json
-!research/20260813_intersubmod_public_surfaces_refresh/pages_browser_qa.json
-!research/20260813_intersubmod_public_surfaces_refresh/report_artifact.json
+!research/20260813_public_docs_p0_correction/github_about_evidence/*.json
 # ⚠ receipt*.json 刻意「不」放行（2026-08-06 用戶決策）：
 #   實測 research/ 下 308 個 receipt 共 106.8 MB、86 個 >200KB，
 #   分類後幾乎全是 QA/審查/測試失敗輸出（audit_notes/ 136、*.failed.*/ 83、

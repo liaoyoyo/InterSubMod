@@ -69,4 +69,3 @@
 - 允許：完整 claim audit、fresh build/test、小型 fixture runtime、authority 重算、外部原始來源核對、HTML/SVG 報告。
 - 不允許：把本輪文件稽核當成新 biological validation；不重跑全量 BAM pipeline；不以未測項作 negative；不直接改公開內容或 push。
 - 最終輸出必須分清：GitHub main、Wiki、Pages/feature、repo current science 四個層次。
-

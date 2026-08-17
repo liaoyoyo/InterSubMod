@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liaoyoyo/InterSubMod/schemas/longlineage-preview-safety-receipt.schema.json",
+  "title": "LongLineage public-preview safety receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_type",
+    "source_commit",
+    "longlineage_candidate_commit",
+    "safety_stacked_commit",
+    "generated_at",
+    "overall_pass",
+    "blocking_gates",
+    "preview_safety_gates",
+    "phase_gates"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "receipt_type": {"const": "longlineage_public_preview_safety"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "longlineage_candidate_commit": {
+      "const": "b9aaa12a11fa00606bd174dabd0f172a5d112359"
+    },
+    "safety_stacked_commit": {"$ref": "#/$defs/commit"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "overall_pass": {"const": true},
+    "blocking_gates": {"type": "array", "maxItems": 0},
+    "preview_safety_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["license", "source_origin", "dependencies", "public_safety"],
+      "properties": {
+        "license": {"$ref": "#/$defs/safety_gate"},
+        "source_origin": {"$ref": "#/$defs/safety_gate"},
+        "dependencies": {"$ref": "#/$defs/safety_gate"},
+        "public_safety": {"$ref": "#/$defs/safety_gate"}
+      }
+    },
+    "phase_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P3", "P4", "P5", "P7", "P8"],
+      "properties": {
+        "P3": {"const": "BLOCKED"},
+        "P4": {"const": "BLOCKED"},
+        "P5": {"const": "BLOCKED"},
+        "P7": {"const": "BLOCKED"},
+        "P8": {"const": "BLOCKED"}
+      }
+    }
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "safety_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "subject_commit", "sha256", "uri", "verified_at"],
+      "properties": {
+        "artifact_id": {"type": "string", "pattern": "^[A-Za-z0-9._/-]+$"},
+        "subject_commit": {
+          "const": "b9aaa12a11fa00606bd174dabd0f172a5d112359"
+        },
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "uri": {"type": "string", "minLength": 1},
+        "verified_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "safety_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "subject_commit", "verified_at", "evidence"],
+      "properties": {
+        "status": {"const": "PASS"},
+        "subject_commit": {
+          "const": "b9aaa12a11fa00606bd174dabd0f172a5d112359"
+        },
+        "verified_at": {"type": "string", "format": "date-time"},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safety_evidence"}
+        }
+      }
+    }
+  }
+}

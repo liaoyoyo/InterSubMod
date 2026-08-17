@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "cycle_id": "cycle_20260813-1032-complete-research-handoff",
+  "topic": "complete_research_handoff",
+  "task_type": [
+    "B_comprehensive_validation",
+    "D_external_handoff"
+  ],
+  "status": "verdict_PROBE",
+  "score": 50,
+  "dimensions": {
+    "theory": 20,
+    "observation": 10,
+    "mechanism": 20,
+    "counter_risk": 0,
+    "resource": 0
+  },
+  "cynefin_domain": "complicated",
+  "verdict": "PROBE",
+  "falsifier_observable": "Any final-for-scope artifact lacking producer commit, inputs, command receipt, schema, scope, hash, and machine location, or any missing/mismatched frozen authority artifact, blocks release-ready status.",
+  "decision_lock": true,
+  "red_team": {
+    "performed": true,
+    "passed": true,
+    "failure_modes": [
+      "Mistaking a clean ddd8909a build for reproduction of the 2026-08-01 frozen scientific results",
+      "Mistaking bip8-mounted NFS paths visible on bip7 for an independent hostname=bip8 acceptance receipt",
+      "Mistaking a buildable LongLineage preview for completed source-origin, license, or production gates"
+    ]
+  },
+  "baseline": {
+    "intersubmod": "ddd8909a838318d8a77969313e9561c8ff9d01c2",
+    "longlineage": "b9aaa12a11fa00606bd174dabd0f172a5d112359"
+  },
+  "scoped_go": [
+    "clean_handoff",
+    "registries",
+    "claim_corrections",
+    "portable_interfaces",
+    "private_longlineage_preview_pr"
+  ],
+  "publication_blocks": [
+    "INTERSUBMOD_TAG_RELEASE_BLOCKED",
+    "BIP8_INDEPENDENT_RECEIPT_BLOCKED",
+    "LONGLINEAGE_PUBLIC_VISIBILITY_BLOCKED",
+    "LONGLINEAGE_PRODUCTION_RELEASE_BLOCKED"
+  ],
+  "scored_at": "2026-08-13T10:40:00+08:00"
+}

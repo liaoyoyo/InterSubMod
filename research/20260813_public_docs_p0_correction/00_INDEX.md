@@ -1,76 +1,91 @@
 <!--
-建立時間: 2026-08-13 09:52
-目標: 把 2026-08-12 公開文件全面稽核轉成可驗證的 P0 修正循環
-處理範圍: Task B — 全部 34 個 InterSubMod P0 claim families，以及 CCU lab-tutorial 全部 OLD-P0 與 REGRESSED findings；P1/P2 保留在後續 queue
-build_branch: chore/handoff-20260813
-build_commit_at_start: 83741469
-current_head_at_last_verify: 95d420f6
-status: VALIDATED_LOCAL_SOURCE_WITH_EXTERNAL_PUBLICATION_REQUIRED
-artifact_tracking: UNCOMMITTED_WORKSPACE_DELIVERABLE_WITH_SHA256_MANIFEST
-worktree: /big7_disk/liaoyoyo2001/InterSubMod
-data_sources: research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv,research/20260812_intersubmod_github_public_docs_full_validation/lab_tutorial_delta_reaudit.tsv,docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/authority_manifest.json
-驗證方式: 逐 claim occurrence 對照、殘餘字串 gate、文件／HTML 結構檢查、桌機／手機／列印 browser QA；remote GitHub About、merge、Wiki publish 與 CCU deploy 明確列為外部 action
-證據等級: L2 ⭐⭐⭐⭐（完整文件母體與 fresh runtime 已驗；未執行 remote publication）
+建立時間: 2026-08-13
+目標: 將 2026-08-12 的 158-row 公開文件稽核轉成可重跑、fail-closed 的修正與發布 Gate
+處理範圍: Task B + D；34 個 P0 source corrections 與完整 158-claim remediation registry
+release_baseline: ddd8909a838318d8a77969313e9561c8ff9d01c2
+status: P0_SOURCE_READY__ABOUT_C108_LIVE_CONFIRMED__ALL_SOURCE_BLOCKED__PUBLICATION_BLOCKED__RELEASE_BLOCKED
 關聯檔案:
-  - InterSubMod/research/20260813_public_docs_p0_correction/pre-decision-audit.md
-  - InterSubMod/research/20260813_public_docs_p0_correction/implementation-notes.md
-  - InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/00_INDEX.md
+  - InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv
+  - InterSubMod/research/20260813_public_docs_p0_correction/claim_remediation_registry.json
+  - InterSubMod/research/20260813_public_docs_p0_correction/claim_remediation_build_receipt.json
 -->
 
-# 2026-08-13 公開文件 P0 修正循環
+# 2026-08-13 公開文件 claim 修正與發布 Gate
 
-> **Task B / P0 correction scope**：本輪完整處理既定 P0 母體，不把 P1/P2 或尚未發布的 remote 狀態算成已解決。
+> **結論先行：**34 個 P0 中，33 個本機可控 claim 已通過 source guard；GitHub About（C108）已換成 bounded description、移除 `subclone`／`phylogeny` topics並re-fetch，receipt已保存。初始24個P1/P2中，C047/C048/C089/C114已以可追溯的有界證據收旂，其餘20個仍為醒目UNVERIFIED；default branch／Wiki／Pages尚未發布與抓回驗證。因此只允許說 **bounded source/evidence closure**，不可說全source-ready、publication-ready或release-ready。
 
-## 服務目標
+## 任務與 claim ceiling
 
-- G2：避免把 molecular candidate structure 誤稱 cellular subclone。
-- G3：把 methylation 限定為 pattern-conditioned association，不升格成 lineage/function truth。
-- G4：同步 EN/ZH、Wiki、Pages 與 CCU 教材的版本與分母口徑。
-- G5：建立可由 CI 重跑的 public-claim guard 與 correction receipt。
+- Task type：B Comprehensive validation + D External handoff。
+- 服務 G1、G3、G4、G5。
+- 分子共現是 physical-molecule observation；不是 cellular co-membership truth。
+- candidate topology 是 local、recurrence-allowed、model-conditional；確認的 cellular subclone = 0、linear ancestry = 0。
+- methylation 僅為 genetic grouping 後的 association；CN/LOH 尚未整合。
+- 63,506 / 71,955 = 88.2579% 是 model-conditional graph shape，不是生物正確率或 prevalence。
 
-## Pre-registration（Confirmatory）
+## 輸入 → 輸出 → 驗證
 
-| 預測 H | 否證條件 | Decision threshold |
+1. 輸入：InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv
+   → 輸出：InterSubMod/research/20260813_public_docs_p0_correction/claim_remediation_registry.json
+   → 驗證：158 IDs 完全相等、無重複／遺漏。
+2. 輸入：README EN/ZH、Quickstart、Summary、8 Wiki sources、17 Pages HTML、page-07 generator
+   → 輸出：受控source corrections與可重跑guard
+   → 驗證：P0 guard 34/34、27 target documents、77 target rules；42個cross-document guards在34個public source files執行500次document checks、285 required anchors、1,217 forbidden anchors、0 errors。
+3. 輸入：2026-08-01 denominator_registry.tsv
+   → 輸出：7 個固定 denominator assertions
+   → 驗證：469,849、255,752、170,131、71,955、63,506、811、3 與精確百分比一致。
+4. 輸入：branch/commit-specific capability statements
+   → 驗證：LongLineage private baseline/main snapshot `5daf50f`、private public-preview candidate `b9aaa12`、revision-scoped `longlineage-tag-bam`、`NOT_READY`與P3/P4/P5/P7/P8 BLOCKED；InterSubMod 199-column schema anchors皆存在。
+5. 輸入：`scripts/p0_claim_registry.json` 的跨文件 guard contract
+   → 驗證：current schema 不得回退 59/193 欄、ISM 與 exact-PS solver 不得混用、66.5%／63,506／unique-tree 必帶 grain、README 不得手抄 test count、Python ≥3.10、fixture 必須是 Git stage-0 regular blobs、公開來源不得使用 `/develop/` raw URL。
+6. 輸入：GitHub About API response
+   → 輸出：`github_about_c108_receipt.json`
+   → 驗證：description精確等於bounded wording、topics不含`subclone`／`phylogeny`、repository identity與re-fetch時間存在；C108為`CONFIRMED_WITH_LIMITS_AFTER_REFETCH`。
+7. 發布後才可執行：re-fetch default branch／Wiki／Pages
+   → 驗證：live bytes與指定commit/hash一致；本輪未執行，故這三面仍為UNVERIFIED_AFTER_20260812_LOCKED_SNAPSHOT。
+
+## Registry 結果
+
+| 維度 | 數量 |
+|---|---:|
+| claims | 158 |
+| P0 / P1 / P2 / P3 | 34 / 20 / 35 / 69 |
+| CONFIRMED | 69 |
+| CONFIRMED_WITH_LIMITS | 69 |
+| UNVERIFIED | 20 |
+| 本機 SOURCE_READY P0 | 33 |
+| SOURCE_EDITED_REVIEW_REQUIRED P1/P2 | 20 |
+| EXTERNAL_LIVE_CONFIRMED_WITH_LIMITS | 1（C108） |
+
+注意：current_verdict 是 evidence adjudication；source_status 是 checked-in source；live_status 是重新抓回的發布物。三者不可互相代替。
+
+## Gate
+
+| Gate | 狀態 | 原因 |
 |---|---|---|
-| H-P0-1：34 個 InterSubMod P0 claim families 都能映射到本機可控來源或明示 external action | 任一 P0 claim 無 occurrence／owner／修正文案，或把 About／remote merge 誤標成 local fixed | 34/34 有 disposition；local-fixed 與 external-action 分開計數 |
-| H-P0-2：更正後所有本機公開入口都遵守 molecular-not-cell claim ceiling | target files 仍出現「confirmed clone／same cell lineage／methylation confirms clone／automatic heatmap」等禁語，或候選／local／model-conditional 限定缺失 | P0 residual gate 0 個未豁免命中；所有允許例外逐條列 receipt |
-| H-P0-3：CCU OLD-P0 與 REGRESSED claims 可在 commit `9eb1618` 上形成可套用 patch | patch 無法乾淨套用、generated print-all 未同步、或 source page 仍保留 regression wording | 所有 OLD-P0 + REGRESSED finding 有 fixed／external disposition；patch apply-check PASS；site QA PASS |
-| H-P0-4：修正不破壞既有公開文件與 HTML 互動 | link、TOC、details、responsive、print 或 no-JS 任一失敗 | 結構檢查與 Chromium desktop/mobile/print 全 PASS；0 console/page error；0 horizontal overflow |
+| P0_SOURCE_READY | PASS | 33個local P0 source claims通過semantic anchors；C108 About有bounded live receipt |
+| SOURCE_READY | BLOCKED | 其餘20個P1/P2 source edits尚缺逐claim evidence closure |
+| PUBLICATION_READY | BLOCKED | default branch、Wiki、Pages未發布／re-fetch；About C108單獨通過不會升格整體 |
+| RELEASE_READY | BLOCKED | publication gate 與完整 handoff release gates 尚未通過 |
 
-## Step → Verify
+HTML companion的repository-owned Chromium runner綁定精確allowlist：17頁public explain + 4頁handoff，共21頁×desktop/mobile/no-JS/print=`84` cases，並檢查21份standalone SVG、inline SVG、local link、fragment target、水平overflow、page/console error與HTTP(S) runtime request。最終驗收只接受clean-source receipt；此receipt只驗呈現與runtime safety，不重算science。
 
-1. 鎖定 dirty-tree 邊界與 audited versions → 驗證：列 branch／commit／target diff，非目標檔 0 次修改。
-2. 逐項修 InterSubMod 34 個 P0 claim → 驗證：每個 ID 有 occurrence-before／after／evidence／disposition。
-3. 修 CCU 全部 OLD-P0 與 REGRESSED → 驗證：基於 `9eb1618` 的 patch、generated aggregate 同步、finding-level receipt。
-4. 新增 claim guard → 驗證：正向 contract、禁語、分母、CLI/schema assertions 全部自動檢核。
-5. 重跑文件與 HTML QA → 驗證：命令 exit 0、實際輸出片段、browser viewport 與 print receipt。
-6. 產生修正報告與 standalone HTML／SVG → 驗證：claim mapping、external actions、remaining P1/P2、provenance 皆可見。
-7. 執行獨立 fresh-reader gate → 驗證：數量閉合、首屏狀態、SVG 幾何、未 commit provenance 與資料優先序可由只讀者重建。
+## 重跑命令
 
-## Scope boundary
+~~~bash
+python3 research/20260813_public_docs_p0_correction/scripts/run_claim_validation.py
 
-- 本輪不修改生物資訊核心演算法、不重跑 7 樣本 BAM pipeline。
-- 本輪不 push、merge、改 GitHub About、發布 Wiki、部署 Pages 或 CCU live site。
-- P1/P2 不會被本輪的 P0 成功率吞掉；另列 remaining queue。
-- 既有 2026-08-12 validated audit 保持 immutable；修正另建 receipt。
+# 上述 canonical runner 依序重建 registry，再執行以下分解步驟：
+python3 research/20260813_public_docs_p0_correction/scripts/build_claim_remediation_registry.py
+python3 research/20260813_public_docs_p0_correction/scripts/validate_public_p0_claims.py
+python3 research/20260813_public_docs_p0_correction/scripts/validate_claim_remediation_registry.py
+python3 -m unittest discover -v -s research/20260813_public_docs_p0_correction/tests -p 'test_*.py'
+~~~
 
-## 輸入與預期輸出
+`p0_claim_registry.json` 是 guard 的唯一權威輸入；builder 必須先驗證它，並把其 SHA-256 寫入 generated registry 與 receipt。35個 fail-closed tests另覆蓋 duplicate／missing ID、illegal verdict、missing evidence、denominator drift、capability commit drift、guard-hash drift、59/193 current schema、solver 混用、裸分母、手抄 test count、Python 3.9、未追蹤 fixture、`/develop/` raw URL，以及把 local source 偷升 live confirmed 的錯誤。
 
-- 輸入：`InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv`
-- 輸入：`InterSubMod/research/20260812_intersubmod_github_public_docs_full_validation/lab_tutorial_delta_reaudit.tsv`
-- 輸入：`InterSubMod/docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/{authority_manifest.json,denominator_registry.tsv}`
-- InterSubMod 輸出：本機修正檔、claim receipt、validator 與 QA receipt。
-- CCU 輸出：基於 `9eb1618d359e602d9c528675952b20d051fb2346` 的可套用 patch 與 QA receipt。
-- 報告輸出：`InterSubMod/docs/reports/validated/2026/08/20260813_公開文件P0修正與驗證_01.{md,standalone.html}`。
+## 尚未完成
 
-## 終局輸出
-
-- Markdown：`InterSubMod/docs/reports/validated/2026/08/20260813_公開文件P0修正與驗證_01.md`
-- Standalone HTML／inline SVG：`InterSubMod/docs/reports/validated/2026/08/20260813_公開文件P0修正與驗證_01.standalone.html`
-- Browser QA：`InterSubMod/research/20260813_public_docs_p0_correction/html_qa_receipt.md`
-- Validated correction bytes：`InterSubMod/research/20260813_public_docs_p0_correction/validated_target_manifest.sha256`（33 entries；SHA-256 `4c7b0e...f6e1`）
-- Final report bytes：`InterSubMod/research/20260813_public_docs_p0_correction/final_report_manifest.sha256`
-- Fresh-reader gate：`InterSubMod/research/20260813_public_docs_p0_correction/reader_test_receipt.md`（第三輪 PASS）
-- Evidence ledger：`InterSubMod/research/autoresearch/evidence_ledger.jsonl`（cycle `20260813_public_docs_p0_correction`）
-- P0 guard：34/34 inventory、27 documents、77 target rules、140 required、79 forbidden、errors 0。
-- External state：main／Wiki／Pages／About／CCU live 仍未發布；只允許標 `LOCAL_SOURCE_CORRECTED`／`PATCH_VALIDATED_ON_PINNED_CLONE`，CCU 正式狀態為 `NOT_APPLIED / NOT_DEPLOYED`。
+- 初始 24 個 P1/P2 中尚有 20 個 source edits需依 registry 的 targets／inventory_minimum_rewrite補專屬guard、evidence closure與review；2026-08-12 inventory仍為不可變 audit input，當前 verdict以registry為準。
+- main merge、Wiki push、Pages deploy，及四個 live surfaces 的 commit/hash re-fetch。
+- default branch／Wiki／Pages live state未驗證前，任何local SOURCE_READY都不得改成published/resolved；C108僅依其獨立receipt例外。

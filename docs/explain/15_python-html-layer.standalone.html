@@ -7,6 +7,14 @@
 <!--
   doc_type: explain_python_html   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
+  source_created_at: 2026-08-06
+  source_commit: UNKNOWN
+  source_branch: research/subclonal-reconstruction-202606
+  last_verified_at: 2026-08-13
+verification_commit: null
+verification_receipt: research/20260813_public_docs_p0_correction/html_browser_qa_receipt.json
+  published_at: null
+  claim_ceiling: 本輪公開 claim 修正僅為既有證據的 verification，不重算 science。
   data_sources: scratchpad/collect_python_html_layer.json
   驗證: 主力腳本 --help 實跑取 exit code；refuse 行為以自建最小 spec 實測 exit 3；
         檔案大小與腳本計數為實際 ls / 遞迴統計
@@ -97,6 +105,40 @@ footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:
 footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
+/* Responsive QA overlay: keep overflow inside the component that owns it. */
+table{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+code{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+pre,
+.evi{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+pre code,
+.evi code{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+:where(.grid,.grid2,.grid3,.split,.track2,.wrap)>*{
+  min-width:0;
+}
+.badge,
+.rname,
+.verdict{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 </style>
 <style>
 /* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
@@ -146,7 +188,7 @@ pre code{display:block;white-space:pre;word-break:normal}
 </header>
 
 <div class="kpis">
-  <div class="kpi info"><div class="v">2,147</div><div class="k">deploy commit <code>fbdf7c7</code> 的 tracked Python 檔</div></div>
+  <div class="kpi info"><div class="v">2,147</div><div class="k">deploy fbdf7c7 全 repo Python 檔（find *.py）</div></div>
   <div class="kpi warn"><div class="v">59 / 117</div><div class="k">讀 CSV 但無任何欄位檢查</div></div>
   <div class="kpi dead"><div class="v">182</div><div class="k">硬編了別的分支路徑的腳本</div></div>
   <div class="kpi pass"><div class="v">1</div><div class="k">最推薦的第一支腳本（見下）</div></div>
@@ -158,8 +200,10 @@ pre code{display:block;white-space:pre;word-break:normal}
   <h3><span class="num">01</span>歷史 35,332-site 方法管線的數字收據</h3>
   <p class="sub"><code>verify_pipeline_numbers.py</code> 只驗證 2026-06 方法說明所用的 35,332-site pipeline；它不是全 repo、全研究流程或目前 exact-PS 流程的總驗證器。</p>
 
-  <pre class="cmd"><code>cd /big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
-python3 verify_pipeline_numbers.py</code></pre>
+  <pre class="cmd"><code><span class="c"># 將 placeholder 換成 release manifest 指定 commit 的 clone root</span>
+REPO_ROOT="&lt;REPO_ROOT&gt;"
+cd "$REPO_ROOT"
+python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/verify_pipeline_numbers.py</code></pre>
 
   <p><b>它會做什麼</b>：重算該歷史方法文件中 35,332 個 sSNV 的 TP/FP、共現連結、訊號不足與孤立分類，並比對該文件的宣稱值。它<b>不涵蓋</b> 2026-07-24 exact-PS 產物、LongLineage、儲存體稽核、repo 程式碼/測試計數或其他頁面的數字。實跑輸出摘要：</p>
   <pre class="out"><code>sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
@@ -178,7 +222,7 @@ python3 verify_pipeline_numbers.py</code></pre>
 <!-- ═══════ 2 ═══════ -->
 <section id="s2">
   <h3><span class="num">02</span>主力腳本 — 各自產出什麼</h3>
-  <p class="sub">從 deploy commit <code>fbdf7c7</code> 的 2,147 個 tracked Python 檔中挑出真正是「入口」的那幾支；此計數不等於 production entry-point 數。</p>
+  <p class="sub">從 deploy <code>fbdf7c7</code> 的 2,147 個 Python 檔中挑出真正是「入口」的那幾支；此數字不是 production entry-point count。</p>
 
   <div class="table-wrap"><table>
     <thead><tr><th style="width:27%">腳本</th><th style="width:73%">產出什麼、回答什麼問題</th></tr></thead>
@@ -202,7 +246,7 @@ python3 verify_pipeline_numbers.py</code></pre>
       </tr>
       <tr>
         <td><code>build_layered_per_sample.py</code></td>
-        <td>產生 7 樣本的<b>分層工作站 HTML</b>（呈現層主成品）。</td>
+        <td>產生 7 technical datasets／6 biological IDs 的<b>分層工作站 HTML</b>（呈現層主成品）。</td>
       </tr>
       <tr>
         <td><code>build_exact_ps_layered_workstation.py</code></td>
@@ -226,8 +270,9 @@ python3 verify_pipeline_numbers.py</code></pre>
               <td>每個突變一列的帳本：來源、正常組織的支持數、是否確認為體細胞突變、變異頻率、
                   50 kb 內有幾個潛在夥伴、實際連上幾個、最高共讀深度、拷貝數狀態。</td></tr>
           <tr><td><code>regions.tsv</code></td>
-              <td>每個共現區域一列：座標、跨度、含幾個突變、重建出的樹是什麼形狀、節點數、
-                  巢狀／兄弟關係各幾對、最大深度、<b>有沒有矛盾</b>。</td></tr>
+              <td>在 frozen recurrence-allowed revision 中，每個共現區域一列：座標、跨度、突變數、
+                  local candidate graph／arborescence 的形狀摘要、節點與相容／矛盾計數。這不是 biological tree、
+                  ancestry 或 clone truth，且尚未做 allele-specific CN／LOH correction。</td></tr>
           <tr><td><code>funnel_census_HCC1395.json</code></td>
               <td><b>所有百分比的分母來源</b>。六層漏斗，每層丟了多少、為什麼丟，
                   並<b>自我檢查各層加總等於總數</b>。要引用任何比例前先看這個檔。</td></tr>
@@ -243,12 +288,12 @@ python3 verify_pipeline_numbers.py</code></pre>
   <p class="sub">產出的是<b>零外部依賴、可離線開啟</b>的單一 HTML 檔，可以直接寄給別人。</p>
 
   <figure>
-    <div class="figtitle">圖 1 · 工作站生成器的「拒絕渲染」設計 — 必填指標缺失時 fail-closed</div>
+    <div class="figtitle">圖 1 · 工作站生成器的「拒絕渲染」設計 — 防止必填欄位被靜默省略</div>
     <svg viewBox="0 0 900 300" role="img" aria-labelledby="p1t p1d" xmlns="http://www.w3.org/2000/svg">
       <title id="p1t">工作站生成器的拒絕渲染機制</title>
       <desc id="p1d">生成器讀取宣告式 spec，逐項檢查每個項目是否具備 spec 宣告的必填指標；
       若齊全則渲染出互動 HTML，若缺少任一必填指標則以退出碼 3 拒絕渲染，
-      而不是填入破折號或空白。這個 guard 可防止「已宣告必填 metric 缺失卻靜默渲染」，但不驗證數值真實性、方法適切性或科學結論。</desc>
+      而不是填入破折號或空白；此機制不保證數值來源或科學解讀正確。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="w1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -282,12 +327,12 @@ python3 verify_pipeline_numbers.py</code></pre>
         <rect x="20" y="212" width="858" height="70" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="40" y="234" font-size="11.5" font-weight="800" fill="#B06A16">為什麼要這樣設計</text>
         <text x="40" y="253" font-size="10.5" fill="#6b4310">如果缺資料時填一個破折號，報告看起來仍然完整，讀的人不會發現那一格其實沒有依據。</text>
-        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">它防止缺少已宣告必填 metric 時靜默渲染；不保證數值或科學解讀正確。</text>
+        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">阻止已宣告必填欄位被靜默省略；不保證數值來源或科學解讀正確。</text>
       </g>
     </svg>
     <figcaption>
       這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。
-      <b>這個 required-metric guard 防止缺少已宣告欄位時靜默渲染；不是資料真實性或科學正確性的驗證器。</b>
+      <b>此機制只涵蓋已宣告必填欄位，不保證整份報告的科學正確性。</b>
       <br><span class="dot">●</span> 但目前這個通用生成器<b>只有 2 個真正的複用者</b> ——
       實務上大家用的是 4,741 行的專用版本。這是這一層最明顯的技術債。
     </figcaption>
@@ -363,8 +408,8 @@ python3 verify_pipeline_numbers.py</code></pre>
 
   <div class="takeaway">
     <span class="lab">坑四：資料讀取普遍沒有欄位檢查</span>
-    deploy commit <code>fbdf7c7</code> 的 <code>scripts/</code> 下有 291 個 tracked Python 檔（未排除 generated/test/helper）；其中 117 個會讀 CSV／TSV，
-    但其中 <b>59 個</b>（超過一半）原始碼裡<b>沒有任何 schema 或欄位檢查</b>。
+    <code>scripts/</code> 下 291 個 Python 檔（deploy <code>fbdf7c7</code>；含 generated/test helpers）中，117 個會讀 CSV／TSV，
+    其中 <b>59 個</b>原始碼裡<b>沒有任何 schema 或欄位檢查</b>；母體不同，不宣稱超過一半。
     <div style="font-weight:400;font-size:.92rem;margin-top:10px">
       配合 <a href="12_intersubmod-io.standalone.html">ISM 分冊</a>提到的
       「<code>significance_summary.csv</code> 欄數跨版本不一致」，

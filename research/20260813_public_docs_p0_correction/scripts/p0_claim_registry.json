@@ -12,16 +12,725 @@
     {"surface": "GitHub Wiki", "locked_at": "master@6cfc990f1fbe0b0aa76b8adbe56bbe645ef7ee7b", "status": "external_action_required"},
     {"surface": "GitHub Pages", "locked_at": "deploy@fbdf7c7d229b0b37930778cbcd928cf9e15ecb17", "status": "external_action_required"}
   ],
+  "cross_document_guards": {
+    "semantics": "These fail-closed guards supplement per-claim anchors. The builder must pin this registry hash; generated outputs are never an independent policy source.",
+    "public_source_globs": [
+      "README.md",
+      "README.zh-TW.md",
+      "QUICKSTART.md",
+      "README_PROJECT_SUMMARY.md",
+      "docs/README.md",
+      "docs/handoff/README.md",
+      "docs/wiki/*.md",
+      "docs/explain/*.standalone.html",
+      "pipeline/README.md",
+      "pipeline/lineage/reference_python/README.md"
+    ],
+    "required_tracked_paths": [
+      "scripts/handoff/build_tiny_public_fixture.sh",
+      "scripts/handoff/run_tiny_public_e2e.sh",
+      "scripts/handoff/validate_tiny_public_e2e.py",
+      "tests/fixtures/tiny_public/README.md",
+      "tests/fixtures/tiny_public/reference.fa",
+      "tests/fixtures/tiny_public/tumor.sam",
+      "tests/fixtures/tiny_public/variants.vcf",
+      "tests/fixtures/tiny_public/expected_significance_schema.json"
+    ],
+    "required_executable_paths": [
+      "scripts/handoff/build_tiny_public_fixture.sh",
+      "scripts/handoff/run_tiny_public_e2e.sh",
+      "scripts/handoff/validate_tiny_public_e2e.py"
+    ],
+    "document_rules": [
+      {
+        "guard_id": "G_CANONICAL_HANDOFF_NAVIGATION",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "QUICKSTART.md",
+          "docs/README.md",
+          "docs/handoff/README.md"
+        ],
+        "required_all": [
+          "(?:2026-08-13.{0,100}(?:complete software/data handoff|完整研究資料與軟體交接)|(?:complete software/data handoff|完整研究資料與軟體交接).{0,100}2026-08-13)",
+          "(?:2026-08-01.{0,100}(?:science authority|科學(?:數值)?\\s*authority|frozen authority|frozen bundle)|(?:science authority|科學(?:數值)?\\s*authority|frozen authority|frozen bundle).{0,100}2026-08-01)"
+        ],
+        "forbidden_any": [
+          "2026-08-13.{0,80}(?:science authority|科學數值 authority)",
+          "2026-08-01.{0,80}(?:latest handoff|最新交接|最新.*入口)"
+        ]
+      },
+      {
+        "guard_id": "G_HP_VALUE_COMPATIBILITY_CENSUS",
+        "targets": [
+          "pipeline/README.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md"
+        ],
+        "required_all": [
+          "1-2.{0,30}2-2",
+          "ddd8909a",
+          "HP_OTHER",
+          "HP value census"
+        ],
+        "forbidden_any": [
+          "九態.{0,30}`1`/`2`/`1-1`/`2-1`/`3`"
+        ]
+      },
+      {
+        "guard_id": "G_HISTORICAL_PIPELINE_REDIRECT",
+        "targets": [
+          "pipeline/README.md",
+          "pipeline/lineage/reference_python/README.md"
+        ],
+        "required_all": [
+          "SUPERSEDED.{0,30}HISTORICAL",
+          "不可作為.{0,30}執行入口",
+          "b9aaa12.{0,120}NOT_READY.{0,30}non-production",
+          "P3/P4/P5/P7/P8.{0,30}BLOCKED"
+        ],
+        "forbidden_any": [
+          "(?:cd|python3|bash).{0,120}/big7_disk/liaoyoyo2001/LongLineage",
+          "實際執行請用 LongLineage",
+          "由 LongLineage 產生.{0,200}run_sample\\.sh"
+        ]
+      },
+      {
+        "guard_id": "G_SCHEMA_CURRENT_199",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/02_ism-core.standalone.html",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "significance_summary(?:\\.csv)?",
+          "199\\s*(?:欄|columns)"
+        ],
+        "forbidden_any": [
+          "(?:current|currently|現行|目前|固定|主輸出|runtime/source header|實測).{0,140}(?:significance(?:_summary)?(?:\\.csv)?[^.]{0,80})?(?:59|193)\\s*(?:欄|columns)",
+          "(?:significance(?:_summary)?(?:\\.csv)?[^.]{0,80})?(?:59|193)\\s*(?:欄|columns).{0,140}(?:current|currently|現行|目前|固定|主輸出)"
+        ]
+      },
+      {
+        "guard_id": "G_SOLVER_BOUNDARY_REQUIRED",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "QUICKSTART.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "exact[- ]PS.{0,220}(?:separate|independent|獨立|不是.{0,50}inter_sub_mod|not.{0,50}inter_sub_mod)"
+        ],
+        "forbidden_any": [
+          "(?:inter_sub_mod|InterSubMod|ISM)\\s+(?:directly\\s+)?(?:produces?|generates?|writes?|outputs?|reconstructs?|產生|輸出|重建).{0,120}(?:exact[- ]PS|topology funnel|candidate arborescence|候選樹|拓撲 funnel)",
+          "(?:exact[- ]PS|topology funnel).{0,120}(?:\\bis\\b|(?<!不)是|(?<!不)為)\\s*(?:an?\\s+)?(?:inter_sub_mod|InterSubMod|ISM)(?:\\s+output|\\s+輸出)?"
+        ]
+      },
+      {
+        "guard_id": "G_README_DYNAMIC_TEST_COUNTS",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md"
+        ],
+        "required_all": [
+          "(?:test/suite counts?|測試.{0,30}套件.{0,30}數量).{0,160}(?:generated|dynamic|動態|產生)"
+        ],
+        "forbidden_any": [
+          "270\\s+tests?.{0,50}39\\s+suites?",
+          "CTest\\s*270\\s*/\\s*270",
+          "270\\s*個?測試.{0,50}39\\s*個?套件"
+        ]
+      },
+      {
+        "guard_id": "G_PYTHON_MINIMUM_310",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "QUICKSTART.md"
+        ],
+        "required_all": [
+          "Python\\s*(?:>=|≥)?\\s*3\\.10(?:\\+|\\s+or newer|\\s*以上)?"
+        ],
+        "forbidden_any": [
+          "Python\\s*(?:<=|≤)?\\s*3\\.9(?:\\b|\\+)"
+        ]
+      },
+      {
+        "guard_id": "G_FIXTURE_DOCUMENTED_AS_TRACKED_DEMO",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "QUICKSTART.md"
+        ],
+        "required_all": [
+          "(?:(?:tracked|追蹤).{0,100}(?:tiny synthetic|synthetic).{0,80}(?:fixture|資料)|(?:public repo|公開 repo).{0,100}(?:tiny synthetic|synthetic).{0,80}fixture)",
+          "run_tiny_public_e2e\\.sh",
+          "(?:DEMO|示範)"
+        ],
+        "forbidden_any": [
+          "(?:tiny synthetic|synthetic|DEMO)\\s+(?:fixture|測試資料)\\s*(?:is\\s+|it\\s+is\\s+)?(?:not shipped|not included|未隨 repo|沒有納入 repo|沒有.*fixture)"
+        ]
+      },
+      {
+        "guard_id": "G_CONFIRMED_CLAIM_CEILING_ZERO",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md"
+        ],
+        "required_all": [
+          "(?:Confirmed cellular subclones?|確認的細胞亞群|confirmed 細胞亞群)[^0-9]{0,20}0\\b",
+          "(?:Confirmed linear ancestry relationships?|確認的線性祖先關係|confirmed 線性祖先關係)[^0-9]{0,20}0\\b"
+        ],
+        "forbidden_any": [
+          "(?:Confirmed cellular subclones?|確認的細胞亞群|confirmed 細胞亞群)[^0-9]{0,20}[1-9][0-9]*",
+          "(?:Confirmed linear ancestry relationships?|確認的線性祖先關係|confirmed 線性祖先關係)[^0-9]{0,20}[1-9][0-9]*"
+        ]
+      },
+      {
+        "guard_id": "G_STRENGTHSCORE_CURRENT_FIVE_COMPONENTS",
+        "targets": [
+          "docs/explain/09_three-stats-division-of-labor.standalone.html"
+        ],
+        "required_all": [
+          "StrengthScore",
+          "(?:five|5|五個).{0,100}(?:component|分量|sub-score).{0,160}(?:equal|等權)|(?:equal|等權).{0,100}(?:five|5|五個).{0,100}(?:component|分量|sub-score)",
+          "(?:historical|歷史).{0,120}(?:0\\.30/0\\.25/0\\.25/0\\.20|four|4|四)|(?:0\\.30/0\\.25/0\\.25/0\\.20|four|4|四).{0,120}(?:historical|歷史)"
+        ],
+        "forbidden_any": [
+          "(?:current|現行|目前).{0,120}StrengthScore.{0,120}(?:four|4|四)(?:[- ]term|\\s*項|\\s*個分量)",
+          "StrengthScore.{0,120}(?:current|現行|目前).{0,120}(?:four|4|四)(?:[- ]term|\\s*項|\\s*個分量)"
+        ]
+      },
+      {
+        "guard_id": "G_PERMANOVA_PRODUCTION_999",
+        "targets": [
+          "docs/explain/01_background-glossary.standalone.html",
+          "docs/explain/02_ism-core.standalone.html",
+          "docs/explain/03_methylation-read-filter.standalone.html"
+        ],
+        "required_all": [
+          "999",
+          "0\\.001",
+          "(?:RegionProcessor\\.cpp|LabelTest\\.hpp)"
+        ],
+        "forbidden_any": [
+          "(?:生產|production).{0,80}(?<![0-9])(?:99(?: 次| permutations?)|n_permutations=99)(?![0-9])",
+          "n_permutations=99(?!9)",
+          "(?:p[- ]?floor|解析度下限).{0,40}(?:0\\.01|1/100)(?!0)"
+        ]
+      },
+      {
+        "guard_id": "G_ALLREF_LOCAL_PATTERN_NOT_ANCESTOR",
+        "targets": [
+          "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html"
+        ],
+        "required_all": [
+          "17 條\\(HKU\\) / 15 條\\(DORADO\\)",
+          "all-REF local read patterns",
+          "不代表已觀測到 ancestor"
+        ],
+        "forbidden_any": [
+          "22 條\\(HKU\\) / 17 條\\(DORADO\\)",
+          "ancestral ref read.{0,40}(?:確實存在|exists)",
+          "祖先.{0,30}(?:確實存在|已觀測)"
+        ]
+      },
+      {
+        "guard_id": "G_HPPS_REPRESENTATION_BOUNDARY",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/Upstream-and-Data.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/14_upstream-data.standalone.html"
+        ],
+        "required_all": [
+          "(?:InterSubMod|inter_sub_mod).{0,120}(?:BAM.{0,50}HP/PS|HP/PS.{0,50}BAM)",
+          "(?:exact[- ]PS|LongLineage).{0,120}sidecar",
+          "(?:not|不是|並非).{0,100}(?:direct|直接).{0,100}(?:runtime|執行期)"
+        ],
+        "forbidden_any": [
+          "only byte-identical contract between both engines",
+          "兩支(?: C\\+\\+)?(?:程式|引擎).{0,50}唯一.{0,50}(?:byte-level|相同格式|介面)",
+          "sidecar TSV.{0,40}全系統的(?:樞紐|hub)"
+        ]
+      },
+      {
+        "guard_id": "G_NHD_CLI_DEFAULT_SEMANTICS",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/How-to-Run.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/explain/16_how-to-run.standalone.html"
+        ],
+        "required_all": [
+          "(?:no-argument|未指定).{0,100}(?:default|預設).{0,50}NHD",
+          "(?:explicit|明示).{0,100}(?:NHD.{0,40}BERNOULLI|BERNOULLI.{0,40}NHD).{0,120}(?:honored|保留|生效)",
+          "(?:first|第一個).{0,100}(?:drives?|驅動).{0,50}(?:clustering|分群)"
+        ],
+        "forbidden_any": [
+          "silently forced to NHD",
+          "靜默改成 NHD",
+          "無條件清空.{0,80}(?:再填入|改成) NHD",
+          "實際會被覆寫成 NHD"
+        ]
+      },
+      {
+        "guard_id": "G_ALG023_HISTORICAL_AUDIT_UNVERIFIED",
+        "targets": [
+          "docs/wiki/Home.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html"
+        ],
+        "required_all": [
+          "ALG-023",
+          "UNVERIFIED",
+          "commit-pinned"
+        ],
+        "forbidden_any": [
+          "334.{0,120}111.{0,160}全部經機械重驗",
+          "0 個捏造.{0,80}0 個行號越界"
+        ]
+      },
+      {
+        "guard_id": "G_CLI_OPTION_COUNT_BRANCH_SCOPED",
+        "targets": [
+          "docs/wiki/System-Overview.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "ddd8909a",
+          "29(?:-option| 個 CLI| 個選項)",
+          "branch[- ]scope(?:d)?|branch-sensitive"
+        ],
+        "forbidden_any": [
+          "(?:全部|all) 29 個 CLI 選項.{0,80}(?:stable|穩定|固定)"
+        ]
+      },
+      {
+        "guard_id": "G_MATRIX_REPRESENTATION_DENSE_FINAL",
+        "targets": [
+          "README_PROJECT_SUMMARY.md"
+        ],
+        "required_all": [
+          "sparse-like",
+          "dense rectangular representation",
+          "read × CpG"
+        ],
+        "forbidden_any": [
+          "動態建構稀疏甲基化矩陣.{0,80}優化記憶體"
+        ]
+      },
+      {
+        "guard_id": "G_PYTHON_PRODUCER_PRESENTER_BOUNDARY",
+        "targets": [
+          "docs/wiki/Analysis-and-Presentation.md",
+          "docs/wiki/System-Overview.md",
+          "docs/explain/11_system-map-overview.standalone.html",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/ai_context/CONTEXT.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_軟體輸入輸出與研究流程_01.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_完整研究交接總覽_01.standalone.html"
+        ],
+        "required_all": [
+          "Python.{0,160}(?:science producer|research solver)",
+          "(?:validator|publication builder).{0,180}(?:validated|呈現|驗證)"
+        ],
+        "forbidden_any": [
+          "Python/HTML只呈現",
+          "Python／HTML：呈現validated data",
+          "Python 分析層 → HTML 呈現層"
+        ]
+      },
+      {
+        "guard_id": "G_LINEAGE_AXIS_FIRST_ONLY",
+        "targets": [
+          "pipeline/README.md"
+        ],
+        "required_all": [
+          "lineage-axis",
+          "(?:only|只).{0,50}(?:first|第一)",
+          "(?:not|不).{0,100}(?:multi-axis|多軸|各自獨立)"
+        ],
+        "forbidden_any": [
+          "多軸並行.{0,100}每個位點"
+        ]
+      },
+      {
+        "guard_id": "G_SUBCLONE_STRUCTURE_DEPRECATION",
+        "targets": [
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html"
+        ],
+        "required_all": [
+          "subclone_structure\\.txt",
+          "Legacy-named deprecation",
+          "not inferred cellular subclones|不是 inferred cellular subclones"
+        ],
+        "forbidden_any": [
+          "subclone_structure\\.txt.{0,120}(?:reports?|推論|報告).{0,60}(?:cellular )?subclones?"
+        ]
+      },
+      {
+        "guard_id": "G_CN_LOH_INFERENCE_BOUNDARY",
+        "targets": [
+          "README.md",
+          "README.zh-TW.md",
+          "docs/wiki/InterSubMod-Engine.md",
+          "docs/explain/12_intersubmod-io.standalone.html",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/00_INDEX.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/20260813_研究結論時間與Finality_01.md",
+          "docs/handoff/20260813_完整研究資料與軟體交接_01/ai_context/CONTEXT.md"
+        ],
+        "required_all": [
+          "CN/LOH.{0,120}(?:not integrated into|未整合進).{0,80}(?:frozen candidate reconstruction|frozen reconstruction)",
+          "LOH BED.{0,120}(?:(?:only|僅|只).{0,40}(?:annotation|stratification)|(?:annotation|stratification).{0,40}(?:only|僅|只))"
+        ],
+        "forbidden_any": [
+          "(?:CN/LOH|LOH).{0,100}(?:integrated|已整合).{0,100}(?:cellular|clone|lineage)",
+          "LOH BED.{0,100}(?:proves?|證明).{0,80}(?:clone|lineage|subclone)"
+        ]
+      }
+    ],
+    "corpus_rules": [
+      {
+        "guard_id": "G_NO_DEVELOP_RAW_URL",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "view": "raw",
+        "forbidden_any": [
+          "https?://raw\\.githubusercontent\\.com/[^\\s)<>]+/develop(?:/|\\b)",
+          "https?://github\\.com/[^\\s)<>]+/(?:raw|blob)/develop(?:/|\\b)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_ISM_EXACT_PS_CONFLATION",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "(?:inter_sub_mod|InterSubMod|ISM)\\s+(?:directly\\s+)?(?:produces?|generates?|writes?|outputs?|reconstructs?|產生|輸出|重建).{0,120}(?:exact[- ]PS|topology funnel|candidate arborescence|候選樹|拓撲 funnel)",
+          "(?:exact[- ]PS|topology funnel).{0,120}(?:\\bis\\b|(?<!不)是|(?<!不)為)\\s*(?:an?\\s+)?(?:inter_sub_mod|InterSubMod|ISM)(?:\\s+output|\\s+輸出)?"
+        ]
+      },
+      {
+        "guard_id": "G_NO_BARE_665_KPI",
+        "target_globs": [
+          "README*.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "66\\.5\\d*\\s*%?\\s*(?:單點|isolated)(?!.{0,100}strict)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_CELLULAR_OR_ANCESTRY_OVERCLAIM",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+        "(?:same[- ](?:read|molecule)|同一(?:條)?(?:read|分子))(?:(?!\\bnot\\b|isn't|cannot|不是|並非|不能|不代表|勿寫|未確認).){0,160}(?:(?:directly )?(?:proves?|confirms?|validates?|establishes?).{0,80}(?:cellular|evolutionary|lineage|ancestry|branch)|(?:cellular|evolutionary|lineage|ancestry|branch|細胞|演化|譜系|祖先|分支).{0,80}(?:direct evidence|direct proof|直接證據|直接證明|獲得驗證|得到驗證))",
+          "(?<!not )confirmed (?:child|parent|cellular|ancestral) branch|(?<!不)(?<!未)(?:已)?確認(?:的)?(?:子代|親代|細胞|祖先).{0,20}分支",
+          "(?:must be|必然是|只能是).{0,30}(?:somatic|體細胞)",
+          "(?:cannot be|不可能是).{0,30}(?:two parents|two parental haplotypes|兩個親本|兩親本)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_UNIVERSAL_FILTER_ABSOLUTISM",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "(?:universal|all|every|any|通用|所有|任何).{0,80}(?:methylation|甲基).{0,80}(?:filter|篩選).{0,80}(?:dead|impossible|never|invalid|無效|死路|不可能)",
+          "100%\\s*(?:circular(?:ity)?|循環).{0,100}(?:proves?|證明).{0,100}(?:no|none|沒有|任何).{0,100}(?:methylation|甲基).{0,60}(?:filter|篩選).{0,60}(?:work|可行|有效)"
+        ]
+      },
+      {
+        "guard_id": "G_LONGLINEAGE_REVISION_STATUS",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "(?:public main|public baseline|公開 main|公開主線).{0,60}`?5daf50f`?|`?5daf50f`?.{0,60}(?:public main|public baseline|公開 main|公開主線)",
+          "(?:feature(?: branch| revision)?|功能分支).{0,60}`?b9aaa12`?|`?b9aaa12`?.{0,60}(?:feature(?: branch| revision)?|功能分支)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_TRACKED_BINARY_OR_FIXED_EXECUTABLE_COUNT",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "(?:checked[- ]in|tracked|version-controlled|版控追蹤|已納入版控).{0,60}(?:build/bin|compiled binar(?:y|ies)|編譯後執行檔|binary 執行檔)",
+          "(?:exactly|共|固定|ships?)\\s*(?:6|six|六)(?:個)?\\s*(?:executables?|binaries|執行檔)"
+        ]
+      },
+      {
+        "guard_id": "G_RUN_LOG_NOT_SUFFICIENT_ALONE",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "run\\.log.{0,50}(?:alone|by itself|is sufficient|單獨就足以|即可|已足夠).{0,100}(?:reproduc|provenance|重現|可重現)",
+          "(?:only|just|只需|單靠)\\s*(?:the\\s*)?run\\.log.{0,100}(?:reproduc|provenance|重現|可重現)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_HARDCODED_BIG7_COPY_COMMAND",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "view": "raw",
+        "forbidden_any": [
+          "(?:^|[\\n;]|<code>)\\s*(?:\\$\\s*)?(?:cp|scp|rsync)\\s+[^\\n]{0,200}/big7(?:_disk)?/",
+          "(?:^|[\\n;]|<code>)\\s*(?:\\$\\s*)?(?:python3?|bash|sh)\\s+/big7(?:_disk)?/"
+        ]
+      },
+      {
+        "guard_id": "G_NO_ANTI_FABRICATION_GUARANTEE",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "防(?:捏|捻)造|杜絕(?:捏|捻)造|prevent(?:s|ing)? (?:fabrication|hallucination)",
+          "(?:claim guard|validator|拒絕渲染).{0,100}(?:(?<!not )guarantee|(?<!不)保證).{0,60}(?:true|truth|correct|真實|正確|無誤)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_PERMANOVA_TRUTH_OR_CLUSTER_EXISTENCE",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+        "PERMANOVA(?!.{0,100}\\b(?:not|never|cannot|can't)\\b).{0,100}(?:proves?|confirms?|validates?|establishes?|demonstrates?)\\s+(?:that\\s+)?(?:the\\s+)?(?:clusters?|clustering|structure|truth|causality|real|true)",
+          "PERMANOVA.{0,60}(?:證明|確認|真有)(?:了|存在)?(?:\\s*HP)?\\s*(?:分群|結構|真值|因果)",
+          "PERMANOVA.{0,60}真有.{0,20}分群",
+          "(?:有沒有|是否有|到底有沒有).{0,30}(?:結構|分群).{0,80}(?:看|由|靠).{0,30}PERMANOVA",
+          "(?:真實分群|真有分群|真有 HP 分群)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_METHYLATION_TOPOLOGY_BRIDGE",
+        "target_globs": [
+          "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+          "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+          "docs/explain/06_ism-subclone-pipeline-concept.standalone.html",
+          "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+          "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+        ],
+        "forbidden_any": [
+        "(?<!not a )(?<!not )(?:methylation[- ]bridged|甲基橋接|甲基化橋接)",
+        "[Mm]ethylation\\s+(?!.{0,20}(?:not|never|cannot|can't))(?:(?:builds?|creates?|merges?|directs?|supports?|establishes?|defines?|infers?|forms?))\\s+(?:the\\s+|an?\\s+)?(?:candidate\\s+)?(?:topology|edge|tree)",
+        "甲基(?:化)?(?:可|會|能|用來|負責).{0,20}(?:建立|合併|定向|支持|定義|推導|形成)(?:了)?.{0,30}(?:topology|edge|tree|拓撲|邊|樹)",
+          "(?:使用|透過|依靠)甲基(?:化)?.{0,20}(?:建立|合併|定向|支持|定義|推導|形成)(?:了)?.{0,30}(?:topology|edge|tree|拓撲|邊|樹)",
+          "甲基(?:化)?(?:建立|合併|定向|支持|定義|推導|形成)(?:了)?.{0,30}(?:topology|edge|tree|拓撲|邊|樹)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_LOH_MECHANISM_OVERCLAIM",
+        "target_globs": [
+          "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html",
+          "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html",
+          "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html",
+          "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html"
+        ],
+        "forbidden_any": [
+          "SEQC2[- ]confirmed LOH",
+        "LOH(?!.{0,30}(?:not|never|cannot|不|未|無法|不能|不可)).{0,80}(?:獲證|已確認|confirmed mechanism|mechanism confirmed|proven mechanism|was confirmed|is confirmed|has been confirmed|was proven|is proven|was established|is established|只剩單一親本|整段丟失)",
+          "(?:只剩單一親本|幾乎只剩單一親本|親本 haplotype 整段丟失)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_SEVEN_SAMPLE_COHORT_SHORTHAND",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+        "(?<!not a )(?<!not )(?:7|seven)(?:[- ]|\\s+(?:biological|independent|distinct|unique)\\s+)samples?",
+        "(?<!不是)(?<!並非)(?:全\\s*)?7\\s*(?:個)?\\s*(?:生物|獨立|不同)?\\s*樣本",
+          "七樣本"
+        ]
+      },
+      {
+        "guard_id": "G_LONGLINEAGE_BLOCKER_SET_NOT_SIMPLIFIED",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+          "BLOCKED.{0,160}(?:對照|對齊|parity).{0,100}(?:證據不存在|證據尚未存在|evidence does not exist)",
+          "M1.{0,30}M2.{0,40}topology.{0,100}(?:核心都已實作|都已經實作完成|all kernels are implemented)"
+        ]
+      },
+      {
+        "guard_id": "G_NO_CIS_HEURISTIC_GUARANTEE",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "forbidden_any": [
+        "normal[- ]anchored(?!.{0,40}(?:not|never|cannot|不|未|不能|不可|無法)).{0,100}(?:removes?|eliminates?|去掉|排除).{0,100}(?:copy|germline|drift|假象)",
+        "(?:copy|germline|drift|假象)(?!.{0,30}(?:not|never|cannot|不|未|不能|不可|無法)).{0,100}(?:is |are |was |were |已)?(?:removed|eliminated|excluded|去掉|排除).{0,100}(?:normal[- ]anchored|normal 錨定|normal 控制)",
+          "(?:cis[- ]test|cis-control|cis heuristic|cis 檢定|cis 控制).{0,100}(?:not confounded by copy|不被 copy 混淆|已排除 copy)"
+        ]
+      }
+    ],
+    "context_rules": [
+      {
+        "guard_id": "G_LEGACY_SCHEMA_MENTION_CONTEXT",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "anchor_pattern": "(?:significance(?:_summary)?(?:\\.csv)?).{0,180}(?:59|193)\\s*(?:欄|columns)|(?:59|193)\\s*(?:欄|columns).{0,180}(?:significance(?:_summary)?(?:\\.csv)?)",
+        "window_chars": 500,
+        "required_all": [
+          "(?:historical|歷史|legacy|舊版|superseded)",
+          "199\\s*(?:欄|columns)"
+        ]
+      },
+      {
+        "guard_id": "G_665_DENOMINATOR_CONTEXT",
+        "target_globs": [
+          "README*.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "anchor_pattern": "66\\.5\\d*\\s*%",
+        "window_chars": 500,
+        "required_all": [
+          "170,131",
+          "255,752",
+          "strict(?:[ -](?:read-linkage|read-linked))?[ -]components?"
+        ]
+      },
+      {
+        "guard_id": "G_63506_DENOMINATOR_CONTEXT",
+        "target_globs": [
+          "README*.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "anchor_pattern": "63,506",
+        "window_chars": 1600,
+        "required_all": [
+          "71,955",
+          "88\\.2(?:6|579)\\s*%",
+          "(?:model-conditional|模型條件|frozen model|候選形狀|rooted-unlabeled)"
+        ]
+      },
+      {
+        "guard_id": "G_UNIQUE_TREE_SEMANTIC_CONTEXT",
+        "target_globs": [
+          "README*.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "anchor_pattern": "(?:unique(?:\\s+[A-Za-z-]+){0,4}\\s+tree|唯一.{0,24}(?:樹|tree))",
+        "window_chars": 1200,
+        "skip_if_any": [
+          "(?:not|non[- ]|cannot|isn't).{0,40}unique",
+          "(?:不是|並非|非|不能|無法).{0,30}唯一",
+          "非唯一",
+          "不可(?:交付|宣稱|確認).{0,50}唯一"
+        ],
+        "required_all": [
+          "71,955",
+          "(?:candidate|model-conditional|模型條件|候選|AF-best)",
+          "(?:not.{0,50}cellular|不是.{0,50}細胞|非.{0,50}細胞|not.{0,50}biological|不是.{0,50}生物)"
+        ]
+      },
+      {
+        "guard_id": "G_CELLULAR_ANCESTRY_MENTION_CONTEXT",
+        "target_globs": [
+          "README*.md",
+          "QUICKSTART.md",
+          "README_PROJECT_SUMMARY.md",
+          "docs/wiki/*.md",
+          "docs/explain/*.standalone.html"
+        ],
+        "anchor_pattern": "(?:confirmed (?:cellular (?:clone|subclone|lineage)|linear ancestry(?: relationships?)?)|確認的(?:細胞亞群|細胞亞克隆|細胞譜系|線性祖先關係)|confirmed (?:細胞亞群|線性祖先關係|細胞譜系))",
+        "window_chars": 500,
+        "required_all": [
+          "(?:=\\s*0|\\b0\\b|not|non[- ]|不是|並非|未(?:被)?確認|不確認|不能|無法|不可|不適合|forbidden)"
+        ]
+      }
+    ]
+  },
   "claims": [
     {
       "claim_id": "C043",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "README.md", "required_all": ["inter_sub_mod`? does not write BAM", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["neither InterSubMod nor LongLineage can write tagged BAM"]},
-        {"target": "README.zh-TW.md", "required_all": ["inter_sub_mod`? 不寫 BAM", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["InterSubMod.*LongLineage.*都.*無法.*BAM"]},
-        {"target": "docs/wiki/System-Overview.md", "required_all": ["public main `?5daf50f`?.*沒有 tagged-BAM writer", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["兩支程式都不會輸出 tagged BAM"]},
-        {"target": "docs/wiki/Upstream-and-Data.md", "required_all": ["public main `?5daf50f`?.*沒有 tagged-BAM writer", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer"]},
-        {"target": "docs/explain/14_upstream-data.standalone.html", "required_all": ["main.*5daf50f.*沒有 BAM writer", "feature.*b9aaa12.*longlineage-tag-bam"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer"]}
+        {"target": "README.md", "required_all": ["inter_sub_mod`? does not write BAM", "private baseline/main snapshot `?5daf50f`?.{0,80}does not", "private public-preview candidate `?b9aaa12`?.{0,80}(?:provides|contains|includes) `?longlineage-tag-bam`?", "NOT_READY.{0,40}non-production|non-production.{0,40}NOT_READY"], "forbidden_any": ["neither InterSubMod nor LongLineage can write tagged BAM", "public main `?5daf50f`?|feature `?b9aaa12`?"]},
+        {"target": "README.zh-TW.md", "required_all": ["inter_sub_mod`? 不寫 BAM", "private baseline/main snapshot `?5daf50f`?.{0,80}不支援", "private public-preview candidate `?b9aaa12`?.{0,80}提供 `?longlineage-tag-bam`?", "NOT_READY.{0,40}non-production|non-production.{0,40}NOT_READY"], "forbidden_any": ["InterSubMod.{0,100}LongLineage.{0,100}都.{0,30}無法.{0,30}(?:輸出|寫).{0,20}BAM", "public main `?5daf50f`?|feature `?b9aaa12`?"]},
+        {"target": "docs/wiki/System-Overview.md", "required_all": ["private baseline/main snapshot.{0,20}`?5daf50f`?.{0,80}沒有 writer", "private public-preview candidate.{0,20}`?b9aaa12`?.{0,80}longlineage-tag-bam", "revision-scoped.{0,80}NOT_READY"], "forbidden_any": ["兩支程式都不會輸出 tagged BAM", "public main `?5daf50f`?|feature `?b9aaa12`?"]},
+        {"target": "docs/wiki/Upstream-and-Data.md", "required_all": ["private baseline/main snapshot.{0,20}`?5daf50f`?.{0,80}沒有 tagged-BAM writer", "private public-preview candidate.{0,20}`?b9aaa12`?.{0,80}longlineage-tag-bam", "P3/P4/P5/P7/P8.{0,40}BLOCKED"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer", "public main `?5daf50f`?|feature `?b9aaa12`?"]},
+        {"target": "docs/explain/14_upstream-data.standalone.html", "required_all": ["private baseline/main snapshot `?5daf50f`?.{0,80}沒有 BAM writer", "private public-preview candidate `?b9aaa12`?.{0,80}longlineage-tag-bam", "NOT_READY.{0,40}non-production|non-production.{0,40}NOT_READY"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer", "public main `?5daf50f`?|feature `?b9aaa12`?"]}
       ],
       "external_actions": ["Publish corrected README, Wiki and Pages sources, then verify the version boundary in the live artifacts."]
     },
@@ -72,7 +781,7 @@
         {"target": "docs/wiki/Home.md", "required_all": ["Local mutation-state candidate reconstruction", "細胞譜系.*受模型與資料限制的推論"], "forbidden_any": ["已重建.*腫瘤演化樹"]},
         {"target": "docs/wiki/System-Overview.md", "required_all": ["local recurrence-allowed minimum mutation-state candidate arborescence"], "forbidden_any": ["解出腫瘤.*真實演化樹"]},
         {"target": "docs/explain/index.standalone.html", "required_all": ["局部 mutation-state candidates", "不是已確認的 cellular clone 或 lineage tree"], "forbidden_any": ["confirmed.*subclone.*tree"]},
-        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["局部、允許 recurrence、模型條件下的 minimum mutation-state candidate"], "forbidden_any": ["得到誠實版的 subclone 重建樹"]}
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["局部、允許 recurrence、非時間且非唯一的 mutation-state compatibility graph"], "forbidden_any": ["得到誠實版的 subclone 重建樹"]}
       ],
       "external_actions": ["Publish the standardized candidate terminology across all public planes and re-scan live bytes."]
     },
@@ -120,8 +829,8 @@
         {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
         {"target": "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
         {"target": "docs/explain/06_ism-subclone-pipeline-concept.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
-        {"target": "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
-        {"target": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py", "required_all": ["regional molecular-state candidates", "非 biological clone truth"], "forbidden_any": ["regional subclonal states"]}
+        {"target": "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html", "required_all": ["local molecular-state candidates|局部 read-level 分子狀態候選", "confirmed cellular subclone = 0", "confirmed linear ancestry = 0"], "forbidden_any": ["regional subclonal states"]},
+        {"target": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py", "required_all": ["local molecular-state candidates|局部 read-level 分子狀態候選", "非 biological clone truth", "confirmed cellular subclone = 0", "confirmed linear ancestry = 0"], "forbidden_any": ["regional subclonal states"]}
       ],
       "external_actions": ["Publish pages 04-07 and re-fetch every regional-state occurrence."]
     },
@@ -197,16 +906,16 @@
       "claim_id": "C138",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "QUICKSTART.md", "required_all": ["INTERNAL ONLY", "hard-coded paths", "tiny fixture"], "forbidden_any": ["標準推薦命令.*run_vcf_all_snv"]},
-        {"target": "README.md", "required_all": ["public repository currently ships no.*runnable BAM/FASTA/VCF fixture"], "forbidden_any": ["run_vcf_all_snv.sh.*standard public workflow"]}
+        {"target": "QUICKSTART.md", "required_all": ["INTERNAL ONLY", "hard-coded paths", "tiny synthetic DEMO fixture", "run_tiny_public_e2e.sh"], "forbidden_any": ["標準推薦命令.*run_vcf_all_snv", "公開 repo 目前.*沒有.*fixture"]},
+        {"target": "README.md", "required_all": ["tracked tiny synthetic fixture", "DEMO scope", "run_tiny_public_e2e.sh"], "forbidden_any": ["public repository currently ships no.*fixture", "run_vcf_all_snv.sh.*standard public workflow"]}
       ],
-      "external_actions": ["Merge the internal-only boundary to main; separately publish a licensed fixture and portable wrapper before claiming public reproducibility."]
+      "external_actions": ["Merge the internal-only boundary and tracked synthetic DEMO fixture to main; re-fetch the live README before claiming synthetic-smoke reproducibility. Do not promote DEMO to real-data science validation."]
     },
     {
       "claim_id": "C139",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "README_PROJECT_SUMMARY.md", "required_all": ["實驗室內部 orchestration", "Public clone 目前沒有 runnable fixture"], "forbidden_any": ["一鍵式運行.*原始 BAM.*最終可視化"]}
+        {"target": "README_PROJECT_SUMMARY.md", "required_all": ["實驗室內部 orchestration", "tiny synthetic DEMO fixture", "不是 real-data science"], "forbidden_any": ["一鍵式運行.*原始 BAM.*最終可視化", "Public clone 目前沒有 runnable fixture"]}
       ],
       "external_actions": ["Merge the corrected project summary to main and verify the live first-hop document."]
     },
@@ -231,10 +940,10 @@
       "claim_id": "C142",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "README.md", "required_all": ["66\\.52.*strict components", "dataset records.*36\\.21"], "forbidden_any": ["two thirds of all mutations"]},
-        {"target": "README.zh-TW.md", "required_all": ["66\\.52.*strict components", "dataset records.*36\\.21"], "forbidden_any": ["所有突變的三分之二"]},
+        {"target": "README.md", "required_all": ["66\\.52.*strict components", "component census.*cannot.*isolated.dataset.record percentage"], "forbidden_any": ["two thirds of all mutations", "170,131.{0,60}469,849.{0,30}(?:36\\.21|percent|%)"]},
+        {"target": "README.zh-TW.md", "required_all": ["66\\.52.*strict components", "component census.*無法推得.*isolated dataset-record percentage"], "forbidden_any": ["所有突變的三分之二", "170,131.{0,60}469,849.{0,30}(?:36\\.21|百分比|%)"]},
         {"target": "docs/wiki/Home.md", "required_all": ["66\\.52.*strict components", "不能說成.*全部突變的三分之二"], "forbidden_any": ["所有突變有三分之二.*孤立"]},
-        {"target": "docs/explain/11_system-map-overview.standalone.html", "required_all": ["170,131 / 255,752.*66\\.52", "469,849 dataset records.*36\\.21"], "forbidden_any": ["所有突變.*三分之二.*孤立"]}
+        {"target": "docs/explain/11_system-map-overview.standalone.html", "required_all": ["170,131 / 255,752.*66\\.52", "component census.*無法推得.*isolated dataset-record percentage"], "forbidden_any": ["所有突變.*三分之二.*孤立", "170,131.{0,60}469,849.{0,30}(?:36\\.21|百分比|%)"]}
       ],
       "external_actions": ["Publish all denominator corrections and verify the live percentages retain their explicit grains."]
     },
@@ -269,11 +978,11 @@
       "claim_id": "C149",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "QUICKSTART.md", "required_all": ["沒有.*BAM／FASTA／VCF fixture", "不能宣稱.*10 分鐘"], "forbidden_any": ["10 分鐘內得到第一個分析結果"]},
-        {"target": "docs/wiki/How-to-Run.md", "required_all": ["public repo 目前沒有.*fixture", "internal-data example"], "forbidden_any": ["10 分鐘.*第一個分析結果"]},
-        {"target": "docs/explain/16_how-to-run.standalone.html", "required_all": ["公開重現狀態：BLOCKED（缺輸入 fixture）", "INTERNAL-ONLY"], "forbidden_any": ["約.{0,20}10 分鐘.{0,80}第一個分析結果"]}
+        {"target": "QUICKSTART.md", "required_all": ["tiny synthetic DEMO fixture", "run_tiny_public_e2e.sh", "不得寫入science validation ledger"], "forbidden_any": ["公開 repo 目前.*沒有.*fixture", "10 分鐘內得到第一個分析結果"]},
+        {"target": "docs/wiki/How-to-Run.md", "required_all": ["Public tiny synthetic E2E", "run_tiny_public_e2e.sh", "DEMO", "internal-data example"], "forbidden_any": ["public repo 目前沒有.*fixture", "10 分鐘.*第一個分析結果"]},
+        {"target": "docs/explain/16_how-to-run.standalone.html", "required_all": ["SYNTHETIC_SMOKE_SUPPORTED", "REAL_DATA_PREFLIGHT_REQUIRED", "INTERNAL-ONLY", "run_tiny_public_e2e.sh"], "forbidden_any": ["BLOCKED（缺輸入 fixture）", "約.{0,20}10 分鐘.{0,80}第一個分析結果"]}
       ],
-      "external_actions": ["Publish corrected quick-start surfaces; do not close reproducibility until a licensed fixture, checksums and expected receipts are public."]
+      "external_actions": ["Publish the tracked synthetic fixture and corrected quick-start surfaces, re-fetch live bytes and receipt, and keep the result DEMO-only. Real-data reproducibility remains a separate preflight."]
     },
     {
       "claim_id": "C150",
@@ -306,7 +1015,7 @@
       "claim_id": "C153",
       "disposition": "local_source_fixed_external_publish_required",
       "checks": [
-        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["分支 candidate.*相容|與候選分支模型相容", "不是唯一可識別|非唯一樹"], "forbidden_any": ["只能解釋成.*姊妹分支"]}
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["只約束非時間、非唯一的 compatibility models", "block L.*block R.*unresolved"], "forbidden_any": ["只能解釋成.*姊妹分支"]}
       ],
       "external_actions": ["Publish page 08 and verify the live parsimony language is candidate-only and non-unique."]
     },

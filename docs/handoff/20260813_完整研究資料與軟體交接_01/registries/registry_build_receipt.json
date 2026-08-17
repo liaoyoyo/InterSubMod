@@ -1,0 +1,38 @@
+{
+  "actual_host": "bip7",
+  "artifact_rows": 36,
+  "authority_crosswalk_rows": 3,
+  "biological_ids": 6,
+  "canonical_tagged_bam_artifacts": 14,
+  "canonical_tagged_bam_hash_policy": "NOT_COMPUTED_TIB_PAYLOAD",
+  "canonical_tagged_bam_total_bytes": 3709322840333,
+  "claim_ceiling": "Inventory and frozen provenance validation; not a TiB-scale scientific rerun.",
+  "datasets": 7,
+  "errors": [],
+  "machine_path_rows": 16,
+  "pass": true,
+  "receipt_type": "handoff_registry_build",
+  "registered_physical_run_rows": 51,
+  "run_reconciliation": {
+    "current_physical_directories": 35,
+    "current_physical_unregistered": 26,
+    "explanation_18_19_35": "18 logical data rows + 1 TSV header = 19 file lines; 35 is the current canonical physical-directory count. The complete physical inventory is 35 current + 16 pending archive = 51.",
+    "logical_manifest_rows": 18,
+    "logical_rows_merged_current": 9,
+    "logical_rows_merged_pending_archive": 9,
+    "manifest_file_lines": 19,
+    "manifest_header_lines": 1,
+    "merge_policy": "A logical row is metadata merged into its matching physical directory by canonical run path or the same sample/mode/run relative path under _ARCHIVE_pending_cleanup_202606/canonical; it never creates a duplicate record.",
+    "pending_archive_extras": 7,
+    "pending_archive_physical_directories": 16,
+    "physical_directories_total": 51
+  },
+  "schema_validation": {
+    "documents_checked": 6,
+    "requested": true,
+    "validator": "Draft202012Validator"
+  },
+  "schema_version": "2.0.0",
+  "storage_root_rows": 11,
+  "verified_at": "2026-08-13T21:19:26+08:00"
+}

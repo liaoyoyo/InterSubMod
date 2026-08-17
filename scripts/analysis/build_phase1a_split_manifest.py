@@ -4,18 +4,27 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
 
-from build_phase1_training_manifest import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.analysis.build_phase1_training_manifest import (  # noqa: E402
     PROVENANCE_EXPORT_FIELDS,
     dataset_role,
     harmonization_group,
 )
-from research_common import ensure_dir, write_json, write_tsv_rows
-from scripts.lib.verification_schema_contract import (
+from scripts.analysis.research_common import (  # noqa: E402
+    ensure_dir,
+    write_json,
+    write_tsv_rows,
+)
+from scripts.lib.verification_schema_contract import (  # noqa: E402
     UNKNOWN_CURRENT_CLASS,
     VERIFICATION_PROVENANCE_COLUMNS,
     SchemaContractError,
