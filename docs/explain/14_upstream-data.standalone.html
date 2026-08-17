@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>上游工具鏈與資料 — 兩支 C++ 的輸入是怎麼來的</title>
@@ -93,6 +96,8 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -137,9 +142,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <div class="kpis">
   <div class="kpi pass"><div class="v">7 / 7</div><div class="k">樣本 sidecar 全部生產完成</div></div>
-  <div class="kpi info"><div class="v">5.83 GiB</div><div class="k">7 樣本 sidecar 總量（壓縮後）</div></div>
-  <div class="kpi warn"><div class="v">1.67 TiB</div><div class="k">若改存 tagged BAM 需要的空間</div></div>
-  <div class="kpi info"><div class="v">287×</div><div class="k">sidecar 方案節省的倍數</div></div>
+  <div class="kpi info"><div class="v">5.8265 GiB</div><div class="k">7 樣本 sidecar 總量（6,256,168,164 bytes）</div></div>
+  <div class="kpi warn"><div class="v">UNVERIFIED</div><div class="k">7 個 tagged BAM 總量：缺 per-file bytes / hash receipt</div></div>
+  <div class="kpi info"><div class="v">N/A</div><div class="k">未有同對象的精確 bytes 前不報節省倍率</div></div>
 </div>
 
 <!-- ═══════ 1 ═══════ -->
@@ -236,17 +241,17 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <rect x="120" y="424" width="700" height="122" rx="8" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.8"/>
         <text x="470" y="446" text-anchor="middle" font-size="12.5" font-weight="800" fill="#9A3B3B">為什麼要大費周章用管道，而不是存 tagged BAM？</text>
-        <text x="146" y="470" font-size="10.5" fill="#7a3030">7 個樣本的 tagged BAM 合計約 <tspan font-weight="700">1.67 TiB</tspan>，含餘裕需準備約 2.3 TB 空間。</text>
-        <text x="146" y="488" font-size="10.5" fill="#7a3030">而 sidecar 只有 <tspan font-weight="700">5.83 GiB</tspan>（壓縮後）／13.98 GiB（未壓縮）——<tspan font-weight="700">相差約 287 倍</tspan>。</text>
+        <text x="146" y="470" font-size="10.5" fill="#7a3030">7 份壓縮 sidecar 實測合計 <tspan font-weight="700">6,256,168,164 bytes（5.8265 GiB）</tspan>。</text>
+        <text x="146" y="488" font-size="10.5" fill="#7a3030">歷史 tagged-BAM 總量缺 per-file bytes / compression / hash receipt；<tspan font-weight="700">倍率目前不可驗證</tspan>。</text>
         <text x="146" y="510" font-size="10.5" fill="#7a3030">更重要的是：分析真正需要的資訊只有「哪條 read、在哪、屬於哪個單倍型」這 9 個欄位，</text>
-        <text x="146" y="526" font-size="10.5" font-weight="700" fill="#9A3B3B">序列與品質字串佔了 99% 以上的體積卻完全用不到。</text>
+        <text x="146" y="526" font-size="10.5" font-weight="700" fill="#9A3B3B">目前九欄 sidecar contract 省略 SEQ/QUAL；尚無逐欄 byte census 或效用稽核。</text>
         <text x="146" y="540" font-size="9.5" fill="#7a3030">代價：無法直接用 IGV 之類的工具看標籤（見下方 §4）。</text>
       </g>
     </svg>
     <figcaption>
       <b>這個設計是本系統最值得學習的工程決定之一</b> ——
       它把「我需要什麼資訊」與「這些資訊被裝在什麼容器裡」分開來想，
-      結果用 1/287 的空間保留了 100% 需要的內容。
+      已確認的是：九欄 sidecar 保留 frozen downstream contract 宣告的必需欄位；未驗證 tagged-BAM 總量、節省倍率或所有潛在 BAM 資訊的效用。
     </figcaption>
   </figure>
 </section>
@@ -344,23 +349,22 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">這是被問最多的需求之一，答案有點反直覺。</p>
 
   <div class="takeaway">
-    <span class="lab">現況</span>
-    <b>兩支 C++ 程式都沒有寫 BAM 的能力</b>（寫入 API 在整個 repo 出現 0 次，所有開檔都是唯讀模式）。
-    現存的 tagged BAM 全部由外部工具 LongPhase-S 產生。
-    而 LongLineage 更在架構層<b>明文禁止</b>輸出 BAM —— 這是寫進格式規範裡的硬性限制，不是可調參數。
+    <span class="lab">版本邊界（不可混講）</span>
+    <b>InterSubMod 仍沒有寫 BAM 的能力</b>（寫入 API 在本 repo 出現 0 次，所有開檔都是唯讀模式）。
+    <b>LongLineage 則必須指定版本</b>：公開 main <code>5daf50f</code> 沒有 BAM writer；feature <code>b9aaa12</code> 已含 <code>longlineage-tag-bam</code> tagged-BAM 輸出。
+    因此「LongLineage 架構上禁止 BAM」已不是跨版本真實的敘述。
   </div>
 
-  <p><b>好消息是技術上完全可行</b>，因為比對用的鍵是確定性的正向計算：</p>
+  <p><b>若使用公開 main，仍可用獨立匯出工具；若使用 feature，可評估 <code>longlineage-tag-bam</code></b>。兩條路徑都依賴確定性的比對鍵：</p>
   <ul>
     <li>sidecar 裡的 <code>QNAME</code> 是<b>明文</b>的 UUID</li>
     <li>LongLineage 的 <code>read_id</code> 是它的 <b>SHA-256 雜湊</b></li>
     <li>所以讀 BAM 時對每條 read 名重算一次雜湊就能對上，<b>不需要任何反查表</b></li>
   </ul>
   <p>
-    可行的做法是寫一個<b>獨立的匯出工具</b>（讀凍結結果 + 原始 BAM，重算雜湊做比對），
-    放在正式流程之外。這不違反上述任何限制，因為它不是流程本身的產物。
-    <br><span class="dot">●</span> <b>但要先解決磁碟問題</b>：目前該磁碟只剩約 617 GB，
-    而全量 tagged BAM 需要 1.67 TiB。實務上建議只針對感興趣的區間產生子集。
+    公開 main 的可行做法是寫一個<b>獨立的匯出工具</b>（讀凍結結果 + 原始 BAM，重算雜湊做比對）；feature 則要以實際 build/test receipt 確認 <code>longlineage-tag-bam</code> 的輸入契約與輸出語意，不可將「feature 存在」當成「公開 main 已可用」。
+    <br><span class="dot">●</span> <b>但要先做 fresh 容量盤點</b>：磁碟餘量是 host/time-specific，不能沿用歷史頁面數字；
+    全量 tagged BAM 的精確總量也尚無收據，不能用歷史估計代替容量規劃。實務上先產生感興趣區間子集，全量則先建立 per-file bytes / compression / hash receipt。
   </p>
 
   <div class="rel">
@@ -390,3 +394,5 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </p>
 </footer>
 </div>
+</body>
+</html>

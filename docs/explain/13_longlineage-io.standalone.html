@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LongLineage 部件 — 契約、科學鏈、以及為什麼它現在輸出 0 棵樹</title>
@@ -95,6 +98,8 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -151,7 +156,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td><code>preflight</code></td><td><span class="badge b-pass">可跑</span></td>
           <td>驗證 8 個角色的 manifest 完整性。</td></tr>
       <tr><td><code>dataset-gate</code></td><td><span class="badge b-warn">可跑但綁死</span></td>
-          <td><b>唯一能真的算出科學結果的入口</b>，已在真實 HCC1395 資料上完整跑完，產出 8 個 artifact。</td></tr>
+          <td>目前可執行科學核心的 <b>HCC1395-only frozen <code>dataset-gate</code></b>；該資料實跑產出 8 個 artifact，不代表一般化 production path。</td></tr>
       <tr><td><code>run</code></td><td><span class="badge b-dead">被鎖</span></td>
           <td>回 <code>KernelBlocked</code>（exit 6）。實測 <code>message="release attestation is NOT_READY"</code>。</td></tr>
       <tr><td><code>probe</code></td><td><span class="badge b-dead">被鎖</span></td>
@@ -197,10 +202,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </p>
 
   <figure>
-    <div class="figtitle">圖 1 · HCC1395 全 autosome 唯一一次完整跑：79,687 個位點如何流失到 0</div>
+    <div class="figtitle">圖 1 · HCC1395-only frozen dataset-gate：79,687 個位點如何流失到 0</div>
     <svg viewBox="0 0 940 610" role="img" aria-labelledby="l1t l1d" xmlns="http://www.w3.org/2000/svg">
       <title id="l1t">LongLineage 位點流失漏斗</title>
-      <desc id="l1d">從 79,687 個凍結的體細胞突變位點開始，78,629 個可評估，
+      <desc id="l1d">此圖僅描述 HCC1395-only frozen dataset-gate，非全樣本或 production 驗證。從 79,687 個凍結的體細胞突變位點開始，78,629 個可評估，
       其中只有 12,851 個通過甲基化穩定分群關卡；這 12,851 個再經第二道關卡後只剩 5 個合格，
       12,815 個被判為資訊不足、31 個被判為確實不合格；共現配對共 134,278 列但其中 134,276 列被前一道關卡擋掉；
       聯合特徵檢定通過 0 個位點，最終拓撲單元為 0。</desc>
@@ -419,3 +424,5 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </p>
 </footer>
 </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-11 10:00
-更新時間: 2026-07-23 19:00
+更新時間: 2026-08-13（新增公開資訊全面校正、local-vs-live 狀態與完整稽核入口）
 目標: 提供 docs/ 目錄的最新結構、命名規範與工作流程，並提供 AI 漸進查閱指引
 處理範圍: docs/ 全目錄（archive/deep 歷史快照除外）
 關聯檔案:
@@ -13,13 +13,17 @@
 
 # InterSubMod 文檔庫
 
-> 🟢 **Canonical root（2026-08-01）**：研究真值在 `/big7_disk/liaoyoyo2001/InterSubMod`；`/big8_disk/...` 是三月快照。exact-PS×HP strict read-linkage L1 已 7/7 完成（W=85,621）；其後續 recurrence-allowed candidate analysis 有 98,955 final groups、71,955 read-AF ranked units 與 exact topology census，但 cellular clone count、CN/LOH-aware parent→child 與全樣本 biological tree 仍未建立。`research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 是 historical pre-strict candidate census，不能當成最新 strict 結果。
+> 🟢 **Canonical root（2026-08-13）**：研究真值在 `/big7_disk/liaoyoyo2001/InterSubMod`；`/big8_disk/...` 是三月快照。exact-PS×HP strict read-linkage L1 已 7/7 完成（W=85,621）；其後續 recurrence-allowed candidate analysis 有 98,955 final groups、71,955 read-AF ranked units 與 exact topology census，但 cellular clone count、CN/LOH-aware parent→child 與全樣本 biological tree 仍未建立。`research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json` 是 historical pre-strict candidate census，不能當成最新 strict 結果。
 
 ## 快速導航
 
 ### 常用入口
 
 - [當前目標](CURRENT_FOCUS.md)
+- [**InterSubMod 公開資訊校正與 CCU 改進稽核（HTML＋SVG）**](reports/validated/2026/08/20260813_InterSubMod公開資訊更新與CCU改進清單_01.standalone.html) ← 本地修正、live publication boundary、科學 claim ceiling 與 CCU 16 項 acceptance contract
+- [**2026-08-13 公開資訊全面校正循環**](../research/20260813_intersubmod_public_surfaces_refresh/00_INDEX.md) ← 158 claim families、58 個問題分級、GitHub/Pages 本地校正、CCU 唯讀清單與 local-vs-live receipt
+- [**InterSubMod GitHub 公開說明與教學完整驗證**](reports/validated/2026/08/20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md) ← 69/31/28/26/4 verdict、scientific claim ceiling 與需補資料
+- [**公開文件 P0 修正與驗證**](reports/validated/2026/08/20260813_公開文件P0修正與驗證_01.md) ← P0 34/34 disposition、證據鏈與 publication gate
 - [**2026-08-01 Exact-PS×HP／read-AF／CNV AI 交接入口**](handoff/README.md) ← 最新 authority manifest、單一樹決策、分母與過期來源登錄
 - [**Exact-PS 全 7 資料集最終 HTML observation**](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260801_exact_ps_observation_report/all7_v1/report.standalone.html) ← 13/13 authority hashes、responsive/no-JS/A4 QA PASS；CN/LOH=`NOT_INTEGRATED`
 - [**HTML builder／finalizer／QA 重生說明**](../research/20260801_exact_ps_observation_report/00_INDEX.md) ← Python 最後輸出階段與 fail-closed release 契約

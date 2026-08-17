@@ -11,13 +11,13 @@
   repo_head: 9098f11   branch: research/subclonal-reconstruction-202606
   scope: PARTIAL — chr2:18M HCC1395 單位點 × 單樣本；對照「ISM C++ as-built」vs「chr2 subclone 敘述」
   data_sources:
-    - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json (pysam 案例真值, build b761336, L2)
+    - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json (pysam 案例 evidence artifact, build b761336, L2；其中 CCF 欄為歷史 TVAF 近似轉換)
     - docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md
     - output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/.../clustering/significance.json (ISM C++ 實測, 本 session 親讀)
     - src/core/{SubcloneAnalyzer,NormalBaseline,PerCpgAsm,TreeStructure,SomaticSnv,ReadParser,LabelTest,StructureTest,GlobalTest,RegionProcessor}.cpp (file:line 親讀)
   provenance_note: 所有 ISM 數字本 session 由 significance.json + reads.tsv + metadata.txt Read 讀回；所有案例數字引自 workstation_data.json (commit b761336)。§13.0 撰寫與分析分屬不同 batch。
 -->
-<!-- provenance-verified: ISM allele_PERMANOVA F/p (#1 15.43/.001 #2 23.65/.001 #5 12.25/.001)、reads 數、alt_support 分布、case 甲基 q/FDR/CCF/LOH 全本 session 親讀 significance.json + workstation_data.json；module file:line 親讀 src/core/*.cpp -->
+<!-- provenance-verified: ISM allele_PERMANOVA F/p (#1 15.43/.001 #2 23.65/.001 #5 12.25/.001)、reads 數、alt_support 分布、case 甲基 q/FDR/LOH 與歷史 TVAF 近似轉換全本 session 親讀 significance.json + workstation_data.json；module file:line 親讀 src/core/*.cpp -->
 <style>
 :root{
   --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
@@ -111,6 +111,26 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 .warnote{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-left:5px solid var(--c-warn);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.88rem;margin:var(--sp-3) 0}
 .warnote b{color:var(--c-warn)}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
 </head>
 <body>
 
@@ -137,8 +157,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ============ BLUF ============ -->
 <div class="bluf">
   <h2>L0 一眼結論</h2>
-  <p><span class="key">ISM C++ 足夠解釋 subclone 故事的「甲基刻畫」半邊，但解釋不了「重建骨幹」半邊。</span> 而且 — 關鍵事實 — chr2:18M 敘述裡的 α/β lineage、互斥 linkage、甲基 α-vs-β 那些數字，<strong>不是 ISM C++ 算的，是 pysam 自訂腳本算的</strong>。ISM C++ <strong>確實獨立在同一批 sSNV 位點跑過</strong>，但它輸出的是「單位點 allele-軸甲基結構」，不是「跨位點 lineage 重建」。</p>
-  <p class="pi">▸ <b>給 PI 一句話：</b>ISM 在 chr2 三個 sSNV 上<b>都獨立複製了「ALT vs REF 甲基結構顯著」（allele PERMANOVA p=0.001 ×3）</b>＝主軸「甲基 corroborate somatic 軸」的硬證據；但 ISM 沒有多-sSNV read linkage、沒有 clone tree、沒有 CCF —— 重建骨幹是 genetic haplotag + pysam，不是甲基、也不是 ISM 的 <code>SubcloneAnalyzer</code>（那只是 4-bucket 跨區分類器，名不副實）。</p>
+  <p><span class="key">ISM C++ 足夠描述這個案例的「單位點 allele-associated 甲基」半邊，但解釋不了「跨位點重建」半邊。</span> chr2:18M 敘述裡的 α/β-like 狀態、互斥 linkage 與 α-vs-β 甲基數字，<strong>不是 ISM C++ 算的，是 pysam 自訂腳本算的</strong>。ISM C++ 另以同一生物樣本、同一批位點做 label-first 檢定；它輸出的是「單位點 ALT/REF-associated 甲基結構」，不是獨立 biological replicate，也不是「跨位點 lineage 重建」。</p>
+  <p class="pi">▸ <b>給 PI 一句話：</b>ISM 在 chr2 三個 sSNV 得到 allele PERMANOVA <b>p=0.001 ×3</b>，是<strong>強的位點特異 allele-associated methylation evidence</strong>；三次檢定來自同一生物樣本，且甲基分組由 ALT/REF 標籤條件化，不能當作獨立 clone validation 或「硬證據」。ISM 沒有多-sSNV read linkage、clone tree 或 corrected CCF；重建骨幹不在 <code>SubcloneAnalyzer</code>（它只是 4-bucket 跨區分類器）。</p>
 </div>
 
 <div class="ironclad">
@@ -154,7 +174,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ============ 1. chr2 例子是什麼 ============ -->
 <section id="case">
   <h3><span class="num">1</span> 先講清楚：chr2:18M subclone 例子是什麼 <span class="badge tier">案例 L2</span></h3>
-  <p class="sub">HCC1395 乳癌細胞株，<code>chr2:18,068,480–18,108,828</code>（~40 kb，2p24.2，KCNS3 intron，落在 SEQC2-confirmed LOH 區 <code>chr2:16,146,119–22,100,000</code>）。使用者手動 IGV 觀察「LOH→subclone→多群 read」，再用 <strong>pysam 逐 read 萃取</strong> 6 個 somatic SNV 的 base + HP/PS + MM/ML 甲基，對照 SEQC2 truth + DORADO 跨 basecaller 複製 + 第二輪獨立 audit。</p>
+  <p class="sub">HCC1395 乳癌細胞株，<code>chr2:18,068,480–18,108,828</code>（~40 kb，2p24.2，KCNS3 intron，落在 SEQC2-confirmed LOH 區 <code>chr2:16,146,119–22,100,000</code>）。使用者手動 IGV 觀察「LOH→多群 read」假說，再用 <strong>pysam 逐 read 萃取</strong> 6 個 somatic SNV 的 base + HP/PS + MM/ML 甲基，對照 SEQC2 truth + DORADO 跨 basecaller 技術重現 + 第二輪計算複核；兩套 basecaller 仍來自同一生物樣本。</p>
 
   <div class="kpis">
     <div class="kpi pass"><div class="v">6</div><div class="k">somatic SNV（5 TP + 1 落 HC 空隙）</div></div>
@@ -165,7 +185,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <h4 class="mini">6 個 somatic SNV 與其角色（pysam + SEQC2，<span class="tag-l l2">L2</span>）</h4>
   <table>
-    <thead><tr><th>#</th><th>座標</th><th>變異</th><th>SEQC2</th><th>CCF</th><th>角色（lineage）</th></tr></thead>
+    <thead><tr><th>#</th><th>座標</th><th>變異</th><th>SEQC2</th><th>歷史 TVAF 近似轉換*</th><th>候選分子狀態角色</th></tr></thead>
     <tbody>
       <tr><td>1</td><td><code>18,068,480</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.814</td><td>beta-left block</td></tr>
       <tr><td>2</td><td><code>18,072,546</code></td><td>G&gt;C</td><td>TP HighConf</td><td>0.786</td><td>beta-left block</td></tr>
@@ -175,22 +195,23 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td>6</td><td><code>18,108,828</code></td><td>C&gt;G</td><td>TP HighConf</td><td>0.772</td><td>beta-right block</td></tr>
     </tbody>
   </table>
+  <p class="muted">* 此欄為 case-specific 的歷史近似轉換，未校正 copy number、LOH 與 purity；不是 canonical corrected CCF，也不是 cellular-clone corroboration。</p>
 
   <h4 class="mini">敘述的 6 個 claim（已被第二輪 audit 校正，<span class="tag-l l2">L2</span>）</h4>
   <table>
     <thead><tr><th class="lcol">Claim</th><th>已驗證內容</th><th>裁決</th></tr></thead>
     <tbody>
-      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor/normal allele 兩 basecaller 重現；normal 6 點全 REF</td><td class="verdict v-ok">✔ 確認</td></tr>
-      <tr><td><b>B</b> read linkage 定 α/β lineage</td><td>α(pos3=A) 與 β(pos1G/2C/6G) 互斥 0 違反；(3)A→(5)C 巢狀；「5 群」校正為 ~3 regional states</td><td class="verdict v-ok">✔ 骨幹確認</td></tr>
-      <tr><td><b>C</b> 甲基把兩 lineage 分開</td><td>10 候選 CpG，扣 normal-HP ASM 後乾淨子集 <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code>，最強 <code>{3.1,3.2}</code>（如 3.2 HKU α0.97/β0.14 q=4.1e-5、DORADO 1.00/0.006 q=2.4e-5）</td><td class="verdict v-part">⚠ 有界</td></tr>
-      <tr><td><b>D</b> LOH + normal=REF</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 全 REF</td><td class="verdict v-ok">✔ 確認</td></tr>
-      <tr><td><b>E</b> 樹拓樸 + 順序</td><td>骨幹 parsimony 強制；演化順序僅 (3)→(5) nesting 可排，其餘不可排</td><td class="verdict v-part">⚠ 骨幹 L2 / 順序 L3</td></tr>
-      <tr><td><b>F</b> pos3「FP」其實真 somatic</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩 normal 0% A，僅落 SEQC2 HC 空隙</td><td class="verdict v-ok">✔ 最強單點</td></tr>
+      <tr><td><b>A</b> 6 sSNV 逐 read REF/ALT</td><td>tumor allele 有兩 basecaller 技術重現；matched normal 未觀察到六個預期 somatic ALT，但偶有其他 non-reference error calls</td><td class="verdict v-ok">✔ 有界確認</td></tr>
+      <tr><td><b>B</b> read linkage 定義 α/β-like states</td><td>在 strict 定義與現有覆蓋下，α(pos3=A) 與 β-like(pos1G/2C/6G) 為 0 observed co-alt；(3)A 與 (5)C 呈巢狀；相容於約 3 種 local mutation-state candidates，非唯一 cellular lineage tree</td><td class="verdict v-part">⚠ 候選模型</td></tr>
+      <tr><td><b>C</b> 遺傳分組後甲基差異</td><td>10 候選 CpG；normal-ASM-screen-negative 子集 <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code>，最強技術重現 <code>{3.1,3.2}</code>（如 3.2 HKU α0.97/β0.14 q=4.1e-5、DORADO 1.00/0.006 q=2.4e-5）</td><td class="verdict v-part">⚠ 有界關聯</td></tr>
+      <tr><td><b>D</b> LOH + normal expected-ALT screen</td><td>HP1 殘留 1.7%（4/236，HP2 占 98.3%）；normal 無六個預期 ALT，但有少數其他 non-reference errors</td><td class="verdict v-ok">✔ 有界確認</td></tr>
+      <tr><td><b>E</b> 候選拓樸 + 順序</td><td>parsimony 下有相容候選；(3)/(5) 的巢狀觀測支持 provisional ordering，其餘不可排，且整體非唯一可識別</td><td class="verdict v-part">⚠ 觀測 L2 / 模型 L3</td></tr>
+      <tr><td><b>F</b> pos3 不可由 SEQC2 判成 FP</td><td>tumor ALT 分子 HKU 29 / DORADO 21（BQ20）、雙股、兩份 normal reads 未觀察到 A；但位點落 SEQC2 HC 空隙，外部 truth 不可評估</td><td class="verdict v-part">⚠ 腫瘤相關候選</td></tr>
     </tbody>
   </table>
-  <p class="muted">最終可防守用語（verdict_02）：<em>"a regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence"</em> —— <b>非</b>「confirmed five-subclone evolutionary reconstruction」。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
+  <p class="muted">依目前 claim ceiling，可防守用語是 <em>"local LOH-constrained mutation-state candidates with bounded, mutation-conditioned methylation association"</em>；不是 confirmed cellular-subclone reconstruction。完整走查見 <a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>／<a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a>。</p>
 
-  <div class="warnote">⚠ <b>關鍵前提</b>：上述 A–F 的數字，全部來自 <code>pysam</code> 自訂腳本（<code>extract_locus_matrix.py</code> + <code>analyze_matrix.py</code> → <code>independent_audit.json</code>，build commit <code>b761336</code>），<b>不是 ISM C++ 算的</b>。下一節看 ISM C++ 在同一批位點實際算了什麼。</p></div>
+  <div class="warnote">⚠ <b>關鍵前提</b>：上述 A–F 的數字，全部來自 <code>pysam</code> 自訂腳本（<code>extract_locus_matrix.py</code> + <code>analyze_matrix.py</code> → <code>independent_audit.json</code>，build commit <code>b761336</code>），<b>不是 ISM C++ 算的</b>。下一節看 ISM C++ 在同一批位點實際算了什麼。</div>
 </section>
 
 <!-- ============ 2. ISM C++ 實際算了什麼 ============ -->
@@ -233,14 +254,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </table>
     <figcaption>
       <b>讀法（3 件事）：</b>
-      ① <b>allele PERMANOVA 三位點全顯著 p=0.001</b>（F=12–24，dispersion_p=1.0 排除離散度假象）→ ISM 用<b>自己的 read×read 距離 + label-first 檢定</b>，獨立證實「攜帶 somatic ALT 的 read 與攜帶 REF 的 read 甲基結構顯著不同」。連低-VAF 的 #5（ALT 僅 11 條）也過。
+      ① <b>allele PERMANOVA 三位點皆為 p=0.001</b>（F=12–24）→ 在同一 HCC1395 生物樣本中，ISM 的 read×read 距離 + label-first 檢定支持「ALT 與 REF 標籤相關的甲基結構差異」。這是三個 locus-specific tests，不是三個獨立 biological replicates；<code>dispersion_p=1.0</code> 來自目前較弱的 dispersion 守門，不能寫成完全排除離散度假象。
       ② <b>cluster PERMANOVA（unsupervised）三位點全 invalid</b> → ISM 的「無監督切群結構」檢定在此<b>無有效結論</b>；訊號完全靠 a-priori allele 標籤，不靠盲切。
       ③ ISM 的 allele call（REF21/ALT15 等）與 pysam（#1 C22/G16）<b>幾乎吻合</b> = 兩條 pipeline 交叉驗證 per-read base calling 一致。
       <br><b>來源：</b><code>output/canonical/HCC1395/paired_full/20260314_..._complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/.../clustering/significance.json</code>（本 session Read）。
     </figcaption>
   </figure>
 
-  <h4 class="mini">ISM 一個 region 內部做兩條正交軸（<code>RegionProcessor.cpp</code>）</h4>
+  <h4 class="mini">ISM 一個 region 內部做兩種分析視角（<code>RegionProcessor.cpp</code>）</h4>
   <div class="flow1">
     每 read → [甲基 read×CpG 矩陣] → read×read 距離(NHD/BERNOULLI) → UPGMA 樹 → 切 k∈[2,6] 群<br>
     ↘ 軸A <b>cluster-first</b>：群 × {ALT/REF, HP} Fisher-FFH 列聯表（<code>GlobalTest.cpp</code>）<br>
@@ -282,7 +303,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <td>ISM 把 LOH 當<b>輸入註記</b>，不自己 call LOH、不建 CN model、不 phasing（<code>LohBedAnnotator.cpp:73,88</code>）</td>
       </tr>
       <tr>
-        <td><b>C′</b>　normal-anchored ASM-control<br><span class="muted">（拆 germline vs tumor-acquired）</span></td>
+        <td><b>C′</b>　normal-anchored ASM-control<br><span class="muted">（篩出可觀察的 germline-ASM confound）</span></td>
         <td>delta-of-deltas（tumor HP delta − normal HP delta）+ per-CpG ASM Fisher+BH-FDR；residual-matrix 路徑<b>刻意停用</b></td>
         <td class="verdict v-part">⚠ 合理但弱</td>
         <td>概念有實作但軸是 <b>HP1-family vs HP2-family（germline 軸）</b>；somatic-skewed 常見情況退化為 germline-only、sig=false（<code>RegionProcessor.cpp:976,985-992,890-893</code>、<code>PerCpgAsm.cpp:228</code>）</td>
@@ -307,11 +328,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <h5>✔ ISM C++ 撐得起 ——「characterize」半邊</h5>
       <ul>
         <li><b>C</b> 甲基結構分群（read×read 距離 + PERMANOVA）+ <b>實測 allele PERMANOVA p=0.001 ×3</b></li>
-        <li><b>C′</b> normal-anchored ASM-control（拆 germline vs tumor-acquired，雖弱）</li>
+        <li><b>C′</b> normal-anchored ASM-control（標記可觀察的 germline-ASM confound；不能證明 acquisition）</li>
         <li><b>D</b> LOH 註記（BED overlap + hp_ratio）</li>
         <li><b>A</b>(部分) 單錨點逐 read allele call（與 pysam 吻合）</li>
       </ul>
-      <p class="muted">＝「在已被獨立軸（allele/HP/LOH）定義好的結構上，<b>刻畫</b>甲基」。</p>
+      <p class="muted">＝「在 allele/HP/LOH 標籤條件化的結構上，<b>刻畫</b>甲基」；不是獨立 clone 確認。</p>
     </div>
     <div class="col dead">
       <h5>✘ ISM C++ 缺少 ——「reconstruct」骨幹半邊</h5>
@@ -346,8 +367,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <details class="card"><summary>陷阱 3　allele PERMANOVA p=0.001 很漂亮，但 allele 軸最易被 cis-ASM 污染 <span class="badge b-warn">baseline-dependence</span></summary>
   <div class="body">
     <p>第 2 節 ISM 實測的顯著訊號在 <b>ALT vs REF allele 軸</b>。對一個 LOH 區的 somatic SNV，ALT-vs-REF 甲基差<b>可能是 cis-ASM</b>（somatic 變異 cis 連帶的 allele-specific methylation），<b>不一定是 subclone marker</b>。ISM 的 <code>significance.json</code> 在 allele 軸<b>沒有</b>跑 normal-anchored cis-control（它的 ASM-control 是 HP 軸的 delta-of-deltas，且 somatic-skewed 時退化）。</p>
-    <p>這正是 pysam audit 補的關鍵一刀：跑 <b>normal HP1-vs-HP2</b> 後發現 10 個 CpG 是<b>混合的</b> —— 乾淨 tumor-acquired <code>{2.1,2.2,3.1,3.2,5.1,5.2}</code> vs 既存 germline-ASM confounded <code>{3.3,3.4,3.5,4.1}</code>（如 3.3 normal HP1 0.814/HP2 0.046 FDR 0.007）。<b>ISM 的 region-level allele PERMANOVA 看不到這層拆解</b>，需要 per-CpG + normal-HP 控制（pysam 做的）才分得開。</p>
-    <p class="muted">→ ISM allele PERMANOVA 證明「甲基隨 somatic allele 軸<b>共分離</b>」（真），但「這是 subclone 甲基 vs cis-ASM」要靠 normal-anchored 拆解才判得了。詞義隨 baseline 變，見 baseline-discipline 詞典。</p>
+    <p>pysam audit 另跑 <b>normal HP1-vs-HP2</b>：<code>{3.3,3.4,3.5,4.1}</code> 在 matched-normal 顯示 germline-ASM confound（如 3.3 normal HP1 0.814/HP2 0.046，FDR 0.007）；<code>{2.1,2.2,3.1,3.2,5.1,5.2}</code> 則是 <strong>tumor-associated、normal-ASM-screen-negative</strong>。screen-negative 只代表此檢定未偵測到 normal HP 差異，不證明 tumor-acquired 或 clone identity。<b>ISM 的 region-level allele PERMANOVA 看不到這層拆解</b>，需另做 per-CpG + normal-HP screen。</p>
+    <p class="muted">→ ISM allele PERMANOVA 支持「甲基與 somatic allele 標籤<b>相關</b>」；normal-anchored screen 可標記部分 cis/germline-ASM confound，但兩者都不單獨確認 subclone 或 acquisition。</p>
   </div></details>
 </section>
 
@@ -356,24 +377,24 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <h3><span class="num">5</span> 結論：足夠解釋哪些、不足解釋哪些 <span class="badge tier">Tier 4 paper-scope</span></h3>
 
   <div class="takeaway pass"><span class="lab">足夠 ✔</span>
-    ISM C++ 的數據與敘述<b>足夠解釋 chr2 subclone 故事的「甲基刻畫」半邊</b>：它在同一批 sSNV 位點上<b>獨立複製了 allele-軸甲基結構顯著</b>（allele PERMANOVA p=0.001 ×3，dispersion 排除），並提供 normal-anchored ASM-control 概念 + LOH 註記。這直接支撐主軸「甲基 = corroborate somatic 軸的 lineage coherence」。
+    ISM C++ 的數據足夠描述 chr2 案例的<b>單位點 allele-associated 甲基</b>：同一 HCC1395 樣本的三個 sSNV 皆得到 allele PERMANOVA p=0.001，並有 normal-anchored ASM-control 概念與 LOH 註記。這支持 genetic grouping 後的 bounded methylation concordance；不等於獨立 replication、clone validation 或完全排除 dispersion/confound。
   </div>
 
   <div class="takeaway dead"><span class="lab">不足 ✘</span>
     ISM C++ <b>不足以解釋「重建骨幹」半邊</b>：多 sSNV read linkage 定 α/β lineage（claim B）、clone tree／演化順序／CCF（claim E）、truth-gap somatic 驗證（claim F）—— 這些是 <b>pysam 自訂腳本 + genetic haplotag + SEQC2</b> 做的，<b>不在 ISM C++</b>。ISM 的 <code>SubcloneAnalyzer</code>／<code>TreeStructure</code>／<code>"Subclone"</code> class 名實不符，不能拿來宣稱重建。
   </div>
 
-  <p><b>為什麼這個結論其實是好消息（與論文主軸一致）：</b>主軸定位本就是 <span class="key">骨幹 = somatic haplotagging（genetic）；甲基 = characterize／corroborate，非 driver、非 filter、非獨立重建</span>。ISM 的角色恰恰是「在已由獨立軸（allele/HP/LOH）定義好的結構上刻畫甲基」，而不是「無中生有重建 subclone」。所以 ISM「缺重建骨幹」不是缺陷 —— 是<b>正確的分工</b>。要對外講 subclone 重建，骨幹引用 haplotag + pysam linkage，甲基引用 ISM 的 allele PERMANOVA 當 corroboration，<b>兩者軸別與角色不可混講</b>。</p>
+  <p><b>合理的分工：</b><span class="key">genetic read linkage 提供局部 mutation-state candidates；甲基負責 characterize 分組後關聯，非 driver、非 filter、非獨立重建</span>。ISM 的角色是在 allele/HP/LOH 標籤條件化後描述甲基，而不是從零重建 cellular subclone。對外應把直接觀測、模型推論與甲基關聯分層陳述，不能把同一樣本、同一批 reads 的兩種量測寫成獨立確認。</p>
 
   <h4 class="mini">一句話對外口徑（可直接用）</h4>
   <div class="flow1" style="border-style:solid;border-color:var(--c-pass);text-align:left">
-    「chr2:18M 的 subclone <b>骨幹</b>由 somatic-haplotag + 多 sSNV read linkage 定義（pysam 驗證、L2）；<b>ISM C++ 在同一位點獨立證實了 ALT/REF allele 軸的甲基結構顯著</b>（allele PERMANOVA p=0.001，跨 3 個 sSNV 複製），作為 lineage 的甲基 <b>corroboration</b>。ISM 不重建譜系、不出 clone tree／CCF，甲基是刻畫不是驅動。」
+    「chr2:18M 的 somatic-haplotag + 多 sSNV read linkage 支持局部 mutation-state candidates（pysam，L2）；<b>ISM C++ 在同一 HCC1395 樣本的三個 sSNV 上觀察到 ALT/REF-associated 甲基結構差異</b>（allele PERMANOVA p=0.001 ×3）。這是遺傳分組後的有界甲基關聯，不是獨立 clone validation。ISM 不重建 cellular lineage、不輸出 clone tree 或 corrected CCF。」
   </div>
 
   <h4 class="mini">若要讓 ISM 真的能撐起重建半邊，缺口清單（→ 系統化 handoff）</h4>
   <ol style="font-size:.92rem">
     <li><b>cross-SNV read linkage 引擎</b>：reads.tsv 加 PS 欄／or 多 anchor 同 read 共現表（補 claim B 骨幹）。</li>
-    <li><b>allele 軸 cis-control</b>：在 region-level allele PERMANOVA 加 normal-HP1-vs-HP2 拆解（把 cis-ASM 與 subclone 甲基分開，現只在 pysam）。</li>
+    <li><b>allele 軸 cis-control</b>：在 region-level allele PERMANOVA 加 normal-HP1-vs-HP2 screen，標記可觀察的 cis/germline-ASM confound（現只在 pysam；screen-negative 不等於 acquired）。</li>
     <li><b>模組正名</b>：<code>SubcloneAnalyzer</code>→「per-region ASM-signature stratifier」；<code>"Subclone"</code> class→「unlabeled-structure candidate」；避免 over-claim。</li>
     <li><b>第二 LOH 位點／第二樣本（COLO829）</b>：破單位點 L2 天花板（升 ★4）。</li>
   </ol>
@@ -391,7 +412,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <footer class="prov"><div>
   <h4>Provenance（所有數字可追溯）</h4>
   <p><b>ISM C++ 實測</b>（<span class="tag-l l1">L1</span> 本 session 親讀）：<code>output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/intersubmod_tp/filtered_snv_tp/chr2/chr2_{18068480,18072546,18099697}/&lt;window&gt;/clustering/significance.json</code> + <code>reads/reads.tsv</code> + <code>metadata.txt</code>。allele PERMANOVA：#1 F=15.43/p=0.001、#2 F=23.65/p=0.001、#5 F=12.25/p=0.001（disp_p=1.0）；cluster PERMANOVA 三位點 invalid。</p>
-  <p><b>chr2 案例真值</b>（<span class="tag-l l2">L2</span>）：<code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json</code>（pysam，build commit <code>b761336</code>）+ <code>..._independent_verdict_02.md</code> + <code>data/independent_audit.json</code>。</p>
+  <p><b>chr2 案例 evidence artifact</b>（<span class="tag-l l2">L2</span>）：<code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/display/workstation_data.json</code>（pysam，build commit <code>b761336</code>）+ <code>..._independent_verdict_02.md</code> + <code>data/independent_audit.json</code>；它不是 cellular-clone ground truth。</p>
   <p><b>ISM 模組事實</b>（<span class="tag-l l1">L1</span> file:line 親讀）：<code>src/core/{SubcloneAnalyzer:100-128, NormalBaseline:84 + RegionProcessor:890-993, PerCpgAsm:228, TreeStructure, SomaticSnv:82, ReadParser:167-261, LabelTest:307, StructureTest:153-201/292, GlobalTest:259-315, RegionProcessor:740-1290}.cpp</code> + <code>src/io/RegionWriter.cpp:151</code>。</p>
   <p><b>推論層</b>（<span class="tag-l l3">L3</span>）：「allele PERMANOVA 可能是 cis-ASM 非 subclone」「ISM 缺重建是正確分工」為解讀，依 normal-HP 控制 + 主軸定位支持，非單一實測。</p>
   <ul>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>真實案例：HCC1395 chr2:18M 的 subclone 重建 — 手動直覺 → 實測校正</title>
+<title>HCC1395 chr2:18M：局部 mutation-state candidate — 手動直覺 → 實測校正</title>
 <!--
   doc_type: explain_page (case study)  id: 04_subclone-reconstruction-chr2-18M  version: v1  created: 2026-06-15
   branch: research/subclonal-reconstruction-202606
@@ -138,6 +138,26 @@ mark{background:#fdf2c8;padding:0 2px}
 .tablewrap{overflow-x:auto}
 @media(max-width:720px){.kpi{min-width:140px}}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
 </head>
 <body>
 
@@ -155,30 +175,30 @@ mark{background:#fdf2c8;padding:0 2px}
 <div class="wrap">
 
 <header class="hero">
-  <div class="kicker">解釋頁 04 · 真實案例 · 給教授與同學的 subclone 重建走查</div>
-  <h1>一個真實 subclone 是怎麼被「重建」出來的？</h1>
-  <p class="lede">以 HCC1395 在 <code>chr2:18,068,480–18,108,828</code> 的一段 <strong>LOH 區</strong>為例：6 個 somatic 點突變 + 甲基化訊號，如何從一堆 long read 拼回幾條 subclone 譜系。本頁<strong>並陳兩個階段</strong> — 先看研究者用 IGV 手動推出的直覺，再用實際 BAM 資料<strong>一步步驗證、並誠實校正</strong>三處過度宣稱。</p>
+  <div class="kicker">解釋頁 04 · 區域案例 · 局部突變狀態候選結構走查</div>
+  <h1>一個局部突變狀態候選結構是怎麼推出來的？</h1>
+  <p class="lede">以 HCC1395 在 <code>chr2:18,068,480–18,108,828</code> 的一段 <strong>LOH 區</strong>為例：6 個 somatic 點突變 + 甲基化訊號，如何從 long-read 分子證據建立<strong>局部、允許 recurrence、模型條件下的 minimum mutation-state candidate arborescence/topology</strong>。本頁<strong>並陳兩個階段</strong> — 先看研究者用 IGV 手動推出的歷史直覺，再用實際 BAM 資料<strong>一步步驗證、並誠實校正</strong>過度宣稱。它不確認細胞 clone 或真實演化譜系。</p>
 </header>
 
 <!-- ============ L0 BLUF ============ -->
 <div class="bluf">
   <h2>L0 一眼看懂</h2>
-  <p>這段 DNA 發生 <span class="key">LOH（雜合性缺失）</span>，只剩單一條親本染色體。在這條僅存的染色體上，腫瘤後天累積的 somatic 突變把 read 分成<strong>互斥的譜系（lineage）</strong>，而<strong>甲基化模式剛好沿著這些譜系一起變</strong> — 這正是論文主軸要的「subclone 層級甲基化 characterization」乾淨案例。</p>
-  <p class="pi">▸ <b>給教授一句話：</b>骨幹（LOH → somatic 定義的 α/β 兩譜系 → 甲基化追蹤譜系）在實際資料中<b>獲證、且跨 basecaller（HKU + DORADO）複製</b>；但對抗式複核抓出 <b>3 處需校正</b>：「5 群」其實是 <b>~3 條譜系</b>（一個位點落在 20bp homopolymer 上 = 定序假象）、突變先後順序是<b>推論不是觀測</b>、且這是 <b>operational subclonal 而非 live germline ASM</b>。整體證據天花板 <span class="badge tier">L2</span>（單位點 × 單樣本 × 單 pipeline）。</p>
+  <p>這段 DNA 落在 <span class="key">LOH（雜合性缺失）</span>區，因此可排除「兩條親本 haplotype 本來不同」這個簡單替代解釋。觀測到的 somatic allele 共現/互斥模式支持<strong>區域 molecular-state candidates</strong>，甲基化則是在這些遺傳分組後觀察到的有界關聯。這不等於細胞譜系或 clone 已獲證。</p>
+  <p class="pi">▸ <b>給教授一句話：</b>本案支持局部、允許 recurrence 的突變狀態候選分支，並觀察到跨 basecaller 的甲基關聯；但「5 群」、唯一順序、細胞 subclone 身分與甲基化取得時點都沒有被確認。<span class="badge tier">證據天花板：分子層候選</span>（單位點 × 單生物樣本；HKU/DORADO 為技術重現）。</p>
   <div class="kpis">
-    <div class="kpi pass"><div class="v">0</div><div class="k">α / β 兩譜系互斥分叉的「違反」read（兩 basecaller）</div></div>
+    <div class="kpi pass"><div class="v">0 observed</div><div class="k">strict α / β-like markers 的共同 alt read（兩 basecaller；非零錯誤率證明）</div></div>
     <div class="kpi pass"><div class="v">1.4%</div><div class="k">LOH：HP1 殘餘 read 比例（4 / 280）</div></div>
-    <div class="kpi warn"><div class="v">~3</div><div class="k">可信譜系數（原宣稱「5 群」校正後）</div></div>
-    <div class="kpi info"><div class="v">3.1/3.2</div><div class="k">最乾淨 tumor-acquired 甲基 CpG（扣 normal ASM 後；權威裁決見頁 05）</div></div>
+    <div class="kpi warn"><div class="v">~3</div><div class="k">可區分的局部 mutation-state candidates（非 clone 數）</div></div>
+    <div class="kpi info"><div class="v">3.1/3.2</div><div class="k">最強 tumor-associated、normal-ASM-screen-negative 甲基 CpG（未證明 acquired；見頁 05）</div></div>
   </div>
 </div>
 
 <div class="ironclad">
   <b><span style="color:var(--c-dead);font-weight:800">●</span> 看這頁前，先記住三條誠實底線（教學頁不藏 caveat）</b>
   <ol>
-    <li><b>這是「重建」不是「定案」</b>：祖先（all-REF root）與突變順序是 <u>parsimony 推論</u>，不是直接看到的 read。任何寫成「先突變 / 後突變」的句子都是<b>推論層（L3）</b>。</li>
-    <li><b>「5 群」是過報</b>：第 4 個位點緊接一段 <code>20bp poly-T</code> homopolymer（ONT 最易出錯的情境），它的 G/T/DEL 三態多半是<u>定序抖動</u>，不是三個真 subclone → 收斂為 <b>≥3 條可區分譜系</b>。</li>
-    <li><b>是 subclonal 而非 germline ASM</b>（operational 為真），但「LOH 前既存的等位基因甲基不對稱被保留、再被 somatic 切分」這條<u>無法被本資料形式排除</u> → 需 normal-anchored cis/ASM 對照。<b>絕非</b>把甲基當變異 filter（那條路另有驗證為 <span class="badge b-dead">DEAD</span>）。</li>
+    <li><b>這是候選結構，不是生物定案</b>：祖先（all-REF root）與突變順序是局部、recurrence-allowed 模型下的 <u>parsimony 推論</u>，不是直接看到的細胞譜系。</li>
+    <li><b>「5 群」是過報</b>：第 4 個位點緊接一段 <code>20bp poly-T</code> homopolymer（ONT 最易出錯的情境），G/T/DEL 三態不可當三個真 subclone → 保守收斂為<b>約 3 種可區分的局部 mutation-state candidates</b>。</li>
+    <li><b>只能稱 regional molecular-state candidates</b>：normal-ASM screen 陰性不足以證明甲基化是 tumor-acquired，也不足以把分子狀態升級為 cellular subclone。<b>絕非</b>把甲基當變異 filter（該已測 formulation 在當時範圍內為 <span class="badge b-dead">NEGATIVE</span>）。</li>
   </ol>
 </div>
 
@@ -187,7 +207,7 @@ mark{background:#fdf2c8;padding:0 2px}
   <p>本頁是<strong>教學敘述</strong>（手動直覺→校正）。之後一個<strong>更嚴謹的第二輪獨立 audit</strong>（含 matched-normal ASM 控制 + 跨 basecaller FDR）做出權威裁決，並修正本頁兩處仍偏寬的判定 —
   <a href="05_subclone-correction-audit-chr2-18M.standalone.html"><strong>解釋頁 05 · 權威矯正 audit</strong></a>。兩處更新：
   <b>① 推論 4 由「順序 L3」改判為「否定／需重寫」</b>（pos3 與 pos1/2/6 互斥，不能同 trunk）；
-  <b>② 甲基「robust 子集」改為扣掉 germline ASM 的乾淨集 {2.1,2.2,3.1,3.2,5.1,5.2}</b>（最強 3.1/3.2；而 {3.3,3.4,3.5,4.1} 被既存 ASM confound）。本頁 §④/§⑤/§⑦ 已標註，細節以頁 05 為準。</p>
+  <b>② 甲基子集改為 normal-ASM-screen-negative {2.1,2.2,3.1,3.2,5.1,5.2}</b>（3.1/3.2 技術重現最強；{3.3,3.4,3.5,4.1} 被既存 ASM confound；screen-negative 不證明 acquired）。本頁 §④/§⑤/§⑦ 已標註，細節以頁 05 為準。</p>
 </div>
 
 <!-- ============ §0 位點地圖 ============ -->
@@ -197,7 +217,9 @@ mark{background:#fdf2c8;padding:0 2px}
 
   <figure>
     <div class="figtitle">圖 1 · chr2:18.07–18.11M 的 6 個 sSNV、HP 歸屬與兩個 confound 區</div>
-    <svg viewBox="0 0 1000 250" role="img" aria-label="6 個 sSNV 在 chr2 上的位置地圖">
+    <svg viewBox="0 0 1000 250" role="img" aria-labelledby="p04-svg1-title p04-svg1-desc">
+      <title id="p04-svg1-title">chr2:18M 區間六個 sSNV 位置</title>
+      <desc id="p04-svg1-desc">顯示 HCC1395 chr2 LOH 區間內六個 somatic mutation marker 的座標與相對位置。</desc>
       <!-- axis -->
       <line x1="55" y1="120" x2="950" y2="120" stroke="#5C5A54" stroke-width="2"/>
       <text x="55" y="145" class="svgnote" font-size="10">18,068,480</text>
@@ -255,13 +277,13 @@ mark{background:#fdf2c8;padding:0 2px}
 
   <h4 class="mini">先用一句白話定義 subclone 與 LOH</h4>
   <details class="card def"><summary><span class="term">subclone（子克隆）</span>同一顆腫瘤裡的不同「細胞家族」</summary>
-    <div class="body"><div class="intuition"><b>直覺：</b>腫瘤不是單一細胞無限複製，而是邊長邊變異 — 不同分支累積不同的 somatic 突變，形成像家譜一樣的<u>譜系（lineage）</u>。同一譜系的細胞共享一組突變；不同譜系互斥。我們的目標就是從 read 把這些譜系拼回來。</div></div>
+    <div class="body"><div class="intuition"><b>概念：</b>subclone 指共享一組變異的細胞家族；但一條 ONT read 只直接代表一個 DNA 分子，沒有 cellular barcode。本案例能做的是依 read-level mutation pattern 建立局部分子狀態候選，再檢查其與 clone 模型是否相容，不能直接把細胞譜系「拼回來」。</div></div>
   </details>
   <details class="card def"><summary><span class="term">LOH（雜合性缺失）</span>一對染色體只剩一條</summary>
-    <div class="body"><div class="intuition"><b>直覺：</b>正常細胞每個位點有兩條親本染色體（HP1 + HP2）。LOH = 其中一條<u>整段丟失</u>，只剩單一親本。本案 HP1 只剩 <b>1.4%</b> 殘餘 read（4/280），實際分析的 read 幾乎全在 HP2 / HP2-1。<b>為什麼重要：</b>只剩一條染色體 → 同一條上的 read 差異就<u>不可能</u>是「兩條親本本來就不同」造成的，必然來自後天 somatic 變化 → 這讓 subclone 訊號變乾淨。</div></div>
+    <div class="body"><div class="intuition"><b>直覺：</b>正常細胞每個位點有兩條親本染色體（HP1 + HP2）。LOH = 其中一條<u>整段丟失</u>，只剩單一親本。本案 HP1 只剩 <b>1.4%</b> 殘餘 read（4/280），實際分析的 read 幾乎全在 HP2 / HP2-1。<b>為什麼重要：</b>LOH 排除「兩條親本 haplotype 本來不同」這個簡單解釋，但定序錯誤、copy-number/純度、隨機甲基變動與其他替代解釋仍需另外控制。</div></div>
   </details>
   <details class="card def"><summary><span class="term">HP2 vs HP2-1</span>同一條 haplotype 的「子切分」</summary>
-    <div class="body"><div class="intuition"><b>直覺：</b>定相工具 longphase-S 把這條僅存的 haplotype 標成 HP2，又把帶 somatic 變異的子集另標 HP2-1 — 兩者<u>共用同一個 phase block</u>（<code>PS=16735547</code>），所以 HP2-1 不是「第二條親本」，而是<b>同一條染色體上的 somatic 子家族</b>。這就是 subclone 的雛形。</div></div>
+    <div class="body"><div class="intuition"><b>直覺：</b>定相工具 longphase-S 把 reads 標成 HP2，並把帶 somatic 變異的子集標成 HP2-1；兩者共用 <code>PS=16735547</code>。這是同一 phase-block 內的<b>haplotag read families</b>，不是第二條親本，也不識別單一實體染色體 copy 或 originating cell；它只能作局部分子狀態候選的技術容器。</div></div>
   </details>
 </section>
 
@@ -272,7 +294,9 @@ mark{background:#fdf2c8;padding:0 2px}
 
   <figure>
     <div class="figtitle">圖 2 · 研究者手動推出的「5 群」read 變異簽章（直覺階段）</div>
-    <svg viewBox="0 0 760 320" role="img" aria-label="原始 5 群 read 簽章矩陣">
+    <svg viewBox="0 0 760 320" role="img" aria-labelledby="p04-svg2-title p04-svg2-desc">
+      <title id="p04-svg2-title">歷史五群 read mutation-signature 矩陣</title>
+      <desc id="p04-svg2-desc">展示原始以六個 mutation markers 區分的五組 read 簽章；後續 audit 將同聚物 pos4 多態合併，故五群不等於五個 cellular clones。</desc>
       <g font-size="12" text-anchor="middle">
         <!-- column headers -->
         <text x="70" y="34" font-weight="700" text-anchor="start">群</text>
@@ -349,7 +373,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <thead><tr><th style="width:90px">研究者推論</th><th>內容（直覺階段，原話）</th></tr></thead>
     <tbody>
       <tr><td class="imp">推論 1</td><td>這段是 <b>LOH</b>，被分到 HP2 與 HP2-1。</td></tr>
-      <tr><td class="imp">推論 2</td><td>Normal 每個 sSNV 都與 REF 一致、且沒有完整 read 全是 REF → 發生 <b>subclone</b>。</td></tr>
+      <tr><td class="imp">推論 2</td><td>Normal sampled reads 在候選位點沒有 ALT 支持 → 與 tumor-associated mutation-state candidate 相容；不單獨證明 acquisition 或 cellular subclone。</td></tr>
       <tr><td class="imp">推論 3</td><td>HP2 可能因競爭或全部突變，最後沒抽到 read 資訊。</td></tr>
       <tr><td class="imp">推論 4</td><td>多個甲基位點把兩群分很開 → sSNV (1)(2)(3)(6) <b>較早突變</b>。</td></tr>
       <tr><td class="imp">推論 5</td><td>sSNV (5) 突變把 群一、群二 分開。</td></tr>
@@ -366,14 +390,14 @@ mark{background:#fdf2c8;padding:0 2px}
 
   <!-- Step: 互斥分叉骨幹 -->
   <div class="step ok">
-    <div class="head"><span class="no">骨幹</span><h4>α / β 兩譜系互斥分叉</h4><span class="badge tier">L2</span><span class="badge b-pass">獲證</span></div>
+    <div class="head"><span class="no">骨幹</span><h4>α / β-like mutation markers 的互斥模式</h4><span class="badge tier">L2</span><span class="badge b-pass">觀測有界</span></div>
     <div class="body2">
       <div class="claim"><span class="lab">研究者直覺</span>read 自然分成「帶 pos3=A」與「帶 pos1/2/6 突變」兩大群，互不重疊。</div>
       <p>從 108 條覆蓋 ≥2 個 sSNV 的 linkage read 中，兩組定義突變<strong>完全互斥、0 條違反</strong>（pos1×pos3、pos2×pos3、pos3×pos6 的 alt-alt 共現都是 0）。兩個 basecaller（HKU_MOD 與 DORADO）都複製。</p>
       <div class="evi">α 代表 read <span class="rname">88197de2</span>  (1)C (2)G (3)<b>A</b> (4)C (5)G (6)C   ← pos3 突變、其餘 ref
 β 代表 read <span class="rname">d8397fe2</span>  (1)<b>G</b> (2)<b>C</b> …             ← pos1/2 突變、pos3 ref
 linkage reads (≥2 cov) = 108 / 340</div>
-      <div class="verd"><span class="lab">判定 · L2</span><b>骨幹成立</b>：α = <code>C·G·A</code>（pos3 somatic）、β = <code>G·C·G</code>（pos1/2/6 somatic），互斥 0 違反 → parsimony 強制兩者為 <b>siblings</b>（共同祖先分叉）。</div>
+      <div class="verd"><span class="lab">判定 · L2/L3</span><b>直接觀測</b>：α = <code>C·G·A</code> 與 β-like = <code>G·C·G</code> markers 在目前 strict、有覆蓋 reads 中為 0 observed co-alt。<b>模型推論</b>：這與 parsimony 下的 α/β-like 分支候選相容，但 recurrence、不完全覆蓋與錯誤尚未排除，並非唯一可識別的 siblings 或共同祖先樹。</div>
     </div>
   </div>
 
@@ -385,19 +409,19 @@ linkage reads (≥2 cov) = 108 / 340</div>
       <p>實際 HP 標籤分佈證實：HP1 只剩 <strong>4 / 280 = 1.4%</strong> 殘餘 read；HP2 與 HP2-1 <strong>共用同一個 phase block</strong>（<code>PS=16735547</code>）= 同一條 haplotype 的 sub-haplotype 切分，<u>不是第二條親本</u>。</p>
       <div class="evi">[TUMOR HP 分佈]  HP1:4   HP2:157   HP2-1:130   HPNone:49
 LOH 殘餘  HP1 = 4 / 280 (dedup 後) = 1.4%</div>
-      <div class="verd"><span class="lab">判定 · L2</span><b>LOH 獲證</b>。這是讓後續 subclone 訊號乾淨的前提 — 單一親本 → read 差異不可能來自「兩條親本本來不同」。</div>
+      <div class="verd"><span class="lab">判定 · L2</span><b>LOH 獲證</b>。它排除兩親本 haplotype 的簡單 confound，但不會把每個 read 差異自動證成 somatic；序列誤差與其他模型仍要逐項檢查。</div>
     </div>
   </div>
 
   <!-- Step 2 subclone -->
   <div class="step ok">
-    <div class="head"><span class="no">推論 2</span><h4>發生 subclone</h4><span class="badge tier">L2</span><span class="badge b-pass">獲證（operational）</span></div>
+    <div class="head"><span class="no">推論 2</span><h4>是否支持局部 mutation-state candidate？</h4><span class="badge tier">L2</span><span class="badge b-warn">有界支持</span></div>
     <div class="body2">
       <div class="claim"><span class="lab">研究者直覺</span>Normal 每點都 REF、且沒有完整 all-REF read → 發生 subclone。</div>
-      <p>Normal 在 somatic 定義位點 pos2 / pos3 = <strong>0/48、0/36</strong>（兩 basecaller 一致），確認這些變異是腫瘤後天的。LOH 單親保留 + 兩譜系由 somatic 定義 → 這就是 <strong>operational subclonal</strong>（在一條 haplotype 內由 somatic 切出的子家族）。</p>
+      <p>Normal 在候選 somatic 位點 pos2 / pos3 的非 REF 支持為 <strong>0/48、0/36</strong>（兩 basecaller 合計），與 tumor-associated variant 相容；但 absence in sampled normal reads 不單獨證明 acquisition。LOH + mutation patterns 支持同一保留 haplotype 內的<strong>局部分子狀態候選</strong>，不確認 cellular subclone。</p>
       <div class="evi">NORMAL  (2)18072546  G:48 (100%)   非 REF: 0
 NORMAL  (3)18086020  G:36 (100%)   非 REF: 0</div>
-      <div class="verd"><span class="lab">判定 · L2</span><b>subclone 成立（operational 定義）</b>。但「subclonal vs germline ASM」的形式區分見 §<a href="#limit">⑦ 限制</a> — 不能只靠這步斷言。</div>
+      <div class="verd"><span class="lab">判定 · L2</span><b>支持 tumor-associated regional molecular-state candidate</b>；不確認 acquisition、cellular subclone 或 lineage。matched-normal 與其他限制見 §<a href="#limit">⑦ 限制</a>。</div>
     </div>
   </div>
 
@@ -419,11 +443,13 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
     <div class="head"><span class="no">推論 6 / 「5 群」</span><h4>pos4 把 β 再分成群三/四/五（共 5 群）</h4><span class="badge tier">校正→ ~3</span><span class="badge b-dead">最重要校正</span></div>
     <div class="body2">
       <div class="claim"><span class="lab">研究者直覺</span>sSNV (4) 出現 G / T / DEL 三態 → β 再分成 群三、群四、群五，全域共 5 群。</div>
-      <p><span style="color:var(--c-dead);font-weight:800">●</span> <strong>承重校正</strong>：第 4 個位點 <code>chr2:18,096,269</code>（ref=C）<u>緊接正好 20 個 T 的同聚物（homopolymer）</u> — 這是 ONT 定序<strong>最容易出錯</strong>的情境。群三/四/五在<strong>其他每一個 marker 都相同</strong>（pos3=G、pos5=ref、pos6=G、甲基簽章一致），<strong>只差在 pos4 的 G/T/DEL</strong> → 高度可能是<strong>一條 β 子譜系 + homopolymer 抖動</strong>，不是 3 個真 subclone。</p>
+      <p><span style="color:var(--c-dead);font-weight:800">●</span> <strong>承重校正</strong>：第 4 個位點 <code>chr2:18,096,269</code>（ref=C）<u>緊接 20 個 T 的同聚物</u>。原群三/四/五在其他 markers 相同，只差 pos4 的 G/T/DEL；因此這三態不可拆成三個真 subclone，應合併為<strong>一個 homopolymer-uncertain β-like 分子狀態</strong>。</p>
 
       <figure style="margin:var(--sp-3) 0">
         <div class="figtitle">圖 3 · 為什麼 pos4 的三態不可信：它坐在 20bp 同聚物上</div>
-        <svg viewBox="0 0 960 210" role="img" aria-label="pos4 參考序列同聚物">
+        <svg viewBox="0 0 960 210" role="img" aria-labelledby="p04-svg3-title p04-svg3-desc">
+          <title id="p04-svg3-title">pos4 周邊參考序列的 homopolymer</title>
+          <desc id="p04-svg3-desc">顯示 pos4 緊鄰 poly-T homopolymer，說明 G、T 與 deletion calls 應視為 homopolymer-uncertain state，不應直接分為多個 clones。</desc>
           <text x="20" y="26" font-size="12" font-weight="700">GRCh38 參考序列 @ chr2:18,096,244–18,096,294（本 session 親驗）</text>
           <!-- sequence boxes -->
           <g font-family="JetBrains Mono,monospace" font-size="15" text-anchor="middle">
@@ -454,15 +480,15 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
             <text x="470" y="150" font-family="JetBrains Mono,monospace">群五=DEL</text>
             <text x="600" y="150">→</text>
             <rect x="630" y="134" width="300" height="26" fill="#F6EBD8" stroke="#B06A16" rx="5"/>
-            <text x="780" y="151" text-anchor="middle" fill="#B06A16" font-weight="700">收斂為 1 條 β+pos4-altered 子譜系</text>
+            <text x="780" y="151" text-anchor="middle" fill="#B06A16" font-weight="700">合併為 1 個 β-like+pos4-altered 分子狀態</text>
             <text x="20" y="182" fill="#5C5A54">其餘 marker（pos3=G、pos5=ref、pos6=G、甲基簽章）三群完全相同 → 差異僅來自同聚物抖動。</text>
-            <text x="20" y="200" fill="#5C5A54">pos4 變異本身真（tumor 非C 55%、normal 96% C 乾淨），但 <tspan font-weight="700">G/T/DEL 三分是 artifact</tspan>。</text>
+            <text x="20" y="200" fill="#5C5A54">pos4 有 tumor-associated 非 C 訊號；normal 多為 C，但 <tspan font-weight="700">G/T/DEL 三分受 homopolymer artifact 影響</tspan>。</text>
           </g>
         </svg>
         <figcaption><b>來源：</b>序列 = <code>samtools faidx GRCh38 chr2:18096244-18096294</code> 本 session 重驗（<code>CATTTCCAGAGCTCTGTACTCTAGTC</code> + <code>20×T</code> + <code>GAGAC</code>）；pos4 allele = <code>hku_mod_analysis.txt</code>（tumor C:28/T:18/DEL:12/G:6；normal C:44/96%）。</figcaption>
       </figure>
 
-      <div class="verd"><span class="lab">判定 · 校正</span>「5 群」<b>過報 → 收斂為 ≥3 條可區分譜系</b>：<b>α</b>（群一）、<b>α+pos5C</b>（群二）、<b>β+pos4-altered</b>（群三四五併一）。論文若保留 pos4 三態，必須標 <code>ONT-homopolymer-uncertain</code>。</div>
+      <div class="verd"><span class="lab">判定 · 校正</span>「5 群」過報 → 保守收斂為約 3 種可區分的 regional molecular-state candidates：<b>α</b>、provisional <b>α+pos5C</b>、<b>β-like+pos4-altered</b>。這不是 cellular clone 數；pos4 必須標 <code>ONT-homopolymer-uncertain</code>。</div>
     </div>
   </div>
 
@@ -478,12 +504,12 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
 
   <!-- Step 5 pos5 nest -->
   <div class="step ok">
-    <div class="head"><span class="no">推論 5</span><h4>sSNV (5) 把群一、群二分開</h4><span class="badge tier">L2（弱）</span><span class="badge b-pass">獲證 · provisional</span></div>
+    <div class="head"><span class="no">推論 5</span><h4>sSNV (5) 支持 provisional nested candidate</h4><span class="badge tier">L2（弱）</span><span class="badge b-warn">有界支持</span></div>
     <div class="body2">
       <div class="claim"><span class="lab">研究者直覺</span>pos5 的 C 把 α 再分出群二。</div>
       <p>pos5=C <strong>巢狀在 α 內</strong>（出現在帶 pos3=A 的 read 上，如 <span class="rname">12582ff3</span> = C·G·A·C·<b>C</b>），確認群二是 α 的子分支。但支持 read 僅 <strong>~4 條</strong> → 標 provisional。</p>
       <div class="evi">α+pos5 read <span class="rname">12582ff3</span>  (1)C (2)G (3)<b>A</b> (4)C (5)<b>C</b>   ← pos5=C 巢狀在 α</div>
-      <div class="verd"><span class="lab">判定 · L2 弱</span>巢狀結構成立，但 read 數少 → <b>provisional</b>，不宜當定量結論。</div>
+      <div class="verd"><span class="lab">判定 · L2 弱</span>目前 reads 與 provisional nested candidate 相容；支持數少，不能視為唯一結構或定量結論。</div>
     </div>
   </div>
 
@@ -492,7 +518,7 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
     <div class="head"><span class="no">分類</span><h4>用 VAF 把譜系排成 2-1 / 2-1-1 / 2-2-1/2/3</h4><span class="badge tier">L3</span><span class="badge b-dead">撤回排序</span></div>
     <div class="body2">
       <div class="claim"><span class="lab">研究者直覺</span>比對 REF 數突變次數 + VAF → 排出 parent/child 層級分類。</div>
-      <p><span style="color:var(--c-dead);font-weight:800">●</span> <strong>VAF 排序撤回</strong>：在 LOH 區，<u>局部 VAF 被嚴重扭曲</u>（pos5 局部 VAF=<strong>0.31</strong>，而非它在 SEQC2 全基因組的 0.05）；α 與 β 是 <strong>siblings</strong>，無法用 VAF 斷定誰是 parent、誰是 child。</p>
+      <p><span style="color:var(--c-dead);font-weight:800">●</span> <strong>VAF 排序撤回</strong>：在 LOH 區，局部 VAF 受 copy number、純度與抽樣影響（pos5 局部 VAF=<strong>0.31</strong>，SEQC2 consensus TVAF 約 0.05）。α / β-like 關係本身只是候選模型，更不能由 VAF 斷定 parent/child。</p>
       <div class="verd"><span class="lab">判定 · 撤回</span>「2-1 / 2-1-1 / 2-2-x」這種<b>層級命名可保留為標籤</b>，但其<b>排序語意（誰衍生誰）是 L3 推論</b>，不可由 VAF 宣稱。</div>
       <details class="card cav"><summary>caveat：為什麼 LOH 會扭曲 VAF？</summary><div class="body">VAF = 變異 read / 總 read。LOH 把一條染色體整段移除後，分母只剩單親本的 read，任何 somatic 變異的「相對比例」都被放大、且受 copy number 影響 → 全基因組 VAF 與此局部 VAF 不可互換，更不能拿來推時間。</div></details>
     </div>
@@ -501,29 +527,31 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
 
 <!-- ============ §3 甲基追蹤 ============ -->
 <section id="methyl">
-  <h3><span class="num">④</span> 甲基化怎麼「追蹤」譜系？</h3>
-  <p class="sub">這是論文主軸的核心觀察：在這個乾淨的 LOH+somatic 案例裡，<strong>甲基化模式沿著兩條譜系一起翻轉</strong>。但要誠實標出「哪些 CpG 跨 basecaller 真的複製」。</p>
+  <h3><span class="num">④</span> 遺傳分組後，甲基化呈現什麼關聯？</h3>
+  <p class="sub">先依 mutation markers 分組後，部分 CpG 在 α / β-like reads 間呈方向一致差異，3.1/3.2 跨 basecaller 技術重現。這是同一樣本、同一批 reads 上的有界關聯，不是獨立 clone confirmation。</p>
 
   <figure>
-    <div class="figtitle">圖 4 · α(pos3=A) vs β(pos3=G) 兩譜系的 CpG 甲基化翻轉（HKU + DORADO，data-bound 修正版）</div>
-    <svg viewBox="0 0 880 416" role="img" aria-label="甲基化翻轉熱圖（data-bound 修正版）"><g font-size="11"><rect x="600" y="14" width="16" height="16" fill="rgb(200,50,55)"/><text x="622" y="27">高甲基 (meanM→1)</text><rect x="600" y="34" width="16" height="16" fill="rgb(230,230,225)" stroke="#E3DACC"/><text x="622" y="47">中</text><rect x="600" y="54" width="16" height="16" fill="rgb(40,90,170)"/><text x="622" y="67">低甲基 (meanM→0)</text></g><g font-size="12" text-anchor="middle" font-weight="700"><text x="250" y="34">HKU · α</text><text x="330" y="34">HKU · β</text><text x="470" y="34">DORADO · α</text><text x="550" y="34">DORADO · β</text></g><g font-family="monospace" font-size="11" text-anchor="middle"><text x="150" y="74" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.1</text><rect x="215" y="58" width="70" height="24" fill="rgb(214,139,139)"/><text x="250" y="74" fill="#111">0.75</text><rect x="295" y="58" width="70" height="24" fill="rgb(223,225,223)"/><text x="330" y="74" fill="#111">0.48</text><rect x="435" y="58" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="74" fill="#fff">0.01</text><rect x="515" y="58" width="70" height="24" fill="rgb(45,94,171)"/><text x="550" y="74" fill="#fff">0.02</text><text x="600" y="74" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="104" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.2</text><rect x="215" y="88" width="70" height="24" fill="rgb(205,85,88)"/><text x="250" y="104" fill="#fff">0.90</text><rect x="295" y="88" width="70" height="24" fill="rgb(124,152,194)"/><text x="330" y="104" fill="#111">0.22</text><rect x="435" y="88" width="70" height="24" fill="rgb(211,121,122)"/><text x="470" y="104" fill="#111">0.80</text><rect x="515" y="88" width="70" height="24" fill="rgb(42,92,170)"/><text x="550" y="104" fill="#fff">0.01</text><text x="600" y="104" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="134" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.1</text><rect x="215" y="118" width="70" height="24" fill="rgb(124,152,194)"/><text x="250" y="134" fill="#111">0.22</text><rect x="295" y="118" width="70" height="24" fill="rgb(205,80,83)"/><text x="330" y="134" fill="#fff">0.92</text><rect x="435" y="118" width="70" height="24" fill="rgb(68,110,178)"/><text x="470" y="134" fill="#fff">0.07</text><rect x="515" y="118" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="134" fill="#fff">1.00</text><text x="600" y="134" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨+DORADO複製（最強）</text><text x="150" y="164" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.2</text><rect x="215" y="148" width="70" height="24" fill="rgb(201,60,65)"/><text x="250" y="164" fill="#fff">0.97</text><rect x="295" y="148" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="164" fill="#fff">0.14</text><rect x="435" y="148" width="70" height="24" fill="rgb(200,50,55)"/><text x="470" y="164" fill="#fff">1.00</text><rect x="515" y="148" width="70" height="24" fill="rgb(42,91,170)"/><text x="550" y="164" fill="#fff">0.01</text><text x="600" y="164" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨+DORADO複製（最強）</text><text x="150" y="194" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.3</text><rect x="215" y="178" width="70" height="24" fill="rgb(197,206,215)"/><text x="250" y="194" fill="#111">0.42</text><rect x="295" y="178" width="70" height="24" fill="rgb(209,106,108)"/><text x="330" y="194" fill="#fff">0.84</text><rect x="435" y="178" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="194" fill="#111">0.26</text><rect x="515" y="178" width="70" height="24" fill="rgb(200,52,57)"/><text x="550" y="194" fill="#fff">0.99</text><text x="600" y="194" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="224" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.4</text><rect x="215" y="208" width="70" height="24" fill="rgb(57,102,174)"/><text x="250" y="224" fill="#fff">0.04</text><rect x="295" y="208" width="70" height="24" fill="rgb(207,95,97)"/><text x="330" y="224" fill="#fff">0.87</text><rect x="435" y="208" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="224" fill="#111">0.26</text><rect x="515" y="208" width="70" height="24" fill="rgb(208,101,103)"/><text x="550" y="224" fill="#fff">0.86</text><text x="600" y="224" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="254" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.5</text><rect x="215" y="238" width="70" height="24" fill="rgb(43,92,171)"/><text x="250" y="254" fill="#fff">0.01</text><rect x="295" y="238" width="70" height="24" fill="rgb(208,98,100)"/><text x="330" y="254" fill="#fff">0.87</text><rect x="435" y="238" width="70" height="24" fill="rgb(184,196,211)"/><text x="470" y="254" fill="#111">0.38</text><rect x="515" y="238" width="70" height="24" fill="rgb(209,109,110)"/><text x="550" y="254" fill="#fff">0.84</text><text x="600" y="254" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.05）</text><text x="150" y="284" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 4.1</text><rect x="215" y="268" width="70" height="24" fill="rgb(201,57,61)"/><text x="250" y="284" fill="#fff">0.98</text><rect x="295" y="268" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="284" fill="#fff">0.14</text><rect x="435" y="268" width="70" height="24" fill="rgb(201,60,65)"/><text x="470" y="284" fill="#fff">0.97</text><rect x="515" y="268" width="70" height="24" fill="rgb(193,202,214)"/><text x="550" y="284" fill="#111">0.40</text><text x="600" y="284" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="314" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.1</text><rect x="215" y="298" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="314" fill="#fff">0.03</text><rect x="295" y="298" width="70" height="24" fill="rgb(203,68,72)"/><text x="330" y="314" fill="#fff">0.95</text><rect x="435" y="298" width="70" height="24" fill="rgb(229,229,224)"/><text x="470" y="314" fill="#111">0.50</text><rect x="515" y="298" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="314" fill="#fff">1.00</text><text x="600" y="314" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="344" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.2</text><rect x="215" y="328" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="344" fill="#fff">0.03</text><rect x="295" y="328" width="70" height="24" fill="rgb(200,52,57)"/><text x="330" y="344" fill="#fff">0.99</text><rect x="435" y="328" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="344" fill="#fff">0.01</text><rect x="515" y="328" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="344" fill="#fff">1.00</text><text x="600" y="344" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><rect x="210" y="116" width="380" height="60" fill="none" stroke="#2F7D5B" stroke-width="2.5" rx="6"/></g><text x="400" y="380" text-anchor="middle" font-size="11" fill="#2F7D5B" font-weight="700">乾淨且跨 basecaller 複製（normal 無 ASM + DORADO FDR&lt;0.05）= {3.1, 3.2}</text><text x="400" y="398" text-anchor="middle" font-size="11" fill="#9A3B3B" font-weight="700">被既存 germline ASM confound = {3.3, 3.4, 3.5, 4.1} → 不可當 subclone 新生甲基</text></svg>
-    <figcaption><b>怎麼讀：</b>數字 = 該譜系在該 CpG 的<u>平均甲基化機率</u>（meanM，0–1）。同一行 α/β 顏色相反 = <b>翻轉</b>。<b>✔ 本圖已修正為 data-bound（α=pos3·A vs β=pos3·G，值由 <code>independent_audit.json</code> 注入；舊版 DORADO·β 顯示「—」的 v1 bug 已修）。權威矯正見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05 §④</a>，互動判讀工作站見 <a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">頁 07</a></b>：扣掉 germline ASM 後，乾淨且跨 basecaller 複製的子集 = <b>{2.1,2.2,3.1,3.2,5.1,5.2}</b>（最強 3.1/3.2）；<b>{3.3,3.4,3.5,4.1} 被既存 ASM confound</b>，不可當 subclone 新生甲基。</figcaption>
+    <div class="figtitle">圖 4 · α(pos3=A) vs β-like(pos3=G) 遺傳分組後的 CpG 甲基差異（HKU + DORADO）</div>
+    <svg viewBox="0 0 880 416" role="img" aria-labelledby="p04-svg4-title p04-svg4-desc"><title id="p04-svg4-title">mutation-defined 分組的甲基關聯熱圖</title><desc id="p04-svg4-desc">比較 HKU 與 DORADO 中 alpha/beta-like mutation-defined groups 的 CpG meanM；綠色子集是 normal-ASM-screen-negative，紅色子集被 germline ASM confound。圖只支持有界關聯，不證明 acquired 或 clone-specific methylation。</desc><g font-size="11"><rect x="600" y="14" width="16" height="16" fill="rgb(200,50,55)"/><text x="622" y="27">高甲基 (meanM→1)</text><rect x="600" y="34" width="16" height="16" fill="rgb(230,230,225)" stroke="#E3DACC"/><text x="622" y="47">中</text><rect x="600" y="54" width="16" height="16" fill="rgb(40,90,170)"/><text x="622" y="67">低甲基 (meanM→0)</text></g><g font-size="12" text-anchor="middle" font-weight="700"><text x="250" y="34">HKU · α</text><text x="330" y="34">HKU · β</text><text x="470" y="34">DORADO · α</text><text x="550" y="34">DORADO · β</text></g><g font-family="monospace" font-size="11" text-anchor="middle"><text x="150" y="74" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.1</text><rect x="215" y="58" width="70" height="24" fill="rgb(214,139,139)"/><text x="250" y="74" fill="#111">0.75</text><rect x="295" y="58" width="70" height="24" fill="rgb(223,225,223)"/><text x="330" y="74" fill="#111">0.48</text><rect x="435" y="58" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="74" fill="#fff">0.01</text><rect x="515" y="58" width="70" height="24" fill="rgb(45,94,171)"/><text x="550" y="74" fill="#fff">0.02</text><text x="600" y="74" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG・DORADO未過FDR/小n</text><text x="150" y="104" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.2</text><rect x="215" y="88" width="70" height="24" fill="rgb(205,85,88)"/><text x="250" y="104" fill="#fff">0.90</text><rect x="295" y="88" width="70" height="24" fill="rgb(124,152,194)"/><text x="330" y="104" fill="#111">0.22</text><rect x="435" y="88" width="70" height="24" fill="rgb(211,121,122)"/><text x="470" y="104" fill="#111">0.80</text><rect x="515" y="88" width="70" height="24" fill="rgb(42,92,170)"/><text x="550" y="104" fill="#fff">0.01</text><text x="600" y="104" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG・DORADO未過FDR/小n</text><text x="150" y="134" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.1</text><rect x="215" y="118" width="70" height="24" fill="rgb(124,152,194)"/><text x="250" y="134" fill="#111">0.22</text><rect x="295" y="118" width="70" height="24" fill="rgb(205,80,83)"/><text x="330" y="134" fill="#fff">0.92</text><rect x="435" y="118" width="70" height="24" fill="rgb(68,110,178)"/><text x="470" y="134" fill="#fff">0.07</text><rect x="515" y="118" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="134" fill="#fff">1.00</text><text x="600" y="134" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG+DORADO重現（最強）</text><text x="150" y="164" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.2</text><rect x="215" y="148" width="70" height="24" fill="rgb(201,60,65)"/><text x="250" y="164" fill="#fff">0.97</text><rect x="295" y="148" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="164" fill="#fff">0.14</text><rect x="435" y="148" width="70" height="24" fill="rgb(200,50,55)"/><text x="470" y="164" fill="#fff">1.00</text><rect x="515" y="148" width="70" height="24" fill="rgb(42,91,170)"/><text x="550" y="164" fill="#fff">0.01</text><text x="600" y="164" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG+DORADO重現（最強）</text><text x="150" y="194" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.3</text><rect x="215" y="178" width="70" height="24" fill="rgb(197,206,215)"/><text x="250" y="194" fill="#111">0.42</text><rect x="295" y="178" width="70" height="24" fill="rgb(209,106,108)"/><text x="330" y="194" fill="#fff">0.84</text><rect x="435" y="178" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="194" fill="#111">0.26</text><rect x="515" y="178" width="70" height="24" fill="rgb(200,52,57)"/><text x="550" y="194" fill="#fff">0.99</text><text x="600" y="194" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="224" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.4</text><rect x="215" y="208" width="70" height="24" fill="rgb(57,102,174)"/><text x="250" y="224" fill="#fff">0.04</text><rect x="295" y="208" width="70" height="24" fill="rgb(207,95,97)"/><text x="330" y="224" fill="#fff">0.87</text><rect x="435" y="208" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="224" fill="#111">0.26</text><rect x="515" y="208" width="70" height="24" fill="rgb(208,101,103)"/><text x="550" y="224" fill="#fff">0.86</text><text x="600" y="224" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="254" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.5</text><rect x="215" y="238" width="70" height="24" fill="rgb(43,92,171)"/><text x="250" y="254" fill="#fff">0.01</text><rect x="295" y="238" width="70" height="24" fill="rgb(208,98,100)"/><text x="330" y="254" fill="#fff">0.87</text><rect x="435" y="238" width="70" height="24" fill="rgb(184,196,211)"/><text x="470" y="254" fill="#111">0.38</text><rect x="515" y="238" width="70" height="24" fill="rgb(209,109,110)"/><text x="550" y="254" fill="#fff">0.84</text><text x="600" y="254" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.05）</text><text x="150" y="284" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 4.1</text><rect x="215" y="268" width="70" height="24" fill="rgb(201,57,61)"/><text x="250" y="284" fill="#fff">0.98</text><rect x="295" y="268" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="284" fill="#fff">0.14</text><rect x="435" y="268" width="70" height="24" fill="rgb(201,60,65)"/><text x="470" y="284" fill="#fff">0.97</text><rect x="515" y="268" width="70" height="24" fill="rgb(193,202,214)"/><text x="550" y="284" fill="#111">0.40</text><text x="600" y="284" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="314" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.1</text><rect x="215" y="298" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="314" fill="#fff">0.03</text><rect x="295" y="298" width="70" height="24" fill="rgb(203,68,72)"/><text x="330" y="314" fill="#fff">0.95</text><rect x="435" y="298" width="70" height="24" fill="rgb(229,229,224)"/><text x="470" y="314" fill="#111">0.50</text><rect x="515" y="298" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="314" fill="#fff">1.00</text><text x="600" y="314" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG・DORADO未過FDR/小n</text><text x="150" y="344" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.2</text><rect x="215" y="328" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="344" fill="#fff">0.03</text><rect x="295" y="328" width="70" height="24" fill="rgb(200,52,57)"/><text x="330" y="344" fill="#fff">0.99</text><rect x="435" y="328" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="344" fill="#fff">0.01</text><rect x="515" y="328" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="344" fill="#fff">1.00</text><text x="600" y="344" text-anchor="start" font-size="10" fill="#2F7D5B">SCREEN-NEG・DORADO未過FDR/小n</text><rect x="210" y="116" width="380" height="60" fill="none" stroke="#2F7D5B" stroke-width="2.5" rx="6"/></g><text x="400" y="380" text-anchor="middle" font-size="11" fill="#2F7D5B" font-weight="700">normal-ASM-screen-negative 且跨 basecaller 重現（未證明 acquired；DORADO FDR&lt;0.05）= {3.1, 3.2}</text><text x="400" y="398" text-anchor="middle" font-size="11" fill="#9A3B3B" font-weight="700">被既存 germline ASM confound = {3.3, 3.4, 3.5, 4.1} → 不可宣稱 acquired 或 clone-specific</text></svg>
+    <figcaption><b>怎麼讀：</b>數字是 mutation-defined 組別在該 CpG 的平均甲基機率（meanM，0–1）。α/β-like 顏色相反表示組間關聯，不等於 lineage causality。<b>本圖由 <code>independent_audit.json</code> 注入；權威矯正見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05 §④</a></b>：<b>{2.1,2.2,3.1,3.2,5.1,5.2}</b> 為 normal-ASM-screen-negative，其中 3.1/3.2 跨 basecaller 技術重現最強；<b>{3.3,3.4,3.5,4.1}</b> 被既存 ASM confound。screen-negative 不證明 acquired 或 clone-specific。</figcaption>
   </figure>
 
-  <div class="so"><b>關鍵正向證據：</b>有 2 條「基因型仍是 ref（C-G-G）」的 read，<u>卻帶著乾淨的 β 甲基簽章</u>（CpG 3.1 高、2.2 低）→ <strong>表觀基因型（epigenotype）也追著譜系跑</strong>，這強化（而非削弱）「甲基沿譜系變化」的觀察 — 即使基因型 marker 沒覆蓋到，甲基也能把 read 歸對譜系。</div>
+  <div class="so"><b>關鍵有界觀察：</b>有 2 條「基因型仍是 ref（C-G-G）」的 read，同時呈現與 β 組一致的局部甲基模式（CpG 3.1 高、2.2 低）。這支持<b>遺傳分組後的有界一致關聯</b>；但沒有 per-read 真值或救援誤差率，因此「用甲基把未覆蓋 marker 的 read 正確歸類」仍是<b>未驗證假說</b>。</div>
 
   <details class="card cav"><summary>caveat：跟手標不符的一個 CpG（2.2）</summary><div class="body">研究者手標 CpG 2.2 在 α 為 L（低），但實際資料 α=0.90（高）= 方向相反。其餘手標方向都對。教學頁如實呈現此一矛盾，不抹平。</div></details>
-  <details class="card cav"><summary><span style="color:var(--c-dead);font-weight:800">●</span> 重要：必須扣掉「既存 germline ASM」才算 subclone 甲基（頁 05 §④ 權威）</summary><div class="body">用 matched-normal 比 HP1-vs-HP2 發現：<b>{3.3,3.4,3.5,4.1} 在 normal 本來就有顯著 ASM</b>（如 3.3 normal HP1=0.814/HP2=0.046，FDR 0.007）→ 它們的 tumor lineage 差異被既存 ASM confound，<u>不能算 subclone 新生甲基</u>。<b>{2.1,2.2,3.1,3.2,5.1,5.2} normal 無 HP 差異 = 乾淨候選</b>。這正是 ISM 的價值：把「既存 ASM」與「tumor-associated 甲基」拆開。</div></details>
+  <details class="card cav"><summary><span style="color:var(--c-dead);font-weight:800">●</span> 重要：matched-normal screen 只能標記已偵測的 germline ASM confound</summary><div class="body"><b>{3.3,3.4,3.5,4.1}</b> 在 normal 已有顯著 ASM（如 3.3 HP1=0.814/HP2=0.046，FDR 0.007），因此標為 confounded；<b>{2.1,2.2,3.1,3.2,5.1,5.2}</b> 為 normal-ASM-screen-negative。後者是 tumor-associated methylation candidates，不是 tumor-acquired 或 cellular-subclone-specific 的正面證據。</div></details>
 </section>
 
 <!-- ============ §4 校正後樹 ============ -->
 <section id="tree">
-  <h3><span class="num">⑤</span> 校正後的重建：≥3 條譜系（標清楚哪些是觀測、哪些是推論）</h3>
-  <p class="sub">把上面的校正全部套用後，得到誠實版的 subclone 重建樹。<strong>實線 = 觀測到的互斥分叉；虛線 = parsimony 推論</strong>（祖先、順序）。</p>
+  <h3><span class="num">⑤</span> 校正後模型：約 3 種局部分子狀態候選</h3>
+  <p class="sub">套用校正後，只能畫出一個 recurrence-allowed、minimum mutation-state 的<strong>候選拓撲</strong>。marker 共現/互斥是觀測；把它畫成分支、root 或順序均是模型推論，並非 subclone 重建真值。</p>
 
   <figure>
-    <div class="figtitle">圖 5 · 校正後 subclone 重建樹（observed vs inferred）</div>
-    <svg viewBox="0 0 920 380" role="img" aria-label="校正後重建樹">
+    <div class="figtitle">圖 5 · 校正後的局部 mutation-state 候選拓撲（observed vs inferred）</div>
+    <svg viewBox="0 0 920 380" role="img" aria-labelledby="p04-svg5-title p04-svg5-desc">
+      <title id="p04-svg5-title">局部 mutation-state 候選拓撲</title>
+      <desc id="p04-svg5-desc">在 recurrence-allowed 假設下，由同一條實驗取樣物理分子上的 mutation co-occurrence 與互斥建立的局部候選圖；非已確認的 cellular clone 或 lineage tree。</desc>
       <!-- root -->
       <rect x="360" y="20" width="200" height="46" rx="8" fill="#F0EDE6" stroke="#5C5A54" stroke-dasharray="6 4" stroke-width="2"/>
       <text x="460" y="40" text-anchor="middle" font-size="12" font-weight="700">all-REF 祖先 (root)</text>
@@ -535,7 +563,7 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
       <text x="600" y="98" font-size="10" fill="#2F7D5B" font-weight="700">somatic pos1/2/6</text>
       <!-- alpha -->
       <rect x="140" y="122" width="220" height="58" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="2"/>
-      <text x="250" y="144" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4f3a">譜系 α</text>
+      <text x="250" y="144" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4f3a">α molecular state</text>
       <text x="250" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12">(1)C (2)G (3)A</text>
       <text x="250" y="176" text-anchor="middle" font-size="9" fill="#2F7D5B">觀測 · 互斥 0 違反 · L2</text>
       <!-- beta -->
@@ -563,7 +591,7 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
       </g>
       <text x="60" y="362" font-size="11" fill="#9A3B3B" font-weight="700">⛔ 不可寫：5 個 subclone、突變先後順序、VAF 排序、把 beta-like left/right 當已確認直接連鎖。</text>
     </svg>
-    <figcaption><b>怎麼讀：</b>共 <b>≥3 條 regional molecular states</b>（α、α+pos5C、beta-like）。α/β 分叉是<b>觀測</b>（互斥，L2）；root、巢狀、順序是<b>推論</b>（L3）。<b>⚠ 權威樹（beta-like 的 left (1)(2) / right (4)(6) 兩 block 以甲基橋接、無直接 genetic link）見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05 §⑤</a></b>。</figcaption>
+    <figcaption><b>怎麼讀：</b>圖示約 3 種 regional molecular-state candidates（α、provisional α+pos5C、beta-like）。直接觀測是特定 marker 的共現/互斥；把它連成分支、root、nesting 或順序皆是模型推論，且不唯一。beta-like left (1)(2) / right (4)(6) 無直接跨距 read，只能作有界橋接候選；見 <a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05 §⑤</a>。</figcaption>
   </figure>
 </section>
 
@@ -593,10 +621,10 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
 <!-- ============ §6 限制 ============ -->
 <section id="limit">
   <h3><span class="num">⑦</span> 限制與「要升級結論還缺什麼」</h3>
-  <p class="sub">教學頁不藏限制。這案例是<strong>乾淨的單一示範</strong>，不是論文的全部證據；推廣前有明確前置。</p>
+  <p class="sub">教學頁不藏限制。這是單一樣本、單一區域的候選案例，不是 cellular-clone truth，也不是論文的全部證據；推廣前有明確前置。</p>
 
   <div class="takeaway pass"><span class="lab">更新 · ASM 控制已跑（頁 05 §④）→ 部分解 confound</span>
-    「subclonal 而非 germline ASM」operational 為真（單一保留 allele → live 雙親 ASM 結構上不可能、翻轉跨 HP tag、HP-free DORADO 也複製）。<strong>matched-normal ASM 控制現已執行</strong>：用 normal HP1-vs-HP2 把既存 ASM 拆出 — <b>{2.1,2.2,3.1,3.2,5.1,5.2} 乾淨（normal 無 HP 差異）= tumor-associated 甲基</b>；<b>{3.3,3.4,3.5,4.1} 被既存 ASM confound，保守排除</b>。仍待：第二樣本（COLO829）複製 + region-level 正式檢定。
+    <strong>matched-normal ASM screen 已執行</strong>：<b>{3.3,3.4,3.5,4.1}</b> 可觀察到既存 germline ASM confound；<b>{2.1,2.2,3.1,3.2,5.1,5.2}</b> 為 tumor-associated、normal-ASM-screen-negative。screen-negative 不證明 acquired 或 subclone identity。仍待第二樣本、獨立 truth、CN/純度模型與 region-level 正式檢定。
   </div>
 
   <table>
@@ -611,14 +639,14 @@ ancestral ref read 實例：<span class="rname">895e6dcb</span> <span class="rna
 
   <h4 class="mini">升 tier（→ L3+）的三個前置</h4>
   <ol>
-    <li><b>(a) per-read 5mC partition 的 binomial / permutation test</b> — 把「甲基沿譜系翻轉」從描述升到正式檢定。</li>
-    <li><b>(b) normal-anchored cis / ASM control</b> — 分離「subclone 甲基」與「保留在 LOH 上的既存 ASM」（解上面那條最關鍵未解）。</li>
+    <li><b>(a) 預先固定的 per-read classifier + 獨立 truth</b> — 回報未定相 read 的 precision/recall、校準與錯誤率，才能測試甲基救援假說。</li>
+    <li><b>(b) CN/純度/等位背景模型 + 更完整 normal control</b> — matched-normal ASM screen 已抓出部分 confound，但 screen-negative 仍不證明 acquisition。</li>
     <li><b>(c) 第二個 LOH 位點 或 第二個樣本</b>（如 COLO829）複製 — 突破單位點/單樣本天花板。</li>
   </ol>
 
   <div class="rel">
     <a href="02_ism-core.standalone.html">ISM 方法本體</a>
-    <a href="03_methylation-read-filter.standalone.html">甲基讀取與篩選（含 filter-DEAD）</a>
+    <a href="03_methylation-read-filter.standalone.html">甲基讀取與篩選（含已測 filter NEGATIVE）</a>
     <a href="index.standalone.html">← 回 INDEX</a>
   </div>
 </section>

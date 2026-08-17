@@ -3,18 +3,18 @@
 ## 1. 專案資訊 (Project Info)
 
 * **專案名稱**: InterSubMod (Inter-Subclonal Methylation Analysis)
-* **核心目標**: 通過整合長讀取 (Long-read) 測序數據中的甲基化 (Methylation) 與體細胞變異 (Somatic SNVs)，解析腫瘤內的亞克隆結構 (Subclonal Structure) 與表觀遺傳異質性 (Epigenetic Heterogeneity)。
+* **目前可支持的核心目標**: 以長讀長上的 somatic-SNV 物理分子共現建立**局部、允許 recurrence 的最小突變狀態候選結構**，再以甲基化做 pattern-conditioned association。這不是 confirmed cellular subclone、lineage 或全樣本真實 phylogeny。
 * **技術特點**:
   * **高效能 C++ 核心**: 採用 C++17 標準，結合 OpenMP 平行運算。
   * **精確甲基化解析**: 支援 BAM 格式中的 MM/ML 標籤解析，精確定位 CpG 位點的甲基化狀態。
   * **多樣化距離度量**: 支援 L1 Distance、NHD (Normalized Hamming Distance) 等多種距離算法，用於量化 Read 間的表觀遺傳差異。
-  * **自動化視覺化**: 整合 Python 繪圖工具，自動生成距離熱圖 (Distance Heatmap) 與分群熱圖 (Cluster Heatmap)。
+  * **下游視覺化工具**: Python 工具可由 C++ 輸出的資料生成距離與 read-level methylation cluster 熱圖；C++ binary 本身不會自動渲染 PNG。
 
 ---
 
 ## 2. 完整分析流程 (Complete Workflow)
 
-本專案提供一鍵式自動化腳本 (`scripts/run_vcf_all_snv.sh`)，串聯從原始 BAM 檔到最終視覺化圖表的完整流程。
+`scripts/run_vcf_all_snv.sh` 是**實驗室內部 orchestration**：它能在既定內部資料配置下串接核心運算與 Python 圖表，但依賴未納入 Git 的 `/big7`／`/big8` 絕對路徑。Public clone 目前沒有 runnable fixture，不能把此腳本描述為一鍵 portable workflow。
 
 ### 流程步驟
 
@@ -39,7 +39,7 @@
 
 4. **視覺化與輸出 (Visualization & Output)**
     * **Distance Heatmap**: 展示 Read 間的相似度結構，包含雙向階層分群 (Hierarchical Clustering)。
-    * **Cluster Heatmap**: 展示 Read 與 CpG 位點的甲基化模式，直觀呈現亞克隆分群。
+    * **Cluster Heatmap**: 展示 Read 與 CpG 位點的甲基化模式與 read-level clusters；這些群不是細胞亞克隆。
 
 ---
 
@@ -78,7 +78,9 @@
 
 ## 5. 技術亮點與效能 (Highlights & Performance)
 
-* **平行化設計**: 使用 OpenMP 實現 Region-level 平行化，在 32 核環境下可達線性加速比，單 Region 平均處理時間 < 300ms。
+* **平行化設計**: 使用 OpenMP 實現 Region-level 平行化；目前沒有鎖定 hardware、commit、
+  input distribution、repetitions 與 thread-scaling curve 的公開 benchmark，因此不提供
+  speedup 或 per-region latency 數字。
 * **精準座標映射**: 解決了 ONT 數據中常見的 Insertion/Deletion 對甲基化座標偏移的影響，確保每個 CpG 位點精確對齊。
 * **完整 MM/ML 支援**: 正確處理多種修飾類型共存時的 ML 陣列偏移 (Offset) 問題。
 

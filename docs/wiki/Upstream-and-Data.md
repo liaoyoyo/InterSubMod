@@ -19,9 +19,9 @@
 | 指標 | 數值 |
 |---|---|
 | ✅ 樣本 sidecar 全部生產完成 | **7 / 7** |
-| 7 樣本 sidecar 總量（壓縮後） | **5.83 GiB** |
-| ⚠️ 若改存 tagged BAM 需要的空間 | **1.67 TiB** |
-| sidecar 方案節省的倍數 | **287×** |
+| 7 樣本 sidecar 總量（壓縮後） | **6,256,168,164 bytes（5.83 GiB）** |
+| ⚠️ 7 個 tagged BAM 的總量 | **UNVERIFIED**：缺 path／exact bytes／hash／compression receipt |
+| sidecar 方案節省的倍數 | **不報告**：沒有兩端 exact-byte receipts |
 
 ---
 
@@ -33,7 +33,9 @@
 
 > **圖 1 · 上游前處理鏈，以及為什麼 tagged BAM 從不落地**
 >
-> **這個設計是本系統最值得學習的工程決定之一** —— 它把「我需要什麼資訊」與「這些資訊被裝在什麼容器裡」分開來想，結果用 1/287 的空間保留了 100% 需要的內容。
+> **這個設計是本系統最值得學習的工程決定之一** —— 它把「目前九欄契約需要什麼資訊」
+> 與「完整 BAM 容器還帶了什麼」分開；本頁只確認 sidecar bytes，不宣稱未量測的縮減倍率
+> 或下游資訊保留率。
 
 ### 八個步驟逐項
 
@@ -61,9 +63,10 @@ tagged BAM 串流       ───►       .fifo      ───►  每條 read 
 
 ### 為什麼要大費周章用管道，而不是存 tagged BAM？
 
-- 7 個樣本的 tagged BAM 合計約 **1.67 TiB**，含餘裕需準備約 2.3 TB 空間。
-- 而 sidecar 只有 **5.83 GiB**（壓縮後）／13.98 GiB（未壓縮）—— **相差約 287 倍**。
-- 更重要的是：分析真正需要的資訊只有「哪條 read、在哪、屬於哪個單倍型」這 9 個欄位，**序列與品質字串佔了 99% 以上的體積卻完全用不到**。
+- 七個 current sidecars 的 exact sum 是 **6,256,168,164 bytes（5.83 GiB）**；這是可重播的檔案統計。
+- 先前的 **1.67 TiB** tagged-BAM estimate 沒有逐檔 registry，因此不能拿來計算倍率；current raw BAM total 是不同物件，也不能替代。
+- 現行 sidecar contract 只保留九欄，不保留 `SEQ`／`QUAL`；尚無 field-level BAM byte census
+  或 downstream utility audit，因此不宣稱它們占 `>99%` 或有 `0%` 用途。
 - ⚠️ 代價：無法直接用 IGV 之類的工具看標籤（見下方 §04）。
 
 ---
@@ -138,7 +141,7 @@ LongPhase-S 不只把「原本不合格」的位點救回來，**也會把原本
 
 > **現況**
 >
-> 🔴 **兩支 C++ 程式都沒有寫 BAM 的能力**（寫入 API 在整個 repo 出現 0 次，所有開檔都是唯讀模式）。現存的 tagged BAM 全部由外部工具 LongPhase-S 產生。而 LongLineage 更在架構層**明文禁止**輸出 BAM —— 這是寫進格式規範裡的硬性限制，不是可調參數。
+> `inter_sub_mod` 沒有 BAM writer。LongLineage 則必須標明版本：**public main `5daf50f`** 沒有 tagged-BAM writer，但 **feature `b9aaa12`** 已含 `longlineage-tag-bam`。因此不能再概括成「兩支程式都做不到」。現存生產檔案究竟由 LongPhase-S 或哪個 LongLineage revision 產生，必須依 dataset provenance／receipt 判定。
 
 ✅ **好消息是技術上完全可行**，因為比對用的鍵是確定性的正向計算：
 
@@ -146,9 +149,10 @@ LongPhase-S 不只把「原本不合格」的位點救回來，**也會把原本
 - LongLineage 的 `read_id` 是它的 **SHA-256 雜湊**
 - 所以讀 BAM 時對每條 read 名重算一次雜湊就能對上，**不需要任何反查表**
 
-可行的做法是寫一個**獨立的匯出工具**（讀凍結結果 + 原始 BAM，重算雜湊做比對），放在正式流程之外。這不違反上述任何限制，因為它不是流程本身的產物。
+若使用 public main `5daf50f`，可行做法仍是獨立匯出工具（讀凍結結果 + 原始 BAM，重算雜湊做比對）；若評估 feature `b9aaa12` 的 `longlineage-tag-bam`，必須另做該 revision 的 schema、provenance 與輸出驗證，不能把 feature 能力回填到 public main。
 
-🔴 ● **但要先解決磁碟問題**：目前該磁碟只剩約 617 GB，而全量 tagged BAM 需要 1.67 TiB。實務上建議只針對感興趣的區間產生子集。
+🔴 ● **仍須先做容量規劃**：在產生 tagged BAM 前，應由實際輸入、輸出 compression 與
+目標區間估算空間；目前沒有可引用的七檔 exact-byte registry。實務上可先針對感興趣區間產生子集。
 
 ---
 

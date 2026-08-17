@@ -12,15 +12,19 @@
 
 ## 一分鐘版本
 
-這套系統要解決的問題是：**一顆腫瘤裡混著好幾群帶不同突變的細胞，我們想知道哪個突變先發生、哪些突變住在同一群細胞裡**。
+這套系統研究的問題是：**一顆腫瘤裡混著好幾群帶不同突變的細胞，我們想約束可能的局部突變狀態關係**。
 
-傳統做法用短讀長測序，只能看到每個位點各自的變異頻率，再回頭猜組合 —— 這在數學上被證明是**無解**的（non-identifiable 反卷積）。本系統改用 **ONT 長讀長**：一條 DNA 分子動輒數萬鹼基，可以**同時跨過好幾個突變位點**，於是「這兩個突變在不在同一群細胞裡」從「用頻率推論」變成**直接看得到的觀測**。
+傳統短讀長資料主要提供位點邊際頻率，單靠邊際頻率無法唯一識別聯合結構。本系統改用 **ONT 長讀長**：一條 DNA 分子可以**同時跨過好幾個突變位點**，所以同一物理分子上的共現是直接觀測；細胞共屬、突變先後與譜系仍是 model-dependent inference，不能直接觀測。
+
+> **宣稱邊界**：exact-PS 主線產出的是 **local recurrence-allowed minimum mutation-state candidate arborescence／topology**。read-AF 是未經 CN／LOH 校正的條件式排序；甲基化只做 pattern-conditioned association。它不確認 cellular clone、subclone 或 biological ancestry。
 
 系統由 **兩支 C++ 主程式**（InterSubMod、LongLineage）＋ **一層上游工具鏈** ＋ **一層 Python 分析與 HTML 呈現**組成。其中只有一部分現在真的跑得動 —— 下面的狀態表會誠實標出來。
 
 > **✅ 本系統最值得注意的設計**
-> 它在**機器欄位的層級**把「技術跑通」和「科學可用」分開：canonical 輸出裡 `technical_all_pass = true` 但 `validation_evidence_eligible = false`。
-> 程式全過、雜湊全對、265 個測試全綠 —— 但系統自己宣告這批結果**還不能當作驗證證據**。
+> 它在**機器欄位的層級**把「技術跑通」和「科學可用」分開：canonical
+> `cohort_receipt.json` 與 `summary/all7_summary.json`（不是 `authority_manifest.json` 頂層）
+> 記錄 `technical_all_pass = true` 但 `validation_evidence_eligible = false`。
+> 程式與雜湊技術檢查通過，但這兩份 canonical artefact 仍宣告結果**還不能當作驗證證據**。
 > 這種「不確定就明講不確定」的紀律，貫穿整份設計。
 
 ---
@@ -35,7 +39,10 @@
 >
 > **怎麼讀這張圖：** 由下往上是資料流方向。第 ③ 層的 sidecar TSV 是全系統的**樞紐** —— 它是唯一被兩支 C++ 程式的原始碼**寫死成相同格式**的檔案，也是把「一條 read 屬於哪個單倍型」這件事持久化的地方。
 >
-> **數字出處：** 292 GB tumor BAM 與 40,859,727 列 sidecar 皆為實測檔案大小與行數；1.67 TiB 為 7 個 tagged BAM 的位元組加總。
+> **數字出處：** 2026-08-13 以 `stat -L` 量得 HCC1395 tumor BAM 為 283,071,595,503 bytes
+> （283.072 GB decimal；263.631 GiB），40,859,727 列 sidecar 為既有逐列收據。
+> 七個 sidecars 的 current exact sum 為 6,256,168,164 bytes（5.83 GiB）；先前的
+> 1.67 TiB tagged-BAM total 缺七檔 path／exact bytes／hash／compression receipt，故為 **UNVERIFIED**。
 
 ### 五層逐層說明
 
@@ -43,7 +50,7 @@
 
 | 部件 | 說明 |
 |---|---|
-| `tumor BAM`（ONT） | HCC1395 = 292 GB |
+| `tumor BAM`（ONT） | HCC1395 = 283,071,595,503 bytes（2026-08-13 `stat -L`） |
 | `normal BAM` | 配對正常組織 |
 | `reference FASTA` | GRCh38 + `.fai` 必備 |
 
@@ -70,7 +77,8 @@
 
 每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。
 
-為什麼用 sidecar 而不是直接存 tagged BAM：7 個樣本的 tagged BAM 合計 1.67 TiB，磁碟放不下。
+sidecar 的工程目的，是在串流期間只保留目前九欄契約需要的欄位，避免把完整 tagged BAM
+作為必要的中間落地物；由於 tagged-BAM exact receipt 缺失，本頁不報其總量或縮減倍率。
 
 #### ④ 兩支 C++ 主程式（本專案核心）
 
@@ -78,7 +86,7 @@
 |---|---|---|
 | 定位 | 研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read 的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。 | 工業化重寫版（clean-room，不是 fork）。強制 fail-closed：每個輸出都有 schema 與 SHA-256 收據，證據不足就拒絕出結果。 |
 | 輸出粒度 | **per-region**（每個位點一包結果） | **per-read**（每條 read 一列） |
-| 現況 | 29 個 CLI 選項 · 最小指令 2.9 秒跑完 · exit 0 | 🔴 `run` / `probe` 子命令被鎖 · 只有 `dataset-gate` 能出科學結果 |
+| 現況 | 29 個 CLI 選項 · historical internal single-locus smoke exit 0；不作一般 runtime claim | 🔴 `run` / `probe` 子命令被鎖 · 只有 `dataset-gate` 能出科學結果 |
 | 吃 | tumor BAM + reference + somatic VCF（必要） | 8 角色 manifest（BAM + VCF + sidecar + reference） |
 | 吐 | `methylation.csv` · `distance_matrix` · `tree.nwk` · `significance_summary.csv` | `site_reads` · `methyl_calls` · `cooccurrence_*` · `topology_unit` |
 
@@ -86,7 +94,7 @@
 
 | 部件 | 說明 |
 |---|---|
-| **Python 分析腳本** | 共現骨幹建構 · 分層樹枚舉 · funnel 普查 · 熱圖繪製 |
+| **Research solver + Python 分析腳本** | exact-PS 共現骨幹建構 · local recurrence-allowed minimum mutation-state candidate family 枚舉 · funnel 普查 · 熱圖繪製 |
 | **standalone HTML 工作站** | 離線可開 · 逐項人工判讀 · 缺必填值就拒絕渲染 |
 
 這層是「人真正看的東西」。C++ 只吐檔案，Python 把它變成可以用眼睛檢查的圖與表，並把人工判讀結果存回 `localStorage` 匯出。
@@ -122,19 +130,19 @@
 
 | 部件 | 狀態 | 實測依據與限制 |
 |---|---|---|
-| **`inter_sub_mod`**<br>ISM 主程式 | ✅ 可跑 | 最小指令實跑 **2.9 秒**完成、exit 0；含 normal BAM ＋ LOH BED 的完整版本也 exit 0。<br>⚠️ 目前的 binary 是 **STALE**：有 5 個原始碼檔的修改時間新於它，用前建議重編。 |
+| **`inter_sub_mod`**<br>ISM 主程式 | ✅ 曾以內部 input 跑通 | Historical internal single-locus smoke 與含 normal BAM＋LOH BED 的內部版本皆曾 exit 0；缺完整 hardware/input locus/commit/date 效能 provenance，故不報一般 runtime。<br>⚠️ 每次 build/run 必須記錄 source commit、dirty diff、binary SHA-256、compiler 與 command；不以 mtime 判定公開的 stale/current 狀態。 |
 | **`longlineage preflight`** | ✅ 可跑 | 驗證 8 個角色的 manifest 完整性。 |
 | **`longlineage dataset-gate`** | ⚠️ 限制 | **唯一能產出科學結果的路徑**，已在真實 HCC1395 資料上完整跑完並產出 8 個 artifact。<br>🔴 但 **樣本名稱硬寫死在原始碼裡** —— 換一個樣本就會失敗，必須改 C++ 重新編譯。 |
 | **`longlineage run` / `probe`** | 🔴 被鎖 | 即使所有閘門都通過，仍被無條件擋下（`KernelBlocked`, exit 6）。<br>**關鍵區辨：這不是「程式沒寫」** —— M1／M2／topology 的核心都已實作，也被 `dataset-gate` 實際執行過。被鎖的原因是**對照驗證（parity）的證據還不存在**。 |
-| **`longlineage` 的 topology 產出** | 🔴 目前為 0 | HCC1395 全 autosome 唯一一次完整跑的結果：79,687 個位點 → 通過甲基化關卡的只剩 **5 個** → 最終拓撲單元 **0 個**。<br>134,278 個配對中有 134,276 個被標記為不合格。repo 自己的決策紀錄也承認這點。 |
+| **Frozen HCC1395 `dataset-gate` 的 topology 產出** | 🔴 0 units（此 scope） | HCC1395-only frozen dataset-gate：79,687 個位點 → 通過甲基化關卡的只剩 **5 個** → 最終 topology units **0 個**。<br>134,278 個配對中有 134,276 個被標記為不合格；不可外推成每個 real-data run 或所有版本都為 0。 |
 | **`longlineage-query` / `export-legacy`** | 🔴 未實作 | 仍是 fail-closed 的空殼。 |
-| **ISM 的分層樹枚舉 solver**<br>Python + C++ | ✅ 可跑 | 這才是目前**實際產出論文核心數字**的路徑，7 個樣本全跑完（見下方 §05 的 funnel）。 |
+| **Research exact-PS topology-AF solver**<br>Python runners + separate C++ solver | ✅ 可跑 | 這是目前實際產出 2026-07-24 funnel 數字的路徑，7 個資料集全跑完；不是 `inter_sub_mod` binary（見下方 §05）。 |
 | **7 個樣本的 sidecar 資料** | ✅ 齊全 | 實測 `run_status.tsv` 顯示 **7/7 全部 PASS**，可立即使用。 |
-| **輸出帶標籤的 BAM** | 🔴 做不到 | 兩支程式**都沒有寫 BAM 的能力**（寫入 API 在整個 repo 出現 0 次）。現存的 tagged BAM 全部是外部工具 LongPhase-S 產生的。LL 更在架構層明文禁止輸出 BAM。 |
+| **輸出帶標籤的 BAM** | ⚠️ 依版本而異 | `inter_sub_mod` 不寫 BAM；LongLineage **public main `5daf50f`** 也沒有 tagged-BAM writer，但 **feature `b9aaa12`** 已含 `longlineage-tag-bam`。現存生產 tagged BAM 的來源仍須依各資料集 provenance 判定，不可再用「兩支程式都做不到」概括。 |
 | **兩支程式串起來跑** | 🔴 無 | **沒有任何腳本同時執行兩個 binary**（雙向搜尋皆無命中）。目前是兩條各自獨立的線。 |
 
 > **🔴 給教授看的三句重點**
-> 1. **能跑的那條線，是 InterSubMod ＋ 它的 Python 分層 solver**，不是 LongLineage 主線。論文核心數字出自前者。
+> 1. **exact-PS funnel 來自獨立的 research `exact_ps_topology_af` C++ solver ＋ Python runners**；`inter_sub_mod` 產生 per-region 甲基化／統計輸出。兩者不可寫成同一支程式。
 > 2. **LongLineage 被鎖的原因是「證據不足」不是「程式沒寫」** —— 這是它刻意的 fail-closed 設計，不是 bug。
 > 3. **沒有一條打通兩支程式的路**。零件很齊、契約很嚴，但接縫還沒建。
 
@@ -169,7 +177,7 @@
 
 > **✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹**
 > 一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。
-> 甲基化被結構性地隔離在主線之外：樹先由遺傳證據定好，甲基化只在事後做關聯描述，改不動任何一條邊。
+> 甲基化被結構性地隔離在 exact-PS 主線之外：local recurrence-allowed minimum mutation-state candidate topology 先由遺傳證據定好，甲基化只在事後做 association-only 描述，改不動任何一條邊。
 
 ---
 
@@ -180,34 +188,34 @@
 | 指標 | 數值 |
 |---|---|
 | sSNV 資料列（全 7 樣本） | **469,849** |
-| 單點無共現，無法建樹 | ⚠️ **66.5%** |
+| k=1 strict read-linkage components | ⚠️ **170,131 / 255,752（66.52%）** |
 | 有拓撲解且可排序的單元 | ✅ **71,955** |
 | confirmed 細胞亞群 | 🔴 **0** |
 
 ![funnel-7samples](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/funnel-7samples.png)
 
-> **圖 3 · 從 469,849 個突變到 63,506 個單一拓撲：每一層流失到哪裡去了**
+> **圖 3 · 從 469,849 筆 dataset-records 到 63,506 個單一 rooted-unlabeled 數學拓撲：每一層如何改變分析 grain**
 >
 > **算術自洽性已驗證：** 39,648 + 23,858 = 63,506；+ 8,449 = 71,955；+ 3,224 + 45 = 75,224；+ 10,717 = 85,941；+ 13,014 = 98,955。每一層加總都對得起來。
 >
-> **🔴 最常被誤引的數字就是那個 88.26%。** 它的正確讀法是：「在**已經可排序的 71,955 個單元中**，有 88.26% 收斂到單一樹形」—— 這是 **model-conditional 的圖形統計**，**不是**「腫瘤裡 88% 的演化關係已經解出來了」。分母不是全部突變，前面已經流失了 66.5% 的單點與 12.47% 的算力放棄。
+> **🔴 最常被誤引的數字就是那個 88.26%。** 它的正確讀法是：「在**已經可排序的 71,955 個 family-complete 單元中**，有 88.26% 只有一種 rooted-unlabeled 數學拓撲」—— 這是 **local、recurrence-allowed、model-conditional** 的圖形統計，**不是**「腫瘤裡 88% 的演化關係已經解出來了」。另有 170,131 / 255,752（66.52%）個 strict components 為 k=1；該比例不能套用到 469,849 筆 dataset-records。
 
 ### funnel 逐層數字
 
 | 層 | 內容 | 數值 | 該層流失 |
 |---|---|---|---|
 | L1 | sSNV 資料列（7 樣本 · chr1–22） | **469,849** | — |
-| L2 | 嚴格 read-linked 連通成分 | **255,752** | ⚠️ k=1 單點，無共現可用：**170,131（66.52%）** |
+| L2 | 嚴格 read-linked 連通成分 | **255,752** | ⚠️ k=1 strict components：**170,131 / 255,752（66.52%）**；這是 component grain，不是 dataset-record grain |
 | L3 | k≥2 有共現 → 有界切分後的分析單元 | **85,621 → 98,955** | k>12 的大成分被切開，所以單元數會變多 |
 | L4 | 帶突變的單元 | **85,941（86.85%）** | ⚠️ 無活躍 ALT，不推論：**13,014（13.15%）** |
-| L5 | 候選樹家族**完整枚舉完成** | **75,224（87.53%）** | 🔴 算力上限，主動放棄：**10,717（12.47%）**<br>非隨機缺失，集中在複雜區 |
+| L5 | local recurrence-allowed minimum mutation-state candidate family **完整枚舉完成** | **75,224（87.53%）** | 🔴 算力上限，主動放棄：**10,717（12.47%）**<br>非隨機缺失，集中在複雜區 |
 | L6 | 可用 read-AF 排序 | **71,955（95.65%）** | ⚠️ 分母為 0 / 遞迴篩選：**3,224 + 45** |
 
 ### L6 之後的三分支
 
 | 分支 | 數值 | 說明 |
 |---|---|---|
-| ✅ 唯一最佳樹 | **39,648（55.10%）** | AF 算術上唯一勝出 |
+| ✅ 唯一 AF-best candidate arborescence | **39,648（55.10%）** | 未經 CN／LOH 校正的 read-AF 算術上唯一勝出；不是確認的生物譜系 |
 | 並列，但樹形相同 | **23,858（33.16%）** | 拓撲確定，只是標籤可換 |
 | ⚠️ 並列且跨不同樹形 | **8,449（11.74%）** | 「定不出來」← 這也是答案 |
 
@@ -249,7 +257,7 @@
 | **對整棵樹做機率排序** | 候選樹在 likelihood 下**等機率**，posterior 只會吐 P=1/N。換成連續 posterior「只是換個記法，變不出 reads 裡不存在的資訊」。 |
 | **用甲基化排序拓撲** | 三個理由全否：cis 構造對稱、四配子最常見成因是拷貝數多重性而非二次突變、等機率區沒有遺傳真值可校驗（等於拿甲基驗甲基）。 |
 | **甲基化非監督分群確認亞群** | 單一位點的四種成因不可拆（見 §04），屬已判 NEGATIVE 的 tumor-only double-dip。 |
-| **甲基化當變異 TP/FP 過濾器** | DEAD，「方向已窮盡，勿再開」。 |
+| **甲基化當變異 TP/FP 過濾器** | 已測 formulation 的結果為 negative；只有提出 materially new hypothesis、通過 pre-decision audit 並預先固定評估口徑時才重開。 |
 | **用舊的 50 kb 鄰近取代嚴格 read linkage** | 幾何鄰近不等於同分子連鎖。已被 read-linked 方法取代。 |
 
 > **證據等級的天花板**

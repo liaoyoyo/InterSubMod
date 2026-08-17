@@ -2,24 +2,29 @@
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 > **從零到跑出第一個結果**
-> 本頁每一條指令都在 **2026-08-06 實際執行過**，並附上真實輸出。
-> 照順序做，約 **10 分鐘**可以從編譯到看見第一個分析結果。
+> 編譯與測試可由 public clone 執行；真正的 `inter_sub_mod` 分析另需使用者合法取得的 BAM、FASTA 與 VCF。
+> 下方輸出是 historical internal HCC1395 single-locus smoke receipt；本頁沒有完整釘定
+> hardware、input locus、commit 與 date，因此不報秒數，也不把它當成一般 runtime。
+
+> **公開可重現性邊界**：Git 物件不含 `data/bam/HCC1395/tumor.bam`、`data/ref/hg38.fa` 或示例 `one_snv.vcf`。在發布有授權、附 checksum 的小型 fixture 之前，步驟 4–5 必須標為 **internal-data example**；讀者不能只靠 clone 直接重現該數值輸出。
 
 ---
 
 ## ⚠️ 開始之前：先確認機器狀態
 
-這台機器有 **48 核**，但 `/big7_disk` **只剩約 617 GB（99% 已用）**。
-跑全基因組分析前務必先確認餘量，大型輸出很容易把磁碟寫爆。
+2026-08-06 內部實測機有 48 核，當時 `/big7_disk` 只剩約 617 GB；這不是讀者環境的固定值。
+跑分析前請在自己的輸出磁碟執行 `df -h` 並確認餘量，大型輸出很容易把磁碟寫爆。
 
 ---
 
 ## 步驟 1 · 編譯 C++（約 2–5 分鐘）
 
-🔴 **一定要先做這步。** 現有的執行檔是 STALE 的 —— 有 5 個原始碼檔比它新。
+🔴 **一定要先做這步。** 不要依賴工作目錄裡既有 binary 的 mtime 狀態；每次 build/run
+都應記錄 source commit、dirty diff、binary SHA-256、compiler 與 build command。
 
 ```bash
-cd /big7_disk/liaoyoyo2001/InterSubMod
+git clone https://github.com/liaoyoyo/InterSubMod.git
+cd InterSubMod
 
 # 設定並編譯（Release 模式）
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -42,17 +47,18 @@ test_phase1_2        test_phase3     test_phase4_5
 ./build/bin/run_tests
 ```
 
-**本輪實跑的真實輸出**：
+**版本限定的稽核輸出**（tracked core `73afaeac`，2026-08-12；未來 commit 請以實際輸出為準）：
 
 ```text
-[==========] 265 tests from 38 test suites ran. (2062 ms total)
-[  PASSED  ] 265 tests.
+[==========] Running 270 tests from 39 test suites.
+[  PASSED  ] 270 tests.
 
 $ echo $?
 0
 ```
 
-✅ **265 / 265 通過** — 如果這裡有任何失敗，**先不要往下走** —— 後面跑出來的數字都不可信。
+✅ 驗收的是**目前 checkout 的實際退出碼為 0，且輸出沒有 failed tests**；不要把快照的
+270/39 硬編成未來版本的固定契約。如果有任何失敗，先不要往下走。
 
 ---
 
@@ -76,26 +82,40 @@ pip install -r requirements.txt
 
 ---
 
-## 步驟 4 · 跑出第一個分析結果（約 3 秒）
+## 步驟 4 · 跑出第一個分析結果（internal-data example）
 
-先用單一個突變位點試跑，確認整條路徑通暢。
+先用單一突變位點試跑，確認整條路徑通暢。下列三個輸入必須由使用者自行提供；public repo
+目前沒有可直接代入的 fixture。Historical internal smoke 只能證明該次 input exit 0，不能提供
+一般 runtime；要報時程必須另附 hardware、input locus、commit、date 與 repetitions。
 
 ```bash
-# 準備一個只含單一突變的小 VCF
-SP=/tmp/ism_demo && mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
-grep '^#' $V > $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V >> $SP/one_snv.vcf
+# 填入自己合法取得的絕對路徑
+ISM_TUMOR_BAM=/absolute/path/to/tumor.bam
+ISM_REFERENCE=/absolute/path/to/reference.fa
+ISM_INPUT_VCF=/absolute/path/to/somatic.vcf.gz
+ISM_DEMO_DIR=/tmp/ism_demo
+mkdir -p "$ISM_DEMO_DIR"
+
+# 先驗證外部輸入；reference 需有 .fai，BAM 需可被 samtools 讀取
+test -r "$ISM_TUMOR_BAM"
+test -r "$ISM_REFERENCE" && test -r "${ISM_REFERENCE}.fai"
+test -r "$ISM_INPUT_VCF"
+samtools quickcheck "$ISM_TUMOR_BAM"
+
+# 取輸入 VCF 的第一筆 biallelic SNV 作小型 smoke test
+bcftools view -h "$ISM_INPUT_VCF" > "$ISM_DEMO_DIR/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$ISM_INPUT_VCF" | head -n 1 >> "$ISM_DEMO_DIR/one_snv.vcf"
+test "$(bcftools view -H "$ISM_DEMO_DIR/one_snv.vcf" | wc -l)" -eq 1
 
 # 跑（只給三個必填參數）
 ./build/bin/inter_sub_mod \
-  --tumor-bam  data/bam/HCC1395/tumor.bam \
-  --reference  data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min
+  --tumor-bam  "$ISM_TUMOR_BAM" \
+  --reference  "$ISM_REFERENCE" \
+  --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
+  --output-dir "$ISM_DEMO_DIR/out_min"
 ```
 
-**實跑輸出**（約 2.9 秒）：
+**Historical internal HCC1395 single-locus receipt 的實跑輸出**（只保留功能輸出，不報一般 runtime）：
 
 ```text
 Total regions: 1 / Successful: 1 / Failed: 0
@@ -117,7 +137,7 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127
 ## 步驟 5 · 看結果
 
 ```bash
-find $SP/out_min -type f | head -20
+find "$ISM_DEMO_DIR/out_min" -type f | head -20
 ```
 
 輸出分兩層。**先看這三個檔**：
@@ -136,21 +156,21 @@ find $SP/out_min -type f | head -20
 
 ---
 
-## 步驟 6 · 驗證整套流程的數字（推薦）
+## 步驟 6 · 驗證 historical 35,332-site pipeline 數字（推薦）
 
 ```bash
 cd docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
 python3 verify_pipeline_numbers.py
 ```
 
-這支會把方法文件裡的每個數字**重新算一次**並比對。實跑輸出：
+這支只重算 2026-06-27 教材所用的 **historical 35,332-site pipeline** 指標並比對；它不驗證 2026-07-24 exact-PS、LongLineage、儲存量、code count 或目前 test count。實跑輸出：
 
 ```text
 sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 共現連上 21,554 · 訊號不足 5,458 · 孤立 8,320        （加總 = 35,332 ✓）
 ```
 
-對得上，代表你的環境能重現既有結果。
+對得上，只代表 tracked historical data 能重現上述 35,332-site 指標。exact-PS 應另查 `docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv`、`authority_manifest.json` 與 solver receipts；LongLineage 則須在指定 commit 分別執行其 gates／binary inventory。
 
 ---
 
@@ -158,18 +178,20 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 
 ![howto-six-steps](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/howto-six-steps.png)
 
-> **圖 1 · 六個步驟與各自的驗收點** —— 六個步驟依序為：編譯、跑測試、裝 Python 依賴、單點試跑、檢視輸出、驗證數字；每步都標註對應的驗收條件，例如測試須 265 個全過、單點試跑須在三秒內完成且產出 region 目錄。
+> **圖 1 · 六個步驟與各自的驗收點** —— 六個步驟依序為：編譯、跑測試、裝 Python
+> 依賴、單點試跑、檢視輸出、驗證數字。圖內若出現舊測試數或固定秒數，視為 historical
+> illustration；current acceptance 以本頁文字、實際 exit code 與當次 command output 為準。
 
 ### 每一步的驗收條件（不過就停下來，別往下走）
 
 | 步驟 | 驗收條件 |
 |---|---|
 | 1 編譯 | `build/bin/` 下出現 6 個執行檔 |
-| 2 測試 | **265 tests 全過、退出碼 0** |
+| 2 測試 | 當前 checkout 的 test command **退出碼 0，且 0 failed tests**；不硬編固定 test count |
 | 3 依賴 | `import pysam` 不報錯 |
 | 4 試跑 | 印出 `Successful: 1 / Failed: 0` |
 | 5 輸出 | region 目錄下有 methylation 與 distance |
-| 6 驗證 | 各層加總打勾，數字對得上 |
+| 6 驗證 | historical 35,332-site 指標加總打勾；不代表其他 claim family 已驗證 |
 
 🔴 任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。
 
@@ -184,7 +206,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 | CI 判定 `--help` 失敗 | `--help` 的**退出碼是 1 不是 0**（與參數錯誤共用同一路徑）。改寫檢查方式。 |
 | 某支腳本跑了但什麼都沒發生 | 可能是**函式庫不是入口**（如 `ism_heatmap_std.py`）。看它有沒有 argparse。 |
 | 讀 CSV 後整列變成一欄 | `linkage_matrix.csv` **實際是 tab 分隔**。加 `sep='\t'`。 |
-| 跨 run 比較時欄位對不上 | `significance_summary.csv` **欄數隨版本變動且無版本欄位**。一律**用欄名**取值。 |
+| 跨 run 比較時欄位對不上 | `significance_summary.csv` 欄數隨版本變動。commit `73afaea` 為 199 欄，含 `VerificationSchemaVersion=2` 與 `RegionStratificationSchemaVersion=1` 兩個 component-level 欄，但仍無 single whole-file layout version；一律**用欄名並檢查 schema 欄**。 |
 | 工作站 HTML 開很久／瀏覽器很卡 | 單檔可達 188 MB。示範時先開最小的那個（約 14.6 MB）。 |
 | LongLineage 說 KernelBlocked | 🔴 **這是預期行為不是故障**。正式入口刻意 fail-closed，見 [LongLineage 分冊](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine)。 |
 
@@ -192,8 +214,11 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 
 ## 本頁的驗證方式
 
-- **測試套件**：2026-08-06 實跑 `./build/bin/run_tests` → **265 tests / 38 suites 全過，2062 ms，退出碼 0**。（比 08-05 記錄的 258/37 有增加，本頁採用實測的當前值。）
-- **單點試跑**：實際執行並記錄真實輸出，約 2.9 秒、退出碼 0。
+- **測試套件**：最近一次公開稽核快照為 tracked core `73afaeac`、2026-08-12：
+  `./build/bin/run_tests` 得 270 tests / 39 suites、退出碼 0；CTest 270/270。
+  這不是 future commits 的固定期望值，每次應保留當次 command output。
+- **單點試跑**：historical internal HCC1395 single-locus receipt 的退出碼為 0；因 provenance
+  不足以支援一般效能 claim，本頁不報秒數。
 - **環境數字**：48 核、磁碟餘量 617 GB、兩個 Python 版本，皆為本輪實測。
 - **6 個執行檔**：實際 `ls build/bin/` 所得。
 

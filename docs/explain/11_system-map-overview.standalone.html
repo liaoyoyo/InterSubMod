@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>系統全景 — 這套系統由哪些部件組成、各自做什麼</title>
@@ -101,6 +104,8 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -128,12 +133,12 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <div class="bluf">
   <h2>一分鐘版本</h2>
   <p>
-    這套系統要解決的問題是：<b>一顆腫瘤裡混著好幾群帶不同突變的細胞，我們想知道哪個突變先發生、哪些突變住在同一群細胞裡</b>。
+    這套系統要解決的問題是：<b>從 bulk 長讀長資料建立可審核的局部突變狀態候選結構，並標出哪些證據仍不足以確認細胞譜系</b>。
   </p>
   <p style="margin-top:12px">
-    傳統做法用短讀長測序，只能看到每個位點各自的變異頻率，再回頭猜組合 —— 這在數學上被證明是<b>無解</b>的（non-identifiable 反卷積）。
+    若只使用短讀長所給的<b>各位點 marginal VAF</b>，不加 linkage 或額外模型假設，多種突變組合可產生相同觀察，因而不可識別（non-identifiable）；這不是對所有 short-read 整合方法的無條件不可能宣告。
     本系統改用 <b>ONT 長讀長</b>：一條 DNA 分子動輒數萬鹼基，可以<b>同時跨過好幾個突變位點</b>，
-    於是「這兩個突變在不在同一群細胞裡」從「用頻率推論」變成<b>直接看得到的觀測</b>。
+    於是「這兩個突變在不在同一條實驗取樣到的物理分子上」成為<b>直接觀測</b>；它們是否來自同一細胞群、以及譜系關係，仍是受模型與輔助資料限制的推論。
   </p>
   <p style="margin-top:12px">
     系統由 <b>兩支 C++ 主程式</b>（InterSubMod、LongLineage）＋ <b>一層上游工具鏈</b> ＋ <b>一層 Python 分析與 HTML 呈現</b>組成。
@@ -145,7 +150,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <span class="lab">本系統最值得注意的設計</span>
   它在<b>機器欄位的層級</b>把「技術跑通」和「科學可用」分開：canonical 輸出裡
   <code>technical_all_pass = true</code> 但 <code>validation_evidence_eligible = false</code>。
-  程式全過、雜湊全對、265 個測試全綠 —— 但系統自己宣告這批結果<b>還不能當作驗證證據</b>。
+  這兩個 flag 記在 canonical <code>cohort_receipt.json</code> 與 <code>summary/all7_summary.json</code>（不在 <code>authority_manifest.json</code> 頂層）。2026-08-13 的命令實測為 270 tests / 39 suites 全過，但該批結果仍<b>不具 validation-evidence eligibility</b>。
   這種「不確定就明講不確定」的紀律，貫穿整份設計。
 </div>
 
@@ -174,7 +179,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <rect x="14" y="38" width="952" height="58" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
         <rect x="28" y="50" width="170" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
         <text x="113" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">tumor BAM（ONT）</text>
-        <text x="113" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">HCC1395 = 292 GB</text>
+        <text x="113" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">HCC1395 = 283.072 GB</text>
         <rect x="208" y="50" width="150" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
         <text x="283" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">normal BAM</text>
         <text x="283" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">配對正常組織</text>
@@ -213,7 +218,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
         <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
         <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
-        <text x="654" y="287" font-size="10" fill="#3f2c70">7 個樣本的 tagged BAM 合計 1.67 TiB，磁碟放不下</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 sidecars = 6,256,168,164 B；tagged-BAM 總量尚無收據</text>
 
         <!-- 層 4 兩支 C++ -->
         <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
@@ -224,7 +229,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
         <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
         <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
-        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 最小指令 2.9 秒跑完 · exit 0</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 內部單點命令 exit 0（非 public fixture）</text>
         <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
         <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
         <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>
@@ -271,8 +276,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <figcaption>
       <b>怎麼讀這張圖：</b>由下往上是資料流方向。第 ③ 層的 sidecar TSV 是全系統的<b>樞紐</b> ——
       它是唯一被兩支 C++ 程式的原始碼<b>寫死成相同格式</b>的檔案，也是把「一條 read 屬於哪個單倍型」這件事持久化的地方。
-      <br><b>數字出處：</b>292 GB tumor BAM 與 40,859,727 列 sidecar 皆為實測檔案大小與行數；
-      1.67 TiB 為 7 個 tagged BAM 的位元組加總。
+      <br><b>數字出處：</b>2026-08-13 以 <code>stat -L</code> 量得 HCC1395 tumor BAM 為 <b>283,071,595,503 bytes（283.072 GB decimal；263.631 GiB）</b>；40,859,727 列 sidecar 為既有逐列收據。7 份壓縮 sidecar 總量為 <b>6,256,168,164 bytes（5.826510641724 GiB）</b>。歷史 tagged-BAM 總量 claim 沒有已提交的 per-file receipt，故不引用總量或節省倍率。
     </figcaption>
   </figure>
 </section>
@@ -314,8 +318,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>inter_sub_mod</b><br><span class="muted">ISM 主程式</span></td>
         <td><span class="badge b-pass">可跑</span></td>
-        <td>最小指令實跑 <b>2.9 秒</b>完成、exit 0；含 normal BAM ＋ LOH BED 的完整版本也 exit 0。
-            ⚠ 目前的 binary 是 <b>STALE</b>：有 5 個原始碼檔的修改時間新於它，用前建議重編。</td>
+        <td>內部單點指令在 2026-08-06 實測 exit 0；輸入未收入公開 Git objects，故執行時間不作 public/reproducible benchmark。含 normal BAM ＋ LOH BED 的版本亦為內部輸入測試。
+            ⚠ 原始碼與 binary 的 mtime 不能證明版本身分；正式使用前應從宣告 commit 重編，並記錄 toolchain、binary hash、測試輸出與退出碼。</td>
       </tr>
       <tr>
         <td><b>longlineage preflight</b></td>
@@ -325,7 +329,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>longlineage dataset-gate</b></td>
         <td><span class="badge b-warn">限制</span></td>
-        <td><b>唯一能產出科學結果的路徑</b>，已在真實 HCC1395 資料上完整跑完並產出 8 個 artifact。
+        <td>目前可執行科學核心的 <b>HCC1395-only frozen <code>dataset-gate</code> 路徑</b>，在該資料上產出 8 個 artifact。
             <span style="color:var(--c-dead);font-weight:800">●</span> 但 <b>樣本名稱硬寫死在原始碼裡</b> —— 換一個樣本就會失敗，必須改 C++ 重新編譯。</td>
       </tr>
       <tr>
@@ -338,7 +342,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr>
         <td><b>longlineage 的 topology 產出</b></td>
         <td><span class="badge b-dead">目前為 0</span></td>
-        <td>HCC1395 全 autosome 唯一一次完整跑的結果：79,687 個位點 → 通過甲基化關卡的只剩 <b>5 個</b> → 最終拓撲單元 <b>0 個</b>。
+        <td>HCC1395-only frozen <code>dataset-gate</code> 的全 autosome 實跑：79,687 個位點 → 通過甲基化關卡的只剩 <b>5 個</b> → 最終拓撲單元 <b>0 個</b>。
             134,278 個配對中有 134,276 個被標記為不合格。repo 自己的決策紀錄也承認這點。</td>
       </tr>
       <tr>
@@ -347,7 +351,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <td>仍是 fail-closed 的空殼。</td>
       </tr>
       <tr>
-        <td><b>ISM 的分層樹枚舉 solver</b><br><span class="muted">Python + C++</span></td>
+        <td><b>ISM 研究性候選樹枚舉器</b><br><span class="muted">Python + C++；model-conditional</span></td>
         <td><span class="badge b-pass">可跑</span></td>
         <td>這才是目前<b>實際產出論文核心數字</b>的路徑，7 個樣本全跑完（見下方 §5 的 funnel）。</td>
       </tr>
@@ -358,9 +362,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       </tr>
       <tr>
         <td><b>輸出帶標籤的 BAM</b></td>
-        <td><span class="badge b-dead">做不到</span></td>
-        <td>兩支程式<b>都沒有寫 BAM 的能力</b>（寫入 API 在整個 repo 出現 0 次）。
-            現存的 tagged BAM 全部是外部工具 LongPhase-S 產生的。LL 更在架構層明文禁止輸出 BAM。</td>
+        <td><span class="badge b-warn">版本相依</span></td>
+        <td>InterSubMod <b>沒有寫 BAM 的能力</b>。LongLineage 公開 main <code>5daf50f</code> 也沒有；但 feature <code>b9aaa12</code> 已含 <code>longlineage-tag-bam</code>。
+            必須指定 commit，不可再寫成跨版本的「兩支都做不到」。</td>
       </tr>
       <tr>
         <td><b>兩支程式串起來跑</b></td>
@@ -373,7 +377,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="ironclad">
     <b>給教授看的三句重點</b>
     <ol>
-      <li><b>能跑的那條線，是 InterSubMod ＋ 它的 Python 分層 solver</b>，不是 LongLineage 主線。論文核心數字出自前者。</li>
+      <li><b>能跑的那條線，是 InterSubMod ＋ 它的 Python 研究性候選樹枚舉器</b>，不是 LongLineage 主線。論文核心的 model-conditional 候選數字出自前者。</li>
       <li><b>LongLineage 被鎖的原因是「證據不足」不是「程式沒寫」</b> —— 這是它刻意的 fail-closed 設計，不是 bug。</li>
       <li><b>沒有一條打通兩支程式的路</b>。零件很齊、契約很嚴，但接縫還沒建。</li>
     </ol>
@@ -396,11 +400,11 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <title id="f2t">甲基化循環論證示意</title>
       <desc id="f2d">左側顯示一個位點觀察到兩群不同甲基化模式的 read，右側列出四種可能成因：
       germline 等位特異性甲基化、雜合性缺失導致的解遮蔽、拷貝數增益的劑量效應、以及真正的亞群譜系差異。
-      單一 bulk 樣本無法區分這四者，因此用甲基化分群來確認亞群等於用待證明的結論當前提。</desc>
+      目前單一 bulk measurement set 在沒有 orthogonal data 或額外假設時不可識別這四者，因此不能單用甲基分群確認細胞亞群。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
 
         <text x="450" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#9A3B3B">
-          觀察到「兩群甲基化模式不同的 read」時，至少有四種成因，單一 bulk 分不開</text>
+          觀察到兩群甲基模式時，目前單-bulk measurement set 無法獨立區分至少四種成因</text>
 
         <!-- 觀察 -->
         <rect x="20" y="42" width="200" height="120" rx="8" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
@@ -447,13 +451,13 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="632" y="144" font-size="10.5" fill="#7a3030">但要排除 ①②③，就得先知道</text>
         <text x="632" y="160" font-size="10.5" fill="#7a3030">哪些 read 屬於哪個亞群 ——</text>
         <text x="632" y="182" font-size="11" font-weight="700" fill="#9A3B3B">這正是待證明的結論。</text>
-        <text x="632" y="204" font-size="10" fill="#5C5A54">單一 bulk 樣本無法打破這個循環。</text>
+        <text x="632" y="204" font-size="10" fill="#5C5A54">需 orthogonal data 或明確額外假設才能打破。</text>
 
         <!-- 底部解方 -->
         <rect x="20" y="252" width="864" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
         <text x="36" y="274" font-size="12" font-weight="800" fill="#2F7D5B">✔ 本系統的解法：改用「同一條分子上的突變共現」當骨幹</text>
         <text x="36" y="293" font-size="10.5" fill="#1f4f3a">一條 read 上同時看到兩個突變 = 物理上的分子連鎖，不依賴任何「待推論的標籤」，因此非循環。</text>
-        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">甲基化被結構性地隔離在主線之外：樹先由遺傳證據定好，甲基化只在事後做關聯描述，改不動任何一條邊。</text>
+        <text x="36" y="307" font-size="10.5" fill="#1f4f3a">遺傳 read-linkage 先定義 model-conditional 候選結構；甲基只事後描述關聯，不重排候選邊。</text>
       </g>
     </svg>
     <figcaption>
@@ -484,10 +488,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <div class="figtitle">圖 3 · 從 469,849 個突變到 63,506 個單一拓撲：每一層流失到哪裡去了</div>
     <svg viewBox="0 0 940 560" role="img" aria-labelledby="f3t f3d" xmlns="http://www.w3.org/2000/svg">
       <title id="f3t">七樣本 funnel 分流圖</title>
-      <desc id="f3d">從 469,849 筆 sSNV 資料列開始，經連鎖成分建構得到 255,752 個成分，其中 66.5% 為單點無法建樹；
+      <desc id="f3d">從 469,849 筆 dataset records 開始，經 strict read-linked component 建構得到 255,752 個成分；170,131 個 k=1 成分占 strict-component 分母 66.52%，若改用 dataset-record 分母則為 36.21%，兩種口徑不可混用；
       k 大於等於 2 者經有界切分成為 98,955 個分析單元，扣掉無突變者剩 85,941 個帶突變單元；
       其中 12.47% 因搜尋資源上限而放棄，75,224 個完成候選家族枚舉；再扣除分母為零與遞迴篩選者，
-      71,955 個可排序；最終 39,648 個有唯一最佳樹、23,858 個形狀相同、8,449 個拓撲未解。</desc>
+      71,955 個可依指定 read-AF heuristic 排序；39,648 個在該模型/目標函數下有單一勝出候選樹、23,858 個的並列候選共用 rooted-unlabeled 形狀、8,449 個候選跨不同形狀。這些都不是 cellular phylogeny truth。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker>
@@ -507,9 +511,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <path d="M470,120 L470,140" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <!-- 流失 1 -->
         <path d="M690,98 L760,98" stroke="#B06A16" stroke-width="1.6" marker-end="url(#ar3r)" fill="none"/>
-        <rect x="766" y="80" width="166" height="38" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
-        <text x="849" y="96" text-anchor="middle" font-size="10" fill="#6b4310">k=1 單點，無共現可用</text>
-        <text x="849" y="111" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#B06A16">170,131（66.52%）</text>
+        <rect x="766" y="76" width="166" height="50" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.2"/>
+        <text x="849" y="92" text-anchor="middle" font-size="9.5" fill="#6b4310">k=1 單點，無共現可用</text>
+        <text x="849" y="108" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" font-weight="700" fill="#B06A16">170,131 / 255,752 = 66.52%</text>
+        <text x="849" y="119" text-anchor="middle" font-size="8.5" fill="#6b4310">對 469,849 records 則為 36.21%</text>
 
         <!-- L3 -->
         <rect x="250" y="142" width="440" height="40" rx="6" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.5"/>
@@ -557,14 +562,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <path d="M760,396 L760,414" stroke="#8a8578" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
 
         <rect x="60" y="418" width="240" height="62" rx="6" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
-        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">唯一最佳樹</text>
+        <text x="180" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F7D5B">模型下單一勝出候選</text>
         <text x="180" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F7D5B">39,648（55.10%）</text>
-        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">AF 算術上唯一勝出</text>
+        <text x="180" y="472" text-anchor="middle" font-size="9" fill="#1f4f3a">指定 read-AF heuristic 下勝出</text>
 
         <rect x="350" y="418" width="240" height="62" rx="6" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.6"/>
         <text x="470" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#2F6690">並列，但樹形相同</text>
         <text x="470" y="456" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="800" fill="#2F6690">23,858（33.16%）</text>
-        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">拓撲確定，只是標籤可換</text>
+        <text x="470" y="472" text-anchor="middle" font-size="9" fill="#2F6690">模型下共用形狀；標籤並列</text>
 
         <rect x="640" y="418" width="240" height="62" rx="6" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="760" y="437" text-anchor="middle" font-size="11" font-weight="700" fill="#B06A16">並列且跨不同樹形</text>
@@ -576,7 +581,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <path d="M470,482 L470,498" stroke="#2F7D5B" stroke-width="1.6" fill="none"/>
         <path d="M470,498 L470,512" stroke="#2F7D5B" stroke-width="1.6" marker-end="url(#ar3)" fill="none"/>
         <rect x="230" y="516" width="480" height="38" rx="6" fill="#fff" stroke="#2F7D5B" stroke-width="2"/>
-        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">單一 rooted-unlabeled 拓撲 = 39,648 + 23,858</text>
+        <text x="470" y="533" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">模型下單一 rooted-unlabeled 候選形狀 = 39,648 + 23,858</text>
         <text x="470" y="549" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12.5" font-weight="800" fill="#2F7D5B">63,506 / 71,955 = 88.26%</text>
       </g>
     </svg>
@@ -585,9 +590,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       + 10,717 = 85,941；+ 13,014 = 98,955。每一層加總都對得起來。
       <br>
       <b><span style="color:var(--c-dead);font-weight:800">●</span> 最常被誤引的數字就是那個 88.26%。</b>它的正確讀法是：
-      「在<b>已經可排序的 71,955 個單元中</b>，有 88.26% 收斂到單一樹形」——
+      「在<b>已可依指定 heuristic 排序的 71,955 個單元中</b>，有 88.26% 在模型下共用單一 rooted-unlabeled 候選形狀」——
       這是 <b>model-conditional 的圖形統計</b>，<b>不是</b>「腫瘤裡 88% 的演化關係已經解出來了」。
-      分母不是全部突變，前面已經流失了 66.5% 的單點與 12.47% 的算力放棄。
+      分母不是全部突變。圖中的 170,131 個 k=1 是 <b>170,131 / 255,752 strict read-linked components = 66.52%</b>；若以最上游 <b>469,849 dataset records</b> 作比較分母則為 <b>36.21%</b>，兩者回答不同問題、不可互換。後續另有 12.47% 的資源上限放棄。
     </figcaption>
   </figure>
 
@@ -632,7 +637,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </div>
   </div>
 
-  <h4 class="mini">已被判定為死路的方向（不要重開）</h4>
+  <h4 class="mini">已測 formulation 的 NEGATIVE 結論與重啟條件</h4>
   <div class="table-wrap"><table>
     <thead><tr><th style="width:34%">方向</th><th style="width:66%">為什麼不行</th></tr></thead>
     <tbody>
@@ -645,7 +650,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <tr><td><b>甲基化非監督分群確認亞群</b></td>
         <td>單一位點的四種成因不可拆（見 §4），屬已判 NEGATIVE 的 tumor-only double-dip。</td></tr>
       <tr><td><b>甲基化當變異 TP/FP 過濾器</b></td>
-        <td>DEAD，「方向已窮盡，勿再開」。</td></tr>
+        <td>當時範圍的已測 formulation 在多個測試呈 NEGATIVE；只有實質新假說且通過 pre-decision audit 才重啟。</td></tr>
       <tr><td><b>用舊的 50 kb 鄰近取代嚴格 read linkage</b></td>
         <td>幾何鄰近不等於同分子連鎖。已被 read-linked 方法取代。</td></tr>
     </tbody>
@@ -653,9 +658,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <div class="takeaway">
     <span class="lab">證據等級的天花板</span>
-    <b>單一 bulk 樣本只能做 characterize（描述），不能做 confirm（確認）</b>，因此封頂 ★3。
-    要突破需要 single-cell 或 multi-region 資料。
-    這不是能力不足，而是資訊論上的界限 —— Steiner 節點會被誠實標成 <code>inferred</code>。
+    <b>在目前單一 bulk measurement set 且不加 orthogonal data / 額外假設時，只能 characterize，不能確認 cellular clone/lineage</b>，因此封頂 ★3。
+    single-cell、multi-region 或其他正交證據可改變可識別性；Steiner 節點維持 <code>inferred</code>。
   </div>
 </section>
 
@@ -731,3 +735,5 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   </p>
 </footer>
 </div>
+</body>
+</html>

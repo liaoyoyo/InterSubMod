@@ -178,7 +178,7 @@ mark{background:#fdf2c8;padding:0 2px}
 <div class="bluf">
   <h2>L0 一眼看懂這個研究在做什麼</h2>
   <p>用 ONT 長讀在<span class="key">單一 read 上同時讀到 somatic 突變 + 單倍型 + 甲基化</span>，研究 LOH 如何重塑 haplotype 結構，並<strong>誠實界定甲基化能做（characterization）與不能做（當 variant filter）的事</strong>。</p>
-  <p class="pi">▸ <b>給 PI 一句話：</b>論文主體 = <b>三~四道防彈 NEGATIVE</b>（甲基不能當 filter）+ <b>phasing 脊柱</b>（Grade B+）+ <b>ASM copy-confounded 支撐</b>。主軸 = Subclonal Reconstruction（somatic haplotag + methylation）。</p>
+  <p class="pi">▸ <b>給 PI 一句話：</b>論文主體 = <b>多個相互一致的 NEGATIVE tests</b>（就已測 formulation，甲基不能當 filter）+ <b>phasing 脊柱</b>（Grade B+）+ <b>ASM copy-confounded 支撐</b>。主軸 = Subclonal Reconstruction（somatic haplotag + methylation）。</p>
 </div>
 
 <div class="ironclad">
@@ -187,7 +187,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <li>「<b>存在</b> ASM」≠「<b>能判別</b> TP/FP」——兩個 claim 永遠分開講。</li>
     <li><b>HP-axis</b>（HP1 vs HP1-1）somatic-controlled；<b>ALLELE-axis</b>（ALT vs REF）被 germline het baseline 污染。</li>
     <li>絕對 AUC 系統性膨脹（germline het null median 0.974）；引相對 null（excess/delta）不引絕對 AUC。</li>
-    <li>甲基→TP/FP filter = <b>DEAD</b>，勿再開；同 haplotype 內拆亞群（T3）= NEGATIVE。</li>
+    <li>甲基→TP/FP filter 的<b>已測 formulation = NEGATIVE</b>；只有出現實質新假說且通過 pre-decision audit 才重啟。同 haplotype 內拆亞群（T3）的已測 formulation 亦為 NEGATIVE。</li>
   </ol>
 </div>
 
@@ -198,7 +198,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <span class="pchip done">✓ 背景名詞地基</span>
     <span class="pchip done">✓ ISM 方法本體</span>
     <span class="pchip done">✓ 甲基讀取與篩選</span>
-    <span class="pchip done">✓ 真實案例 chr2:18M subclone</span>
+    <span class="pchip done">✓ chr2:18M 局部分子狀態案例</span>
     <span class="pchip done">✓ chr2:18M 矯正 audit（權威裁決）</span>
     <span class="pchip done">✓ ISM subclone pipeline 構想（9 步）</span>
     <span class="pchip done">✓ 系統全景（架構 · 狀態 · funnel）</span>
@@ -233,14 +233,14 @@ mark{background:#fdf2c8;padding:0 2px}
     <div class="lcard method">
       <h4>系統全景 <span class="badge b-info">先看這頁</span></h4>
       <div class="oneline">五層架構圖、兩個 repo 的關係（clean-room 重建不是 fork）、誠實狀態表、全 7 樣本 funnel、能與不能回答什麼。</div>
-      <div class="pi">▸ PI：技術層 <code>technical_all_pass=true</code> 但科學層 <code>validation_evidence_eligible=false</code> —— 系統在機器欄位層級就把「跑通」與「可用」分開。</div>
+      <div class="pi">▸ PI：技術層 <code>technical_all_pass=true</code> 但科學層 <code>validation_evidence_eligible=false</code> —— 這兩個欄位在 canonical <code>cohort_receipt.json</code> 與 <code>summary/all7_summary.json</code>，不在 <code>authority_manifest.json</code> 頂層。</div>
       <a class="go" href="11_system-map-overview.standalone.html">看全景 →</a>
     </div>
 
     <div class="lcard pos">
       <h4>InterSubMod 部件 <span class="badge b-pass">可跑</span></h4>
       <div class="oneline">3 個必填輸入、8 個內部階段、17 種輸出檔（附真實 header 與資料行）、3 條實跑驗證過的指令、9 條會靜默出錯的陷阱。</div>
-      <div class="pi">▸ 重點：<code>tree.nwk</code> 的葉子是 <b>read 不是 clone</b>；<code>significance_summary.csv</code> 欄數跨版本不一致且無版本欄位。</div>
+      <div class="pi">▸ 重點：<code>tree.nwk</code> 的葉子是 <b>read 不是 clone</b>；<code>significance_summary.csv</code> 欄數跨版本不一致，目前 199 欄含兩個元件 schema 版本，但仍沒有單一 whole-file layout version。</div>
       <a class="go" href="12_intersubmod-io.standalone.html">看 ISM 部件 →</a>
     </div>
 
@@ -268,7 +268,7 @@ mark{background:#fdf2c8;padding:0 2px}
     <div class="lcard pos">
       <h4>操作手冊 <span class="badge b-info">可複製指令</span></h4>
       <div class="oneline">從編譯到跑出第一個結果的 6 個步驟，每步附驗收條件與真實輸出；常見狀況排除表。</div>
-      <div class="pi">▸ 本輪實跑：<code>run_tests</code> → <b>265 tests / 38 suites 全過</b>；單點分析 2.9 秒完成。</div>
+      <div class="pi">▸ 2026-08-13 在 working-tree HEAD <code>95d420f6f397</code> 執行既有 <code>build/bin/run_tests</code> → <b>270 tests / 39 suites 全過</b>；本輪未從 clean checkout 重建，故這是 command-derived observation，不是 binary/source 身分或效能認證。</div>
       <a class="go" href="16_how-to-run.standalone.html">照著跑 →</a>
     </div>
   </div>
@@ -296,8 +296,8 @@ mark{background:#fdf2c8;padding:0 2px}
 
     <div class="lcard mixed">
       <h4>methyl-phasing-assist <span class="badge tier">混合</span></h4>
-      <div class="oneline">用每條 read 甲基模式幫判斷它屬哪個 haplotype，救援 unphase read 或糾正 longphase-S 打錯的 tag（V1-V12）。</div>
-      <div class="pi">▸ PI：88.5% 模擬 unphase 能回推 haplotype 且 normal 排除 copy 假象，但 94% 真實 unphase read 住在 LOH/imprinting → 機制在最需要處失效。</div>
+      <div class="oneline">研究假說：測試 read-level 甲基模式能否輔助 haplotype assignment；目前沒有已驗證的 per-read rescue／correct-tag truth（V1-V12）。</div>
+      <div class="pi">▸ PI：88.5% 僅屬模擬條件下的回推結果；94% 真實 unphase reads 落在 LOH/imprinting 等困難區，不能把模擬成功率外推為 production rescue。</div>
       <div class="meta">關聯入度最高（7）· 建議樞紐起點</div>
       <a class="go dis">待建</a>
     </div>
@@ -305,13 +305,13 @@ mark{background:#fdf2c8;padding:0 2px}
     <div class="lcard method">
       <h4>ism-vs-external（軸 C vs 軸 A）<span class="badge tier">★3</span></h4>
       <div class="oneline">ISM 把「read 是否結構分亞群」當主問題（軸 C），而非算「兩組率差」（軸 A）；且誠實 NEGATIVE：甲基不判別 TP/FP。</div>
-      <div class="pi">▸ PI：可防守新穎 = read-read 距離 + PERMANOVA + normal-anchored cis 三位一體，但每個單元件都有更成熟競品。</div>
+      <div class="pi">▸ PI：本專案目前組合 read-read 距離 + PERMANOVA + normal-anchored cis；是否具新穎性或比較優勢，仍需引文的系統性文獻回顧與 head-to-head benchmark。</div>
       <a class="go dis">待建</a>
     </div>
 
     <div class="lcard neg">
-      <h4>四道 NEGATIVE（filter DEAD）<span class="badge b-dead">★2 L4</span></h4>
-      <div class="oneline">用甲基特徵辨別 TP/FP 多道驗證全失敗——這些 NEGATIVE 本身即論文貢獻（防彈負結果）。</div>
+      <h4>多道 NEGATIVE（已測 filter formulation）<span class="badge b-dead">★2 L4</span></h4>
+      <div class="oneline">用甲基特徵辨別 TP/FP 的已測 formulation，在當時範圍與日期的多個測試呈相互一致的 NEGATIVE；這是有界負結果，非對所有未來假說的證明。</div>
       <div class="pi">▸ PI：pilot ΔF1=+0.00242 低於門檻 / LOSO 100% 循環 / 消融確認甲基是第 5 順位 vestigial。</div>
       <a class="go dis">待建</a>
     </div>
@@ -340,35 +340,35 @@ mark{background:#fdf2c8;padding:0 2px}
     <div class="lcard mixed">
       <h4>主軸：Subclonal Reconstruction <span class="badge tier">混合</span></h4>
       <div class="oneline">ONT 單 read 同時讀 somatic + HP tag + 甲基，揭示 LOH 重塑 haplotype，誠實界定 characterization vs filter。</div>
-      <div class="pi">▸ PI：deliverable = 四道防彈「甲基不能當 filter」+ 方向一致跨樣本 phasing 訊號；脊柱 = genetic haplotagging。</div>
+      <div class="pi">▸ PI：deliverable = 多個相互一致的「已測甲基 filter formulation 為 NEGATIVE」+ 方向一致跨樣本 phasing 訊號；脊柱 = genetic haplotagging。</div>
       <a class="go dis">待建（論文框架）</a>
     </div>
 
     <div class="lcard pos">
-      <h4>真實案例：chr2:18M subclone 重建 <span class="badge tier">案例 L2</span></h4>
-      <div class="oneline">HCC1395 一段 LOH 區的 6 sSNV + 甲基逐步重建走查。並陳「手動 IGV 直覺 → 實測校正」，給教授與同學看一個真實 subclone 怎麼被拼回來。</div>
-      <div class="pi">▸ PI：骨幹（LOH→α/β somatic 譜系→甲基追蹤）獲證且跨 basecaller 複製；3 處校正（5群→~3、順序=推論、operational≠germline ASM）。</div>
+      <h4>案例：chr2:18M 局部分子狀態候選 <span class="badge tier">案例 L2</span></h4>
+      <div class="oneline">HCC1395 一段 LOH 區的 6 sSNV + 甲基逐步走查，展示「手動 IGV 直覺 → read-level 實測校正」。直接資料支持局部 mutation-state candidates 與分組後甲基關聯，不是已確認的 cellular clone 或 lineage tree。</div>
+      <div class="pi">▸ PI：LOH、mutation-marker 共現/互斥與部分 CpG 的跨 basecaller 技術重現獲觀察；約 3 種 regional state 仍是模型候選，順序、clone 身分與 originating cell 不可由本案例確定。</div>
       <a class="go" href="08_subclone-logic-chain-chr2-18M.standalone.html">先看為何可行(邏輯鏈) →</a> &nbsp;<a class="go" href="04_subclone-reconstruction-chr2-18M.standalone.html">看案例走查 →</a> &nbsp;<a class="go" href="05_subclone-correction-audit-chr2-18M.standalone.html">看權威 audit →</a> &nbsp;<a class="go" href="07_subclone-judgment-workstation-chr2-18M.standalone.html">看判讀工作站 →</a>
     </div>
 
     <div class="lcard method">
       <h4>案例 audit：chr2:18M 權威裁決 <span class="badge tier">L2</span></h4>
-      <div class="oneline">第二輪獨立複核（matched-normal ASM 控制 + 跨 basecaller FDR）對推論 1-6 逐一裁決，並把甲基訊號拆成「乾淨 tumor-associated」vs「既存 germline ASM confound」。</div>
-      <div class="pi">▸ PI：≥3 regional states；甲基乾淨子集 {2.1,2.2,3.1,3.2,5.1,5.2}（最強 3.1/3.2）、confound {3.3,3.4,3.5,4.1}；用語=regional LOH-constrained somatic-haplotag-conditioned subclonal structure。</div>
+      <div class="oneline">第二輪程式複核（matched-normal ASM screen + 跨 basecaller FDR）對推論 1–6 逐一裁決；這是同一生物樣本的技術/分析複核，不是獨立 biological replicate。</div>
+      <div class="pi">▸ PI：約 3 種 regional mutation-state candidates；normal-ASM-screen-negative {2.1,2.2,3.1,3.2,5.1,5.2}（3.1/3.2 技術重現最強）、confounded {3.3,3.4,3.5,4.1}；screen-negative 不證明 acquired 或 clone identity。</div>
       <a class="go" href="05_subclone-correction-audit-chr2-18M.standalone.html">看權威 audit →</a>
     </div>
 
     <div class="lcard method">
       <h4>ISM subclone pipeline 構想 <span class="badge tier">構想 · B2</span></h4>
-      <div class="oneline">從 chr2 案例萃取的 9 步 ISM subclone 分析方法（輸入→譜系→甲基+ASM控制→可防守樹）+ 3 防呆 + 系統化路徑。構想基礎，非已實作模組。</div>
-      <div class="pi">▸ PI：方法核心 = 互斥 linkage 定 lineage（非 VAF）+ homopolymer guard + matched-normal ASM 控制（拆 subclone 甲基 vs 既存 ASM）+ 只畫有證據的樹邊；升 validated = 自動化 + 標準化 + 跨樣本。</div>
+      <div class="oneline">從 chr2 案例萃取的 9 步候選分析流程（輸入→局部 mutation states→甲基關聯+ASM screen→候選圖）+ 3 防呆。它是構想，非已實作或已驗證的 cellular-subclone 重建器。</div>
+      <div class="pi">▸ PI：核心 = read-level linkage + homopolymer guard + matched-normal ASM screen + 只畫資料支持的候選邊；要升 validated，仍需自動化、獨立 truth、跨樣本與 CN/純度模型。</div>
       <a class="go" href="06_ism-subclone-pipeline-concept.standalone.html">看 pipeline 構想 →</a>
     </div>
 
     <div class="lcard method">
       <h4>ISM 能力 vs chr2 敘述 gap <span class="badge tier">能力對照</span></h4>
       <div class="oneline">把 chr2:18M subclone 敘述逐 claim 對到「ISM C++ as-built 在同一批位點實際算了什麼」：哪些撐得起（characterize）、哪些缺（reconstruct 骨幹）、為什麼。</div>
-      <div class="pi">▸ PI：ISM 在 3 個 sSNV 都複製 allele PERMANOVA p=0.001（甲基 corroborate somatic 軸），但無 read linkage／clone tree／CCF；SubcloneAnalyzer/TreeStructure/"Subclone" class 名實不符勿 over-claim。骨幹數字來自 pysam 非 ISM。</div>
+      <div class="pi">▸ PI：同一 HCC1395 樣本的 3 個 sSNV 皆有 allele PERMANOVA p=0.001，屬強的 locus-specific allele-associated methylation evidence；不是 3 個獨立 replicate 或 clone validation。ISM 無 cross-SNV linkage／clone tree／corrected CCF。</div>
       <a class="go" href="10_ism-cpp-vs-chr2-subclone-capability.standalone.html">看能力 vs 敘述 gap →</a>
     </div>
 
@@ -389,17 +389,17 @@ mark{background:#fdf2c8;padding:0 2px}
     <li><b>背景名詞地基</b> — 先建立語言（HP-axis / ASM / LOH / 統計詞）。<a href="01_background-glossary.standalone.html">→ 已建</a></li>
     <li><b>ISM 方法本體</b> — 主軸引擎：作用位置 + 五階段 + 為何用 read-read 距離。<a href="02_ism-core.standalone.html">→ 已建</a></li>
     <li><b>ISM 甲基讀取與篩選</b> — 細節層：MM/ML → 矩陣、二值化灰帶、七道守門、兩種「篩選」（給教授講細節）。<a href="03_methylation-read-filter.standalone.html">→ 已建</a></li>
-    <li><b>為何可行：chr2:18M 邏輯鏈（給完全不懂的教授）</b> — 第一性原理走查：為何 LOH 讓訊號乾淨 → sSNV 互斥切譜系 → 甲基獨立印證 → normal 對照濾假 → 標 tag；並回答「為什麼偵測甲基重要」。聚焦邏輯鏈、靜態教學。<a href="08_subclone-logic-chain-chr2-18M.standalone.html">→ 已建</a></li>
-    <li><b>真實案例：chr2:18M subclone 重建</b> — 把方法用在一個真位點：6 sSNV + 甲基逐步重建，並陳手動直覺與實測校正（給教授與同學看具體案例）。<a href="04_subclone-reconstruction-chr2-18M.standalone.html">→ 已建</a></li>
-    <li><b>案例 audit：chr2:18M 權威裁決</b> — 第二輪獨立複核（ASM 控制 + 跨 basecaller FDR）逐一裁決推論 1-6，把甲基拆成乾淨 vs ASM-confound（給要看嚴謹度的人）。<a href="05_subclone-correction-audit-chr2-18M.standalone.html">→ 已建</a></li>
-    <li><b>判讀工作站：chr2:18M 互動檢視</b> — 把上面案例的權威數字（6 sSNV 卡 + 甲基三組 + LOH + CCF + 6 推論裁決）做成可逐項判讀（同意/存疑/否定 + JSON/CSV 匯出）的 data-bound 工作站；每個數字由 <code>independent_audit.json</code> 注入、附 file:line 來源。<a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">→ 已建</a></li>
-    <li><b>ISM subclone pipeline 構想（9 步）</b> — 從案例萃取的方法構想：輸入→互斥 linkage 譜系→homopolymer guard→甲基 + normal-ASM 控制→可防守樹（給 Ch3 Methods / 系統化 handoff）。<a href="06_ism-subclone-pipeline-concept.standalone.html">→ 已建</a></li>
+    <li><b>chr2:18M 邏輯鏈（給完全不懂的教授）</b> — 第一性原理走查：LOH 降低雙親本解釋 → sSNV 共現/互斥形成局部 mutation-state candidates → 遺傳分組後甲基關聯 → normal ASM screen → 帶不確定性的 read label。<a href="08_subclone-logic-chain-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>案例：chr2:18M 局部分子狀態候選</b> — 6 sSNV + 甲基逐步走查，並陳手動直覺與實測校正；不把局部 reads 直接升格成 cellular clone truth。<a href="04_subclone-reconstruction-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>案例 audit：chr2:18M 權威裁決</b> — 同一樣本的第二輪程式複核（ASM screen + 跨 basecaller FDR），把甲基分成 normal-ASM-screen-negative 與 confounded；前者不證明 acquired。<a href="05_subclone-correction-audit-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>判讀工作站：chr2:18M 互動檢視</b> — 6 sSNV、甲基三組、LOH、歷史 TVAF-derived 非 canonical transform 與 6 項推論裁決；該 transform 不是 CN/純度校正 CCF，也不能 corroborate clone。<a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>ISM subclone pipeline 構想（9 步）</b> — 從案例萃取的候選流程：輸入→read linkage→homopolymer guard→甲基關聯 + normal-ASM screen→候選圖；非已驗證重建器。<a href="06_ism-subclone-pipeline-concept.standalone.html">→ 已建</a></li>
     <li><b>ISM 能力 vs chr2 敘述 gap</b> — 把 chr2:18M 敘述逐 claim 對到「ISM C++ as-built 實際算了什麼」：ISM 撐 characterize 半邊（實測 allele PERMANOVA p=0.001 ×3）、缺 reconstruct 骨幹半邊（linkage/tree/CCF），並標出 SubcloneAnalyzer/TreeStructure 命名 over-claim 風險。<a href="10_ism-cpp-vs-chr2-subclone-capability.standalone.html">→ 已建</a></li>
     <li><b>HP-axis vs ALLELE-axis</b> — 全專案最易誤讀的軸別 confound（暫在名詞地基 + ISM 頁，將獨立成頁）。</li>
     <li><b>ism-vs-external</b> — ISM 在業界的定位（軸 C vs 軸 A）。<span class="todo">待建</span></li>
-    <li><b>四道 NEGATIVE</b> — 論文最強武器（防彈負結果）。<span class="todo">待建</span></li>
+    <li><b>多道 NEGATIVE</b> — 當時範圍內對已測 formulation 的相互一致負結果；新假說需重新 audit。<span class="todo">待建</span></li>
     <li><b>LOH-phasing 脊柱</b> — 主軸 positive headline + 循環性（HD-1）。<span class="todo">待建</span></li>
-    <li><b>normal-anchored cis-test</b> — ISM 唯一可防守原創貢獻。<span class="todo">待建</span></li>
+    <li><b>normal-anchored cis-test</b> — 本專案的特定組合；新穎性與優勢待系統性文獻回顧及比較 benchmark。<span class="todo">待建</span></li>
   </ol>
 </section>
 

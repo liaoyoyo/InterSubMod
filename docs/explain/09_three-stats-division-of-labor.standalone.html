@@ -44,6 +44,26 @@
   .key span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
   .key .ka::before{background:var(--A)} .key .kb::before{background:var(--B)} .key .kw::before{background:var(--warn)}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -53,7 +73,9 @@
 
   <!-- ============ THE FIGURE ============ -->
   <div class="fig">
-  <svg viewBox="0 0 1040 660" font-family="system-ui,sans-serif">
+  <svg viewBox="0 0 1040 660" font-family="system-ui,sans-serif" role="img" aria-labelledby="p09-svg1-title p09-svg1-desc">
+    <title id="p09-svg1-title">Fisher、Cramér's V、PERMANOVA 與 PERMDISP 的分工</title>
+    <desc id="p09-svg1-desc">Fisher p 量觀察統計與指定 null 的不相容性；Cramér's V 量關聯幅度；PERMANOVA 檢驗 label-associated centroid separation，必須配合 PERMDISP 與設計限制解讀。</desc>
     <defs>
       <marker id="ar" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto">
         <path d="M0,0 L7,3 L0,6 Z" fill="#7f93b8"/>
@@ -108,20 +130,20 @@
     <!-- Fisher -->
     <rect x="60" y="288" width="380" height="78" rx="10" fill="#121d33" stroke="#3a4f7a"/>
     <text x="74" y="312" fill="#60a5fa" font-size="14" font-weight="700">Fisher 精確檢定 (FFH, Monte-Carlo) → p</text>
-    <text x="74" y="332" fill="#e7edf7" font-size="12.5">「分群跟標籤這麼吻合，是<tspan font-weight="700">真的還是巧合</tspan>？」</text>
-    <text x="74" y="350" fill="#9fb0cc" font-size="11.5">洗牌幾千次，比實際更極端的比例 = p；越小越不像運氣</text>
+    <text x="74" y="332" fill="#e7edf7" font-size="12.5">「觀察到的吻合，與<tspan font-weight="700">指定 null 有多不相容</tspan>？」</text>
+    <text x="74" y="350" fill="#9fb0cc" font-size="11.5">洗牌幾千次；p = null 下至少同樣極端的比例，不是真假機率</text>
 
     <!-- Cramér's V -->
     <rect x="60" y="372" width="380" height="78" rx="10" fill="#121d33" stroke="#3a4f7a"/>
     <text x="74" y="396" fill="#60a5fa" font-size="14" font-weight="700">Cramér's V (0~1)</text>
-    <text x="74" y="416" fill="#e7edf7" font-size="12.5">「就算是真的，吻合得<tspan font-weight="700">多強</tspan>？」（效應量）</text>
+    <text x="74" y="416" fill="#e7edf7" font-size="12.5">「分群與標籤的<tspan font-weight="700">關聯幅度</tspan>多大？」（效應量）</text>
     <text x="74" y="434" fill="#9fb0cc" font-size="11.5">由卡方算出；表太稀疏 (Cochran) → 不可靠則歸 0</text>
 
     <!-- PERMANOVA -->
     <rect x="600" y="288" width="380" height="78" rx="10" fill="#0f1f1c" stroke="#2a5b54"/>
     <text x="614" y="312" fill="#14b8a6" font-size="14" font-weight="700">PERMANOVA → pseudo-F + p</text>
-    <text x="614" y="332" fill="#e7edf7" font-size="12.5">「reads 真的分成<tspan font-weight="700">不同的『雲』</tspan>嗎？」</text>
-    <text x="614" y="350" fill="#9fb0cc" font-size="11.5">洗標籤，看 組間距離 ≫ 組內距離 (StructureTest.cpp:141-201)</text>
+    <text x="614" y="332" fill="#e7edf7" font-size="12.5">「指定標籤的<tspan font-weight="700">群心是否分離</tspan>？」</text>
+    <text x="614" y="350" fill="#9fb0cc" font-size="11.5">洗標籤檢驗 centroid separation；仍需 dispersion/設計檢查</text>
 
     <!-- PERMDISP -->
     <rect x="600" y="372" width="380" height="78" rx="10" fill="#0f1f1c" stroke="#2a5b54"/>
@@ -152,11 +174,11 @@
     <rect x="60" y="500" width="210" height="120" rx="10" fill="#0c1326" stroke="#2a3b5e"/>
     <text x="70" y="520" fill="#cfe" font-size="12" font-weight="700">看圖重點</text>
     <circle cx="80" cy="540" r="5" fill="#60a5fa"/><text x="92" y="544" fill="#bdd7ff" font-size="11">A：看「分群 vs 標籤」對齊</text>
-    <circle cx="80" cy="562" r="5" fill="#14b8a6"/><text x="92" y="566" fill="#9cefe0" font-size="11">B：看「分群本身」成不成立</text>
+    <circle cx="80" cy="562" r="5" fill="#14b8a6"/><text x="92" y="566" fill="#9cefe0" font-size="11">B：看標籤關聯的 centroid separation</text>
     <circle cx="80" cy="584" r="5" fill="#fbbf24"/><text x="92" y="588" fill="#fde68a" font-size="11">黃：最終判定</text>
     <text x="70" y="608" fill="#9fb0cc" font-size="10.5">虛線=有算但未進舊閘</text>
   </svg>
-  <div class="cap">圖：同一個 region 的甲基化矩陣分兩條路 — 路線 A（對照表）由 Fisher+Cramér's V 檢驗「對齊」，路線 B（距離矩陣）由 PERMANOVA 檢驗「分群結構」。</div>
+  <div class="cap">圖：同一個 region 的甲基化矩陣分兩條路 — 路線 A 的 Fisher p 量與指定 null 的不相容性、Cramér's V 量關聯幅度；路線 B 的 PERMANOVA 量標籤關聯的 centroid separation，需配合 PERMDISP 與設計限制。</div>
   <div class="key">
     <span class="ka">路線 A：Fisher · Cramér's V</span>
     <span class="kb">路線 B：PERMANOVA · PERMDISP</span>
@@ -176,13 +198,13 @@
     </tr>
     <tr>
       <td><b>Fisher (FFH)</b></td>
-      <td>對齊是真的還是巧合？</td>
-      <td>R×C Fisher-Freeman-Halton，Monte-Carlo 固定邊際洗牌（2000–10000 次，Wilson CI 提早停）；p = 比實際更極端的比例</td>
+      <td>觀察統計與指定 null 有多不相容？</td>
+      <td>R×C Fisher-Freeman-Halton，Monte-Carlo 固定邊際洗牌（2000–10000 次，Wilson CI 提早停）；p = null 下得到至少同樣極端統計量的比例，不是 hypothesis 為真的機率</td>
       <td><code>FisherExact.cpp:259-320</code> · <code>GlobalTest.cpp:73-132</code></td>
     </tr>
     <tr>
       <td><b>Cramér's V</b></td>
-      <td>對齊有多強（0~1）</td>
+      <td>分群與標籤的關聯幅度（0~1）</td>
       <td>由 Pearson 卡方算 V=√(χ²/(n·(min_dim−1)))；Cochran 可靠性：≥80% 細胞期望≥5 才採信，否則 V=0</td>
       <td><code>MathUtils.cpp:154-207</code> · 可靠性 <code>:185-200</code></td>
     </tr>
@@ -194,8 +216,8 @@
     </tr>
     <tr>
       <td><b>PERMANOVA</b></td>
-      <td>reads 真的分成不同雲嗎？</td>
-      <td>pseudo-F = (組間SS/(k−1))÷(組內SS/(N−k))；洗標籤 99~999 次得 p。分群、HP、ALT 三種 labeling 各跑一次</td>
+      <td>指定 labeling 的 centroid 是否分離？</td>
+      <td>pseudo-F = (組間SS/(k−1))÷(組內SS/(N−k))；洗標籤 99~999 次得 p。它檢驗 label-associated centroid separation；dispersion 不同或設計 confound 也可產生顯著結果</td>
       <td><code>StructureTest.cpp:141-201</code> · <code>SignificanceAnalyzer.cpp:99-131,301-304</code></td>
     </tr>
     <tr>
@@ -215,8 +237,8 @@
   <!-- ============ WHY THREE ============ -->
   <h2>為何要三個、不是一個</h2>
   <ul class="why">
-    <li><b>只有 p 不夠</b>：reads 一多，芝麻大的對齊也會「顯著」→ 加 Cramér's V 看強度。所以是<b>雙門檻</b>（p 管真假、V 管強弱），兩個都過才 pass。</li>
-    <li><b>Fisher/V 只看「分群 vs 標籤」</b>：若真有結構但對不上 ALT/HP 標籤就會漏 → PERMANOVA 直接看距離矩陣，補抓「分群本身是否成立」。</li>
+    <li><b>只有 p 不夠</b>：reads 一多，很小的差異也可顯著→ 加 Cramér's V 看關聯幅度。所以是<b>雙門檻</b>：p 表示與指定 null 的不相容性，V 表示關聯幅度；都不是「真假機率」。</li>
+    <li><b>Fisher/V 只看「分群 vs 標籤」</b>：若候選結構對不上 ALT/HP 標籤會漏 → PERMANOVA 直接用距離矩陣檢驗標籤關聯的 centroid separation；不能略過 PERMDISP 或設計限制就升格為真實分群。</li>
     <li><b>PERMANOVA 會被「某組比較散」騙</b>（看似分開、其實只是離散度不同）→ PERMDISP 側檢標記這種假象。</li>
   </ul>
 
@@ -226,7 +248,7 @@
     <b>① 舊閘 Significant 根本沒用 PERMANOVA。</b> verdict 只聽 Fisher 那張表（<code>SignificanceAnalyzer.cpp:309-311</code>）；「PERMANOVA 顯著但 Fisher p&gt;0.05」的 region 會被打成 Weak/Noise — 即 06-16 FN1 audit 那件事。圖中以<b>虛線</b>表示 PERMANOVA「有算但未進舊閘」。
   </div>
   <div class="warnbox">
-    <b>② Cramér's V 在表太稀疏時被強制歸 0。</b> Cochran：期望&lt;5 的格子佔比&gt;20% → 不可靠 → V=0（<code>RegionProcessor.cpp:1745-1749</code>）；真實但小樣本的關聯會憑空消失（memory 記的 762 MISSED / 487 latent gate-to-0）。
+    <b>② Cramér's V 在表太稀疏時被強制歸 0。</b> Cochran：期望&lt;5 的格子佔比&gt;20% → 不可靠 → V=0（<code>RegionProcessor.cpp:1745-1749</code>）；因此 762 MISSED / 487 gate-to-0 只能稱「PERMANOVA-positive candidate structure missed by the V reliability gate」，不是真實關聯證明。
   </div>
   <div class="warnbox">
     <b>③ <code>chi_square_p</code> 是佔位符</b>（直接 = Fisher p，<code>GlobalTest.cpp:122-124</code>），沒有獨立的卡方 p；卡方統計量只用來算 V。

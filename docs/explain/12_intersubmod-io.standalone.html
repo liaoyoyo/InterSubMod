@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>InterSubMod 部件 — 吃什麼、做什麼、吐什麼</title>
@@ -88,6 +91,8 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -107,7 +112,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <div class="kicker">部件分冊 · 第 12 頁 · InterSubMod（inter_sub_mod）</div>
   <h1>InterSubMod 吃什麼、做什麼、吐什麼</h1>
   <p class="lede">
-    這是目前<b>真正跑得動、也真正產出論文核心數字</b>的那支程式。
+    這是目前<b>可編譯、可執行，並產出 per-region 甲基化矩陣與統計輸出</b>的程式。
+    七資料集 exact-PS 漏斗與候選拓樸數字來自另一條 research <code>exact_ps_topology_af</code> C++ solver + Python runner 流程，<b>不是</b> <code>inter_sub_mod</code> 本體輸出。
     本頁把它的 3 個必填輸入、8 個處理階段、17 種輸出檔案全部攤開，
     每個檔案都附<b>實際 head 出來的 header 與資料行</b>。
   </p>
@@ -126,15 +132,14 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     因此能用 <b>read 層級</b>（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
   </p>
   <p style="margin-top:10px">
-    <span class="badge b-pass">實測可跑</span>
-    最小指令 <b>2.9 秒</b>完成、exit 0；含 normal BAM 與 LOH 標註的完整版本也 exit 0。
+    <span class="badge b-pass">內部 smoke test 曾 exit 0</span>
+    最小指令與含 normal BAM／LOH 標註的版本都曾在內部資料環境完成；因缺可公開 fixture 與完整 hardware／commit／repetition receipt，本頁不把該次耗時當成可泛化 benchmark。
   </p>
 </div>
 
-<div class="takeaway dead">
-  <span class="lab"><span class="dot">●</span> 用之前一定要知道的一件事</span>
-  目前 <code>build/bin/inter_sub_mod</code> 這個執行檔是 <b>STALE 的</b> ——
-  有 5 個原始碼檔的修改時間比它還新。<b>跑之前請先重新編譯</b>，否則你跑的不是現在的程式碼。
+<div class="takeaway info">
+  <span class="lab">用之前一定要知道的一件事</span>
+  原始碼與執行檔的修改時間不足以證明 binary 身分。要把輸出連回特定版本，應從宣告的 commit 重新編譯，記錄 toolchain、build command、binary hash 與測試退出碼；本頁既有內部 binary 不作 clean-checkout release certification。
 </div>
 
 <!-- ═══════════ 1 輸入 ═══════════ -->
@@ -237,7 +242,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
       <title id="g1t">InterSubMod 內部八階段處理鏈</title>
       <desc id="g1d">從 VCF 載入突變錨點開始，依序為：以突變為中心開視窗、從 BAM 抓取 read、
       read 過濾與單倍型解析、解析甲基化標記組成 read 乘 CpG 矩陣、二值化、計算 read 兩兩距離矩陣、
-      剔除含缺失值的 read 後做階層分群建樹、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
+      剔除含缺失值的 read 後建立 read-level methylation dendrogram（階層分群，非 cellular phylogeny）、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -273,7 +278,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="716" y="246" font-size="9.5" font-weight="700" fill="#5B3FA0">HP 標籤實測值域（6 種）</text>
         <text x="716" y="260" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">1:7864  2:6453  1-1:3856</text>
         <text x="716" y="273" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">2-1:3161  0:1658  3:374</text>
-        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = 帶體細胞突變的單倍型</text>
+        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = somatic-supporting haplotag/read family</text>
         <path d="M470,292 L470,312" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
 
         <!-- S5 -->
@@ -301,8 +306,8 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
         <!-- S8 -->
         <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
-        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
-        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
+        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ read-level methylation dendrogram → 群數 → 統計</text>
+        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）；非 cellular phylogeny；輪廓係數掃 k=2..6</text>
         <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
         <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
 
@@ -314,7 +319,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
         <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
         <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
         <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
-        <text x="716" y="593" font-size="9" fill="#5C5A54">群在距離空間真的分開了嗎</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">標籤關聯 centroid separation 是否與 null 不相容</text>
         <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
         <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
         <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>
@@ -450,9 +455,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ═══════════ 4 指令 ═══════════ -->
 <section id="s4">
   <h3><span class="num">04</span>怎麼跑 — 三條可直接複製的指令</h3>
-  <p class="sub">以下指令<b>本輪全部實際執行過</b>，exit code 皆為 0。路徑都是磁碟上真實存在的檔案。</p>
+  <p class="sub">以下指令曾在 2026-08-06 的內部環境執行並記錄 exit code 0；所列 BAM／reference／VCF 路徑未包含在公開 Git objects，不能視為 public-clone reproduction。</p>
 
-  <h4 class="mini">① 最小可跑 — 驗證環境與執行檔正常（約 3 秒）</h4>
+  <h4 class="mini">① 內部限定的最小 smoke test — 驗證環境與執行檔</h4>
   <p>先從 VCF 抽出單一個突變，只給三個必填參數：</p>
   <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的 VCF</span>
 SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
@@ -532,8 +537,8 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
       <tr>
         <td><span class="dot">●</span></td>
         <td><b><code>significance_summary.csv</code> 跨 run 欄數不一致</b></td>
-        <td>實測 59/114/117/157/180 五種，原始碼 193，<b>且無版本欄位</b>。
-            用固定欄號解析的腳本會靜默錯位。<b>一律用欄名讀。</b></td>
+        <td>歷史實測有 59/114/117/157/180 欄；新鮮 runtime + source header（commit <code>73afaea</code>）為 <b>199 欄</b>。
+            其中第 187 欄 <code>VerificationSchemaVersion=2</code>，第 196 欄 <code>RegionStratificationSchemaVersion=1</code>；它們是元件 schema，尚非單一的 whole-file layout version。用固定欄號解析仍可能靜默錯位，<b>一律用欄名讀。</b></td>
       </tr>
       <tr>
         <td><span class="badge b-warn">中</span></td>
@@ -609,3 +614,5 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
   </p>
 </footer>
 </div>
+</body>
+</html>

@@ -1,11 +1,14 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>操作手冊 — 從零到跑出第一個結果</title>
 <!--
   doc_type: explain_howto   version: v1   created: 2026-08-06
   branch: research/subclonal-reconstruction-202606
-  驗證: 本頁每條指令均於 2026-08-06 實際執行並記錄 exit code 與輸出；
-        測試套件實跑 265 tests / 38 suites 全過（2062 ms, exit 0）
+  驗證: 本頁每條指令均於 2026-08-06 內部環境實際執行並記錄 exit code 與輸出；
+        2026-08-13 在 working-tree HEAD 95d420f6f397 執行既有 run_tests：270 tests / 39 suites 全過、exit 0；未做 clean-checkout rebuild
 -->
 <style>
 :root{
@@ -85,6 +88,8 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -101,25 +106,30 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
 <div class="wrap">
 <header class="hero">
-  <div class="kicker">操作手冊 · 第 16 頁 · 照著做就會動</div>
-  <h1>從零到跑出第一個結果</h1>
+  <div class="kicker">操作手冊 · 第 16 頁 · 公開可重現性邊界已標示</div>
+  <h1>從零到第一個結果：公開步驟與內部 smoke test</h1>
   <p class="lede">
-    本頁每一條指令都在 <b>2026-08-06 實際執行過</b>，並附上真實輸出。
-    照順序做，約 <b>10 分鐘</b>可以從編譯到看見第一個分析結果。
+    本頁保存 <b>2026-08-05/06 的內部機器執行收據</b>；不是任何人 clone 公開 GitHub 後都能在 10 分鐘完成的承諾。
+    編譯與測試指令可從 repo 嘗試，但 Step 4 使用的 HCC1395 BAM、hg38 FASTA 與 VCF <b>未包含在公開 Git objects</b>，因此目前公開讀者無法照原指令重現第一個分析結果。
   </p>
 </header>
 
+<div class="takeaway dead">
+  <span class="lab">公開重現狀態：BLOCKED（缺輸入 fixture）</span>
+  要把本頁升級成可公開執行的教學，需補一組可合法散布的最小 fixture：區域化 tumor BAM + BAI、相符 reference FASTA + FAI、單位點 VCF、SHA-256、下載/建立指令，以及固定版本的預期輸出收據。補齊前，Step 4–5 只能視為<b>內部環境 smoke test</b>。
+</div>
+
 <div class="takeaway info">
-  <span class="lab">開始之前：先確認機器狀態</span>
-  這台機器有 <b>48 核</b>，但 <code>/big7_disk</code> <b>只剩約 617 GB（99% 已用）</b>。
-  跑全基因組分析前務必先確認餘量，大型輸出很容易把磁碟寫爆。
+  <span class="lab">開始之前：先確認你自己的機器狀態</span>
+  CPU、記憶體與磁碟餘量會隨主機與時間改變；不要沿用本頁的歷史環境數字。
+  跑全基因組分析前應實際檢查資源並保存 command receipt，大型輸出可能快速耗盡磁碟。
 </div>
 
 <!-- ═══ Step 1 ═══ -->
 <section id="s1">
-  <div class="step"><div class="n">1</div><div class="t">編譯 C++（約 2–5 分鐘）</div></div>
+  <div class="step"><div class="n">1</div><div class="t">從宣告版本編譯 C++</div></div>
   <p class="sub" style="margin-left:48px">
-    <span class="dot">●</span> <b>一定要先做這步。</b>現有的執行檔是 STALE 的 —— 有 5 個原始碼檔比它新。
+    <span class="dot">●</span> <b>一定要先做這步。</b>mtime 不能證明既有 binary 對應哪個 source；請從宣告的 commit 重建並記錄 binary hash、toolchain 與退出碼。
   </p>
 
   <pre class="cmd"><code>cd /big7_disk/liaoyoyo2001/InterSubMod
@@ -128,7 +138,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)</code></pre>
 
-  <p><b>編譯完成後應該有 6 個執行檔</b>：</p>
+  <p><b>2026-08-06 的內部 build 曾產生下列 6 個執行檔</b>；未來版本應以實際 <code>ls build/bin/</code> 輸出為準：</p>
   <pre class="out"><code>$ ls build/bin/
 exact_ps_partition   inter_sub_mod   run_tests
 test_phase1_2        test_phase3     test_phase4_5</code></pre>
@@ -136,18 +146,18 @@ test_phase1_2        test_phase3     test_phase4_5</code></pre>
 
 <!-- ═══ Step 2 ═══ -->
 <section id="s2">
-  <div class="step"><div class="n">2</div><div class="t">確認編譯結果是好的（約 2 秒）</div></div>
+  <div class="step"><div class="n">2</div><div class="t">確認編譯結果通過測試</div></div>
 
   <pre class="cmd"><code>./build/bin/run_tests</code></pre>
 
-  <p><b>本輪實跑的真實輸出</b>：</p>
-  <pre class="out"><code>[==========] 265 tests from 38 test suites ran. (2062 ms total)
-[  PASSED  ] 265 tests.
+  <p><b>2026-08-13 對 workspace 既有 test binary 的 command-derived 輸出</b>（不是 clean-checkout build certification，也不把耗時當 benchmark）：</p>
+  <pre class="out"><code>[==========] 270 tests from 39 test suites ran. (7039 ms total)
+[  PASSED  ] 270 tests.
 
 $ echo $?
 0</code></pre>
   <p>
-    <span class="badge b-pass">265 / 265 通過</span>
+    <span class="badge b-pass">270 / 270 通過</span>
     如果這裡有任何失敗，<b>先不要往下走</b> —— 後面跑出來的數字都不可信。
   </p>
 </section>
@@ -179,12 +189,21 @@ pip install -r requirements.txt</code></pre>
 
 <!-- ═══ Step 4 ═══ -->
 <section id="s4">
-  <div class="step"><div class="n">4</div><div class="t">跑出第一個分析結果（約 3 秒）</div></div>
-  <p class="sub" style="margin-left:48px">先用單一個突變位點試跑，確認整條路徑通暢。</p>
+  <div class="step"><div class="n">4</div><div class="t">內部限定：單位點 smoke test</div></div>
+  <p class="sub" style="margin-left:48px"><span class="badge b-dead">INTERNAL-ONLY</span> 下列三個輸入路徑未隨公開 GitHub 發布；只有已取得內部資料與授權的環境才能執行。</p>
 
-  <pre class="cmd"><code><span class="c"># 準備一個只含單一突變的小 VCF</span>
+<pre class="cmd"><code><span class="c"># 準備一個只含單一突變的小 VCF</span>
 SP=/tmp/ism_demo &amp;&amp; mkdir -p $SP
 V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
+
+<span class="c"># internal preflight：公開 clone 目前會在這裡停止</span>
+test -r "$V" &amp;&amp; \
+test -r data/bam/HCC1395/tumor.bam &amp;&amp; test -r data/bam/HCC1395/tumor.bam.bai &amp;&amp; \
+test -r data/ref/hg38.fa &amp;&amp; test -r data/ref/hg38.fa.fai || {
+  echo "Missing internal fixture; public smoke test is not yet reproducible" &gt;&amp;2
+  exit 2
+}
+
 grep '^#' $V &gt; $SP/one_snv.vcf
 grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
 
@@ -195,7 +214,7 @@ grep -P '^chr19\t29283968\t' $V &gt;&gt; $SP/one_snv.vcf
   --vcf        $SP/one_snv.vcf \
   --output-dir $SP/out_min</code></pre>
 
-  <p><b>實跑輸出</b>（約 2.9 秒）：</p>
+  <p><b>2026-08-06 內部環境的歷史實跑輸出</b>（不是公開 fixture 的驗收值；缺完整 commit／hardware／repetition receipt，故不報 runtime benchmark）：</p>
   <pre class="out"><code>Total regions: 1 / Successful: 1 / Failed: 0
 Total reads processed: 85
 Forward strand (+): 40 / Reverse strand (-): 45
@@ -207,6 +226,11 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
     <b><code>--threads</code></b> 說明寫預設 1，<b>實際是 16</b>（資源估算會差 16 倍）。<br>
     <b><code>--distance-metric</code></b> 宣告預設 BERNOULLI，<b>實際會被覆寫成 NHD</b>。
     <span class="muted">想要哪個就明確指定，不要靠預設。</span>
+  </div>
+
+  <div class="takeaway warn">
+    <span class="lab">公開版仍要補的資料契約</span>
+    僅列檔名仍不足：fixture 必須同時固定 reference contig/座標、BAM index、VCF header、MM/ML 與 HP/PS tag 條件、檔案授權及 checksum；再用 CI 從乾淨 clone 執行並保存 exit code、stdout 摘要與輸出檔 checksum。
   </div>
 </section>
 
@@ -239,15 +263,15 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127</code></pr
 
 <!-- ═══ Step 6 ═══ -->
 <section id="s6">
-  <div class="step"><div class="n">6</div><div class="t">驗證整套流程的數字（推薦）</div></div>
+  <div class="step"><div class="n">6</div><div class="t">驗證歷史 35,332-site 方法文件（限此 scope）</div></div>
 
   <pre class="cmd"><code>cd docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
 python3 verify_pipeline_numbers.py</code></pre>
 
-  <p>這支會把方法文件裡的每個數字<b>重新算一次</b>並比對。實跑輸出：</p>
+  <p>這支只重算歷史 35,332-site pipeline 的 TP/FP 與共現分類數字。它不驗證 2026-07-24 exact-PS、LongLineage、storage、程式碼/測試計數或本頁 Step 4 的公開可重現性。歷史實跑輸出：</p>
   <pre class="out"><code>sSNV 總數 35,332（TP 30,490 / FP 4,842）              ✓
 共現連上 21,554 · 訊號不足 5,458 · 孤立 8,320        （加總 = 35,332 ✓）</code></pre>
-  <p>對得上，代表你的環境能重現既有結果。</p>
+  <p>對得上，只代表該歷史方法文件的受管數字與它所讀取的 artifacts 一致；其他 claim family 必須各用 authority manifest、receipt 與專用 validator 驗證。</p>
 </section>
 
 <!-- ═══ 全流程圖 ═══ -->
@@ -258,8 +282,7 @@ python3 verify_pipeline_numbers.py</code></pre>
     <div class="figtitle">圖 1 · 六個步驟與各自的驗收點</div>
     <svg viewBox="0 0 900 330" role="img" aria-labelledby="h1t h1d" xmlns="http://www.w3.org/2000/svg">
       <title id="h1t">操作六步驟流程</title>
-      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、單點試跑、檢視輸出、驗證數字；
-      每步都標註對應的驗收條件，例如測試須 265 個全過、單點試跑須在三秒內完成且產出 region 目錄。</desc>
+      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、內部單點試跑、檢視輸出、驗證歷史 35,332-site 文件；單點試跑需要公開 Git objects 中不存在的內部資料，不能作為公開重現承諾。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -267,13 +290,13 @@ python3 verify_pipeline_numbers.py</code></pre>
         <rect x="18" y="30" width="128" height="66" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
         <text x="82" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">1 編譯</text>
         <text x="82" y="70" text-anchor="middle" font-size="9" fill="#2F6690">cmake + build</text>
-        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">2–5 分鐘</text>
+        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">耗時依環境而異</text>
         <path d="M150,63 L176,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="182" y="30" width="128" height="66" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
         <text x="246" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">2 跑測試</text>
         <text x="246" y="70" text-anchor="middle" font-size="9" fill="#1f4f3a">run_tests</text>
-        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 2 秒</text>
+        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">以退出碼驗收</text>
         <path d="M314,63 L340,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="346" y="30" width="128" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
@@ -283,9 +306,9 @@ python3 verify_pipeline_numbers.py</code></pre>
         <path d="M478,63 L504,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="510" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
-        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 單點試跑</text>
+        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 內部試跑</text>
         <text x="574" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">inter_sub_mod</text>
-        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 3 秒</text>
+        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#9A3B3B">公開缺 fixture</text>
         <path d="M642,63 L668,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="674" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
@@ -295,18 +318,18 @@ python3 verify_pipeline_numbers.py</code></pre>
 
         <path d="M738,100 L738,124" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
         <rect x="600" y="128" width="202" height="52" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
-        <text x="701" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">6 驗證數字</text>
+        <text x="701" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">6 歷史 scope 驗證</text>
         <text x="701" y="167" text-anchor="middle" font-size="9" fill="#1f4f3a">verify_pipeline_numbers.py</text>
 
         <!-- 驗收欄 -->
         <rect x="18" y="200" width="784" height="112" rx="8" fill="#FAF9F5" stroke="#E3DACC" stroke-width="1.4"/>
         <text x="36" y="222" font-size="11.5" font-weight="800" fill="#5C5A54">每一步的驗收條件（不過就停下來，別往下走）</text>
         <text x="36" y="244" font-size="10" fill="#1c1b19">1 編譯 → <tspan font-family="ui-monospace,monospace">build/bin/</tspan> 下出現 6 個執行檔</text>
-        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">265 tests 全過、退出碼 0</tspan></text>
+        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">2026-08-13 snapshot：270 / 39、exit 0</tspan></text>
         <text x="36" y="280" font-size="10" fill="#1c1b19">3 依賴 → <tspan font-family="ui-monospace,monospace">import pysam</tspan> 不報錯</text>
-        <text x="430" y="244" font-size="10" fill="#1c1b19">4 試跑 → 印出 <tspan font-family="ui-monospace,monospace">Successful: 1 / Failed: 0</tspan></text>
+        <text x="430" y="244" font-size="10" fill="#1c1b19">4 內部試跑 → 先通過輸入 preflight；公開 clone 預期停止</text>
         <text x="430" y="262" font-size="10" fill="#1c1b19">5 輸出 → region 目錄下有 methylation 與 distance</text>
-        <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 各層加總打勾，數字對得上</text>
+        <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 只涵蓋歷史 35,332-site 受管數字</text>
         <text x="36" y="302" font-size="9.5" fill="#9A3B3B">任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。</text>
       </g>
     </svg>
@@ -331,7 +354,7 @@ python3 verify_pipeline_numbers.py</code></pre>
       <tr><td>讀 CSV 後整列變成一欄</td>
           <td><code>linkage_matrix.csv</code> <b>實際是 tab 分隔</b>。加 <code>sep='\t'</code>。</td></tr>
       <tr><td>跨 run 比較時欄位對不上</td>
-          <td><code>significance_summary.csv</code> <b>欄數隨版本變動且無版本欄位</b>。一律<b>用欄名</b>取值。</td></tr>
+          <td>目前稽核版本的 <code>significance_summary.csv</code> 有 <b>199 欄</b>，並含 <code>VerificationSchemaVersion=2</code> 與 <code>RegionStratificationSchemaVersion=1</code> 兩個元件 schema；<b>沒有單一 whole-file layout version</b>。解析時須用欄名，並同時驗證必要欄位集合與兩個 component versions。</td></tr>
       <tr><td>工作站 HTML 開很久／瀏覽器很卡</td>
           <td>單檔可達 188 MB。示範時先開最小的那個（約 14.6 MB）。</td></tr>
       <tr><td>LongLineage 說 KernelBlocked</td>
@@ -350,18 +373,19 @@ python3 verify_pipeline_numbers.py</code></pre>
 <footer class="prov">
   <h4>本頁的驗證方式</h4>
   <ul>
-    <li><b>測試套件</b>：2026-08-06 實跑 <code>./build/bin/run_tests</code> →
-        <b>265 tests / 38 suites 全過，2062 ms，退出碼 0</b>。
-        <span class="muted">（比 08-05 記錄的 258/37 有增加，本頁採用實測的當前值。）</span></li>
-    <li><b>單點試跑</b>：實際執行並記錄真實輸出，約 2.9 秒、退出碼 0。</li>
-    <li><b>環境數字</b>：48 核、磁碟餘量 617 GB、兩個 Python 版本，皆為本輪實測。</li>
-    <li><b>6 個執行檔</b>：實際 <code>ls build/bin/</code> 所得。</li>
+    <li><b>測試套件</b>：2026-08-13 在 HEAD <code>95d420f6f397</code> 對 workspace 現有 <code>build/bin/run_tests</code> 實跑 →
+        <b>270 tests / 39 suites 全過，7039 ms，退出碼 0</b>。
+        <span class="muted">（這是 command-derived observation；本輪未從乾淨 checkout 重建 binary。）</span></li>
+    <li><b>單點試跑</b>：2026-08-06 在含內部 HCC1395 BAM/reference/VCF 的機器執行、退出碼 0；輸入未在公開 Git objects，且缺完整 commit／hardware／repetition receipt，故不是 public-clone reproduction 或效能 benchmark。</li>
+    <li><b>環境資訊</b>：CPU、磁碟與 Python 狀態是 host/time-specific，執行者須重新量測，不沿用歷史數字。</li>
+    <li><b>執行檔清單</b>：2026-08-06 由 <code>ls build/bin/</code> 取得；未來版本以 fresh command output 為準。</li>
   </ul>
   <h4 style="margin-top:16px">誠實標註</h4>
   <ul>
     <li>本頁的編譯指令<b>未在本輪從零重跑</b>（現有 build 目錄已存在）；
         該流程於 2026-08-05 曾以全新目錄驗證通過。</li>
     <li><b>全基因組全量跑法未實跑</b> —— 屬長時間計算，且需先確認磁碟餘量。</li>
+    <li><b>公開重現未完成</b> —— 缺可散布的最小 BAM/BAI、FASTA/FAI、VCF fixture 與 checksum/CI receipt；本頁不再承諾 clone 後 10 分鐘可得分析結果。</li>
   </ul>
   <p style="margin-top:14px">
     <b>路徑</b>：<code>InterSubMod/docs/explain/16_how-to-run.standalone.html</code> ·
@@ -369,3 +393,5 @@ python3 verify_pipeline_numbers.py</code></pre>
   </p>
 </footer>
 </div>
+</body>
+</html>

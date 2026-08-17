@@ -2,6 +2,8 @@
 
 **[🏠 Home](https://github.com/liaoyoyo/InterSubMod/wiki)**
 
+<sub>Local mutation-state candidate reconstruction from single-molecule sSNV co-occurrence</sub>
+
 ---
 
 **系統**
@@ -24,7 +26,7 @@
 **記住三件事**
 
 1. `tree.nwk` 葉子是 **read** 不是 clone
-2. 88.26% 的分母是**可排序單元**，不是全部突變
+2. 88.26% 的分母是**71,955 個可排序單元**；66.52% 是 **170,131 / 255,752 個 strict components 為 k=1**
 3. LongLineage 的 BLOCKED＝**證據不存在**，不是程式沒寫
 
 ---

@@ -1,6 +1,7 @@
 # `docs/wiki/` — GitHub Wiki 的來源檔
 
-這個目錄是 **GitHub Wiki 頁面的版控來源**。
+這個目錄是 **GitHub Wiki 頁面的版控來源**。`docs/explain/` 是 editorial upstream，
+而 `docs/wiki/*.md` 是**人工同步的衍生版本**，不是由 HTML 自動生成且可能漂移。
 Wiki 本身是一個獨立的 git repo（`InterSubMod.wiki.git`），內容不會隨主 repo 一起走，
 所以在這裡保留一份可審查、可重新產生的來源。
 
@@ -94,7 +95,8 @@ git push
 
 ## 修改流程
 
-Wiki 內容的真實來源是 `docs/explain/` 的 HTML 頁面。正確的修改順序是：
+Wiki 內容的 editorial upstream 是 `docs/explain/` 的 HTML 頁面；Wiki 仍須人工同步與審查。
+正確的修改順序是：
 
 ```
 改 docs/explain/*.standalone.html

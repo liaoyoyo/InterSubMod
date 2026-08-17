@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>chr2:18M subclone — 獨立複核權威裁決（推論 1-6 + 甲基 ASM 控制）</title>
+<title>chr2:18M 局部分子狀態 — 第二輪程式複核（推論 1–6 + matched-normal ASM screen）</title>
 <!--
   doc_type: explain_page (authoritative correction-audit)  id: 05_subclone-correction-audit-chr2-18M  version: v2  created: 2026-06-15
   branch: research/subclonal-reconstruction-202606
@@ -109,6 +109,26 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 .svgnote{font-size:8.5px;fill:#6B6B66}
 @media(max-width:720px){.kpi{min-width:140px}}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
 </head>
 <body>
 
@@ -125,28 +145,28 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <div class="wrap">
 
 <header class="hero">
-  <div class="kicker">解釋頁 05 · 獨立複核權威裁決 · 04 案例走查的審計姊妹篇</div>
-  <h1>第二輪獨立複核：每個推論的權威裁決</h1>
-  <p class="lede">頁 04 提出校正後，一個<strong>更嚴謹的第二輪獨立 audit</strong>（重算腳本 + matched-normal ASM 控制 + 跨 basecaller FDR）對推論 1-6 逐一裁決。本 session 已獨立驗證它 PASS（重跑 byte-identical、code-path 數字逐位吻合）。<strong>這頁是「矯正確認」的權威定案</strong> — 並修正頁 04 仍偏寬的兩處（推論 4、甲基子集）。</p>
+  <div class="kicker">解釋頁 05 · 第二輪程式複核 · 04 案例走查的審計姊妹篇</div>
+  <h1>第二輪計算複核：每個推論支持到哪裡？</h1>
+  <p class="lede">本頁以重算腳本、matched-normal ASM screen 與跨 basecaller FDR 對推論 1–6 逐一複核；重跑結果 byte-identical，code path 數字吻合。這是同一生物樣本的分析/技術複核，不是獨立 biological replicate，也不把候選模型升格成 cellular clone 真值。</p>
 </header>
 
 <div class="bluf">
   <h2>L0 一眼看懂權威裁決</h2>
-  <p>骨幹（LOH + somatic allele + read 連鎖）<span class="key">強</span>；regional subclonal 結構<span class="key">強支持但屬 operational/regional</span>；完整 clone identity / fraction / phylogeny <span class="key">未證</span>；甲基<span class="key">沿 lineage 一致（coherence）且跨 basecaller 複製</span>，但甲基造成突變<span class="key">完全未證</span>。</p>
-  <div class="verdict-quote">「A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.」— <b>不是</b>「Confirmed five-subclone evolutionary reconstruction.」</div>
-  <p class="pi">▸ <b>給教授一句話：</b>原始 5 群收斂為 <b>≥3 regional molecular states</b>（alpha / alpha-1 / beta-like）；甲基沿譜系一致<b>但必須用 matched-normal 拆掉既存 ASM</b> — 乾淨的 tumor-associated 甲基子集 = <b>{2.1,2.2,3.1,3.2,5.1,5.2}</b>（normal 無 HP 差異），而 <b>{3.3,3.4,3.5,4.1} 被既存 germline ASM confound</b>，不可當 subclone 新生 epimutation。</p>
+  <p>骨幹（LOH + somatic allele + read 連鎖）支持<span class="key">區域 molecular-state candidates</span>；完整 cellular clone identity / fraction / phylogeny <span class="key">未證</span>；甲基<span class="key">在 mutation-defined 分組後呈局部關聯，且有跨 basecaller 技術重現</span>，但不是獨立 clone 驗證，也沒有證明取得時點或因果。</p>
+  <div class="verdict-quote">「Local LOH-constrained molecular-state candidates with bounded, mutation-conditioned methylation association.」— <b>不是</b>「Confirmed cellular subclones or evolutionary reconstruction.」</div>
+  <p class="pi">▸ <b>給教授一句話：</b>原始 5 群收斂為 <b>≥3 regional molecular-state candidates</b>（alpha / alpha-1 / beta-like）；甲基關聯<b>必須用 matched-normal 標記既存 ASM confound</b> — tumor-associated、normal-ASM-screen-negative 子集 = <b>{2.1,2.2,3.1,3.2,5.1,5.2}</b>，而 <b>{3.3,3.4,3.5,4.1} 被既存 germline ASM confound</b>。screen 陰性不證明 tumor-acquired epimutation。</p>
   <div class="kpis">
     <div class="kpi pass"><div class="v">確認</div><div class="k">推論 1 LOH（SEQC2 LOH BED + HP imbalance 98–99.6%）</div></div>
     <div class="kpi dead"><div class="v">否定×2</div><div class="k">推論 3（HP2 消失）+ 推論 6（pos4 三群）</div></div>
     <div class="kpi warn"><div class="v">重寫</div><div class="k">推論 4（pos3 與 1/2/6 互斥，不能同 trunk）</div></div>
-    <div class="kpi info"><div class="v">6 / 4</div><div class="k">甲基乾淨 CpG / 被既存 ASM confound 的 CpG</div></div>
+    <div class="kpi info"><div class="v">6 / 4</div><div class="k">normal-ASM-screen-negative / confounded CpG（前者未證明 acquired）</div></div>
   </div>
 </div>
 
 <div class="ironclad">
   <b><span style="color:var(--c-dead);font-weight:800">●</span> 這個案例可以說什麼、不可以說什麼（claim 邊界）</b>
   <ol>
-    <li><b>可以說</b>：LOH 區內、由多個 somatic allele 連鎖定義、帶一致局部 5mC 結構的 regional subclonal states；至少 2 主分支 + <code>(3)A→(5)C</code> 巢狀子分支；甲基跨 basecaller coherence。</li>
+    <li><b>可以說</b>：LOH 區內、由多個 somatic allele 連鎖定義、帶局部 5mC 關聯的 regional molecular-state candidates；<code>(3)A→(5)C</code> 是 provisional nesting candidate；甲基跨 basecaller 為技術 coherence。</li>
     <li><b>不可以說</b>：5 個 subclone 已證實 / 完整演化順序已確認 / 甲基造成突變 / 甲基獨立重建完整 clone tree / DORADO 是獨立病人（它是同細胞株技術重現）。</li>
     <li><b>關鍵紀律</b>：此區域<u>同時</u>有 normal haplotype ASM 與 tumor-associated allele-methylation — ISM 的價值是<b>把兩者拆開</b>，不是把所有甲基差異都歸給 subclone。</li>
   </ol>
@@ -161,7 +181,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     <thead><tr><th style="width:160px">推論</th><th style="width:110px">裁決</th><th>修正版</th></tr></thead>
     <tbody>
       <tr><td class="imp">1. 發生 LOH</td><td><span class="v-ok">確認</span></td><td>SEQC2 LOH BED <code>chr2:16,146,119–22,100,000</code> + HP imbalance（HKU HP2-parent 232/HP1 4 ≈98.3%；DORADO 279/1 ≈99.6%）一致。</td></tr>
-      <tr><td class="imp">2. 發生 subclone</td><td><span class="v-mid">強支持 · 有界</span></td><td>可稱 <b>regional operational subclonal states</b>；非完整 biological clone truth。</td></tr>
+      <tr><td class="imp">2. 存在分子狀態分支</td><td><span class="v-mid">支持 · 有界</span></td><td>可稱 <b>regional molecular-state candidates</b>；非 biological clone truth。</td></tr>
       <tr><td class="imp">3. HP2 沒抽到/突變到不見</td><td><span class="v-no">否定</span></td><td>HP2 是主體 parent；all-REF 短連鎖 read 存在（≥2 點 17 條、≥3 點 4 條）；缺完整跨點 read 是 coverage 限制。</td></tr>
       <tr><td class="imp">4. (1)(2)(3)(6) 先突變</td><td><span class="v-no">不成立 · 需重寫</span></td><td><b>(3) 與 (1)(2)(6) 互斥</b>，不能在同一 trunk；只可稱「不同的早期 branch-defining candidates」。</td></tr>
       <tr><td class="imp">5. (5) 把群一、群二分開</td><td><span class="v-ok">支持 · provisional</span></td><td><code>(5)C</code> 對 <code>(3)A</code> perfect nesting；直接支持 read HKU 4 / DORADO 2 → provisional。</td></tr>
@@ -213,27 +233,27 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 <!-- ============ §4 甲基 + ASM 控制 ============ -->
 <section id="methyl">
   <h3><span class="num">④</span> 甲基化：哪些跨 basecaller 複製、哪些被既存 ASM confound</h3>
-  <p class="sub">這是本頁最關鍵的一節，也是 ISM 真正的價值所在 — <strong>用 matched-normal 把「subclone 新生甲基」與「LOH 前既存的 haplotype ASM」拆開</strong>。</p>
+  <p class="sub">matched-normal HP1/HP2 screen 能標記已觀察到的 germline-ASM confound；未達顯著者只能稱 normal-ASM-screen-negative，不能由陰性 screen 證明 tumor-acquired 或 subclone-specific。</p>
 
-  <h4 class="mini">(a) tumor lineage 甲基差異（pos3 A vs G）跨 basecaller 複製</h4>
+  <h4 class="mini">(a) mutation-defined 組間甲基差異與跨 basecaller 技術重現</h4>
   <div class="tablewrap">
   <table>
     <thead><tr><th>CpG</th><th>HKU A→G mean</th><th>HKU MW-FDR</th><th>跨 basecaller</th><th>normal ASM?</th><th>判定</th></tr></thead>
     <tbody>
-      <tr><td class="imp">2.1</td><td>0.75 → 0.48</td><td>0.176</td><td>方向一致</td><td>無 (FDR 0.41)</td><td><span class="v-mid">乾淨但弱</span></td></tr>
-      <tr class="clean"><td class="imp">2.2</td><td>0.90 → 0.22</td><td>0.0032</td><td>複製</td><td>無 (FDR 0.055)</td><td><span class="v-ok">乾淨</span></td></tr>
-      <tr class="clean"><td class="imp">3.1</td><td>0.22 → 0.92</td><td>3.3e-4</td><td>複製</td><td>無 (FDR 0.41)</td><td><span class="v-ok">乾淨 ★</span></td></tr>
-      <tr class="clean"><td class="imp">3.2</td><td>0.97 → 0.14</td><td>4.1e-5</td><td>複製</td><td>無 (FDR 0.50)</td><td><span class="v-ok">乾淨 ★</span></td></tr>
+      <tr><td class="imp">2.1</td><td>0.75 → 0.48</td><td>0.176</td><td>方向一致</td><td>未偵測 (FDR 0.41)</td><td><span class="v-mid">SCREEN-NEG / 弱</span></td></tr>
+      <tr class="clean"><td class="imp">2.2</td><td>0.90 → 0.22</td><td>0.0032</td><td>技術重現</td><td>未偵測 (FDR 0.055)</td><td><span class="v-ok">SCREEN-NEG</span></td></tr>
+      <tr class="clean"><td class="imp">3.1</td><td>0.22 → 0.92</td><td>3.3e-4</td><td>技術重現</td><td>未偵測 (FDR 0.41)</td><td><span class="v-ok">SCREEN-NEG ★</span></td></tr>
+      <tr class="clean"><td class="imp">3.2</td><td>0.97 → 0.14</td><td>4.1e-5</td><td>技術重現</td><td>未偵測 (FDR 0.50)</td><td><span class="v-ok">SCREEN-NEG ★</span></td></tr>
       <tr class="conf"><td class="imp">3.3</td><td>0.42 → 0.84</td><td>0.025</td><td>複製</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
       <tr class="conf"><td class="imp">3.4</td><td>0.04 → 0.87</td><td>4.1e-5</td><td>方向(DORADO 未過 FDR)</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
       <tr class="conf"><td class="imp">3.5</td><td>0.01 → 0.87</td><td>0.0017</td><td>方向(DORADO 未過 FDR)</td><td><b>有 (FDR 0.050)</b></td><td><span class="v-no">ASM confound</span></td></tr>
       <tr class="conf"><td class="imp">4.1<span class="muted">(校正座標)</span></td><td>0.98 → 0.14</td><td>0.0027</td><td>複製</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
-      <tr class="clean"><td class="imp">5.1</td><td>0.03 → 0.95</td><td>0.0060</td><td>複製</td><td>無 (FDR 0.30)</td><td><span class="v-ok">乾淨</span></td></tr>
-      <tr class="clean"><td class="imp">5.2</td><td>0.03 → 0.99</td><td>0.0060</td><td>複製</td><td>無 (FDR 0.41)</td><td><span class="v-ok">乾淨</span></td></tr>
+      <tr class="clean"><td class="imp">5.1</td><td>0.03 → 0.95</td><td>0.0060</td><td>小 n / 未確認</td><td>未偵測 (FDR 0.30)</td><td><span class="v-ok">SCREEN-NEG</span></td></tr>
+      <tr class="clean"><td class="imp">5.2</td><td>0.03 → 0.99</td><td>0.0060</td><td>小 n / 未確認</td><td>未偵測 (FDR 0.41)</td><td><span class="v-ok">SCREEN-NEG</span></td></tr>
     </tbody>
   </table>
   </div>
-  <p class="muted">tumor pos3-anchored A-vs-G + normal HP1-vs-HP2 ASM 皆親讀 <code>independent_audit.md</code>（機器輸出）。<span style="background:#E4F0EA;padding:0 3px">綠列</span>=乾淨 tumor-associated；<span style="background:#F3E2E2;padding:0 3px">紅列</span>=被既存 germline ASM confound。</p>
+  <p class="muted">tumor pos3-anchored A-vs-G + normal HP1-vs-HP2 ASM 皆親讀 <code>independent_audit.md</code>。<span style="background:#E4F0EA;padding:0 3px">綠列</span>=tumor-associated、normal-ASM-screen-negative（非 acquired 證明）；<span style="background:#F3E2E2;padding:0 3px">紅列</span>=既存 germline ASM confounded。</p>
 
   <h4 class="mini">(b) matched-normal 揭露的既存 ASM（為什麼必須扣）</h4>
   <div class="evi">Normal HP1 vs HP2（已 LOH 前的 germline allele 甲基不對稱）顯著者：
@@ -241,10 +261,10 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   3.4  HP1=0.033  HP2=0.850   MW-FDR 0.0070
   3.5  HP1=0.583  HP2=0.012   MW-FDR 0.0496
   4.1  HP1=0.887  HP2=0.078   MW-FDR 0.0070
-→ 這四個 CpG 的 tumor lineage 甲基差異，部分來自既存 germline ASM，不能算 subclone 新生 epimutation。
-  2.1/2.2、3.1/3.2、5.1/5.2 normal 無顯著 HP 差異 → 乾淨候選。</div>
+→ 這四個 CpG 的 mutation-group 甲基差異受既存 germline ASM confound，不能宣稱 acquired 或 clone-specific。
+  2.1/2.2、3.1/3.2、5.1/5.2 在本 screen 未見顯著 normal HP 差異 → normal-ASM-screen-negative 候選。</div>
 
-  <div class="so"><b>權威結論（取代頁 04 / v1 的「robust {3.1,3.2,3.3}」）：</b>乾淨且跨 basecaller 複製的 tumor-associated 甲基子集 = <b>{2.1, 2.2, 3.1, 3.2, 5.1, 5.2}</b>；其中 <b>3.1 / 3.2 最強（★，FDR≤3e-4、|Δ|≈0.7–0.83、normal 無 ASM）</b>。<b>{3.3, 3.4, 3.5, 4.1} 被既存 germline ASM confound，保守排除。</b>注意：3.3 雖跨 basecaller 複製，但 normal 也有 ASM → 不算乾淨（這正是 v1 的錯：把 3.3 當 robust）。</div>
+  <div class="so"><b>校正結論：</b>normal-ASM-screen-negative 子集 = <b>{2.1, 2.2, 3.1, 3.2, 5.1, 5.2}</b>；其中 <b>3.1 / 3.2 的組間差異與跨 basecaller 技術重現最強</b>。<b>{3.3, 3.4, 3.5, 4.1}</b> 被既存 germline ASM confound。這個分類是 confound screen，不是 acquisition 或 clone identity test。</div>
 
   <details class="card cav"><summary>nuance（這 session 加的銳化）：LOH 已丟 HP1，為何還說 ASM confound？</summary><div class="body">tumor 是 LOH、已丟 HP1，故 3.3/3.4 的 tumor 差異不可能是「簡單繼承 germline ASM」（HP1 已不在）。較準確的說法是：這些 CpG <b>本身 epigenetically labile</b>（在 normal 兩 allele 就差很大）→ 它們的 tumor 訊號可信度低，<b>保守排除</b>即可，不必宣稱機制。</div></details>
 
@@ -259,7 +279,9 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 
   <figure>
     <div class="figtitle">圖 1 · chr2:18M 可防守候選樹（verdict_02 §九）</div>
-    <svg viewBox="0 0 940 420" role="img" aria-label="可防守候選樹">
+    <svg viewBox="0 0 940 420" role="img" aria-labelledby="p05-svg1-title p05-svg1-desc">
+      <title id="p05-svg1-title">經 audit 校正的局部 mutation-state 候選圖</title>
+      <desc id="p05-svg1-desc">將歷史五群歸納為約三種 regional molecular-state candidates，並標出 provisional nesting、homopolymer 不確定性與不可識別的邊；非 cellular phylogeny truth。</desc>
       <!-- root -->
       <rect x="360" y="16" width="220" height="48" rx="8" fill="#F0EDE6" stroke="#5C5A54" stroke-dasharray="6 4" stroke-width="2"/>
       <text x="470" y="36" text-anchor="middle" font-size="12" font-weight="700">all-REF / unsampled 共同祖先</text>
@@ -323,7 +345,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </tbody>
   </table>
   </div>
-  <div class="so"><b>結論：</b>(3) 是強 tumor-specific somatic candidate（兩套 tumor 都 G&gt;A、兩 normal 0 A），但<u>因落 HC 空隙不能升 truth-confirmed TP</u>。使用者「可能是真的」直覺<b>方向正確</b>。教學重點：不能只看真值標籤判 TP/FP，要看變異本身的證據 + 真值集的覆蓋邊界。</div>
+  <div class="so"><b>結論：</b>(3) 是有多條雙股 tumor ALT 分子支持、且 sampled normal reads 未見 A 的 tumor-associated somatic candidate；但它落在 SEQC2 HC 空隙，外部 truth 不可評估，不能升 truth-confirmed TP。</div>
 </section>
 
 <!-- ============ §7 claim 邊界 + 外部對齊 ============ -->
@@ -332,7 +354,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
   <p class="sub">把這案例放回 ISM 研究定位，並用外部文獻劃 claim 邊界。</p>
 
   <div class="takeaway pass"><span class="lab">ISM 在這案例的價值</span>
-    ① 同一長讀聯合觀測 somatic allele + haplotag + native 5mC；② 找跨 basecaller 重現的 allele-CpG association；③ 在 LongPhase-S fine tag 無法拆開時補 regional molecular-state characterization；④ <b>用 matched normal 揭露哪些甲基差異是既存 ASM confound</b>；⑤ 用多點 read linkage 提出帶不確定性標記的 regional subclone 假說。
+    ① 同一長讀聯合觀測 allele + haplotag + native 5mC；② 找跨 basecaller 技術重現的 allele-CpG association；③ 補 regional molecular-state characterization；④ <b>用 matched normal 揭露已偵測的 ASM confound</b>；⑤ 用多點 read linkage 提出帶不確定性的局部 mutation-state 候選模型。
   </div>
 
   <h4 class="mini">外部對齊（claim 邊界）</h4>
@@ -345,7 +367,7 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
     </tbody>
   </table>
 
-  <p style="margin-top:var(--sp-4)">論文適合用語：<span class="badge b-pass">A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.</span><br>不適合：<span class="badge b-dead">Confirmed five-subclone evolutionary reconstruction.</span></p>
+  <p style="margin-top:var(--sp-4)">目前適合用語：<span class="badge b-pass">Local LOH-constrained mutation-state candidates with bounded, mutation-conditioned methylation association.</span><br>不適合：<span class="badge b-dead">Confirmed cellular subclones or evolutionary reconstruction.</span></p>
 
   <div class="rel">
     <a href="04_subclone-reconstruction-chr2-18M.standalone.html">← 回案例走查 04</a>

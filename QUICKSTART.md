@@ -1,6 +1,9 @@
-# InterSubMod - 快速開始 (Quick Start)
+# InterSubMod — 建置與自備資料執行指南
 
-本文檔將協助您快速配置環境並執行 InterSubMod 分析流程。
+本文檔先提供可由 public clone 重現的建置與測試，再說明如何以**使用者自備、已建立索引且帶 MM/ML tag** 的資料執行。
+
+> [!IMPORTANT]
+> 公開 repo 目前**沒有**可直接分析的 BAM／FASTA／VCF fixture；因此不能宣稱 fresh clone 後 10 分鐘內得到第一個生物分析結果。`scripts/run_vcf_all_snv.sh` 亦含 `/big7`／`/big8` 內部路徑，是實驗室 orchestration，不是 portable public quick start。
 
 ---
 
@@ -28,49 +31,56 @@ make -j$(nproc)
 
 ---
 
-## 2. 執行分析 (Run Analysis)
-
-我們提供整合腳本 `scripts/run_vcf_all_snv.sh`，可自動完成核心運算與圖表繪製。
-
-### 預設快速執行
-
-請使用以下指令執行完整的 VCF 測試流程：
+## 2. 先驗證公開 clone 的建置
 
 ```bash
-# 回到專案根目錄
-cd /big7_disk/liaoyoyo2001/InterSubMod
-
-# 執行全流程測試 (包含 reads 過濾、矩陣建構、視覺化)
-./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
+# 在 repo 根目錄執行
+./build/bin/run_tests
+ctest --test-dir build --output-on-failure
 ```
 
-### 指令說明
-
-*   `--mode all-with-w1000`: 啟用標準過濾器，並設定分析窗口為 SNV 前後 ±1000bp。這是最推薦的標準分析模式。
-*   `--plot-type distance`: 只生成距離熱圖（可改為 `all` / `cluster` / `no`）。
-*   此腳本會自動執行以下步驟：
-    1.  呼叫 C++ 核心程式 `inter_sub_mod` 處理數據。
-    2.  產出甲基化矩陣與 reads 資訊。
-    3.  呼叫 Python 腳本生成距離熱圖與分群熱圖。
-
-### 進階選項
-
-您也可以自定義參數：
-
-```bash
-# 指定輸出目錄
-./scripts/run_vcf_all_snv.sh --mode all-with-w1000 -o output/my_custom_run
-
-# 僅生成距離熱圖 (Skip Cluster Heatmap)
-./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
-
-# 使用更多執行緒 (C++ Core: 64, Python Plotting: 64)
-./scripts/run_vcf_all_snv.sh --threads 64 --plot-threads 64
-```
+2026-08-12 的 version-scoped audit 在 tracked core `73afaeac` 得到 GoogleTest **270 tests / 39 suites** 與 CTest **270/270**。未來 commit 的實際輸出才是當下 authority。
 
 ---
 
-## 3. 輸出結果檢視 (Output)
+## 3. 以自備資料執行 C++ 核心
+
+```bash
+./build/bin/inter_sub_mod \
+    --tumor-bam /path/to/tumor.mm_ml.bam \
+    --reference /path/to/reference.fa \
+    --vcf /path/to/candidates.vcf \
+    --output-dir /path/to/results \
+    --threads 16 \
+    --window-size 1000 \
+    --distance-metric NHD
+```
+
+必要前置：
+
+- BAM 有 `.bai` 並含 `MM`／`ML` methylation tags。
+- FASTA 有 `.fai`。
+- VCF 的 reference build 與 BAM／FASTA 相同。
+- 無參數時 effective distance default 是 `NHD`；為了 provenance，仍建議明寫。
+
+`inter_sub_mod` 產生 per-region methylation／statistics 資料；它**不會**產生 exact-PS topology funnel，也不會自動產生 PNG。Exact-PS funnel 來自獨立 research solver pipeline。
+
+---
+
+## 4. 內部 orchestration（非 portable）
+
+`scripts/run_vcf_all_snv.sh` 可在實驗室環境串接 C++ 與 Python 圖表，但目前依賴未納入 Git 的內部資料與絕對路徑。只有在那些依賴存在時才可執行：
+
+```bash
+# INTERNAL ONLY — 不是 fresh public clone acceptance command
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 -o output/my_custom_run
+```
+
+要把它升格為 public workflow，需先移除 `/big7`／`/big8` hard-coded paths，改成顯式 BAM／FASTA／VCF 參數，並發布有授權的 tiny fixture、checksum 與預期輸出 receipt。
+
+---
+
+## 5. 輸出結果檢視 (Output)
 
 執行完成後，請前往輸出目錄（預設為 `output/YYYYMMDD_vcf_*`）。
 輸出包含根層摘要檔與依 VCF/染色體分層的結果目錄，示意如下：
@@ -90,21 +100,6 @@ output/
 > `output/` 建議在 repo 內保留為入口目錄，實際儲存可放在其他硬碟並以軟連結對接；`output` 內容不納入 Git 版本控管。
 
 ---
-
-## 4. 進階：手動執行 C++ 核心 (Manual Execution)
-
-若需直接控制底層參數，可直接呼叫執行檔：
-
-```bash
-./build/bin/inter_sub_mod \
-    --tumor-bam data/tumor.bam \
-    --reference data/ref.fa \
-    --vcf data/somatic.vcf \
-    --output-dir results \
-    --threads 32 \
-    --window-size 1000 \
-    --log-level debug
-```
 
 > [!NOTE]
 > 手動執行僅產出數據檔案 (TSV/CSV)，不會自動生成熱圖。如需圖表，請接續執行 `tools/` 下的 Python 腳本。

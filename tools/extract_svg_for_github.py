@@ -39,7 +39,7 @@ PLAN = [
     ("14_upstream-data.standalone.html", 1, "upstream-toolchain",
      "上游前處理鏈與 sidecar 串流設計"),
     ("15_python-html-layer.standalone.html", 1, "workstation-refuse-design",
-     "工作站生成器的拒絕渲染設計（由構造防捏造）"),
+     "工作站生成器的拒絕渲染設計（必填指標缺失時 fail-closed；不驗證科學真實性）"),
     ("16_how-to-run.standalone.html", 1, "howto-six-steps",
      "操作六步驟與各自的驗收點"),
 ]

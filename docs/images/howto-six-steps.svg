@@ -4,8 +4,7 @@
      由 tools/extract_svg_for_github.py 產生，勿手改；改上游解釋頁後重跑。 -->
 <svg viewBox="0 0 900 330" role="img" aria-labelledby="h1t h1d" xmlns="http://www.w3.org/2000/svg">
       <title id="h1t">操作六步驟流程</title>
-      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、單點試跑、檢視輸出、驗證數字；
-      每步都標註對應的驗收條件，例如測試須 265 個全過、單點試跑須在三秒內完成且產出 region 目錄。</desc>
+      <desc id="h1d">六個步驟依序為：編譯、跑測試、裝 Python 依賴、內部單點試跑、檢視輸出、驗證歷史 35,332-site 文件；單點試跑需要公開 Git objects 中不存在的內部資料，不能作為公開重現承諾。</desc>
   <rect x="0" y="0" width="900" height="330" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -14,13 +13,13 @@
         <rect x="18" y="30" width="128" height="66" rx="7" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.4"/>
         <text x="82" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">1 編譯</text>
         <text x="82" y="70" text-anchor="middle" font-size="9" fill="#2F6690">cmake + build</text>
-        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">2–5 分鐘</text>
+        <text x="82" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">耗時依環境而異</text>
         <path d="M150,63 L176,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="182" y="30" width="128" height="66" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.4"/>
         <text x="246" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">2 跑測試</text>
         <text x="246" y="70" text-anchor="middle" font-size="9" fill="#1f4f3a">run_tests</text>
-        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 2 秒</text>
+        <text x="246" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">以退出碼驗收</text>
         <path d="M314,63 L340,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="346" y="30" width="128" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.4"/>
@@ -30,9 +29,9 @@
         <path d="M478,63 L504,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="510" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
-        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 單點試跑</text>
+        <text x="574" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5B3FA0">4 內部試跑</text>
         <text x="574" y="70" text-anchor="middle" font-size="9" fill="#3f2c70">inter_sub_mod</text>
-        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#5C5A54">約 3 秒</text>
+        <text x="574" y="85" text-anchor="middle" font-size="9" fill="#9A3B3B">公開缺 fixture</text>
         <path d="M642,63 L668,63" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
 
         <rect x="674" y="30" width="128" height="66" rx="7" fill="#ECE6F6" stroke="#5B3FA0" stroke-width="1.4"/>
@@ -42,18 +41,18 @@
 
         <path d="M738,100 L738,124" stroke="#8a8578" stroke-width="1.6" marker-end="url(#h)" fill="none"/>
         <rect x="600" y="128" width="202" height="52" rx="7" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.6"/>
-        <text x="701" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">6 驗證數字</text>
+        <text x="701" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">6 歷史 scope 驗證</text>
         <text x="701" y="167" text-anchor="middle" font-size="9" fill="#1f4f3a">verify_pipeline_numbers.py</text>
 
         <!-- 驗收欄 -->
         <rect x="18" y="200" width="784" height="112" rx="8" fill="#FAF9F5" stroke="#E3DACC" stroke-width="1.4"/>
         <text x="36" y="222" font-size="11.5" font-weight="800" fill="#5C5A54">每一步的驗收條件（不過就停下來，別往下走）</text>
         <text x="36" y="244" font-size="10" fill="#1c1b19">1 編譯 → <tspan font-family="ui-monospace,monospace">build/bin/</tspan> 下出現 6 個執行檔</text>
-        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">265 tests 全過、退出碼 0</tspan></text>
+        <text x="36" y="262" font-size="10" fill="#1c1b19">2 測試 → <tspan font-weight="700" fill="#2F7D5B">2026-08-13 snapshot：270 / 39、exit 0</tspan></text>
         <text x="36" y="280" font-size="10" fill="#1c1b19">3 依賴 → <tspan font-family="ui-monospace,monospace">import pysam</tspan> 不報錯</text>
-        <text x="430" y="244" font-size="10" fill="#1c1b19">4 試跑 → 印出 <tspan font-family="ui-monospace,monospace">Successful: 1 / Failed: 0</tspan></text>
+        <text x="430" y="244" font-size="10" fill="#1c1b19">4 內部試跑 → 先通過輸入 preflight；公開 clone 預期停止</text>
         <text x="430" y="262" font-size="10" fill="#1c1b19">5 輸出 → region 目錄下有 methylation 與 distance</text>
-        <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 各層加總打勾，數字對得上</text>
+        <text x="430" y="280" font-size="10" fill="#1c1b19">6 驗證 → 只涵蓋歷史 35,332-site 受管數字</text>
         <text x="36" y="302" font-size="9.5" fill="#9A3B3B">任何一步的退出碼不是 0，或數字對不上 —— 先解決再繼續，否則後面的結果都不可信。</text>
       </g>
     </svg>

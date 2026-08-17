@@ -2,17 +2,22 @@
 [← Home](https://github.com/liaoyoyo/InterSubMod/wiki) · [System Overview](https://github.com/liaoyoyo/InterSubMod/wiki/System-Overview) · [InterSubMod](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine) · [LongLineage](https://github.com/liaoyoyo/InterSubMod/wiki/LongLineage-Engine) · [Upstream](https://github.com/liaoyoyo/InterSubMod/wiki/Upstream-and-Data) · [Analysis](https://github.com/liaoyoyo/InterSubMod/wiki/Analysis-and-Presentation) · [How to Run](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
 > **部件分冊 · 第 13 頁 · LongLineage**
-> **LongLineage：契約很嚴、程式都在，但目前輸出 0 棵樹**
+> **LongLineage：契約很嚴；frozen HCC1395-only dataset-gate 輸出 0 topology units**
 >
-> 這是同一套科學想法的**工業化重寫版**。它的設計品質很高（每個輸出都有 schema 與 SHA-256 收據），但目前主線被鎖住，而且在真實資料上的拓撲產出是 **0**。本頁解釋**為什麼**是 0 —— 這不是 bug，理解原因比理解程式碼更重要。
+> 這是同一套科學想法的**工業化重寫版**。它的設計品質很高（每個輸出都有 schema 與
+> SHA-256 收據），但正式主線被鎖住；目前可引用的 frozen **HCC1395-only dataset-gate**
+> 在 79,687 loci 上產出 **0 topology units**。本頁解釋這個指定 run 為何是 0；
+> **不可外推成每個 real-data run、其他樣本或所有版本都為 0**。
 
 ---
 
 ## 一句話
 
-LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一條 read 上**」的證據表，再用**最少隱藏節點的超立方體**解出這些突變之間的譜系關係。
+LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一條 read 上**」的證據表，再以最少隱藏節點的超立方體建立**局部、允許遞迴、最小的突變狀態候選拓撲**。同一 read 上的共現是分子層直接觀測；cellular clone／subclone 與 biological lineage 不是直接觀測，也未被此流程確認。
 
 **它與 InterSubMod 的根本差異**：ISM 輸出是 **per-region**（每個位點一包結果），LL 輸出是 **per-read**（每條 read 一列）；ISM 從 BAM 直接讀單倍型標籤，LL **明文禁止讀 BAM tag**，只認 sidecar 檔案。
+
+下表全部只屬 frozen HCC1395-only dataset-gate（chr1–22，79,687 loci）：
 
 | 指標 | 數值 | 意義 |
 |---|---|---|
@@ -49,9 +54,11 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 
 🔴 另外 `longlineage-query` 只接受狀態為 `VALIDATED_FROZEN` 的 run，但 HCC1395 那個 run 的狀態是 `VALIDATED_FROZEN_DATASET_GATE` —— 實測回 exit 8 拒絕。**要讀資料目前只能自己 zcat。**
 
+⚠️ tagged-BAM 能力有明確版本邊界：**public main `5daf50f`** 沒有 writer；**feature `b9aaa12`** 已含 `longlineage-tag-bam`。因此本頁描述 public main 行為時，不可把 feature 能力視為已發布主線能力。
+
 ---
 
-## 02 · 為什麼輸出是 0？—— 甲基化是總開關，不是輔助
+## 02 · 為什麼 frozen HCC1395 dataset-gate 輸出是 0？—— 甲基化是總開關，不是輔助
 
 這是本頁最重要的一節。答案不在程式效能或資料量，而在**科學設計的一個前提**。
 
@@ -85,8 +92,10 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 
 這也正是它與 InterSubMod「甲基化絕不進重建」立場衝突的地方（見系統全景頁 §2）。
 
-> 🔴 **「LongLineage 能算出樹」目前沒有 run 層級的實證**
-> 現存三個完整科學 run 的拓撲輸出檔**都是 28 bytes**（僅檔案結尾標記，零筆資料）。如果直接拿 LL 當「已經算出亞群樹」的證據，會落空。
+> 🔴 **Frozen HCC1395 dataset-gate 目前沒有非零 topology-unit 實證**
+> 這個 HCC1395 evidence bundle 內現存三個完整科學 run 的拓撲輸出檔**都是 28 bytes**
+>（僅檔案結尾標記，零筆資料）。這只限制該 frozen HCC1395 scope；不能證明所有未來
+> real-data runs 都會為零，也不能拿它當「LongLineage 已算出亞群樹」的證據。
 > 真正跑出區域樹的是另一條 descriptive-only 的相容路徑，但該路徑的規格文件明文禁止它宣稱 clone／祖先／時序／正式拓撲發現。
 
 ---
@@ -103,7 +112,7 @@ LongLineage 把 ONT 資料算成「**哪些體細胞突變共同出現在同一�
 | `m1_assignments` | — | 78,629 | 哪些 read 被分到哪一群。**注意：這是甲基化的群，不是亞群譜系標籤。** |
 | `cooccurrence_pairs` | 74 | 134,278 | 兩個位點在同一條 read 上的共現統計。 |
 | `cooccurrence_sites` | 24 | 79,687 | 每個位點的共現彙總。 |
-| `topology_units` | 34 必填鍵 | **0**<br>（28 bytes） | 本來要放拓撲解的地方。目前是空的。 |
+| `topology_units` | 34 必填鍵 | **0**<br>（28 bytes） | Frozen HCC1395-only dataset-gate 的檔案為空；不代表每個 real-data run 或所有版本都為 0。 |
 
 > **一個設計上的亮點值得學習**
 > `topology_unit` 的 schema 把「解到什麼程度」拆成**四個獨立狀態欄位**（用哪條求解路徑／目標函數狀態／候選家族狀態／排序狀態），並且**每種放棄都有具名的理由**。這讓「沒解出來」不會被誤讀成「解出來是空的」—— 值得在自己的輸出格式裡沿用。

@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>分析與呈現層 — 你實際上會用到的 Python 腳本與 HTML 工作站</title>
@@ -95,6 +98,28 @@ footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}
 footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 @media print{.topbar{position:static}figure,table,pre{page-break-inside:avoid}}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
+</head>
+<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -121,46 +146,46 @@ footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
 </header>
 
 <div class="kpis">
-  <div class="kpi info"><div class="v">2,144</div><div class="k">全 repo 的 Python 檔</div></div>
+  <div class="kpi info"><div class="v">2,147</div><div class="k">deploy commit <code>fbdf7c7</code> 的 tracked Python 檔</div></div>
   <div class="kpi warn"><div class="v">59 / 117</div><div class="k">讀 CSV 但無任何欄位檢查</div></div>
   <div class="kpi dead"><div class="v">182</div><div class="k">硬編了別的分支路徑的腳本</div></div>
   <div class="kpi pass"><div class="v">1</div><div class="k">最推薦的第一支腳本（見下）</div></div>
 </div>
+<p class="muted">計數命令：<code>git ls-tree -r --name-only fbdf7c7 | rg '\.py$' | wc -l</code> → 2,147；<code>git ls-tree -r --name-only fbdf7c7 scripts | rg '\.py$' | wc -l</code> → 291。後者包含 <code>scripts/</code> 下所有 tracked <code>.py</code>，未排除 generated/test/helper 檔。</p>
 
 <!-- ═══════ 1 ═══════ -->
 <section id="s1">
-  <h3><span class="num">01</span>先跑這一支 — 一鍵重算所有關鍵數字</h3>
-  <p class="sub">如果你只想跑一個指令來確認整套東西是活的，跑這個。</p>
+  <h3><span class="num">01</span>歷史 35,332-site 方法管線的數字收據</h3>
+  <p class="sub"><code>verify_pipeline_numbers.py</code> 只驗證 2026-06 方法說明所用的 35,332-site pipeline；它不是全 repo、全研究流程或目前 exact-PS 流程的總驗證器。</p>
 
   <pre class="cmd"><code>cd /big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
 python3 verify_pipeline_numbers.py</code></pre>
 
-  <p><b>它會做什麼</b>：把方法說明文件裡的<b>每一個數字重新算一次</b>，並與文件宣稱值比對。實跑輸出摘要：</p>
+  <p><b>它會做什麼</b>：重算該歷史方法文件中 35,332 個 sSNV 的 TP/FP、共現連結、訊號不足與孤立分類，並比對該文件的宣稱值。它<b>不涵蓋</b> 2026-07-24 exact-PS 產物、LongLineage、儲存體稽核、repo 程式碼/測試計數或其他頁面的數字。實跑輸出摘要：</p>
   <pre class="out"><code>sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 共現連上   21,554  ·  訊號不足 5,458  ·  孤立 8,320   （加總 = 35,332 ✓）</code></pre>
   <p>
     <span class="badge b-pass">實跑 exit 0</span>
-    這支腳本的價值在於它是<b>可執行的文件</b> —— 如果數字對不上，它會直接告訴你，
-    而不是讓錯誤的數字悄悄流進報告。
+    在這個明確範圍內，它是一份<b>可執行的歷史收據</b>：若 35,332-site 方法文件的受管數字對不上，腳本會報錯；它的 exit 0 不代表其他研究資產已驗證。
   </p>
 
   <div class="takeaway info">
     <span class="lab">建議的閱讀順序</span>
-    先跑上面這支確認環境沒問題 → 再看 §2 挑你需要的分析腳本 → 最後用 §3 的工作站 HTML 看結果。
+    若要重現這份歷史方法文件，可先跑上面腳本；若要驗證 exact-PS、LongLineage 或目前主流程，必須分別使用其 authority manifest、receipt 與專用驗證命令，不能拿這個 exit 0 代替。
   </div>
 </section>
 
 <!-- ═══════ 2 ═══════ -->
 <section id="s2">
   <h3><span class="num">02</span>主力腳本 — 各自產出什麼</h3>
-  <p class="sub">從 2,144 個 Python 檔中挑出真正是「入口」的那幾支。</p>
+  <p class="sub">從 deploy commit <code>fbdf7c7</code> 的 2,147 個 tracked Python 檔中挑出真正是「入口」的那幾支；此計數不等於 production entry-point 數。</p>
 
   <div class="table-wrap"><table>
     <thead><tr><th style="width:27%">腳本</th><th style="width:73%">產出什麼、回答什麼問題</th></tr></thead>
     <tbody>
       <tr>
         <td><code>verify_pipeline_numbers.py</code><br><span class="badge b-pass">先跑這個</span></td>
-        <td>一鍵重算並驗證方法文件裡的每個數字。<b>最適合當第一支跑的腳本。</b></td>
+        <td>重算並驗證歷史 35,332-site 方法文件的受管數字；<b>scope 僅限該文件</b>，不涵蓋 exact-PS、LongLineage、storage 或 code/test counts。</td>
       </tr>
       <tr>
         <td><code>sm_linkage_genomewide.py</code></td>
@@ -218,12 +243,12 @@ python3 verify_pipeline_numbers.py</code></pre>
   <p class="sub">產出的是<b>零外部依賴、可離線開啟</b>的單一 HTML 檔，可以直接寄給別人。</p>
 
   <figure>
-    <div class="figtitle">圖 1 · 工作站生成器的「拒絕渲染」設計 — 由構造防止捏造數字</div>
+    <div class="figtitle">圖 1 · 工作站生成器的「拒絕渲染」設計 — 必填指標缺失時 fail-closed</div>
     <svg viewBox="0 0 900 300" role="img" aria-labelledby="p1t p1d" xmlns="http://www.w3.org/2000/svg">
       <title id="p1t">工作站生成器的拒絕渲染機制</title>
       <desc id="p1d">生成器讀取宣告式 spec，逐項檢查每個項目是否具備 spec 宣告的必填指標；
       若齊全則渲染出互動 HTML，若缺少任一必填指標則以退出碼 3 拒絕渲染，
-      而不是填入破折號或空白，藉此讓「缺資料卻看起來有資料」在結構上不可能發生。</desc>
+      而不是填入破折號或空白。這個 guard 可防止「已宣告必填 metric 缺失卻靜默渲染」，但不驗證數值真實性、方法適切性或科學結論。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="w1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -257,12 +282,12 @@ python3 verify_pipeline_numbers.py</code></pre>
         <rect x="20" y="212" width="858" height="70" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.6"/>
         <text x="40" y="234" font-size="11.5" font-weight="800" fill="#B06A16">為什麼要這樣設計</text>
         <text x="40" y="253" font-size="10.5" fill="#6b4310">如果缺資料時填一個破折號，報告看起來仍然完整，讀的人不會發現那一格其實沒有依據。</text>
-        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">「拒絕產出」讓「看起來有資料但其實沒有」這件事在結構上不可能發生 —— 這比任何檢查清單都可靠。</text>
+        <text x="40" y="271" font-size="10.5" font-weight="700" fill="#9A3B3B">它防止缺少已宣告必填 metric 時靜默渲染；不保證數值或科學解讀正確。</text>
       </g>
     </svg>
     <figcaption>
       這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。
-      <b>純文字的規則擋不住，只有讓它在構造上做不到才有效。</b>
+      <b>這個 required-metric guard 防止缺少已宣告欄位時靜默渲染；不是資料真實性或科學正確性的驗證器。</b>
       <br><span class="dot">●</span> 但目前這個通用生成器<b>只有 2 個真正的複用者</b> ——
       實務上大家用的是 4,741 行的專用版本。這是這一層最明顯的技術債。
     </figcaption>
@@ -338,7 +363,7 @@ python3 verify_pipeline_numbers.py</code></pre>
 
   <div class="takeaway">
     <span class="lab">坑四：資料讀取普遍沒有欄位檢查</span>
-    <code>scripts/</code> 下 268 個 Python 檔中，117 個會讀 CSV／TSV，
+    deploy commit <code>fbdf7c7</code> 的 <code>scripts/</code> 下有 291 個 tracked Python 檔（未排除 generated/test/helper）；其中 117 個會讀 CSV／TSV，
     但其中 <b>59 個</b>（超過一半）原始碼裡<b>沒有任何 schema 或欄位檢查</b>。
     <div style="font-weight:400;font-size:.92rem;margin-top:10px">
       配合 <a href="12_intersubmod-io.standalone.html">ISM 分冊</a>提到的
@@ -370,3 +395,5 @@ python3 verify_pipeline_numbers.py</code></pre>
   </p>
 </footer>
 </div>
+</body>
+</html>

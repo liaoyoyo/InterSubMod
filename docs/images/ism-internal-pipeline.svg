@@ -6,7 +6,7 @@
       <title id="g1t">InterSubMod 內部八階段處理鏈</title>
       <desc id="g1d">從 VCF 載入突變錨點開始，依序為：以突變為中心開視窗、從 BAM 抓取 read、
       read 過濾與單倍型解析、解析甲基化標記組成 read 乘 CpG 矩陣、二值化、計算 read 兩兩距離矩陣、
-      剔除含缺失值的 read 後做階層分群建樹、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
+      剔除含缺失值的 read 後建立 read-level methylation dendrogram（階層分群，非 cellular phylogeny）、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
   <rect x="0" y="0" width="960" height="700" fill="#FAF9F5"/>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -43,7 +43,7 @@
         <text x="716" y="246" font-size="9.5" font-weight="700" fill="#5B3FA0">HP 標籤實測值域（6 種）</text>
         <text x="716" y="260" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">1:7864  2:6453  1-1:3856</text>
         <text x="716" y="273" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">2-1:3161  0:1658  3:374</text>
-        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = 帶體細胞突變的單倍型</text>
+        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = somatic-supporting haplotag/read family</text>
         <path d="M470,292 L470,312" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
 
         <!-- S5 -->
@@ -71,8 +71,8 @@
 
         <!-- S8 -->
         <rect x="250" y="570" width="440" height="66" rx="7" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
-        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ 建樹 → 決定群數 → 四類統計檢定</text>
-        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）建樹；輪廓係數掃 k=2..6 挑最高分</text>
+        <text x="470" y="590" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B06A16">⑧ read-level methylation dendrogram → 群數 → 統計</text>
+        <text x="470" y="606" text-anchor="middle" font-size="10" fill="#6b4310">階層分群（預設 UPGMA）；非 cellular phylogeny；輪廓係數掃 k=2..6</text>
         <text x="470" y="620" text-anchor="middle" font-size="10" font-weight="700" fill="#9A3B3B">群數最少是 2 — 它不回答「到底有沒有結構」</text>
         <text x="470" y="632" text-anchor="middle" font-size="9.5" fill="#5C5A54">有沒有結構要看 PERMANOVA 與 gating，不是看 k</text>
 
@@ -84,7 +84,7 @@
         <text x="716" y="549" font-size="9.5" font-weight="700" fill="#6b4310">Local</text>
         <text x="716" y="562" font-size="9" fill="#5C5A54">哪一群特別富集某個標籤</text>
         <text x="716" y="580" font-size="9.5" font-weight="700" fill="#6b4310">Structure</text>
-        <text x="716" y="593" font-size="9" fill="#5C5A54">群在距離空間真的分開了嗎</text>
+        <text x="716" y="593" font-size="9" fill="#5C5A54">標籤關聯 centroid separation 是否與 null 不相容</text>
         <text x="716" y="611" font-size="9.5" font-weight="700" fill="#6b4310">Label</text>
         <text x="716" y="624" font-size="9" fill="#5C5A54">直接拿已知標籤切，避開先分群</text>
         <text x="716" y="634" font-size="9" fill="#5C5A54">再檢定的循環論證</text>

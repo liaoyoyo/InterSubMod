@@ -7,14 +7,14 @@ C++ 只吐檔案，**把資料變成看得懂的圖與表的是這一層**。這
 
 | 數字 | 意義 |
 |---|---|
-| **2,144** | 全 repo 的 Python 檔 |
+| **2,147** | audited Pages deploy `fbdf7c7` 全 repo 的 tracked `.py` 檔 |
 | **59 / 117** | ⚠️ 讀 CSV 但無任何欄位檢查 |
 | **182** | 🔴 硬編了別的分支路徑的腳本 |
 | **1** | ✅ 最推薦的第一支腳本（見下） |
 
 ---
 
-## 01 先跑這一支 — 一鍵重算所有關鍵數字
+## 01 先跑這一支 — 重算 historical 35,332-site pipeline 指標
 
 如果你只想跑一個指令來確認整套東西是活的，跑這個。
 
@@ -23,14 +23,21 @@ cd /big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclon
 python3 verify_pipeline_numbers.py
 ```
 
-**它會做什麼**：把方法說明文件裡的**每一個數字重新算一次**，並與文件宣稱值比對。實跑輸出摘要：
+**它會做什麼**：重算 2026-06-27 教材所用的 **historical 35,332-site pipeline** 指標，並與該版文件宣稱值比對。它**不會**驗證 2026-07-24 exact-PS funnel、LongLineage、儲存量、程式碼檔案數或目前測試數。實跑輸出摘要：
 
 ```text
 sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 共現連上   21,554  ·  訊號不足 5,458  ·  孤立 8,320   （加總 = 35,332 ✓）
 ```
 
-✅ **實跑 exit 0** — 這支腳本的價值在於它是**可執行的文件**：如果數字對不上，它會直接告訴你，而不是讓錯誤的數字悄悄流進報告。
+✅ **實跑 exit 0** — 這只證明 historical 35,332-site 指標與其輸入相符，不能外推成「整份 Wiki／所有版本已驗證」。
+
+| Claim family | 應使用的分開驗證來源 | `verify_pipeline_numbers.py` 是否覆蓋 |
+|---|---|---|
+| historical 35,332-site pipeline | `verify_pipeline_numbers.py` | ✅ |
+| 2026-07-24 exact-PS funnel | `docs/handoff/20260801_exactPS_readAF_CNV_AI交接_01/denominator_registry.tsv`、`authority_manifest.json` 與對應 solver receipts | ❌ |
+| LongLineage 功能／版本 | 對指定 commit 分別跑 `preflight`／`dataset-gate`／binary inventory | ❌ |
+| 儲存量、程式碼數、測試數 | 在目標 commit／機器上分別做檔案統計、source inventory 與 fresh test run | ❌ |
 
 > **建議的閱讀順序**
 > 先跑上面這支確認環境沒問題 → 再看 §02 挑你需要的分析腳本 → 最後用 §03 的工作站 HTML 看結果。
@@ -39,11 +46,12 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ## 02 主力腳本 — 各自產出什麼
 
-從 2,144 個 Python 檔中挑出真正是「入口」的那幾支。
+從 audited Pages deploy `fbdf7c7` 的 2,147 個 tracked Python 檔中挑出真正是「入口」的那幾支；
+這是版本限定的 source inventory，不是 current working tree 的永久常數。
 
 | 腳本 | 產出什麼、回答什麼問題 |
 |---|---|
-| `verify_pipeline_numbers.py`<br>✅ **先跑這個** | 一鍵重算並驗證方法文件裡的每個數字。**最適合當第一支跑的腳本。** |
+| `verify_pipeline_numbers.py`<br>✅ **先跑這個** | 重算 historical 35,332-site pipeline 的 TP／FP／共現／訊號不足／孤立等指標；**不覆蓋** exact-PS、LongLineage、儲存量、code count 或 test count。 |
 | `sm_linkage_genomewide.py` | 建立**全基因組突變共現地圖** —— 這是整套方法的骨幹。對每一對距離 50 kb 內的突變，統計有幾條 read 同時看到它們、四種等位組合各幾條、判成巢狀／互斥／共連鎖／獨立哪一種關係。<br>*實測產物 26.5 MB：53,094 對配對 + 35,332 筆位點帳本。* |
 | `build_strict_ps_hp_regions.py` | 用**嚴格規則**切出可建樹的區域：同一定相組、同一 germline 單倍型內、至少 3 條分子同時確定兩端 —— 才連一條邊。<br>🔴 **距離只記錄、不參與連邊**，這是刻意的方法學選擇（避免用幾何鄰近冒充分子連鎖）。 |
 | `build_layered_per_sample.py` | 產生 7 樣本的**分層工作站 HTML**（呈現層主成品）。 |
@@ -67,11 +75,13 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 產出的是**零外部依賴、可離線開啟**的單一 HTML 檔，可以直接寄給別人。
 
-### 圖 1 · 工作站生成器的「拒絕渲染」設計 — 由構造防止捏造數字
+### 圖 1 · 工作站生成器的「拒絕渲染」設計 — 防止靜默略過已宣告必填指標
 
 ![workstation-refuse-design](https://raw.githubusercontent.com/liaoyoyo/InterSubMod/develop/docs/images/workstation-refuse-design.png)
 
-> 這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。**純文字的規則擋不住，只有讓它在構造上做不到才有效。**
+> 這個設計來自一次真實事故：曾有報告把「預期數字」當成真實結果寫進 HTML，而分析其實沒跑完。
+> `exit 3` 能防止 generator 在**已宣告必填指標缺失**時仍渲染，但不會驗證數值真偽、分母、
+> source correctness，也不能發現未宣告的 optional fields。
 >
 > 🔴 但目前這個通用生成器**只有 2 個真正的複用者** —— 實務上大家用的是 4,741 行的專用版本。這是這一層最明顯的技術債。
 
@@ -86,7 +96,8 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ⚠️ **為什麼要這樣設計**
 如果缺資料時填一個破折號，報告看起來仍然完整，讀的人不會發現那一格其實沒有依據。
-🔴 「拒絕產出」讓「看起來有資料但其實沒有」這件事在結構上不可能發生 —— 這比任何檢查清單都可靠。
+🔴 「拒絕產出」讓**已宣告必填欄位缺失卻仍被靜默渲染**這件事 fail closed；它仍需要
+claim registry、來源收據與科學審查，不能被解讀為 fabrication 在整份報告中結構上不可能。
 
 ### 現成的工作站成品
 
@@ -134,7 +145,10 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ### ⚠️ 坑四：資料讀取普遍沒有欄位檢查
 
-`scripts/` 下 268 個 Python 檔中，117 個會讀 CSV／TSV，但其中 **59 個**（超過一半）原始碼裡**沒有任何 schema 或欄位檢查**。
+audited Pages deploy `fbdf7c7` 的 `scripts/` 下有 **291 個 tracked `.py` files**（包含 tracked
+test/generated-named files，未另做角色排除）。既有 source audit 找出 117 個會讀 CSV／TSV，
+其中 **59 個**原始碼裡沒有 schema 或欄位檢查；後兩個數字是該 audit 的分類結果，
+不應由 291 的 file count 直接推得。
 
 配合 [ISM 分冊](https://github.com/liaoyoyo/InterSubMod/wiki/InterSubMod-Engine)提到的「`significance_summary.csv` 欄數跨版本不一致」，這代表**拿舊資料餵新腳本時很可能靜默讀到錯的欄位**。
 
@@ -144,9 +158,15 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 ## 本頁的驗證方式
 
-- **腳本可用性**：主力腳本的 `--help` 本輪實跑取 exit code；`verify_pipeline_numbers.py` 完整跑完並讀回輸出。
+- **腳本可用性**：主力腳本的 `--help` 本輪實跑取 exit code；`verify_pipeline_numbers.py` 完整跑完並讀回 historical 35,332-site 輸出。此驗證不涵蓋其他 claim family。
 - **拒絕渲染行為**：以自建的最小 spec（故意缺一個必填指標）實測，確認退出碼為 3。
-- **檔案大小與腳本計數**：實際 `ls` 與遞迴統計，非估計值。
+- **檔案大小與腳本計數**：Python inventory 鎖定 audited deploy `fbdf7c7`，以以下 exact command
+  計算所有 tracked `.py`（不排除 tests 或 generated-named sources）：
+
+  ```bash
+  git ls-tree -r --name-only fbdf7c7 | rg -c '\.py$'                 # 2147
+  git ls-tree -r --name-only fbdf7c7 -- scripts | rg -c '\.py$'      # 291
+  ```
 - **python 版本問題**：以預設 `python3` 實跑重現崩潰，再以 3.10 實跑確認正常。
 
 **路徑**：`InterSubMod/docs/explain/15_python-html-layer.standalone.html` · 分支 `research/subclonal-reconstruction-202606` · 建立於 2026-08-06

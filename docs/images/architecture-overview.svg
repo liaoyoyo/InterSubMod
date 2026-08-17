@@ -16,7 +16,7 @@
         <rect x="14" y="38" width="952" height="58" rx="8" fill="#FAF9F5" stroke="#E3DACC"/>
         <rect x="28" y="50" width="170" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
         <text x="113" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">tumor BAM（ONT）</text>
-        <text x="113" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">HCC1395 = 292 GB</text>
+        <text x="113" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">HCC1395 = 283.072 GB</text>
         <rect x="208" y="50" width="150" height="34" rx="5" fill="#E2ECF3" stroke="#2F6690" stroke-width="1.2"/>
         <text x="283" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F6690">normal BAM</text>
         <text x="283" y="79" text-anchor="middle" font-size="9.5" fill="#2F6690">配對正常組織</text>
@@ -55,7 +55,7 @@
         <text x="30" y="299" font-size="10" fill="#5C5A54">每條 read 一列，記錄它落在哪、屬於哪個單倍型。HCC1395 這一份有 40,859,727 列、1.43 GB。</text>
         <rect x="640" y="256" width="310" height="40" rx="5" fill="#fff" stroke="#5B3FA0" stroke-width="1.1"/>
         <text x="654" y="272" font-size="10" fill="#3f2c70">為什麼用 sidecar 而不是直接存 tagged BAM：</text>
-        <text x="654" y="287" font-size="10" fill="#3f2c70">7 個樣本的 tagged BAM 合計 1.67 TiB，磁碟放不下</text>
+        <text x="654" y="287" font-size="10" fill="#3f2c70">7 sidecars = 6,256,168,164 B；tagged-BAM 總量尚無收據</text>
 
         <!-- 層 4 兩支 C++ -->
         <text x="14" y="336" font-size="12" font-weight="700" fill="#5C5A54">④ 兩支 C++ 主程式（本專案核心）</text>
@@ -66,7 +66,7 @@
         <text x="30" y="385" font-size="10.5" fill="#1f4f3a">研究原型。對每個 somatic SNV 開一個視窗，把跨過它的 read</text>
         <text x="30" y="399" font-size="10.5" fill="#1f4f3a">的甲基化狀態排成矩陣 → 算 read-read 距離 → 分群 → 統計檢定。</text>
         <text x="30" y="418" font-size="10.5" font-weight="700" fill="#1f4f3a">輸出粒度：per-region（每個位點一包結果）</text>
-        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 最小指令 2.9 秒跑完 · exit 0</text>
+        <text x="30" y="437" font-size="10" fill="#5C5A54">29 個 CLI 選項 · 內部單點命令 exit 0（非 public fixture）</text>
         <rect x="28" y="447" width="440" height="36" rx="5" fill="#fff" stroke="#2F7D5B" stroke-width="1"/>
         <text x="40" y="462" font-size="9.5" fill="#1f4f3a">吃：tumor BAM + reference + somatic VCF（必要）</text>
         <text x="40" y="475" font-size="9.5" fill="#1f4f3a">吐：methylation.csv · distance_matrix · tree.nwk · significance_summary.csv</text>

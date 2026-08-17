@@ -3,7 +3,9 @@
 
 > 部件分冊 · 第 12 頁 · InterSubMod（`inter_sub_mod`）
 
-這是目前**真正跑得動、也真正產出論文核心數字**的那支程式。本頁把它的 3 個必填輸入、8 個處理階段、17 種輸出檔案全部攤開，每個檔案都附**實際 head 出來的 header 與資料行**。
+這是目前可執行的 **per-region 甲基化／統計引擎**。本頁把它的 3 個必填輸入、8 個處理階段、17 種輸出檔案全部攤開，每個檔案都附**實際 head 出來的 header 與資料行**。
+
+> **架構邊界**：2026-07-24 exact-PS funnel 的核心數字不是 `inter_sub_mod` 直接產生；它來自獨立的 research `exact_ps_topology_af` C++ solver 與 Python runners。該研究線重建的是 local recurrence-allowed minimum mutation-state candidate arborescence／topology，不是已確認的細胞譜系。
 
 ---
 
@@ -13,17 +15,21 @@
 
 **為什麼要這樣做：** 一般 bulk 定序把所有細胞的訊號平均掉了。ONT 長 read 可以在**單一分子**上同時看到「這條分子帶的是突變型還是正常型」與「這條分子上的 CpG 甲基化型態」，因此能用 **read 層級**（而非樣本層級）的分群，去檢驗「帶突變的 read 是否在甲基化上自成一群」。
 
-✅ **實測可跑** — 最小指令 **2.9 秒**完成、exit 0；含 normal BAM 與 LOH 標註的完整版本也 exit 0。
+✅ **曾以內部 HCC1395 單位點 smoke input 實測可跑** — 最小指令 exit 0；含 normal BAM
+與 LOH 標註的內部版本也 exit 0。原收據沒有在本頁完整釘定 hardware、input locus、commit
+與 date，因此不把秒數當成一般 runtime。
 
 > 🔴 **用之前一定要知道的一件事**
 >
-> 目前 `build/bin/inter_sub_mod` 這個執行檔是 **STALE 的** —— 有 5 個原始碼檔的修改時間比它還新。**跑之前請先重新編譯**，否則你跑的不是現在的程式碼。
+> 不要用檔案 mtime 或工作目錄裡「現有 binary」的瞬時狀態作公開事實。每次 build/run 都應
+> 記錄 source commit、dirty diff、binary SHA-256、compiler、build command 與執行日期；
+> 無法對齊 source/binary identity 時先重新編譯，並把該 run 標為非 release authority。
 
 ---
 
 ## 01 · 輸入 — 3 個必填、2 個選填
 
-下表的「實際路徑」都是磁碟上真實存在的檔案，可直接拿去跑。
+下表的「實際路徑」是 2026-08-06 內部機器收據，不存在於 public Git objects；公開讀者須自行提供合法取得的 BAM、FASTA 與 VCF。
 
 | 參數 | 必填 | 這是什麼、程式拿它做什麼 | 限制與實測值 |
 |---|---|---|---|
@@ -189,9 +195,14 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 0,chr1,877772,G,C,46,17,2.990000e-01,0.0000,3.065000e-01,0.0000,...
 ```
 
-> 🔴 **欄數會隨 binary 版本改變，而且檔案裡沒有版本欄位**
+> 🔴 **欄數會隨 producing binary 版本改變，且仍沒有單一 whole-file layout version**
 >
-> 磁碟上實測到的欄數有 **59 / 114 / 117 / 157 / 180** 五種，而目前原始碼是 **193** 欄。意思是**不同時期跑出來的結果，欄位位置是錯開的**。任何用固定欄號（而非欄名）解析的下游腳本，**會靜默讀到錯的欄位**。**務必用欄名讀，並記錄產生該檔的 binary 版本。**
+> Historical files 實測到 **59 / 114 / 117 / 157 / 180** 欄；tracked core `73afaeac` 的
+> 2026-08-12 runtime/source header 是 **199 欄**，包含第 187 欄
+> `VerificationSchemaVersion=2` 與第 196 欄 `RegionStratificationSchemaVersion=1`。
+> 這兩欄是 component-level schema fields，不代表存在單一 whole-file layout version。
+> 不同 producing versions 的欄位位置會錯開；下游必須用欄名、檢查 schema 欄，並記錄
+> source/binary identity，不能把 199 概括成所有未來版本的永恆 current。
 
 </details>
 
@@ -208,30 +219,35 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 
 ---
 
-## 04 · 怎麼跑 — 三條可直接複製的指令
+## 04 · 怎麼跑 — 三種參數組合（需自行提供資料）
 
-以下指令**本輪全部實際執行過**，exit code 皆為 0。路徑都是磁碟上真實存在的檔案。
+三種組合曾在 2026-08-06 內部 HCC1395 資料上實跑、exit code 皆為 0；public repo 不含該 BAM／FASTA／VCF。以下改用可攜式變數，讀者必須先替換成自己合法取得的絕對路徑。
 
-### ① 最小可跑 — 驗證環境與執行檔正常（約 3 秒）
+### ① 最小可跑 — 驗證環境與執行檔正常
 
 先從 VCF 抽出單一個突變，只給三個必填參數：
 
 ```bash
-# 準備一個只含單一突變的 VCF
-SP=/tmp/ism_demo && mkdir -p $SP
-V=/big7_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf
-grep '^#' $V > $SP/one_snv.vcf
-grep -P '^chr19\t29283968\t' $V >> $SP/one_snv.vcf
+# 使用者提供的外部輸入
+ISM_TUMOR_BAM=/absolute/path/to/tumor.bam
+ISM_REFERENCE=/absolute/path/to/reference.fa
+ISM_INPUT_VCF=/absolute/path/to/somatic.vcf.gz
+ISM_DEMO_DIR=/tmp/ism_demo
+mkdir -p "$ISM_DEMO_DIR"
+
+# 準備只含第一筆 biallelic SNV 的 smoke-test VCF
+bcftools view -h "$ISM_INPUT_VCF" > "$ISM_DEMO_DIR/one_snv.vcf"
+bcftools view -m2 -M2 -v snps -H "$ISM_INPUT_VCF" | head -n 1 >> "$ISM_DEMO_DIR/one_snv.vcf"
 
 # 跑
-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_min
+./build/bin/inter_sub_mod \
+  --tumor-bam  "$ISM_TUMOR_BAM" \
+  --reference  "$ISM_REFERENCE" \
+  --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
+  --output-dir "$ISM_DEMO_DIR/out_min"
 ```
 
-**預期輸出**（實跑結果）：
+**內部 HCC1395 收據的實跑輸出**（不是任意輸入的固定預期值）：
 
 ```text
 Total regions: 1 / Successful: 1 / Failed: 0
@@ -244,11 +260,11 @@ Metric: NHD / Total valid read pairs: 3443 / Total invalid pairs: 127
 ### ② 典型分析 — 指定執行緒、視窗、兩種距離指標
 
 ```bash
-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --output-dir $SP/out_typical \
+./build/bin/inter_sub_mod \
+  --tumor-bam  "$ISM_TUMOR_BAM" \
+  --reference  "$ISM_REFERENCE" \
+  --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
+  --output-dir "$ISM_DEMO_DIR/out_typical" \
   --window-size 1000 \
   --threads 8 \
   --distance-metric BERNOULLI \
@@ -267,13 +283,16 @@ Configuration 區塊會印 `Threads: 8` 與 `Distance Metrics: BERNOULLI, NHD`�
 ### ③ 完整配對分析 — 加上正常組織與 LOH 標註
 
 ```bash
-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod \
-  --tumor-bam  /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam \
-  --normal-bam /big7_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam \
-  --reference  /big7_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa \
-  --vcf        $SP/one_snv.vcf \
-  --loh-bed    /big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed \
-  --output-dir $SP/out_full \
+ISM_NORMAL_BAM=/absolute/path/to/normal.bam
+ISM_LOH_BED=/absolute/path/to/loh.bed
+
+./build/bin/inter_sub_mod \
+  --tumor-bam  "$ISM_TUMOR_BAM" \
+  --normal-bam "$ISM_NORMAL_BAM" \
+  --reference  "$ISM_REFERENCE" \
+  --vcf        "$ISM_DEMO_DIR/one_snv.vcf" \
+  --loh-bed    "$ISM_LOH_BED" \
+  --output-dir "$ISM_DEMO_DIR/out_full" \
   --window-size 1000 --threads 8 \
   --distance-metric BERNOULLI --distance-metric NHD
 ```
@@ -297,7 +316,7 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
 | 嚴重 | 問題 | 會怎麼咬你 |
 |---|---|---|
 | 🔴 | **甲基化與 read 靠隱含列序綁定** | `methylation.csv` 首欄是列號不是 read 名，唯一的綁定在程式內部。任何過濾或重排不同步 → **甲基化配到別條 read 的單倍型，無任何 assert 會抓到**。 |
-| 🔴 | **`significance_summary.csv` 跨 run 欄數不一致** | 實測 59/114/117/157/180 五種，原始碼 193，**且無版本欄位**。用固定欄號解析的腳本會靜默錯位。**一律用欄名讀。** |
+| 🔴 | **`significance_summary.csv` 跨 run 欄數不一致** | 歷史實測有 59/114/117/157/180 欄；tracked core `73afaeac` 的 2026-08-12 runtime/source header 是 **199 欄**。該版本含兩個 component-level schema 欄：第 187 欄 `VerificationSchemaVersion=2`、第 196 欄 `RegionStratificationSchemaVersion=1`，但仍沒有單一 whole-file layout version。用固定欄號解析會靜默錯位；**一律用欄名並檢查兩個 schema 欄**。199 是版本快照，不是所有未來版本的固定欄數。 |
 | ⚠️ 中 | **二值化門檻有三套** | 主線 0.8/0.2 三分法、另一模組硬寫死 0.5 二分法、Python 端 128/255。同一個 CpG 因為走哪條路而甲基化判定不同，**跨模組數字不可比**。 |
 | ⚠️ 中 | **`linkage_matrix.csv` 其實是 TSV** | 副檔名與分隔符不符。`pandas.read_csv` 預設逗號 → 整列變單欄，**不會報錯**。 |
 | ⚠️ 中 | **`--threads` 預設是 16 不是 1** | help 寫 Default: 1，實際 `Config.hpp` 是 16。**資源估算差 16 倍**，在共用機器上平行跑多個 job 時會嚴重超載。 |

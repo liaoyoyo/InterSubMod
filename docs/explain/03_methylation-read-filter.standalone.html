@@ -155,6 +155,26 @@ mark{background:#fdf2c8;padding:0 2px}
 .gate li b{color:var(--c-text)} .gate li .src{font-family:var(--mono);font-size:.74rem;color:var(--c-text-soft)}
 @media(max-width:720px){.track2{grid-template-columns:1fr}}
 </style>
+<style>
+/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
+html,body{max-width:100%}
+.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
+p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
+code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+pre{overflow-x:auto}
+pre code{display:block;white-space:pre;word-break:normal}
+.evi{min-width:0;max-width:100%;overflow-x:auto}
+@media(max-width:680px){
+  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
+  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
+  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
+  .kpi,.step>.head h4{min-width:0}
+  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
+  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
+}
+</style>
 </head>
 <body>
 
@@ -180,14 +200,14 @@ mark{background:#fdf2c8;padding:0 2px}
 <div class="bluf">
   <h2>L0 一眼看懂</h2>
   <p>ISM 把每條 read 上 ONT basecaller 標記的<span class="key">每個 CpG 甲基化機率</span>抽出來，對齊到參考基因組座標，組成一張「哪條 read 在哪個 CpG 是否甲基化」的矩陣。<strong>讀</strong>＝解析 MM/ML 標籤＋CIGAR 對位；<strong>篩</strong>＝沿路丟掉不可信／不合格的 read、位點、與模糊訊號。</p>
-  <p class="pi">▸ <b>給教授一句話：</b>甲基「讀取」是確定性的 BAM 標籤解析（5mC-only、CpG-context、機率＝ML/255）；甲基「篩選」要分兩層 — <b>處理層</b>（QC＋覆蓋＋二值化灰帶丟棄，決定什麼進矩陣）與<b>應用層</b>（把甲基當 variant filter 判 TP/FP，已驗證 <span class="badge b-dead">DEAD</span>）。兩者常被混為一談。</p>
+  <p class="pi">▸ <b>給教授一句話：</b>甲基「讀取」是確定性的 BAM 標籤解析（5mC-only、CpG-context、機率＝ML/255）；甲基「篩選」要分兩層 — <b>處理層</b>（QC＋覆蓋＋二值化灰帶丟棄，決定什麼進矩陣）與<b>應用層</b>（把甲基當 variant filter 判 TP/FP，已測 formulation 為 <span class="badge b-dead">NEGATIVE</span>）。兩者常被混為一談。</p>
 </div>
 
 <div class="ironclad">
   <b><span style="color:var(--c-dead);font-weight:800">●</span> 本頁最重要的一條：兩種「篩選」不要混</b>
   <ol>
     <li><b>處理層篩選</b>（data cleaning）＝ read QC、SNV 覆蓋、去重、CpG-context、二值化灰帶丟棄、C<sub>min</sub> 覆蓋門檻。目的：<u>讓矩陣乾淨可算</u>。這是<b>每次跑都在做</b>的正常前處理。</li>
-    <li><b>應用層篩選</b>（用甲基當變異 filter）＝拿甲基特徵去判斷某個 somatic 呼叫是 TP 還是 FP。目的：<u>提升 caller 精度</u>。這條路 <b>多重驗證全失敗 → DEAD</b>，是論文的「防彈負結果」。</li>
+    <li><b>應用層篩選</b>（用甲基當變異 filter）＝拿甲基特徵去判斷某個 somatic 呼叫是 TP 還是 FP。目的：<u>提升 caller 精度</u>。已測 formulation 在當時範圍的<b>多個相互一致的 NEGATIVE 測試</b>；重啟需實質新假說 + pre-decision audit。</li>
     <li>教授若問「甲基化能不能幫忙篩變異？」——答案是<b>「能讀、能 characterize，但不能當 filter」</b>。§<a href="#dead">⑦</a> 給完整證據。</li>
   </ol>
 </div>
@@ -245,7 +265,9 @@ mark{background:#fdf2c8;padding:0 2px}
 
   <figure>
     <div class="figtitle">圖 2‑1　一條 read 的甲基訊號怎麼變成矩陣裡的一格（示意）</div>
-    <svg viewBox="0 0 980 380" role="img" aria-label="MM/ML 解析管線">
+    <svg viewBox="0 0 980 380" role="img" aria-labelledby="p03-svg1-title p03-svg1-desc">
+      <title id="p03-svg1-title">MM/ML 甲基標記解析管線</title>
+      <desc id="p03-svg1-desc">從 BAM 的 MM/ML tags 解析修飾位置與機率，經 CIGAR 對位與 CpG context 驗證後建立 read-level 甲基呼叫。</desc>
       <defs>
         <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#D97757"/></marker>
       </defs>
@@ -336,7 +358,9 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
 
   <figure>
     <div class="figtitle">圖 3‑1　二值化的三個區間（門檻 0.2 / 0.8）</div>
-    <svg viewBox="0 0 940 230" role="img" aria-label="二值化門檻數線">
+    <svg viewBox="0 0 940 230" role="img" aria-labelledby="p03-svg2-title p03-svg2-desc">
+      <title id="p03-svg2-title">甲基機率的二值化門檻</title>
+      <desc id="p03-svg2-desc">機率不大於 0.2 記為未甲基、不小於 0.8 記為甲基；中間灰帶在二值路徑當作缺失。</desc>
       <!-- number line -->
       <line x1="60" y1="120" x2="880" y2="120" stroke="#5C5A54" stroke-width="2"/>
       <!-- ticks -->
@@ -358,7 +382,7 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
       </g>
       <text class="svgnote" x="60" y="220">門檻來源：Config.hpp:33-34（binary_methyl_high=0.8 / binary_methyl_low=0.2）；三態指派：RegionProcessor.cpp:1411-1423。</text>
     </svg>
-    <figcaption><b>關鍵設計：</b>灰帶（0.2–0.8）在<b>二值</b>路徑被當缺失（−1）丟掉 — basecaller「不確定」的位點不參與二值距離。但生產預設用的是 <b>BERNOULLI</b> 距離（走原始機率），它<u>不丟灰帶</u>，改用「信心權重」把 p≈0.5 的貢獻壓到接近 0（見 §⑤）。所以「灰帶去哪」取決於用哪種距離。</figcaption>
+    <figcaption><b>關鍵設計：</b>灰帶（0.2–0.8）在<b>二值</b>路徑被當缺失（−1）丟掉 — basecaller「不確定」的位點不參與二值距離。有效 CLI 在未指定 metric 時預設走 <b>NHD</b>，因此灰帶會被排除；只有明示請求 <b>BERNOULLI</b> 才會保留原始機率，並用信心權重把 p≈0.5 的貢獻壓低（見 §⑤）。</figcaption>
   </figure>
 
   <div class="worked">
@@ -388,7 +412,9 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
 
   <figure>
     <div class="figtitle">圖 4‑1　read 進入甲基矩陣的漏斗（每關都可能淘汰）</div>
-    <svg viewBox="0 0 720 360" role="img" aria-label="read QC 漏斗">
+    <svg viewBox="0 0 720 360" role="img" aria-labelledby="p03-svg3-title p03-svg3-desc">
+      <title id="p03-svg3-title">read QC 與甲基矩陣建立漏斗</title>
+      <desc id="p03-svg3-desc">示意 read 經比對品質、長度、突變覆蓋、去重與 MM/ML 條件後，進入 read 乘 CpG 矩陣的處理層流程。</desc>
       <g font-size="12" font-family="-apple-system,sans-serif">
         <rect x="60" y="20" width="600" height="38" rx="6" fill="#E2ECF3" stroke="#2F6690"/><text x="360" y="44" text-anchor="middle" font-weight="700" fill="#2F6690">該區所有 BAM reads（tumor + normal）</text>
         <polygon points="60,58 660,58 600,98 120,98" fill="#fff" stroke="#2F6690"/><text x="360" y="84" text-anchor="middle" fill="#1c1b19">G1 FLAG：丟 secondary / supplementary / duplicate / unmapped</text>
@@ -431,21 +457,21 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
 
 <!-- ============ §5 距離與 C_min ============ -->
 <section id="dist">
-  <h3><span class="num">⑤</span> 距離計算：C<sub>min</sub> 門檻、灰帶處理、與生產用的 BERNOULLI</h3>
-  <p class="sub">矩陣建好後，算每對 read 的距離。這裡有第三種「篩選」— 共同覆蓋不足的 read 對被判無效。ISM 實作了 6 種距離，<strong>生產預設是 BERNOULLI</strong>（不是最直覺的 NHD）。</p>
+  <h3><span class="num">⑤</span> 距離計算：C<sub>min</sub> 門檻、灰帶處理、與有效預設 NHD</h3>
+  <p class="sub">矩陣建好後，算每對 read 的距離。這裡有第三種「篩選」— 共同覆蓋不足的 read 對被判無效。ISM 實作了 6 種距離；<strong>有效 CLI 無參數預設是 NHD</strong>，BERNOULLI 只在明示指定時使用。</p>
 
   <table>
     <thead><tr><th>距離</th><th>用哪個矩陣</th><th>怎麼處理灰帶</th><th>一句話</th></tr></thead>
     <tbody>
-      <tr><td class="imp">NHD</td><td>binary</td><td>灰帶＝−1 → <b>丟</b></td><td>不一致位點 / 共同位點（最直覺）</td></tr>
-      <tr><td class="imp">BERNOULLI <span class="badge b-pass">生產預設</span></td><td>raw 機率</td><td><b>保留</b>，用 2|p−0.5| 降權</td><td>期望不一致率，按信心加權</td></tr>
+      <tr><td class="imp">NHD <span class="badge b-pass">有效無參數預設</span></td><td>binary</td><td>灰帶＝−1 → <b>丟</b></td><td>不一致位點 / 共同位點（最直覺）</td></tr>
+      <tr><td class="imp">BERNOULLI <span class="badge b-info">需明示指定</span></td><td>raw 機率</td><td><b>保留</b>，用 2|p−0.5| 降權</td><td>期望不一致率，按信心加權</td></tr>
       <tr><td>L1 / L2</td><td>raw</td><td>保留</td><td>機率差的平均 / 均方根</td></tr>
       <tr><td>CORR</td><td>raw</td><td>保留（需 ≥3 點）</td><td>1 − 皮爾森相關</td></tr>
       <tr><td>JACCARD</td><td>binary</td><td>灰帶＝−1 → 丟</td><td>甲基位點集合重疊度</td></tr>
     </tbody>
   </table>
 
-  <div class="intuition"><b>為什麼預設用 BERNOULLI 而非更直覺的 NHD？</b> 依源碼設計説明（<code>DistanceMatrix.cpp:237‑252</code>），Bernoulli「用原始機率 + 信心權重，降低 p≈0.5 低信心位點的影響」。好處：<u>保留 basecaller 的機率資訊</u>，避免二值化「硬切」把整段灰帶丟掉造成的資訊損失與門檻假象；代價是比 NHD 多算權重、較不直覺。</div>
+  <div class="intuition"><b>為什麼會明示選 BERNOULLI？</b> 依源碼設計說明（<code>DistanceMatrix.cpp:237‑252</code>），Bernoulli「用原始機率 + 信心權重，降低 p≈0.5 低信心位點的影響」。好處：<u>保留 basecaller 的機率資訊</u>；代價是比 NHD 多算權重、較不直覺。這是可選路徑，不是目前 CLI 預設。</div>
 
   <h4 class="mini">NHD vs BERNOULLI：灰帶位點的命運（具體例子）</h4>
   <div class="worked">
@@ -468,10 +494,10 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
       <tr><td>C<sub>min</sub>（min_common_coverage）</td><td class="imp">3</td><td>Config.hpp:37 → RegionProcessor.cpp:424</td><td>⚠ <code>DistanceConfig</code> struct 預設是 5，但被 Config 的 3 覆寫</td></tr>
       <tr><td>無效對策略</td><td>MAX_DIST</td><td>Config.hpp:39</td><td>不足 C<sub>min</sub> → 填 max_distance_value</td></tr>
       <tr><td>max_distance_value</td><td>1.0</td><td>Config.hpp:49</td><td>正規化距離的「最遠」</td></tr>
-      <tr><td>主距離 metric</td><td class="imp">BERNOULLI</td><td>Config.hpp:40 → 用 distance_metrics_[0]</td><td>NHD 等其他可額外輸出</td></tr>
+      <tr><td>主距離 metric</td><td class="imp">NHD（無 CLI 參數）</td><td>ArgParser.hpp:181‑194</td><td>Config.hpp:40 的 BERNOULLI initializer 會被清空；BERNOULLI 需明示指定</td></tr>
     </tbody>
   </table>
-  <div class="howto"> 給教授可講的一句：「我們對<b>不確定的甲基位點不是硬丟，而是按 basecaller 的信心加權</b>（Bernoulli），同時對共同覆蓋不足的 read 對直接判定不可比（C<sub>min</sub>）。」</div>
+  <div class="howto"> 給教授可講的一句：「無參數時我們用 <b>NHD</b>，灰帶當缺失；若要依 basecaller 信心加權，必須明示選 <b>BERNOULLI</b>；兩者都受 C<sub>min</sub> 共同覆蓋門檻限制。」</div>
 </section>
 
 <!-- ============ §6 下游：reliability gate + 4 檢定 ============ -->
@@ -486,26 +512,26 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
       <tr><td>GlobalTest / LocalTest / PerCpgAsm</td><td>區域整體 / 局部 / 每 CpG 等位差異</td><td>多檢定組合，非單一 filter</td><td>SignificanceAnalyzer</td></tr>
     </tbody>
   </table>
-  <p class="muted">註：這些檢定量的是「<b>結構是否存在</b>」，<u>不是</u>「這個 somatic 呼叫對不對」。把前者誤當後者，正是 §⑦ 要破的迷思。</p>
+  <p class="muted">註：這些檢定量的是「<b>指定標籤的 centroid separation 是否與 null 不相容</b>」，<u>不是</u>「這個 somatic 呼叫對不對」，也不單獨證明真實分群。</p>
 </section>
 
-<!-- ============ §7 應用層 DEAD ============ -->
+<!-- ============ §7 應用層已測 formulation NEGATIVE ============ -->
 <section id="dead">
-  <h3><span class="num">⑦</span> 應用層「篩選」：用甲基當 variant filter＝<span class="badge b-dead">DEAD</span></h3>
-  <p class="sub">前面六節都是「處理層」。這節是完全不同的問題：<strong>能不能用甲基特徵去判一個 somatic 呼叫是 TP 還是 FP？</strong> 多重驗證的答案是不行。這些 NEGATIVE 本身是論文貢獻。</p>
+  <h3><span class="num">⑦</span> 應用層「篩選」：已測 variant-filter formulation＝<span class="badge b-dead">NEGATIVE</span></h3>
+  <p class="sub">前面六節都是「處理層」。這節問：<strong>已測的甲基特徵 formulation 能否判一個 somatic 呼叫是 TP 還是 FP？</strong> 在當時範圍與日期的多個測試一致為 NEGATIVE；這是有界結論，非對所有未來假說的不可能證明。</p>
 
   <div class="takeaway dead">
     <span class="lab">Verdict</span>
-    甲基化「<b>能讀、能 characterize ASM、能輔助 phasing</b>」，但<b>不能當 somatic variant filter</b> — 多道獨立驗證一致失敗。對外引用守「存在 ≠ 判別」。
+    甲基化「<b>能讀、能 characterize ASM、能輔助 phasing</b>」；但<b>已測 somatic-variant-filter formulation 在當時範圍內不支持使用</b>。對外引用守「存在 ≠ 判別」，新假說需先 audit。
   </div>
 
   <div class="kpis">
     <div class="kpi dead"><div class="v">+0.00242</div><div class="k">ΔF1（甲基增強 filter pilot）<br>低於 +0.005 Cohen ribbon → 不算改善</div></div>
     <div class="kpi dead"><div class="v">第 5 順位</div><div class="k">多軸 LR 的 <b>deviance 貢獻</b>（非機率，不求和=1）<br>caller_af 0.393 ≫ CN 0.211 ≫ HP 0.063 ≫ LOH 0.038 ≫ 甲基</div></div>
-    <div class="kpi dead"><div class="v">100%</div><div class="k">LOSO 留一驗證顯示的循環性<br>filter direction 已耗盡</div></div>
+    <div class="kpi dead"><div class="v">100%</div><div class="k">LOSO 留一驗證顯示的 sample-level circularity<br>已測 formulation 為 NEGATIVE</div></div>
   </div>
 
-  <h4 class="mini">四道（為什麼是「防彈」負結果）</h4>
+  <h4 class="mini">多個相互一致的測試（當時範圍與日期）</h4>
   <table>
     <thead><tr><th>#</th><th>驗證</th><th>結果</th><th>機制 / 為何失敗</th><th>來源</th></tr></thead>
     <tbody>
@@ -555,12 +581,12 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
         <li>LR 消融：甲基第 5 順位</li>
         <li>LOSO 循環、跨樣本不一致</li>
       </ul>
-      <p style="font-size:.84rem;color:#9A3B3B;margin:6px 0 0"><b>狀態：<span class="badge b-dead">DEAD</span></b> — 論文當「防彈負結果」呈現。</p>
+      <p style="font-size:.84rem;color:#9A3B3B;margin:6px 0 0"><b>狀態：<span class="badge b-dead">NEGATIVE</span></b> — 限定為已測 formulation；新假說需 pre-decision audit。</p>
     </div>
   </div>
   <div class="takeaway">
     <span class="lab">One Line</span>
-    「<b>讀</b>」是確定性的標籤解析；「<b>篩</b>」要分清是<b>清資料</b>（處理層，照做）還是<b>判變異</b>（應用層，DEAD）。
+    「<b>讀</b>」是確定性的標籤解析；「<b>篩</b>」要分清是<b>清資料</b>（處理層，照做）還是<b>判變異</b>（應用層的已測 formulation，NEGATIVE）。
   </div>
 </section>
 
@@ -577,7 +603,7 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
     <li><code>src/core/DistanceMatrix.cpp</code>:31‑55（NHD）、:254‑302（BERNOULLI）、:435‑437（MAX_DIST 填補）</li>
     <li><code>include/core/Config.hpp</code>:33‑34（0.8/0.2）、:36（min_site_coverage=5，<b>未接線</b>）、:37（min_common_coverage=3）、:39‑40（MAX_DIST / BERNOULLI）、:49（max_dist=1.0）</li>
   </ul>
-  <p><b>應用層 filter‑DEAD 證據（引自已驗證紀錄）：</b></p>
+  <p><b>應用層 filter 的已測 formulation NEGATIVE 證據（引自已驗證紀錄）：</b></p>
   <ul>
     <li>ΔF1=+0.00242 / TP 救援 NEGATIVE / LR 第 5 順位：<code>docs/experiments/in_progress/2026/05/20260518_V6_Methyl_Filter_Pilot_01.md</code>（memory: methyl-filter-pilot-marginal-positive）</li>
     <li>6 樣本 28 萬位點存在性：TP 3.95%(11655/294723) &gt; FP 1.07%(34/3177)、COLO829 TP≈FP：<code>docs/experiments/in_progress/2026/06/20260604_ISM_complete_TPFPFN_existence_cis_01.standalone.html</code>（memory: project_ism_complete_tpfpfn_existence_cis）</li>
