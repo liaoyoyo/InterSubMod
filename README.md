@@ -1,18 +1,20 @@
 # InterSubMod
 
-**Subclonal reconstruction from single-molecule somatic mutation co-occurrence in ONT long reads.**
+**Local mutation-state candidate reconstruction from single-molecule somatic-mutation co-occurrence in ONT long reads.**
 
 [繁體中文版 →](README.zh-TW.md) · [**Docs site →**](https://liaoyoyo.github.io/InterSubMod/) · [Wiki →](https://github.com/liaoyoyo/InterSubMod/wiki) · [How to run →](https://github.com/liaoyoyo/InterSubMod/wiki/How-to-Run)
 
-A tumour is not one cell population — it is several subpopulations carrying different
-mutation sets. Knowing *which mutation came first* and *which mutations live in the same
-cells* matters for understanding resistance and progression.
+A tumour can contain several cellular populations carrying different mutation sets.
+Learning their order and cellular co-membership matters for resistance and progression,
+but those biological quantities are **not directly observed by an unbarcoded bulk long read**.
 
-With short reads you only observe each locus' marginal variant allele frequency, and
-recovering the joint structure from those marginals is a **provably non-identifiable**
-deconvolution problem. ONT long reads change the problem: a single molecule can span
-several somatic mutations at once, so *"are these two mutations in the same cell lineage?"*
-becomes a **direct observation** rather than an inference from frequencies.
+If the input is limited to per-locus marginal variant allele frequencies, with no linkage
+or additional model assumptions, multiple joint structures can explain the same marginals;
+the joint structure is therefore **not identifiable from those marginals alone**. ONT long
+reads add a different observation: a single molecule can span
+several called somatic mutations at once. Their co-occurrence on the **same physical
+molecule** becomes a direct observation; cellular co-membership and lineage remain
+model-dependent inferences because the originating cell is not identified.
 
 This repository implements that idea end to end — and, just as importantly, it is explicit
 about where the evidence runs out.
@@ -31,7 +33,7 @@ Five layers, bottom to top. Only some of them are currently runnable — see
 | Raw data | tumour / normal BAM, reference FASTA | ONT long reads carrying methylation tags |
 | Upstream | Dorado · ClairS · LongPhase-S · SAVANA | basecalling + methylation, somatic SNV calling, haplotagging, copy number |
 | Interface | **HP/PS sidecar TSV** | one row per read; the only byte-identical contract between both engines |
-| Engines | **`inter_sub_mod`** (C++17) · `longlineage` (C++17) | per-region statistics · per-read artefacts |
+| Engines | **`inter_sub_mod`** (C++17) · `longlineage` (C++17) | per-region methylation/statistics · version-scoped per-read artefacts |
 | Presentation | Python analysis + standalone HTML | figures, funnels, interactive review workstations |
 
 ---
@@ -45,18 +47,21 @@ the reconstruction** — and methylation is deliberately *not*.
 
 When you observe two groups of reads with different methylation at a locus, there are at
 least four possible causes: germline allele-specific methylation, unmasking by loss of
-heterozygosity, copy-number dosage, and genuine lineage difference. **A single bulk sample
-cannot separate them.** Using methylation to "confirm" a subclone therefore requires
-already knowing the subclone assignment — which is the very thing being proven.
+heterozygosity, copy-number dosage, and genuine lineage difference. **They are not
+identifiable from the current single-bulk measurement set without orthogonal data or
+additional assumptions.** Using methylation to independently "confirm" a cellular subclone
+would therefore require an external cellular assignment; conditioning on mutation-defined
+labels is concordant association, not independent confirmation.
 
 So the backbone is **somatic mutation co-occurrence on the same physical molecule**, which
 depends on no inferred label and is therefore non-circular. Methylation is retained as a
-strictly *bounded auxiliary* signal: it is computed **after** the tree is fixed by genetic
-evidence, it annotates, and it **cannot move a single edge**.
+strictly *bounded auxiliary* signal: it is computed **after** the genetic candidate structure
+is fixed, it annotates that structure, and it **cannot move a single edge**.
 
 > Empirically this restraint is justified: of 811 evaluable methylation units, only
-> **3 (0.37 %)** reached a robust association. Had it been used as the backbone, it would
-> have been carrying almost no signal.
+> **3 (0.37 %)** supported a robust pattern-conditioned association. This low yield is one
+> reason not to use methylation to choose topology; it is not a test of every possible
+> methylation signal.
 
 ---
 
@@ -72,24 +77,28 @@ Every layer is auditable and the arithmetic is self-consistent
 | Quantity | Value |
 |---|---|
 | sSNV dataset records | 469,849 |
-| Single sites with no co-occurrence partner (cannot form a tree) | 170,131 (66.52 %) |
+| `k=1` strict read-linkage components | 170,131 / 255,752 strict components (66.52 %) |
 | Analysis units carrying mutations | 85,941 |
 | Abandoned at the search-node guard | 10,717 (12.47 %) |
 | Units rankable by read-AF | 71,955 |
-| Resolving to a **single rooted-unlabeled topology** | 63,506 (**88.26 %** of rankable) |
+| Resolving to one **rooted-unlabeled mathematical topology signature** | 63,506 (**88.26 %** of rankable) |
 | **Confirmed cellular subclones** | **0** — see below |
 
 > **How to read the 88.26 %.** It means: *of the 71,955 units that were already rankable,*
-> 88.26 % converge to one tree shape. It is a **model-conditional graph statistic**, not
-> "88 % of the tumour's evolutionary history is solved" — two thirds of all mutations were
-> already lost upstream as isolated single sites.
+> 88.26 % converge to one mathematical shape under the frozen recurrence-allowed model.
+> It is a **model-conditional graph statistic**, not "88 % of the tumour's evolutionary
+> history is solved". Separately, 170,131 / 255,752 strict components (66.52 %) are `k=1`;
+> relative to 469,849 sSNV dataset records, 170,131 is 36.21 %. These denominators are not
+> interchangeable.
 
 ---
 
 ## Capability boundary
 
-This project ships a machine-readable claim boundary. The canonical output literally
-records `technical_all_pass = true` alongside `validation_evidence_eligible = false`:
+This project ships a machine-readable claim boundary. The canonical
+`cohort_receipt.json` and `summary/all7_summary.json` (not the top level of
+`authority_manifest.json`) record `technical_all_pass = true` alongside
+`validation_evidence_eligible = false`:
 every hash matches and all tests pass, yet the system declares the batch **not yet usable
 as validation evidence**.
 
@@ -99,7 +108,7 @@ as validation evidence**.
 
 - Strict read-linked **local** structure
 - Complete minimal candidate families (when the family is complete)
-- Recurrence-allowed Hamming-1 parent trees
+- Local recurrence-allowed Hamming-1 candidate arborescences
 - Deterministic read-AF ordering, **CN/LOH-uncorrected**
 - Exact rooted-unlabeled topology census
 - Pattern-conditioned methylation **association**
@@ -124,20 +133,21 @@ Inferred internal nodes are labelled `inferred` rather than asserted.
 
 ## Status
 
-Everything below was verified by actually running it, not by reading documentation.
+The table is version-scoped. "Verified" means the listed artifact was run or inspected at
+the stated audit version; it is not a blanket guarantee for every public command or file.
 
 | Component | Status | Notes |
 |---|:---:|---|
-| `inter_sub_mod` | ✅ runnable | Minimal run completes in **2.9 s**, exit 0 |
-| C++ test suite | ✅ passing | **265 tests / 38 suites**, 2.06 s |
+| `inter_sub_mod` | ✅ runnable | Fresh build/run audit at tracked core `73afaeac`; command receipt is linked below |
+| C++ test suite | ✅ passing | **270 tests / 39 suites** and CTest **270/270**, fresh 2026-08-12 run |
 | 7-sample HP/PS sidecars | ✅ complete | 7/7 PASS |
-| Layered tree-enumeration solver | ✅ runnable | This is the path producing the numbers above |
+| Research exact-PS topology solver | ✅ runnable | Separate research solver path producing the exact-PS funnel above; not `inter_sub_mod` |
 | `longlineage preflight` | ✅ runnable | Validates the 8-role manifest |
 | `longlineage dataset-gate` | ⚠️ constrained | Only path yielding science output — but **hardcoded to one dataset** |
 | `longlineage run` / `probe` | 🔴 blocked | `KernelBlocked` by design |
 | `longlineage` topology output | 🔴 0 units | See [caveat](#a-note-on-longlineage) |
-| Writing a tagged BAM | 🔴 not supported | Neither engine can write BAM; forbidden by contract in LongLineage |
-| Single script spanning both engines | 🔴 none | The two lines are currently independent |
+| Writing a tagged BAM | ✅ runnable | `inter_sub_mod` does not write BAM; LongLineage public main `583e03e` now builds `longlineage-tag-bam` (`CMakeLists.txt:221`), merged 2026-08-17 |
+| Single script spanning both engines | ⚠️ per-engine only | LongLineage ships `scripts/run_sample.sh` (partition → tagged BAM). No single script yet spans LongLineage **and** `inter_sub_mod`; the run order is documented in [LongLineage's README](https://github.com/liaoyoyo/LongLineage#與-intersubmod-的關係先讀這節再決定要不要裝) |
 
 ### A note on LongLineage
 
@@ -146,7 +156,8 @@ fork). Its contracts are excellent: every artefact is schema-locked with SHA-256
 and `topology_unit` splits "how far did we get" into four independent state fields with
 named abstention reasons.
 
-But **on real data it currently emits 0 topology units**, and this is *not* a bug:
+For the frozen **HCC1395 dataset-gate receipt** it emits 0 topology units; this does not
+generalise to every possible LongLineage run:
 
 ![LongLineage funnel](docs/images/longlineage-funnel.png)
 
@@ -172,17 +183,18 @@ Full walkthrough with expected output at every step:
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 
-# 2. Verify the build   -> expect "265 tests from 38 test suites ... PASSED"
+# 2. Verify the build   -> audited 2026-08-12: 270 tests from 39 suites, all passed
 ./build/bin/run_tests
 
 # 3. Python dependencies
 pip install -r requirements.txt
 
-# 4. Run on a single locus (~3 s)
+# 4. Supply your own indexed, licensed inputs. The public repository currently ships no
+#    runnable BAM/FASTA/VCF fixture, so these are placeholders, not copy-paste data paths.
 ./build/bin/inter_sub_mod \
-  --tumor-bam data/bam/HCC1395/tumor.bam \
-  --reference data/ref/hg38.fa \
-  --vcf       one_snv.vcf \
+  --tumor-bam /path/to/tumor.mm_ml.bam \
+  --reference /path/to/reference.fa \
+  --vcf       /path/to/candidates.vcf \
   --output-dir out_min
 ```
 
@@ -197,10 +209,12 @@ pip install -r requirements.txt
   read methylation similarity — **not** a subclonal phylogeny. This is the single most
   commonly misread output.
 
-Two more that fail *silently*: `methylation.csv`'s first column is a row index rather than
-a read name (the binding to reads is positional, with no key check), and
-`significance_summary.csv` has a **different column count across binary versions** with no
-version field — always index by column name.
+Two more version-sensitive details: `methylation.csv`'s first column is a row index rather
+than a read name (the binding to reads is positional, with no key check). At audited core
+`73afaeac`, `significance_summary.csv` has **199 columns**, including
+`VerificationSchemaVersion=2` and `RegionStratificationSchemaVersion=1`. These are component
+schema fields, not a single whole-file layout version; always index by column name and pin
+the producing commit.
 
 </details>
 
@@ -222,9 +236,12 @@ no external dependencies, openable offline.
 
 > **Two ways to read the same material.** The table above links to the **Wiki**, which
 > GitHub renders natively and is the quickest to skim. The same content is also served as
-> fully self-contained HTML at **[liaoyoyo.github.io/InterSubMod](https://liaoyoyo.github.io/InterSubMod/)**
-> — richer typography, interactive fold-out sections, and 29 hand-drawn diagrams rendered
-> inline as SVG. Both are generated from `docs/explain/`, which is the single source.
+> fully self-contained HTML at **[liaoyoyo.github.io/InterSubMod](https://liaoyoyo.github.io/InterSubMod/)**.
+> `docs/explain/` is the editorial upstream; the Wiki is a manually synchronized derivative,
+> and publication is a separate step. At audited Pages deploy `fbdf7c7`, the 17 standalone
+> pages contained **37 inline `<svg>` elements**, counted with the command documented in the
+> correction receipt. Do not assume that this version-scoped element count represents 37
+> distinct semantic figures or that Wiki and Pages are byte-identical.
 
 Pages 01–10 cover the scientific method itself (glossary, ISM core, methylation read/filter,
 worked case studies, statistical division of labour, capability vs. narrative).
@@ -235,17 +252,19 @@ worked case studies, statistical division of labour, capability vs. narrative).
 
 Two patterns in this repository generalise beyond genomics.
 
-**1 · Streaming instead of materialising.** Haplotagged BAMs for 7 samples would occupy
-**1.67 TiB**. The tagged stream is instead piped through a named FIFO and reduced on the fly
-to a 9-column sidecar — **5.83 GiB, a 287× reduction** — because the analysis only ever needs
-"which read, where, which haplotype". Sequence and quality strings were >99 % of the volume
-and 0 % of the use.
+**1 · Streaming instead of materialising.** A tagged stream can be piped through a named FIFO
+and reduced on the fly to the current 9-column sidecar contract. The seven audited sidecars
+sum to **6,256,168,164 bytes (5.83 GiB)**. The previously displayed **1.67 TiB** tagged-BAM
+total has no committed seven-file path/byte/hash/compression receipt, so it is **UNVERIFIED**
+and no storage-reduction multiplier is claimed. The current sidecar omits `SEQ` and `QUAL`;
+their byte share and downstream utility were not measured by a field-level census.
 
 ![Upstream chain](docs/images/upstream-toolchain.png)
 
-**2 · Make fabrication structurally impossible.** The report generator takes a declarative
-spec and **refuses to render (exit 3)** when a required metric is missing — it does not
-emit a dash or a blank. A missing number cannot be silently dressed up as a present one.
+**2 · Refuse missing required metrics.** The audited workstation generator takes a
+declarative spec and **refuses to render (exit 3)** when a declared required metric is
+missing. This prevents silent rendering of those declared fields; it does not validate
+their truth, denominator or source, and it cannot detect omitted optional fields.
 
 ![Refuse-on-missing design](docs/images/workstation-refuse-design.png)
 
@@ -270,12 +289,32 @@ tools/                      Rendering, QA and extraction utilities
 state/                      Research cycle state machine
 ```
 
-## Status of this document
+## Verification scope of this document
 
-Every number, command and file format in this README was verified on **2026-08-06** by
-executing the commands and reading the source. Figures are generated from
-`docs/explain/` by `tools/extract_svg_for_github.py` — regenerate them after editing the
-source pages rather than editing the images.
+This README is bounded by the
+[2026-08-12 public-claim audit](docs/reports/validated/2026/08/20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md).
+The frozen exact-PS counts were checked against the authority manifest and denominator
+registry; the tracked C++ core was freshly built and tested. The public quick-start data are
+**not shipped**, GitHub About/Wiki/Pages have independent publication state, and LongLineage
+capabilities are pinned to the commits named above. Therefore no blanket "every number and
+command was verified" claim is made. Figures are extracted from `docs/explain/` by
+`tools/extract_svg_for_github.py`; regenerate them after editing their source pages.
+
+| Artifact / claim family | Verification identity and date | Reproducible check and result | Scope and known failure |
+|---|---|---|---|
+| Frozen exact-PS funnel | Frozen authority artifacts, rechecked 2026-08-12 | Manifest/hash census plus independent denominator recomputation; exact counts reproduced | Frozen 7-dataset analysis only; it is not the `inter_sub_mod` CLI and does not identify cellular clones |
+| Tracked C++ core | `73afaeac-dirty`, GCC 11.4.0, htslib 1.18; run 2026-08-12 | `cmake -S . -B <build> -DCMAKE_BUILD_TYPE=Release`, build, direct GoogleTest and CTest: build exit 0; 270 tests / 39 suites; CTest 270/270 | Audited C++/CMake build inputs were byte-equivalent to remote feature `ddd8909`; the run was local-dirty, not a clean-checkout release certification |
+| Public quick start | Current source, reviewed 2026-08-13 | Build/test path is reproducible; analysis invocation uses explicit user-supplied placeholders | No public tumor BAM/reference/VCF fixture is shipped, so no end-to-end biological result is claimed |
+| LongLineage status | Public main `583e03e` (2026-08-17); frozen HCC1395 evidence | Merged the three `agent/public-preview-*` branches plus the tag-bam/solver commits into public `main`, then rebuilt and reran its suite in an isolated worktree: build exit 0, **ctest 49/49** | `scripts/ci/check_public_preview_gate.sh HEAD` still reports **FAIL with 5 open blockers** (license review pending, 4 `NO_GO` source rows, 21 unapproved source-license rows, 11 `NOASSERTION` dependencies, 4 historical blobs carrying developer absolute paths). Readable/buildable, **not** a license-cleared redistribution. No 7-sample runtime/memory or multi-dataset topology validation |
+| GitHub surfaces | Local source corrected 2026-08-13; GitHub About is `RESOLVED_LIVE` | Live API check plus the P0/P1/P2 claim guards and source checks in this refresh cycle | Default `main`, Wiki and Pages still expose the earlier deployed bytes; they remain pending publication and must not be described as live-corrected |
+
+The exact commands and captured output are preserved in the
+[command receipts](research/20260812_intersubmod_github_public_docs_full_validation/command_receipts.md);
+the per-claim correction status is tracked in the
+[P0 correction cycle](research/20260813_public_docs_p0_correction/00_INDEX.md), and the
+[2026-08-13 public-surfaces refresh cycle](research/20260813_intersubmod_public_surfaces_refresh/00_INDEX.md)
+separates local corrections from the
+[live remote-state receipt](research/20260813_intersubmod_public_surfaces_refresh/remote_state_receipt.md).
 
 Known gaps, stated honestly: copy-number is `NOT_INTEGRATED`; LongLineage's 7-sample runtime
 and memory ceiling have **never been measured** and its own documentation forbids

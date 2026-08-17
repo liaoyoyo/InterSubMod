@@ -350,6 +350,7 @@ docs/**/*_bak
 #    故不在此排除；但 >10 MB 的 workstation HTML 建議改為外部載入資料而非內嵌。
 docs/methodology/_assets/**/*.json
 docs/methodology/_assets/**/*.tsv
+!docs/methodology/_assets/20260627_subclone_4axis_teaching/schemas/layered_input_manifest_v3.schema.json
 
 # === research 分析輸出資料（added 2026-08-06）===
 # 決策（2026-08-06 用戶）：research/ 的分析輸出視為「可重生」不進版本控制，
@@ -375,6 +376,20 @@ research/**/*.csi
 research/**/*.tbi
 research/**/*.sqlite
 research/**/*.sqlite3
+# Append-only research SoT required by research/AGENTS.md; keep this one JSONL trackable.
+!research/autoresearch/evidence_ledger.jsonl
+# 2026-08-13 multi-BAM dashboard: tracked ingestion contracts and validation artifacts.
+!research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.schema.json
+!research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.json
+!research/20260813_hcc1395_drilldown_validation/multi_bam_dashboard_artifact.json
+!research/20260813_hcc1395_drilldown_validation/results/multi_bam_input_manifest_validation.json
+!research/20260813_hcc1395_drilldown_validation/results/multi_bam_dashboard_browser_qa.json
+!research/20260813_hcc1395_drilldown_validation/results/cohort_topology_metrics.csv
+!research/20260813_hcc1395_drilldown_validation/results/bundle_overview.csv
+!research/20260813_hcc1395_drilldown_validation/results/methylation_coverage_by_k.csv
+!research/20260813_hcc1395_drilldown_validation/results/methylation_axis_metrics.csv
+!research/20260813_hcc1395_drilldown_validation/results/metrics_audit.json
+!research/20260813_hcc1395_drilldown_validation/results/legacy_browser_visual_audit.generated.json
 # debug trace 以 PID 當副檔名（實例：audit_notes/diagnostic_staging/20260723_v18_c_child_failure/
 # v18_c_write_trace.2906527 等 153 個）。用檔案級 pattern 而非擋整個 diagnostic_staging/ 目錄，
 # 因為該目錄內的 README.md 是有價值的失敗判定文件。
@@ -382,6 +397,13 @@ research/**/*_trace.[0-9]*
 !research/**/manifest.json
 !research/**/schemas/*.json
 !research/**/*.standalone.html
+# Machine-readable contract for the bounded 2026-08-13 public-doc P0 correction guard.
+!research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json
+# 2026-08-13 InterSubMod public-surface refresh: small canonical contracts and final QA only.
+!research/20260813_intersubmod_public_surfaces_refresh/scripts/p1_p2_claim_registry.json
+!research/20260813_intersubmod_public_surfaces_refresh/pages_structural_qa.json
+!research/20260813_intersubmod_public_surfaces_refresh/pages_browser_qa.json
+!research/20260813_intersubmod_public_surfaces_refresh/report_artifact.json
 # ⚠ receipt*.json 刻意「不」放行（2026-08-06 用戶決策）：
 #   實測 research/ 下 308 個 receipt 共 106.8 MB、86 個 >200KB，
 #   分類後幾乎全是 QA/審查/測試失敗輸出（audit_notes/ 136、*.failed.*/ 83、
@@ -431,3 +453,10 @@ drilldown.paths.json
 # 研究過程產生的大量圖表仍由上方 *.png 規則擋住。
 !docs/images/*.png
 !docs/images/*.svg
+
+# 合成 fixture 全部是衍生產物 —— 只有產生器進 git。
+# 把產物也提交會多出一個真值來源，日後改了產生器卻忘了重產，
+# committed fixture 就會和它宣稱的產生方式不一致。
+# 產生方式：python3 scripts/make_synthetic_fixture.py（固定亂數種子，結果可重現）
+tests/fixtures/synthetic/*
+!tests/fixtures/synthetic/README.md
