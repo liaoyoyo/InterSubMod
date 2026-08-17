@@ -20,7 +20,7 @@ CLAIM_INVENTORY_RELATIVE = "research/20260812_intersubmod_github_public_docs_ful
 GUARD_RELATIVE = "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json"
 OUTPUT = PACKAGE / "evidence/algorithm_cli_claim_crosswalk.json"
 VALIDATOR = "scripts/handoff/validate_algorithm_cli_crosswalk.py"
-ASSESSED_GIT_COMMIT = "e83437ab9775d2cd3e27eb4e57f89f7d38126023"
+ASSESSED_GIT_COMMIT = "e0fa8571dd53c4834c7f292227b28158278c7638"
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 EXPECTED_COLUMNS = [
     "claim_id",
