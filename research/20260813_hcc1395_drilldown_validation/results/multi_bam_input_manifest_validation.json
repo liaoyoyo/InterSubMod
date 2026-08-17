@@ -1,0 +1,638 @@
+{
+  "builder": {
+    "path": "research/20260813_hcc1395_drilldown_validation/scripts/build_multi_bam_input_manifest.py",
+    "sha256": "d0b3f5304c79d89006a34d3c34bb9c7f2fd6a0ea06a1a012910adddeb2d4d6b4"
+  },
+  "claim_ceiling": "bounded_input_identity_and_existing_producer_receipts_only",
+  "command_argv": [
+    "research/20260813_hcc1395_drilldown_validation/scripts/build_multi_bam_input_manifest.py",
+    "--source-manifest",
+    "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5/input_manifest.snapshot.json",
+    "--source-schema",
+    "docs/methodology/_assets/20260627_subclone_4axis_teaching/schemas/layered_input_manifest_v3.schema.json",
+    "--topology-csv",
+    "research/20260813_hcc1395_drilldown_validation/results/cohort_topology_metrics.csv",
+    "--schema",
+    "research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.schema.json",
+    "--output",
+    "research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.json",
+    "--receipt",
+    "research/20260813_hcc1395_drilldown_validation/results/multi_bam_input_manifest_validation.json"
+  ],
+  "dataset_evidence": [
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/HCC1395/ONT/ClairS_v0_4_0/output.vcf.gz",
+        "sha256": "09a22727712e4f2abda1c5f687d694e431e60699928d2673511a899d91842cf5",
+        "source_directory_pairing_status": "CROSS_DIRECTORY_REVIEW_REQUIRED"
+      },
+      "dataset_id": "HCC1395",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "de584fa07a3d100fa4c52c8afd05e81c531c9195de00507a250ec342d7474552"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/HCC1395/ONT_Dorado/ClairS_v0_4_0/output.vcf.gz",
+        "sha256": "ae8ade229812e701a76f712454ff9a401494436d603d5474a2177bf6c8574f81",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "HCC1395_DORADO",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1395_DORADO/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "37e53d2e6571b809be6fb1fe2f69a69bf87f53d5dd3f4a76cb76d8b30ecaf8ca"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/COLO829/ONT_PAO/ClairS_v0_4_1/output.vcf.gz",
+        "sha256": "74909a8626c624a56d3037d3e657a0bb44a7aabd1888a0d43c07b0532d82985b",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "COLO829",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/COLO829/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "e2ff97d618899cf83dc4843d041411c24652453e761f13aec6bdfc4766074c36"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/H1437/ONT/ClairS_v0_4_1/output.vcf.gz",
+        "sha256": "a9ef4900bd79b157ab1d9d0e8678c61ca69d272eb1075529fede56bcd0871a4b",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "H1437",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/H1437/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "9e095fad9427beb6da0577aa2b2a2a5c1f179ad1ab17b5fae295b99ce4e27b80"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/H2009/ONT/ClairS_v0_4_1/output.vcf.gz",
+        "sha256": "afa425621864678eb979b78e9337e4d00df3a4d915b247324035406c3e858cdb",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "H2009",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/H2009/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "a69607042af61229c662fc9c96f2aaea02834f2278d003228cc9e5014102df71"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/HCC1937/ONT/ClairS_v0_4_1/output.vcf.gz",
+        "sha256": "3f86d0f4b22e1d6e1dc01f68ad68fa2ab25c52915bd48031e71b7ffee6a0126a",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "HCC1937",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1937/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "40980baf3621230d053c16657c96877ec24274f65f7f73146bfcdc9d040d3e5f"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    },
+    {
+      "caller_input": {
+        "path": "/big8_disk/data/HCC1954/ONT/ClairS_v0_4_1/output.vcf.gz",
+        "sha256": "7372008d72e4aacddd4e54ea7a3c52903be2255a14339cc396de69f3399a0842",
+        "source_directory_pairing_status": "SAME_DIRECTORY_FAMILY"
+      },
+      "dataset_id": "HCC1954",
+      "normal_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      },
+      "producer_capture_receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2/samples/HCC1954/producer_capture_receipt_v2.json",
+        "same_sample_output_binding": "PASS",
+        "schema_name": "intersubmod.longphase_raw_all_capture_receipt",
+        "schema_version": "2.0.0",
+        "sha256": "09f95ba11e9ed346b9bd836076cee221d894c68165df36452071ff70b4260377"
+      },
+      "read_tag_validation": {
+        "failed_checks": [],
+        "same_sample_evidence_chain": "PASS",
+        "source_schema_version": "1.0"
+      },
+      "reference": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ]
+      },
+      "tumor_bam": {
+        "frozen_st_dev": 59,
+        "observed_st_dev": 60,
+        "payload_match_fields": [
+          "requested_path",
+          "realpath",
+          "logical_is_symlink",
+          "logical_size_bytes",
+          "logical_mtime_ns",
+          "st_ino",
+          "size_bytes",
+          "mtime_ns",
+          "ctime_ns",
+          "chunk_size_bytes",
+          "chunks",
+          "index"
+        ],
+        "quickcheck_diagnostic": ""
+      }
+    }
+  ],
+  "generated_at_utc": "2026-08-13T03:49:44+00:00",
+  "inputs": {
+    "source_manifest": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260713_layered_reconstruction_v3_raw_all_lps_pass_v5/input_manifest.snapshot.json",
+      "sha256": "16f2ef66634e8592e32e5088d8383d94dead0ae2b0d32847f4d8843f8bdc1a45"
+    },
+    "topology_csv": {
+      "path": "research/20260813_hcc1395_drilldown_validation/results/cohort_topology_metrics.csv",
+      "sha256": "4c22293d436fff4bce2da0180d6f3e3cecb883e7ad7cee0078aa71d0b1d177f9"
+    }
+  },
+  "output": {
+    "path": "research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.json",
+    "sha256": "2e290c06be9e98be480ea913b62b3de30ad827eb9e6894a5a68b4e5dfa53f190"
+  },
+  "samtools_version": "samtools 1.17-25-geb3be52",
+  "schema": {
+    "path": "research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.schema.json",
+    "sha256": "786126a683cbdad09ff0f890b460f0eedf4d9ab50a77ee99c0fc6ebc02dc86f0",
+    "supported_keywords": [
+      "$defs",
+      "$id",
+      "$ref",
+      "$schema",
+      "additionalProperties",
+      "allOf",
+      "const",
+      "description",
+      "enum",
+      "format",
+      "items",
+      "maxItems",
+      "maxLength",
+      "maximum",
+      "minItems",
+      "minLength",
+      "minimum",
+      "oneOf",
+      "pattern",
+      "prefixItems",
+      "properties",
+      "required",
+      "title",
+      "type",
+      "uniqueItems"
+    ],
+    "validation_engine": "intersubmod bounded Draft 2020-12 keyword validator plus semantic validation"
+  },
+  "schema_name": "intersubmod.multi_bam_dashboard_input_manifest_validation",
+  "schema_version": "1.0.0",
+  "source_schema": {
+    "path": "docs/methodology/_assets/20260627_subclone_4axis_teaching/schemas/layered_input_manifest_v3.schema.json",
+    "sha256": "47f54d86159beae66b68719e034c7755eba59b2d1719d4546153fa0ae74ff19f",
+    "validation_engine": "intersubmod bounded Draft 2020-12 keyword validator"
+  },
+  "status": "PASS_BOUNDED_WITH_METADATA_DRIFT",
+  "verification_summary": {
+    "all_input_roles_mount_device_drift_only_n": 7,
+    "all_input_roles_strict_storage_identity_match_n": 0,
+    "bai_present_n": 7,
+    "bai_sha256_match_n": 7,
+    "bam_present_n": 7,
+    "cross_directory_pairing_n": 1,
+    "dataset_count": 7,
+    "full_bam_sha256_n": 0,
+    "header_read_n": 7,
+    "no_read_group_n": 7,
+    "normal_bai_present_n": 7,
+    "normal_bam_present_n": 7,
+    "normal_bounded_payload_match_n": 7,
+    "normal_quickcheck_pass_n": 7,
+    "quickcheck_pass_n": 7,
+    "read_tag_conservation_pass_n": 7,
+    "reference_bounded_payload_match_n": 7,
+    "reference_dictionary_compatible_n": 7,
+    "sample_set_match": true,
+    "sidecar_validation_pass_n": 7,
+    "status": "PASS_BOUNDED_WITH_METADATA_DRIFT",
+    "tumor_bounded_payload_match_n": 7,
+    "tumor_mount_device_drift_only_n": 7,
+    "tumor_strict_storage_identity_match_n": 0
+  }
+}

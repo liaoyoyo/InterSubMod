@@ -1,0 +1,653 @@
+{
+  "schema_version": 1,
+  "generated_for": "20260813_intersubmod_public_surfaces_refresh",
+  "source_inventory": "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+  "status_semantics": {
+    "publication_pending": "All listed checks concern local source only. A claim remains open on public surfaces until the corrected source is published and the live artifact is re-fetched.",
+    "local_source_corrected_publication_pending": "The local wording is bounded or corrected, but remote publication and live-byte verification remain outstanding.",
+    "unsupported_public_claim_removed_publication_pending": "The unsupported number or assertion was removed locally; the remote artifact must still be published and re-fetched."
+  },
+  "locked_public_state": [
+    {
+      "surface": "default branch",
+      "locked_at": "main@635437a65a33f8ba698acf85b22ebb069455c6cc",
+      "live_status": "publication_pending"
+    },
+    {
+      "surface": "GitHub Wiki",
+      "locked_at": "master@6cfc990f1fbe0b0aa76b8adbe56bbe645ef7ee7b",
+      "live_status": "publication_pending"
+    },
+    {
+      "surface": "GitHub Pages",
+      "locked_at": "deploy@fbdf7c7d229b0b37930778cbcd928cf9e15ecb17",
+      "live_status": "publication_pending"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "C047",
+      "source_verdict": "UNVERIFIABLE",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The seven sidecars have an exact byte sum, but no committed per-tagged-BAM path, exact-byte, compression-state and hash receipt supports a seven-file tagged-BAM total.",
+      "checks": [
+        {
+          "target": "docs/explain/14_upstream-data.standalone.html",
+          "required_all": [
+            "6,256,168,164 bytes",
+            "UNVERIFIED",
+            "tagged BAM.*缺 per-file bytes / hash receipt"
+          ],
+          "forbidden_any": [
+            "<div class=\"v\">\\s*1\\.67\\s*TiB\\s*</div>"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the corrected README, Wiki and Pages sources; then verify that every live tagged-BAM total is explicitly UNVERIFIED unless a complete receipt is added."
+      ]
+    },
+    {
+      "claim_id": "C048",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "unsupported_public_claim_removed_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The displayed rounded values imply 293.34-fold rather than 287-fold, and an exact tagged-BAM numerator is not available for a valid exact comparison.",
+      "checks": [
+        {
+          "target": "docs/explain/14_upstream-data.standalone.html",
+          "required_all": [
+            "6,256,168,164 bytes",
+            "未有同對象的精確 bytes 前不報節省倍率"
+          ],
+          "forbidden_any": [
+            "287\\s*(?:×|x|-fold)",
+            "293\\.34\\s*(?:×|x)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the corrected storage wording and re-fetch the live README, Wiki and Pages to verify that no 287-fold multiplier remains."
+      ]
+    },
+    {
+      "claim_id": "C089",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "Only the sidecar sum is exactly receipted; the tagged-BAM estimate and any whole-storage-snapshot verification claim lack equivalent provenance.",
+      "checks": [
+        {
+          "target": "docs/wiki/Upstream-and-Data.md",
+          "required_all": [
+            "6,256,168,164 bytes",
+            "tagged BAM 的總量.*UNVERIFIED",
+            "沒有兩端 exact-byte receipts"
+          ],
+          "forbidden_any": [
+            "(?:fully verified|完整驗證).{0,80}(?:storage snapshot|儲存快照)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the split sidecar-versus-tagged-BAM provenance statement and verify the live Wiki and Pages retain the UNVERIFIED boundary."
+      ]
+    },
+    {
+      "claim_id": "C090",
+      "source_verdict": "UNVERIFIABLE",
+      "priority": "P1",
+      "disposition": "unsupported_public_claim_removed_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The nine-field sidecar contract omits SEQ and QUAL, but no field-level byte census or downstream-utility audit supports greater-than-99-percent payload or zero-utility claims.",
+      "checks": [
+        {
+          "target": "docs/wiki/Upstream-and-Data.md",
+          "required_all": [
+            "sidecar contract 只保留九欄",
+            "不保留 `SEQ`／`QUAL`",
+            "尚無 field-level BAM byte census",
+            "不宣稱它們占 `>99%` 或有 `0%` 用途"
+          ],
+          "forbidden_any": [
+            "(?:SEQ|QUAL)[^\\n。]{0,60}(?:本身|實際|alone).{0,30}(?:占|account for).{0,15}>?99%",
+            "(?:SEQ|QUAL).{0,80}0%\\s*(?:utility|用途|效用)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the contract-only statement and re-fetch live artifacts to verify that field byte-share and utility are not presented as measured."
+      ]
+    },
+    {
+      "claim_id": "C110",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "Non-identifiability is supported only for the stated per-locus marginal-VAF observation model without linkage or additional assumptions, not for every short-read design.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "per-locus marginal variant allele frequencies",
+            "no linkage.*additional model assumptions",
+            "not identifiable from those marginals alone"
+          ],
+          "forbidden_any": [
+            "provably non-identifiable",
+            "mathematically proven unsolvable"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the conditional identifiability wording and verify the live README, Wiki and Pages do not generalize it to all short-read designs."
+      ]
+    },
+    {
+      "claim_id": "C111",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The four-way methylation-cause ambiguity is conditional on the current single-bulk measurement set and the absence of orthogonal data or additional assumptions.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "not\\s+identifiable from the current single-bulk measurement set",
+            "without\\s+orthogonal data or\\s+additional assumptions"
+          ],
+          "forbidden_any": [
+            "A single bulk sample (?:cannot|can not).{0,100}(?:separate|distinguish).{0,80}(?:four|4)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the measurement-conditional statement and verify the live README, Wiki and Pages preserve the orthogonal-data caveat."
+      ]
+    },
+    {
+      "claim_id": "C114",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The two eligibility flags occur in canonical cohort_receipt.json and summary/all7_summary.json, not at the top level of authority_manifest.json.",
+      "checks": [
+        {
+          "target": "docs/explain/11_system-map-overview.standalone.html",
+          "required_all": [
+            "cohort_receipt\\.json",
+            "summary/all7_summary\\.json",
+            "不在.*authority_manifest\\.json.*頂層"
+          ],
+          "forbidden_any": [
+            "canonical output literally records"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the named-artifact provenance statement and verify both live flag occurrences point to the two actual canonical files."
+      ]
+    },
+    {
+      "claim_id": "C115",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "docs/explain is the editorial upstream, whereas docs/wiki files are manually synchronized derivatives in a separate Wiki repository and may drift.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "docs/explain/` is the editorial upstream",
+            "Wiki is a manually synchronized derivative",
+            "publication is a separate step"
+          ],
+          "forbidden_any": [
+            "(?:Wiki and Pages|Wiki.{0,40}Pages).{0,60}generated from.{0,30}docs/explain"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the source-of-truth boundary and verify the live README does not describe Wiki and Pages as one automatically generated artifact."
+      ]
+    },
+    {
+      "claim_id": "C116",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P2",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "At deploy fbdf7c7 the 17 standalone HTML files contain 37 inline SVG elements; this DOM count is not a semantic-figure inventory.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "17 standalone",
+            "37 inline `<svg>` elements",
+            "Do not assume.{0,160}37.{0,40}distinct semantic figures"
+          ],
+          "forbidden_any": [
+            "29\\s+(?:hand-drawn\\s+)?(?:inline\\s+)?SVG",
+            "29 張.{0,20}SVG"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the version-scoped DOM-element count and re-count the deployed live Pages before closing the claim."
+      ]
+    },
+    {
+      "claim_id": "C117",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The evaluated methylation-filter formulation is a bounded negative result; repository governance allows reopening only with a materially new hypothesis and pre-decision audit.",
+      "checks": [
+        {
+          "target": "docs/explain/02_ism-core.standalone.html",
+          "required_all": [
+            "已測 formulation = NEGATIVE",
+            "重啟必須有實質新假說 \\+ pre-decision audit",
+            "不影響.*characterization 價值"
+          ],
+          "forbidden_any": [
+            "(?:never|永遠|永不|勿).{0,20}(?:reopen|重開)",
+            "filter\\s+DEAD"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the bounded governance wording and verify all live Pages and Wiki occurrences permit audited reconsideration of materially new hypotheses."
+      ]
+    },
+    {
+      "claim_id": "C118",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P2",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The negative evidence consists of multiple convergent tests for a dated evaluated formulation; it is not an assumption-free or permanent proof.",
+      "checks": [
+        {
+          "target": "docs/explain/03_methylation-read-filter.standalone.html",
+          "required_all": [
+            "已測的甲基特徵 formulation",
+            "當時範圍與日期的多個測試一致為 NEGATIVE",
+            "有界結論"
+          ],
+          "forbidden_any": [
+            "bulletproof",
+            "四個.{0,15}(?:鐵證|無懈可擊)",
+            "永久證明"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the scoped/date-bounded negative-evidence wording and verify the live Pages contain no bulletproof framing."
+      ]
+    },
+    {
+      "claim_id": "C119",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "Matched-normal calling usually improves germline/somatic separation but remains fallible and requires truth-set benchmarking.",
+      "checks": [
+        {
+          "target": "docs/explain/01_background-glossary.standalone.html",
+          "required_all": [
+            "paired caller.*通常能改善 germline/somatic 分離",
+            "仍會誤判",
+            "truth set 做 benchmark"
+          ],
+          "forbidden_any": [
+            "精準(?:地)?(?:分開|分離)",
+            "precisely separate"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the imperfect-caller caveat and verify the live glossary requires benchmarking rather than asserting precise separation."
+      ]
+    },
+    {
+      "claim_id": "C120",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The normal-anchored 1.8-times-drift-plus-0.02 rule is a project heuristic with complete matched-normal evidence only for HCC1395, not a validated causal cis test.",
+      "checks": [
+        {
+          "target": "docs/explain/02_ism-core.standalone.html",
+          "required_all": [
+            "\\|d_cis\\| &gt; 1\\.8×\\|d_drift\\| \\+ 0\\.02",
+            "cis-compatible / copy-screen-negative",
+            "不是 cis truth|不確認 cis truth",
+            "僅 HCC1395"
+          ],
+          "forbidden_any": [
+            "\\btrue cis\\b",
+            "(?:真正|真實)的? cis"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the heuristic and single-sample limitations, then verify every live cis-test occurrence uses candidate rather than causal-truth language."
+      ]
+    },
+    {
+      "claim_id": "C121",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "A significant PERMANOVA result when Cramer's V is reliability-gated to zero is a candidate structure requiring dispersion and design checks, not latent truth.",
+      "checks": [
+        {
+          "target": "docs/explain/02_ism-core.standalone.html",
+          "required_all": [
+            "PERMANOVA-positive candidate structure missed by the V reliability gate",
+            "非已確認真實 HP 分群|不等於已確認分群",
+            "dispersion.*設計檢查"
+          ],
+          "forbidden_any": [
+            "latent true structure",
+            "潛在真實結構"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the candidate-only interpretation and verify the live core Pages do not label reliability-gated sites as latent truth."
+      ]
+    },
+    {
+      "claim_id": "C122",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The p-value measures incompatibility with a specified null and Cramer's V summarizes association magnitude; neither is a truth controller.",
+      "checks": [
+        {
+          "target": "docs/explain/09_three-stats-division-of-labor.standalone.html",
+          "required_all": [
+            "指定 null.{0,20}不相容",
+            "Cramér's V.{0,80}關聯幅度",
+            "都不是.{0,20}真假機率"
+          ],
+          "forbidden_any": [
+            "p\\s*(?:控制|決定).{0,12}(?:truth|真偽)",
+            "V\\s*(?:控制|決定).{0,12}(?:strength|強度)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the null-incompatibility and effect-size definitions, then verify the live statistics page contains no truth-control wording."
+      ]
+    },
+    {
+      "claim_id": "C123",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "PERMANOVA tests label-associated centroid separation and can be confounded by dispersion or design; it does not establish biological grouping validity.",
+      "checks": [
+        {
+          "target": "docs/explain/09_three-stats-division-of-labor.standalone.html",
+          "required_all": [
+            "label-associated centroid separation",
+            "PERMDISP",
+            "設計限制"
+          ],
+          "forbidden_any": [
+            "PERMANOVA.{0,40}(?:validates|establishes).{0,30}(?:group|grouping)",
+            "PERMANOVA.{0,25}(?:判定|決定).{0,25}分組.{0,12}(?:有效|成立)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the centroid-separation definition and re-fetch the live Pages to verify PERMDISP and design limitations are visible."
+      ]
+    },
+    {
+      "claim_id": "C132",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P2",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The public evidence supports a project-specific combination, while novelty and comparative advantage require a cited systematic review and matched head-to-head benchmark.",
+      "checks": [
+        {
+          "target": "docs/explain/02_ism-core.standalone.html",
+          "required_all": [
+            "專案特定組合",
+            "不等於已證明首創或優於競品",
+            "系統性文獻回顧與 head-to-head benchmark"
+          ],
+          "forbidden_any": [
+            "本(?:方法|工具|組合).{0,20}(?:是|為).{0,12}(?:首創|首次|唯一)",
+            "(?:first|unique).{0,25}(?:method|tool|combination)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the project-specific wording and complete a dated systematic review plus matched benchmark before making novelty or superiority claims."
+      ]
+    },
+    {
+      "claim_id": "C133",
+      "source_verdict": "NEEDS_CORRECTION",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "Exit code 3 guards only declared required metrics; it cannot validate data truth, denominator, source correctness, omitted optional fields, methods or conclusions.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "refuses to render \\(exit 3\\)",
+            "declared required metric",
+            "does not validate.*truth, denominator or source",
+            "cannot detect omitted optional fields"
+          ],
+          "forbidden_any": [
+            "fabrication.{0,30}structurally impossible",
+            "structurally impossible.{0,30}fabrication"
+          ]
+        },
+        {
+          "target": "docs/explain/15_python-html-layer.standalone.html",
+          "required_all": [
+            "required-metric guard 防止缺少已宣告欄位時靜默渲染",
+            "不是資料真實性或科學正確性的驗證器"
+          ],
+          "forbidden_any": [
+            "由構造防止捏造數字",
+            "fabrication.{0,30}structurally impossible"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the required-metric-only boundary and verify the live README, Wiki and Pages contain no structural-impossibility fabrication claim."
+      ]
+    },
+    {
+      "claim_id": "C145",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "A fresh 2026-08-12 audit at tracked core 73afaeac produced 270 tests from 39 suites and CTest 270/270; future commits must use their own command output.",
+      "checks": [
+        {
+          "target": "README.md",
+          "required_all": [
+            "tracked core `73afaeac`",
+            "270 tests / 39 suites",
+            "2026-08-12",
+            "CTest 270/270"
+          ],
+          "forbidden_any": [
+            "265 tests",
+            "38 suites"
+          ]
+        },
+        {
+          "target": "docs/explain/16_how-to-run.standalone.html",
+          "required_all": [
+            "2026-08-13",
+            "270 tests / 39 suites",
+            "command-derived observation",
+            "未從乾淨 checkout 重建"
+          ],
+          "forbidden_any": [
+            "265 tests",
+            "38 suites"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the version-scoped test snapshot and verify live documents do not treat 270/39 as a permanent future-commit constant."
+      ]
+    },
+    {
+      "claim_id": "C146",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "git ls-tree at deploy fbdf7c7 counts 2,147 tracked Python files across the repository.",
+      "checks": [
+        {
+          "target": "docs/explain/15_python-html-layer.standalone.html",
+          "required_all": [
+            "deploy commit.*fbdf7c7",
+            "2,147",
+            "git ls-tree -r --name-only fbdf7c7.*rg.*\\\\.py\\$"
+          ],
+          "forbidden_any": [
+            "2,144",
+            "2144\\s+(?:Python|tracked)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish page 15 and the Wiki mirror, then repeat the exact tree-count command against the deployed commit and verify live wording."
+      ]
+    },
+    {
+      "claim_id": "C147",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "git ls-tree at deploy fbdf7c7 counts 291 tracked .py files under scripts, including generated-, test- and helper-named tracked files.",
+      "checks": [
+        {
+          "target": "docs/explain/15_python-html-layer.standalone.html",
+          "required_all": [
+            "git ls-tree -r --name-only fbdf7c7 scripts.*291",
+            "291 個 tracked Python 檔",
+            "未排除 generated/test/helper"
+          ],
+          "forbidden_any": [
+            "268\\s+(?:Python|tracked)",
+            "scripts/.{0,30}268"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the corrected scripts count and inclusion definition, then verify the live Page and Wiki against the exact commit tree."
+      ]
+    },
+    {
+      "claim_id": "C156",
+      "source_verdict": "CONTRADICTED",
+      "priority": "P1",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "Matched normal shows none of the six expected somatic ALT alleles, but it includes occasional other non-reference error calls.",
+      "checks": [
+        {
+          "target": "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html",
+          "required_all": [
+            "matched normal 未觀察到六個預期 somatic ALT",
+            "偶有其他 non-reference error calls"
+          ],
+          "forbidden_any": [
+            "normal reads.{0,50}(?:all|全部).{0,12}REF",
+            "normal.{0,30}六個.{0,30}全(?:部)?是 REF"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish page 10 and verify the live case study distinguishes absence of the six expected ALT alleles from absence of all non-reference errors."
+      ]
+    },
+    {
+      "claim_id": "C157",
+      "source_verdict": "UNVERIFIABLE",
+      "priority": "P1",
+      "disposition": "unsupported_public_claim_removed_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "No locked benchmark log provides hardware, producing commit, input distribution, repetitions and a thread-scaling curve for the old speedup or latency claims.",
+      "checks": [
+        {
+          "target": "README_PROJECT_SUMMARY.md",
+          "required_all": [
+            "OpenMP.*Region-level 平行化",
+            "沒有鎖定 hardware.?commit",
+            "input distribution.*repetitions.*thread-scaling curve",
+            "不提供.*speedup 或 per-region latency 數字"
+          ],
+          "forbidden_any": [
+            "linear speedup.{0,20}32 cores",
+            "32 核.{0,20}線性加速",
+            "<\\s*300\\s*ms",
+            "低於\\s*300\\s*(?:ms|毫秒)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the benchmark-gap wording; only restore performance numbers after adding hardware, commit, inputs, repetitions, distributions and scaling curves."
+      ]
+    },
+    {
+      "claim_id": "C158",
+      "source_verdict": "UNVERIFIABLE",
+      "priority": "P2",
+      "disposition": "local_source_corrected_publication_pending",
+      "live_status": "publication_pending",
+      "evidence": "The public pages do not contain a dated systematic literature search or matched head-to-head benchmark that can support first or unique priority claims.",
+      "checks": [
+        {
+          "target": "docs/explain/02_ism-core.standalone.html",
+          "required_all": [
+            "專案特定組合",
+            "不等於已證明首創或優於競品",
+            "系統性文獻回顧與 head-to-head benchmark"
+          ],
+          "forbidden_any": [
+            "本(?:方法|工具|組合).{0,20}(?:是|為).{0,12}(?:首創|首次|唯一)",
+            "(?:first|unique).{0,25}(?:method|tool|combination)"
+          ]
+        }
+      ],
+      "external_actions": [
+        "Publish the non-priority wording and require a dated systematic search plus matched benchmark before any future first or unique claim."
+      ]
+    }
+  ]
+}

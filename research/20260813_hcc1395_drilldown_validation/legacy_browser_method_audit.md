@@ -302,7 +302,7 @@ current code：0=no current L4 summary；1=HP；2=ALT/REF；4=lineage；bitwise 
 
 ### 10.1 Hash 與 stable input identity
 
-輸入：上述 legacy files、raw JSON、current `index.html/receipt.json/SELFCHECK.md`。  
+輸入：上述 legacy files、raw JSON、current `/bip7_disk/liaoyoyo2001/drilldown_out/HCC1395_v1/index.html`、`/bip7_disk/liaoyoyo2001/drilldown_out/HCC1395_v1/receipt.json`、`/bip7_disk/liaoyoyo2001/drilldown_out/HCC1395_v1/SELFCHECK.md`。
 命令：
 
 ```bash

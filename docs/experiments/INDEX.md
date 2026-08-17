@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-03-05 10:00
-更新時間: 2026-07-27（補多 sSNV pattern × 甲基 read 聚集圖 v06）
+更新時間: 2026-08-13（新增公開資訊全面校正與 performance claim 驗證邊界）
 目標: 實驗研究歷史主索引（精簡版），供 AI 快速掌握研究脈絡
 處理範圍: InterSubMod 專案 2025-11 至今的所有研究方向
 關聯檔案:
@@ -18,6 +18,22 @@
 ## 狀態圖例
 
 - ✅ 成功完成 | ❌ 失敗/無效 | ⏳ 進行中 | 🔄 值得再探索
+
+---
+
+## 最新（2026-08）
+
+### InterSubMod 公開資訊全面校正 — ✅ 2026-08-13（Task B / G4-G5）
+
+跨 README／Wiki／Pages 去重稽核 **158 個 claim families**：69 confirmed、31 confirmed with
+limits、28 needs correction、26 contradicted、4 unverifiable；問題集合 **58 = P0 34 + P1 20 +
+P2 4**。本地公開來源與 17 個 Pages 已依同一 scientific ceiling 校正，37 個 inline SVG 及
+desktop／mobile／no-JS／print 共 68 個 browser checks 全通過。GitHub About 已
+`RESOLVED_LIVE`；default `main`、Wiki、Pages 仍待發布。CCU 本輪只產生唯讀改進清單，未改
+CCU source 或 live site。[循環索引](../../research/20260813_intersubmod_public_surfaces_refresh/00_INDEX.md) ·
+[校正與 CCU 清單 HTML＋SVG 報告](../reports/validated/2026/08/20260813_InterSubMod公開資訊更新與CCU改進清單_01.standalone.html) ·
+[完整稽核](../reports/validated/2026/08/20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md) ·
+[遠端狀態收據](../../research/20260813_intersubmod_public_surfaces_refresh/remote_state_receipt.md)
 
 ---
 
@@ -92,7 +108,7 @@ SAVANA 1.3.7 在 ONT HCC1395（R10 5kHz Dorado）**跑通且 CN/LOH 與 SEQC2 tr
 判別流程把每位點分 5 態（①不可驗證 ②1群/無訊號 ③監督可分 mean-shift ④可分未對齊 ⑤確認真結構），tumor-only 與 merged(+normal cis-control) **分開**計算。N=30,490（=切群總帳一致）。**tumor**：①1.35% ②16.57% ③18.12%(loc4907/disp618) ④43.92% ⑤20.04%；切群對齊率 ⑤/(④+⑤)=**31.34%**、切不出有訊號 ③/(②+③)=**52.24%**(loc 46.4%)。**merged**（cis-control）：②2.35% ③6.76% ④54.93% ⑤34.73%；對齊 38.74%、切不出有訊號 74.24%。**門檻 valid≥4**（≤3 當 outlier）：aligned 切群 minority 中位 18/22 ≫ unaligned 7/9，T=3→5 把 ④ 砍 35%、對齊率 24%→36%。方法：outlier-tolerant UPGMA 切群 + CramérV 對齊 / PERMANOVA(BH-FDR)+PERMDISP(location vs dispersion)。🔴 merged ⑤ 多為 germline cis-ASM 非 somatic subclone；④ 是最大桶（雜訊+可能 epiallele 混雜）。[報告](in_progress/2026/06/20260620_decisionflow_5state_classification_wg_01.md) · HTML+4 figs `_assets/20260618_subcluster_pilot/20260620_decisionflow_5state_classification_01.standalone.html` · scripts decisionflow_{wg,analyze,plot} + build_decisionflow_report · 單樣本 ⭐2-3 偵測非驗證
 
 ### 論文就緒收斂稽核 + 外部文獻地景 + T7 umtag 註冊 — ✅ 2026-06-08（meta：跨 7 線獨立稽核）
-**(a) 7 角度外部文獻地景**（`knowledge/11_external_literature/` 00-09 + HTML，workflow wf_37b2cc97-663 實際 WebFetch ~38 篇）：我們做法/困難/觀察 × 外部 CONFIRM/REFUTE/DIFFERENT-VIEW + 跨問題依賴鏈。**(b) 論文就緒收斂稽核**（doc 10 + HTML，workflow wf_9e169112-573 7 線獨立 fresh-context auditor 實讀 ledger/json）：論文主軸 = read-level LOH/haplotype+甲基 **characterization+tooling**；主體三~四道防彈 NEGATIVE + phasing 脊柱(**Grade B+ 非 A**) + ASM copy-confounded 支撐。**2 真矛盾**：🔴 BRCA2 cis→**subclone/copy-confounded**(HP1-1=somatic subclone tag 非 copy、非 CN-dosage；% 不 robust；chr17/TBC1D16 唯一乾淨 cis；06-09 R1/R2/R3 已 amend lit-07+master_draft+全相關文件) / Grade A→B+。**決定性 HD-1（用戶決定·hold）**：phasing by-construction 循環 → 跑 R-SELFREF(~25-50hr C++) or 降為 characterization。**(c) T7 umtag 註冊（HD-5）**：methyl-assist phasing / 救 unphase read prototype 之前未進 SoT，本輪 append ledger `20260608_methyl_assisted_phasing_umtag_registration` = FUTURE-WORK/Discussion-only（held-out 0.8852 是模擬非真救援；白地真實但 NOT-READY）。**(d) NEGATIVE backbone 草稿**：[in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md](in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md)。現況地圖（給其他 AI）：[concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md](../concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md)。⚠ tsg 專案仍 active，T2/T3 數字可能再動。
+**(a) 7 角度外部文獻地景**（`knowledge/11_external_literature/` 00-09 + HTML，workflow wf_37b2cc97-663 實際 WebFetch ~38 篇）：我們做法/困難/觀察 × 外部 CONFIRM/REFUTE/DIFFERENT-VIEW + 跨問題依賴鏈。**(b) 論文就緒收斂稽核**（doc 10 + HTML，workflow wf_9e169112-573 7 線獨立 fresh-context auditor 實讀 ledger/json）：論文主軸 = read-level LOH/haplotype+甲基 **characterization+tooling**；主體三~四道防彈 NEGATIVE + phasing 脊柱(**Grade B+ 非 A**) + ASM copy-confounded 支撐。**2 真矛盾**：🔴 BRCA2 cis→**subclone/copy-confounded**(HP1-1=somatic subclone tag 非 copy、非 CN-dosage；% 不 robust；chr17/TBC1D16 唯一乾淨 cis；06-09 R1/R2/R3 已 amend lit-07+master_draft+全相關文件) / Grade A→B+。**決定性 HD-1（用戶決定·hold）**：phasing by-construction 循環 → 跑 R-SELFREF(~25-50hr C++) or 降為 characterization。**(c) T7 umtag 註冊（HD-5）**：methyl-assist phasing / 救 unphase read prototype 之前未進 SoT，本輪 append ledger `20260608_methyl_assisted_phasing_umtag_registration` = FUTURE-WORK/Discussion-only（held-out 0.8852 是模擬非真救援；白地真實但 NOT-READY）。**(d) NEGATIVE backbone 草稿**：[in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md](../reports/in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md)。現況地圖（給其他 AI）：[concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md](../concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md)。⚠ tsg 專案仍 active，T2/T3 數字可能再動。
 
 ### 甲基「可分群」非 coverage/CN 假象 + LOH-抑制機制 — ✅ 2026-06-10（confound 驗證 characterization，§N2b）
 
@@ -115,7 +131,9 @@ ONT BAM MM/ML 標籤解碼 + CIGAR 座標校正正確。[詳情](INDEX_DETAIL_AR
 NHD/L1/L2/CORR/BERNOULLI/JACCARD 六種距離 + UPGMA 聚類。[詳情](INDEX_DETAIL_ARCHIVE.md#03-距離計算與聚類分析)
 
 ### 04. OpenMP 平行化 — ✅
-Per-region 平行化，單 Region < 300ms。[詳情](INDEX_DETAIL_ARCHIVE.md#04-openmp-平行化)
+Per-region OpenMP 平行化已實作；但目前沒有綁定硬體、commit、輸入、重複次數與 scaling
+curve 的可重現 benchmark receipt，因此**不宣稱任何單 region runtime 或 speedup 數值**。
+[詳情](INDEX_DETAIL_ARCHIVE.md#04-openmp-平行化)
 
 ### 05. 統計顯著性：Fisher / χ² — ✅
 Fisher-Freeman-Halton RxC + Monte Carlo early stopping。[詳情](INDEX_DETAIL_ARCHIVE.md#05-統計顯著性fisher--χ²)
@@ -292,7 +310,7 @@ HCC1395 paired (31K TP + 1.3K FP) 全基因體驗證。Phase B: Sample ASM 97.3%
 LOH 區域 intermediate AF (0.1-0.4/0.6-0.9) 的 variants 具有顯著更高的甲基化多樣性。**TO mode**: Intermediate vs Extreme NGroups: 1.796 vs 1.091（+0.705, **7/7 p<10^-39**），NR 控制後持續（r=0.48-0.71）；Segment ρ=0.270（6/7 positive）。**Paired mode 延伸驗證**: ΔNG=+0.787（7/7 p<10^-65），效應量更強（median |r|=**0.755** vs TO 0.630），segment rho=0.382；**4/4 假說全部 POSITIVE，7/7 效應方向跨模式一致**。構成跨模式確認的 subclonal LOH 雙重證據鏈（genetic AF + epigenetic ASM）。[報告](validated/2026/04/20260414_LOH_Subclone_AF_Methylation_Evidence_01.md)
 
 ### Per-CpG ASM + Epiallele 異質性指標 — ⚠️ CONDITIONAL POSITIVE 2026-04-15
-30+ 方法文獻調查 → 6 指標家族 24 metrics Python PoC（Fisher, NME, Epipolymorphism, PDR, Shannon, VEF）。**Filter value=0**（全 AUC 0.38-0.54，與 Beyond-AUC 一致）。**Characterization value 確認**：PERMANOVA concordance 84%；LOH 降 fisher_frac_sig 12.5pp；NGroups=1→0.001/NGroups=3→0.270。PDR/VEF 飽和（0.917/0.918）。推薦精簡 C++ 整合 10 欄位（Fisher 4 + NME 3 + Epipoly 3）。[報告](in_progress/2026/04/20260415_PerCpG_ASM_Epiallele_Metrics_01.md) [文獻](../../references/20260415_ASM_subclone_methods_literature_survey.md)
+30+ 方法文獻調查 → 6 指標家族 24 metrics Python PoC（Fisher, NME, Epipolymorphism, PDR, Shannon, VEF）。**Filter value=0**（全 AUC 0.38-0.54，與 Beyond-AUC 一致）。**Characterization value 確認**：PERMANOVA concordance 84%；LOH 降 fisher_frac_sig 12.5pp；NGroups=1→0.001/NGroups=3→0.270。PDR/VEF 飽和（0.917/0.918）。推薦精簡 C++ 整合 10 欄位（Fisher 4 + NME 3 + Epipoly 3）。[報告](in_progress/2026/04/20260415_PerCpG_ASM_Epiallele_Metrics_01.md) [文獻](../references/20260415_ASM_subclone_methods_literature_survey.md)
 
 ### LOH/CN/AF 結論驗證 — ✅ 5/6 confirmed, 1 needs correction 2026-04-17
 6 個關鍵結論系統化驗證：Q1 cnLOH Simpson's Paradox（確認），Q2 HPFineNGroups CN confound 68%（確認），Q3 Coverage_Multiple CN proxy r=0.997（確認），Q4 LOH Subclone DNGroups 7/7 positive（確認），Q5 Zone exclusion abs ratio 0.082（確認），**Q6 LOH Tier direction reversal（需更正：post-HP-fix ALL tiers TP-enriched，0.43×/2.018× 為 artifact）**。[報告](../../research/loh_cn_af_verification/20260417_LOH_CN_AF_結論驗證報告_01.md) [總整理](../reports/research_landscape/07_LOH_CN_AF_研究總整理.md)

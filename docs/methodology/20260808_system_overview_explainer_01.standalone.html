@@ -493,6 +493,10 @@ ol.steps>li{margin:.45rem 0}
     <td><span class="tag" style="color:var(--accent2)">可信度</span> 上一列那個推論有多硬</td></tr>
 <tr><td><code>lo</code></td><td>Z</td><td>突變獲得順序 <code>pos&gt;pos&gt;pos</code></td>
     <td><span class="tag" style="color:var(--amber)">推論</span> <code>ls=A</code> 時不寫</td></tr>
+<tr><td><code>lg</code></td><td>Z</td><td><b>合併觀察標籤</b> = <code>lv</code> 去掉 <code>+</code>；跨 block 取最深那段</td>
+    <td><span class="tag" style="color:var(--accent2)">呈現</span> 給 IGV 配色用</td></tr>
+<tr><td><code>ln</code></td><td>i</td><td><b>相容頂點數</b>；命中頂點為 1，走 LCA 時為候選集大小</td>
+    <td><span class="tag" style="color:var(--accent2)">可信度</span> 量化 <code>+</code> 有多鬆</td></tr>
 <tr><td><code>lc</code>／<code>lu</code></td><td>Z</td><td>component／block 的識別碼</td>
     <td>索引</td></tr>
 <tr><td><code>HP</code></td><td><b>Z（字串）</b></td><td>九態單倍型 <code>1</code> <code>2</code> <code>1-1</code> <code>2-1</code> <code>3</code></td>
@@ -500,6 +504,13 @@ ol.steps>li{margin:.45rem 0}
 <tr><td><code>MM</code>／<code>ML</code></td><td>Z／B</td><td>鹼基修飾（5mC/5hmC）</td>
     <td><span class="tag" style="color:var(--accent)">事實</span> 原封不動保留</td></tr>
 </tbody></table>
+
+<div class="q"><b><code>ls=P</code> 不等於「位置不確定」。</b>
+實測 chr21：<code>ls=P</code> 的 read 中有 <b>49.6%（1,840/3,706）</b>其 <code>ln=1</code> ——
+帶著 <code>+</code>，但相容頂點只有一個，表示後代都因某位點讀到 <code>R</code> 而被排除，
+<b>read 其實就在該節點上</b>。所以要「已確認」的集合，用 <code>ls=U OR ln=1</code>
+比只用 <code>ls=U</code> 好：chr21 從 614 條擴大到 2,454 條（4×），
+而且是把原本丟掉的資訊撿回來，不是放寬標準。</div>
 
 <div class="q"><b>設計要點：把「事實」與「推論」分開存。</b>
 <code>lp</code> 是這條 read 上實際讀到什麼，<code>lv</code> 是據此推得的位置，
@@ -510,8 +521,13 @@ ol.steps>li{margin:.45rem 0}
 <p>輸出<b>預設是單一座標排序的 BAM</b>（逐染色體只是平行化的中間產物，跑完會自動合併）。
 載入 IGV 後：</p>
 <ol class="steps">
-<li><b>Group alignments by → tag → 輸入 <code>lv</code></b> → 依譜系分組，看哪些 read 屬於同一分支</li>
-<li>改成 <code>ls</code> → 把唯一解與部分覆蓋的 read 分開看</li>
+<li><b>Color alignments by → tag → <code>lg</code></b> → 依譜系上色。
+    <code>lg</code> 把 <code>HP2-1</code> 與 <code>HP2-1+</code> 併成同一色 ——
+    IGV 的 color-by-tag 是按字串精確配色，用 <code>lv</code> 會讓同一支譜系分裂成兩色。
+    實測相異值僅 <b>13 種</b>，配色可讀。</li>
+<li><b>Group alignments by → tag → <code>ls</code></b> → 同時把可信度分層：
+    <code>U</code> 唯一解 ／ <code>M</code> 同分並列 ／ <code>P</code> 部分覆蓋 ／ <code>A</code> 拓撲未定。
+    <b>顏色管譜系、分組管可信度，兩個軸不打架。</b></li>
 <li>開啟 base modification 顯示 → 直接看每條 read 的甲基化</li>
 </ol>
 <div class="q warn"><b>一個必須知道的細節：</b><code>HP</code> 是<b>字串</b> <code>HP:Z</code>，不是 IGV 內建 haplotype 模式認的 <code>HP:i</code> 整數。

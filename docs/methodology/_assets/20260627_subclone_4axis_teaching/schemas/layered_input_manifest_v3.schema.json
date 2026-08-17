@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/schemas/layered_input_manifest_v3.schema.json",
+  "title": "InterSubMod layered input manifest v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_name",
+    "schema_version",
+    "manifest_id",
+    "created_at_utc",
+    "dataset_count",
+    "biological_sample_count",
+    "analysis_contract",
+    "production_summary",
+    "samples"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/schemas/layered_input_manifest_v3.schema.json"
+    },
+    "schema_name": {"const": "intersubmod.layered_input_manifest"},
+    "schema_version": {"const": "3.0.0"},
+    "manifest_id": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "dataset_count": {"const": 7},
+    "biological_sample_count": {"const": 6},
+    "analysis_contract": {"$ref": "#/$defs/analysisContract"},
+    "production_summary": {"$ref": "#/$defs/productionSummary"},
+    "samples": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {"$ref": "#/$defs/sample"}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "safeId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+    "absolutePath": {"type": "string", "pattern": "^/[^\\u0000-\\u001f]*$"},
+    "fullIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "size_bytes", "sha256"],
+      "properties": {
+        "policy": {"const": "full_sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "identity"],
+      "properties": {
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "identity": {"$ref": "#/$defs/fullIdentity"}
+      }
+    },
+    "indexedArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "identity", "index"],
+      "properties": {
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "identity": {"$ref": "#/$defs/fullIdentity"},
+        "index": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "sampledChunk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "offset", "length", "sha256"],
+      "properties": {
+        "label": {"enum": ["first", "middle", "last"]},
+        "offset": {"type": "integer", "minimum": 0},
+        "length": {"type": "integer", "minimum": 0, "maximum": 1048576},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "storageIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy", "assurance", "is_full_content_hash", "requested_path", "realpath",
+        "logical_is_symlink", "logical_size_bytes", "logical_mtime_ns", "st_dev", "st_ino",
+        "size_bytes", "mtime_ns", "ctime_ns", "chunk_size_bytes", "chunks", "index", "identity_sha256"
+      ],
+      "properties": {
+        "policy": {"const": "storage_identity_v1"},
+        "assurance": {"const": "metadata_plus_sampled_chunks_not_full_content_hash"},
+        "is_full_content_hash": {"const": false},
+        "requested_path": {"$ref": "#/$defs/absolutePath"},
+        "realpath": {"$ref": "#/$defs/absolutePath"},
+        "logical_is_symlink": {"type": "boolean"},
+        "logical_size_bytes": {"type": "integer", "minimum": 0},
+        "logical_mtime_ns": {"type": "integer", "minimum": 0},
+        "st_dev": {"type": "integer", "minimum": 0},
+        "st_ino": {"type": "integer", "minimum": 0},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "mtime_ns": {"type": "integer", "minimum": 0},
+        "ctime_ns": {"type": "integer", "minimum": 0},
+        "chunk_size_bytes": {"const": 1048576},
+        "chunks": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/sampledChunk"}, {"properties": {"label": {"const": "first"}}}]},
+            {"allOf": [{"$ref": "#/$defs/sampledChunk"}, {"properties": {"label": {"const": "middle"}}}]},
+            {"allOf": [{"$ref": "#/$defs/sampledChunk"}, {"properties": {"label": {"const": "last"}}}]}
+          ],
+          "items": false
+        },
+        "index": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "identity"],
+          "properties": {
+            "path": {"$ref": "#/$defs/absolutePath"},
+            "identity": {"$ref": "#/$defs/fullIdentity"}
+          }
+        },
+        "identity_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "productionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "longphase_internal_filter_enabled", "disable_filter_flag_present",
+        "truth_flags_present", "forbidden_truth_options_absent"
+      ],
+      "properties": {
+        "name": {"const": "production_default_filter"},
+        "longphase_internal_filter_enabled": {"const": true},
+        "disable_filter_flag_present": {"const": false},
+        "truth_flags_present": {"const": false},
+        "forbidden_truth_options_absent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["--truth-vcf", "--truth-bed"],
+          "properties": {
+            "--truth-vcf": {"const": true},
+            "--truth-bed": {"const": true}
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "contigs"],
+      "properties": {
+        "name": {"const": "whole_autosomes_chr1_22"},
+        "contigs": {
+          "type": "array",
+          "minItems": 22,
+          "maxItems": 22,
+          "prefixItems": [
+            {"const": "chr1"}, {"const": "chr2"}, {"const": "chr3"}, {"const": "chr4"},
+            {"const": "chr5"}, {"const": "chr6"}, {"const": "chr7"}, {"const": "chr8"},
+            {"const": "chr9"}, {"const": "chr10"}, {"const": "chr11"}, {"const": "chr12"},
+            {"const": "chr13"}, {"const": "chr14"}, {"const": "chr15"}, {"const": "chr16"},
+            {"const": "chr17"}, {"const": "chr18"}, {"const": "chr19"}, {"const": "chr20"},
+            {"const": "chr21"}, {"const": "chr22"}
+          ],
+          "items": false
+        }
+      }
+    },
+    "analysisContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_type", "scope", "read_tag_mode", "embedded_tag_policy", "require_exact_join",
+        "sidecar_identity_schema", "sidecar_assurance", "bam_identity_policy", "bam_identity_assurance",
+        "production_filter_policy", "longphase_input_contract", "tree_input_contract",
+        "tagging_semantics", "duplicate_identity_policy", "join_method_validation"
+      ],
+      "properties": {
+        "task_type": {"enum": ["comprehensive_validation", "backbone_sensitivity"]},
+        "scope": {"$ref": "#/$defs/scope"},
+        "read_tag_mode": {"const": "external_sidecar"},
+        "embedded_tag_policy": {"const": "ignore"},
+        "require_exact_join": {"const": true},
+        "sidecar_identity_schema": {"enum": ["coordinate_join_v1", "alignment_identity_v2"]},
+        "sidecar_assurance": {
+          "enum": ["bounded_coordinate_equivalence_not_global_payload_identity", "global_alignment_payload_identity"]
+        },
+        "bam_identity_policy": {"const": "storage_identity_v1"},
+        "bam_identity_assurance": {"const": "metadata_plus_sampled_chunks_not_full_content_hash"},
+        "production_filter_policy": {"$ref": "#/$defs/productionPolicy"},
+        "longphase_input_contract": {"const": "normalized_ClairS_raw_all"},
+        "tree_input_contract": {
+          "enum": ["longphase_s_recalibrated_FILTER_PASS", "clairs_FILTER_PASS_sensitivity"]
+        },
+        "tagging_semantics": {"const": "longphase_s_raw_all_bidirectional_recalibration_tags"},
+        "duplicate_identity_policy": {"const": "collapse_redundant_rows_with_identical_HP_PS"},
+        "join_method_validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["assurance", "claim_limit", "real_data_bounded_receipt", "synthetic_three_case_receipt"],
+          "properties": {
+            "assurance": {"const": "bounded_coordinate_equivalence_not_global_payload_identity"},
+            "claim_limit": {"const": "join_method_only_not_per_sample_global_payload_identity"},
+            "real_data_bounded_receipt": {"$ref": "#/$defs/artifact"},
+            "synthetic_three_case_receipt": {"$ref": "#/$defs/artifact"}
+          }
+        }
+      }
+    },
+    "coordinateSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_name", "schema_version", "sample", "duplicate_identity_policy", "coordinate_identity_columns",
+        "sidecar_sha256", "sidecar_index_sha256", "validation_sha256", "producer_capture_receipt_sha256",
+        "alignment_payload_storage_identity_sha256", "producer_command_argv_sha256",
+        "producer_input_binding_sha256", "producer_effective_options_sha256", "caller_raw_vcf_sha256",
+        "longphase_input_vcf_sha256", "caller_pass_baseline_vcf_sha256",
+        "longphase_recalibrated_all_vcf_sha256", "longphase_recalibrated_pass_vcf_sha256",
+        "mapped_alignment_count", "identity_unique_count", "duplicate_count", "conflict_count"
+      ],
+      "properties": {
+        "schema_name": {"const": "intersubmod.coordinate_join_subject"},
+        "schema_version": {"const": "1.0.0"},
+        "sample": {"$ref": "#/$defs/safeId"},
+        "duplicate_identity_policy": {"const": "collapse_redundant_rows_with_identical_HP_PS"},
+        "coordinate_identity_columns": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "QNAME"}, {"const": "CHROM"}, {"const": "START0"},
+            {"const": "END0"}, {"const": "FLAG"}, {"const": "CIGAR_B2"}
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "sidecar_sha256": {"$ref": "#/$defs/sha256"},
+        "sidecar_index_sha256": {"$ref": "#/$defs/sha256"},
+        "validation_sha256": {"$ref": "#/$defs/sha256"},
+        "producer_capture_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "alignment_payload_storage_identity_sha256": {"$ref": "#/$defs/sha256"},
+        "producer_command_argv_sha256": {"$ref": "#/$defs/sha256"},
+        "producer_input_binding_sha256": {"$ref": "#/$defs/sha256"},
+        "producer_effective_options_sha256": {"$ref": "#/$defs/sha256"},
+        "caller_raw_vcf_sha256": {"$ref": "#/$defs/sha256"},
+        "longphase_input_vcf_sha256": {"$ref": "#/$defs/sha256"},
+        "caller_pass_baseline_vcf_sha256": {"$ref": "#/$defs/sha256"},
+        "longphase_recalibrated_all_vcf_sha256": {"$ref": "#/$defs/sha256"},
+        "longphase_recalibrated_pass_vcf_sha256": {"$ref": "#/$defs/sha256"},
+        "mapped_alignment_count": {"type": "integer", "minimum": 1},
+        "identity_unique_count": {"type": "integer", "minimum": 1},
+        "duplicate_count": {"type": "integer", "minimum": 0},
+        "conflict_count": {"const": 0}
+      }
+    },
+    "readTags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority", "identity_schema", "assurance", "tagging_semantics", "duplicate_identity_policy",
+        "require_unique_identity", "fallback_policy",
+        "sidecar", "index", "validation", "producer_capture_receipt", "producer_policy", "subject_binding"
+      ],
+      "properties": {
+        "authority": {"const": "external_coordinate_sidecar"},
+        "identity_schema": {"const": "coordinate_join_v1"},
+        "assurance": {"const": "bounded_coordinate_equivalence_not_global_payload_identity"},
+        "tagging_semantics": {"const": "longphase_s_raw_all_bidirectional_recalibration_tags"},
+        "duplicate_identity_policy": {"const": "collapse_redundant_rows_with_identical_HP_PS"},
+        "require_unique_identity": {"const": false},
+        "fallback_policy": {"const": "forbidden"},
+        "sidecar": {"$ref": "#/$defs/artifact"},
+        "index": {"$ref": "#/$defs/artifact"},
+        "validation": {"$ref": "#/$defs/artifact"},
+        "producer_capture_receipt": {"$ref": "#/$defs/artifact"},
+        "producer_policy": {"$ref": "#/$defs/productionPolicy"},
+        "subject_binding": {"$ref": "#/$defs/coordinateSubject"}
+      }
+    },
+    "copyNumber": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "source", "semantics", "coordinate_system", "unlisted_position_semantics", "allowed_states", "overlap_policy", "reason", "cn_bed", "cn_int_gain", "cn_int_loss", "integration_json"],
+          "properties": {
+            "availability": {"const": "measured"},
+            "source": {"type": "string", "minLength": 1},
+            "semantics": {"type": "string", "minLength": 1},
+            "coordinate_system": {"const": "0_based_half_open"},
+            "unlisted_position_semantics": {"const": "neutral"},
+            "allowed_states": {
+              "type": "array", "minItems": 4, "maxItems": 4,
+              "prefixItems": [{"const": "gain"}, {"const": "loss"}, {"const": "loh"}, {"const": "neutral"}],
+              "items": false
+            },
+            "overlap_policy": {"const": "forbid"},
+            "reason": {"type": "null"},
+            "cn_bed": {"$ref": "#/$defs/artifact"},
+            "cn_int_gain": {"oneOf": [{"$ref": "#/$defs/artifact"}, {"type": "null"}]},
+            "cn_int_loss": {"oneOf": [{"$ref": "#/$defs/artifact"}, {"type": "null"}]},
+            "integration_json": {"oneOf": [{"$ref": "#/$defs/artifact"}, {"type": "null"}]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "source", "semantics", "coordinate_system", "unlisted_position_semantics", "allowed_states", "overlap_policy", "reason", "cn_bed", "cn_int_gain", "cn_int_loss", "integration_json"],
+          "properties": {
+            "availability": {"const": "unavailable"},
+            "source": {"const": "unavailable"},
+            "semantics": {"const": "missing; never interpreted neutral"},
+            "coordinate_system": {"type": "null"},
+            "unlisted_position_semantics": {"const": "unavailable"},
+            "allowed_states": {"type": "array", "minItems": 0, "maxItems": 0},
+            "overlap_policy": {"const": "not_applicable"},
+            "reason": {"type": "string", "minLength": 1},
+            "cn_bed": {"type": "null"},
+            "cn_int_gain": {"type": "null"},
+            "cn_int_loss": {"type": "null"},
+            "integration_json": {"type": "null"}
+          }
+        }
+      ]
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample", "biological_id", "platform", "replicate_role", "alignment_payload",
+        "somatic", "read_tags", "copy_number"
+      ],
+      "properties": {
+        "sample": {"$ref": "#/$defs/safeId"},
+        "biological_id": {"$ref": "#/$defs/safeId"},
+        "platform": {"type": "string", "minLength": 1},
+        "replicate_role": {"enum": ["canonical", "platform_replica"]},
+        "alignment_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "index_path", "embedded_hp_ps_policy", "identity_policy", "storage_identity_v1"],
+          "properties": {
+            "path": {"$ref": "#/$defs/absolutePath"},
+            "index_path": {"$ref": "#/$defs/absolutePath"},
+            "embedded_hp_ps_policy": {"const": "ignore"},
+            "identity_policy": {"const": "storage_identity_v1"},
+            "storage_identity_v1": {"$ref": "#/$defs/storageIdentity"}
+          }
+        },
+        "somatic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "backbone_role", "caller_raw_vcf", "longphase_input_vcf", "caller_pass_baseline_vcf",
+            "longphase_recalibrated_all_vcf", "longphase_recalibrated_pass_vcf", "tree_vcf"
+          ],
+          "properties": {
+            "backbone_role": {
+              "enum": ["longphase_s_recalibrated_filter_pass", "clairs_filter_pass_sensitivity"]
+            },
+            "caller_raw_vcf": {"$ref": "#/$defs/indexedArtifact"},
+            "longphase_input_vcf": {"$ref": "#/$defs/indexedArtifact"},
+            "caller_pass_baseline_vcf": {"$ref": "#/$defs/indexedArtifact"},
+            "longphase_recalibrated_all_vcf": {"$ref": "#/$defs/indexedArtifact"},
+            "longphase_recalibrated_pass_vcf": {"$ref": "#/$defs/indexedArtifact"},
+            "tree_vcf": {"$ref": "#/$defs/indexedArtifact"}
+          }
+        },
+        "read_tags": {"$ref": "#/$defs/readTags"},
+        "copy_number": {"$ref": "#/$defs/copyNumber"}
+      }
+    },
+    "productionDataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample", "pass", "filter_policy", "truth_flags_present", "identity_schema",
+        "longphase_input_contract", "tree_backbone_role", "validation_sha256"
+      ],
+      "properties": {
+        "sample": {"$ref": "#/$defs/safeId"},
+        "pass": {"const": true},
+        "filter_policy": {"const": "production_default_filter"},
+        "truth_flags_present": {"const": false},
+        "identity_schema": {"const": "coordinate_join_v1"},
+        "longphase_input_contract": {"const": "normalized_ClairS_raw_all"},
+        "tree_backbone_role": {"const": "longphase_s_recalibrated_filter_pass"},
+        "validation_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "productionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_dataset_count", "completed_dataset_count", "passed_dataset_count", "all_pass", "datasets"],
+      "properties": {
+        "expected_dataset_count": {"const": 7},
+        "completed_dataset_count": {"const": 7},
+        "passed_dataset_count": {"const": 7},
+        "all_pass": {"const": true},
+        "datasets": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {"$ref": "#/$defs/productionDataset"}
+        }
+      }
+    }
+  }
+}

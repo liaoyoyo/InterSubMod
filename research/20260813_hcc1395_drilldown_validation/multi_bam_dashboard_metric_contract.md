@@ -1,15 +1,17 @@
 <!--
 建立時間: 2026-08-13
 目標: 為一頁式多 BAM／多樣本分析總覽建立可實作、可稽核、fail-closed 的 metric 與 chart contract
-處理範圍: 7 份 topology datasets（6 biological + 1 technical replicate）、HCC1395 v1/v3 bundle、HCC1395 methylation/lineage/LCA、legacy browser 方法附錄；不修改 generator/dashboard source，不生成新 bundle
+處理範圍: 7 份 topology datasets（6 biological + 1 technical replicate）、HCC1395 v1/v3 bundle、HCC1395 methylation/lineage/LCA、legacy browser 方法附錄；原始 bundle 不變，另產生 bounded dashboard artifact/HTML
 關聯檔案:
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/results/metrics_audit.json
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/results/cohort_topology_metrics.csv
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/20260813_HCC1395_drilldown完整驗證與多樣本改進_01.md
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/legacy_browser_method_audit.md
+  - InterSubMod/research/20260813_hcc1395_drilldown_validation/multi_bam_dashboard_artifact.json
+  - InterSubMod/research/20260813_hcc1395_drilldown_validation/results/multi_bam_dashboard_browser_qa.json
 任務類型: B — Comprehensive validation；全 7 topology datasets、全 HCC1395 v1/v3 保存 metrics，無 subset
 服務目標: G3（read-level epigenetic 可解讀性）、G4（多樣本一致性與 reproducibility）、G5（可外部稽核的 metric provenance）
-狀態: METRIC_CONTRACT_READY；SOURCE_IMPLEMENTATION_NOT_AUTHORIZED
+狀態: METRIC_CONTRACT_IMPLEMENTED_IN_BOUNDED_SNAPSHOT；SCIENCE_PARTIAL
 -->
 
 用 KPI Tree + Metric Contract + Evidence Ladder：**TL;DR：一頁總覽應明示「7 datasets = 6 biological samples + 1 HCC1395 technical replicate」，只把 topology 指標做七資料集比較；跨樣本 ISM/lineage 沒有等價資料時顯示 `N/A / PARTIAL`、絕不補值；6 個 biological samples 採 per-sample macro median + IQR，HCC1395 v1/v3 只放在帶 `BLOCKED` 權威標籤的診斷層（影響：高，信心：高）。**
@@ -76,7 +78,7 @@
 - HCC1395 downstream 區塊採獨立 data island：先選 `sample=HCC1395`，再以 `bundle` filter 查 `bundle`／`coverage_k`／`axis`／`assets`／`integrity`。
 - `lca_chrom` 的 sample 是固定 HCC1395；不得靠缺少的 sample 欄位擴到其他 dataset。
 - legacy 30,077 loci 與 current 19,849 loci 只有 coordinate overlap；缺 REF/ALT，且 window/statistic/taxonomy 不等價，禁止 join 後當同一 biological unit。
-- `sample` 名稱不得被解析成 platform、basecaller 或 BAM identity。`HCC1395_DORADO` 的唯一可用契約是 `biological_id=HCC1395`、`technical_replicate=True`；現有表沒有 `bam_id`、input BAM SHA256 或 platform 欄位。
+- `sample` 名稱不得被解析成 platform、basecaller 或 biological identity。v1.1 manifest 已有 BAM path、platform 與 bounded identity，但 full BAM SHA 為 0/7、14 BAM 無 `@RG`；`HCC1395_DORADO` 仍只能依 `biological_id=HCC1395`、`technical_replicate=True` 契約作 technical control。
 
 ## 3. Identity 與 aggregation policy
 
@@ -166,7 +168,7 @@
 | G12 | Truth / accuracy availability | 無 TP/FP/FN/HighConf benchmark chain | 主報告 scope/omission table | precision/recall/F1 card不建立；顯示 `NOT MEASURED` | topology/ISM coverage 不能代理 caller F1 |
 | G13 | Legacy non-equivalence | coordinate Jaccard 49.658%；window/statistic/taxonomy不同 | legacy crosswalk JSON + method appendix | legacy 只在 method detail；禁止全域 filter與 current聯動 | A≠ALT、B≠HP；14 cases 不是 prevalence |
 | G14 | UI/runtime evidence boundary | generated QA=`DIRECT_GENERATED`、current desktop/mobile overflow false、browser errors 0；selfcheck仍 2 FAIL | generated visual audit JSON nested fields | footer顯示 runtime QA，和 science status分欄 | screenshot/無 error 不提升 scientific claim |
-| G15 | BAM identity gap | source只有 dataset/sample identity與 topology output hash | cohort fields | dashboard標題稱 dataset，不宣稱每列有可驗 BAM identity | 不由 sample suffix推論 BAM、platform或basecaller effect |
+| G15 | BAM identity ceiling | v1.1 有 bounded chunks、BAI/FAI、header/dictionary與 strict category；full BAM SHA/RG identity 未完整 | manifest + receipt | dashboard標示 `AVAILABLE_BOUNDED/PARTIAL_IDENTITY`，不宣稱 full-content 或 biological identity | 不由 sample suffix/directory 推論 platform、basecaller effect |
 
 ## 8. Detail metric contract
 
@@ -264,43 +266,43 @@
 | Bundle provenance缺欄 | `generator_commit`, `receipt_schema_name/version` 兩列皆空 | High / High | H6永遠BLOCKED；不得標 reproducible build |
 | ISM input不封口 | v1=`MISSING`；v3=`UNVERIFIABLE_DIRECTORY` | High / High | HCC methyl只可legacy observation |
 | 跨樣本 capability coverage不足 | cohort只有topology；無6個非HCC等價ISM/lineage rows | Critical for multi-omics / High | H5顯N/A/PARTIAL；不得算coverage rate |
-| BAM identity不可驗 | cohort缺 `bam_id`, input BAM SHA256, platform | High for multi-BAM / High | UI稱dataset；下一版manifest必補 |
+| BAM identity只到 bounded 層 | v1.1 已有路徑、BAI/FAI、header、quickcheck、固定 chunks；full BAM SHA=0/7、14 BAM 無 `@RG` | High for biological identity / High | UI稱dataset並明示 `AVAILABLE_BOUNDED`；不可升為 full-content／biological identity |
 | technical replicate非獨立 | HCC1395_DORADO biological_id重複且technical=true | High / High | 只作control，不進n=6 macro |
 | legacy/current schema不等價 | cohort/window/statistic/taxonomy不同；coordinate-only overlap | High / High | legacy只放method detail |
 
-### 下一版資料契約必補欄位（目前不得假裝已有）
+### 下一版資料契約仍需補的欄位（不得把 partial 當 complete）
 
-- `dataset_id`, `biological_id`, `replicate_id`, `replicate_type`, `bam_uri`, `bam_sha256`, `platform`, `basecaller`, `coverage_summary`。
+- v1.1 已有 `dataset_id`、`biological_id`、technical replicate flag、BAM URI、platform 與 bounded identity；仍缺 canonical `replicate_id/type`、full `bam_sha256`、可靠 RG/SM、basecaller provenance 與 depth/coverage summary。
 - 每 sample 的 capability matrix：`topology/MLHP/ISM/lineage/LCA/panels/IGV` 各自 `AVAILABLE/PARTIAL/ABSENT/UNVERIFIABLE`、source URI、hash、schema/version。
 - 固定 ISM `window_bp`、axis definition/effect unit、group n、validity、missing reason、multiplicity family/q-value provenance。
 - truth benchmark contract：caller/callset、truth VCF、HighConf BED、command、TP/FP/FN、precision/recall/F1 與 receipt。
 - 每次 dashboard snapshot 的 `generated_at`, source revision, extract hash；目前只有 bundle-level `built_at`，不足以代表整頁 freshness。
 
-## 13. 完整 BAM 狀況仍需新增的資料欄
+## 13. BAM／phasing／甲基化欄位的目前可用性
 
-下列欄位在本次 `results/*.csv/*.json` dashboard snapshot **全部是 `NOT_COLLECTED`**。這裡定義的是未來採集契約，不代表數值為 0，也不代表 workspace 其他位置一定沒有原始檔。實作前必須由逐 BAM receipt／QC 輸出提供可驗 source、grain、denominator 與 hash。
+v1.1 intake manifest 已補入 7/7 datasets 的 bounded BAM/reference identity 與既有 LongPhase-S producer receipt；因此不再把全部欄位籠統標為 `NOT_COLLECTED`。每個 family 仍需依權威層級分開：`AVAILABLE_BOUNDED` 只代表固定三段 payload＋index／dictionary；`PARTIAL_EXISTING_PRODUCER_RECEIPT` 只代表既有 mapped alignment-record sidecar；其餘沒有逐 BAM 採集的 family 保持 `NOT_COLLECTED`。
 
 > [!IMPORTANT]
-> Dashboard 現在只能顯示 `NOT_COLLECTED`；不得產生 0、0%、空 bar、零長度 phase block 或「無 methylation」等視覺。只有 source row 實際存在且通過 identity/hash gate 後，才可把狀態改為 `MEASURED` 並啟用圖表。
+> `AVAILABLE_BOUNDED` 不是 full BAM SHA；producer tag receipt 的 denominator 是所有 captured mapped **alignment records**（含 primary／secondary／supplementary），不是 primary reads。任何缺失 family 仍不得產生 0、0%、空 bar、零長度 phase block或「無 methylation」等視覺。
 
-| ID / 面向 | 未來必備欄位 | 定義、grain 與 denominator | Current status（全 7 datasets） | 未來可用 surface | 現在禁止的替代推論 |
+| ID / 面向 | 完整契約必備欄位 | 定義、grain 與 denominator | Current status（全 7 datasets） | 目前／未來 surface | 現在禁止的替代推論 |
 |---|---|---|---|---|---|
-| B1 / BAM identity + reference | `dataset_id`, `bam_uri`, `bam_sha256`, `bai_uri`, `bai_sha256`, `reference_build`, `reference_fasta_uri`, `reference_sha256`, `read_group_samples` | 1 row / dataset×BAM；BAM、index、reference各自 content hash；sample/RG identity另存，不由檔名解析 | **NOT_COLLECTED** | identity/provenance table；hash gate | topology output hash不可代替 input BAM/reference hash；`sample` suffix不可代理platform/basecaller |
-| B2 / mapped + primary reads | `reads_total`, `reads_primary`, `reads_secondary`, `reads_supplementary`, `reads_duplicate`, `reads_mapped`, `reads_primary_mapped`, `flagstat_tool_version` | BAM grain；primary mapping rate=`reads_primary_mapped/reads_primary`；overall mapping rate=`reads_mapped/reads_total`；兩者分列且 N/D 同顯 | **NOT_COLLECTED** | exact KPI + 7-dataset horizontal bars，等資料完整後才啟用 | 不得用 region/sSNV count代理 read count；missing mapping rate不得顯示 0% |
+| B1 / BAM identity + reference | `dataset_id`, `bam_uri`, `bam_sha256`, `bai_uri`, `bai_sha256`, `reference_build`, `reference_fasta_uri`, `reference_sha256`, `read_group_samples` | 1 row / dataset×BAM；BAM、index、reference各自 content hash；sample/RG identity另存，不由檔名解析 | **AVAILABLE_BOUNDED / PARTIAL_IDENTITY**：tumor＋normal 路徑、header、quickcheck、BAI full SHA、reference FAI/dictionary、固定 3×1 MiB 均 7/7；full BAM/reference SHA 0/7，14 BAM 無 `@RG`，all-role strict identity 0/7、mount-only drift 7/7 | 已啟用 bounded identity/provenance table與兩張 readiness cards | bounded chunks不可改寫為 full content identity；檔名／directory不可代理 biological identity或platform effect |
+| B2 / mapped + primary reads | `reads_total`, `reads_primary`, `reads_secondary`, `reads_supplementary`, `reads_duplicate`, `reads_mapped`, `reads_primary_mapped`, `flagstat_tool_version` | BAM grain；primary mapping rate=`reads_primary_mapped/reads_primary`；overall mapping rate=`reads_mapped/reads_total`；兩者分列且 N/D 同顯 | **PARTIAL_EXISTING_PRODUCER_RECEIPT**：保存 total mapped alignment records 與 primary／secondary／supplementary class counts；沒有 raw-read total、unique-read或primary-mapped denominator，故 mapping rates仍 `NOT_COLLECTED` | producer detail exact table已啟用；mapping KPI仍停用 | captured alignment-record count不可稱 read count或 mapping rate；duplicate identity row不是 SAM duplicate flag |
 | B3 / depth + IQR / breadth | `depth_scope`, `scope_bases`, `depth_mean`, `depth_p25`, `depth_median`, `depth_p75`, `depth_p95`, `covered_bases_ge_1/10/20/30`, `depth_tool_version`, `depth_command` | dataset×declared scope；IQR=`P25–P75`；breadth@x=`covered_bases_ge_x/scope_bases`；必須凍結 WGS/HC BED/callable scope與是否含duplicate | **NOT_COLLECTED** | median+IQR dot/interval；breadth bars | 不得從 BAM bytes、read count、topology regions推估 depth；不同 scope不可同圖 |
 | B4 / read length + N50 | `read_length_population`, `eligible_read_n`, `eligible_bases`, `read_length_p25/median/p75`, `read_n50_bp`, `read_length_max`, `read_length_tool_version` | dataset×明示 read population；N50 是使累積 bases達50%的 read length，不是 median；須固定用query length或aligned length、primary/supplementary policy | **NOT_COLLECTED** | N50 KPI + length distribution summary；有原始 bins才畫histogram | 不得由 IGV asset、coverage 或 file size反推 read N50 |
-| B5 / HP/PS tag coverage | `eligible_primary_mapped_reads`, `hp_tag_read_n`, `ps_tag_read_n`, `hp_and_ps_read_n`, `valid_hp_value_read_n`, `valid_ps_value_read_n`, `hp_tag_rate`, `ps_tag_rate`, `hp_ps_joint_rate`, `tag_parser_version` | dataset×BAM；各 rate 的 denominator固定為eligible primary mapped reads；HP/PS存在、值合法、共同存在分開 | **NOT_COLLECTED** | numerator/denominator KPI + paired bars | `ranked_n`、tree coverage或phased variant count不可代理read-level tag coverage；missing不得稱 unphased |
+| B5 / HP/PS tag coverage | `eligible_primary_mapped_reads`, `hp_tag_read_n`, `ps_tag_read_n`, `hp_and_ps_read_n`, `valid_hp_value_read_n`, `valid_ps_value_read_n`, `hp_tag_rate`, `ps_tag_rate`, `hp_ps_joint_rate`, `tag_parser_version` | 最終目標 denominator 是 eligible primary mapped reads；本版 producer denominator 明確不同，為所有 captured mapped alignment records | **PARTIAL_EXISTING_PRODUCER_RECEIPT**：7/7 有 HP/all、HP+PS/all、HP+PS/HP、duplicate/all 的 exact N/D 與 conservation；primary-read HP/PS、PS/all 與合法值 coverage仍 `NOT_COLLECTED` | 已啟用三系列 tag chart＋exact producer table；標題與 tooltip 明示 alignment-record denominator | 不得把現有率改稱 primary-read tag coverage或phasing accuracy；duplicate/all只作 denominator-composition guard |
 | B6 / phase blocks | `phased_variant_n`, `phase_block_n`, `phase_block_total_span_bp`, `phase_block_n50_bp`, `phase_block_median_bp`, `phase_block_max_bp`, `phase_block_scope`, `phasing_tool_version`, `phasing_command` | dataset×VCF/BAM phasing run；block N50以block span加權且定義必須固定；autosome/HC BED scope另列 | **NOT_COLLECTED** | block N50/median KPI + distribution；需有per-block rows才畫histogram | topology tree/region不是phase block；無truth時不得顯示switch error或phasing accuracy=0 |
 | B7 / MM/ML + CpG | `eligible_primary_mapped_reads`, `mm_tag_read_n`, `ml_tag_read_n`, `valid_mm_ml_read_n`, `mm_ml_parse_error_n`, `cpg_call_n`, `unique_cpg_site_n`, `callable_cpg_site_n`, `methylated_cpg_call_n`, `beta_median/p25/p75`, `modkit_or_parser_version`, `mod_code`, `ml_threshold` | dataset×BAM×modification code；tag coverage以eligible reads為denominator；CpG call/site/read三種grain分開；beta需明示threshold與callable denominator | **NOT_COLLECTED** | tag coverage bars、CpG count table、beta interval；只在同mod/threshold下比較 | ISM summary rows或linked sSNV不可代理MM/ML/CpG完整度；missing tag不可當unmethylated |
 | B8 / KDE provenance | `kde_status`, `kde_corrected`, `kde_method`, `kde_software_version`, `kde_parameters_json`, `kde_parameters_sha256`, `kde_input_uri/sha256`, `kde_output_uri/sha256`, `kde_completed_at` | dataset×methylation preprocessing run；`kde_corrected`須為明示 enum/boolean，不能由資料分布猜測 | **NOT_COLLECTED** | provenance status table；無合格數值圖 | 不得從 v1/v3、CpG數或effect distribution推斷KDE-corrected；unknown不等於False |
-| B9 / VCF + truth benchmark | `callset_vcf_uri/sha256`, `caller`, `caller_version`, `caller_mode`, `truth_vcf_uri/sha256`, `highconf_bed_uri/sha256`, `reference_sha256`, `benchmark_command`, `benchmark_tool/version`, `tp`, `fp`, `fn`, `precision`, `recall`, `f1`, `benchmark_scope`, `benchmark_receipt_sha256` | dataset×callset×truth×scope；precision=`TP/(TP+FP)`、recall=`TP/(TP+FN)`、F1 harmonic mean；所有 counts與region policy同一receipt | **NOT_COLLECTED** | truth readiness status；來源完整後才建立accuracy cards/plots | topology distinct sSNV、ISM linkage或selfcheck PASS不可代理TP/FP/FN/F1；缺truth不得顯示0分 |
+| B9 / VCF + truth benchmark | `callset_vcf_uri/sha256`, `caller`, `caller_version`, `caller_mode`, `truth_vcf_uri/sha256`, `highconf_bed_uri/sha256`, `reference_sha256`, `benchmark_command`, `benchmark_tool/version`, `tp`, `fp`, `fn`, `precision`, `recall`, `f1`, `benchmark_scope`, `benchmark_receipt_sha256` | dataset×callset×truth×scope；precision=`TP/(TP+FP)`、recall=`TP/(TP+FN)`、F1 harmonic mean；所有 counts與region policy同一receipt | **PARTIAL_INPUT_ONLY**：7/7 caller input path/SHA 與 producer VCF bindings可稽核；truth VCF、HighConf BED、benchmark receipt、TP/FP/FN/F1全部 `NOT_COLLECTED` | 僅顯 truth-readiness blocker；不畫 accuracy card | input VCF hash、topology distinct sSNV、ISM linkage或selfcheck PASS皆不可代理TP/FP/FN/F1 |
 | B10 / runtime + resources | `run_id`, `command_argv`, `code_commit`, `working_tree_dirty`, `container_image_digest`, `host`, `started_at`, `completed_at`, `exit_code`, `wall_seconds`, `cpu_seconds`, `max_rss_bytes`, `read_bytes`, `write_bytes`, `output_bytes`, `thread_count` | 1 row / run；資源必須和確切command/input/output hashes綁定；failed/aborted run保留status，不與成功run取平均 | **NOT_COLLECTED** | run table、wall/RSS/output cost bars；只比較同scope run | bundle asset bytes不可代理runtime/RSS；缺run receipt不得稱效能改善 |
 
 ### BAM readiness gate
 
 完整 BAM 狀況區塊只能在下列條件同時成立後啟用：
 
-1. 每個要比較的 dataset 都有 B1 identity/reference row，BAM、BAI、reference hash非空且可驗。
+1. 每個 dataset 都已有 B1 bounded identity/reference row；若要升為 full identity gate，仍須補 BAM/reference full SHA 與可靠 RG/SM 或 canonical identity manifest。
 2. 每一 metric family 都有明確的 eligible population、numerator、denominator、tool/version與scope。
 3. 同一張跨樣本圖的 reference、region scope、read policy、tag policy與工具版本相容；否則分面或標 `NON_COMPARABLE`。
 4. 任一 dataset 缺 row 時維持 `NOT_COLLECTED`；不能因其他 6 份有值而插補或以 cohort median代替。
@@ -407,5 +409,7 @@ cohort identity: datasets=7, biological=6, technical=1
 - [x] aggregate／canonical／extreme observed／well-explained control 四層皆有 selection rule 與現存 row。
 - [x] HCC1395-only metrics 不外推其餘 6 datasets；v1/v3不當 controlled A/B。
 - [x] legacy/current 不作 class mapping；visual QA 不作 scientific evidence。
-- [x] 完整 BAM identity/reference、alignment、depth/read N50、HP/PS、phase block、MM/ML/CpG、KDE、VCF/truth、runtime/resources 全部標 `NOT_COLLECTED`；不畫 0。
-- [x] 未修改 generator、dashboard source、artifact 或其他報告。
+- [x] B1 標 `AVAILABLE_BOUNDED/PARTIAL_IDENTITY`；B2/B5 標 `PARTIAL_EXISTING_PRODUCER_RECEIPT`；B9 標 `PARTIAL_INPUT_ONLY`；B3/B4/B6/B7/B8/B10 保持 `NOT_COLLECTED`，且缺失不畫 0。
+- [x] 未修改原始 HCC1395 generator/bundle；實作集中於專用 builder、artifact、delivery wrapper、QA runner 與 companion reports。
+- [x] Artifact 中的 macro median/P25/P75、1 technical replicate 與三個技術 gate 已由 builder contract 重算並通過 canonical `validate_artifact`。
+- [x] Standalone HTML 的 All + 7 dataset states、ABSENT/null 隔離、responsive、keyboard/focus/aria-live、6 個 audit disclosures 與本地 table overflow已由 **40 項** Playwright assertions 驗證。

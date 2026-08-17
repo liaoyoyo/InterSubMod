@@ -1,0 +1,706 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/multi_bam_dashboard_input_manifest-1.1.0.json",
+  "title": "InterSubMod multi-BAM dashboard input manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "manifest_id",
+    "generated_at_utc",
+    "task_type",
+    "claim_ceiling",
+    "source_manifest",
+    "dataset_count",
+    "biological_sample_count",
+    "verification_summary",
+    "datasets"
+  ],
+  "properties": {
+    "schema_name": {
+      "const": "intersubmod.multi_bam_dashboard_input_manifest"
+    },
+    "schema_version": {
+      "const": "1.1.0"
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task_type": {
+      "const": "comprehensive_validation"
+    },
+    "claim_ceiling": {
+      "const": "bounded_input_identity_and_existing_producer_receipts_only"
+    },
+    "source_manifest": {
+      "$ref": "#/$defs/sourceManifest"
+    },
+    "dataset_count": {
+      "const": 7
+    },
+    "biological_sample_count": {
+      "const": 6
+    },
+    "verification_summary": {
+      "$ref": "#/$defs/verificationSummary"
+    },
+    "datasets": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "$ref": "#/$defs/dataset"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullableSha256": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sourceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "schema_name",
+        "schema_version",
+        "manifest_id",
+        "created_at_utc"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "schema_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at_utc": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verificationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "dataset_count",
+        "bam_present_n",
+        "bai_present_n",
+        "quickcheck_pass_n",
+        "tumor_bounded_payload_match_n",
+        "tumor_strict_storage_identity_match_n",
+        "tumor_mount_device_drift_only_n",
+        "all_input_roles_strict_storage_identity_match_n",
+        "all_input_roles_mount_device_drift_only_n",
+        "bai_sha256_match_n",
+        "full_bam_sha256_n",
+        "normal_bam_present_n",
+        "normal_bai_present_n",
+        "normal_quickcheck_pass_n",
+        "normal_bounded_payload_match_n",
+        "reference_bounded_payload_match_n",
+        "reference_dictionary_compatible_n",
+        "no_read_group_n",
+        "cross_directory_pairing_n",
+        "header_read_n",
+        "sidecar_validation_pass_n",
+        "read_tag_conservation_pass_n",
+        "sample_set_match"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS_BOUNDED",
+            "PASS_BOUNDED_WITH_METADATA_DRIFT"
+          ]
+        },
+        "dataset_count": {
+          "const": 7
+        },
+        "bam_present_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "bai_present_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "quickcheck_pass_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "tumor_bounded_payload_match_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "tumor_strict_storage_identity_match_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "tumor_mount_device_drift_only_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "all_input_roles_strict_storage_identity_match_n": {
+          "description": "Datasets whose tumor BAM, paired-normal BAM, and reference all have strict MATCH.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "all_input_roles_mount_device_drift_only_n": {
+          "description": "Datasets whose three input roles are each MATCH or MOUNT_DEVICE_DRIFT_ONLY and at least one role has mount-device-only drift.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "bai_sha256_match_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "full_bam_sha256_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "normal_bam_present_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "normal_bai_present_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "normal_quickcheck_pass_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "normal_bounded_payload_match_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "reference_bounded_payload_match_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "reference_dictionary_compatible_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "no_read_group_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "cross_directory_pairing_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "header_read_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "sidecar_validation_pass_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "read_tag_conservation_pass_n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "sample_set_match": {
+          "const": true
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_id",
+        "biological_id",
+        "replicate_type",
+        "technical_replicate",
+        "platform",
+        "bam",
+        "paired_normal_bam",
+        "reference",
+        "input_compatibility",
+        "producer_read_tags"
+      ],
+      "properties": {
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "biological_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replicate_type": {
+          "enum": [
+            "canonical",
+            "technical_platform_replica"
+          ]
+        },
+        "technical_replicate": {
+          "type": "boolean"
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bam": {
+          "$ref": "#/$defs/bam"
+        },
+        "paired_normal_bam": {
+          "$ref": "#/$defs/bam"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "input_compatibility": {
+          "$ref": "#/$defs/inputCompatibility"
+        },
+        "producer_read_tags": {
+          "$ref": "#/$defs/producerReadTags"
+        }
+      }
+    },
+    "bam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "realpath",
+        "index_path",
+        "size_bytes",
+        "logical_is_symlink",
+        "sort_order",
+        "read_group_samples",
+        "contig_count",
+        "header_sha256",
+        "reference_dictionary_sha256",
+        "quickcheck_status",
+        "identity_policy",
+        "identity_assurance",
+        "frozen_identity_sha256",
+        "observed_identity_sha256",
+        "strict_storage_identity_status",
+        "strict_differing_fields",
+        "bounded_payload_status",
+        "index_sha256",
+        "index_sha256_status",
+        "full_content_sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "realpath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "index_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "logical_is_symlink": {
+          "type": "boolean"
+        },
+        "sort_order": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "read_group_samples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "contig_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "header_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reference_dictionary_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "quickcheck_status": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "identity_policy": {
+          "const": "storage_identity_v1"
+        },
+        "identity_assurance": {
+          "const": "metadata_plus_sampled_chunks_not_full_content_hash"
+        },
+        "frozen_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "observed_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "strict_storage_identity_status": {
+          "enum": [
+            "MATCH",
+            "MOUNT_DEVICE_DRIFT_ONLY",
+            "MISMATCH"
+          ]
+        },
+        "strict_differing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "bounded_payload_status": {
+          "description": "Three fixed 1 MiB sampled payload chunks plus bounded metadata match; this is not biological identity or a full-content hash.",
+          "enum": [
+            "MATCH",
+            "MISMATCH"
+          ]
+        },
+        "index_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "index_sha256_status": {
+          "enum": [
+            "MATCH",
+            "MISMATCH"
+          ]
+        },
+        "full_content_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "realpath",
+        "fai_path",
+        "size_bytes",
+        "identity_policy",
+        "identity_assurance",
+        "strict_storage_identity_status",
+        "strict_differing_fields",
+        "bounded_payload_status",
+        "fai_sha256",
+        "fai_sha256_status",
+        "contig_count",
+        "reference_dictionary_sha256",
+        "full_content_sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "realpath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fai_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "identity_policy": {
+          "const": "storage_identity_v1"
+        },
+        "identity_assurance": {
+          "const": "metadata_plus_sampled_chunks_not_full_content_hash"
+        },
+        "strict_storage_identity_status": {
+          "enum": [
+            "MATCH",
+            "MOUNT_DEVICE_DRIFT_ONLY",
+            "MISMATCH"
+          ]
+        },
+        "strict_differing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "bounded_payload_status": {
+          "description": "Three fixed 1 MiB sampled payload chunks plus bounded metadata match; this is not a full-content hash.",
+          "enum": [
+            "MATCH",
+            "MISMATCH"
+          ]
+        },
+        "fai_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fai_sha256_status": {
+          "enum": [
+            "MATCH",
+            "MISMATCH"
+          ]
+        },
+        "contig_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reference_dictionary_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "full_content_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "inputCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tumor_reference_dictionary_status",
+        "normal_reference_dictionary_status",
+        "tumor_normal_dictionary_status",
+        "read_group_identity_status",
+        "caller_input_path",
+        "caller_input_sha256",
+        "alignment_source_directory",
+        "caller_source_directory",
+        "source_directory_pairing_status",
+        "interpretation_note"
+      ],
+      "properties": {
+        "tumor_reference_dictionary_status": {
+          "const": "PASS"
+        },
+        "normal_reference_dictionary_status": {
+          "const": "PASS"
+        },
+        "tumor_normal_dictionary_status": {
+          "const": "PASS"
+        },
+        "read_group_identity_status": {
+          "enum": [
+            "AVAILABLE_UNVERIFIED",
+            "UNAVAILABLE_NO_RG"
+          ]
+        },
+        "caller_input_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caller_input_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "alignment_source_directory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caller_source_directory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_directory_pairing_status": {
+          "enum": [
+            "SAME_DIRECTORY_FAMILY",
+            "CROSS_DIRECTORY_REVIEW_REQUIRED"
+          ]
+        },
+        "interpretation_note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "producerReadTags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "assurance",
+        "denominator_population",
+        "validation_path",
+        "validation_sha256",
+        "validation_sha256_status",
+        "validation_status",
+        "total_alignment_records",
+        "primary_alignment_records",
+        "secondary_alignment_records",
+        "supplementary_alignment_records",
+        "hp_assigned_alignment_records",
+        "hp_assigned_rate_all_alignment_records",
+        "hp_and_ps_alignment_records",
+        "hp_and_ps_rate_all_alignment_records",
+        "hp_and_ps_rate_among_hp_assigned_alignment_records",
+        "record_key_missing",
+        "record_key_extra",
+        "duplicate_identity_rows",
+        "duplicate_identity_rate_all_alignment_records",
+        "duplicate_identity_conflicts",
+        "unknown_hp_category_n"
+      ],
+      "properties": {
+        "authority": {
+          "const": "external_coordinate_sidecar"
+        },
+        "assurance": {
+          "const": "bounded_coordinate_equivalence_not_global_payload_identity"
+        },
+        "denominator_population": {
+          "const": "all_captured_mapped_alignment_records_including_primary_secondary_supplementary"
+        },
+        "validation_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "validation_sha256_status": {
+          "enum": [
+            "MATCH",
+            "MISMATCH"
+          ]
+        },
+        "validation_status": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "total_alignment_records": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "primary_alignment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "secondary_alignment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supplementary_alignment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hp_assigned_alignment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hp_assigned_rate_all_alignment_records": {
+          "description": "HP-assigned alignment records divided by all captured mapped alignment records, including primary, secondary, and supplementary records.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hp_and_ps_alignment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hp_and_ps_rate_all_alignment_records": {
+          "description": "HP+PS alignment records divided by all captured mapped alignment records.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hp_and_ps_rate_among_hp_assigned_alignment_records": {
+          "description": "HP+PS alignment records divided by HP-assigned alignment records.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "record_key_missing": {
+          "const": 0
+        },
+        "record_key_extra": {
+          "const": 0
+        },
+        "duplicate_identity_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicate_identity_rate_all_alignment_records": {
+          "description": "Exact duplicate alignment identity rows divided by all captured mapped alignment records; a denominator guard, not an accuracy metric.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "duplicate_identity_conflicts": {
+          "const": 0
+        },
+        "unknown_hp_category_n": {
+          "const": 0
+        }
+      }
+    }
+  }
+}

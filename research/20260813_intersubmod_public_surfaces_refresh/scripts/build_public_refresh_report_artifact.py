@@ -1,0 +1,689 @@
+#!/usr/bin/env python3
+"""Build the canonical portable-report artifact for the public-surface refresh."""
+
+from __future__ import annotations
+
+import csv
+import json
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+
+ROOT = Path(__file__).resolve().parents[3]
+OUTPUT = ROOT / "research/20260813_intersubmod_public_surfaces_refresh/report_artifact.json"
+INVENTORY = (
+    ROOT
+    / "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv"
+)
+P0_REGISTRY = ROOT / "research/20260813_public_docs_p0_correction/scripts/p0_claim_registry.json"
+P1P2_REGISTRY = (
+    ROOT
+    / "research/20260813_intersubmod_public_surfaces_refresh/scripts/p1_p2_claim_registry.json"
+)
+
+
+def read_inventory() -> list[dict[str, str]]:
+    with INVENTORY.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    if len(rows) != 158:
+        raise ValueError(f"Expected 158 claims, observed {len(rows)}")
+    return rows
+
+
+def validate_correction_denominator(rows: list[dict[str, str]]) -> None:
+    problem_verdicts = {"NEEDS_CORRECTION", "CONTRADICTED", "UNVERIFIABLE"}
+    problem = [row for row in rows if row["verdict"] in problem_verdicts]
+    if len(problem) != 58:
+        raise ValueError(f"Expected 58 problem claims, observed {len(problem)}")
+    priorities = Counter(row["priority"] for row in problem)
+    if priorities != Counter({"P0": 34, "P1": 20, "P2": 4}):
+        raise ValueError(f"Unexpected problem priorities: {priorities}")
+    p0 = json.loads(P0_REGISTRY.read_text(encoding="utf-8"))["claims"]
+    p1p2 = json.loads(P1P2_REGISTRY.read_text(encoding="utf-8"))["claims"]
+    registered = {item["claim_id"] for item in p0} | {item["claim_id"] for item in p1p2}
+    expected = {row["claim_id"] for row in problem}
+    if registered != expected:
+        raise ValueError(
+            f"Correction registries do not close the problem set: "
+            f"missing={sorted(expected-registered)} extra={sorted(registered-expected)}"
+        )
+
+
+def source(source_id: str, label: str, path: str) -> dict[str, str]:
+    if path.startswith("/") or ".." in Path(path).parts:
+        raise ValueError(f"Unsafe public source path: {path}")
+    if not (ROOT / path).is_file():
+        raise FileNotFoundError(path)
+    return {"id": source_id, "label": label, "path": path}
+
+
+def query_source(
+    source_id: str, label: str, dataset: str, generated_at: str
+) -> dict[str, object]:
+    return {
+        "id": source_id,
+        "label": label,
+        "query": {
+            "engine": "portable artifact snapshot",
+            "language": "sql",
+            "sql": f"SELECT * FROM {dataset};",
+            "description": f"Read the reviewed, bounded {dataset} dataset embedded in this artifact.",
+            "tables_used": [dataset],
+            "executed_at": generated_at,
+        },
+    }
+
+
+def build() -> dict[str, object]:
+    rows = read_inventory()
+    validate_correction_denominator(rows)
+    generated_at = datetime.now(ZoneInfo("Asia/Taipei")).isoformat(timespec="seconds")
+
+    verdict_order = [
+        ("CONFIRMED", "已確認"),
+        ("CONFIRMED_WITH_LIMITS", "有限制確認"),
+        ("NEEDS_CORRECTION", "需修正"),
+        ("CONTRADICTED", "遭證據反駁"),
+        ("UNVERIFIABLE", "無法驗證"),
+    ]
+    verdict_counts = Counter(row["verdict"] for row in rows)
+    claim_verdicts = [
+        {"verdict": label, "claims": verdict_counts[key]} for key, label in verdict_order
+    ]
+    if [row["claims"] for row in claim_verdicts] != [69, 31, 28, 26, 4]:
+        raise ValueError(f"Unexpected verdict counts: {claim_verdicts}")
+
+    sources = [
+        source(
+            "claim_inventory",
+            "2026-08-12 public claim inventory (158 claim families)",
+            "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+        ),
+        source(
+            "full_audit",
+            "InterSubMod GitHub public documentation full validation",
+            "docs/reports/validated/2026/08/20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md",
+        ),
+        source(
+            "p0_guard",
+            "P0 public-claim correction guard receipt",
+            "research/20260813_public_docs_p0_correction/claim_guard_receipt.md",
+        ),
+        source(
+            "p1p2_guard",
+            "P1/P2 public-claim correction guard receipt",
+            "research/20260813_intersubmod_public_surfaces_refresh/claim_guard_receipt.md",
+        ),
+        source(
+            "github_receipt",
+            "GitHub source correction receipt",
+            "research/20260813_intersubmod_public_surfaces_refresh/github_correction_receipt.md",
+        ),
+        source(
+            "pages_receipt",
+            "Pages correction and visual QA receipt",
+            "research/20260813_intersubmod_public_surfaces_refresh/pages_correction_receipt.md",
+        ),
+        source(
+            "pages_structural",
+            "Pages structural QA (17 pages / 37 inline SVG)",
+            "research/20260813_intersubmod_public_surfaces_refresh/pages_structural_qa.json",
+        ),
+        source(
+            "pages_browser",
+            "Pages browser QA (desktop/mobile/no-JS/print)",
+            "research/20260813_intersubmod_public_surfaces_refresh/pages_browser_qa.json",
+        ),
+        source(
+            "remote_receipt",
+            "Live GitHub and Pages state receipt",
+            "research/20260813_intersubmod_public_surfaces_refresh/remote_state_receipt.md",
+        ),
+        source(
+            "ccu_checklist",
+            "CCU tutorial prioritized improvement checklist",
+            "research/20260813_intersubmod_public_surfaces_refresh/20260813_CCU教學站重點改進清單_01.md",
+        ),
+        source(
+            "status_receipt",
+            "Public status documents correction receipt",
+            "research/20260813_intersubmod_public_surfaces_refresh/status_docs_correction_receipt.md",
+        ),
+        source(
+            "implementation_notes",
+            "Public-surface refresh implementation notes",
+            "research/20260813_intersubmod_public_surfaces_refresh/implementation-notes.md",
+        ),
+        source(
+            "report_notes",
+            "Report scope, section mapping, chart map, and omission notes",
+            "research/20260813_intersubmod_public_surfaces_refresh/report_source_notes.md",
+        ),
+    ]
+    sources.extend(
+        [
+            query_source("q_headline_claims", "Reviewed snapshot: headline claims", "headline_claims", generated_at),
+            query_source("q_headline_disposition", "Reviewed snapshot: correction dispositions", "headline_disposition", generated_at),
+            query_source("q_headline_pages", "Reviewed snapshot: Pages headline", "headline_pages", generated_at),
+            query_source("q_headline_browser", "Reviewed snapshot: browser headline", "headline_browser", generated_at),
+            query_source("q_headline_ccu", "Reviewed snapshot: CCU headline", "headline_ccu", generated_at),
+            query_source("q_claim_verdicts", "Reviewed snapshot: claim verdicts", "claim_verdicts", generated_at),
+            query_source("q_svg_accessibility", "Reviewed snapshot: SVG accessibility", "svg_accessibility", generated_at),
+            query_source("q_ccu_partition", "Reviewed snapshot: CCU partition", "ccu_partition", generated_at),
+            query_source("q_public_status", "Reviewed snapshot: public status", "public_status", generated_at),
+            query_source("q_claim_boundary", "Reviewed snapshot: claim boundary", "claim_boundary", generated_at),
+            query_source("q_correction_matrix", "Reviewed snapshot: correction matrix", "correction_matrix", generated_at),
+            query_source("q_ccu_remaining", "Reviewed snapshot: CCU remaining", "ccu_remaining", generated_at),
+        ]
+    )
+
+    cards = [
+        {
+            "id": "c_problem_claims",
+            "dataset": "headline_claims",
+            "sourceId": "q_headline_claims",
+            "description": "需修正、遭反駁或無法驗證的完整 claim-family 母體。",
+            "metrics": [{"label": "問題 claim families", "field": "problem_claims", "format": "number"}],
+        },
+        {
+            "id": "c_closed_dispositions",
+            "dataset": "headline_disposition",
+            "sourceId": "q_headline_disposition",
+            "description": "P0 與 P1/P2 registries 對 58 項問題的完整處置；不等於全部 live。",
+            "metrics": [{"label": "有處置／總問題", "field": "closed_dispositions", "format": "number"}],
+        },
+        {
+            "id": "c_pages",
+            "dataset": "headline_pages",
+            "sourceId": "q_headline_pages",
+            "description": "完整 standalone Pages inventory。",
+            "metrics": [{"label": "Pages 通過", "field": "pages", "format": "number"}],
+        },
+        {
+            "id": "c_svg",
+            "dataset": "headline_pages",
+            "sourceId": "q_headline_pages",
+            "description": "全部 inline SVG 均具有 title、desc、role 與 ARIA linkage。",
+            "metrics": [{"label": "SVG 可近用", "field": "accessible_svg", "format": "number"}],
+        },
+        {
+            "id": "c_browser",
+            "dataset": "headline_browser",
+            "sourceId": "q_headline_browser",
+            "description": "17 頁 × desktop/mobile/no-JS/print；failures=0。",
+            "metrics": [{"label": "Browser checks", "field": "checks", "format": "number"}],
+        },
+        {
+            "id": "c_ccu",
+            "dataset": "headline_ccu",
+            "sourceId": "q_headline_ccu",
+            "description": "CCU 下一輪仍須處理的唯一 finding 集合。",
+            "metrics": [{"label": "CCU 未解 finding", "field": "remaining", "format": "number"}],
+        },
+    ]
+
+    charts = [
+        {
+            "id": "ch_claim_verdicts",
+            "title": "158 個公開 claim family 的驗證判定",
+            "subtitle": "完整 inventory；問題集合為需修正、遭反駁、無法驗證三類，共 58 項",
+            "type": "bar",
+            "intent": "comparison",
+            "dataset": "claim_verdicts",
+            "sourceId": "q_claim_verdicts",
+            "question": "公開說明中有多少主張可保留、需限縮或必須修正？",
+            "rationale": "五個互斥 verdict 是離散類別，以單系列柱狀圖直接比較數量最誠實。",
+            "comparisonContext": {
+                "grain": "claim family",
+                "denominator": "158 audited claim families",
+                "unit": "claims",
+            },
+            "encodings": {
+                "x": {"field": "verdict", "type": "nominal", "label": "驗證判定"},
+                "y": {"field": "claims", "type": "quantitative", "format": "number", "label": "Claim families"},
+                "tooltip": [{"field": "claims", "type": "quantitative", "label": "數量"}],
+            },
+            "maxRows": 5,
+        },
+        {
+            "id": "ch_svg_accessibility",
+            "title": "Pages inline SVG 可近用性修正前後",
+            "subtitle": "同一組 37 個 SVG；修正前 26 個缺 title/desc，修正後 37/37 通過",
+            "type": "bar",
+            "intent": "comparison",
+            "dataset": "svg_accessibility",
+            "sourceId": "q_svg_accessibility",
+            "question": "Pages 圖例是否從部分可近用提升為完整 contract？",
+            "rationale": "前後兩個狀態、各自拆成通過與缺件，以 grouped bar 顯示完整分母。",
+            "comparisonContext": {
+                "grain": "inline SVG element",
+                "denominator": "37 inline SVG elements in 17 Pages",
+                "unit": "SVG elements",
+            },
+            "encodings": {
+                "x": {"field": "stage", "type": "nominal", "label": "階段"},
+                "y": {"field": "svg", "type": "quantitative", "format": "number", "label": "SVG elements"},
+                "color": {"field": "status", "type": "nominal", "label": "Contract 狀態"},
+                "tooltip": [{"field": "svg", "type": "quantitative", "label": "數量"}],
+            },
+            "maxRows": 4,
+        },
+        {
+            "id": "ch_ccu_partition",
+            "title": "CCU 教學站 32 項 finding 的處置分流",
+            "subtitle": "13 項只驗證既有 patch、16 項仍待處理、3 項先前已解；本輪未改 CCU",
+            "type": "bar",
+            "intent": "comparison",
+            "dataset": "ccu_partition",
+            "sourceId": "q_ccu_partition",
+            "question": "CCU 的已知問題中，哪些只是有 patch、哪些仍待修、哪些已解？",
+            "rationale": "三組互斥狀態需要精確比較，單系列柱狀圖避免把 patch 誤讀為 live 修復。",
+            "comparisonContext": {
+                "grain": "CCU finding",
+                "denominator": "32 frozen findings",
+                "unit": "findings",
+            },
+            "encodings": {
+                "x": {"field": "partition", "type": "nominal", "label": "分流"},
+                "y": {"field": "findings", "type": "quantitative", "format": "number", "label": "Findings"},
+                "tooltip": [{"field": "findings", "type": "quantitative", "label": "數量"}],
+            },
+            "maxRows": 3,
+        },
+    ]
+
+    tables = [
+        {
+            "id": "t_public_status",
+            "title": "本地修正與 live publication 是兩個不同狀態",
+            "dataset": "public_status",
+            "sourceId": "q_public_status",
+            "density": "spacious",
+            "columns": [
+                {"field": "surface", "label": "公開介面", "type": "text"},
+                {"field": "local", "label": "本地來源", "type": "text"},
+                {"field": "live", "label": "Live 狀態", "type": "text"},
+                {"field": "evidence", "label": "2026-08-13 證據", "type": "text"},
+                {"field": "next_gate", "label": "下一個 gate", "type": "text"},
+            ],
+        },
+        {
+            "id": "t_claim_boundary",
+            "title": "InterSubMod 現有證據能支持到哪一層",
+            "dataset": "claim_boundary",
+            "sourceId": "q_claim_boundary",
+            "density": "spacious",
+            "columns": [
+                {"field": "layer", "label": "證據層", "type": "text"},
+                {"field": "supported", "label": "可支持", "type": "text"},
+                {"field": "not_supported", "label": "不可升格", "type": "text"},
+                {"field": "needed", "label": "若要升級需補", "type": "text"},
+            ],
+        },
+        {
+            "id": "t_correction_matrix",
+            "title": "InterSubMod 公開資訊校正與確認清單",
+            "dataset": "correction_matrix",
+            "sourceId": "q_correction_matrix",
+            "density": "spacious",
+            "columns": [
+                {"field": "area", "label": "主題", "type": "text"},
+                {"field": "problem", "label": "原問題", "type": "text"},
+                {"field": "correction", "label": "本輪校正", "type": "text"},
+                {"field": "verification", "label": "驗證／限制", "type": "text"},
+                {"field": "status", "label": "狀態", "type": "text"},
+            ],
+        },
+        {
+            "id": "t_ccu_remaining",
+            "title": "CCU 下一輪 16 項優先改善 acceptance contract",
+            "dataset": "ccu_remaining",
+            "sourceId": "q_ccu_remaining",
+            "density": "dense",
+            "columns": [
+                {"field": "order", "label": "序", "format": "number"},
+                {"field": "priority", "label": "優先", "type": "text"},
+                {"field": "finding", "label": "Finding", "type": "text"},
+                {"field": "problem", "label": "重點問題", "type": "text"},
+                {"field": "needed", "label": "要補的資料／方法", "type": "text"},
+                {"field": "acceptance", "label": "最低驗收", "type": "text"},
+            ],
+        },
+    ]
+
+    blocks = [
+        {
+            "id": "b_title",
+            "type": "markdown",
+            "body": "# InterSubMod 公開資訊校正與 CCU 改進稽核",
+        },
+        {
+            "id": "b_summary_audit",
+            "type": "markdown",
+            "sourceId": "claim_inventory",
+            "body": "## 技術摘要 — 本地公開來源已校正，live 發布仍未完成\n\n**完整稽核的 158 個 claim families 中，100 個可保留（69 已確認、31 有限制確認），58 個屬問題集合（28 需修正、26 遭證據反駁、4 無法驗證）。** 這 58 項已由 P0 34、P1 20、P2 4 的 registries 全部給出修正、移除或 external disposition；這表示本地 correction denominator 已閉合，不表示所有 live 公開頁面已更新。",
+        },
+        {
+            "id": "b_summary_remote",
+            "type": "markdown",
+            "sourceId": "remote_receipt",
+            "body": "**Live 狀態必須分開讀。** GitHub About 已以 API 與 repository page 確認為有界新描述；default `main`、Wiki 與 17 個 Pages route 仍是舊 commit／舊 bytes。沒有另行授權前，本輪不 commit、push、merge、publish 或 deploy。",
+        },
+        {
+            "id": "b_summary_ccu",
+            "type": "markdown",
+            "sourceId": "ccu_checklist",
+            "body": "**CCU 僅完成 32 項 finding 的封閉式清單。** 其中 13 項是已驗證但未套用／未部署的既有 patch targets，16 項仍待處理，3 項先前已解。本輪沒有修改 CCU source、generated HTML、live site、remote 或既有 patch；清單不是修復證明。",
+        },
+        {
+            "id": "b_metrics",
+            "type": "metric-strip",
+            "cardIds": ["c_problem_claims", "c_closed_dispositions", "c_pages", "c_svg", "c_browser", "c_ccu"],
+        },
+        {
+            "id": "b_claims_intro",
+            "type": "markdown",
+            "sourceId": "claim_inventory",
+            "body": "## 問題不在少數，但母體與處置已可稽核\n\n下圖的單位是 **claim family**，不是文字命中次數。`NEEDS_CORRECTION`、`CONTRADICTED`、`UNVERIFIABLE` 三類合計 58，是本輪 correction denominator；`CONFIRMED_WITH_LIMITS` 的 31 項不是漏修，而是保留限制後可繼續使用。",
+        },
+        {"id": "b_claims_chart", "type": "chart", "chartId": "ch_claim_verdicts"},
+        {
+            "id": "b_claims_after",
+            "type": "markdown",
+            "sourceId": "p1p2_guard",
+            "body": "**解讀：** P1/P2 guard 實際掃描 12 份文件、26 個 target rules、80 個 required anchors 與 50 個 forbidden anchors，errors=0；移除 C157 的負控制會 exit 1。這證明 guard 能抓到 claim-set 遺漏，但仍只是文字與 registry contract，不是生物 truth validator。",
+        },
+        {
+            "id": "b_pages_intro",
+            "type": "markdown",
+            "sourceId": "implementation_notes",
+            "body": "## Pages 從內容正確進一步補到可近用與響應式\n\n初始 37 個 inline SVG 中有 26 個缺 `title`／`desc`。修正後 37/37 同時具有 title、desc、`role=img` 與有效 ARIA linkage；17 頁在 desktop、390 px mobile、no-JS、print 共 68 次 browser checks 全部通過，沒有水平 overflow 或 browser error。",
+        },
+        {"id": "b_pages_chart", "type": "chart", "chartId": "ch_svg_accessibility"},
+        {
+            "id": "b_pages_after",
+            "type": "markdown",
+            "sourceId": "pages_receipt",
+            "body": "**解讀：** 這是 presentation contract 的實質改善，不會把科學 claim 自動變真。內容 guard、HTML/SVG 結構、browser behavior 與 8 組公開 SVG/PNG 圖例都分別驗證；`exit 3` 也只代表缺少已宣告必填 metric 時拒絕渲染，不驗證 metric 真實性、分母或統計方法。",
+        },
+        {
+            "id": "b_public_intro",
+            "type": "markdown",
+            "sourceId": "remote_receipt",
+            "body": "## 目前只有 About 已在 live plane 解決\n\n本地工作樹與公開站是不同 evidence plane。下表把每個 surface 的 source state、live state 與下一個 gate 分開，避免把『已修改檔案』寫成『讀者現在已看到』。",
+        },
+        {"id": "b_public_table", "type": "table", "tableId": "t_public_status"},
+        {
+            "id": "b_scope_intro",
+            "type": "markdown",
+            "sourceId": "status_receipt",
+            "body": "## 推論上限已統一為 molecule → local candidate → association\n\n公開文件現在把 observation、model-conditioned inference 與 biological interpretation 分層。核心原則是：同一條 read 上的 calls 可以是直接的分子證據；來源細胞、細胞 clone、演化 lineage 與因果功能仍需要額外資料與識別條件。",
+        },
+        {"id": "b_scope_table", "type": "table", "tableId": "t_claim_boundary"},
+        {
+            "id": "b_corrections_intro",
+            "type": "markdown",
+            "sourceId": "status_receipt",
+            "body": "## InterSubMod 已修正的問題與仍保留的限制\n\n本輪沒有以新估計值替換缺證據的舊數字：無 receipt 的 tagged-BAM total、倍率、`>99%` 欄位占比與效能數字被撤回或標為未驗證；可重算的 exact sidecar／BAM bytes、版本限定 test/code/schema count 則保留並附適用範圍。",
+        },
+        {"id": "b_corrections_table", "type": "table", "tableId": "t_correction_matrix"},
+        {
+            "id": "b_ccu_intro",
+            "type": "markdown",
+            "sourceId": "ccu_checklist",
+            "body": "## CCU 下一輪先處理數值、因果、模型越界與工具事實\n\n32 項 finding 被完整分成三個互斥集合。最重要的判讀是：**13 項 patch-validated 不等於 source 已套用，更不等於 live 已修復。** 真正仍待處理的 16 項，前 9 項列為 P0，必須先降階不合理精確數字、因果語氣、模型能力與錯誤 tag/route 敘述。",
+        },
+        {"id": "b_ccu_chart", "type": "chart", "chartId": "ch_ccu_partition"},
+        {
+            "id": "b_ccu_after",
+            "type": "markdown",
+            "sourceId": "ccu_checklist",
+            "body": "**解讀：** 下一輪不能以『文句已改』作 Definition of Done。每個 finding 都要能回到 source line、generated line、live URL、版本化輸入、命令、numerator/denominator、模型假設與 acceptance evidence；否則維持 open。",
+        },
+        {"id": "b_ccu_table", "type": "table", "tableId": "t_ccu_remaining"},
+        {
+            "id": "b_method",
+            "type": "markdown",
+            "sourceId": "report_notes",
+            "body": "## 驗證方法 — inventory、registry、負控制、結構與 live bytes 分層\n\n1. 以 2026-08-12 frozen inventory 定義 158 個 claim-family 母體與 58 個問題集合。\n2. P0 與 P1/P2 registry 必須 exact-set closure；required／forbidden anchors 全部通過，並以移除 claim 的負控制驗證 fail-closed。\n3. GitHub README／Wiki 與 Pages 分流修改；可重算數值綁版本、分母、命令，缺 receipt 的數字撤回。\n4. Pages 另跑 17-page／37-SVG structural QA、68-profile browser QA 與 8 組圖例 XML/PNG 檢查。\n5. Remote state 以 API、remote refs、HTTP status 與 live-byte hashes獨立驗證；local corrected 不自動升格為 live resolved。\n6. CCU 只讀既有 TSV／receipt／patch，驗算 13+16+3=32 並建立 acceptance contract，不改任何 CCU material。",
+        },
+        {
+            "id": "b_limits",
+            "type": "markdown",
+            "sourceId": "full_audit",
+            "body": "## 限制與 robustness — 文件正確不等於方法已被 truth-set 驗證\n\n**本報告驗證的是公開說明、數值來源、版本邊界與呈現 contract。** 它不新增 SEQC2 truth-set performance、CN/LOH-corrected CCF、single-cell lineage、因果甲基化或跨樣本 runtime evidence。GitHub live state 也會隨外部 publication 改變；發布後必須重新抓 remote refs 與 17 頁 bytes。精確 sidecar sum 是目前 7 個 compressed sidecars 的大小，不可當 hypothetical tagged-BAM total。HCC1395 BAM 的 exact bytes 也不是跨樣本容量 benchmark。",
+        },
+        {
+            "id": "b_next",
+            "type": "markdown",
+            "body": "## 建議下一步 — 先發布 InterSubMod，再另行決定是否授權 CCU 修復\n\n1. 在乾淨 publication branch 重跑 P0、P1/P2、Pages structural/browser QA 與圖例生成，確認輸出 hash。\n2. 經明確授權後，分別發布 default README、Wiki 與 Pages；發布後重新驗 remote refs、17/17 HTTP 200 與內容 hashes。\n3. 將 GitHub repository homepage 欄位設為 Pages URL，可改善導覽；這是 external metadata action，尚未執行。\n4. CCU 維持 checklist-only。若另行授權修復，先做 9 項 P0，再做 7 項 P1；source rebuild 與 live parity 全過後才關閉 findings。\n5. 研究數據方面，優先補 CN/LOH/purity、independent/held-out phasing、truth-set benchmark、版本化 performance receipt，而不是擴大現有 biological wording。",
+        },
+        {
+            "id": "b_questions",
+            "type": "markdown",
+            "body": "## 仍會改變決策的問題\n\n- 是否授權把目前本地修正拆成可審核 commit／PR，並發布到 default branch、Wiki 與 Pages？\n- GitHub repository homepage 是否要設為 Pages URL？\n- CCU 下一輪若取得修改授權，13 項既有 patch 要先套用並 rebase，還是與 16 項 remaining 一次重做 source-first correction？\n- 哪一組 truth release、BED、caller/callset 與 FILTER policy 應成為 InterSubMod／CCU 對外 F1 的 canonical benchmark？\n- 若要把 local mutation-state candidate 升級為 cellular clone/lineage，誰負責提供 allele-specific CN/LOH、purity、orthogonal phase 或 single-cell truth？",
+        },
+    ]
+
+    snapshot = {
+        "version": 1,
+        "generatedAt": generated_at,
+        "status": "ready",
+        "datasets": {
+            "headline_claims": [{"problem_claims": 58}],
+            "headline_disposition": [{"closed_dispositions": 58}],
+            "headline_pages": [{"pages": 17, "accessible_svg": 37}],
+            "headline_browser": [{"checks": 68, "failures": 0}],
+            "headline_ccu": [{"remaining": 16}],
+            "claim_verdicts": claim_verdicts,
+            "svg_accessibility": [
+                {"stage": "修正前", "status": "符合 contract", "svg": 11},
+                {"stage": "修正前", "status": "缺 title/desc", "svg": 26},
+                {"stage": "修正後", "status": "符合 contract", "svg": 37},
+                {"stage": "修正後", "status": "缺 title/desc", "svg": 0},
+            ],
+            "ccu_partition": [
+                {"partition": "既有 patch、未套用", "findings": 13},
+                {"partition": "仍待處理", "findings": 16},
+                {"partition": "先前已解", "findings": 3},
+            ],
+            "public_status": [
+                {
+                    "surface": "GitHub About",
+                    "local": "不需本地檔案",
+                    "live": "RESOLVED_LIVE",
+                    "evidence": "API 與 repository page 均為有界新描述",
+                    "next_gate": "維持 regression check",
+                },
+                {
+                    "surface": "Default main README",
+                    "local": "CORRECTED",
+                    "live": "舊版／待發布",
+                    "evidence": "main=635437a65a33；live README 仍含舊敘述",
+                    "next_gate": "明確授權後 merge/push，再抓 live bytes",
+                },
+                {
+                    "surface": "GitHub Wiki",
+                    "local": "CORRECTED",
+                    "live": "舊版／待發布",
+                    "evidence": "Wiki master=6cfc990f1fbe",
+                    "next_gate": "發布 Wiki source，再核對 remote head/content",
+                },
+                {
+                    "surface": "GitHub Pages",
+                    "local": "17/17 CORRECTED + QA PASS",
+                    "live": "17/17 舊 bytes／待部署",
+                    "evidence": "17 routes HTTP 200，但 hashes 未變",
+                    "next_gate": "部署後重驗 17 routes、hash、browser QA",
+                },
+            ],
+            "claim_boundary": [
+                {
+                    "layer": "Read／alignment observation",
+                    "supported": "同一 physical molecule 上的 allele、HP/PS、MM/ML called evidence；仍受 basecalling、mapping、phasing/tag error 影響",
+                    "not_supported": "來源細胞、同一 cellular clone、親源或實體 chromosome copy 的直接識別",
+                    "needed": "cell barcode／single-cell 或 orthogonal truth；版本化 error/QC model",
+                },
+                {
+                    "layer": "Genetic structure inference",
+                    "supported": "局部、recurrence-allowed、模型條件下的 mutation-state candidate arborescence／topology signature",
+                    "not_supported": "confirmed cellular clone、lineage、完整演化史、canonical CN/LOH-corrected CCF",
+                    "needed": "allele-specific CN/LOH、purity、multi-region/timepoint、held-out/orthogonal phase、truth calibration",
+                },
+                {
+                    "layer": "Methylation",
+                    "supported": "依 genetic pattern 分組後的區域甲基化 association；effect 與 p-value 需依指定 null 解讀",
+                    "not_supported": "獨立確認 subclone、因果甲基化、functional mechanism 或 universal cell clock",
+                    "needed": "獨立標籤、避免 double-dipping 的 held-out design、multiple-testing/dispersion control、功能驗證",
+                },
+                {
+                    "layer": "效能與可重現性",
+                    "supported": "綁定 commit、輸入、硬體、命令、重複與 exit code 的版本限定結果",
+                    "not_supported": "無 receipt 的線性 speedup、固定 latency、跨版本／跨樣本泛化",
+                    "needed": "benchmark artifact、分布與失敗率、controlled scaling、binary/input identity",
+                },
+            ],
+            "correction_matrix": [
+                {
+                    "area": "研究定位",
+                    "problem": "把 molecule co-occurrence 寫成細胞／clone／lineage 的直接觀測",
+                    "correction": "改為 local mutation-state candidate；物理分子是直接證據，細胞層是模型推論",
+                    "verification": "P0/P1/P2 guard；EN/ZH/Wiki/Pages 一致",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "分母與 88.26%",
+                    "problem": "170,131 的 component 與 469,849 record 分母混用；拓撲比例被解讀為腫瘤史",
+                    "correction": "66.52%=170,131/255,752 strict components；36.21%=170,131/469,849 records；88.26% 僅在 71,955 rankable units",
+                    "verification": "denominator registry／authority recomputation",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "資料容量",
+                    "problem": "1.67 TiB、287×、SEQ/QUAL >99% 無 exact receipt／field census",
+                    "correction": "撤回倍率與欄位占比；保留 7 sidecars exact 6,256,168,164 bytes = 5.826510641724 GiB",
+                    "verification": "exact-byte receipt；tagged-BAM total 維持 UNVERIFIED",
+                    "status": "CORRECTED WITH GAP",
+                },
+                {
+                    "area": "HCC1395 BAM",
+                    "problem": "舊 292 GB 顯示值不精確",
+                    "correction": "stat -L：283,071,595,503 bytes = 263.63096712436527 GiB",
+                    "verification": "本機 exact stat；不可外推全 cohort",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "統計解釋",
+                    "problem": "p、Cramér's V、PERMANOVA 被升格為 truth／因果／latent structure",
+                    "correction": "p=與指定 null 的不相容度；V=關聯幅度；PERMANOVA=label-associated centroid separation，需 PERMDISP",
+                    "verification": "Pages/Wiki wording guard；無因果升格",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "Methylation",
+                    "problem": "用 mutation-defined labels 後再以甲基化『確認』同一 subclone",
+                    "correction": "只稱 pattern-conditioned association；不能移動 genetic candidate topology",
+                    "verification": "scientific ceiling guard；3/811 只限 frozen association yield",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "LongLineage",
+                    "problem": "HCC1395 的 0 topology units 被外推為所有 real data；tag-BAM 能力跨 commit 混用",
+                    "correction": "0 units 限 frozen HCC1395 dataset-gate；main 5daf50f 與 feature b9aaa12 分開",
+                    "verification": "commit-scoped Wiki／README contract",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "Schema／版本統計",
+                    "problem": "59/114/117/157/180 columns 與 199-column runtime 混為全檔版本；測試／Python 計數過時",
+                    "correction": "historical schemas 與 tracked source 199 columns 分開；270 tests/39 suites、2,147/291 `.py` 均綁 commit/date/corpus",
+                    "verification": "fresh commands、guard、schema fields；未宣稱永續數字",
+                    "status": "LOCAL CORRECTED",
+                },
+                {
+                    "area": "效能",
+                    "problem": "2.9 秒、<300 ms、32-core linear speedup 缺完整 benchmark receipt",
+                    "correction": "公開數字移除；未來須綁 hardware/commit/input/repetitions/distribution/failure",
+                    "verification": "stale-string guard 0 hit",
+                    "status": "UNSUPPORTED CLAIM REMOVED",
+                },
+                {
+                    "area": "Pages 呈現",
+                    "problem": "26/37 SVG 缺 title/desc；mobile overflow；部分頁缺完整 HTML wrapper",
+                    "correction": "37/37 SVG contract、17/17 wrapper/structure、68/68 browser profiles PASS；8 組公開圖例重建",
+                    "verification": "structural/browser/XML/PNG receipts",
+                    "status": "LOCAL QA PASS",
+                },
+                {
+                    "area": "發布狀態",
+                    "problem": "把 local corrected 說成 live resolved",
+                    "correction": "About 單獨標 RESOLVED_LIVE；default main/Wiki/Pages 保持 publication pending",
+                    "verification": "API、remote refs、17 route hashes",
+                    "status": "1 LIVE / 3 PENDING",
+                },
+                {
+                    "area": "CCU",
+                    "problem": "清單、patch 或 local build 容易被誤稱 live repair",
+                    "correction": "32=13 patch-only +16 remaining +3 resolved；本輪 NO CCU CHANGE",
+                    "verification": "input hashes/mtime unchanged；16/16 acceptance fields",
+                    "status": "CHECKLIST ONLY",
+                },
+            ],
+            "ccu_remaining": [
+                {"order": 1, "priority": "P0", "finding": "OLD-P1-SR2C", "problem": "64.89% 無 numerator/denominator，且殘留 cell wording", "needed": "原始 artifact、unit/grain、版本、SHA；找不到就移除精確值", "acceptance": "source/generated/live 不再無 receipt 顯示 64.89%；不升格 cell"},
+                {"order": 2, "priority": "P0", "finding": "DELTA-NEW-011", "problem": "n=60、δ=1% 直接推 0.07 detection bound", "needed": "detector、H0/H1、α、power、sidedness、multiplicity、dispersion與 power curve", "acceptance": "有版本化 power receipt，否則移除 0.07 detection-limit wording"},
+                {"order": 3, "priority": "P0", "finding": "DELTA-NEW-010", "problem": "H2009 max k=12 被寫成 19×成本原因", "needed": "matched profiler、k histogram、coverage/unit/search/I/O、硬體/commit 與 confound-adjusted analysis", "acceptance": "只有 controlled evidence 才能稱 cause；否則限於 association/hypothesis"},
+                {"order": 4, "priority": "P0", "finding": "DELTA-NEW-009", "problem": "LOH 被寫成必然且 quietly wrong", "needed": "allele-specific CN/LOH truth、purity strata、loss simulation、abstention route", "acceptance": "無絕對語氣；detect/unknown loss 時 flag 或 abstain"},
+                {"order": 5, "priority": "P0", "finding": "DELTA-NEW-007", "problem": "four-gamete 被說成唯一 tree 且不需 search", "needed": "明定 theorem scope；unique/non-unique、recurrence/loss/error fixtures與 candidate search", "acceptance": "非嚴格假設不得稱唯一／免 search；五類 unit tests"},
+                {"order": 6, "priority": "P0", "finding": "DELTA-NEW-003", "problem": "未實作輸出被寫成可估 clone/CCF/cell proportion", "needed": "current/proposed schema boundary；CN/LOH/purity model、truth/calibration", "acceptance": "首屏 SPEC/NOT IMPLEMENTED/NOT VALIDATED；current output 不含假欄位"},
+                {"order": 7, "priority": "P0", "finding": "OLD-P1-M06", "problem": "HP tag 型別與平台支援事實錯誤", "needed": "LongPhase-S/TO pinned releases、runtime help、integer/string tag fixtures", "acceptance": "版本與 tag type 可由 fixture/command 重現；錯誤字串歸零"},
+                {"order": 8, "priority": "P0", "finding": "OLD-P1-M07", "problem": "混用 LongPhase-S/TO tag 語意並忽略 local negative result", "needed": "版本化 benchmark、caller AF、TP/FP/FN、TP-loss guard與樣本異質性", "acceptance": "工具語意分開；rescue 只限有 benchmark 的資料/版本"},
+                {"order": 9, "priority": "P0", "finding": "OLD-P1-SR6", "problem": "source 存在但 live route 404／狀態不明", "needed": "route/navigation manifest、source/generated/live hashes、deploy receipt", "acceptance": "要嘛正式 deploy 200 且 parity；要嘛明示 DRAFT 並從導航排除"},
+                {"order": 10, "priority": "P1", "finding": "OLD-P1-M02", "problem": "0.909/0.9093 缺 technical-pair receipt", "needed": "dataset IDs、truth region、version、n、Spearman定義、CI/uncertainty", "acceptance": "同屏可見 metric/n/scope/version；不得稱 accuracy/biological replication"},
+                {"order": 11, "priority": "P1", "finding": "OLD-P1-M03", "problem": "精確 F1 表缺逐列 provenance 與 confusion counts", "needed": "truth/BED/FILTER policy、TP/FP/FN、precision/recall、row-level command/hash", "acceptance": "每列可重算；缺任一必要欄不得顯示精確值或排名"},
+                {"order": 12, "priority": "P1", "finding": "OLD-P1-M05", "problem": "haplotype concentration 被當獨立確認", "needed": "marker-held-out reads、orthogonal anchors、CN/LOH/purity strata與 negative controls", "acceptance": "未通 independence/systematics gate 時 abstain，不稱確認真變異"},
+                {"order": 13, "priority": "P1", "finding": "OLD-P1-M11", "problem": "CLI／threshold 被寫成跨版本長期事實", "needed": "release/commit、binary SHA、build flags、runtime --help、threshold benchmark", "acceptance": "所有參數在 pinned binary 可找到；無 benchmark 不稱 universal/optimal"},
+                {"order": 14, "priority": "P1", "finding": "OLD-P1-SR2", "problem": "research guide 未持續標示未實作／未驗證", "needed": "estimand、truth、pre-registered benchmark、implementation state", "acceptance": "首屏 persistent proposal banner；全文不使用 result tense"},
+                {"order": 15, "priority": "P1", "finding": "OLD-P1-SR4", "problem": "algebra/spec 被讀成已校準 estimator", "needed": "truth simulations、held-out phase、CN/LOH/purity、bias/coverage/calibration", "acceptance": "首屏 ALGEBRA ONLY；無 calibration 不稱 validated/robust"},
+                {"order": 16, "priority": "P1", "finding": "OLD-P1-GLOSSARY", "problem": "跨頁術語缺 recurrence/CN/LOH/purity/self-phasing 邊界", "needed": "版本化 terminology matrix、tag fixtures、authority/source mapping", "acceptance": "glossary 與相關頁 fixture 一致；physical-copy/cell promotion 歸零"},
+            ],
+        },
+        "accessIssues": [],
+    }
+
+    manifest = {
+        "version": 1,
+        "surface": "report",
+        "title": "InterSubMod 公開資訊校正與 CCU 改進稽核",
+        "description": "2026-08-13 完整 claim correction、Pages HTML/SVG/browser QA、live publication boundary，以及 CCU checklist-only acceptance contract。",
+        "generatedAt": generated_at,
+        "cards": cards,
+        "charts": charts,
+        "tables": tables,
+        "sources": sources,
+        "blocks": blocks,
+    }
+    return {
+        "surface": "report",
+        "manifest": manifest,
+        "snapshot": snapshot,
+        "sources": sources,
+    }
+
+
+def main() -> int:
+    artifact = build()
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT.write_text(
+        json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+        encoding="utf-8",
+    )
+    print(f"artifact={OUTPUT.relative_to(ROOT)}")
+    print("claims=158 problem=58 dispositions=58 pages=17 svg=37 browser_checks=68 ccu_remaining=16")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

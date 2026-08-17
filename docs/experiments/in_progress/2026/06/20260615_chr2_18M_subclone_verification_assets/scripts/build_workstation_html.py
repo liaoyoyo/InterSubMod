@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Build the chr2:18M HCC1395 subclone JUDGMENT WORKSTATION (standalone HTML).
+Build the chr2:18M HCC1395 molecular-state candidate JUDGMENT WORKSTATION.
 
 Design (CLAUDE.md §13-A "由構造防捏造"):
   - EVERY metric is pulled from independent_audit.json / concordance.tsv by key path.
   - req() raises if a REQUIRED metric is missing -> the build REFUSES rather than
     silently rendering a dash (this is exactly the bug that froze in page-04 Fig4).
   - Legitimately-absent values (e.g. DORADO n=1 -> FDR NA) render as explicit "NA".
-  - CLEAN/CONFOUNDED/DORADO-replicate classification is COMPUTED from the data
-    (normal HP1-vs-HP2 FDR<0.05 = confounded), never hand-assigned.
+  - The legacy internal CLEAN/CONFOUNDED/DORADO-replicate classification is
+    COMPUTED from the data (normal HP1-vs-HP2 FDR<0.05 = confounded), never
+    hand-assigned. Public output spells CLEAN as normal-ASM-screen-negative;
+    it does not mean acquired or clone-specific methylation.
 
 Sources (machine-deterministic; re-run independent_subclone_audit.py = byte-identical):
   independent_audit.json   -> all read-level metrics
-  chr2_18M_seqc2_concordance.tsv -> SEQC2 CCF/TVAF gradient
+  chr2_18M_seqc2_concordance.tsv -> SEQC2 TVAF + historical approximate transform
 Narrative (qualitative rulings) transcribed from verdict_02 WITH file:line citations.
 
 Run:
   python3 build_workstation_html.py
 Outputs:
   <assets>/display/workstation_data.json
-  InterSubMod/docs/explain/06_subclone-judgment-workstation-chr2-18M.standalone.html
+  InterSubMod/docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html
 """
 import json, os, subprocess, sys, html, datetime
 
@@ -142,7 +144,10 @@ for k in ["1", "2", "3", "4", "5", "6"]:
         "role": conc.get("our_label", "NA"),
         "tvaf": conc.get("tvaf", "."),
         "ccf": conc.get("ccf_est", "."),
-        "clonal_class": conc.get("clonal_class", "NA"),
+        # The source column stores a historical, case-specific TVAF transform.
+        # It is not canonical CN/LOH/purity/multiplicity-corrected CCF.
+        "clonal_class": ("historical_tvaf_transform_noncanonical"
+                         if conc.get("ccf_est", ".") not in (".", "", "n/a") else "n/a"),
         "hku_t_bq20": allele_str(t_bq),
         "dor_t_bq20": allele_str(d_bq),
         "hku_n_bq20": allele_str(n_bq),
@@ -240,24 +245,24 @@ POS4 = {"hku": pos4(HKU_T), "dor": pos4(DOR_T)}
 # ----------------------------------------------------------------------------- narrative (verdict_02, cited)
 RULINGS = [
     ("1", "發生 LOH", "確認", "confirm", "SEQC2 LOH BED + HKU/DORADO HP imbalance 一致", "verdict_02:267"),
-    ("2", "發生 subclone", "強支持・有界", "bounded", "可稱 regional operational subclonal states；非完整 biological clone truth", "verdict_02:268"),
+    ("2", "存在區域分子狀態分支", "支持・有界", "bounded", "可稱 regional molecular-state candidates；非 biological clone truth", "verdict_02:268"),
     ("3", "HP2 沒抽到／突變到不見", "否定", "negated", "HP2 是主體；all-REF 短 linkage reads 存在；完整 read 缺失是 coverage", "verdict_02:269"),
     ("4", "(1)(2)(3)(6) 先突變", "不成立・需重寫", "rewrite", "(3) 與 (1)(2)(6) 互斥，不能是同一 trunk；只可稱不同早期 branch-defining candidates", "verdict_02:270"),
     ("5", "(5) 將群一群二分開", "支持 (provisional)", "provisional", "(5)C 對 (3)A 呈 perfect nesting；direct support HKU 4 / DORADO 2", "verdict_02:271"),
     ("6", "(4) 多突變造成三群", "否定", "negated", "合併為 pos4-altered beta-like state；G/T/DEL 為 homopolymer-uncertain", "verdict_02:272"),
 ]
 RETRACTIONS = [
-    ("「5 群 / 5 subclone」→ ~3 regional states", "(4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；收斂為 alpha / alpha-1 / beta-like ≥3 個 regional molecular states", "verdict_02:49-59"),
-    ("「VAF 排序突變」撤回", "局部 VAF 受 LOH 扭曲；alpha/beta 為 siblings，不能由 VAF 排 parent/child；(4)(6) 共現不可排序", "verdict_02:154"),
+    ("「5 群 / 5 subclone」→ 約 3 種 regional molecular-state candidates（非 clone 數）", "(4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；保守合併為 alpha / provisional alpha-1 / beta-like 三種 local state candidates", "verdict_02:49-59"),
+    ("「VAF 排序突變」撤回", "局部 VAF 受 LOH/CN/純度影響；alpha/beta-like 分支關係不是唯一可識別，且不能由 VAF 排 parent/child；(4)(6) 共現不可排序", "verdict_02:154"),
     ("「無 ancestral REF read / HP2 突變到不見」撤回", "HKU 有 17 條 reads 在 ≥2 已覆蓋 SNV 全為 REF；ancestral C-G-G reads 存在；root 是 parsimony 推論非觀測完整 read", "verdict_02:128-132"),
 ]
-FINAL_DEFENSIBLE = "在 SEQC2-confirmed LOH 區中，存在可重現、由多個 somatic allele linkage 定義、且帶一致局部 5mC 結構的 regional subclonal states。資料支持至少兩個主要分支與 (3)A → (5)C 的巢狀子分支；甲基可作 lineage coherence 與區域 characterization，但不能把 pos4 的 G/T/DEL 證成三個 subclone，也不能單獨確認完整演化順序。"
-FINAL_PAPER = "A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence."
+FINAL_DEFENSIBLE = "在 SEQC2-confirmed LOH 區中，多個 somatic allele linkage 支持局部 regional molecular-state candidates；(3)A → (5)C 是 provisional nesting candidate。甲基只支持 mutation-defined 分組後的有界關聯與跨 basecaller 技術重現，不確認 cellular subclone、完整演化順序或因果。"
+FINAL_PAPER = "Local LOH-constrained molecular-state candidates with bounded, mutation-conditioned methylation association."
 FINAL_NOT = "Confirmed five-subclone evolutionary reconstruction."
 CAVEATS = [
-    ("整體 tier = L2", "單位點 × 單樣本 × 單 pipeline；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ⭐4 需 COLO829 等第二樣本）。", "verdict_02:314 / critical_audit_03"),
+    ("整體 tier = L2", "單位點 × 單樣本 × 單 pipeline；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ★4 需 COLO829 等第二樣本）。", "verdict_02:314 / critical_audit_03"),
     ("pos3 (3) 落 SEQC2 HC 空隙", "out-of-HC truth-unevaluable，非 SEQC2 FP；樹的 alpha-pivot 只能靠內部 read linkage，外部無真值可確認。", "verdict_02:81-91"),
-    ("甲基 confound 未完全形式排除", "3.3/3.4/3.5/4.1 在 matched-normal 已有顯著 germline ASM；乾淨 tumor-associated 子集限於 normal 無 HP 差異的 CpG。", "verdict_02:205-225"),
+    ("甲基 confound 未完全形式排除", "3.3/3.4/3.5/4.1 在 matched-normal 已有顯著 germline ASM；其餘只能稱 tumor-associated、normal-ASM-screen-negative，不能據此證明 acquired 或 cellular-subclone-specific。", "verdict_02:205-225"),
     ("「0 違反」僅 strict 定義", "broadened pos4-beta 在 DORADO 有 1 條 discordant read；多組遠距 pair 無跨距 read，故「0 observed」非強 cross-data 複製。", "critical_audit_03 High-2"),
     ("DORADO normal 未 tag", "germline-ASM confound 檢定僅靠 HKU normal；confound 側未跨 basecaller 複製。", "independent_audit.md:244-257"),
 ]
@@ -266,7 +271,7 @@ CONFLICTS = [
     ("all-REF reads (≥2 clean pts)", "報告A: 22/17", "權威(audit): 17/15", "independent_audit.md:63,152"),
     ("pos3 tumor 分子數", "報告A: 30/28 (BQ10)", "權威 BQ20: HKU 29/30・DORADO 21/27", "independent_audit.md:36,125"),
     ("DORADO 複製的乾淨 CpG", "報告A: {2.1,2.2,3.1,3.2,3.3}", "權威: 乾淨∩DORADO複製 = {3.1,3.2}（3.3 屬 confound）", "verdict_02:221 / methyl table"),
-    ("「乾淨 somatic 甲基案例」", "報告A: 乾淨案例", "權威: 混合 (normal ASM + tumor-acquired)；乾淨子集={2.1,2.2,3.1,3.2,5.1,5.2}", "verdict_02:215-225"),
+    ("「乾淨 somatic 甲基案例」", "報告A: 乾淨案例", "權威: 混合 (normal ASM + tumor-associated)；normal-ASM-screen-negative 子集={2.1,2.2,3.1,3.2,5.1,5.2}，未證明 acquired", "verdict_02:215-225"),
     ("TVAF 口徑", "早期 bwaTVAF: .396/.297/.050/.389", "權威 consensus: .403/.389/.242/.048/.382", "concordance_demo:43"),
 ]
 
@@ -281,6 +286,8 @@ BUILD = {
 DATAJSON = {
     "build": BUILD,
     "region": AUD["region"],
+    "ccf_semantics": "historical_case_specific_approximate_tvaf_transform_noncanonical_not_clone_corroboration",
+    "methyl_class_semantics": "legacy_CLEAN_means_normal_ASM_screen_negative_not_acquired_or_clone_specific",
     "sources": {"audit_json": AUDIT_REL, "verdict_02": VERDICT_REL, "concordance_tsv": CONC_REL},
     "snv_cards": snv_cards,
     "loh": loh,
@@ -323,7 +330,9 @@ def methyl_heatmap_svg():
     x0, y0 = 150, 56
     W = x0 + cw * len(cols) + 230
     H = y0 + ch * len(methyl_rows) + 30
-    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="甲基化三組熱圖">']
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="methyl-heatmap-title methyl-heatmap-desc">',
+           '<title id="methyl-heatmap-title">甲基化三組熱圖</title>',
+           '<desc id="methyl-heatmap-desc">逐 CpG 比較 HKU 與 DORADO 的 mutation-conditioned 甲基值及 matched-normal ASM screen；screen-negative 不表示 acquired 或 clone-specific。</desc>']
     out.append(f'<rect width="{W}" height="{H}" fill="#16161d"/>')
     # col headers
     for ci, (lab, _, _) in enumerate(cols):
@@ -358,7 +367,7 @@ def methyl_heatmap_svg():
         else:
             col = "#2e5d44" if not r["strongest"] else "#3a6e1f"
             out.append(f'<rect x="{bx}" y="{ry+5}" width="96" height="{ch-12}" fill="{col}" rx="4"/>')
-            lab = "CLEAN★" if r["strongest"] else "CLEAN"
+            lab = "SCREEN-NEG★" if r["strongest"] else "SCREEN-NEG"
             out.append(f'<text x="{bx+48}" y="{ry+ch/2+4:.0f}" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">{lab}</text>')
         # dorado replicate dot
         rep = "#4ad" if r["dorado_replicates"] else "#555"
@@ -368,16 +377,18 @@ def methyl_heatmap_svg():
     return "".join(out)
 
 def ccf_bar_svg():
-    """SEQC2 CCF gradient bar from concordance.tsv (data-bound)."""
+    """Historical, case-specific TVAF transform; not canonical CCF."""
     rows = [r for r in CONC if r["ccf_est"] not in (".", "", "n/a")]
     W, H = 760, 230; x0, y0 = 60, 28; bw = 84; gap = 26
-    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="SEQC2 CCF 梯度">']
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="tvaf-transform-title tvaf-transform-desc">',
+           '<title id="tvaf-transform-title">歷史案例特定 TVAF 近似轉換</title>',
+           '<desc id="tvaf-transform-desc">這不是 allele-specific CN、LOH、純度與 multiplicity 校正後的 canonical CCF，不能作 clone 佐證。</desc>']
     out.append(f'<rect width="{W}" height="{H}" fill="#16161d"/>')
     base = y0 + 150
-    # clonal threshold line 0.85
+    # Historical reference line retained for auditability; it is not a current gate.
     yth = base - 0.85 * 150
     out.append(f'<line x1="{x0-8}" y1="{yth:.0f}" x2="{W-20}" y2="{yth:.0f}" stroke="#f2994a" stroke-dasharray="5 4" stroke-width="1"/>')
-    out.append(f'<text x="{W-22}" y="{yth-4:.0f}" fill="#f2994a" font-size="10" text-anchor="end">CCF=0.85 (clonal 界)</text>')
+    out.append(f'<text x="{W-22}" y="{yth-4:.0f}" fill="#f2994a" font-size="10" text-anchor="end">歷史 0.85 參考線（非現行 gate）</text>')
     order = sorted(rows, key=lambda r: float(r["ccf_est"]))
     for i, r in enumerate(order):
         ccf = float(r["ccf_est"])
@@ -388,16 +399,17 @@ def ccf_bar_svg():
         out.append(f'<text x="{bx+bw/2:.0f}" y="{base-bh-6:.0f}" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">{ccf:.2f}</text>')
         pos = int(r["pos1"])
         out.append(f'<text x="{bx+bw/2:.0f}" y="{base+16:.0f}" fill="#9aa" font-size="10" text-anchor="middle">chr2:{pos:,}</text>')
-        cls = r["clonal_class"].replace("subclonal-", "")
-        out.append(f'<text x="{bx+bw/2:.0f}" y="{base+30:.0f}" fill="#789" font-size="9" text-anchor="middle">{esc(cls)} (VAF {r["tvaf"]})</text>')
-    out.append(f'<text x="{x0-8}" y="{base+30:.0f}" fill="#c0504d" font-size="11">↑ CCF</text>')
+        out.append(f'<text x="{bx+bw/2:.0f}" y="{base+30:.0f}" fill="#789" font-size="9" text-anchor="middle">VAF {r["tvaf"]}</text>')
+    out.append(f'<text x="{x0-8}" y="{base+30:.0f}" fill="#c0504d" font-size="11">↑ 近似轉換值</text>')
     out.append('</svg>')
     return "".join(out)
 
 def tree_svg():
     """Defensible candidate tree (verdict_02 §九). Hand-laid topology, labels from data."""
     return """
-<svg viewBox="0 0 760 300" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="可防守候選樹">
+<svg viewBox="0 0 760 300" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="candidate-tree-title candidate-tree-desc">
+<title id="candidate-tree-title">可防守的局部分子狀態候選圖</title>
+<desc id="candidate-tree-desc">非唯一、recurrence-allowed 的分子狀態候選；不代表已確認的 cellular clone 或 lineage tree。</desc>
 <rect width="760" height="300" fill="#16161d"/>
 <text x="380" y="26" fill="#9aa" font-size="11" text-anchor="middle">root = parsimony / contamination-aware 假說（非完整 spanning read 觀測）</text>
 <circle cx="380" cy="48" r="7" fill="#888"/><text x="380" y="42" fill="#bbb" font-size="10" text-anchor="middle">all-REF ancestor</text>
@@ -427,7 +439,9 @@ def fig4_page04_svg():
     rh = 30; y0 = 56
     H = y0 + rh * len(methyl_rows) + 60
     xs = {"ha": (215, 250), "hb": (295, 330), "da": (435, 470), "db": (515, 550)}
-    out = [f'<svg viewBox="0 0 880 {H}" role="img" aria-label="甲基化翻轉熱圖（data-bound 修正版）">']
+    out = [f'<svg viewBox="0 0 880 {H}" role="img" aria-labelledby="fig4-title fig4-desc">',
+           '<title id="fig4-title">甲基化翻轉熱圖資料綁定修正版</title>',
+           '<desc id="fig4-desc">比較兩個 basecaller 的 mutation-conditioned 甲基值，並標示 matched-normal ASM confound；不作 acquired 或 clone-specific 結論。</desc>']
     # legend
     out.append('<g font-size="11">'
                '<rect x="600" y="14" width="16" height="16" fill="rgb(200,50,55)"/><text x="622" y="27">高甲基 (meanM→1)</text>'
@@ -457,7 +471,7 @@ def fig4_page04_svg():
         if r["class"] == "CONFOUNDED":
             out.append(f'<text x="600" y="{ry+18}" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR {fq(r["norm_fdr"])}）</text>')
         else:
-            tag = "乾淨+DORADO複製（最強）" if r["strongest"] else ("乾淨" + ("・DORADO複製" if r["dorado_replicates"] else "・DORADO未過FDR/小n"))
+            tag = "screen-negative+DORADO複製" if r["strongest"] else ("screen-negative" + ("・DORADO複製" if r["dorado_replicates"] else "・DORADO未過FDR/小n"))
             out.append(f'<text x="600" y="{ry+18}" text-anchor="start" font-size="10" fill="#2F7D5B">{tag}</text>')
         if r["strongest"]:
             strong_y.append(ry)
@@ -467,9 +481,9 @@ def fig4_page04_svg():
         out.append(f'<rect x="210" y="{top}" width="380" height="{bot-top}" fill="none" stroke="#2F7D5B" stroke-width="2.5" rx="6"/>')
     out.append('</g>')
     out.append(f'<text x="400" y="{y0+rh*len(methyl_rows)+24}" text-anchor="middle" font-size="11" fill="#2F7D5B" font-weight="700">'
-               f'乾淨且跨 basecaller 複製（normal 無 ASM + DORADO FDR&lt;0.05）= {{{", ".join(strong_set)}}}</text>')
+               f'normal-ASM-screen-negative 且跨 basecaller 技術重現 = {{{", ".join(strong_set)}}}（不證明 acquired/clone）</text>')
     out.append(f'<text x="400" y="{y0+rh*len(methyl_rows)+42}" text-anchor="middle" font-size="11" fill="#9A3B3B" font-weight="700">'
-               f'被既存 germline ASM confound = {{{", ".join(conf_set)}}} → 不可當 subclone 新生甲基</text>')
+               f'被既存 germline ASM confound = {{{", ".join(conf_set)}}} → 不可當 acquired 或 clone-specific 甲基</text>')
     out.append('</svg>')
     return "".join(out)
 
@@ -558,7 +572,7 @@ def build_html():
   <h4>({c['idx']}) chr2:{c['pos']:,} <span class="note">{esc(c['ref'])}&gt;{esc(c['alt'])}</span></h4>
   <div>{status_badge(c['seqc2_status'])}</div>
   <div class="kv"><span class="k">譜系角色</span><span class="v">{esc(c['role'])}</span></div>
-  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">{esc(c['tvaf'])} / {esc(c['ccf'])} <span class="note">{esc(c['clonal_class'])}</span></span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / 歷史近似轉換</span><span class="v">{esc(c['tvaf'])} / {esc(c['ccf'])} <span class="note">{esc('非 canonical CCF；不作 clone 判定' if c['ccf'] not in ('.', '', 'n/a') else 'n/a')}</span></span></div>
   <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">{esc(c['hku_t_bq20'])}</span></div>
   <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">{esc(c['dor_t_bq20'])}</span></div>
   <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">{esc(c['hku_n_bq20'])}</span></div>
@@ -589,7 +603,7 @@ def build_html():
             f'<td>{f2(r["hku_a"])}/{f2(r["hku_b"])}</td><td>{fq(r["hku_fdr"])}</td>'
             f'<td>{f2(r["dor_a"])}/{f2(r["dor_b"])}</td><td>{fq(r["dor_fdr"])}</td>'
             f'<td>{f2(r["norm_hp1"])}/{f2(r["norm_hp2"])}</td><td>{fq(r["norm_fdr"])}</td>'
-            f'<td>{"germline-ASM" if r["class"]=="CONFOUNDED" else ("CLEAN★" if r["strongest"] else "CLEAN")}</td>'
+            f'<td>{"germline-ASM" if r["class"]=="CONFOUNDED" else ("SCREEN-NEG★" if r["strongest"] else "SCREEN-NEG")}</td>'
             f'<td>{"✓" if r["dorado_replicates"] else "—"}</td></tr>')
     # ----- pos4
     p4 = POS4
@@ -606,7 +620,7 @@ def build_html():
 
     body = f"""
 <header class="hd">
-  <h1>🔬 chr2:18M 亞克隆重建 — 判讀工作站 <span class="badge b-tier">tier L2</span> <span class="badge b-partial">PARTIAL</span></h1>
+  <h1>🔬 chr2:18M 分子狀態候選 — 判讀工作站 <span class="badge b-tier">tier L2</span> <span class="badge b-partial">PARTIAL</span></h1>
   <div class="sub">HCC1395 · {esc(AUD['region'])} · 6 sSNV × 10 CpG · HKU(5mCG_5hmCG haplotag) + DORADO cross-basecaller ·
   權威 SoT = <code>independent_audit.json</code> + <code>verdict_02</code> · build <code>{esc(head)}</code></div>
   <div class="sub" style="margin-top:6px">
@@ -663,18 +677,18 @@ def build_html():
 
 <h2 id="methyl">④ 甲基化三組（這是最容易誤讀的地方）</h2>
 <p class="note">tumor α(pos3=A) vs β(pos3=G) 每 CpG meanM；右側 normal HP1/HP2 = matched-normal germline ASM。
-<b>分類由資料算出</b>：normal MW-FDR&lt;{CONF_FDR} ⇒ <span style="color:var(--red)">germline-ASM confounded</span>；否則 <span style="color:var(--green)">CLEAN</span>。
+<b>screen 由資料算出</b>：normal MW-FDR&lt;{CONF_FDR} ⇒ <span style="color:var(--red)">germline-ASM confounded</span>；否則 <span style="color:var(--green)">NORMAL-ASM-SCREEN-NEGATIVE</span>（不證明 acquired）。
 DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
 <div class="grid" style="grid-template-columns:1.3fr 1fr">
   <div class="fig"><figure>{methyl_heatmap_svg()}<figcaption>圖4 · 甲基三組熱圖（藍=低甲基→紅=高甲基）。
-  CLEAN★ = 乾淨且 DORADO 複製（{', '.join(strong_set)}）。資料源 ⌖ independent_audit.json methyl_alpha_vs_pos3_ref + methyl_normal_hp1_vs_hp2。
+  SCREEN-NEG★ = normal-ASM-screen-negative 且 DORADO 技術重現（{', '.join(strong_set)}；不證明 acquired/clone）。資料源 ⌖ independent_audit.json methyl_alpha_vs_pos3_ref + methyl_normal_hp1_vs_hp2。
   缺必填值會 refuse 而非顯示「—」（修掉舊 Fig4 的 v1/v2 漂移）。</figcaption></figure></div>
   <div>
     <div class="card"><h4>三組結論</h4>
-      <div class="kv"><span class="k clean" style="padding:1px 5px;border-radius:4px">CLEAN（tumor-associated）</span><span class="v">{esc(', '.join(clean_set))}</span></div>
+      <div class="kv"><span class="k clean" style="padding:1px 5px;border-radius:4px">normal-ASM-screen-negative</span><span class="v">{esc(', '.join(clean_set))} <span class="note">（tumor-associated；非 acquired 證明）</span></span></div>
       <div class="kv"><span class="k conf" style="padding:1px 5px;border-radius:4px">CONFOUNDED（germline-ASM）</span><span class="v">{esc(', '.join(conf_set))}</span></div>
       <div class="kv"><span class="k">DORADO 複製</span><span class="v">{esc(', '.join(repl_set))}</span></div>
-      <div class="kv"><span class="k">乾淨 ∩ DORADO 複製（最強）</span><span class="v" style="color:var(--gold)">{esc(', '.join(strong_set))}</span></div>
+      <div class="kv"><span class="k">screen-negative ∩ DORADO 技術重現</span><span class="v" style="color:var(--gold)">{esc(', '.join(strong_set))}</span></div>
       <div class="note" style="margin-top:6px">⚠ 報告A 曾寫 DORADO 複製={{2.1,2.2,3.1,3.2,3.3}}，已修正（見限制末表）。</div>
     </div>
   </div>
@@ -690,9 +704,8 @@ DORADO✓ = DORADO tumor α/β FDR&lt;{CONF_FDR} 且同方向。</p>
 </tbody></table>
 <p class="note">HKU 的 G 僅 4 條且全 reverse strand → 不可視為乾淨獨立群。⌖ independent_audit.json: pos4_subtype_summary（[推論6] 否定）。</p>
 
-<h2 id="ccf">⑥ SEQC2 CCF 梯度（外部佐證亞群結構）</h2>
-<div class="fig"><figure>{ccf_bar_svg()}<figcaption>圖5 · SEQC2 共識 TVAF 推得的 CCF。同區內 0.10(minor)→0.49→0.77-0.81(major) 梯度 ⇒ 非單一 clonal block。
-in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。CCF≈TVAF×CN/(purity×mult) 近似。</figcaption></figure></div>
+<h2 id="ccf">⑥ 歷史、案例特定的 TVAF 近似轉換（非 canonical CCF）</h2>
+<div class="fig"><figure>{ccf_bar_svg()}<figcaption>圖 5 · 這些值是早期以 SEQC2 consensus TVAF 套入簡化式的案例特定近似轉換。現行 canonical 分析未整合 allele-specific CN、LOH、purity、multiplicity，因此本圖<b>不是 CN/LOH-corrected CCF，不能作 clone 結構佐證或 clonal/minor 分類</b>。in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。</figcaption></figure></div>
 
 <h2 id="tree">⑦ 可防守候選樹 + 6 推論裁決</h2>
 <div class="fig"><figure>{tree_svg()}<figcaption>圖6 · 可防守候選樹（verdict_02 §九）。虛線=甲基 bridge（缺直接 genetic link）。</figcaption></figure></div>
@@ -715,7 +728,7 @@ in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。CC
     datalit = json.dumps(DATAJSON, ensure_ascii=False)
     page = f"""<!DOCTYPE html>
 <!--
-  06 chr2:18M subclone JUDGMENT WORKSTATION (generated, do not hand-edit)
+  07 chr2:18M molecular-state candidate JUDGMENT WORKSTATION (generated, do not hand-edit)
   build: {esc(head)} / {esc(git_branch())} / {BUILD['built_utc']}
   regenerate: python3 .../verification_assets/scripts/build_workstation_html.py
   data_sources: {AUDIT_REL} ; {VERDICT_REL} ; {CONC_REL}
@@ -723,7 +736,7 @@ in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。CC
 -->
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>chr2:18M 亞克隆判讀工作站 · HCC1395 · L2</title>
+<title>chr2:18M 分子狀態候選判讀工作站 · HCC1395 · L2</title>
 <style>{CSS}</style></head>
 <body>
 <div class="wrap">
@@ -738,7 +751,7 @@ in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。CC
   <a href="#loh">③ LOH</a>
   <a href="#methyl">④ 甲基三組</a>
   <a href="#pos4">⑤ pos4 homopolymer</a>
-  <a href="#ccf">⑥ SEQC2 CCF 梯度</a>
+  <a href="#ccf">⑥ 歷史 TVAF 近似轉換</a>
   <a href="#tree">⑦ 候選樹 + 裁決</a>
   <a href="#limit">⑧ 限制 + 校正</a>
   <div class="note" style="padding:10px 8px">tier L2 · PARTIAL<br>build {esc(head)}</div>

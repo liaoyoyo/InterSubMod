@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "cycle": "20260813_intersubmod_public_surfaces_refresh",
+  "created_at": "2026-08-13T17:36:53+08:00",
+  "task_type": "B_comprehensive_validation",
+  "goals": ["G2", "G3", "G4", "G5"],
+  "verdict": "GO",
+  "score": 80,
+  "frozen_problem_claim_count": 24,
+  "frozen_pages_count": 17,
+  "frozen_svg_count": 37,
+  "ccu_policy": "read_only_checklist_no_ccu_mutation",
+  "remote_publication_authorized": false,
+  "claim_ceiling": {
+    "direct_observation": "called molecular evidence on the same physical molecule",
+    "structure": "local recurrence-allowed model-conditional mutation-state candidates",
+    "methylation": "genetic-pattern-conditioned regional association",
+    "forbidden": [
+      "confirmed cellular clone or lineage",
+      "canonical CN/LOH-corrected CCF",
+      "causal methylation or function"
+    ]
+  },
+  "hard_failures": [
+    "any orphan among the 24 frozen problem claims",
+    "any residual public claim above the scientific ceiling",
+    "any CCU source, patch, remote, or live-site mutation",
+    "any local source described as live before publication verification"
+  ]
+}

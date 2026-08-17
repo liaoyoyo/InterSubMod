@@ -52,9 +52,16 @@ def main() -> None:
             )
         page.wait_for_timeout(600)
         if args.open_sample_filter or args.select_sample:
-            page.locator("button", has_text="Sample filter").first.click(
-                force=True, timeout=5000
-            )
+            filter_button = None
+            for index in range(page.locator("button").count()):
+                candidate = page.locator("button").nth(index)
+                text = candidate.inner_text().strip()
+                if text.startswith("選擇資料集") or text.startswith("Sample filter"):
+                    filter_button = candidate
+                    break
+            if filter_button is None:
+                raise RuntimeError("Sample filter button not found")
+            filter_button.click(force=True, timeout=5000)
             page.wait_for_timeout(250)
         if args.select_sample:
             option = page.locator("button").filter(has_text=args.select_sample)
@@ -191,6 +198,13 @@ def main() -> None:
                 rows: node.querySelectorAll('tbody tr').length,
                 text: node.textContent?.trim().replace(/\s+/g, ' ').slice(0, 500),
               }));
+              const iframes = [...document.querySelectorAll('iframe')].map((node) => ({
+                title: node.title,
+                className: String(node.className),
+                width: node.getBoundingClientRect().width,
+                height: node.getBoundingClientRect().height,
+                srcdocLength: node.srcdoc.length,
+              }));
               return {
                 innerWidth,
                 clientWidth: de.clientWidth,
@@ -204,6 +218,7 @@ def main() -> None:
                 controls,
                 metricCards,
                 renderedTables,
+                iframes,
               };
             }
             """

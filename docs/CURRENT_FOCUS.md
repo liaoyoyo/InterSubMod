@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-08-10 (對外文件層上線：README雙語/Wiki 8頁/Pages 17頁皆線上200；修正public repo上「用甲基化區分細胞群體」的錯誤能力宣稱；修復02_ism-core一張已壞近兩月的SVG〔損失50%元素〕+10頁62個缺字emoji，全17頁0 FAIL；Pages改Actions部署627MB→2.0MB。未改動任何科學結論或canonical數值) | 2026-08-05 (工程交接驗收：證據鏈 19/19 hash MATCH、clean build exit 0、C++ 258/258 tests PASS；四項工程 gate 未過〔pytest 缺、磁碟 617GB、580 未提交、GitHub 落後 268 commits〕，皆非科學問題) | 2026-08-01 (Exact-PS 全 7 資料集 HTML observation report = VALIDATED_DERIVED_OBSERVATION) | 2026-07-24 (全 sSNV Task-B 科學分析已驗證；signed release因nested v29 finalizer blocker依bounded policy停止，無authority/receipt/signature) | 2026-07-23 (exact-PS strict completion audit：L1 read-linkage 7/7；production strict directed topology 0/7；clone/parent/fusion 0/7) | 2026-07-22 (全 sSNV Task-B：v7 source authority已簽署；primary v6與singleton audit v2 PASS；102,842-task raw-identity preflight v9執行中)
+更新時間: 2026-08-13（公開資訊全面校正：158 claim families 完整分級；58 個問題依 P0/P1/P2 完成 disposition；GitHub/Pages 本地來源校正與 17 頁瀏覽器 QA 完成；About 已 live 解決，default main/Wiki/Pages 仍待發布；CCU 僅產生唯讀清單）
 狀態: in_progress（全sSNV正式release與Read-linked Hypercube M2兩條Task-B）+ validated（下方明示之已驗證結果）
 資料來源:
   - InterSubMod/research/20260716_read_linked_hypercube_exact_likelihood_validation/00_INDEX.md
@@ -20,7 +20,60 @@
 
 # 當前目標
 
-## 2026-08-10 — 對外文件層上線：README／Wiki／Pages；並修正一項公開的錯誤能力宣稱
+## 2026-08-13 — 公開資訊全面校正（目前公開文件狀態權威）
+
+> **Task B／Comprehensive validation；服務 G4/G5。**本輪校正公開來源與狀態入口，不改
+> canonical 科學輸出、C++ 演算法或 CCU 教學站。所有 live 狀態皆與本地 source 分開判定。
+
+### 稽核母體與問題分級
+
+| 母體 | 結果 | 正確解讀 |
+|---|---:|---|
+| 158 個去重 claim families | 69 confirmed、31 confirmed with limits、28 needs correction、26 contradicted、4 unverifiable | 是跨 README／Wiki／Pages 去重命題，不是句子數或網站錯誤率 |
+| 58 個問題 claim families | P0 34 + P1 20 + P2 4 | `28 + 26 + 4 = 58`；優先級是修正順序，不是另一個母體 |
+| Pages 本地 QA | 17 頁、37 個 inline SVG、68 個 page-profile browser checks，0 failure | 4 profiles 為 desktop／mobile／no-JS／print；只證明本地來源通過，不能代替 live deployment |
+
+完整 scope、逐 claim disposition 與 QA 收據見
+[2026-08-13 公開介面資訊更新循環](../research/20260813_intersubmod_public_surfaces_refresh/00_INDEX.md)；
+可直接閱讀[完整 HTML＋SVG 技術報告](reports/validated/2026/08/20260813_InterSubMod公開資訊更新與CCU改進清單_01.standalone.html)
+或其[技術 Markdown](reports/validated/2026/08/20260813_InterSubMod公開資訊更新與CCU改進清單_01.md)。
+
+### 現行 scientific claim ceiling
+
+- **直接觀測上限**：同一條 physical molecule 上的 allele／HP／PS／MM／ML called evidence；
+  same molecule 不等於 same cell、same clone 或 same lineage。
+- **結構輸出上限**：local、recurrence-allowed、model-conditional minimum mutation-state candidate
+  arborescence；不是已確認的 cellular tree 或 parent→child lineage。
+- **甲基上限**：genetic-pattern-conditioned regional methylation association；只作 bounded auxiliary
+  annotation，不作因果、拓撲或 clone confirmation。
+- **仍缺的升級資料**：allele-specific CN／LOH、purity／ploidy／multiplicity 與 CCF uncertainty、
+  獨立 cellular truth、known-truth calibration，以及跨 biological samples replication。
+
+### 可保留的精確資料量與不可保留的估計
+
+- 7 份 current compressed sidecars 合計 **6,256,168,164 bytes = 5.826510641724 GiB**。
+- 2026-08-13 以 `stat -L` 量得 HCC1395 tumor BAM 為
+  **283,071,595,503 bytes = 263.63096712436527 GiB**。
+- 歷史 tagged-BAM `1.67 TiB` 總量缺 committed per-file bytes/hash registry；因此不作目前容量證據，
+  也不宣稱 `287×`、替代倍率或欄位占比。
+
+### 本地修正與 live 發布狀態
+
+- GitHub About 已由 live API 確認為 **`RESOLVED_LIVE`**。
+- Default `main`、Wiki 與 17 個 Pages routes 仍是先前的 remote commits／bytes；本地校正尚待
+  merge／push／publish 後再抓 live bytes 驗收。HTTP 200 只代表可達，不代表內容已更新。
+- CCU 僅建立 [16 項 remaining finding 的唯讀改進清單](../research/20260813_intersubmod_public_surfaces_refresh/20260813_CCU教學站重點改進清單_01.md)；
+  本輪 **CCU source、live site 與既有 patch 均 0 變動**。
+
+遠端 refs、hash 與 About 狀態見
+[remote state receipt](../research/20260813_intersubmod_public_surfaces_refresh/remote_state_receipt.md)。
+
+---
+
+## 2026-08-10 — 歷史部署快照（狀態已由 2026-08-13 全面稽核取代）
+
+> 下列內容保留作 2026-08-10 部署歷史；其中「已上線」、頁面規模與驗證數字不可作目前
+> remote 或 scientific claim authority。現況一律以上方 2026-08-13 區段與 remote receipt 為準。
 
 > **本輪性質**：文件與對外呈現層。**未改動任何科學結論、canonical 數值或 C++ 邏輯**；
 > 科學層權威仍為 20260801 的 `authority_manifest.json`。
@@ -130,9 +183,11 @@ Pages 於 push 到 develop 時自動重新部署（.github/workflows/pages.yml�
    連帶使 20260801 manifest 宣稱的「37 passed」測試證據在此環境不可重現。
    → 本日已補 `requirements.txt`（同時補上先前漏列的 `pysam`／`scikit-learn`／`python-pptx`／
    `statsmodels`／`Pillow`／`lxml`／`PyYAML` 等實際依賴）。
-2. **磁碟餘量** — `/big7_disk` 僅剩 **617 GB（99% 已用）**。7 個 paired_full tagged BAM 合計
-   **1,840,983,466,353 bytes（1.67 TiB）**，單一最大 HCC1937 416.5 GiB
-   → **P0-4 clean rerun 在清理前無法執行**。
+2. **磁碟餘量（歷史快照，不是目前容量證據）** — 2026-08-05 當時記錄 `/big7_disk`
+   剩 **617 GB（99% 已用）**，並記下 7 個 paired_full tagged BAM 合計
+   **1,840,983,466,353 bytes（1.67 TiB）**。2026-08-13 全面稽核無法用 committed per-file
+   bytes/hash registry 重現該 tagged-BAM 總量；因此這些數字只保留為當時記錄，**不得用來判定
+   目前容量或 clean-rerun gate**。
 3. **版本可指認** — working tree **580 項未提交**（368 新增／202 修改／10 刪除）；
    frozen binary 與當前源碼仍為 `not_proven_byte_reproducible`；`environment_lock` 仍未建立。
 4. **GitHub 落後** — 本地領先 `origin` **268 commits**（remote 最後 commit 為 2026-06-15 `b761336`）；

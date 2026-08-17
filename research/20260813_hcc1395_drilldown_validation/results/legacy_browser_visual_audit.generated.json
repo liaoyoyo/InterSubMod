@@ -1,0 +1,207 @@
+{
+  "schema_name": "intersubmod.legacy_browser_visual_audit",
+  "schema_version": "1.0.0",
+  "current_mode": "generated",
+  "evidence_status": "DIRECT_GENERATED",
+  "legacy_desktop": {
+    "url": "file:///big7_disk/liaoyoyo2001/InterSubMod/docs/reports/in_progress/2026/07/20260726_methyl_allele_axis_backbone_coenrichment/20260726_ssnv_branch_x_methyl_browser.standalone.html",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "initialCount": "顯示 14 / 14 區域",
+    "filteredCount": "顯示 7 / 14 區域",
+    "visibleCards": 7,
+    "detailOpen": true,
+    "widths": {
+      "viewport": 1440,
+      "clientWidth": 1440,
+      "docScrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyFontSize": "15.5px",
+      "bodyLineHeight": "26.35px",
+      "horizontalOverflow": false
+    },
+    "semantics": {
+      "roleImgVisible": 7,
+      "roleImgLabelled": 7,
+      "svgVisible": 7,
+      "svgWithTitleOrLabel": 7,
+      "imgVisible": 42,
+      "imgMissingAlt": 0,
+      "figureCaptionsVisible": 21,
+      "visibleTextBelow12px": 112,
+      "visibleElementCount": 991,
+      "hasDenominatorText": false,
+      "hasMissingText": true,
+      "hasLegendText": true
+    },
+    "sticky": {
+      "barTop": 0,
+      "barBottom": 55,
+      "overlap": false
+    },
+    "browserErrors": [],
+    "screenshot": "research/20260813_hcc1395_drilldown_validation/figures/06_legacy_standalone_desktop.png"
+  },
+  "legacy_mobile": {
+    "url": "file:///big7_disk/liaoyoyo2001/InterSubMod/docs/reports/in_progress/2026/07/20260726_methyl_allele_axis_backbone_coenrichment/20260726_ssnv_branch_x_methyl_browser.standalone.html",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "initialCount": "顯示 14 / 14 區域",
+    "filteredCount": "顯示 7 / 14 區域",
+    "visibleCards": 7,
+    "detailOpen": true,
+    "widths": {
+      "viewport": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 555,
+      "bodyScrollWidth": 555,
+      "bodyFontSize": "15.5px",
+      "bodyLineHeight": "26.35px",
+      "horizontalOverflow": true
+    },
+    "semantics": {
+      "roleImgVisible": 7,
+      "roleImgLabelled": 7,
+      "svgVisible": 7,
+      "svgWithTitleOrLabel": 7,
+      "imgVisible": 42,
+      "imgMissingAlt": 0,
+      "figureCaptionsVisible": 21,
+      "visibleTextBelow12px": 112,
+      "visibleElementCount": 991,
+      "hasDenominatorText": false,
+      "hasMissingText": true,
+      "hasLegendText": true
+    },
+    "sticky": {
+      "barTop": 0,
+      "barBottom": 127.25,
+      "overlap": false
+    },
+    "browserErrors": [],
+    "screenshot": "research/20260813_hcc1395_drilldown_validation/figures/07_legacy_standalone_mobile.png"
+  },
+  "current_desktop": {
+    "url": "http://127.0.0.1:8767/index.html",
+    "mode": "generated",
+    "evidence_status": "DIRECT_GENERATED",
+    "fixture": "direct generated/staging URL; no response or DOM overlay",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "scope": "顯示 19,849 / 19,849 SSNV\n未套用任何篩選 —— 預設全顯示",
+    "listCount": "19,849 筆",
+    "selectedLocus": {
+      "index": 2,
+      "axisCode": 2,
+      "chrom": "chr1",
+      "pos": 1320793
+    },
+    "detailText": "chr1:1,320,793\nk=3\nPS=653452 HP=1\nchr1|PS=653452|HP=1|U67dd31cf070027f8b352cea8:B0001\nunit_status\nranked\nfamily_status\nFAMILY_COMPLETE\nobjective_status\nOBJECTIVE_CERTIFIED\nread_af_status\nranked_complete\n演化分支（代表樹）\n代表樹\n同分並列 7 棵\n候選樹總數 7\n◆ topology\n這個 region 有 7 棵同分最佳樹。下方畫的是其中一棵代表，不是唯一解 —— 突變順序在這裡不可當結論。\n1,320,793\n1,336,326\n1,359,218\nROOT\nARR\nAAR\nAAA\n節點　 實測（read 直接看到）　 補入（solver 推的中間祖先）　 根（全 REF）\n邊　所有邊都是推論，沒有任何一條被直接觀察到。點線 = 代表樹限定（無候選 sidecar，無從區分必然／可替換）。邊上數字 = 獲得該突變的座標。\nLocus 排列 — 位點間距與各自的 ALT 比例\n15.",
+    "methylSectionText": "甲基分群 — 沿哪個軸？\nread 數\n105\n此位點視窗內\nCpG 數\n371\n甲基矩陣的欄數\n甲基分群與 ALT / REF 對得上（p ≤ 0.05；已檢定 2 軸中的 1 個）。這是探索關聯，不是因果或 cohort-wide 顯著結論 —— 甲基沒有參與拓撲推論，這裡是事後 characterize。\n「甲基自身分群」已從結論中排除。此軸的分群標籤是從同一個甲基距離矩陣分出來的，PERMANOVA 又用該矩陣檢定它 —— 循環論證，p 值不可當證據。它能說的只有「這個位點的甲基可以被分成幾群」，不能說「分群有意義」。\n分組軸\tP\t效果量\t群數\t判定\t備註\nHP（merged）\t1.0000\t0.000\t—\t不顯著\t\nHP（fine）\t1.0000\t0.000\t1\t未檢定\t分組數 1 < 2，無從比較\nALT / REF\t0.0010\t0.029\t—\t顯著\t\n甲基自身分群 循環\t1.0000\t0.000\t—\t未檢定\t檢定本身判定為不可用（*Valid=false）\nlineage\t—\t—\t0\t未檢定\t檢定本身判定為不可用（*Valid=false）\n斜線底紋 = 未檢定（第三態，不等於不顯著）。raw p ≤ 0.05；未在此全域觀察層做 cohort-wide 多重檢定校正。窗 ±5,000 bp —— 窗大小決定 CpG 數，直接影響分群強度，不同窗的 run 不可互比。",
+    "cooccur": {
+      "tables": 4,
+      "denominatorLabels": 106,
+      "fakeFilterCells": 0,
+      "text": "共出現\n維度之間的交集\n怎麼讀。格子裡第一行是計數，第二行是欄百分比，r 是 Pearson 殘差（觀察−期望）/√期望 —— |r| ≥ 2 才上色，因為更小的偏離跟隨機沒兩樣。目前矩陣是描述性摘要，未提供交集篩選；格子不可點。\n位點數 k × 唯一解率\n分母 = 11,590 個 region\n◆ topology\nK\tREGION\t分布\t唯一解\t唯一解率\n0\t1,966\t\n\t0\t0.0%\n1\t3,259\t\n\t3,146\t96.5%\n2\t4,250\t\n\t2,861\t67.3%\n3\t1,279\t\n\t721\t56.4%\n4\t405\t\n\t227\t56.0%\n5\t189\t\n\t88\t46.6%\n6\t89\t\n\t4\t4.5%\n7\t49\t\n\t0\t0.0%\n8\t26\t\n\t0\tn<30 不報比率\n9\t27\t\n\t0\tn<30 不報比率\n10\t13\t\n\t0\tn<30 不報比率\n11\t15\t\n\t0\tn<30 不報比率\n12\t23\t\n\t0\tn<30 不報比率\nk=0 是「無 active ALT」，不是樹解不出來 —— 那些 region 根本沒有要解的問題。唯一解率隨 k 下降是預期的（候選空間變大），要看的是下降有沒有崖壁。\nn < 30 的 k 不顯示比率（NCHS 標準），只給原始計數。\nunit_status × 是否有代表樹\n分母 = 11,590 個 region\n◆ topology\n\tF"
+    },
+    "selfcheck": {
+      "heading": "自檢未通過：2 項不成立",
+      "status": "自檢 BLOCKED · 2 FAIL · 0 SKIP。有 2 項守恆等式不成立；此產物不可宣稱驗證通過。另有 0 項無法檢查。"
+    },
+    "widths": {
+      "viewport": 1440,
+      "clientWidth": 1440,
+      "docScrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyFontSize": "15px",
+      "bodyLineHeight": "23.25px",
+      "horizontalOverflow": false
+    },
+    "semantics": {
+      "roleImgVisible": 3,
+      "roleImgLabelled": 3,
+      "svgVisible": 2,
+      "svgWithTitleOrLabel": 2,
+      "imgVisible": 0,
+      "imgMissingAlt": 0,
+      "figureCaptionsVisible": 0,
+      "visibleTextBelow12px": 242,
+      "visibleElementCount": 919,
+      "hasDenominatorText": true,
+      "hasMissingText": true,
+      "hasLegendText": true
+    },
+    "sticky": {
+      "authorityTop": 0,
+      "authorityBottom": 39.875,
+      "levelbarTop": 40,
+      "levelbarBottom": 98.59375,
+      "overlap": false
+    },
+    "browserErrors": [],
+    "screenshot": "research/20260813_hcc1395_drilldown_validation/figures/13_current_generated_desktop.png"
+  },
+  "current_mobile": {
+    "url": "http://127.0.0.1:8767/index.html",
+    "mode": "generated",
+    "evidence_status": "DIRECT_GENERATED",
+    "fixture": "direct generated/staging URL; no response or DOM overlay",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "scope": "顯示 19,849 / 19,849 SSNV\n未套用任何篩選 —— 預設全顯示",
+    "listCount": "19,849 筆",
+    "selectedLocus": null,
+    "detailText": "chr1:98,311\nk=2\nPS=103318 HP=2\nchr1|PS=103318|HP=2|U0b5ec11fc58c628c59470b4f:B0001\nunit_status\nranked\nfamily_status\nFAMILY_COMPLETE\nobjective_status\nOBJECTIVE_CERTIFIED\nread_af_status\nranked_complete\n演化分支（代表樹）\n代表樹\n唯一最佳樹\n候選樹總數 2\n◆ topology\n98,311\n113,820\nROOT\nAR\nAA\n節點　 實測（read 直接看到）　 補入（solver 推的中間祖先）　 根（全 REF）\n邊　所有邊都是推論，沒有任何一條被直接觀察到。點線 = 代表樹限定（無候選 sidecar，無從區分必然／可替換）。邊上數字 = 獲得該突變的座標。\nLocus 排列 — 位點間距與各自的 ALT 比例\n15.5 kb\n↑ 甲基軸：該位點的甲基沿哪個軸分群\nS1\n100%\nS2\n92%\nS1\n目前\n98,311\n100.0%\nALT 7 / REF 0　n=7\n無 ISM\n",
+    "methylSectionText": null,
+    "cooccur": {
+      "tables": 4,
+      "denominatorLabels": 106,
+      "fakeFilterCells": 0,
+      "text": "共出現\n維度之間的交集\n怎麼讀。格子裡第一行是計數，第二行是欄百分比，r 是 Pearson 殘差（觀察−期望）/√期望 —— |r| ≥ 2 才上色，因為更小的偏離跟隨機沒兩樣。目前矩陣是描述性摘要，未提供交集篩選；格子不可點。\n位點數 k × 唯一解率\n分母 = 11,590 個 region\n◆ topology\nK\tREGION\t分布\t唯一解\t唯一解率\n0\t1,966\t\n\t0\t0.0%\n1\t3,259\t\n\t3,146\t96.5%\n2\t4,250\t\n\t2,861\t67.3%\n3\t1,279\t\n\t721\t56.4%\n4\t405\t\n\t227\t56.0%\n5\t189\t\n\t88\t46.6%\n6\t89\t\n\t4\t4.5%\n7\t49\t\n\t0\t0.0%\n8\t26\t\n\t0\tn<30 不報比率\n9\t27\t\n\t0\tn<30 不報比率\n10\t13\t\n\t0\tn<30 不報比率\n11\t15\t\n\t0\tn<30 不報比率\n12\t23\t\n\t0\tn<30 不報比率\nk=0 是「無 active ALT」，不是樹解不出來 —— 那些 region 根本沒有要解的問題。唯一解率隨 k 下降是預期的（候選空間變大），要看的是下降有沒有崖壁。\nn < 30 的 k 不顯示比率（NCHS 標準），只給原始計數。\nunit_status × 是否有代表樹\n分母 = 11,590 個 region\n◆ topology\n\tF"
+    },
+    "selfcheck": {
+      "heading": "自檢未通過：2 項不成立",
+      "status": "自檢 BLOCKED · 2 FAIL · 0 SKIP。有 2 項守恆等式不成立；此產物不可宣稱驗證通過。另有 0 項無法檢查。"
+    },
+    "widths": {
+      "viewport": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "bodyFontSize": "15px",
+      "bodyLineHeight": "23.25px",
+      "horizontalOverflow": false
+    },
+    "semantics": {
+      "roleImgVisible": 3,
+      "roleImgLabelled": 3,
+      "svgVisible": 2,
+      "svgWithTitleOrLabel": 2,
+      "imgVisible": 0,
+      "imgMissingAlt": 0,
+      "figureCaptionsVisible": 0,
+      "visibleTextBelow12px": 203,
+      "visibleElementCount": 750,
+      "hasDenominatorText": true,
+      "hasMissingText": true,
+      "hasLegendText": true
+    },
+    "sticky": {
+      "authorityTop": 0,
+      "authorityBottom": 33.53125,
+      "levelbarTop": 34,
+      "levelbarBottom": 86.1875,
+      "overlap": false
+    },
+    "browserErrors": [],
+    "screenshot": "research/20260813_hcc1395_drilldown_validation/figures/14_current_generated_mobile.png"
+  }
+}

@@ -37,7 +37,7 @@ audit_version: 0.1
 |---|---:|---:|---|
 | HCC1395_v1 共有 11,590 regions、29,572 methylation rows、16,302 loci | ✓ | L1 | `/bip7_disk/liaoyoyo2001/drilldown_out/HCC1395_v1/receipt.json` + shard recount |
 | 32,604 PNG 與 5,410 IGV payload 全數可解析 | ✓ | L1 | 本輪全量 asset scan；0 missing/orphan/parse error |
-| Selfcheck 實際為 10 PASS / 1 FAIL / 1 SKIP | ✓ | L1 | `InterSubMod` 外部產物 `HCC1395_v1/SELFCHECK.md` |
+| Selfcheck 實際為 10 PASS / 1 FAIL / 1 SKIP | ✓ | L1 | InterSubMod 外部產物 `/bip7_disk/liaoyoyo2001/drilldown_out/HCC1395_v1/SELFCHECK.md` |
 | v1 capability 的 MLHP 解釋已過時且與 C12 矛盾 | ✗ | L1 | v1 `receipt.json` 與 current `InterSubMod/scripts/drilldown/sources/mlhp.py` 對照 |
 | 換成 COLO829 時 extension root 會自動阻擋 HCC1395 資料 | ✗ | L1 | `--sample COLO829 --probe-only` 仍回報 HCC1395 LCA/ISM 數值 |
 | 有 ≥3 個獨立樣本 drilldown bundle 可作 cohort 統計 | □ | — | `drilldown_out/` 目前只有 HCC1395_v1、HCC1395_v3 |
@@ -90,7 +90,7 @@ audit_version: 0.1
 
 ## §6 Evidence Conflict Scan
 
-- Repository root 無 `MEMORY.md`，此項明確記為 unavailable；未以外部記憶補寫。
+- Repository root 無 `InterSubMod/MEMORY.md`，此項明確記為 unavailable；未以外部記憶補寫。
 - `InterSubMod/docs/reports/validated/2026/04/20260401_LOH_weekly_review/06_methylation_hypothesis_negative.md` 與本輪工程 hardening 無直接衝突。
 - `InterSubMod/docs/CURRENT_FOCUS.md` 與 `InterSubMod/docs/reports/in_progress/2026/08/20260809_整體流程與軟體輸入輸出格式盤點_01.md` 均支持「lineage 只是一個軸、v3 dirty build/provenance 有缺口」，故限制 claim ceiling。
 - KB HCC1395/benchmark workflow 指定 truth VCF、HC BED、som.py 與 TP/FP/FN/F1 口徑；v1 receipt 缺這些輸入，故禁止從 dashboard 推導 caller F1。
@@ -111,4 +111,3 @@ audit_version: 0.1
 - **Skill version**: `/pre-decision-audit` v0.1
 - **Audit JSON**: `InterSubMod/state/cycles/cycle_20260813-0126-hcc1395-drilldown-validation/audit.json`
 - **Next**: `InterSubMod/research/20260813_hcc1395_drilldown_validation/implementation-notes.md`
-

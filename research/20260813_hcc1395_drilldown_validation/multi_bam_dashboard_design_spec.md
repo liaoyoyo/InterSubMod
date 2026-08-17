@@ -1,7 +1,7 @@
 <!--
 建立時間: 2026-08-13
 目標: 定義多 BAM 單頁 dashboard 的 UX、資訊階層、跨樣本 metric contract 與 browser QA acceptance
-處理範圍: 7 份 topology datasets（6 biological samples + 1 HCC1395 technical replicate）；不實作 builder/HTML
+處理範圍: 7 份 topology datasets（6 biological samples + 1 HCC1395 technical replicate）；已實作 bounded offline snapshot，production/data science 仍維持 PARTIAL
 關聯檔案:
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/20260813_HCC1395_drilldown完整驗證與多樣本改進_01.md
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/results/cohort_topology_metrics.csv
@@ -11,6 +11,9 @@
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/16_current_generated_selfcheck_mobile.png
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/17_current_generated_detail_desktop.png
   - InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/18_current_generated_methyl_detail_desktop.png
+  - InterSubMod/research/20260813_hcc1395_drilldown_validation/multi_bam_dashboard_artifact.json
+  - InterSubMod/research/20260813_hcc1395_drilldown_validation/20260813_multi_bam_analysis_overview.standalone.html
+  - InterSubMod/research/20260813_hcc1395_drilldown_validation/results/multi_bam_dashboard_browser_qa.json
 -->
 
 用 SCQA + decision-first hierarchy：**多 BAM dashboard 應預設呈現 6 個 biological samples／7 個 datasets 的 topology 可比範圍，5 秒內讓讀者看懂「technical identity/receipt 7/7 通過，但 dataset-level 全 family complete 與全 unit objective-certified 皆為 0/7」；technical replicate、PARTIAL/ABSENT、ISM/lineage 與 single-sample selfcheck 必須分層隔離，不能被平均或借用（影響：高，信心：高）。**
@@ -18,7 +21,7 @@
 # 多 BAM 單頁 Dashboard UX 與 Browser QA Spec
 
 > [!IMPORTANT]
-> **狀態：SPEC / NOT IMPLEMENTED。** 本文件定義下一版 dashboard 的產品與驗收契約，不代表 builder、HTML 或多樣本 ISM/lineage bundle 已完成。
+> **狀態：IMPLEMENTED SNAPSHOT / DATA-PRODUCT QA PASS / SCIENCE PARTIAL。** Bounded artifact 與 standalone HTML 已完成；40/40 Playwright assertions、canonical packaging/verification 與 1440/1024/512/390/320 CSS-pixel 檢查通過。此狀態不代表 production route、truth benchmark 或多樣本 ISM/lineage bundles 已完成。
 
 > [!WARNING]
 > **Task Type B — Comprehensive validation。** Default scope 是 `cohort_topology_metrics.csv` 全 7 列，不得用 HCC1395 或少數 BAM 當 cohort 替身。Multi-sample science status 仍是 **PARTIAL**：topology 可逐 dataset 比較，等價的 7-dataset ISM/lineage bundles 不存在。
@@ -264,15 +267,38 @@ Figure 17 的 `無 ISM` 與 Figure 18 的 105 reads／371 CpG、global ALT/REF �
 - Screenshot QA 必須同時包含 overview、technical replicate、PARTIAL、ABSENT、error、missing locus、evidence-present locus與 mobile；只有 happy path 不算通過。
 - 若 asset policy 仍是 `igv=skip, panels=0`，receipt 必須寫 `full image bundle NOT EVALUATED`；不可把 light QA 升格成 full-asset PASS。
 
-## 11. Implementation boundary
+### 10.5 2026-08-13 bounded snapshot 實際驗收
 
-本 spec 不授權修改 builder、HTML、既有 report 或 bundle。實作前需另外鎖定：
+| Spec 項目 | 實際狀態 | 證據／界線 |
+|---|---|---|
+| 7 datasets／6 biological／1 technical | **PASS** | Hero 與四層 evidence strip 明示；DORADO 選取時 macro `n=0`／`n/a` |
+| hash／identity／receipt 三 gate | **PASS** | 三個獨立 badge 均 7/7；不可解讀為 truth validation |
+| macro median + IQR | **PASS** | Tree 77.680% [73.997, 78.600]；unique/tree 62.386% [46.662, 84.173]；n=6 |
+| 七個 dataset 狀態切換 | **PASS** | All + 7 dataset 共 8 states；數值逐列對 artifact；非 HCC 維持 `ABSENT_NO_EQUIVALENT_BUNDLE` |
+| PARTIAL authority | **PASS** | Sticky top bar 有文字 `PARTIAL`；已知資料缺口使用「尚未產生」而非 query failure 文案 |
+| 四層閱讀 | **PASS** | Aggregate／HCC1395 canonical／H2009 extreme observed／HCC1395_DORADO technical control |
+| Responsive／keyboard／fallback | **PASS** | 1440、1024、512（200% zoom 等效）、390、320 無 body overflow；表格只在 local container 捲動；鍵盤選取、焦點回復、aria-live、6 份 chart fallback 通過 |
+| Bounded BAM/reference identity | **PASS_BOUNDED** | 7/7 tumor/normal quickcheck、fixed chunks、BAI/FAI/dictionary；full BAM SHA 0/7、14 BAM 無 RG，不升格 full/biological identity |
+| Producer tag denominator | **PASS_EXISTING_RECEIPT** | 7/7 HP/all、HP+PS/all、HP+PS/HP、duplicate/all exact N/D；分母是 captured alignment records，不是 primary reads |
+| Invalid axis 與 exact rails | **PASS** | cluster 排除於 valid chart、保留 `INVALID · DOUBLE-DIPPING`；active-k 8 rows、axis 5 rows exact N/D |
+| 兩層 cascading selector | **SNAPSHOT DEVIATION** | Canonical portable reader 本版採一個 dataset selector；biological ID 與 replicate 關係仍在 hero、chart tooltip、table、DORADO state 明示。Production route 才實作依 biological sample cascade |
+| 兩張對齊 topology plots | **SNAPSHOT DEVIATION** | 本版採同一 0–100% 軸的 grouped bar + semantic table；兩個 numerator/denominator 未混成 composite score。Production route 可改 aligned panels |
+| Network/shard retry、race、URL state | **NOT APPLICABLE TO OFFLINE SNAPSHOT** | Standalone HTML 無外部 HTTP(S) request；不得把未執行的 async fixture 宣稱 PASS |
+| Multi-BAM locus detail 正負狀態 | **NOT INTEGRATED** | Figure 17/18 只驗證既有 HCC1395 direct-generated browser；尚未接入多樣本頁面 |
+| 每 BAM QC、truth、等價 ISM/lineage | **PARTIAL / NOT COLLECTED** | bounded identity 與 producer alignment-tag receipt 已有；depth/N50/phase blocks/MM/ML/CpG/KDE/truth 保留 null，不以 0 代替 |
+
+機器收據：`InterSubMod/research/20260813_hcc1395_drilldown_validation/results/multi_bam_dashboard_browser_qa.json`。完整執行紀錄：`InterSubMod/research/20260813_hcc1395_drilldown_validation/20260813_multi_bam_dashboard_validation_01.md`。
+
+## 11. Production boundary 與未完成項
+
+本文件初稿只定義 spec；後續依使用者同一任務的明確續作要求，已另外完成 bounded artifact／standalone HTML／QA receipt，沒有修改原始 HCC1395 bundle。若要升級成可持續載入多 BAM 的 production route，仍需鎖定：
 
 1. canonical sample manifest（biological ID、dataset ID、technical replicate、aliases、truth scope）；
 2. cohort metric registry（numerator、denominator、unit、validity、aggregate policy）；
 3. 等價 ISM/lineage manifest 是否存在；不存在即維持 PARTIAL/ABSENT；
-4. full-asset policy、durable output path 與 browser QA fixture budget；
-5. All-samples macro 是六個 primary biological datasets 的 unweighted distribution，或另經統計決策採其他方法；不可默默選擇 pooled denominator。
+4. full-asset policy、durable output path 與 async browser QA fixture budget；
+5. All-samples macro 目前已明定為六個 primary biological datasets 的 unweighted median/P25/P75；若要改成 pooled denominator 或 hierarchical model，必須另開統計決策，不可靜默替換；
+6. biological → dataset cascading selector、URL state、retry/race/error fixtures 與 live BAM processing contract。
 
 ## 12. Evidence mapping
 
@@ -283,7 +309,10 @@ Figure 17 的 `無 ISM` 與 Figure 18 的 105 reads／371 CpG、global ALT/REF �
 | generated desktop/mobile hierarchy 與 86.19px sticky baseline | `InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/13_current_generated_desktop.png`、`14_current_generated_mobile.png` |
 | co-occurrence denominator 與 selected-sample selfcheck | `InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/15_current_generated_cooccur_desktop.png`、`16_current_generated_selfcheck_mobile.png` |
 | missing-data 與 evidence-present detail 兩種狀態 | `InterSubMod/research/20260813_hcc1395_drilldown_validation/figures/17_current_generated_detail_desktop.png`、`18_current_generated_methyl_detail_desktop.png` |
+| bounded snapshot artifact 與 standalone HTML | `InterSubMod/research/20260813_hcc1395_drilldown_validation/multi_bam_dashboard_artifact.json`、`20260813_multi_bam_analysis_overview.standalone.html` |
+| Bounded BAM/reference 與 producer tag contract | `InterSubMod/research/20260813_hcc1395_drilldown_validation/multi_bam_input_manifest.json`、`results/multi_bam_input_manifest_validation.json` |
+| 8 selector states、responsive、accessibility、exact rails 與 screenshot QA | `InterSubMod/research/20260813_hcc1395_drilldown_validation/results/multi_bam_dashboard_browser_qa.json`、`figures/19_multi_bam_dashboard_all_desktop.png` 至 `29_multi_bam_dashboard_denominator_rails.png` |
 
 ---
 
-**PARTIAL footer — Task Type B scope disclosure**：本 spec 覆蓋全 7 列 topology dataset 與現有 HCC1395 UI evidence；尚未有 7 份等價 ISM/lineage bundles、multi-BAM implementation 或 browser receipt。任何 dashboard 實作在完成 §10 全套 acceptance 前，都只能標 `SPEC/IN_PROGRESS`，不得標 validated。
+**PARTIAL footer — Task Type B scope disclosure**：bounded offline snapshot 已覆蓋全 7 列 topology dataset，並通過資料產品層 canonical verification 與 40/40 browser assertions；尚未有 7 份等價 ISM/lineage bundles、完整每 BAM QC/truth、production cascading selector 或 async error fixtures。因此只可標 **snapshot data-product QA PASS / science PARTIAL**，不可標 scientific validated 或 production complete。

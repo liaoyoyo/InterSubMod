@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "generated_for": "20260813_public_docs_p0_correction",
+  "source_inventory": "research/20260812_intersubmod_github_public_docs_full_validation/claim_inventory.tsv",
+  "status_semantics": {
+    "local_source_fixed_external_publish_required": "Local source must pass all guards, but live GitHub state remains unresolved until separately published and re-fetched.",
+    "external_action_required": "No authorized local edit can close this claim; an explicit external action and live-state verification are required."
+  },
+  "locked_public_state": [
+    {"surface": "GitHub About", "locked_at": "live snapshot 2026-08-12", "status": "external_action_required"},
+    {"surface": "default branch", "locked_at": "main@635437a65a33f8ba698acf85b22ebb069455c6cc", "status": "external_action_required"},
+    {"surface": "GitHub Wiki", "locked_at": "master@6cfc990f1fbe0b0aa76b8adbe56bbe645ef7ee7b", "status": "external_action_required"},
+    {"surface": "GitHub Pages", "locked_at": "deploy@fbdf7c7d229b0b37930778cbcd928cf9e15ecb17", "status": "external_action_required"}
+  ],
+  "claims": [
+    {
+      "claim_id": "C043",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["inter_sub_mod`? does not write BAM", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["neither InterSubMod nor LongLineage can write tagged BAM"]},
+        {"target": "README.zh-TW.md", "required_all": ["inter_sub_mod`? 不寫 BAM", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["InterSubMod.*LongLineage.*都.*無法.*BAM"]},
+        {"target": "docs/wiki/System-Overview.md", "required_all": ["public main `?5daf50f`?.*沒有 tagged-BAM writer", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["兩支程式都不會輸出 tagged BAM"]},
+        {"target": "docs/wiki/Upstream-and-Data.md", "required_all": ["public main `?5daf50f`?.*沒有 tagged-BAM writer", "feature `?b9aaa12`?.*longlineage-tag-bam"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer"]},
+        {"target": "docs/explain/14_upstream-data.standalone.html", "required_all": ["main.*5daf50f.*沒有 BAM writer", "feature.*b9aaa12.*longlineage-tag-bam"], "forbidden_any": ["ISM.*LongLineage.*皆無 BAM writer"]}
+      ],
+      "external_actions": ["Publish corrected README, Wiki and Pages sources, then verify the version boundary in the live artifacts."]
+    },
+    {
+      "claim_id": "C059",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["199 columns", "VerificationSchemaVersion=2", "RegionStratificationSchemaVersion=1"], "forbidden_any": ["has 193 columns"]},
+        {"target": "README.zh-TW.md", "required_all": ["199 欄", "VerificationSchemaVersion=2", "RegionStratificationSchemaVersion=1"], "forbidden_any": ["有 193 欄"]},
+        {"target": "docs/wiki/InterSubMod-Engine.md", "required_all": ["199 欄", "VerificationSchemaVersion=2", "RegionStratificationSchemaVersion=1"], "forbidden_any": ["目前固定 193 欄"]},
+        {"target": "docs/explain/12_intersubmod-io.standalone.html", "required_all": ["199 欄", "VerificationSchemaVersion=2", "RegionStratificationSchemaVersion=1"], "forbidden_any": ["目前固定 193 欄"]}
+      ],
+      "external_actions": ["Publish corrected source and re-fetch the live README, Wiki and Pages schema statements."]
+    },
+    {
+      "claim_id": "C107",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["Local mutation-state candidate reconstruction from single-molecule"], "forbidden_any": ["InterSubMod: Subclonal Reconstruction"]},
+        {"target": "README.zh-TW.md", "required_all": ["單分子體細胞突變共現", "局部突變狀態候選結構"], "forbidden_any": ["InterSubMod：亞克隆重建"]},
+        {"target": "docs/wiki/_Sidebar.md", "required_all": ["Local mutation-state candidate reconstruction from single-molecule"], "forbidden_any": ["Subclonal reconstruction from single-molecule"]}
+      ],
+      "external_actions": ["Merge the bounded headline to the default branch and publish the Wiki mirror."]
+    },
+    {
+      "claim_id": "C108",
+      "disposition": "external_action_required",
+      "checks": [],
+      "external_actions": ["Edit GitHub About to: read-level integration and local mutation-state candidate analysis; methylation association.", "Re-fetch the repository page and record the live description before closing C108."]
+    },
+    {
+      "claim_id": "C109",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["same physical molecule.*direct observation", "cellular co-membership and lineage remain.*model-dependent"], "forbidden_any": ["same cell lineage.*direct observation"]},
+        {"target": "README.zh-TW.md", "required_all": ["同一條物理分子.*直接觀測", "細胞共屬性與譜系.*model-dependent"], "forbidden_any": ["同一細胞譜系.*直接觀測"]},
+        {"target": "docs/wiki/Home.md", "required_all": ["直接觀測同一條物理分子上的共現", "細胞譜系.*受模型與資料限制的推論"], "forbidden_any": ["同一細胞譜系.*直接觀測"]},
+        {"target": "docs/explain/11_system-map-overview.standalone.html", "required_all": ["物理分子上.*直接觀測", "譜系關係.*受模型與輔助資料限制的推論"], "forbidden_any": ["同一細胞譜系.*直接觀測"]}
+      ],
+      "external_actions": ["Publish corrected README, Wiki and Pages wording, then verify each live occurrence."]
+    },
+    {
+      "claim_id": "C112",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["Local recurrence-allowed Hamming-1 candidate arborescences"], "forbidden_any": ["reconstruct the tumour subclone tree"]},
+        {"target": "README.zh-TW.md", "required_all": ["局部、允許 recurrence 的 Hamming-1 candidate arborescences"], "forbidden_any": ["重建腫瘤亞克隆樹"]},
+        {"target": "docs/wiki/Home.md", "required_all": ["Local mutation-state candidate reconstruction", "細胞譜系.*受模型與資料限制的推論"], "forbidden_any": ["已重建.*腫瘤演化樹"]},
+        {"target": "docs/wiki/System-Overview.md", "required_all": ["local recurrence-allowed minimum mutation-state candidate arborescence"], "forbidden_any": ["解出腫瘤.*真實演化樹"]},
+        {"target": "docs/explain/index.standalone.html", "required_all": ["局部 mutation-state candidates", "不是已確認的 cellular clone 或 lineage tree"], "forbidden_any": ["confirmed.*subclone.*tree"]},
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["局部、允許 recurrence、模型條件下的 minimum mutation-state candidate"], "forbidden_any": ["得到誠實版的 subclone 重建樹"]}
+      ],
+      "external_actions": ["Publish the standardized candidate terminology across all public planes and re-scan live bytes."]
+    },
+    {
+      "claim_id": "C113",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["170,131 / 255,752 strict components.*66\\.52"], "forbidden_any": ["two thirds of all mutations"]},
+        {"target": "README.zh-TW.md", "required_all": ["170,131 / 255,752 strict components.*66\\.52"], "forbidden_any": ["所有突變的三分之二"]},
+        {"target": "docs/wiki/Home.md", "required_all": ["170,131 / 255,752.*66\\.52.*strict read-linkage components"], "forbidden_any": ["全部突變中有三分之二.*孤立"]}
+      ],
+      "external_actions": ["Publish and verify the corrected component-grain denominator labels."]
+    },
+    {
+      "claim_id": "C124",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html", "required_all": ["strong locus-specific allele-associated methylation evidence|強.*位點.*allele.*甲基", "not independent clone validation|不是.*clone.*驗證"], "forbidden_any": ["甲基 corroborate somatic 軸.*硬證據"]}
+      ],
+      "external_actions": ["Publish page 10 and verify that the live case study no longer calls three p-values clone-confirming hard evidence."]
+    },
+    {
+      "claim_id": "C125",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["tumor-associated.*normal-ASM-screen-negative|腫瘤相關.*normal-ASM.*陰性"], "forbidden_any": ["tumor-acquired subclone methylation|腫瘤後天.{0,80}subclone 甲基"]},
+        {"target": "docs/explain/06_ism-subclone-pipeline-concept.standalone.html", "required_all": ["tumor-associated.*normal-ASM-screen-negative|腫瘤相關.*normal-ASM.*陰性"], "forbidden_any": ["tumor-acquired subclone 甲基"]},
+        {"target": "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html", "required_all": ["tumor-associated.*normal-ASM-screen-negative|腫瘤相關.*normal-ASM.*陰性"], "forbidden_any": ["tumor-acquired subclone methylation|腫瘤後天.{0,80}subclone 甲基"]},
+        {"target": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py", "required_all": ["legacy_CLEAN_means_normal_ASM_screen_negative_not_acquired_or_clone_specific", "不證明 acquired/clone"], "forbidden_any": ["CLEAN（tumor-associated）", "tumor-acquired.*乾淨子集"]}
+      ],
+      "external_actions": ["Publish pages 04, 06 and 10 and verify the live causal wording."]
+    },
+    {
+      "claim_id": "C126",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/06_ism-subclone-pipeline-concept.standalone.html", "required_all": ["normal-ASM-screen-negative 子集與遺傳分組相容", "不證明.*cellular subclone"], "forbidden_any": ["subclone methylation truly exists|subclone 甲基.*真的存在"]}
+      ],
+      "external_actions": ["Publish page 06 and verify the compatibility-only wording in the live page."]
+    },
+    {
+      "claim_id": "C127",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
+        {"target": "docs/explain/05_subclone-correction-audit-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
+        {"target": "docs/explain/06_ism-subclone-pipeline-concept.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
+        {"target": "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html", "required_all": ["regional molecular-state candidates"], "forbidden_any": ["regional subclonal states"]},
+        {"target": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py", "required_all": ["regional molecular-state candidates", "非 biological clone truth"], "forbidden_any": ["regional subclonal states"]}
+      ],
+      "external_actions": ["Publish pages 04-07 and re-fetch every regional-state occurrence."]
+    },
+    {
+      "claim_id": "C128",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/07_subclone-judgment-workstation-chr2-18M.standalone.html", "required_all": ["historical[-_ ]case[-_ ]specific[-_ ]approximate[-_ ]tvaf[-_ ]transform", "noncanonical[-_ ]not[-_ ]clone[-_ ]corroboration"], "forbidden_any": ["external corroboration of subclone structure|外部.{0,80}corroboration.{0,80}subclone"]},
+        {"target": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/scripts/build_workstation_html.py", "required_all": ["historical_case_specific_approximate_tvaf_transform_noncanonical_not_clone_corroboration", "不是 CN/LOH-corrected CCF.*不能作 clone 結構佐證"], "forbidden_any": ["SEQC2 CCF 梯度（外部佐證亞群結構）", "CCF=0.85 \\(clonal 界\\)"]}
+      ],
+      "external_actions": ["Publish page 07 and verify both visible label and embedded workstation data on the live page."]
+    },
+    {
+      "claim_id": "C129",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["read.*一個 DNA 分子|read samples one molecule", "原始細胞身分不可知|originating cell.*unknown"], "forbidden_any": ["long read.*腫瘤細胞的染色體"]}
+      ],
+      "external_actions": ["Publish page 08 and verify the molecule-versus-cell distinction in live bytes."]
+    },
+    {
+      "claim_id": "C130",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["bounded concordant association after genetic grouping|遺傳分組後.*有界.*關聯"], "forbidden_any": ["甲基.*獨立印證.*subclone|第二條獨立的軸"]},
+        {"target": "docs/explain/10_ism-cpp-vs-chr2-subclone-capability.standalone.html", "required_all": ["bounded concordant association after genetic grouping|遺傳分組後.*有界.*關聯"], "forbidden_any": ["獨立證實.*subclone|獨立印證.*subclone"]}
+      ],
+      "external_actions": ["Publish pages 08 and 10 and verify association-only wording in live artifacts."]
+    },
+    {
+      "claim_id": "C131",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["帶不確定性的 candidate molecular-state label|candidate molecular-state label.*uncertain", "救援標記（未驗證未來假說）|甲基救援.*尚未完成"], "forbidden_any": ["給每條 read.*正確的 tag"]}
+      ],
+      "external_actions": ["Publish page 08 and verify that observed tagging is separated from the unvalidated rescue hypothesis."]
+    },
+    {
+      "claim_id": "C134",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["Artifact / claim family", "Verification identity and date", "Scope and known failure"], "forbidden_any": ["Every number, command, and file format.*verified"]},
+        {"target": "README.zh-TW.md", "required_all": ["artefact／claim 家族", "驗證身分與日期", "適用範圍與已知失敗"], "forbidden_any": ["每個數字、命令與檔案格式.*已驗證"]}
+      ],
+      "external_actions": ["Merge the artifact-level ledger to main and verify the live README tables."]
+    },
+    {
+      "claim_id": "C135",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["Local mutation-state candidate reconstruction", "does not identify cellular clones"], "forbidden_any": ["resolves intratumoral subclonal structure"]}
+      ],
+      "external_actions": ["Merge the corrected bounded README to the default branch; the stale live main README remains unresolved until then."]
+    },
+    {
+      "claim_id": "C136",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["computed.*after.*genetic candidate structure", "concordant association, not independent confirmation"], "forbidden_any": ["methylation patterns distinguish different cell populations"]}
+      ],
+      "external_actions": ["Merge corrected methylation scope to the default branch and verify the live landing README."]
+    },
+    {
+      "claim_id": "C137",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README_PROJECT_SUMMARY.md", "required_all": ["Python 工具.*生成.*熱圖", "C\\+\\+ binary 本身不會自動渲染 PNG"], "forbidden_any": ["自動生成距離和聚類熱圖"]},
+        {"target": "QUICKSTART.md", "required_all": ["不會.*自動產生 PNG"], "forbidden_any": ["automatically generate.*heatmap"]}
+      ],
+      "external_actions": ["Merge corrected summary and quick-start behavior to main and verify the live files."]
+    },
+    {
+      "claim_id": "C138",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "QUICKSTART.md", "required_all": ["INTERNAL ONLY", "hard-coded paths", "tiny fixture"], "forbidden_any": ["標準推薦命令.*run_vcf_all_snv"]},
+        {"target": "README.md", "required_all": ["public repository currently ships no.*runnable BAM/FASTA/VCF fixture"], "forbidden_any": ["run_vcf_all_snv.sh.*standard public workflow"]}
+      ],
+      "external_actions": ["Merge the internal-only boundary to main; separately publish a licensed fixture and portable wrapper before claiming public reproducibility."]
+    },
+    {
+      "claim_id": "C139",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README_PROJECT_SUMMARY.md", "required_all": ["實驗室內部 orchestration", "Public clone 目前沒有 runnable fixture"], "forbidden_any": ["一鍵式運行.*原始 BAM.*最終可視化"]}
+      ],
+      "external_actions": ["Merge the corrected project summary to main and verify the live first-hop document."]
+    },
+    {
+      "claim_id": "C140",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README_PROJECT_SUMMARY.md", "required_all": ["read-level clusters", "不是細胞亞克隆"], "forbidden_any": ["展示亞克隆群組"]}
+      ],
+      "external_actions": ["Merge the corrected heatmap interpretation to main and verify the live summary."]
+    },
+    {
+      "claim_id": "C141",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["繁體中文"], "forbidden_any": ["README.zh-TW.md returns 404"]},
+        {"target": "README.zh-TW.md", "required_all": ["English"], "forbidden_any": ["404 Not Found"]}
+      ],
+      "external_actions": ["Merge README.md and README.zh-TW.md to main atomically, then verify both raw endpoints return HTTP 200."]
+    },
+    {
+      "claim_id": "C142",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["66\\.52.*strict components", "dataset records.*36\\.21"], "forbidden_any": ["two thirds of all mutations"]},
+        {"target": "README.zh-TW.md", "required_all": ["66\\.52.*strict components", "dataset records.*36\\.21"], "forbidden_any": ["所有突變的三分之二"]},
+        {"target": "docs/wiki/Home.md", "required_all": ["66\\.52.*strict components", "不能說成.*全部突變的三分之二"], "forbidden_any": ["所有突變有三分之二.*孤立"]},
+        {"target": "docs/explain/11_system-map-overview.standalone.html", "required_all": ["170,131 / 255,752.*66\\.52", "469,849 dataset records.*36\\.21"], "forbidden_any": ["所有突變.*三分之二.*孤立"]}
+      ],
+      "external_actions": ["Publish all denominator corrections and verify the live percentages retain their explicit grains."]
+    },
+    {
+      "claim_id": "C143",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/03_methylation-read-filter.standalone.html", "required_all": ["effective.*default.*NHD|有效.*預設.*NHD", "BERNOULLI.*explicit|BERNOULLI.*明示指定"], "forbidden_any": ["production default.{0,80}BERNOULLI|生產預設.{0,80}BERNOULLI"]}
+      ],
+      "external_actions": ["Publish page 03 and verify the live effective-default statement."]
+    },
+    {
+      "claim_id": "C144",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/01_background-glossary.standalone.html", "required_all": ["effective.*default.*NHD|實際.*預設.*NHD", "Config.*BERNOULLI"], "forbidden_any": ["production actually uses BERNOULLI|生產實際使用.*BERNOULLI"]},
+        {"target": "docs/explain/02_ism-core.standalone.html", "required_all": ["effective.*default.*NHD|實際.*預設.*NHD", "Config.*BERNOULLI"], "forbidden_any": ["production actually uses BERNOULLI|生產實際使用.*BERNOULLI"]}
+      ],
+      "external_actions": ["Publish pages 01-02 and verify consistency with page 03 in live bytes."]
+    },
+    {
+      "claim_id": "C148",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/wiki/Analysis-and-Presentation.md", "required_all": ["historical 35,332-site pipeline", "不會.*驗證.*exact-PS.*LongLineage"], "forbidden_any": ["重算文件中的每一個數字"]},
+        {"target": "docs/explain/15_python-html-layer.standalone.html", "required_all": ["歷史 35,332-site.*pipeline", "不涵蓋.*exact-PS.*LongLineage"], "forbidden_any": ["重算.*每一個數字"]},
+        {"target": "docs/explain/16_how-to-run.standalone.html", "required_all": ["歷史 35,332-site pipeline", "不驗證.*exact-PS.*LongLineage"], "forbidden_any": ["重算.*每一個數字"]}
+      ],
+      "external_actions": ["Publish Wiki and Pages validator scope corrections and verify live occurrences."]
+    },
+    {
+      "claim_id": "C149",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "QUICKSTART.md", "required_all": ["沒有.*BAM／FASTA／VCF fixture", "不能宣稱.*10 分鐘"], "forbidden_any": ["10 分鐘內得到第一個分析結果"]},
+        {"target": "docs/wiki/How-to-Run.md", "required_all": ["public repo 目前沒有.*fixture", "internal-data example"], "forbidden_any": ["10 分鐘.*第一個分析結果"]},
+        {"target": "docs/explain/16_how-to-run.standalone.html", "required_all": ["公開重現狀態：BLOCKED（缺輸入 fixture）", "INTERNAL-ONLY"], "forbidden_any": ["約.{0,20}10 分鐘.{0,80}第一個分析結果"]}
+      ],
+      "external_actions": ["Publish corrected quick-start surfaces; do not close reproducibility until a licensed fixture, checksums and expected receipts are public."]
+    },
+    {
+      "claim_id": "C150",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "README.md", "required_all": ["no blanket.*every number", "Artifact / claim family"], "forbidden_any": ["Every number, command, and file format.*verified"]},
+        {"target": "README.zh-TW.md", "required_all": ["不宣稱.*每個數字", "artefact／claim 家族"], "forbidden_any": ["每個數字、命令與檔案格式.*已驗證"]}
+      ],
+      "external_actions": ["Merge per-artifact receipts to main and independently publish/recheck Wiki and Pages before changing public status."]
+    },
+    {
+      "claim_id": "C151",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/wiki/InterSubMod-Engine.md", "required_all": ["exact-PS funnel.*不是 `?inter_sub_mod`?.*直接產生", "research `?exact_ps_topology_af`? C\\+\\+ solver"], "forbidden_any": ["inter_sub_mod.*產生.*exact-PS.*核心數字"]},
+        {"target": "docs/explain/12_intersubmod-io.standalone.html", "required_all": ["exact-PS.*不是.*inter_sub_mod.*本體輸出", "exact_ps_topology_af.*C\\+\\+ solver"], "forbidden_any": ["inter_sub_mod.*產生.*exact-PS.*核心數字"]}
+      ],
+      "external_actions": ["Publish Wiki/page 12 architecture corrections and verify the live distinction between pipelines."]
+    },
+    {
+      "claim_id": "C152",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["LOH.*兩親本.*解釋", "定序錯誤|sequencing error", "copy number|CN"], "forbidden_any": ["read 差異.*必然來自後天 somatic"]},
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["LOH.*兩親本.*解釋", "定序錯誤|sequencing error", "copy number|CN"], "forbidden_any": ["任何 read 間差異都必然是後天的"]}
+      ],
+      "external_actions": ["Publish pages 04 and 08 and verify that alternatives remain visible in live text and diagrams."]
+    },
+    {
+      "claim_id": "C153",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["分支 candidate.*相容|與候選分支模型相容", "不是唯一可識別|非唯一樹"], "forbidden_any": ["只能解釋成.*姊妹分支"]}
+      ],
+      "external_actions": ["Publish page 08 and verify the live parsimony language is candidate-only and non-unique."]
+    },
+    {
+      "claim_id": "C154",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["local methylation state|局部甲基狀態", "基因表現.*功能|expression.*functional"], "forbidden_any": ["subclone.{0,80}關掉了哪些基因"]}
+      ],
+      "external_actions": ["Publish page 08 and verify the live functional claim requires expression/functional data."]
+    },
+    {
+      "claim_id": "C155",
+      "disposition": "local_source_fixed_external_publish_required",
+      "checks": [
+        {"target": "docs/explain/04_subclone-reconstruction-chr2-18M.standalone.html", "required_all": ["unvalidated future hypothesis|未驗證假說|尚未.*逐 read.*驗證"], "forbidden_any": ["甲基.*補回.*正確.*tag"]},
+        {"target": "docs/explain/08_subclone-logic-chain-chr2-18M.standalone.html", "required_all": ["unvalidated future hypothesis|未驗證.*未來假說", "candidate molecular-state label|候選分子狀態標籤"], "forbidden_any": ["給每條 read.*正確的 tag|補上點突變標不到的 read"]}
+      ],
+      "external_actions": ["Publish pages 04 and 08 and verify live text/figures do not present methylation rescue or correct tags as observed output."]
+    }
+  ]
+}

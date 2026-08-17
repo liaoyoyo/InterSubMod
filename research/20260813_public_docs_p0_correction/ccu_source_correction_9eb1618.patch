@@ -1,0 +1,3404 @@
+diff --git a/src/data/glossary.json b/src/data/glossary.json
+index 92a23ae..d51fc1b 100644
+--- a/src/data/glossary.json
++++ b/src/data/glossary.json
+@@ -749,8 +749,8 @@
+     ]
+   },
+   "triplet graph": {
+-    "zh": "LongPhase-TO 判斷候選變異真假時用的最小結構：候選位置加上左右各一個變異，共三個位置。把 read 上看到的 allele 組合畫成路徑後，真的 somatic 變異會形成一條「跟某一條 germline haplotype 只差候選這一格」的新路徑；定序錯誤則湊不出一致的路徑。因為左右兩側都要對得上，所以三個位置是最小單位。",
+-    "en": "LongPhase-TO's minimal unit for judging a candidate: the candidate plus one flanking variant on each side. A true somatic allele forms a third path differing from one parental haplotype at the candidate alone; artifacts show no consistent path.",
++    "zh": "LongPhase-TO 用來評估候選局部一致性的 heuristic：候選位置加上左右各一個 anchor，共三個位置。多條 reads 若形成與同一局部 haplotype background 相容、只差候選 allele 的穩定路徑，會提高候選可信度；分散路徑則提高 artifact 疑慮。它不是必然真值規則：mapping／basecalling 系統誤差、chimera、錯誤 phasing、重複序列與抽樣都可能造成例外。",
++    "en": "A LongPhase-TO heuristic for local candidate consistency: the candidate plus one anchor on each side. A recurrent read path compatible with one local haplotype background raises candidate confidence, whereas dispersed paths raise artifact concern. It is not a truth rule; systematic alignment or basecalling errors, chimeras, phasing errors, repeats and sampling can produce exceptions.",
+     "see": [
+       "LongPhase-TO",
+       "somatic variant"
+@@ -840,8 +840,8 @@
+   },
+   "epimutation": {
+     "zh_gloss": "表觀突變",
+-    "zh": "細胞分裂時甲基化狀態的隨機翻轉。文獻常引的量級是每個 CpG、每次分裂 {{m: 10^{−5}}} 到 {{m: 10^{−4}}}，而 DNA 突變約每鹼基 {{m: 10^{−9}}} 到 {{m: 10^{−10}}}，同量級對比約差五個數量級，所以甲基化是解析度更高的譜系時鐘。要注意這個速率隨位點與量測方式差異很大（有估到 {{m: 10^{−3}}} 的），應當成量級而非定值。",
+-    "en": "A stochastic flip of methylation state during cell division. Commonly cited at {{m: 10^{−5}}}–{{m: 10^{−4}}} per CpG per division versus {{m: 10^{−9}}}–{{m: 10^{−10}}} per base for DNA mutation — roughly five orders of magnitude faster like-for-like — which makes it a higher-resolution lineage clock. Treat it as an order of magnitude, not a constant: estimates vary by site and assay, up to ~{{m: 10^{−3}}}.",
++    "zh": "甲基化狀態的轉換事件。其估計速率高度依賴位點、組織、cell-division 定義、assay 與模型；文獻中的 {{m: 10^{−5}}}–{{m: 10^{−4}}} 常是特定條件或上界。每 CpG 與每 bp DNA mutation rate 的分母不完全相同，不能直接相除後宣稱通用高解析譜系時鐘。只有在選定位點、明確生成模型與獨立校準下，methylation 才可作候選 lineage clock。",
++    "en": "A change in methylation state. Estimated rates depend strongly on locus, tissue, the definition of cell division, assay and model; values such as {{m: 10^{−5}}}–{{m: 10^{−4}}} are often condition-specific or upper bounds. Per-CpG and per-base DNA-mutation rates do not have fully comparable denominators, so their ratio does not establish a universal high-resolution lineage clock. Methylation can serve as a candidate clock only with selected loci, an explicit generative model and independent calibration.",
+     "see": [
+       "5mC",
+       "CpG",
+@@ -850,8 +850,8 @@
+   },
+   "read-AF": {
+     "zh_gloss": "read 層級的 ALT 比例",
+-    "zh": "在同一個分析區域、同一個單倍型家族的 read 之中，某個 somatic 位點帶 ALT 的比例。分母已限縮到同一條 haplotype 的同一段區域，所以不必經過純度與拷貝數換算；用途是在步數並列的候選樹之間排序。",
+-    "en": "The fraction of reads carrying the ALT allele at a somatic site, computed within one analysis window and one haplotype family. Because the denominator is already restricted, no purity or copy-number correction is needed; it is used to rank candidate trees of equal cost.",
++    "zh": "在同一 exact phase set、同一 primary HP read group 與分析區域內，某 somatic 位點帶 ALT 的未調整 read 比例。現行用途只是在最小成本並列候選間排序；它不是 CCF 或 calibrated probability。Purity、CN／LOH、multiplicity、mapping bias、coverage 與 family misassignment 仍可能改變排序，不能說分母限縮後就不需校正。",
++    "en": "The unadjusted fraction of reads carrying ALT at a somatic site within one exact phase set, primary-HP read group and analysis region. It is currently used only to rank tied minimum-cost candidates; it is neither CCF nor a calibrated probability. Purity, CN/LOH, multiplicity, mapping bias, coverage and family misassignment can still change the ordering, so restricting the denominator does not eliminate correction requirements.",
+     "see": [
+       "VAF",
+       "somatic haplotype",
+@@ -951,9 +951,9 @@
+     ]
+   },
+   "單倍型家族": {
+-    "zh_gloss": "一條 germline 單倍型，加上由它衍生的 somatic 單倍型",
+-    "zh": "把 read 依 <code>HP</code> tag 分成的兩組之一。<b>家族一</b>是 <code>HP1</code> 與從它長出來的 <code>HP1-1</code>，<b>家族二</b>是 <code>HP2</code> 與 <code>HP2-1</code>；歸不到任何一條 germline 單倍型的 <code>HP3</code> 不屬於任何一族。叫「家族」是因為它把一條 germline 單倍型與由它衍生的 somatic 單倍型收在同一組裡 —— 分組看的是 <b>germline 那一層</b>，不是有沒有帶 somatic 突變。<br><br>在同一個 phase block 內，一個家族對應<b>一條染色體拷貝</b>，所以「兩族」就是那個位置上的兩條同源染色體。但兩件事不成立：<b>其一，軟體判定不出哪一族來自父親、哪一族來自母親</b>（那需要另外定序父母）；<b>其二，標號只在該 phase block 內有定義</b>，跨 block 的「家族一」並非同一條染色體。",
+-    "en": "One of the two groups reads are split into by HP tag. Family 1 is HP1 plus the somatic haplotype HP1-1 derived from it; family 2 is HP2 plus HP2-1; HP3, which cannot be assigned to either germline haplotype, belongs to neither. It is called a family because it groups a germline haplotype together with the somatic haplotypes descended from it — the split is by the germline layer, not by whether a read carries a somatic mutation. Within one phase block a family corresponds to one chromosome copy, so the two families are the two homologous chromosomes at that locus. Two things do not follow: which family is paternal cannot be determined without sequencing the parents, and the labels are defined only within that phase block.",
++    "zh_gloss": "依局部 HP label 與 germline allele compatibility 建立的 read group",
++    "zh": "把 reads 依局部 <code>HP</code> tag 與 germline allele compatibility 分成的技術群組。家族一收 <code>HP1</code> 與 <code>HP1-1</code>，家族二收 <code>HP2</code> 與 <code>HP2-1</code>；<code>HP3</code> 缺少可用 germline 錨點，不屬於任一族。<code>HP1-1</code> 表示與 HP1 背景相容且帶 somatic allele，不表示細胞後代。<br><br>只有在 diploid、CN-neutral、phasing 正確且無 mapping／family-assignment artifact 的條件下，兩個 families 才可近似兩個 homologous haplotype backgrounds。它們不識別親源、實體 chromosome copy 或細胞；標號只在該 exact phase set／local unit 內有定義。",
++    "en": "A technical read group defined by a local HP label and germline-allele compatibility. Family 1 contains HP1 and HP1-1, family 2 HP2 and HP2-1; HP3 lacks a usable germline anchor and belongs to neither. HP1-1 means compatible with the HP1 background while carrying a somatic allele, not cellular descent. Only under diploid, copy-neutral, correctly phased and artifact-free conditions may the two families approximate two homologous haplotype backgrounds. They identify neither parent of origin, a physical chromosome copy nor a cell, and labels are local to the exact phase set/unit.",
+     "see": [
+       "somatic haplotype",
+       "單倍型連鎖區段",
+@@ -962,12 +962,12 @@
+     ]
+   },
+   "單倍型連鎖區段": {
+-    "zh": "一個連鎖視窗再限定到一條單倍型家族 —— 也就是「一個連鎖視窗、一條染色體拷貝」。這是局部共現分析的最小單位：其中的 read 全部來自同一條染色體拷貝，另一條拷貝屬於另一個連鎖區段。因此一個連鎖視窗至多切出兩個連鎖區段，<b>連鎖區段數大於連鎖視窗數</b>，兩者不可混用為同一個分母。單倍型標號只在該區段內有定義，跨區段的同名標號並非同一條染色體。",
+-    "en": "A linkage window restricted to one haplotype family — one window, one chromosome copy. It is the smallest unit of local co-occurrence analysis: all its reads come from the same chromosome copy, the other copy forming a separate segment. One window yields at most two segments, so segments outnumber windows and the two must not share a denominator. Haplotype labels are defined only within a segment.",
++    "zh": "一個連鎖視窗再限定到一個 primary-HP read group，是局部共現分析的技術單位。它不保證其中 reads 全部來自同一實體 chromosome copy；只有在 diploid、CN-neutral、phasing 正確且無 assignment artifact 時才可作近似。連鎖區段數與連鎖視窗數不可混用為同一分母；HP label 只在該 exact phase set／local unit 內有定義，跨區段同名標號不代表同一實體染色體或細胞。",
++    "en": "A linkage window restricted to one primary-HP read group, used as a technical unit for local co-occurrence analysis. It does not guarantee that all reads originate from one physical chromosome copy; that is only an approximation under diploid, copy-neutral, correctly phased and artifact-free conditions. Segment and window counts must not share a denominator. HP labels are local to the exact phase set/unit and do not identify the same physical chromosome or cell across segments.",
+     "see": [
+       "連鎖視窗",
+       "phase block",
+       "somatic haplotype"
+     ]
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/src/data/modules.json b/src/data/modules.json
+index 1f192cd..077f8df 100644
+--- a/src/data/modules.json
++++ b/src/data/modules.json
+@@ -229,18 +229,18 @@
+     "num": "上",
+     "src": "sr1-landscape.html",
+     "group": "研究指引",
+-    "short": "Subclone 重建",
+-    "title_zh": "上篇：從一堆變異到一棵腫瘤演化樹",
+-    "title_en": "Part 1 — from variants to a tree",
+-    "q": "腫瘤裡的變異，能不能排出發生的先後順序？",
+-    "sub": "先說清楚要重建的是什麼、為什麼值得重建，再說明頻率路線走到哪裡卡住、長讀把哪一件事從推論變成觀測，以及隨之而來的分析單位與限制。",
++    "short": "局部分子候選",
++    "title_zh": "上篇：從 clone-tree 願景到可驗證的局部分子候選",
++    "title_en": "Part 1 — from clone-tree vision to local molecular candidates",
++    "q": "長讀可觀測哪些局部共現，又有哪些細胞譜系結論仍不可下？",
++    "sub": "先分開長期 cellular clone-tree 願景與現行 exact-PS×HP read-compatible 候選，再說明邊際與分子共現、甲基校準需求、分析單位與不可跨越的推論邊界。",
+     "prereq": [
+       "m09",
+       "m13"
+     ],
+-    "kicker": "研究指引 · Subclone 系統發生重建",
+-    "topic_sub": "一份腫瘤檢體裡有好幾群基因體不同的細胞。這個主題問的是：能不能從定序資料把那些細胞群重建出來，並排出它們的先後順序。",
+-    "topic": "主題一 · Subclone 系統發生重建"
++    "kicker": "研究指引 · 局部分子候選與細胞譜系邊界",
++    "topic_sub": "長讀直接觀測同一 DNA 分子的局部共現；目前只能建立 exact-PS×HP 範圍的數學候選，不能把 read pattern 當成細胞群或完整譜系。",
++    "topic": "主題一 · 局部分子候選與細胞譜系邊界"
+   },
+   {
+     "id": "sr2",
+@@ -263,12 +263,12 @@
+     "num": "下",
+     "src": "sr2b-estimator.html",
+     "group": "研究指引",
+-    "short": "估計式與落地",
+-    "kicker": "研究指引 · Subclone 系統發生重建",
+-    "title_zh": "下篇：完整的估計式，以及它能不能建起來",
+-    "title_en": "Part 3 — the joint estimator and its feasibility",
+-    "q": "幾百個區域各自看到一小塊，合起來寫成一條式子時，怎樣才不會把同一批資料算兩次？",
+-    "sub": "把兩類觀測寫成兩個相乘的因子，說明 beta-binomial 為何只是它在單一變異時的邊界情形；再逐層寫出一個多變異單位的生成模型 —— 分子權重、覆蓋遮罩、兩種形狀不同的錯誤、三種不同的「沒有」—— 最後是現行實作要改的兩處與實作分期。",
++    "short": "已取代的 estimator 提案",
++    "kicker": "研究指引 · 歷史設計（SUPERSEDED by SR2C）",
++    "title_zh": "下篇：已取代的全域 estimator 提案與假設稽核",
++    "title_en": "Part 3 — superseded global-estimator proposal and assumption audit",
++    "q": "這個歷史 factorization 哪些條件尚未被資料與模擬證明？",
++    "sub": "保留舊設計供假設稽核；任何乘積都需完整資料分割與條件獨立，family 只是 phase-tag read group，錯誤通道、偵測能力與 runtime 皆待 calibration／benchmark。現行規格改看 SR2C。",
+     "prereq": [
+       "sr2"
+     ],
+diff --git a/src/data/quizzes.json b/src/data/quizzes.json
+index 52c93ab..3ec99e7 100644
+--- a/src/data/quizzes.json
++++ b/src/data/quizzes.json
+@@ -775,7 +775,7 @@
+      "why": "只有全部都是腫瘤細胞時才會是 1.0。"
+     }
+    ],
+-   "explain_html": "在本教材以 coverage 混合的合成資料中，兩者恰好相等；此結果不代表一般情況。"
++   "explain_html": "一般換算為 {{m: f=pκ/[pκ+2(1-p)]}}，其中 {{m: p}} 是 cellular purity、{{m: κ}} 是腫瘤平均倍體；只有 {{m: κ=2}} 且抽樣與 coverage 沒有系統性偏差時才有 {{m: f=p}}。coverage 混合比例本身不能證明兩者相等。"
+   },
+   {
+    "id": "m08.q2",
+@@ -1120,7 +1120,7 @@
+      "id": "b",
+      "html": "看支持它的 read 左右鄰居是不是都指向同一條 haplotype",
+      "correct": true,
+-     "why": "正確。體細胞變異發生在某一個細胞的某一條染色體上，所以支持它的 read 會一致地落在那一條上，形成一條「跟母體只差一格」的新路徑；定序錯誤落在哪條 read 上是隨機的，湊不出一致的來源。"
++     "why": "這是指定 triplet heuristic 使用的訊號：支持 read 若與鄰近已定相位點呈一致的 haplotype pattern，會提高候選的模型相容性；它不是必然規律或真值證明。mapping、phasing、CN／LOH、低支持數與系統性定序錯誤都可能造成相同外觀，仍須 benchmark 與校準。"
+     },
+     {
+      "id": "c",
+@@ -1135,7 +1135,7 @@
+      "why": "族群資料庫只是第一關，用來排除大家都有的遺傳變異。它收不到這個人的私有變異，所以「不在資料庫裡」不等於「是癌症造成的」。"
+     }
+    ],
+-   "explain_html": "這一步只用 long read 才給得起的資訊：一條 read 一次跨過好幾個位置，所以「哪些 allele 綁在同一條分子上」看得見。左鄰居與右鄰居都要看，因此最小單位是三個位置。"
++   "explain_html": "long read 可直接觀測同一分子上的 allele 共現；LongPhase-TO 的 triplet 是利用左右鄰位點評分候選的模型化做法。觀測到相容 pattern 不等於已識別來源細胞、實體染色體或真實 lineage，且 self-phasing 與 caller／phasing 誤差必須納入驗證。"
+   },
+   {
+    "id": "m13.q2",
+@@ -1242,15 +1242,15 @@
+    "choices": [
+     {
+      "id": "a",
+-     "html": "這個區域大約有一半的分子被甲基化，但不知道是哪一半",
++     "html": "每一個 CpG 各有約一半觀測分子呈甲基化；跨 CpG 的聯合 pattern 未知",
+      "correct": true,
+-     "why": "正確，而且這就是 β 值能講的全部。它可能來自「同一群細胞的隨機起伏」（每條分子各自雜亂地半甲基化），也可能來自「兩群細胞」（一群四個 CpG 全甲基、一群全不甲基）。兩種情況的每個位點都是 0.50。"
++     "why": "正確，而且這就是逐位點 β 值能講的範圍。它可由許多不同的分子 pattern 組成產生；沒有跨 CpG 聯合觀測與細胞標籤，不能判定分子 pattern 或細胞群。"
+     },
+     {
+      "id": "b",
+      "html": "這個區域存在兩群甲基化模式不同的細胞",
+      "correct": false,
+-     "why": "這是其中一種可能，但 β 值分不出來。要支持這個推論，必須看同一條分子上四個 CpG 的<b>組合</b>（epiallele）：若只出現 1111 與 0000 兩種組合，才是兩群細胞。"
++     "why": "這只是多種可能解釋之一，β 值分不出來。即使 epiallele 只出現 1111 與 0000，也只直接支持兩組分子 pattern；read 沒有細胞標籤，尚不能證明兩群細胞。"
+     },
+     {
+      "id": "c",
+@@ -1265,7 +1265,7 @@
+      "why": "β 值等於 0.50 是常見且有意義的觀測，不是品質問題。allele-specific methylation 就會產生接近 0.50 的位點 —— 一條 haplotype 甲基化、另一條不甲基化。"
+     }
+    ],
+-   "explain_html": "β 值與 VAF 有一模一樣的限制：兩者都是邊際統計。這也是 epiallele 分析要求一條 read 至少跨過 4 個 CpG 的原因 —— 少於這個數量，組合太少，算不出組成。而全基因體平均每 100 bp 才一個 CpG，所以 100 bp 短讀只在 CpG 密集區達得到這個門檻。"
++   "explain_html": "β 值與 VAF 都是邊際統計，無法單獨恢復聯合分布。epiallele 方法可預先指定最少跨越 CpG 數（例如特定方法使用 4 個），但這是方法設計選擇，不是少於 4 個就數學上無法分析；實際可辨識度還取決於 CpG 密度、read 長度、深度、錯誤與模型。"
+   },
+   {
+    "id": "m14.q4",
+diff --git a/src/modules/m09-methylation.html b/src/modules/m09-methylation.html
+index 802e80f..42a03bf 100644
+--- a/src/modules/m09-methylation.html
++++ b/src/modules/m09-methylation.html
+@@ -3,8 +3,8 @@
+   "objectives": [
+     "說明 5mC 是什麼、ONT 為什麼能直接偵測它",
+     "說明 MM/ML tag 可能在流程中遺失的情況，以及保留方法",
+-    "區分「甲基化當作證據」與「甲基化當作事後註記」兩種用法",
+-    "說明什麼是 within-ALT residual structure：固定 haplotype 與 allele 之後，仍存在的 read 層級甲基化分群"
++    "區分 M1 operational screen 與 formal regional association 的不同分母",
++    "說明 fixed exact-PS×HP×genetic-pattern 甲基關聯只是 read-level association，不是細胞群或譜系證明"
+   ]
+ }
+ -->
+@@ -13,12 +13,12 @@
+ <h2>為什麼重要</h2>
+ 
+ <p class="prose">一條 ONT read 除了序列，還帶著一串「這個 C 有沒有被加上甲基」的紀錄。
+-這件事的用處不只是「多一種資料」：<b>同一群細胞的甲基化模式會比較像</b>，
+-所以甲基化其實是一個關於「這條 read 來自哪一群細胞」的線索 —— 而 bulk 資料本來查不到這件事。</p>
++甲基化可以與細胞狀態相關，但<b>單條 read 的甲基模式不是細胞來源標籤</b>：
++同一個模式可能來自 allele-specific methylation、批次、區域脈絡或多種細胞組成。</p>
+ 
+-<p class="prose">實驗室有兩個題目用到這個線索，但<b>用法剛好相反</b>：
+-一個把它當成判斷依據（會影響結果），另一個刻意不讓它影響判斷（只當事後註記）。
+-這一章先講清楚兩個題目各自在做什麼，再談為什麼其中一個要刻意不用。</p>
++<p class="prose">本章把現行證據分成兩層：<b>M1 operational screen</b>只標記值得後續檢驗的
++read-level 甲基多群現象；<b>formal assay</b>則在 exact phase set、primary HP 與 genetic pattern 都固定後，
++檢驗區域甲基分群是否仍有關聯。兩者都不直接產生 clone、細胞群或因果結論。</p>
+ </section>
+ 
+ 
+@@ -49,41 +49,37 @@
+ 最後一步只是<b>向量之間的差異</b>加上一般的階層式分群，不需要任何生物學知識 ——
+ 兩種用法的差別不在這裡，而在<b>分出來的群要拿去做什麼</b>。}}
+ 
+-<h3>用法一：當作證據 —— 判斷一個候選是不是 somatic</h3>
++<h3>從 M1 screen 到 formal regional association</h3>
+ 
+-<p class="prose">第一個題目是 tumor-only 的 somatic 變異判讀：手上有一堆候選位置，要決定哪些是真的 somatic 變異。
+-甲基化在這裡派上用場的理由很具體 ——
+-<b>somatic 變異只存在腫瘤細胞裡，所以帶著它的那些 read 全部來自同一群細胞</b>，
+-而不帶它的 read 則來自腫瘤與正常細胞的混合。兩側的甲基化組成因此會不一樣。</p>
++<p class="prose">M1 的問題是：在一個 focal ALT 位點的支持 reads 中，是否觀察到穩定的甲基多群結構？
++這是<b>operational screen flag</b>，不是生物 prevalence，也不能把 ALT reads 轉譯成「同一群細胞」。</p>
+ 
+-{{svg:m09-as-evidence | [wide] 同一個候選位置的三種可能身分。真 somatic 的 ALT 側來源單一、REF 側是混合；
+-germline 的兩側都是混合；定序錯誤的 ALT 側只是 REF 的隨機子集，兩側看起來一樣。
+-這些「組成」被算成數值特徵送進分類器 —— 也就是說，<b>甲基化在這裡參與了判斷</b>。}}
++{{svg:m09-as-evidence | [wide] formal assay 先固定 dataset、染色體、exact phase set、primary HP 與 genetic pattern，
++再在同一個區域分析甲基群與分子狀態的關聯。可許的輸出是 pattern-conditioned regional association；
++不可輸出 cellular clone、線性祖先關係或突變造成甲基改變。}}
+ 
+-<p class="prose">實際的特徵有三類：兩側各自的<b>甲基化覆蓋量</b>與其差距、每一側是<b>單一還是混合</b>的比例，
+-以及把兩側的平均甲基化程度畫成散布圖後的<b>形狀差異</b>。
+-分類器（XGBoost）本身不懂生物學，它只是學會「這幾個數字長這樣時，候選通常是真的」。</p>
++<p class="prose">formal assay 另外要求可評估性、預定檢定與 confound guardrails。
++因此它的分母不是 M1 的 469,849 dataset-sites，而是預先凍結的 formal units；
++將兩者混在同一個「有甲基資料的比例」裡會得到錯誤結論。</p>
+ 
+ <h3>用法二要用到的任務：subclone 重建在做什麼</h3>
+ 
+ <p class="prose">第二個題目常被術語擋住，但它的核心其實是一個很單純的組合問題。</p>
+ 
+-<p class="prose">腫瘤細胞一代一代分裂，過程中<b>只會多拿到突變，不會把突變還回去</b>。
+-所以拿一個小區域、看其中 k 個 somatic 位置，每個細胞在這 k 個位置上就是一個 0／1 向量；
+-一個細胞分裂出的後代，向量只會多出幾個 1。</p>
++<p class="prose">現行技術模型把一個局部區域的 k 個 somatic 位置寫成 0／1 向量，
++並在有向 Boolean hypercube 上列舉 recurrence-allowed Hamming-1 候選。
++這是<b>模型的狀態與邊定義</b>，不是證明細胞實際「只加不減」的觀察。</p>
+ 
+-<p class="prose">bulk 定序給你的每一條 read，就是這些向量的一次取樣（read 夠長才能同時覆蓋好幾個位置）。
+-於是問題變成：<b>已知看到了哪些向量，什麼樣的「一次翻一個 0→1」的路徑能最省步數地產生它們？</b>
+-那條路徑就是這個區域的候選演化順序。</p>
++<p class="prose">每一條足夠長的 read 提供一個局部分子向量的部分觀測。
++問題變成：<b>哪些最小成本 mutation-state arborescences 與這些 read 觀測相容？</b>
++輸出是局部數學候選家族；read 不是細胞，因此不能據此確認細胞譜系。</p>
+ 
+-{{svg:m09-subclone-basics | [wide] 以一個區域內的兩個 somatic 位置為例。
+-左：細胞的狀態只會從 00 走向 10、再走向 11。中：每條 read 在這兩個位置上是一個 0／1 向量，
+-於是觀測到的狀態就是 00、10、11 三種。右：在所有狀態組成的方格上找步數最少、
+-又能走到所有觀測狀態的樹。<b>clone</b> 是整個腫瘤群體共有的那段路徑，
+-<b>subclone</b> 是後來才長出來、只占一部分腫瘤細胞的分支。}}
++{{svg:m09-subclone-basics | [wide] 以兩個 somatic 位置為例，read 觀測形成局部 0／1 pattern。
++求解器依預定模型列舉最小成本 Hamming-1 候選，並保留所有並列解。
++圖中的節點是 mutation-state candidate，不是已確認的 clone 或細胞群。}}
+ 
+-<p class="prose">這樣看的話，<b>subclone 重建的輸出就是「這個區域內、突變發生順序的候選解」</b>，
+-而不是一棵完整的腫瘤演化樹。也因為是最小成本解，<b>並列的候選會全部保留</b>，不強行選一個。</p>
++<p class="prose">這個求解的輸出是<b>局部、read-compatible 的 mutation-state candidate arborescences</b>，
++而不是一棵完整的腫瘤演化樹，也不確認生物學祖先關係。最小成本並列時全部保留。</p>
+ 
+ <h3>同一個狀態裡，read 還能再分群</h3>
+ 
+@@ -96,8 +92,9 @@ germline 的兩側都是混合；定序錯誤的 ALT 側只是 REF 的隨機子
+ <p class="prose">可觀察到：<b>ALT reads 仍可再分成兩群</b>。
+ 它們的 allele 與 haplotype 相同，僅依序列無法區分，但甲基化模式可能不同。</p>
+ 
+-<p class="prose">這個現象稱為 <b>within-ALT residual structure</b>；研究依其統計定義，在七個資料集中將其量化為主要殘餘變異來源（51.2%–80.4%）。
+-換句話說：<b>固定 haplotype 與 allele 後，仍可觀察到額外的 read-level 甲基化分群。</b></p>
++<p class="prose">這類現象可稱為 <b>within-pattern residual methylation structure</b>。
++在 formal assay 中，必須固定 exact PS、primary HP 與 genetic pattern 後才檢驗；
++即使顯著，也只可稱 pattern-conditioned regional association。</p>
+ 
+ <details class="reveal reveal--aside">
+ <summary>資料說明：資料集數為何多於細胞株數</summary>
+@@ -106,9 +103,9 @@ germline 的兩側都是混合；定序錯誤的 ALT 側只是 REF 的隨機子
+ </div>
+ </details>
+ 
+-<p class="prose">它的意義是：上一節那棵樹的<b>一個節點裡，可能還藏著更細的分群</b> ——
+-序列證據已經用完了，但資料還沒說完。這正是甲基化在第二個題目裡的位置：
+-它<b>標記</b>已經建好的節點，而不參與建樹。</p>
++<p class="prose">它的意義是：即使 exact PS、primary HP 與 genetic pattern 都相同，
++read-level 甲基向量仍可能出現殘餘結構。這項結構可在 mutation-state candidate 完成後附加描述，
++但不能因此把一個數學節點升格為細胞群，也不能反推完整譜系。</p>
+ 
+ {{guard:8 | 甲基化的相關性不是因果}}
+ <p class="prose">即使觀察到帶有突變的 reads 甲基化程度較高，也不宜直接推論「該突變造成甲基化改變」。</p>
+@@ -116,44 +113,44 @@ germline 的兩側都是混合；定序錯誤的 ALT 側只是 REF 的隨機子
+ <p class="prose">仍有多項替代解釋：兩群 reads 可能來自不同的細胞族群，且各自具有不同的甲基化背景；也可能受到 coverage、批次效應或區域基因組脈絡影響。</p>
+ {{/guard}}
+ 
+-<h3>兩種角色的對照</h3>
++<h3>兩層證據的分母不可互換</h3>
+ 
+-<p class="prose">兩個題目用的是同一份 read × CpG 表，但甲基化在流程裡的位置完全不同：</p>
++<p class="prose">M1 與 formal assay 都可能讀取 read × CpG 表，但問題、單位與可下結論不同：</p>
+ 
+-{{svg:m09-two-uses | [wide] 左：將甲基化納入分類器的輸入特徵，使其<b>參與判斷</b>；若要評估模型，應使用未參與訓練或搜尋的獨立資料。右：先僅用變異證據完成推論，再附加甲基化描述結果；在未參與推論的前提下，它可作為獨立觀察。}}
++{{svg:m09-two-uses | [wide] 左為 M1 operational screen：102,842／469,849 dataset-sites，只是後續檢驗旗標。
++右為 formal assay：1,045 個凍結 units、811 個可評估、3 個通過 robust guardrails。
++兩者分母與輸出語義不同，皆不能直接確認 clone、細胞譜系或因果。}}
+ 
+ <div class="table-wrap">
+ <table>
+-<thead><tr><th></th><th>用法一　somatic 判讀：當作<b>證據</b></th><th>用法二　subclone 重建：當作<b>註記</b></th></tr></thead>
++<thead><tr><th></th><th>M1 operational screen</th><th>Formal regional association</th></tr></thead>
+ <tbody>
+-<tr><td>在流程的哪一步進來</td><td>判斷之前 —— 成為分類器的輸入特徵</td><td>候選拓撲完成<b>之後</b>才附加</td></tr>
+-<tr><td>會影響結果嗎</td><td><b>會</b> —— 它可影響候選是否保留</td><td><b>在此實作中不會</b> —— 不參與搜尋、成本或排序</td></tr>
+-<tr><td>是否可作為獨立驗證</td><td>同一資料流程中不宜宣稱為獨立驗證</td><td>若未參與推論，可作為獨立觀察</td></tr>
++<tr><td>分析單位</td><td>LongPhase-S recalibrated PASS biallelic autosomal dataset-site</td><td>預先凍結且符合 exact-PS×HP×genetic-pattern 契約的 unit</td></tr>
++<tr><td>目前分母</td><td>469,849；flag 102,842（21.8883%）</td><td>凍結 1,045；可評估 811；robust 3（3/811 = 0.3699%）</td></tr>
++<tr><td>可下結論</td><td>值得進入後續檢驗</td><td>區域、pattern-conditioned 的甲基關聯</td></tr>
++<tr><td>不可下結論</td><td colspan="2">biological prevalence、cellular clone、linear ancestry 或突變造成甲基改變</td></tr>
+ </tbody>
+ </table>
+ </div>
+ 
+-<p class="prose">為什麼用法二要刻意不用？因為那個題目最想知道的，正是「這棵樹對不對」。
+-如果甲基化已經幫忙選過樹，再拿甲基化差異來說「看，這棵樹的分支確實有甲基化差異」，
+-那只是把自己的輸入念一次而已 —— 這是<b>循環論證</b>。</p>
+-
+-<p class="prose">同一個原則也適用於用法一：那裡的甲基化已經進了模型，所以評估模型效能時
+-必須用<b>沒有參與訓練的資料</b>，不能拿甲基化特徵本身當成「模型是對的」的證據。</p>
++<p class="prose">formal assay 固定 genetic pattern 後才檢驗甲基關聯，目的之一是避免用同一甲基訊號
++同時選擇候選、又驗證候選的循環論證。即使如此，它仍只是獨立的關聯觀察，不是候選拓撲正確性的證明。</p>
+ </section>
+ 
+ 
+ <section data-part="evidence">
+ <h2>真實證據</h2>
+ 
+-<p class="prose">實務限制之一是甲基化資料的覆蓋範圍。這裡要留意計數單位：M2 列出的是<b>六個細胞株</b>，
+-而評估用的是<b>資料集</b>，同一株可能有多份（HCC1395 的 HKU 與 NYGC）。
+-以細胞株計，六個裡<b>只有五個有可用的甲基化資料</b>；以資料集計則多於五份。
+-不論用哪個單位，能做甲基化分析的樣本都比能做序列分析的少；
+-因此甲基化較適合作為區域層級的補充證據，而非唯一判準。</p>
++<p class="prose">兩層分母必須分開報告。<b>M1 operational screen</b> 在 469,849 筆
++LongPhase-S recalibrated PASS biallelic autosomal dataset-sites 中標記 102,842 筆（21.8883%）；
++六個 biological cell lines 皆有 M1 screen 資料。這是 operational yield，不是 biological prevalence。</p>
++
++<p class="prose"><b>formal assay</b> 另有 1,045 個凍結的 pattern-conditioned units，其中 811 個可評估，
++只有 3 個通過 robust association guardrails（3/811 = 0.3699%）。六個 cell lines 中五個有 formal units；
++COLO829 的 formal units 為 0。所以不可把「6/6 有 M1 screen」寫成「6/6 都有 formal 甲基證據」。</p>
+ 
+-<p class="prose">研究統計各資料集中帶有<b>穩定甲基化差異</b>的 sSNV 位點比例，
+-COLO829 為 9.5%、H2009 為 35.4%，資料集間差異明顯。不可評估的主要限制之一是 <b>ALT read 的 coverage 不足</b>；
+-要估計兩組甲基化差異，兩邊都需要足夠且相對平衡的 reads。</p>
++<p class="prose">這 3 個結果是<b>區域關聯</b>；目前 confirmed cellular clone = 0，confirmed linear ancestry = 0。
++覆蓋、CpG 數、HP／strand／geometry 對齊、CN／LOH 與共用 caller 都是必須保留的限制。</p>
+ 
+ <div class="guardrail guardrail--info">
+ <p class="guardrail__hd">對實驗設計的影響</p>
+diff --git a/src/modules/m12-longphase-s.html b/src/modules/m12-longphase-s.html
+index 0481439..1cf3b06 100644
+--- a/src/modules/m12-longphase-s.html
++++ b/src/modules/m12-longphase-s.html
+@@ -18,10 +18,11 @@
+ 裡面混著正常細胞與好幾群癌細胞，某些區段還多了或少了拷貝。
+ 在這個前提下，把 read 分成 HP1／HP2 兩堆已經不夠用。</p>
+ 
+-<p class="prose">[[LongPhase-S]] 的做法是<b>多做一層</b>：除了兩條 germline haplotype，
+-再把「帶著 somatic 變異的那些 read」單獨拉成它們的後代分支。
++<p class="prose">[[LongPhase-S]] 的做法是<b>多做一層</b>：除了兩個 germline haplotype read families，
++再把「帶著 somatic 變異的那些 read」標成對應的 somatic 分支。
+ 這一層做出來之後有三個連帶好處 —— 可以直接估<b>腫瘤來源 DNA 佔了多少</b>、
+-可以用來重新判斷變異真假、也可以看出哪些 read 屬於同一個癌細胞群。</p>
++可以用來重新判斷候選品質，也可以看出哪些 read 與同一個局部 haplotype／somatic allele pattern 相容。
++<b>同一標籤不代表同一個癌細胞群</b>。</p>
+ 
+ <p class="prose">第一項要先把量講清楚，因為工具的參數名稱與輸出欄位都叫 <code>purity</code>，
+ 但它估的是 [[tumour DNA fraction|腫瘤 DNA 比例]]（分母是<b>分子</b>），
+@@ -40,7 +41,8 @@ M3 與 M8 的<a href="m08.html#guard-2">重要區分 #2</a> 已建立這兩個
+ 判斷只用兩件事 —— 這條 read 上的 germline allele 屬於哪一條，以及它有沒有帶 somatic allele。</p>
+ 
+ {{svg:m12-haplotagging | [wide] 同一批 read，先用 normal 的 phased germline 變異當骨架，再依兩個問題貼標籤。
+-<b>HP1-1 讀作「HP1 的 somatic 後代」</b>；<code>HP3</code> 不是第三條染色體，而是「證據還不足以判斷來源」的暫時標籤。}}
++<b>HP1-1 表示「與 HP1 背景相容且帶 somatic allele」</b>；<code>HP3</code> 不是第三條染色體，
++而是「缺少 germline 錨點」的暫時標籤。任何一種 HP 標籤都不是細胞 ID。}}
+ 
+ <div class="table-wrap">
+ <table>
+@@ -53,6 +55,10 @@ M3 與 M8 的<a href="m08.html#guard-2">重要區分 #2</a> 已建立這兩個
+ </table>
+ </div>
+ 
++<p class="prose"><b>輸出語義：</b>HP1／HP2 是局部、方向任意的 read-family labels；
++HP1-1／HP2-1 再記錄 somatic allele 與哪個背景相容。它們不識別親源、實體染色體 copy 或個別細胞，
++也不能把同標籤 reads 自動解讀成一個 cellular clone。</p>
++
+ <p class="prose">這個標籤系統帶來一個一般 phasing 工具做不到的事：
+ 在一條 haplotype 整條遺失的 [[LOH]] 區域裡，帶 somatic 變異的 read 仍會被標成 <code>HP1-1</code>，
+ 而不是被硬塞進剩下那條 germline haplotype。</p>
+@@ -103,7 +109,7 @@ GHIR = \frac{\max(\text{HP1 read 數}, \text{HP2 read 數})}{\text{HP1 read 數}
+ <code>HP1-1</code>／<code>HP2-1</code>，就<b>不再算進</b>原本那條的計數。</p>
+ 
+ {{svg:m12-ghir | [wide] 三格由左到右是同一個位點在腫瘤佔比由低到高時的樣子。
+-腫瘤細胞越多，被拉去 HP2-1 的 read 就越多，HP2 剩下的越少，比值就越接近 1。
++腫瘤來源且帶 somatic allele 的分子比例越高，被拉去 HP2-1 的 read 通常越多，HP2 剩下的越少，比值就越接近 1。
+ 下半部提醒第二個來源：腫瘤自己的拷貝數變化與 LOH 也會造成失衡，所以需要先用 normal 當基準過濾。}}
+ 
+ <p class="prose">失衡有<b>兩個</b>來源，這點很容易只記住一個：</p>
+@@ -322,14 +328,16 @@ longphase-s somatic_haplotag \
+ 
+ {{fig:a-s27-purity}}
+ 
+-<h3>結果摘要</h3>
++<h3>論文報告的結果摘要與適用範圍</h3>
+ 
+-<p class="prose">研究在<b>八個資料集、六個癌症細胞株</b>上評估，並用合成混合樣本製造已知的
+-腫瘤 DNA 比例梯度。把 recall 與 precision 分開看，才看得出這個方法實際上做了什麼：</p>
++<p class="prose">下表是 LongPhase-S bioRxiv v1（2025）<b>論文內報告</b>的 benchmark：
++涵蓋八個技術資料集、六個癌症細胞株，並用 BAM read-level synthetic mixtures 建立已知的
++腫瘤 DNA 比例梯度。這不是病人 cohort、臨床效能驗證或獨立外部重現；
++因此表中的平均值只能在該論文的資料、caller、truth set 與評估口徑下解讀。</p>
+ 
+ <div class="table-wrap">
+ <table>
+-<thead><tr><th>面向</th><th>報告的結果</th></tr></thead>
++<thead><tr><th>面向</th><th>論文內報告的結果（非外部驗證）</th></tr></thead>
+ <tbody>
+ <tr><td>DNA 比例估計</td><td>在低比例區段明顯優於 ASCAT（ASCAT 在多個資料集把 0.2 預測成 1.0）；leave-k-out 交叉驗證平均 {{m: R^2}} 約 0.96。<b>比較是在 {{m: f}} 的尺度上做的</b>：ASCAT 輸出 {{m: (p, κ)}}，先經換算式才進入這張表</td></tr>
+ <tr><td>接在 ClairS 之後（SNV）</td><td><b>recall 平均 +4.5%</b>（最多 +14.4%），precision 平均 −1.3%，淨效果 F1 平均 +1.9%（8 個資料集中 6 個變好）</td></tr>
+@@ -357,6 +365,8 @@ longphase-s somatic_haplotag \
+ <p class="guardrail__hd">這些數字的成立條件</p>
+ <p class="prose">全部來自<b>細胞株與合成混合樣本</b>。合成樣本提供了已知的<b>DNA 比例</b>（這是真實檢體給不了的），
+ 代價是它不會有真實腫瘤的纖維組織混雜、空間異質性與更複雜的次族群結構。</p>
++<p class="prose"><b>目前可確認的是論文內 benchmark，不是臨床泛化。</b>若要支持對外或臨床效能 claim，
++仍需預先註冊的獨立病人 cohort、跨中心重現、caller／truth-set 分層與適當的不確定區間。</p>
+ <p class="prose">這裡要補一句原始素材沒明說的假設：<b>「混出比例 0.2 的樣本」預設來源腫瘤是 100% 純的</b>。
+ 細胞株確實接近如此，所以真值可信 —— 但那個真值是 {{m: f}}，
+ 換算成細胞比例還需要細胞株自己的倍體。</p>
+diff --git a/src/modules/m13-longphase-to.html b/src/modules/m13-longphase-to.html
+index fbcbc16..6636909 100644
+--- a/src/modules/m13-longphase-to.html
++++ b/src/modules/m13-longphase-to.html
+@@ -77,13 +77,14 @@ LongPhase-TO 做的是<b>再校正</b>（[[recalibration]]）：把明顯不合
+ <p class="prose">第二關才是重點，而且它用的證據只有 long read 給得起：
+ <b>看支持這個候選的 read，左右兩邊的鄰居是什麼</b>。</p>
+ 
+-{{svg:m13-somatic-vs-artifact | [wide] 兩邊帶 T 的 read 刻意都是三條 —— 光數數量分不出真假，這正是重點。
+-差別在鄰居：左邊三條的鄰居都是 C 與 A，也就是三條全落在同一條染色體上；右邊三條各有各的鄰居，湊不出一致的來源。
+-下半部把同一批資料畫成路徑圖後更清楚：左邊多出<b>一條完整的新路徑</b>，而且它跟 HP2 只差候選這一格；右邊則沒有任何一條新路徑被穩定支持。}}
++{{svg:m13-somatic-vs-artifact | [wide] 兩邊帶 T 的 read 刻意都是三條 —— 光數量分不出候選品質。
++左邊三條鄰居一致，形成與 HP2 只差候選一格的<b>模型相容 read path</b>；右邊鄰居分散，缺乏一致路徑。
++前者是保留候選的局部證據，不是「已證明真變異」；mapping、chimera、phasing 與系統性錯誤仍可能模仿此圖樣。}}
+ 
+-<p class="prose">背後的理由是癌症怎麼發生的。一個體細胞變異只會發生在<b>某一個細胞的某一條染色體</b>上，
+-之後那個細胞分裂出來的後代才帶著它。所以真變異必然掛在一條既有的 haplotype 底下，
+-形成一條「跟母體只差一格」的新路徑。定序錯誤沒有這個身世，它落在哪條 read 上是隨機的。</p>
++<p class="prose">這個 triplet heuristic 的技術假設是：可信候選較可能在多條 reads 上形成
++與同一局部 haplotype 背景相容、只差候選 allele 的穩定 pattern；分散 pattern 則提高 artifact 疑慮。
++<b>它不是必然律，也不是候選真值證明</b>：mapping／basecalling 系統誤差、chimera、錯誤 phasing、
++局部重複序列與抽樣波動都可能造成例外，因此仍須和 caller、品質指標及獨立 truth set 一起驗證。</p>
+ 
+ <div class="guardrail guardrail--info">
+ <p class="guardrail__hd">為什麼要三個位置，兩個不夠？</p>
+@@ -105,8 +106,8 @@ LongPhase-TO 做的是<b>再校正</b>（[[recalibration]]）：把明顯不合
+ 把「同一條 read 上看到的 allele」連成一張圖，再沿著圖走出兩條 haplotype。
+ 差別在這裡多做兩件事：<b>somatic 變異也要一起掛上去</b>，而且<b>LOH 區要接得過去</b>。</p>
+ 
+-{{svg:m13-loh-phasing | [wide] 三條軌道。HP1 與 HP2 是與生俱來的兩條；HP2-1 是 HP2 的體細胞後代 ——
+-它跟 HP2 完全一樣，只有帶紅點的位置不同，名字本身就記錄了來源。
++{{svg:m13-loh-phasing | [wide] 三條軌道。HP1 與 HP2 是局部 germline haplotype labels；HP2-1 表示
++與 HP2 背景相容且帶 somatic allele 的 read pattern，並不是細胞後代。
+ 進到 LOH 區之後 HP1 整段不存在，程式用 LOH 邊界兩側的連結判斷「留下來的是哪一條」，再讓它一路接過去。
+ 下半部是同樣三個位置寫成 VCF 的樣子。}}
+ 
+@@ -121,31 +122,36 @@ LongPhase-TO 做的是<b>再校正</b>（[[recalibration]]）：把明顯不合
+ <tbody>
+ <tr><td><code>GT</code></td><td>與生俱來的兩條長什麼樣</td><td>有一側是 <code>.</code> ＝ 這裡是 LOH</td></tr>
+ <tr><td><code>GT2</code></td><td>癌細胞才有的變異長在哪一條上</td><td>哪一格是 <code>1</code>，就是長在那一條上；<code>1|1</code> 代表<b>判不出來</b></td></tr>
+-<tr><td><code>GT3</code></td><td>LOH 區裡，剩下那一條再往下分的第二支</td><td>非 LOH 區通常用不到，寫 <code>./.</code></td></tr>
++<tr><td><code>GT3</code></td><td>LOH 區裡，在既定編碼下再區分的第二組 somatic read pattern</td><td>非 LOH 區通常用不到，寫 <code>./.</code>；不是細胞群 ID</td></tr>
+ </tbody>
+ </table>
+ </div>
+ 
+ <p class="prose">為什麼 LOH 區要多一層？因為那裡只剩一條 germline haplotype 可以掛，
+-但癌細胞在那一條上可能先後長出<b>兩批</b>不同的變異，屬於不同的細胞群。
+-只有 <code>GT2</code> 一格的話，這兩批會被混在一起；多一層 <code>GT3</code> 才分得開。</p>
++但 reads 上可能觀察到兩組不同的 somatic allele patterns。只有 <code>GT2</code> 一格時兩組會被混在一起；
++<code>GT3</code> 提供額外的<b>技術編碼分支</b>。這可分開局部分子 pattern，不能據此確認兩個細胞群或其先後。</p>
+ 
+ <h3>第四件事：這個樣本有多少比例是腫瘤</h3>
+ 
+ <p class="prose">檢體不會是純的癌細胞，裡面一定混著正常細胞。混得多寡直接影響每個變異的訊號強度，
+ 所以這個比例要估出來。M12 用的是 [[GHIR]]；這裡的比值算法一樣，差別只在<b>數的是帶 reference allele 的 read</b>。</p>
+ 
+-{{svg:m13-imbalance-fraction | [wide] 挑一個長在 HP2 上的體細胞變異。帶 ref 的 read 有兩個來源：HP1 上的（癌細胞與正常細胞都給得出來）
+-與 HP2 上的（<b>只有正常細胞給得出來</b>，因為癌細胞那一份已經變成 alt 了）。
+-所以腫瘤越多，HP2 這一側就越薄，兩側的比值從接近 0.5 一路往 1.0 靠。}}
++{{svg:m13-imbalance-fraction | [wide] 在簡化的 diploid、clonal、copy-neutral 示意中，挑一個定相到 HP2 的 somatic 變異，
++只數帶 ref allele 的 reads。腫瘤來源 DNA 比例增加時，HP2-ref 分子預期減少，失衡比值上升。
++這是 DNA molecule-level 示意；CN／LOH、subclonality、mapping bias 與錯誤定相都會改變關係。}}
+ 
+ <div class="guardrail guardrail--info">
+ <p class="guardrail__hd">這個數字叫什麼，要小心</p>
+ <p class="prose">程式把它寫成 <code>##tumor_purity=</code>，但它量到的其實是
+ <b>[[tumour DNA fraction|腫瘤 DNA 佔的比例]]</b>，不是腫瘤<b>細胞</b>佔的比例。</p>
+-<p class="prose">在實驗室依覆蓋度混出來的合成樣本裡，兩者恰好相等，所以平常不容易察覺差別。
+-但真實腫瘤如果是 [[aneuploidy|非整倍體]]或發生過全基因體加倍，一個癌細胞貢獻的 DNA 比正常細胞多，
+-兩個數字就會分開。報告數字時要說清楚是哪一個。</p>
++<p class="prose">BAM 依 read 數混合直接控制的是 DNA fraction {{m: f}}，<b>不會讓 {{m: f}} 與 cellular purity {{m: p}} 自動相等</b>。
++若腫瘤平均倍體為 {{m: κ}}，兩者關係為：</p>
++{{eq}}
++f = \frac{pκ}{pκ + 2(1-p)}
++{{note}}
++只有 {{m: κ=2}} 且其他取樣假設成立時 {{m: f=p}}。aneuploidy、WGD、CN／LOH 或抽樣偏差都會使簡化關係失效。
++{{/eq}}
++<p class="prose">因此合成資料的標示值應報為 {{m: f}}；要換算 {{m: p}} 必須另外提供倍體與相應假設。</p>
+ </div>
+ 
+ <p class="prose">最後一步是把兩樣東西交給一條事先訓練好的式子：全基因體所有位置的比值分布，
+diff --git a/src/modules/sr1-landscape.html b/src/modules/sr1-landscape.html
+index 1c97852..f073c19 100644
+--- a/src/modules/sr1-landscape.html
++++ b/src/modules/sr1-landscape.html
+@@ -1,10 +1,10 @@
+ <!--tw
+ {
+   "objectives": [
+-    "界定 clone tree 的內容、輸入與輸出，並說明重建它的價值",
++    "區分長期 cellular clone-tree 願景與目前 exact-PS×HP 局部分子候選的可驗證輸出",
+     "說明 VAF 與甲基化 β 值何以同為 marginal distribution，而演化樹所需者為 joint distribution",
+     "解釋同一組 CCF 群集何以同時相容於線性與分支兩棵 clone tree，以及 parsimony 與 latent node 在其中的角色",
+-    "說明 epimutation 何以構成解析度高於 DNA 突變的時鐘，以及 epiallele 至少須跨越幾個位點方可量測",
++    "說明 methylation lineage tracing 需要 site-specific calibration，且 epimutation 不是通用時鐘",
+     "指出長讀將哪一項由推論轉為觀測，並計算該項成立的距離範圍",
+     "切出連鎖視窗與單倍型連鎖區段，並說明為何連鎖區段數大於連鎖視窗數",
+     "說明 read-AF 在此路線中取代了頻率譜的哪一個角色"
+@@ -15,11 +15,21 @@
+ <section data-part="why">
+ <h2>為什麼重要</h2>
+ 
++<div class="guardrail guardrail--warning">
++<p class="guardrail__hd">先分清楚：長期研究願景 ≠ 目前已驗證輸出</p>
++<p class="prose"><b>長期願景</b>是結合更多證據重建 cellular clone tree；<b>目前可確認</b>的只有
++exact phase set × primary HP 範圍內、與 reads 相容的局部 mutation-state candidate arborescences。
++方向採 recurrence-allowed Hamming-1 技術模型，並列候選保留，read-AF 僅作未校正排序。</p>
++<p class="prose">目前 confirmed cellular clone = 0、confirmed linear ancestry = 0；沒有 CN／LOH-aware CCF、
++cellular purity 或跨 HP／跨 phase set 的 cellular pairing。因此本頁談到 clone tree、治療或 methylation lineage clock 時，
++除非另引外部研究，都是<b>研究問題或未來假說</b>，不是 InterSubMod 現行成果。</p>
++</div>
++
+ <p class="prose">課程模組至 Capstone 為止。前述各章所回答的均為同一類問題：
+ <b>某個位置是否存在變異</b>、<b>該變異位於哪一條染色體</b>。
+ 以下三頁轉向另一類問題，性質為<b>研究方向的說明</b>，而非課程。</p>
+ 
+-<h3>重建的對象</h3>
++<h3>長期願景想重建什麼</h3>
+ 
+ <p class="prose">腫瘤並非由單一均質的細胞群體構成。它自單一細胞起始，
+ 於分裂過程中持續累積 [[somatic variant|somatic 變異]]，因而分化為數個群體，
+@@ -28,17 +38,16 @@
+ <p class="prose">這些群體之間存在<b>先後關係</b>：某一群衍生自另一群。
+ 將「何者衍生自何者」表示為圖，即得一棵樹 ——
+ 節點為一群細胞，邊代表「在祖先既有的變異之上再取得一個」。
+-此樹稱為 [[clone tree]]，<b>即為以下三頁所要重建的對象</b>。</p>
++此樹稱為 [[clone tree]]，是領域中的長期 estimand；目前資料與演算法尚不足以把它當成已重建輸出。</p>
+ 
+-{{svg:sr1-goal | [wide] 定序過程消去了「哪些細胞屬於同一群」的資訊，重建即為將其還原。
+-中間一格為實際可得的資料：一批無法辨識來源的片段，以及各位點各自的頻率。
+-下半說明長讀的作用 —— 單一條分子即跨越多個位點，
+-因而可直接觀測「這幾個變異是否位於同一個分子上」，而該資訊正是決定先後次序所需者。}}
++{{svg:sr1-goal | [wide] 圖中把長期願景與目前能力分開：願景是 cellular clone tree；
++現行資料是分子 reads；目前輸出僅為 exact-PS×HP 局部、read-compatible 的 mutation-state candidates。
++長讀可直接觀測同一分子上的共現，但「同一分子」不等於「同一細胞」，不能自動補回 cellular lineage。}}
+ 
+ <p class="prose">困難在於中間一格：觀測資料既不包含該樹，也不包含任何一顆完整的細胞。
+ bulk 定序將所有細胞打碎並混合，可得者僅有片段與頻率，樹須由此反推。</p>
+ 
+-<h3>重建的價值</h3>
++<h3>若未來能通過細胞層驗證，可能的價值</h3>
+ 
+ <ul class="prose">
+ <li><b>用藥</b> —— 兩個可標靶的變異若位於<b>同一群</b>細胞，單一藥物可能同時作用於兩者；
+@@ -47,18 +56,16 @@ bulk 定序將所有細胞打碎並混合，可得者僅有片段與頻率，樹
+ 須先確定群體的組成與各自的比例，方能判斷防治的對象。</li>
+ <li><b>時序</b> —— 最早發生的變異，往往即為驅動該腫瘤生長的變異。</li>
+ </ul>
++<p class="prose">以上是 clone-tree estimand 的潛在用途，不是現行局部分子候選可直接支持的臨床 claim。</p>
+ 
+ <h3>M9 的小規模示範</h3>
+ 
+-<p class="prose">M9 以兩個位點示範過完整的流程：細胞僅會取得變異而不會回復，
+-故狀態由 <code>00</code> 轉為 <code>10</code>，再轉為 <code>11</code>；
+-bulk read 在這兩個位置上即為一個 0／1 向量；
+-重建即為在狀態方格上尋找一棵樹，自 <code>00</code> 出發、每一步僅翻轉一個位元、
+-可達所有觀測狀態且步數最少。</p>
++<p class="prose">M9 以兩個位點示範現行技術模型：bulk read 提供局部 0／1 分子向量，
++求解器在 recurrence-allowed Hamming-1 state graph 上列舉與觀測相容的最小成本 arborescences。
++這是模型候選列舉，不是「細胞只會取得、不會回復」已被資料證明。</p>
+ 
+-<p class="prose">以下三頁處理的是同一問題的放大版本 —— 由兩個位點放大至數千個變異，
+-由單一連鎖視窗放大至整個基因體。放大之後出現兩個在小規模下不顯現的問題，
+-而這三頁即針對該二問題。</p>
++<p class="prose">以下頁面一部分整理全域 clone-tree 文獻，一部分提出把局部共現證據接入更大模型的研究構想。
++現行驗證範圍仍停在局部 exact-PS×HP units；跨視窗、跨 HP 與全基因體拼接尚未成立。</p>
+ 
+ <h3>三篇的分工</h3>
+ 
+@@ -111,7 +118,7 @@ bulk read 在這兩個位置上即為一個 0／1 向量；
+ ① 以頻率將變異分群，首次使「腫瘤含幾群細胞」成為可計算的問題。
+ ② 發現頻率分布本身具有形狀，可用於判定是否存在天擇。
+ ③ 大規模評比顯露前兩者共同的上限：答案不唯一。
+-④ 兩種新的資訊來源 —— 甲基化提供解析度更高的時鐘，長讀提供分子層級的共現關係。}}
++④ 兩種新的資訊來源 —— 經位點特異校準的甲基化可提供候選 lineage signal，長讀提供分子層級共現；兩者都不自動等於細胞譜系。}}
+ 
+ <h3>第一步：將一批變異的頻率繪為直方圖 —— mutation frequency spectrum</h3>
+ 
+@@ -262,18 +269,17 @@ CCF 換算是在<b>估計邊際</b>，簡約性則是在<b>推定聯合</b>。
+ 
+ <p class="prose">既然序列上的頻率不足，更換標記是否有所改善？[[5mC|甲基化]]為自然的候選。</p>
+ 
+-<p class="prose">其吸引力在於速率。[[epimutation]]（甲基化狀態的隨機翻轉）的發生速率，
+-文獻常引的量級為每個 [[CpG]]、每次細胞分裂 {{m: 10^{−5}}} 至 {{m: 10^{−4}}}；DNA 突變則為每個鹼基 {{m: 10^{−9}}} 至 {{m: 10^{−10}}}。
+-同量級相比，<b>快約五個數量級</b>。此即表示甲基化為解析度高得多的時鐘 ——
+-兩群細胞分離僅數十代時，序列上尚無任何差異，甲基化上已可觀測。</p>
++<p class="prose">甲基化的吸引力在於許多 CpG 會發生狀態轉換，但文獻中的 epimutation rate
++高度依賴位點、組織、cell division 定義、assay 與估計模型。常引的 {{m: 10^{−5}}}–{{m: 10^{−4}}}
++通常是特定條件或上界；把它與每 bp 的 DNA mutation rate 直接相除，分母與可觀測單位並不完全等價。</p>
+ 
+-<p class="prose">該速率應視為量級而非定值：它隨位點與量測方式差異甚大，
+-專供作時鐘之用的位點另有估至 {{m: 10^{−3}}} 量級者。
+-故「甲基化快得多」一項穩固，「快幾個數量級」則不宜作為定值引用。</p>
++<p class="prose">因此 methylation 只能在<b>選定位點、明確生成模型與獨立校準</b>下作候選 lineage clock，
++不是跨位點、跨組織皆適用的通用時鐘。InterSubMod 目前的甲基結果只到
++pattern-conditioned regional association，尚未校準 division time，也未驗證 cellular lineage。</p>
+ 
+ <p class="prose">此取徑已達規模化。2015 年一項研究取 19 位低度膠質瘤病人的原發與復發檢體，
+-分別以甲基化與以突變建樹，兩棵樹高度吻合（相關係數 0.56 至 0.90），
+-顯示甲基化所攜帶的譜系訊號為真 —— 惟其為「高度吻合」而非「同一棵樹」，
++分別以甲基化與以突變建樹，兩棵樹呈相關（相關係數 0.56 至 0.90）。
++這支持特定研究設計下存在可用訊號，但不是普遍真值證明；其為「相關」而非「同一棵樹」，
+ 該研究中亦有病人的甲基化訊號跨越了基因型上已分離的分支。
+ 2025 年的一項研究更進一步：僅以 bulk 甲基化資料，在 1,976 個淋巴系癌樣本上
+ 推估腫瘤的生長速率與發生年齡，不需定序基因體。</p>
+@@ -283,7 +289,7 @@ CCF 換算是在<b>估計邊際</b>，簡約性則是在<b>推定聯合</b>。
+ 
+ {{svg:m14-beta-vs-epiallele | [wide] 一段區域內的四個 CpG，<b>左右兩側各位點的 β 值皆為 0.50</b>，
+ 逐位點統計完全無法區分。
+-<b>左</b>：每個分子皆為雜亂的半甲基化，對應同一群細胞的隨機起伏。
++<b>左</b>：每條分子呈不同的部分甲基化 pattern；來源細胞未知。
+ <b>右</b>：分子分為兩組，一組全甲基化、一組全不甲基化。
+ 兩者的差異同樣僅在<b>同一分子上的四個 CpG 聯合觀測</b>時出現。
+ 將單一分子上的甲基化組合視為一個單位，該單位稱為 [[epiallele]]。
+@@ -291,12 +297,13 @@ CCF 換算是在<b>估計邊際</b>，簡約性則是在<b>推定聯合</b>。
+ 
+ {{guard:12 | 兩群 epiallele 不一定是兩群細胞}}
+ <p class="prose">上圖右側「一組全甲基化、一組全不甲基化」的分離形態，最直觀的解讀為兩群細胞。
+-然而同一群細胞的<b>兩條 haplotype</b> 亦產生完全相同的形態 ——
++然而 allele-specific methylation 亦可產生完全相同的形態 ——
+ 一條甲基化、另一條不甲基化。此現象稱為 <b>allele-specific methylation</b>，
+ 在 imprinting 區域為常態而非例外。</p>
+-<p class="prose">區分方式為將 epiallele 的分群與 [[HP tag]] 比對：
+-兩組恰好對應 HP1 與 HP2 → 為同一群細胞的兩條染色體；
+-兩組皆落於<b>同一個</b> HP 之內 → 方為兩群細胞。</p>
++<p class="prose">可先將 epiallele 分群與 [[HP tag]] 比對：兩組恰好對應 HP1 與 HP2 時，
++allele-specific methylation 是直接的替代解釋；兩組皆落於<b>同一個</b> HP read family 內時，
++只排除了這個簡單解釋，<b>仍不能確認兩群細胞</b>。read 沒有來源細胞標籤，且批次、strand、geometry、CN／LOH、
++mapping 與同一細胞內的表觀狀態變異都需再排除。</p>
+ <p class="prose">此即此路線將甲基化置於<b>單倍型家族之內</b>觀察、而非直接觀察整個位點的原因。
+ 缺少此步驟，最常見的生物現象將被誤讀為 subclone。</p>
+ {{/guard}}
+@@ -337,9 +344,10 @@ methclone 要求單一條 read 跨越 <b>4 個相鄰的 CpG</b>（對應 {{m: 2^
+ 
+ {{svg:sr1-longread-resolves | [wide] 左右兩側的 VAF 刻意設為相同：A＝0.50、B＝0.30。
+ 左側兩個位點相距 3 kb，短讀無法跨越，故每條 read 僅在一個位點上有值 ——
+-可計算者僅有該二數字，而該二數字同時相容於兩棵樹。
++可計算者僅有該二數字，而該二數字同時相容於兩種 toy-model pattern。
+ 右側單一條分子即跨越兩個位點，因而可計數組合：兩者皆帶有者 3 條，
+-<b>僅帶 B 者為零</b>。「兩者各自衍生」該棵樹需要存在僅帶 B 的細胞，因而被排除，僅餘一棵。}}
++<b>僅帶 B 者為零</b>。在預定模型與觀測深度下，這會排除一種 pattern；
++它不等於已觀測到 cellular ancestry。}}
+ 
+ <p class="prose">此例的關鍵在於<b>被排除的那一格</b>。
+ 短讀一側並非量測較不準確 —— 其兩個 VAF 與長讀完全相同 ——
+@@ -347,11 +355,13 @@ methclone 要求單一條 read 跨越 <b>4 個相鄰的 CpG</b>（對應 {{m: 2^
+ 邊際頻率不提供此資訊，而該空缺的一格正是決定樹形者。</p>
+ 
+ <p class="prose">與前述區間的說法對照：邊際僅將「同時帶有兩者的比例」限定於 0 至 0.30 之間，
+-兩端各對應一棵樹，中段無法收窄。此例中長讀將該比例直接計數為 <b>0.30</b>，
+-恰為區間的上界，即「帶有 B 的細胞全部亦帶有 A」，區間收斂為一點，樹因而確定。</p>
++兩端各對應一個 toy-model 候選，中段無法收窄。此例中長讀將「同一分子上 A、B 共現」
++直接計數為 <b>0.30</b>。在 toy model 內區間收斂為一點並縮小候選；由於 read 不是 cell，
++不能改寫成「帶 B 的細胞全部亦帶 A」或把數學唯一性等同生物學真值。</p>
+ 
+ <p class="prose">M9 已說明此觀測的形式：將每條 read 在 k 個 somatic 位點上的 R／A 記為 0／1 向量，
+-即得一張狀態表；求步數最少且可達所有觀測狀態的樹，即為該連鎖視窗的候選演化次序。
++即得一張狀態表；在預定模型下求最小成本、可達觀測狀態的 arborescences，
++即為該連鎖視窗的候選分子狀態次序。
+ 在本頁的座標中，該狀態表<b>即為聯合分布的直接樣本</b>，
+ 而非 CCF 群集那類邊際的整理。</p>
+ 
+@@ -360,10 +370,9 @@ methclone 要求單一條 read 跨越 <b>4 個相鄰的 CpG</b>（對應 {{m: 2^
+ 故「狀態 11 有 6 條 read」<b>不等同於</b>「有 6 個細胞同時帶有兩個變異」。
+ 此即 M0「read 為分子片段的觀測，而非細胞標籤」一項警告在此路線上的具體後果。</p>
+ 
+-<p class="prose">尚有第二層結構須先區分。[[somatic variant|somatic 變異]]發生於某一細胞的某<b>一條</b>染色體上，
+-故同一個 somatic 位點的變異僅會出現於其中一條 [[haplotype]] 上。
+-先將 read 依 [[單倍型家族]]分為兩組再各自建樹，
+-一方面符合生物學，一方面使各組的狀態空間減半。</p>
++<p class="prose">尚有第二層技術分組：先依 [[單倍型家族]]將 reads 分開，再於各組列舉候選。
++在 diploid、CN-neutral、phasing 正確且無 recurrence／mapping artifact 的條件下，這可近似
++「somatic allele 位於某一 homologous haplotype」；條件不成立時不可把 HP family 當成實體 copy、親源或細胞。</p>
+ 
+ <h3>代價：分析單位縮小為單倍型連鎖區段</h3>
+ 
+@@ -400,19 +409,20 @@ methclone 要求單一條 read 跨越 <b>4 個相鄰的 CpG</b>（對應 {{m: 2^
+ 某個 somatic 位點的 ALT 所佔比例。它與全基因體 VAF 的差別在於<b>分母受限縮</b> ——
+ 僅計入同一連鎖視窗、同一條 haplotype 的 read。</p>
+ 
+-<p class="prose">以下一點須明確：<b>限縮分母並未使純度消失</b>。
+-同一條 haplotype 的 read 中亦含來自正常細胞的分子（其在該位點為 REF），
+-故 read-AF 約等於「純度 × 帶有該變異的腫瘤細胞比例」，而非後者本身。
+-read-AF 之所以不需換算，是因為它僅用於<b>比較大小</b>：同一連鎖視窗、同一單倍型家族內的兩個位點共用同一個純度，比較兩者時純度為共同因子而消去。
+-M8 已將此列為方法的適用範圍限制 ——
+-兩個位點的<b>局部拷貝數或 multiplicity 若不同，則無法消去</b>。</p>
++<p class="prose">以下一點須明確：<b>限縮分母並未使 purity、CN／LOH、multiplicity、mapping bias 或抽樣誤差消失</b>。
++現行 read-AF 是 caller／BAM 上的未調整分子比例，只能在同一 exact-PS×HP unit 內作候選排序；
++它不是 CCF，也未證明各位點共用一個可消去的純度因子。局部 copy number、allele multiplicity、
++subclonality 或 coverage 不同時，排序本身也可能改變。</p>
+ 
+-<p class="prose">其用法為：發生較早的變異應出現於較多分子上，
+-故候選樹中若有兩條路徑步數相同，read-AF 遞減者較為合理。
++<p class="prose">其現行用法為一個<b>排序 heuristic</b>：在其他條件相同時，read-AF 遞減的候選獲得較高優先度。
++這不是「較早變異必然出現在較多細胞」的確認，且排序不提供 calibrated probability。
+ 關鍵在於<b>次序</b>：先以聯合觀測將候選集合收斂至最小成本解，<b>再</b>以 read-AF 排序。
+ 次序顛倒將退回頻率路線原有的問題 —— 以邊際推定聯合。</p>
+ 
+-<h3>單倍型頻率譜的形式</h3>
++<h3>概念性 toy model：分子 pattern 頻率譜</h3>
++
++<p class="prose"><b>本節是概念比較，不是目前 production output。</b>以下 HP1-1／HP1-2 是
++單一視窗內的示意 read-pattern labels；它們不等於 biological haplotypes、cellular clones 或跨視窗 lineage。</p>
+ 
+ <p class="prose">比較兩條路線之前，須先確認比較的層級：前述既有做法<b>皆非在單一位點上做推論</b>。
+ SciClone、PyClone 與 PhyloWGS 均將數千個變異的 VAF 匯總為一張直方圖，
+@@ -421,43 +431,41 @@ SciClone、PyClone 與 PhyloWGS 均將數千個變異的 VAF 匯總為一張直
+ 
+ <p class="prose">長讀一側亦有一張頻率譜，做法完全相同 —— 同樣將整批數值匯總為直方圖，橫軸同樣為頻率。
+ 所更換者僅為<b>被計數的對象</b>：不再是「單一位點的 ALT 所佔比例」，
+-而是「<b>一條單倍型</b>所佔的分子比例」。單倍型即 somatic haplotagging 所給出的標籤
+-（HP1、HP1-1、HP1-2…），每一條對應<b>一組變異的特定組合</b>。</p>
++而是「<b>一個局部 read pattern</b>所佔的分子比例」。示意標籤（HP1、HP1-1、HP1-2…）
++只在該 exact-PS×HP 視窗內對應一組特定觀測組合。</p>
+ 
+-<p class="prose">更換之後兩張圖形態相異，而相異之處恰好決定了樹。
++<p class="prose">更換之後兩張圖形態相異；在指定 toy model 中，差異可縮小候選集合。
+ 以同一組 SNV 為例。先觀察原始的 read，使後兩張圖的每一個數字皆可回溯：</p>
+ 
+ {{svg:sr1-six-snv-reads | [wide] 一個連鎖視窗、六個 somatic 位點、20 條可跨越全部六個位點的分子。
+ 分為三組：9 條全為參考型、7 條帶有 A B C、4 條帶有 D E F，
+ 且<b>無任何一條同時帶有兩組</b>。
+-下半為同一批分子的兩種計數方式 —— 逐位點計數得到六個 VAF，逐單倍型計數得到三個頻率。}}
++下半為同一批分子的兩種計數方式 —— 逐位點計數得到六個 VAF，逐 read pattern 計數得到三個頻率。}}
+ 
+ <p class="prose">同一批分子，兩種計數方式：<b>逐位點</b>計數，六個位點給出六個數字；
+-<b>逐單倍型</b>計數，三條單倍型給出三個數字。將兩組數字各自匯總為直方圖，即得以下兩張頻率譜。</p>
++<b>逐 read pattern</b>計數，三個局部分子 pattern 給出三個數字。將兩組數字各自匯總為直方圖，即得以下兩張頻率譜。</p>
+ 
+ {{svg:sr1-two-spectra | [wide] 同一組六個 SNV，兩種整理方式，橫軸皆為頻率。
+-左側六個位點各給出一個 VAF，匯為兩根高度 3 的長條；右側三條單倍型各給出一個頻率，各根高度皆為 1。
+-差異恰好落在能否確定樹：左側兩棵樹皆通過，右側僅餘一棵。}}
++左側六個位點各給出一個 VAF；右側三個局部 read patterns 各給出一個分子頻率。
++在 toy model 中，共現會排除一種數學 pattern；這不是 cellular tree 已被確認。}}
+ 
+ <p class="prose"><b>左側</b>：六個 SNV 各給出一個 VAF。A、B、C 皆為 0.35，D、E、F 皆為 0.20，
+ 匯為兩根高度 3 的長條。其讀法為「有兩群，各佔 0.35 與 0.20」——
+ 但此二數字<b>同時相容於兩棵樹</b>（{{m: 0.20 ≤ 0.35}} ✓；{{m: 0.35 + 0.20 ≤ 1}} ✓），故無從區分。
+ 此與前述 1.0／0.6／0.3 一組為同一件事。</p>
+ 
+-<p class="prose"><b>右側</b>：三條單倍型各給出一個頻率，各根長條高度皆為 1。隨之出現兩項差異：</p>
++<p class="prose"><b>右側</b>：三個局部 read patterns 各給出一個頻率，各根長條高度皆為 1。隨之出現兩項差異：</p>
+ 
+ <ul class="prose">
+-<li><b>0.45 一根在左側無法繪出。</b>該群細胞在此連鎖視窗內不帶任何 somatic 變異 ——
+-<b>無變異即無 VAF</b>。然而它是此連鎖視窗內最大的一群，且為另外兩群的祖先。
+-VAF 頻率譜可觀測後代，不可觀測祖先。</li>
+-<li><b>標籤攜帶隸屬關係。</b>HP1-1 與 HP1-2 皆直接隸屬於 HP1，兩者為<b>兄弟</b>而非祖孫。
+-且此關係係自 read <b>計數所得</b>（無分子同時帶有 A B C 與 D E F），而非推定。
+-分支一棵樹因而為唯一解。</li>
++<li><b>0.45 一根在左側無法繪出。</b>該局部分子 pattern 在此視窗內不帶 somatic allele，
++故沒有對應的 variant-level VAF；右側仍能計數這類 molecules。</li>
++<li><b>標籤攜帶局部相容關係。</b>沒有分子同時帶 A B C 與 D E F，
++故在指定 state graph 與誤差假設下可排除一種候選。這是 read-level constraint，不是 cellular 兄弟／祖孫關係的直接觀測。</li>
+ </ul>
+ 
+-<p class="prose">故兩者的差異可精確表述為：<b>左側每一根長條計數的是「變異」，右側計數的是「細胞群」</b>；
+-左側的頻率為邊際，右側的頻率攜帶隸屬關係。
+-同一組 SNV，更換頻率的計數單位之後，樹的形狀隨之確定。</p>
++<p class="prose">故兩者的差異應表述為：<b>左側每根長條計數變異，右側計數局部分子 read patterns</b>；
++左側是位點邊際，右側保留同一分子共現。在指定 toy model 中候選集合可縮小；
++它沒有把 read pattern 轉成細胞群，也沒有確認 biological tree。</p>
+ 
+ <h3>標籤的取捨</h3>
+ 
+@@ -483,10 +491,9 @@ VAF 具有一項性質：它<b>不區分變異位於哪一條 haplotype</b>，
+ 此類視窗內「一條單倍型」即等同於「一個變異」，兩者一一對應。
+ 故其額外提供者僅為較為乾淨的分母。</p>
+ 
+-<p class="prose"><b>保留標籤</b>所額外提供者並非頻率，而是一個<b>偏序</b>：
+-HP1-1 ⊂ HP1，且 HP1-1 與 HP1-2 為兄弟。前述六個 SNV 的例子之所以能確定樹，
+-依據正是此偏序，而非該三個頻率值本身。
+-此為 VAF 譜完全無對應物者。</p>
++<p class="prose"><b>保留標籤</b>所額外提供者並非頻率，而是局部 read-level 相容／排斥關係。
++在指定 state graph 下可將它寫成候選偏序，但 HP1-1、HP1-2 不是已確認的 cellular siblings，
++數學唯一候選也不是 biological unique tree。這類同分子共現是 VAF 邊際沒有的資訊。</p>
+ 
+ <p class="prose">其代價前已述及：<b>標籤僅在連鎖視窗內有定義</b>，跨連鎖視窗的 HP1-1 並非同一條
+ （重要區分 #13）。故該偏序無法延伸至全基因體尺度。</p>
+@@ -508,13 +515,14 @@ HP1-1 ⊂ HP1，且 HP1-1 與 HP1-2 為兄弟。前述六個 SNV 的例子之所
+ </div>
+ </details>
+ 
+-<p class="prose">故此路線所要檢驗的是一個具體的問題：
+-<b>將頻率的計數單位由單一位點改為多位點的單倍型，重建所得的樹是否不同？</b>
+-上述例子顯示<b>會</b>。而由於同一顆腫瘤兩者皆可計算，此問題可直接比較。</p>
++<p class="prose">故此路線可檢驗一個具體問題：
++<b>將計數單位由單一位點改為多位點 read pattern，指定模型下的候選集合是否改變？</b>
++toy example 顯示可能改變；真實資料仍須 simulation、truth set、calibration 與跨樣本重現。</p>
+ 
+ <p class="prose">中篇則先處理一項更關鍵的事實：真正額外提供的資訊<b>不在頻率值，而在標籤</b>，
+ 亦即該偏序；而偏序僅能自多變異連鎖視窗產生。
+-中篇與下篇所處理者，即為如何將這些關係收成約束，並接至全基因體尺度的重建。</p>
++中篇與下篇原本探索如何將這些關係收成約束並接至全基因體；目前這仍是未驗證願景，
++現行權威輸出不做跨視窗 cellular 拼接。</p>
+ 
+ <h3>三條路線的可觀測範圍</h3>
+ 
+@@ -531,8 +539,9 @@ HP1-1 ⊂ HP1，且 HP1-1 與 HP1-2 為兄弟。前述六個 SNV 的例子之所
+ 而是產出數萬筆局部陳述，其形式為
+ 「在此連鎖視窗、此條 haplotype 上，這幾個變異的先後次序有哪些候選」。</p>
+ 
+-<p class="prose">而 M0 的用藥問題恰為局部性質：兩個變異是否位於同一群細胞。
+-此類問題僅需該二位點鄰近範圍的聯合分布，不需完整的樹。</p>
++<p class="prose">M0 的用藥問題需要知道兩個變異是否位於同一群細胞；
++局部長讀能直接回答的只有它們是否在同一 DNA molecule 上。後者可能是必要證據，
++但不是充分證據：同一細胞有多份 DNA copies，且 bulk reads 沒有 cell barcode。</p>
+ </section>
+ 
+ 
+@@ -554,8 +563,8 @@ HP1-1 ⊂ HP1，且 HP1-1 與 HP1-2 為兄弟。前述六個 SNV 的例子之所
+ <td>14 種癌別、904 個腫瘤中有 323 個符合 {{m: 1/f}} 中性演化的直線（2016）。後續分析指出 driver 頻率偏向 0 與 1 兩端，難以在中間頻率被觀察到，因此中性比例可能被高估（2018、2019）</td>
+ </tr>
+ <tr>
+-<td>甲基化為解析度更高的時鐘</td>
+-<td>epimutation 速率約 {{m: 10^{−5}}}–{{m: 10^{−4}}}／CpG／次分裂（文獻多寫為上界），DNA 突變約 {{m: 10^{−9}}}–{{m: 10^{−10}}}／bp／次分裂，同量級相比約差五個數量級。專供作時鐘之用的位點另有估至 {{m: 10^{−3}}} 者，故此為量級而非定值</td>
++<td>甲基化可在校準後提供候選 lineage signal</td>
++<td>epimutation 估計強烈依賴位點、組織、assay 與模型；{{m: 10^{−5}}}–{{m: 10^{−4}}} 常為特定條件或上界。與每 bp DNA mutation rate 的直接倍率比較分母不完全相同，不能據此宣稱通用高解析時鐘</td>
+ </tr>
+ <tr>
+ <td>甲基化所攜帶的譜系訊號與突變高度吻合</td>
+@@ -606,13 +615,14 @@ M10 曾討論同一困難的另一版本：以合成純度的樣本評估 varian
+ <p class="prose">前述單倍型連鎖區段的狀態表即為中篇的起點，
+ 而中篇將其<b>作為約束使用</b>，而非作為輸出。</p>
+ 
+-<p class="prose">關鍵的觀察是：本實驗室現行的實作<b>已經在計算這些關係</b>。
+-它對每個連鎖區段都判定過屬於串接或分岔 —— 這些判定即為「這兩個變異不可能同群」、
+-「此群為彼群的祖先」。所缺的並非資料，而是將其接至全基因體尺度。</p>
++<p class="prose">本實驗室現行實作已在每個 exact-PS×HP unit 計算局部 read patterns，
++並在 recurrence-allowed Hamming-1 模型內列舉與排序候選 arborescences。
++這些輸出只表示<b>模型相容／不相容的分子狀態關係</b>，不能翻譯成
++「兩個變異不可能同一細胞群」或「此細胞群為彼群祖先」。</p>
+ 
+-<p class="prose">接上之後可完成三件 VAF 頻率譜無法完成的事：
+-打破「兩群大小相等」此一結構性盲點、直接量測峰的寬度，
+-以及在不需純度的條件下定出群與群的相對位置。</p>
++<p class="prose">未來若要把局部 constraints 接到更大尺度，仍須 CN／LOH-aware observation model、
++cellular purity／CCF、跨區段 identifiability、simulation truth 與獨立驗證。
++在完成前，不可宣稱已打破全域盲點或定出細胞群的相對位置。</p>
+ 
+ <p class="prose">銜接之前須先確立這些判定的可信度。
+ 在真實輸出中，一個含 194 條 read 的連鎖區段，其三個位點對的跨越深度分別為 20、17 與 <b>3</b>，
+diff --git a/src/modules/sr2b-estimator.html b/src/modules/sr2b-estimator.html
+index c46a94c..fd57dfb 100644
+--- a/src/modules/sr2b-estimator.html
++++ b/src/modules/sr2b-estimator.html
+@@ -1,8 +1,8 @@
+ <!--tw
+ {
+   "objectives": [
+-    "寫出把兩類觀測合起來的完整估計式，並說明為何是兩個因子相乘而不是兩項相加",
+-    "把一個多變異連鎖視窗的生成過程逐層寫出來：全域 clone 如何投影成局部分子比例，再如何長成一條 read，以及同一個視窗的兩條家族為何要在同一個因子內合併",
++    "辨識本頁為已被 SR2C 取代的歷史設計，不把候選 factorization 稱為 validated likelihood",
++    "說明 family、window 與 observation model 的條件依賴，以及哪些獨立性需要 simulation／calibration 驗證",
+     "區分抽樣零、結構零與錯誤地板，並說明為何 Dirichlet 參數不可為零這件事就是「零不代表不可能」的數學形式",
+     "說明分岔與不可同群這類分類為何是輸出而不是證據，以及現行實作要改的兩處各是什麼",
+     "依 Poisson 模型算出給定突變負荷下的可用連鎖區段產量，並說明該數量為何足夠"
+@@ -13,6 +13,15 @@
+ <section data-part="why">
+ <h2>為什麼重要</h2>
+ 
++<div class="guardrail guardrail--warning">
++<p class="guardrail__hd">SUPERSEDED：歷史設計提案，現行規格請看 SR2C</p>
++<p class="prose">本頁保存一條<b>尚未驗證、且已被 SR2C 局部 estimand 取代</b>的全域 factorization 構想，
++供審查假設與失敗模式；不得把以下公式稱為正式部署級似然、完整生成模型或研究結果。</p>
++<p class="prose">目前權威輸出僅是 exact-PS×primary-HP 的局部 read-compatible minimum candidates，
++recurrence allowed、read-AF unadjusted ordering；沒有 cellular clone、CN／LOH-aware CCF、calibrated likelihood
++或跨 HP cellular pairing。以下任何 factorization 都必須先證明資料分割完整、條件獨立、錯誤通道充分且 calibration 有效。</p>
++</div>
++
+ <p class="prose">中篇確立了三件事：僅以 VAF 頻率譜重建時，
+ <b>群數 K 不可辨識</b>、<b>峰寬 φ 與 K 不可區辨</b>、
+ <b>成分位置 c 依賴三個外部估計值</b>；
+@@ -26,26 +35,24 @@
+ 兩項因此不是獨立的資料集，那個和也就不是一個 likelihood；
+ 權重之所以必須存在，正是為了事後稀釋這個重複。</p>
+ 
+-<p class="prose">本頁採取另一條路，而它其實更簡單：<b>不要把 read 換算成關係，直接對 read 建模。</b>
++<p class="prose">本頁曾提出另一條候選路線：<b>不要把 read 換算成關係，直接對 read 建模。</b>
+ 把觀測依連鎖視窗切成互不重疊的兩類 —— 只有一個變異的連鎖視窗，與兩個以上變異的連鎖視窗 ——
+-兩類各寫一個因子，相乘即得完整的 likelihood。
+-單變異那個因子正是原本的 beta-binomial；
+-多變異那個因子是同一個模型在多個位點上的一般形式。
+-<b>兩者不是兩個模型；當視窗只含一個變異時，這個 read 模型的邊界情形就是 beta-binomial。</b></p>
++兩類各寫一個因子。只有在分割涵蓋全部觀測、沒有 read／資訊重疊，且給定參數後條件獨立時，
++乘積才是有效 joint likelihood。單變異 beta-binomial 是否為多位點模型的嚴格邊界情形，
++也取決於相同 observation process 與 overdispersion 定義；本頁沒有用 simulation 或 calibration 證明。</p>
+ 
+ {{svg:sr2b-read-partition | [wide] 這是整頁的地圖，先看它再讀後面的式子。
+ ①一組參數往下投影成「資料應該長什麼樣」；②真實資料依<b>視窗裡有幾個變異</b>分成兩類 ——
+ 左路每條 read 都跨過同一個位點，留計數就夠；右路每條 read 覆蓋的位點各不相同，
+ 所以必須留下聯合狀態與遮罩。兩路沒有共用任何一條 read，
+-<b>所以③是相乘而不是相加，權重也就不需要存在</b>。
++若且唯若分割與條件獨立成立，③才可用乘積；否則只能稱 composite／candidate factorization。
+ ④相乘之後還要扣複雜度、加群數先驗才是目標函數，⑤最後跨 {{m: K}} 比較。
+ 右側那個回頭箭頭是重點：<b>這不是一次算完的公式，是一個迴圈</b> ——
+ 外層換結構、內層調比例，重算再比一次（第七節）。}}
+ 
+-<p class="prose">這個改動的代價與收益都很集中。收益是：權重、關係的可信度、以及為了保護硬約束而設的門檻
+-<b>全部不需要了</b>，因為證據強弱本來就是似然自己會算的東西。
+-代價是：觀測通道必須寫完整 —— 逐位點的定序錯誤與整條分子的家族誤標形狀不同，
+-少寫一種，錯誤造出來的少數幾條 read 就會被讀成一個新的 clone。</p>
++<p class="prose">即使採 likelihood，權重、可信度或門檻也不會自動消失：model misspecification、
++相關 reads、未建模的 mapping／chimera／partial coverage 與錯誤 phasing 都可能造成過度自信。
++逐位點錯誤與 family misassignment 只是候選通道，完整性與相對量級仍待資料校準。</p>
+ 
+ <p class="prose">十二節分成四段，每一段回答一個不同層次的問題：</p>
+ 
+@@ -258,7 +265,7 @@ P(D\mid Θ_K)=∏_{m∈ S_1}P_{BB}(a_m\mid d_m,Θ_K)
+ <table>
+ <thead><tr><th>家族</th><th>包含哪些 <code>HP</code> tag</th><th>對應什麼</th></tr></thead>
+ <tbody>
+-<tr><td>家族一</td><td><code>1</code>（germline 單倍型 1）＋ <code>1-1</code>（由它衍生、帶 somatic 改變的分子）</td><td rowspan="2">在同一個 phase block 內，兩族就是該處的<b>兩條同源染色體</b></td></tr>
++<tr><td>家族一</td><td><code>1</code>（germline background 1）＋ <code>1-1</code>（與該背景相容且帶 somatic allele 的 reads）</td><td rowspan="2"><b>phase-tag read groups</b>；只有在 diploid、CN-neutral、phasing 正確且無 artifact 時，才可近似兩個 homologous haplotype backgrounds</td></tr>
+ <tr><td>家族二</td><td><code>2</code> ＋ <code>2-1</code></td></tr>
+ <tr><td>都不是</td><td><code>3</code>：somatic 改變歸不到任何一條 germline 單倍型</td><td>不進任何一族</td></tr>
+ </tbody>
+@@ -268,53 +275,54 @@ P(D\mid Θ_K)=∏_{m∈ S_1}P_{BB}(a_m\mid d_m,Θ_K)
+ <details class="reveal reveal--aside">
+ <summary>命名補充：為什麼叫「家族」而不是直接叫「單倍型」</summary>
+ <div class="reveal__a">
+-<p class="prose">因為分組看的是<b>germline 那一層</b>：<code>1</code> 與 <code>1-1</code> 屬於<b>同一族</b>，
+-差別只在後者多帶了 somatic 改變。換句話說，一族＝一條 germline 單倍型
+-<b>連同從它長出來的 somatic 分支</b>。</p>
++<p class="prose">因為分組看的是<b>germline allele compatibility</b>：<code>1</code> 與 <code>1-1</code>
++被收在同一技術 read group，差別在後者帶 somatic allele。這個命名不表示 somatic 細胞後代，
++也不識別一條實體 chromosome copy。</p>
+ </div>
+ </details>
+ 
+ {{guard:1 | HP1 與 HP2 不等於父系與母系}}
+-「兩條同源染色體」很容易被讀成「一條來自父親、一條來自母親」，但<b>軟體分不出來</b>。
+-定相只能把 read 分成互不相同的兩組，<b>哪一組來自哪一位親代，要另外定序父母才知道</b>。
+-所以本頁的「家族一／家族二」純粹是<b>編號</b>，不帶親源意義 ——
++「兩個 family labels」不能直接讀成兩條已識別的實體染色體。定相只把 reads 分成局部相容的兩組；
++CN／LOH、錯誤定相與 mapping artifact 都可能破壞二對一近似。
++所以本頁的「家族一／家族二」純粹是<b>局部技術編號</b>，不帶親源、實體 copy 或細胞意義 ——
+ 這也是第二節要把方向 {{m: σ_v}} 邊際化掉的原因：那個編號本來就是任意的。
+ 
+ 還有一層限制：<b>標號只在同一個 phase block 內有定義</b>。
+-跨 block 的「家族一」<b>不是</b>同一條染色體，因此不得跨 block 把同名家族併起來算（見第九節）。
++跨 block 的「家族一」沒有可辨識的連續關係，因此不得跨 block 把同名 family 合併為同一實體染色體（見第九節）。
+ {{/guard}}
+ 
+ <h4>為什麼因子跑在視窗上，而不是跑在家族上</h4>
+ 
+ <p class="prose">這是很容易寫錯的一步，而且寫錯不會有任何錯誤訊息。
+ 直覺上，既然家族一與家族二的 read 各自形成一張 0／1 狀態表，
+-把兩張表各算一次機率再相乘似乎最自然。<b>但那樣寫是錯的</b>，有兩個各自獨立的理由：</p>
++把兩張表各算一次機率再相乘似乎最自然；是否有效取決於完整的生成模型與條件獨立性，
++不能只靠 family 名稱判定對錯：</p>
+ 
+ {{svg:sr2b-window-vs-family | [wide] 兩條家族各有自己的狀態表 —— 資料結構上確實是分開的 ——
+ 但它們被兩件東西綁在一起：家族誤標閘門會把分子從一條通道搬到另一條，
+ 而方向變數 {{m: σ_v}} 是整個視窗<b>共用</b>一個。
+-所以分開的是<b>表</b>，不是<b>機率</b>：一個連鎖視窗只出一個因子。}}
++所以本歷史提案選擇 window-level joint factor；它仍需 simulation／calibration 證明，不是唯一正確 factorization。}}
+ 
+ <div class="table-wrap">
+ <table>
+-<thead><tr><th>綁住兩條家族的東西</th><th>逐家族相乘會發生什麼</th></tr></thead>
++<thead><tr><th>需共同建模的 latent structure</th><th>若忽略會發生什麼</th></tr></thead>
+ <tbody>
+-<tr><td><b>家族誤標</b>：一條分子可能被標到另一條家族（第二節的 {{m: ξ}}）</td><td>兩條家族的觀測不是條件獨立，乘積<b>高估</b>了證據量 —— 同一條被誤標的分子在兩邊各留下一次痕跡</td></tr>
+-<tr><td><b>方向變數 {{m: σ_v}}</b>：兩條家族互為補集，共用同一個方向</td><td>同一個 {{m: σ_v}} 會被<b>邊際化兩次</b>，等於當成兩個獨立的擲硬幣，把方向的不確定性算少了一半</td></tr>
++<tr><td><b>family misassignment</b>：一條分子可能只被觀察在錯的 family</td><td>該 read 在資料中仍只出現一次，不會自動「兩邊各留一次痕跡」；問題是 latent true family 與觀測 label 的 transition 未建模，偏誤方向須用 simulation 決定</td></tr>
++<tr><td><b>方向變數 {{m: σ_v}}</b>：兩個 labels 可能共用一個交換方向</td><td>若模型確實設定共同 {{m: σ_v}}，應聯合邊際化一次；若模型把各 family 定義為獨立、方向已固定的觀測，則需另證明。不能先驗宣稱固定偏誤量</td></tr>
+ </tbody>
+ </table>
+ </div>
+ 
+-<p class="prose">因此本頁的規格是：<b>資料表依家族分開建立，機率在視窗這一層合併。</b>
++<p class="prose">因此本歷史提案選擇：<b>資料表依 family 分開建立，候選 observation model 在 window 層合併。</b>
+ 兩條家族的狀態表都由同一組 {{m: Θ_K}} 投影出來，
+-再一起通過第二節那個成對的觀測通道，最後合成一個 {{m: P_v}}。</p>
++再一起通過候選 transition channel，最後合成 {{m: P_v}}。在驗證前只能稱 proposed joint-window factor。</p>
+ 
+ <details class="reveal reveal--aside">
+ <summary>實作補充：若為了計算成本還是逐家族相乘，該怎麼稱呼它</summary>
+ <div class="reveal__a">
+ <p class="prose">那是一個 <b>composite likelihood 近似</b>（把相關的觀測當成獨立來相乘的簡化寫法），
+-可以用，但必須<b>如此稱呼</b>並記錄它的偏誤方向 —— 上表兩列已經寫出方向：
+-高估證據量、低估方向的不確定性。標準與本頁稍後對
++可以用，但必須<b>如此稱呼</b>；偏誤大小與方向需由已知 truth 的 simulation／calibration 估計，
++不能由「逐 family 相乘」四字直接推出。標準與本頁稍後對
+ 「每個遮罩各自一個分布」所立的完全相同。</p>
+ </div>
+ </details>
+@@ -463,7 +471,7 @@ held-out predictive score，而不是把未校準的 BIC 當成精確答案。</
+ <tr><td>{{m: CN_m}}（total CN）</td><td><b>上游輸入</b></td><td>copy-number 分析</td><td>否</td><td><b>是</b>／QC</td><td>敏感度分析；或多個 CN 候選邊際化</td></tr>
+ <tr><td>{{m: φ_m}}（單位點 overdispersion）</td><td><b>校準量</b></td><td>獨立校準資料，依 depth × CN 分層</td><td>否</td><td><b>是</b></td><td>分層校準；稀疏格標為未知</td></tr>
+ <tr><td>{{m: ε}}（逐位點錯誤）</td><td><b>校準輸入</b></td><td>平台／basecaller，加序列脈絡分層</td><td>否</td><td><b>是</b></td><td>依脈絡分層，不用單一常數</td></tr>
+-<tr><td>{{m: ξ_v}}（家族誤標率）</td><td>觀測 nuisance</td><td><b>就地、成對</b>估計</td><td>視實作</td><td><b>是</b></td><td>成對估計；{{m: k_v≥2}} 時主導錯誤地板</td></tr>
++<tr><td>{{m: ξ_v}}（family misassignment 候選參數）</td><td>觀測 nuisance</td><td>需 truth／simulation 校準；是否可就地識別待驗證</td><td>視實作</td><td><b>是</b></td><td>相對於 mapping、chimera、partial coverage 等通道的量級未知</td></tr>
+ <tr><td>{{m: δ_v}}（錯誤地板總量）</td><td>推導量</td><td>由 {{m: ε}} 與 {{m: ξ_v}} 算出</td><td>否</td><td>否</td><td>隨兩個錯誤通道傳遞；<b>不要與 {{m: ε}} 混用</b></td></tr>
+ <tr><td>{{m: τ_u}}（區段內離散度）</td><td>觀測 nuisance</td><td>預設不啟用（第三節）</td><td>預設否</td><td>否</td><td>殘差顯示過度離散時才加</td></tr>
+ <tr><td>{{m: σ_v}}（家族方向）</td><td>潛在變數</td><td>—</td><td>邊際化掉</td><td>否</td><td>每視窗一個，加總掉</td></tr>
+@@ -524,7 +532,7 @@ held-out predictive score，而不是把未校準的 BIC 當成精確答案。</
+ <table>
+ <thead><tr><th>假設</th><th>用在哪裡</th><th>違反時會怎樣</th></tr></thead>
+ <tbody>
+-<tr><td><b>每個突變只發生一次</b>（無限位點）</td><td>第八節的候選列舉：一條邊只加一個突變</td><td>recurrent／convergent 突變會被讀成「兩群共享祖先」，最小成本解補進的不是記帳節點而是<b>錯的拓撲</b></td></tr>
++<tr><td><b>每個突變只發生一次</b>（無限位點；舊提案）</td><td>歷史全域候選列舉</td><td>與現行 recurrence-allowed 局部權威模型不同；recurrent／convergent mutation 會改變候選集合，故不可把舊拓撲稱為真值</td></tr>
+ <tr><td><b>突變不會消失</b></td><td>同上，以及 {{m: H}} 沿樹單調累積</td><td>deletion／LOH 把突變刪掉時，子代看起來「沒有」祖先的突變，同樣偽造出分岔</td></tr>
+ <tr><td><b>同一 CN 區段內各 clone 的拷貝數一致</b></td><td>{{m: η}} 的分母 {{m: CN_{ug}}}</td><td>subclonal CNA 下分母逐 clone 不同，{{m: q}} 整體偏移；第十二節第 6 階段才放寬</td></tr>
+ <tr><td><b>一條 read 就是一條分子</b></td><td>第三節主張預設 multinomial</td><td>有 PCR 重複時同一條分子被讀到多次，計數的離散度被低估</td></tr>
+@@ -536,21 +544,20 @@ held-out predictive score，而不是把未校準的 BIC 當成精確答案。</
+ 重複突變讓兩支被併到同一祖先下，突變遺失則把巢狀關係讀成分岔 ——
+ 兩者壞掉的都是<b>拓撲本身</b>，不是補一個潛在節點能修的。}}
+ 
+-<p class="prose">前兩條在多數體細胞 SNV 上成立得相當好，這也是簡約類方法長期沿用它們的理由；
+-但<b>它們是假設而不是結論</b>，尤其在高突變負荷或 CN 劇烈變動的樣本上要另行檢查。
++<p class="prose">前兩條是歷史模型假設而不是資料結論；現行局部 candidate generator 已允許 recurrence，
++因此不得沿用本頁的 infinite-sites 唯一性語義。尤其在高突變負荷或 CN 劇烈變動的樣本上要另行檢查。
+ 第四節那個「潛在節點的三種身分」正是這條假設在輸出端的表現形式。</p>
+ 
+-{{svg:sr2b-emission | [wide] 五層各做一件事，中間沒有自由參數。
+-注意第二層：一條家族只看得到一條染色體拷貝，另一條是同一個視窗裡的另一條家族 ——
+-這決定了第三層的分母該怎麼寫。第五層的部分覆蓋是<b>邊際化</b>，不是填成參考型。}}
++{{svg:sr2b-emission | [wide] 這是已取代的候選生成鏈，不是 validated likelihood。
++第二層的 family 是 phase-tag read group；只有在 diploid、CN-neutral、phasing 正確時才近似一個 homologous background，
++不能稱為已識別的實體 copy。第五層的部分覆蓋應邊際化，不可填成參考型。}}
+ 
+ <h4>連鎖區段、局部基因型與分子權重</h4>
+ 
+-<p class="prose">一個<b>連鎖區段</b> {{m: u}} 是一個<b>單倍型連鎖區段</b>：一個連鎖視窗 × 一條 [[單倍型家族]]。
+-這個切法很重要：它表示<b>一個連鎖區段裡的 read 全部來自同一條染色體拷貝</b>，
+-另一條拷貝屬於<b>同一個視窗的另一條連鎖區段</b>。因此
+-<b>不可以在連鎖區段內部再把兩條拷貝混起來寫成各佔一半</b> ——
+-那是尚未依家族分組時的寫法，用在已分組的資料上會把細胞比例整體算錯將近一倍。</p>
++<p class="prose">一個<b>連鎖區段</b> {{m: u}} 在本頁記為連鎖視窗 × 一個 [[單倍型家族]]。
++這只保證 reads 共享同一個<b>觀測 HP label</b>；不保證全部來自同一實體 chromosome copy。
++在 diploid、CN-neutral、phasing 正確且 family misassignment 可忽略的條件下，可把兩個 groups 近似成兩個 homologous backgrounds；
++否則 copy mixture 與 transition channel 必須顯式建模，不能預先宣稱分母差近一倍。</p>
+ 
+ <p class="prose">要同時記住兩件看似相反、其實各管一段的事，第一節那張表已經寫過一次：
+ <b>狀態表逐家族分開建立（{{m: u}} 這一層），機率在視窗合併（{{m: v}} 這一層）。</b>
+@@ -631,30 +638,29 @@ composite likelihood 近似，可以用，但必須<b>如此稱呼</b>，
+ 
+ <p class="prose">{{m: q_u}} 是「還沒經過任何錯誤」的比例。實際觀測到的比例要再過一層：</p>
+ 
+-{{svg:sr2b-mistag | [wide] 左右兩種錯誤的形狀不同：一種一次改一個字母，一種一次搬走整條分子。
+-位點差得越多，逐位點錯誤的機率掉得越快，而誤標完全不受位點數影響 ——
+-所以差三個位點時，能造出假狀態的幾乎只剩誤標這一條路。}}
++{{svg:sr2b-mistag | [wide] 圖示兩個候選錯誤通道：逐位點 allele error 與 family-label transition。
++前者只有在位點錯誤近似獨立時才呈 {{m: ε^r}}；後者也可能隨 anchors、mask 與 state distance 改變。
++mapping、chimera、partial coverage 與 phasing error 尚未完整納入，故不能宣稱只剩 family misassignment。}}
+ 
+ {{guard:19 | 逐位點錯誤與整條分子誤標不是同一件事}}
+-<b>逐位點錯誤</b>（basecalling、mapping／參考偏誤）一次只改一個字母，各位點獨立，
+-所以要造出一個差 {{m: r}} 個位點的狀態，機率約為 {{m: ε^r}}，隨差異位點數 {{m: r}} 急速下降。
++<b>逐位點 allele error</b>若各位點條件獨立，造出差 {{m: r}} 個位點的狀態才近似 {{m: ε^r}}。
++mapping、reference bias、homopolymer 與局部 basecalling errors 可能相關，不能一律套用乘冪。
+ 
+-<b>整條分子的家族誤標</b>（[[haplotagging]] 標錯家族）則是把另一個家族的一條分子整條搬過來，
+-它的所有位點<b>一起</b>改變，機率是單一個 {{m: ξ_v}}，<b>與位點數無關</b>。
++<b>family-label transition</b>可用 {{m: ξ_v}} 作候選參數，但其機率可能依 anchor 數、mask、
++state distance 與 upstream phasing confidence 改變，尚未證明與位點數無關。
+ 
+-<b>後果</b>：若模型只寫了逐位點錯誤，在全 {{m: 0}} 的背景上出現的 {{m: 111}}
+-在模型眼中是「錯誤造不出來的」（{{m: ε^3 ≈ 10^{−7}}}），
+-於是只剩一個解釋 —— 一個新的 clone。而它真正的來源是隔壁那個家族。
+-{{m: k_v ≥ 2}} 時誤標就是主要的假狀態來源，這條寫漏會直接產生假的 subclone。
++<b>後果</b>：若 observation model 漏掉相關錯誤通道，少數 {{m: 111}} reads 可能被過度解讀。
++其來源可包含 family misassignment、mapping、chimera、partial coverage 投影或真實低頻 state；
++在校準前沒有哪一項可被宣稱為唯一或主導來源。
+ 
+ 兩者的<b>來源不同，取得方式也不同</b>（見下一小節）：
+-逐位點錯誤可以先由平台校準，家族誤標則必須就地、成對估計。
++每一通道都需明確的 truth／simulation calibration；哪些參數可跨區域搬用、哪些可就地識別，仍待驗證。
+ {{/guard}}
+ 
+ <h4>兩種錯誤不是同一類參數：一個能先校準，一個不能</h4>
+ 
+-<p class="prose">既然定序平台固定，錯誤率是不是就可以當成已知常數餵進來？
+-<b>對一半，而這一半正好是比較不重要的那一半。</b>兩個通道要分開處理：</p>
++<p class="prose">定序平台固定不代表錯誤率已知。兩個候選通道可分開參數化，
++但相對大小與 identifiability 必須由資料決定：</p>
+ 
+ <div class="table-wrap">
+ <table>
+@@ -669,25 +675,23 @@ composite likelihood 近似，可以用，但必須<b>如此稱呼</b>，
+ </tr>
+ <tr>
+ <td>家族誤標 {{m: ξ_v}}</td>
+-<td><b>必須就地、成對估計</b></td>
++<td><b>候選：truth-calibrated 或就地估計</b></td>
+ <td>它衡量的不是定序品質，是<b>定相品質</b>：取決於該區域的雜合位點密度、
+ phase block 長度與 read 跨距。同一台機器、同一個 basecaller，
+-在雜合位點稀疏的區域 {{m: ξ}} 可以差一個數量級。<b>平台固定完全不決定它</b></td>
++在雜合位點稀疏的區域預期較難定相，但目前沒有本資料的量級估計；
++需以 known-truth reads 或 simulation 檢查 {{m: ξ_v}} 是否可識別</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ 
+-{{svg:sr2b-error-two-sources | [wide] 同一台機器、同一個 basecaller，
+-{{m: ε}} 幾乎不變而 {{m: ξ}} 可以差一個數量級 ——
+-因為 {{m: ξ}} 衡量的是<b>定相</b>品質（錨點夠不夠），不是定序品質。}}
++{{svg:sr2b-error-two-sources | [wide] 平台、basecaller、序列脈絡、mapping、anchors、mask 與 phasing
++共同影響觀測錯誤。{{m: ε}} 與 {{m: ξ}} 都不是已知常數；相對量級與主導通道需以 truth／simulation 校準。}}
+ 
+-<p class="prose">這個區別有實際後果，而且方向明確：<b>{{m: k_v≥2}} 時錯誤地板幾乎完全由
+-{{m: ξ_v}} 決定</b>，因為 {{m: ε^r}} 隨位點數急速掉下去而 {{m: ξ_v}} 不會。
+-所以「把錯誤率當成已知」若指的是 {{m: ε}}，大致無害；
+-若指的是 {{m: ξ_v}}，那正是第四節錯誤地板訂錯的主要途徑 ——
+-也就是把幾條誤標的分子讀成一個新 clone 的那條路。
+-{{m: ξ_v}} 尤其要<b>成對</b>估計，因為它同時連結一個視窗的兩條家族。</p>
++<p class="prose">{{m: k_v≥2}} 時各通道對錯誤地板的貢獻<b>目前未知</b>。
++只有在逐位點錯誤獨立、family transition 與位點數無關且其他通道可忽略時，
++才可能出現 {{m: ξ_v}} 主導。這些是假設，不能把固定 {{m: ε}} 稱為大致無害；
++應以 ablation、calibration curve 與 posterior predictive checks 比較所有候選通道。</p>
+ 
+ {{svg:rg-error-gates | [wide] 每個位點一道錯誤閘門；最末一道為家族交換閘門，
+ 少部分分子被標至另一條通道。交換閘門連結兩條通道，故兩個家族必須一併估計 ——
+@@ -709,7 +713,10 @@ q^{obs}_{u,M}(y)
+ {{note}}
+ {{m: α_{u→u}}} 是正確標記的比例，另一項由 {{m: ξ_v}} 與兩條家族的分子數導出，
+ <b>不是每條家族各自自由擬合的比例</b>。
+-{{m: α}} 同時出現在兩條家族的式子裡 —— 這就是逐家族相乘不成立的地方。
++{{m: α}} 同時出現在兩條家族的式子裡，但<b>共享參數本身不會使乘積失效</b>：
++若給定包含 {{m: α}} 的完整參數與 latent source 後兩組觀測條件獨立，family product 仍可成立。
++本歷史提案選 joint-window factor，是為了只邊際化一次共同 latent transition／方向；
++替代 factorization 是否為 exact 或 composite，必須由完整生成模型與 simulation 決定。
+ {{/eq}}
+ 
+ <h4>HP1／HP2 的方向是 nuisance，而它屬於視窗</h4>
+@@ -798,17 +805,16 @@ read 的計數<b>本來就是 multinomial</b>，額外的離散度沒有來源
+ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ {{note}}
+ {{m: δ_v}} 是<b>地板的總量</b>：一條 read 有多少機率來自任何一種錯誤來源。
+-它<b>由 {{m: ε}} 與 {{m: ξ_v}} 算出來，不是第三個自由參數</b>；
+-{{m: k_v≥2}} 時幾乎完全由家族誤標 {{m: ξ_v}} 撐起來，這也是它掛在視窗層的原因。
++在這個<b>候選模型</b>中它由已納入的 error-channel parameters 推導；若漏了 mapping、chimera、
++partial coverage 或相關錯誤，{{m: δ_v}} 就不是完整背景。哪一通道主導需校準，不能先指定為 {{m: ξ_v}}。
+ {{m: r_{u,h}}} 是地板的<b>形狀</b>（錯誤會把機率灑到哪幾格），逐家族不同，
+ 因為它取決於隔壁那條家族長什麼樣。
+ {{/eq}}
+ 
+-<p class="prose">這不是為了數值穩定而加的小常數。
+-<b>它就是「零不代表不可能」這句話的數學形式</b> ——
+-{{m: δ_v r_{u,h}}} 的大小正是這個連鎖區段能分辨的最小比例，
+-也就是第十一節那個偵測下界的來源。若 {{m: r_{u,h}}} 由第二節的兩個錯誤通道算出來，
+-這個地板是<b>可以就地估計</b>的量，不需要另設參數。</p>
++<p class="prose">{{m: δ_v r_{u,h}}} 只是在候選 observation model 下該 state 的<b>期望背景比例</b>，
++不是 detection limit。可偵測下界還取決於分子數 {{m: n}}、型一錯誤 {{m: α}}、目標 power、
++multiple testing、候選競爭、overdispersion 與 estimator／test。只有先定義 decision rule 並做 power analysis，
++才能把背景轉成可偵測比例；目前也未證明所有通道都能就地識別。</p>
+ 
+ <p class="prose">這一節的取捨在整份規格裡最容易被低估，所以本頁末的「預測與結果檢視」
+ 用一整個問答把它再走一次：<b>門檻確實不需要了，但錯誤地板變得比以前更重要</b>。</p>
+@@ -892,6 +898,9 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ 
+ <h3>六、數百個連鎖區段的局部形狀不同 —— 這是預期，不是矛盾</h3>
+ 
++<p class="prose"><b>以下是 toy data-generating example，不是真實結果。</b>候選數只在指定的 global clone model、
++infinite-sites／CN assumptions、完整 observation channel 與預先指定的 candidate space 內成立。</p>
++
+ <p class="prose">通過品質檢查的連鎖區段有數百個，而它們的局部拓撲<b>形狀各不相同</b>：
+ 有的是一條線，有的是分岔，有的只有一個節點。此現象本身不構成衝突。</p>
+ 
+@@ -903,10 +912,10 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ <p class="prose">成因是每個連鎖區段只裝得下落在該連鎖視窗內的那幾個變異。
+ 上圖的連鎖區段甲裝到的是 B 群與 C 群的變異，兩群互不包含，故其局部形狀是<b>分岔</b>；
+ 連鎖區段乙裝到的是 B 群與 D 群的變異，後者巢狀於前者，故其局部形狀是<b>一條線</b>。
+-兩者皆為<b>同一棵全域 clone tree 在不同變異子集上的投影</b> ——
++在這個 toy generator 裡，兩者被設定為<b>同一棵全域 clone tree 在不同變異子集上的投影</b> ——
+ 形狀相異是因為子集相異，而非證據衝突。</p>
+ 
+-<h4>合起來為什麼更準、解析度更高</h4>
++<h4>Toy model 內為何候選數改變</h4>
+ 
+ <p class="prose">關鍵在於認清<b>頻率譜的輸出並不是一棵樹，而是一棵部分決定的樹</b>。
+ 本例中它換算出三群（{{m: 1.00 / 0.40 / 0.20}}），而這三群在 [[pigeonhole]] 之下
+@@ -925,7 +934,7 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ 
+ <p class="prose">兩個連鎖區段補的正是右欄那兩格，而且各補一格：
+ 甲的狀態表在「兩個突變同時出現」那一格只有錯誤地板的量，乙則相反。
+-候選數因此逐步收斂 —— 這就是「合起來更好」的具體內容：</p>
++候選數因此在 toy candidate space 內逐步收斂；這不代表真實資料的 accuracy 已提高：</p>
+ 
+ <div class="table-wrap">
+ <table>
+@@ -933,7 +942,7 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ <tbody>
+ <tr><td>只有頻率譜</td><td><b>2</b> 棵</td><td>而且 {{m: K = 3}} 本身是錯的（少計一群）</td></tr>
+ <tr><td>＋ 甲</td><td><b>3</b> 棵</td><td>{{m: K}} 先被修正為 4；在 4 群下若無局部觀測會有 7 棵，甲砍到 3 棵</td></tr>
+-<tr><td>＋ 甲 ＋ 乙</td><td><b>1</b> 棵</td><td>唯一解，即真實的樹</td></tr>
++<tr><td>＋ 甲 ＋ 乙</td><td><b>1</b> 棵</td><td>指定 toy model／candidate space 內唯一；不等於 biological truth</td></tr>
+ </tbody>
+ </table>
+ </div>
+@@ -947,12 +956,12 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ <tr>
+ <td>{{m: K}} 由 3 增為 4</td>
+ <td>甲那一格的空缺把 {{m: 0.12}} 那根峰拆開</td>
+-<td><b>解析度</b>提升：多還原一個 subclone，而這是頻率單獨<b>永遠</b>達不到的 —— 兩群的 {{m: θ}} 本就相等</td>
++<td>Toy model 中候選 {{m: K}} 改變；是否提升真實 subclone resolution 需 simulation truth 與外部 validation</td>
+ </tr>
+ <tr>
+ <td>樹由兩棵並列變為唯一解</td>
+ <td>乙的巢狀狀態表把 D 釘在 B 之下</td>
+-<td><b>準確度</b>提升：原本那一棵由簡約性挑選，現在由資料決定</td>
++<td>Toy model 內排除一種候選；沒有 truth label 時不能稱為 accuracy 提升</td>
+ </tr>
+ <tr>
+ <td>群間距不需純度即可定出</td>
+@@ -966,18 +975,20 @@ q_{u,h}^{obs} = (1−δ_v) · q_{u,h} + δ_v · r_{u,h}
+ <p class="prose">第二項尤其值得看清楚：<b>「D 掛在 B 之下還是 C 之下」在頻率上永遠沒有答案。</b>
+ B 與 C 的期望 VAF 完全相同，所以兩種掛法產生<b>一模一樣</b>的直方圖 ——
+ 這不是精度問題，是中篇第三節那個不可辨識性換一個位置再出現一次。
+-連鎖區段乙的共現觀測是唯一回答得了的證據。</p>
++連鎖區段乙的共現可在該 toy model 中區分兩種 pattern；mapping、CN／LOH、recurrence、
++family assignment 與有限 coverage 仍可能留下其他生物候選。</p>
+ 
+-<p class="prose">而三項改變都<b>不需要先把兩個連鎖區段對齊</b>：
+-兩個連鎖區段各自算出自己那張表的機率，而兩張表都由同一組
+-{{m: (w,T,z)}} 產生，相乘即完成合併。
+-<b>形狀不同從頭到尾都不是需要處理的問題</b>，而合併也不需要任何對齊步驟。</p>
++<p class="prose">舊提案假設兩區段可經共同 {{m: (w,T,z)}} 相乘而合併；
++這本身就是尚未驗證的跨區段 cellular coupling。現行權威輸出不做跨區段拼接，
++也沒有可識別的 cross-HP cellular pairing；因此不能把「不需要對齊」當成已證明結論。</p>
+ 
+ <details class="reveal reveal--aside">
+-<summary>精確度的保留：「唯一解」是指樹的形狀唯一</summary>
++<summary>語義保留：「唯一」只指指定 toy candidate space 內的數學唯一</summary>
+ <div class="reveal__a">
+ <p class="prose">拆出來的兩群頻率相同，所以它們的標號可以<b>整組對調</b>而不影響任何機率 ——
+ 編號本就是任意的，這與手動 phasing 練習裡 HP1／HP2 對調也算正確是同一回事。</p>
++<p class="prose">更重要的是：模型唯一不等於生物唯一；擴充 recurrence、CN／LOH、error channels 或 candidate space
++可能重新產生多個候選。</p>
+ </div>
+ </details>
+ 
+@@ -1067,9 +1078,10 @@ w_g\ge0,
+ 在「每項非負、總和為一」這個定義域（一個 simplex）上找最大值。
+ 「直接解」不是說有閉式解 —— 一般沒有 —— 而是說<b>把目標函數與這兩條限制交給數值最佳化器即可</b>。</p>
+ 
+-<p class="prose"><b>這裡不需要 EM，也不需要 MCMC。</b>這一點值得說清楚，
+-因為看到 likelihood 就想到 EM／MCMC 是很自然的反射，但在這個內層問題上兩者都是殺雞用牛刀：
+-五個參數的凸定義域最佳化，數值最佳化器幾毫秒就收斂。</p>
++<p class="prose">不能僅由「參數少、定義域是 simplex」推論演算法或 runtime：凸定義域不代表目標凹，
++每次 objective evaluation 的成本還取決於 windows、states、masks 與 direction marginalization。
++EM／variational／MCMC 是否需要，取決於哪些 latent variables 被邊際化以及是否要 posterior uncertainty。
++目前沒有實作 benchmark；應報 wall time、iterations、convergence rate、multi-start stability、memory 與硬體。</p>
+ 
+ <details class="reveal reveal--aside">
+ <summary>方法補充：用哪一種最佳化器，以及什麼時候<b>才</b>真的需要 EM 或 MCMC</summary>
+@@ -1310,8 +1322,8 @@ report: 每個遮罩的 read 數、連鎖區段的最大跨越深度、
+ <h3>十一、連鎖視窗寬度：連鎖區段產量與品質的取捨</h3>
+ 
+ <p class="prose">視窗開得寬，收得到的位點多，但多數 read 只覆蓋其中一部分，狀態表變得很稀疏；
+-視窗開得窄則相反。<b>結論是兩種都做，因為在似然的寫法下同時用兩種寬度不需要付任何代價</b> ——
+-兩批都進同一個乘積，各自的證據量由各自的計數與遮罩決定。</p>
++視窗開得窄則相反。若同一 read 或位點進入多個重疊視窗，直接把兩種寬度相乘會造成相關與重複計數；
++必須預先定義互斥 assignment、hierarchical model 或 cluster-robust calibration，不能稱為「沒有代價」。</p>
+ 
+ <div class="table-wrap">
+ <table>
+@@ -1325,13 +1337,12 @@ report: 每個遮罩的 read 數、連鎖區段的最大跨越深度、
+ </table>
+ </div>
+ 
+-{{svg:rg-detection-window | [wide] 窄連鎖視窗下每個家族 60 條分子、地板總量 {{m: δ}} 為千分之五時，
+-可偵測的比例下界約為 0.05。該下界應逐連鎖區段計算，不宜採用固定常數 ——
+-它正是第四節那個錯誤地板 {{m: δ_v r_{u,h}}} 的數值 —— 注意 {{m: δ}} 是地板總量，
+-與逐位點錯誤率 {{m: ε}} 是兩個不同的量。}}
++{{svg:rg-detection-window | [wide] {{m: δ_v r_{u,h}}} 只表示候選 observation model 下的 expected background，
++不是 detection limit。要得到可偵測下界，必須另指定 {{m: n}}、{{m: α}}、target power、multiple testing、
++overdispersion、competing states 與 detector，並以 simulation 或 power analysis 求解。}}
+ 
+-<p class="prose">這是與舊寫法最直接的對照 —— 舊寫法必須替兩批各設一個 {{m: ω_r}}，
+-新寫法什麼都不必設。</p>
++<p class="prose">歷史提案試圖移除 ad hoc {{m: ω_r}}，但 observation model、相關結構與 calibration
++仍然需要明確規格；改寫成 likelihood 不會自動免除這些選擇。</p>
+ 
+ <h3>十二、實作分期</h3>
+ 
+@@ -1374,25 +1385,30 @@ report: 每個遮罩的 read 數、連鎖區段的最大跨越深度、
+ <section data-part="evidence">
+ <h2>真實資料與證據</h2>
+ 
+-<h3>現行實作的量測結果：可用連鎖區段的庫存</h3>
++<h3>現行資料的 nested denominator funnel（不是 estimator validation）</h3>
+ 
+ <p class="prose">以下數值皆來自本實驗室既有實作在七個資料集、六個生物樣本、chr1–22 上的輸出，
+-在本頁的脈絡下構成可寫成 {{m: P_v}} 的原料清單。</p>
++以下只描述資料處理 funnel；它不驗證本頁已取代的 {{m: P_v}} 或 cellular model。</p>
+ 
+ {{svg:rg-class-spectrum | [wide] 七個資料集的連鎖視窗分類組成。
+ 在本頁的模型下這張圖的讀法變了：它不是「有幾條約束」，
+-而是「狀態表的形狀分布」——「分支類」僅佔 6%–22%，
+-是拆峰能力唯一的來源，最為稀缺。}}
++而是 ranked-eligible 71,955 units 的描述性類別分布。「分支類」比例不能當成可用 truth、
++拆峰能力或 biological clone 產量。}}
+ 
+ <div class="table-wrap">
+ <table>
+ <thead><tr><th>觀測</th><th>數值</th><th>在本頁的意義</th></tr></thead>
+ <tbody>
+-<tr><td>可分析連鎖區段總數</td><td>85,941 個含突變的單倍型連鎖區段</td><td>原料充足，不需重新定序</td></tr>
+-<tr><td>候選集合可完整列舉</td><td>75,224 個（<b>87.53%</b>）</td><td>可整組帶進全域推論的比例；其餘須另行處理</td></tr>
+-<tr><td>分支類的比例</td><td>各資料集 <b>6%–22%</b></td><td>拆峰能力唯一的來源，最為稀缺</td></tr>
++<tr><td>Final groups</td><td><b>98,955</b></td><td>funnel 起點；不是 mutation-bearing 分母</td></tr>
++<tr><td>No active mutations</td><td><b>13,014</b></td><td>排除後得到 85,941 mutation-bearing groups</td></tr>
++<tr><td>Mutation-bearing groups</td><td><b>85,941</b></td><td>75,224 family-complete 是其 subset</td></tr>
++<tr><td>Family-complete groups</td><td><b>75,224</b></td><td>71,955 ranked-eligible 是其 subset</td></tr>
++<tr><td>Ranked-eligible groups</td><td><b>71,955</b></td><td>圖與 topology 分類的共同分母</td></tr>
++<tr><td>一個 mathematical topology</td><td><b>63,506 / 71,955 = 88.2579%</b></td><td>39,648 unique ＋ 23,858 tied-same-topology；只表示模型內拓撲形狀相同</td></tr>
++<tr><td>Cross-topology ties</td><td><b>8,449 / 71,955</b></td><td>多個不同數學拓撲並列；不可強選一個</td></tr>
++<tr><td>分支類的描述比例</td><td>各資料集 <b>6%–22%</b></td><td>描述性分類，非 truth 或可用證據產量</td></tr>
+ <tr><td>多層無分支的比例</td><td>38.1%–53.3%</td><td>次序資訊的來源，數量最多</td></tr>
+-<tr><td>更換 basecaller 的重現性</td><td>同細胞株跨機構 <b>0.909</b></td><td>此分類非流程雜訊</td></tr>
++<tr><td>更換 basecaller 的技術重現性</td><td>同細胞株跨機構 <b>0.909</b></td><td>只表示在該比較下相似；不證明 truth、accuracy、biological validity 或排除共同 confounding</td></tr>
+ <tr><td>單一連鎖區段的覆蓋結構</td><td>194 條 read，覆蓋 3 個位點者僅 3 條</td><td>遮罩必須留下來的直接依據</td></tr>
+ </tbody>
+ </table>
+@@ -1400,18 +1416,17 @@ report: 每個遮罩的 read 數、連鎖區段的最大跨越深度、
+ 
+ <h3>三項須注意的事項</h3>
+ 
+-<p class="prose"><b>其一，0.909 為目前最強的結果。</b>一個在更換 basecaller 後仍維持、
+-且能區分癌別的統計量，所承載的是真實訊號。改成似然之後<b>應重新計算此數值</b>：
+-若維持或提升，表示新的分數確實在解釋同一個訊號；若下降，
+-則原本的 0.909 有一部分係由共同的覆蓋幾何所致。</p>
++<p class="prose"><b>其一，0.909 只是一項技術重現性指標。</b>它可能同時保留共同 coverage geometry、
++caller selection、phase-block composition 或 sample-specific structure；沒有 truth labels 時，不能推論「訊號是真的」或方法準確。
++若未來改成新的 score，應預先定義相似度、strata 與 null，並另外做 calibration／accuracy 評估。</p>
+ 
+ <p class="prose"><b>其二，「分支類」的比例尚不可直接視為證據產量。</b>
+ 分岔的判定需要兩個單突變狀態皆存在，<b>且</b>雙突變狀態的缺席不是抽樣零也不是錯誤地板 ——
+ 後者正是第四節所檢驗的對象。故 6%–22% 為<b>上限</b>，而非實際可用量。</p>
+ 
+-<p class="prose"><b>其三，有一項計數需要釐清。</b>
+-各資料集的連鎖區段數總和為 71,955，而結論中引用的數值為 85,941。
+-兩者可能計數不同的對象，此點須在成文之前確認。</p>
++<p class="prose"><b>其三，71,955 與 85,941 已由 denominator registry 釐清。</b>
++71,955 是 ranked-eligible subset；85,941 是 mutation-bearing parent denominator，兩者不是衝突計數。
++完整巢狀關係是 98,955 → 85,941 → 75,224 → 71,955，報比例時必須同列 numerator 與 denominator。</p>
+ </section>
+ 
+ 
+diff --git a/src/modules/sr2c-local-tree.html b/src/modules/sr2c-local-tree.html
+index 4eaf319..b21e699 100644
+--- a/src/modules/sr2c-local-tree.html
++++ b/src/modules/sr2c-local-tree.html
+@@ -1,7 +1,7 @@
+ <!--tw
+ {
+   "objectives": [
+-    "把估計目標由全域細胞層級的 clone tree 換成連鎖區段內的分子系譜，並寫出這個目標的形式定義",
++    "把候選估計目標由全域細胞層級 clone tree 換成 exact-PS×HP read family 內的局部分子狀態候選，並寫出形式定義與識別限制",
+     "用證據預算說明局部結構為何走不進以邊際 VAF 為觀測的全域似然，而不是「全域方法不夠準」",
+     "寫出局部生成模型：狀態集合、四配子相容性、節點分子比例與兩個錯誤通道",
+     "把前處理寫成契約：工具鏈與門檻、HP3 的三種處理、連鎖視窗為讀序連鎖的傳遞閉包、以及逐樣本先算連鎖率",
+@@ -16,6 +16,15 @@
+ <section data-part="why">
+ <h2>為什麼重要</h2>
+ 
++<details class="guardrail" open>
++<summary class="guardrail__hd">證據層級：LiLT 是待驗證規格，不是目前已校準或已部署的方法</summary>
++<p class="prose">本頁討論的是<b>候選方法設計</b>。目前可主張的權威輸出仍只到
++fixed exact-PS×HP 技術 read family 內、允許 recurrence 的局部 read-compatible mutation-state candidate；
++排序只使用未經 CN／LOH 校正的 read-AF。HP1／HP2 是 phase-set 內的 read 標籤，
++不識別一條實體染色體拷貝、親源或來源細胞。下文的樹與方向只有在明列模型假設下才是候選結構，
++不能升格成 cellular clone、lineage、CCF、calibrated likelihood 或跨 HP 細胞配對。</p>
++</details>
++
+ <h3>換掉的是目標，不是方法</h3>
+ 
+ <p class="prose">前一篇把兩類觀測寫成兩個相乘的因子，接上同一組全域參數
+@@ -25,13 +34,15 @@
+ 要在<b>同一個目標</b>上勝過它們，需要的證據量遠大於多變異連鎖視窗能提供的。
+ 中篇的計算已經指出，可用的多變異連鎖區段在低突變負荷樣本只有數百個。</p>
+ 
+-<p class="prose">本篇因此換一個估計目標：<b>不重建全域的細胞層級系統發生，
+-而是重建每一個連鎖區段內部的分子系譜</b> —— 哪幾種局部狀態真的存在、
+-各佔多少分子、以及它們之間的先後關係。這個目標的解析度是<b>單倍型連鎖區段</b> —— 一個連鎖視窗（read 連鎖起來的一段，不跨 [[phase block|phase set]]）的一條染色體拷貝，不是「全基因體共用的一個 CCF 位置」。</p>
++<p class="prose">本篇因此提出另一個候選估計目標：<b>不重建全域的細胞層級系統發生，
++而是在每個連鎖區段內估計分子狀態候選</b> —— 哪些局部 read pattern 有足夠分子支持、
++各佔多少觀測分子，以及在指定模型下哪些方向相容。這個目標的解析度是
++<b>exact phase set × HP read family × 連鎖視窗</b>（read 連鎖起來的一段，不跨 [[phase block|phase set]]），
++不是一條可識別的實體染色體拷貝，也不是「全基因體共用的一個 CCF 位置」。</p>
+ 
+ {{svg:sr2c-estimand | [wide] 最上方是同一批 read 與同一批變異，下方兩個面板是它的兩種去向。
+ 中間面板把所有變異匯集成邊際 VAF，輸出<b>一棵</b>樹；
+-最下方讓每個連鎖視窗、每條染色體拷貝各留<b>一棵</b>小樹 ——
++最下方讓每個連鎖視窗、每個 HP read family 各留一個<b>候選</b>局部結構 ——
+ 八棵形狀各不相同，而且同一個連鎖視窗的兩個家族可以不同。
+ 沒有被連鎖起來的變異不產生小樹，那正是後文「輸入與前處理契約」定義的連鎖率。}}
+ 
+@@ -39,10 +50,10 @@
+ <table>
+ <thead><tr><th>　</th><th>既有做法的目標</th><th>本規格的目標</th></tr></thead>
+ <tbody>
+-<tr><td>估計對象</td><td>全基因體的細胞群數、比例與樹</td><td>每個連鎖區段內各局部狀態的比例與先後</td></tr>
++<tr><td>估計對象</td><td>全基因體的細胞群數、比例與樹</td><td>每個 exact-PS×HP 連鎖區段內的局部分子狀態比例與模型相容方向</td></tr>
+ <tr><td>觀測進入似然的形式</td><td>每個變異的邊際 VAF ＋ 拷貝數</td><td>同一條分子上多個位點的共現</td></tr>
+ <tr><td>一個節點是什麼</td><td>一群細胞</td><td>一類分子狀態</td></tr>
+-<tr><td>解析度</td><td>一個全基因體共用的 CCF 位置</td><td>一個連鎖視窗、一條染色體拷貝</td></tr>
++<tr><td>解析度</td><td>一個全基因體共用的 CCF 位置</td><td>一個連鎖視窗、一個 phase-tag read family；不識別實體 copy</td></tr>
+ <tr><td>輸出幾棵樹</td><td>一棵</td><td>幾百到幾萬棵，彼此不相接</td></tr>
+ <tr><td><b>永遠分不出來的</b></td><td>CCF 相同的兩支 lineage</td><td>跨越 read 距離以外的任何關係</td></tr>
+ <tr><td>多分出一支要多少證據</td><td>約 20 個變異（兩群差 0.05 時）；兩群越近需要越多</td><td>數十條跨越分子；與兩支靠得多近<b>無關</b></td></tr>
+@@ -204,16 +215,15 @@ ONT 的實測是 <b>40.5%–98.1%</b>（見「輸入與前處理契約」）。
+ 
+ <h4>估的範圍：一個連鎖區段</h4>
+ 
+-<p class="prose">沿用前一篇的<b>連鎖區段</b>：{{m: u}} 是一個<b>單倍型連鎖區段</b>：一個連鎖視窗 × 一條 [[單倍型家族]]，
++<p class="prose">沿用前一篇的<b>連鎖區段</b>：{{m: u}} 是一個<b>單倍型連鎖區段</b>：一個連鎖視窗 × 一個 [[單倍型家族|phase-tag read family]]，
+ 其位點集合為 {{m: J_u}}、位點數 {{m: k_u=|J_u|}}。</p>
+ 
+-<p class="prose">這樣切有一個具體的理由，不是為了方便：
+-<b>一個連鎖區段裡的分子全部來自同一條染色體拷貝</b>，另一條屬於另一個連鎖區段。
+-所以在連鎖區段內部，「兩個變異出現在同一條分子上」才真的等於
+-「它們在同一條拷貝上先後發生」。
+-若不先依家族切開，位於<b>兩條</b>拷貝上的一對變異（trans）永遠不會共存，
+-其計數表會與「兩支互不包含的 subclone」長得<b>一模一樣</b> ——
+-連鎖區段這個切法就是為了讓這兩件事落進不同的連鎖區段而不會相遇。</p>
++<p class="prose">這樣切的理由是先把同一 phase set 內、帶相同觀測 HP label 的 reads 放在一起。
++只有在 diploid、CN-neutral、無 LOH、定相與 haplotag 均正確且沒有跨 copy mixture 時，
++這個技術 read family 才可近似一個 homologous haplotype background；即使條件成立，標籤也不識別
++某一條實體 copy、親源或細胞。兩個變異在<b>同一條 read／分子</b>上的共現是直接觀測；
++「在同一實體 copy 上先後發生」則仍是需要額外假設的模型推論。CN／LOH、錯誤定相、
++mapping、chimera 或 HP3 都可能破壞此近似，必須以旗標或顯式 transition model 處理。</p>
+ 
+ <h4>要估的三個量</h4>
+ 
+@@ -227,13 +237,13 @@ ONT 的實測是 <b>40.5%–98.1%</b>（見「輸入與前處理契約」）。
+ <tbody>
+ <tr><td>狀態集合</td><td>{{m: X_u ⊆ \{0,1\}^{k_u}}}</td><td>這個連鎖區段裡<b>有哪幾種</b>分子</td></tr>
+ <tr><td>專屬比例</td><td>{{m: ν_{u,h} ≥ 0}}，總和為 1</td><td>每一種<b>各佔多少</b></td></tr>
+-<tr><td>先後關係</td><td>{{m: X_u}} 上的有根樹 {{m: E_u}}</td><td>誰是誰的<b>祖先</b></td></tr>
++<tr><td>模型相容方向</td><td>{{m: X_u}} 上的候選有向結構 {{m: E_u}}</td><td>在明列假設下，哪個 mutation-state pattern 可指向哪個</td></tr>
+ </tbody>
+ </table>
+ </div>
+ 
+ <p class="prose">三者合起來記為 {{m: L_u=(X_u,E_u)}} 與 {{m: ν_u}}，
+-樹根固定為全參考狀態 {{m: 0^{k_u}}}。</p>
++候選結構的根在此規格中固定為全參考狀態 {{m: 0^{k_u}}}；這是模型設定，不是已觀測到的細胞祖先。</p>
+ 
+ <details class="reveal reveal--aside">
+ <summary>變數補充：{{m: ν}} 是專屬比例，不是累積比例</summary>
+@@ -245,9 +255,11 @@ ONT 的實測是 <b>40.5%–98.1%</b>（見「輸入與前處理契約」）。
+ </div>
+ </details>
+ 
+-<h4>先後關係幾乎不用估：四配子相容性</h4>
++<h4>在 perfect-phylogeny 假設下的相容性檢查</h4>
+ 
+-<p class="prose">先後關係看起來是三個量裡最難的，其實不是 —— <b>它不需要搜尋</b>。
++<p class="prose">以下結果只適用於每個突變至多發生一次、沒有 mutation loss／recombination，
++而且狀態集合 {{m: X_u}} 已正確識別的 perfect-phylogeny 模型；目前權威流程允許 recurrence，
++所以不能把這段數學唯一性當成現行生物結論。在上述限定下，候選結構<b>不需要另行搜尋</b>。
+ 兩個位點稱為<b>相容</b>，若四種樣式 {{m: 00,01,10,11}} 中至多出現三種。
+ 只要 {{m: X_u}} 裡<b>每一對</b>位點都相容，樹就已經被 {{m: X_u}} 決定了，
+ 不必列舉任何樹形。實作上要做的只有兩件事：<b>逐對檢查相容性</b>，
+@@ -329,7 +341,7 @@ ONT 的實測是 <b>40.5%–98.1%</b>（見「輸入與前處理契約」）。
+ <thead><tr><th>要回答的問題</th><th>估到什麼</th><th>需要什麼</th><th>條件不足時的輸出</th></tr></thead>
+ <tbody>
+ <tr><td>有哪幾種、各佔多少</td><td>{{m: X_u}} 與 {{m: ν_u}}</td><td>只需要該連鎖區段的 read 與就地估到的錯誤率</td><td><code>FLOOR_LIMITED</code></td></tr>
+-<tr><td>誰在誰之前</td><td>{{m: X_u}} 上的先後關係</td><td>兩個單一狀態皆可見，且雙狀態的有無高於地板</td><td><code>ORDER_UNRESOLVED</code></td></tr>
++<tr><td>哪個方向與模型相容</td><td>{{m: X_u}} 上的候選方向</td><td>明列 perfect-phylogeny 假設成立、相關狀態可見且高於地板</td><td><code>ORDER_UNRESOLVED</code></td></tr>
+ <tr><td>換算成細胞比例</td><td>各節點的 [[cancer cell fraction|CCF]]</td><td>純度與該處 [[copy number|拷貝數]]，由全域基準提供</td><td>只報分子比例，標 <code>CELL_SCALE_UNAVAILABLE</code></td></tr>
+ <tr><td>對得上哪一個全域群</td><td>局部節點與全域群的對應</td><td>節點內至少一個變異有可信的全域指派</td><td><code>UNLINKED_TO_GLOBAL</code></td></tr>
+ </tbody>
+@@ -341,8 +353,10 @@ ONT 的實測是 <b>40.5%–98.1%</b>（見「輸入與前處理契約」）。
+ <p class="prose">上表的「換算成細胞比例」只是尺度轉換，<b>它不會把節點變成細胞群</b>。
+ 一個節點只表示「這些分子在 {{m: J_u}} 上帶有同一組突變」。
+ 兩群基因體其他地方不同、但在這個連鎖視窗內完全相同的細胞，會落進<b>同一個</b>節點。
+-本實驗室的甲基化觀測正是這件事的實例：單一個「單倍型 ＋ 等位」狀態之下，
+-仍可再分出數群甲基化模式。因此節點數的正確讀法恆為「<b>至少</b>此數」。
++本實驗室目前只有 bounded association 證據：M1 screen 為 102,842／469,849（六個生物樣本皆有候選），
++正式 fixed exact-PS×HP×genetic-pattern 分析則是 1,045 個 units、811 個 evaluable、3 個 robust associations
++（3／811＝0.3699%；五個樣本有 formal units，COLO829 為 0）。這不證明可再分出細胞群。
++因此節點數只能讀成局部分子 pattern 數，不能解讀成 clone 數。
+ 反向也不成立：同一群細胞在不同連鎖區段裡對應到不同的局部狀態，
+ 因為每個連鎖區段看的位點集合不同。</p>
+ </details>
+@@ -472,8 +486,8 @@ P(D_u\mid ν_u,e_u)
+ 前者留在 {{m: A}} 內；後者要把成對的兩個連鎖區段一起寫：</p>
+ 
+ {{svg:sr2b-mistag | [wide] 左右兩種錯誤的形狀不同：一種一次改一個字母，一種一次搬走整條分子。
+-位點差得越多，逐位點錯誤的機率掉得越快，而誤標完全不受位點數影響 ——
+-所以差三個位點時，能造出假狀態的幾乎只剩誤標這一條路。}}
++只有在逐位點錯誤條件獨立時才近似 {{m: ε^r}}；family transition 是否與位點數無關也待校準。
++mapping、chimera、partial coverage 與錯誤 phasing 都是候選通道，不能先宣稱 family misassignment 主導。}}
+ 
+ <p class="prose">令 {{m: u_1=u}} 為目前的單倍型家族，{{m: u_2}} 為同一連鎖視窗的另一個家族，
+ {{m: α_{v→u}}} 為「一條最後被標成 {{m: u}} 的 read，實際來自家族 {{m: v}}」的校準權重。
+@@ -488,26 +502,29 @@ p_{u,M}(y)
+ {{note}}
+ {{m: α_{u_1→u}}} 是正確標記的來源，{{m: α_{u_2→u}}} 是由另一家族誤標進來的來源。
+ 這些權重由成對家族的分子數與誤標率導出，不是每個 unit 自由擬合的比例。
+-因此 production likelihood 以 {{m: p_{u,M_r}(Y_r)}} 取代前一個基礎似然括號內的值。
++因此<b>proposed implementation likelihood</b> 以 {{m: p_{u,M_r}(Y_r)}} 取代前一個基礎似然括號內的值；
++在通過 simulation truth、calibration、independent truth set 與 versioned deployment gate 前，不稱 production。
+ {{/eq}}
+ 
+ {{eq}}
+ ν^{obs}_{u,h} = (1−δ_u)·ν_{u,h} + δ_u·r_{u,h}
+ {{note}}
+-這是前述成對觀測通道的摘要寫法。{{m: r_{u,h}}} 由逐位點錯誤與整條分子的家族誤標算出，不是自由參數。
+-{{m: δ_u}} 是<b>地板總量</b>，由逐位點錯誤 {{m: ε}} 與家族誤標算出，不是另一個自由參數；
+-{{m: δ_u r_{u,h}}} 就是這個連鎖區段能分辨的最小比例，也是所有偵測下界的來源。
++這是候選成對觀測通道的摘要寫法。若 observation model 完整，{{m: r_{u,h}}} 與 {{m: δ_u}}
++可由已校準通道推導；漏掉 mapping、chimera、partial coverage 或相關錯誤時則不是完整背景。
++{{m: δ_u r_{u,h}}} 只表示 modelled background probability，不是 detection limit。
++下界另依賴 {{m: n}}、{{m: α}}、target power、multiple testing、state competition 與 detector，
++必須按 unit 用 simulation／power analysis 求解。
+ {{/eq}}
+ 
+ {{svg:sr2b-zero-kinds | [wide] 三欄的觀測一模一樣，都是「這一格計數為 0」。
+ 分得開它們的不是那個 0，而是跨越深度、其他連鎖區段的證據，與就地估到的錯誤率。
+-第③欄那個地板就是上面那條式子的 {{m: δ_u r_{u,h}}}：<b>結構零在觀測上永遠到不了零</b>，
+-所以「這個狀態不存在」這件事只能由它與地板的距離來講，不能由計數是不是 0 來講。}}
++第③欄那個地板以 {{m: δ_u r_{u,h}}} 表示候選模型背景；是否能把結構零與低頻 state 分開，
++還要看 coverage、power、multiple testing 與 calibration，不能由計數是不是 0 或單一背景值定案。}}
+ 
+-<p class="prose">家族誤標尤其要<b>成對</b>估計，因為它連結同一連鎖視窗的兩個連鎖區段。
+-在 {{m: k ≥ 2}} 時它是假狀態的主要來源：只寫逐位點錯誤的話，
+-全 {{m: 0}} 背景上出現的 {{m: 111}} 在模型眼中「錯誤造不出來」（約 {{m: ε^3}}），
+-於是只剩一個解釋 —— 一支新的 lineage。而它真正的來源是隔壁那個家族。</p>
++<p class="prose">family-label transition 可用成對通道建模，因為兩個 observed read groups 共享來源集合；
++但它在 {{m: k ≥ 2}} 是否主導、能否就地識別、偏誤方向與量級目前都未校準。
++少數 {{m: 111}} reads 可能來自真實低頻 state、mapping、chimera、相關 allele errors、partial masks 或 family transition；
++應用 known-truth simulation 與 ablation 比較，不能預設只剩一個 lineage 解釋。</p>
+ 
+ {{svg:rg-error-gates | [wide] 每個位點一道錯誤閘門；最末一道為家族交換閘門，
+ 少部分分子被標至另一條通道。交換閘門連結兩條通道，故兩個家族必須一併估計 ——
+@@ -826,9 +843,9 @@ p(c_{u,h}) = (1−λ)\sum_j \hat{ω}_j · Beta(c_{u,h}; a_j, b_j) + λ · Beta(c
+ 不可以把它讀成「先 1 再加一步」。不認得的標籤一律排除在所有分組之外。</p>
+ 
+ <details class="guardrail">
+-<summary class="guardrail__hd">HP3 破壞的正是「一個連鎖區段只看得到一條拷貝」</summary>
+-<p class="prose">估計單位的核心假設是：連鎖區段內部不必處理兩條拷貝的混合。
+-<b>HP3 的分子不滿足它</b>，因為它們的體細胞改變兩條都歸不上去。
++<summary class="guardrail__hd">HP3 破壞的是「phase-tag read family 可近似單一 homolog background」</summary>
++<p class="prose">這個近似只在 diploid、CN-neutral、無 LOH 且定相正確等條件下可用，
++本來就不等同一條可識別的實體 copy。<b>HP3 的分子不滿足此近似</b>，因為其體細胞改變無法歸入任一 HP family。
+ 三種處理各有代價，必須明選其一並在輸出載明實際被影響的量：
+ <b>整批排除</b>（最保守，但在 LOH 與高拷貝區會丟掉大量證據）；
+ <b>當成獨立的第三個連鎖區段</b>（形狀對，但那個連鎖區段的 CCF 換算沒有分母）；
+diff --git a/src/svg/index-what-we-do.svg b/src/svg/index-what-we-do.svg
+index 4ef65e6..63a2187 100644
+--- a/src/svg/index-what-we-do.svg
++++ b/src/svg/index-what-we-do.svg
+@@ -3,10 +3,10 @@
+   <desc>由上而下三層。第一層是輸入：從病人的腫瘤處取檢體，取到的細胞裡本來就同時有癌細胞與正常細胞；
+         定序機把裡面的 DNA 打斷成片段逐條讀出，得到一疊長得一樣的字串，字串本身沒有標記來源，
+         也沒有標記哪個字母是機器讀錯的。第二層是本實驗室開發的 C++ 軟體。
+-        第三層是輸出：人的染色體是成對的，一條來自父親一條來自母親；
+-        同樣那幾條片段被判回它來自哪一條，其中兩條帶有癌細胞才有的變異，
+-        並可據此估算這個檢體裡癌細胞佔多少比例。
+-        軟體只分得出這是兩條不同的染色體，要知道哪一條來自父親須另外定序父母。</desc>
++        第三層是輸出：軟體依局部定相證據將片段分到兩個方向任意的 haplotype read families，
++        標出支持 somatic 變異的分子，並估計腫瘤來源 DNA 在分子層的比例。
++        這些輸出不是單條 read 的正常／癌細胞來源標籤，DNA fraction 也不等於細胞層的 tumour purity；
++        HP1 與 HP2 只是局部、方向任意的技術標籤，不識別親源。</desc>
+ 
+   <!-- ══════════════════ ① 輸入 ══════════════════ -->
+   <rect class="box" x="16" y="40" width="968" height="304" rx="12"/>
+@@ -91,7 +91,7 @@
+   </g>
+ 
+   <text class="anno zh bold" x="752" y="158">每一條長得都一樣。</text>
+-  <text class="anno zh" x="752" y="194">哪些來自癌細胞、</text>
++  <text class="anno zh" x="752" y="194">哪些支持 somatic 變異、</text>
+   <text class="anno zh" x="752" y="222">哪個字母是機器讀錯的，</text>
+   <text class="anno zh bad bold" x="752" y="258">資料本身都沒有標。</text>
+ 
+@@ -100,7 +100,7 @@
+   <!-- ══════════════════ ② 軟體 ══════════════════ -->
+   <rect class="box accent" x="16" y="380" width="968" height="96" rx="12"/>
+   <text class="lbl mid bold zh" x="500" y="416">② 這個實驗室開發的軟體</text>
+-  <text class="anno mid zh" x="500" y="444">從這疊字串反推出每一條的來源</text>
++  <text class="anno mid zh" x="500" y="444">從這疊字串建立局部分子狀態與證據</text>
+   <text class="tick mid mono" x="500" y="466">C++ · LongPhase / longphase-s / longphase-to</text>
+ 
+   <path class="flow" d="M500,480 L500,508" marker-end="url(#arrow)"/>
+@@ -131,11 +131,11 @@
+   <text class="anno zh" x="128" y="600">染色體是成對的</text>
+   <text class="tick zh" x="128" y="626">一條來自父親，一條來自母親</text>
+ 
+-  <text class="tick zh" x="46" y="686">軟體分得出這是兩條不同的染色體，</text>
+-  <text class="tick zh" x="46" y="710">但要知道哪一條來自父親，得另外定序父母。</text>
++  <text class="tick zh" x="46" y="686">HP1／HP2 是局部技術分組，</text>
++  <text class="tick zh" x="46" y="710">不是親源、單一實體 copy 或細胞標籤。</text>
+ 
+-  <text class="lbl bold hp1 zh end" x="404" y="600">父系</text>
+-  <text class="lbl bold hp2 zh end" x="404" y="690">母系</text>
++  <text class="lbl bold hp1 zh end" x="404" y="600">HP1 家族</text>
++  <text class="lbl bold hp2 zh end" x="404" y="690">HP2 家族</text>
+ 
+   <path class="read hp1" d="M428,552 H714 L726,564 L714,576 H428 Z"/>
+   <path class="read hp1" d="M428,582 H714 L726,594 L714,606 H428 Z"/>
+@@ -187,9 +187,9 @@
+   <!-- 欄位框畫在字母之上，否則 10% 不透明度的底色在螢幕上幾乎看不出來 -->
+   <rect class="box ghost" x="610" y="550" width="26" height="58"/>
+ 
+-  <text class="anno zh bold" x="752" y="566">軟體同時算出三件事</text>
+-  <text class="tick zh" x="752" y="600">① 每條片段來自哪一條染色體</text>
+-  <text class="tick zh" x="752" y="628">② 哪些位置是癌細胞才有的</text>
+-  <text class="tick zh" x="752" y="656">③ 癌細胞在這個檢體佔多少</text>
++  <text class="anno zh bold" x="752" y="566">軟體同時整理三類證據</text>
++  <text class="tick zh" x="752" y="600">① 局部 haplotype read family</text>
++  <text class="tick zh" x="752" y="628">② somatic-supporting molecules</text>
++  <text class="tick zh" x="752" y="656">③ 腫瘤 DNA 比例（非細胞比例）</text>
+   <text class="tick zh" x="752" y="698">整份教材就是在拆解這三件事。</text>
+ </svg>
+diff --git a/src/svg/m09-as-evidence.svg b/src/svg/m09-as-evidence.svg
+index f39c652..aefa0b9 100644
+--- a/src/svg/m09-as-evidence.svg
++++ b/src/svg/m09-as-evidence.svg
+@@ -1,157 +1,51 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 690">
+-  <title>甲基化當作證據：用來判斷候選變異來自哪一群細胞</title>
+-  <desc>三格比較同一個候選位置的三種可能身分。
+-        若候選是 somatic，帶變異的 ALT read 只會來自腫瘤細胞，因此這一側的甲基化模式偏向一致；
+-        不帶變異的 REF read 同時來自腫瘤與正常細胞，因此偏向混合。
+-        若候選是 germline，兩側都同時來自腫瘤與正常細胞，兩側都是混合。
+-        若候選只是定序錯誤，帶變異的 read 只是全部 read 的隨機子集，兩側組成看起來相同。
+-        因此兩側甲基化組成的差異可以量化成數值特徵，交給分類器判斷候選要保留或丟棄。
+-        在這種用法下，甲基化參與了判斷。</desc>
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500">
++  <title>Formal methylation assay 的固定條件與有限結論</title>
++  <desc>formal assay 依序固定 dataset、染色體、exact phase set、primary HP 與 genetic pattern，
++        再檢驗同一區域的甲基群與局部分子狀態是否關聯。這是 pattern-conditioned regional association，
++        不能識別 cellular clone、細胞祖先關係或突變造成甲基改變。</desc>
+ 
+-  <text class="lbl bold zh" x="20" y="32">用法一：甲基化當作證據</text>
+-  <text class="tick zh" x="20" y="58">關鍵直覺：甲基化模式像是「這條 read 來自哪一群細胞」的指紋。read 上的圓＝這個位置是什麼，read 下的點＝甲基化。</text>
++  <text class="lbl bold zh" x="20" y="34">Formal assay：先固定分層，再檢驗區域關聯</text>
++  <text class="tick zh" x="20" y="60">每一步都縮小比較範圍；read-level methylation 不是細胞來源標籤。</text>
+ 
+-  <!-- ══ 候選是 somatic ══ -->
+-  <rect class="box plain" x="16" y="76" width="296" height="436" rx="10"/>
+-  <text class="anno bold zh mid" x="164" y="106">候選是 somatic</text>
+-  <text class="tick mid zh" x="164" y="130">只有腫瘤細胞帶著它</text>
+-  <text class="tick zh bold" x="36" y="158">ALT read（帶變異）</text>
+-  <rect class="read" x="36" y="170" width="216" height="11" rx="5.5"/>
+-  <circle class="mark somatic" cx="66" cy="175" r="5.5"/>
+-  <circle class="cpg met" cx="136" cy="187" r="4.5"/>
+-  <circle class="cpg met" cx="180" cy="187" r="4.5"/>
+-  <circle class="cpg met" cx="224" cy="187" r="4.5"/>
+-  <rect class="read" x="36" y="198" width="216" height="11" rx="5.5"/>
+-  <circle class="mark somatic" cx="66" cy="203" r="5.5"/>
+-  <circle class="cpg met" cx="136" cy="215" r="4.5"/>
+-  <circle class="cpg met" cx="180" cy="215" r="4.5"/>
+-  <circle class="cpg met" cx="224" cy="215" r="4.5"/>
+-  <rect class="read" x="36" y="226" width="216" height="11" rx="5.5"/>
+-  <circle class="mark somatic" cx="66" cy="231" r="5.5"/>
+-  <circle class="cpg met" cx="136" cy="243" r="4.5"/>
+-  <circle class="cpg met" cx="180" cy="243" r="4.5"/>
+-  <circle class="cpg met" cx="224" cy="243" r="4.5"/>
+-  <text class="tick zh bold" x="36" y="282">REF read（沒有變異）</text>
+-  <rect class="read" x="36" y="294" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="66" cy="299" r="5.5"/>
+-  <circle class="cpg met" cx="136" cy="311" r="4.5"/>
+-  <circle class="cpg met" cx="180" cy="311" r="4.5"/>
+-  <circle class="cpg met" cx="224" cy="311" r="4.5"/>
+-  <rect class="read" x="36" y="322" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="66" cy="327" r="5.5"/>
+-  <circle class="cpg met" cx="136" cy="339" r="4.5"/>
+-  <circle class="cpg met" cx="180" cy="339" r="4.5"/>
+-  <circle class="cpg met" cx="224" cy="339" r="4.5"/>
+-  <rect class="read" x="36" y="350" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="66" cy="355" r="5.5"/>
+-  <circle class="cpg unmet" cx="136" cy="367" r="4.5"/>
+-  <circle class="cpg unmet" cx="180" cy="367" r="4.5"/>
+-  <circle class="cpg unmet" cx="224" cy="367" r="4.5"/>
+-  <rect class="read" x="36" y="378" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="66" cy="383" r="5.5"/>
+-  <circle class="cpg unmet" cx="136" cy="395" r="4.5"/>
+-  <circle class="cpg unmet" cx="180" cy="395" r="4.5"/>
+-  <circle class="cpg unmet" cx="224" cy="395" r="4.5"/>
+-  <rect class="box accent" x="36" y="428" width="256" height="72" rx="8"/>
+-  <text class="tick zh" x="52" y="452">ALT 側：全部來自腫瘤細胞</text>
+-  <text class="tick zh" x="52" y="474">→ 甲基化模式一致（單一）</text>
+-  <text class="tick zh" x="52" y="496">REF 側：腫瘤＋正常混在一起</text>
++  <g>
++    <rect class="box plain" x="20" y="100" width="144" height="70" rx="8"/>
++    <text class="anno bold mid zh" x="92" y="130">dataset</text>
++    <text class="tick mid zh" x="92" y="153">固定資料來源</text>
++    <path class="flow" d="M164,135 L190,135" marker-end="url(#arrow)"/>
+ 
+-  <!-- ══ 候選是 germline ══ -->
+-  <rect class="box plain" x="352" y="76" width="296" height="436" rx="10"/>
+-  <text class="anno bold zh mid" x="500" y="106">候選是 germline</text>
+-  <text class="tick mid zh" x="500" y="130">所有細胞都帶著它</text>
+-  <text class="tick zh bold" x="372" y="158">ALT read（帶變異）</text>
+-  <rect class="read" x="372" y="170" width="216" height="11" rx="5.5"/>
+-  <circle class="mark germline" cx="402" cy="175" r="5.5"/>
+-  <circle class="cpg met" cx="472" cy="187" r="4.5"/>
+-  <circle class="cpg met" cx="516" cy="187" r="4.5"/>
+-  <circle class="cpg met" cx="560" cy="187" r="4.5"/>
+-  <rect class="read" x="372" y="198" width="216" height="11" rx="5.5"/>
+-  <circle class="mark germline" cx="402" cy="203" r="5.5"/>
+-  <circle class="cpg unmet" cx="472" cy="215" r="4.5"/>
+-  <circle class="cpg unmet" cx="516" cy="215" r="4.5"/>
+-  <circle class="cpg unmet" cx="560" cy="215" r="4.5"/>
+-  <rect class="read" x="372" y="226" width="216" height="11" rx="5.5"/>
+-  <circle class="mark germline" cx="402" cy="231" r="5.5"/>
+-  <circle class="cpg met" cx="472" cy="243" r="4.5"/>
+-  <circle class="cpg met" cx="516" cy="243" r="4.5"/>
+-  <circle class="cpg unmet" cx="560" cy="243" r="4.5"/>
+-  <text class="tick zh bold" x="372" y="282">REF read（沒有變異）</text>
+-  <rect class="read" x="372" y="294" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="402" cy="299" r="5.5"/>
+-  <circle class="cpg met" cx="472" cy="311" r="4.5"/>
+-  <circle class="cpg met" cx="516" cy="311" r="4.5"/>
+-  <circle class="cpg met" cx="560" cy="311" r="4.5"/>
+-  <rect class="read" x="372" y="322" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="402" cy="327" r="5.5"/>
+-  <circle class="cpg unmet" cx="472" cy="339" r="4.5"/>
+-  <circle class="cpg unmet" cx="516" cy="339" r="4.5"/>
+-  <circle class="cpg unmet" cx="560" cy="339" r="4.5"/>
+-  <rect class="read" x="372" y="350" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="402" cy="355" r="5.5"/>
+-  <circle class="cpg unmet" cx="472" cy="367" r="4.5"/>
+-  <circle class="cpg met" cx="516" cy="367" r="4.5"/>
+-  <circle class="cpg unmet" cx="560" cy="367" r="4.5"/>
+-  <rect class="read" x="372" y="378" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="402" cy="383" r="5.5"/>
+-  <circle class="cpg met" cx="472" cy="395" r="4.5"/>
+-  <circle class="cpg unmet" cx="516" cy="395" r="4.5"/>
+-  <circle class="cpg met" cx="560" cy="395" r="4.5"/>
+-  <rect class="box plain" x="372" y="428" width="256" height="72" rx="8"/>
+-  <text class="tick zh" x="388" y="452">ALT 側：腫瘤與正常都有</text>
+-  <text class="tick zh" x="388" y="474">→ 甲基化模式也是混合</text>
+-  <text class="tick zh" x="388" y="496">REF 側：一樣是混合</text>
++    <rect class="box plain" x="196" y="100" width="144" height="70" rx="8"/>
++    <text class="anno bold mid zh" x="268" y="130">chromosome</text>
++    <text class="tick mid zh" x="268" y="153">固定染色體</text>
++    <path class="flow" d="M340,135 L366,135" marker-end="url(#arrow)"/>
+ 
+-  <!-- ══ 候選是定序錯誤 ══ -->
+-  <rect class="box plain" x="688" y="76" width="296" height="436" rx="10"/>
+-  <text class="anno bold zh mid" x="836" y="106">候選是定序錯誤</text>
+-  <text class="tick mid zh" x="836" y="130">隨機落在任何 read 上</text>
+-  <text class="tick zh bold" x="708" y="158">ALT read（帶變異）</text>
+-  <rect class="read" x="708" y="170" width="216" height="11" rx="5.5"/>
+-  <circle class="mark artifact" cx="738" cy="175" r="5.5"/>
+-  <circle class="cpg met" cx="808" cy="187" r="4.5"/>
+-  <circle class="cpg unmet" cx="852" cy="187" r="4.5"/>
+-  <circle class="cpg met" cx="896" cy="187" r="4.5"/>
+-  <rect class="read" x="708" y="198" width="216" height="11" rx="5.5"/>
+-  <circle class="mark artifact" cx="738" cy="203" r="5.5"/>
+-  <circle class="cpg unmet" cx="808" cy="215" r="4.5"/>
+-  <circle class="cpg met" cx="852" cy="215" r="4.5"/>
+-  <circle class="cpg unmet" cx="896" cy="215" r="4.5"/>
+-  <rect class="read" x="708" y="226" width="216" height="11" rx="5.5"/>
+-  <circle class="mark artifact" cx="738" cy="231" r="5.5"/>
+-  <circle class="cpg met" cx="808" cy="243" r="4.5"/>
+-  <circle class="cpg met" cx="852" cy="243" r="4.5"/>
+-  <circle class="cpg unmet" cx="896" cy="243" r="4.5"/>
+-  <text class="tick zh bold" x="708" y="282">REF read（沒有變異）</text>
+-  <rect class="read" x="708" y="294" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="738" cy="299" r="5.5"/>
+-  <circle class="cpg met" cx="808" cy="311" r="4.5"/>
+-  <circle class="cpg unmet" cx="852" cy="311" r="4.5"/>
+-  <circle class="cpg met" cx="896" cy="311" r="4.5"/>
+-  <rect class="read" x="708" y="322" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="738" cy="327" r="5.5"/>
+-  <circle class="cpg unmet" cx="808" cy="339" r="4.5"/>
+-  <circle class="cpg met" cx="852" cy="339" r="4.5"/>
+-  <circle class="cpg met" cx="896" cy="339" r="4.5"/>
+-  <rect class="read" x="708" y="350" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="738" cy="355" r="5.5"/>
+-  <circle class="cpg met" cx="808" cy="367" r="4.5"/>
+-  <circle class="cpg met" cx="852" cy="367" r="4.5"/>
+-  <circle class="cpg unmet" cx="896" cy="367" r="4.5"/>
+-  <rect class="read" x="708" y="378" width="216" height="11" rx="5.5"/>
+-  <circle class="mark ref" cx="738" cy="383" r="5.5"/>
+-  <circle class="cpg unmet" cx="808" cy="395" r="4.5"/>
+-  <circle class="cpg unmet" cx="852" cy="395" r="4.5"/>
+-  <circle class="cpg met" cx="896" cy="395" r="4.5"/>
+-  <rect class="box plain" x="708" y="428" width="256" height="72" rx="8"/>
+-  <text class="tick zh" x="724" y="452">ALT 側：只是 REF 的隨機子集</text>
+-  <text class="tick zh" x="724" y="474">→ 兩側的組成看起來一樣</text>
+-  <text class="tick zh" x="724" y="496">沒有「只屬於一群細胞」的痕跡</text>
++    <rect class="box plain" x="372" y="100" width="144" height="70" rx="8"/>
++    <text class="anno bold mid zh" x="444" y="130">exact PS</text>
++    <text class="tick mid zh" x="444" y="153">不可跨 phase set</text>
++    <path class="flow" d="M516,135 L542,135" marker-end="url(#arrow)"/>
+ 
+-  <line class="axis" x1="20" y1="538" x2="980" y2="538"/>
+-  <text class="lbl bold zh" x="20" y="570">分類器只是把這些「組成」算成數字再組合起來</text>
+-  <text class="anno zh" x="20" y="600">實際用的特徵例如：REF 與 ALT 兩側各自的甲基化覆蓋量、兩側的差距、</text>
+-  <text class="anno zh" x="20" y="628">以及每一側「單一」與「混合」各佔多少比例。這些數字進 XGBoost，輸出保留或丟棄。</text>
+-  <text class="anno zh bold warn" x="20" y="664">注意：這種用法下甲基化已經參與判斷，所以它不能再拿來驗證同一個判斷。</text>
++    <rect class="box plain" x="548" y="100" width="144" height="70" rx="8"/>
++    <text class="anno bold mid zh" x="620" y="130">primary HP</text>
++    <text class="tick mid zh" x="620" y="153">方向任意的 read family</text>
++    <path class="flow" d="M692,135 L718,135" marker-end="url(#arrow)"/>
++
++    <rect class="box plain" x="724" y="100" width="256" height="70" rx="8"/>
++    <text class="anno bold mid zh" x="852" y="130">genetic pattern</text>
++    <text class="tick mid zh" x="852" y="153">固定局部 0／1 分子狀態</text>
++  </g>
++
++  <path class="flow" d="M852,172 L852,212" marker-end="url(#arrow)"/>
++  <rect class="box accent" x="620" y="220" width="360" height="84" rx="10"/>
++  <text class="anno bold mid zh" x="800" y="247">檢驗區域甲基群與狀態的關聯</text>
++  <text class="tick mid zh" x="800" y="272">coverage、CpG、strand、geometry</text>
++  <text class="tick mid zh" x="800" y="294">與 CN／LOH 均須列為限制</text>
++
++  <rect class="box ok" x="20" y="344" width="452" height="116" rx="10"/>
++  <text class="anno bold zh ok" x="44" y="376">可以說</text>
++  <text class="tick zh" x="44" y="406">pattern-conditioned regional association</text>
++  <text class="tick zh" x="44" y="432">在預定 guardrails 下可評估且具 robust 關聯</text>
++
++  <rect class="box bad" x="500" y="344" width="480" height="116" rx="10"/>
++  <text class="anno bold zh bad" x="524" y="376">不能說</text>
++  <text class="tick zh" x="524" y="406">read 屬於哪個細胞、cellular clone 或線性祖先</text>
++  <text class="tick zh" x="524" y="432">突變造成甲基改變，或甲基差異證明候選樹為真</text>
+ </svg>
+diff --git a/src/svg/m09-subclone-basics.svg b/src/svg/m09-subclone-basics.svg
+index 2579435..68b5c01 100644
+--- a/src/svg/m09-subclone-basics.svg
++++ b/src/svg/m09-subclone-basics.svg
+@@ -1,116 +1,46 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 636">
+-  <title>subclone 重建在做什麼：把 read 變成 0／1 向量，再找最短的突變路徑</title>
+-  <desc>以一個區域內的兩個 somatic 位置 S1 與 S2 為例。
+-        左：腫瘤細胞一代一代累積突變，只會多拿到突變、不會退回去，
+-        因此細胞的狀態從 00 變成 10，再變成 11。
+-        中：bulk 定序後，每條 read 在這兩個位置上就是一個 0／1 向量，
+-        R 記為 0、A 記為 1，觀測到的狀態集合是 00、10、11。
+-        右：重建就是在所有狀態組成的方格上，找一條從 00 出發、
+-        每一步只把一個 0 翻成 1、能走到所有觀測狀態、且步數最少的樹。
+-        本例選出 00 到 10 再到 11；經過未觀測狀態 01 的路徑需要多假設一個沒看到的狀態。
+-        讀法是：先有 S1 的細胞群是 clone，之後其中一部分又拿到 S2，那一支就是 subclone。
+-        輸出是單一區域內的候選拓撲，不是整個腫瘤的全基因體演化樹，
+-        且最小成本並列時全部保留。</desc>
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500">
++  <title>由 read pattern 列舉局部 mutation-state candidates</title>
++  <desc>兩個 somatic 位點在 reads 上形成 00、10、11 等局部觀測。
++        求解器在 recurrence-allowed Hamming-1 模型下列舉最小成本 arborescences，並保留所有並列解。
++        節點是數學 mutation state，不是細胞、clone 或已確認的生物祖先。</desc>
+ 
+-  <text class="lbl bold zh" x="20" y="32">用法二要用到的任務：subclone 重建在做什麼？</text>
+-  <text class="tick zh" x="20" y="58">以一個區域內的 2 個 somatic 位置為例（S1、S2）。R＝沒有變異＝0，A＝有變異＝1。</text>
++  <text class="lbl bold zh" x="20" y="34">局部求解：read pattern → 模型相容候選</text>
++  <text class="tick zh" x="20" y="60">R＝0、A＝1；一條 read 是分子觀測，不是細胞抽樣。</text>
+ 
+-  <!-- ① 細胞一代一代累積突變 -->
+-  <rect class="box plain" x="16" y="76" width="300" height="360" rx="10"/>
+-  <text class="anno bold zh mid" x="166" y="106">① 突變只會累加</text>
+-  <circle class="cell tumor" cx="96" cy="146" r="20"/><circle class="nucleus" cx="96" cy="146" r="9"/>
+-  <rect class="bar" x="80" y="170" width="14" height="14" rx="3"/>
+-  <rect class="bar" x="98" y="170" width="14" height="14" rx="3"/>
+-  <text class="tick mono bold" x="122" y="151">00</text>
+-  <text class="tick zh" x="150" y="156">腫瘤起源</text>
+-  <path class="conn somatic" d="M96,186 L96,212" marker-end="url(#arrow-sm)"/>
+-  <text class="tick somatic mono" x="104" y="206">+S1</text>
+-  <circle class="cell tumor" cx="96" cy="240" r="20"/><circle class="nucleus" cx="96" cy="240" r="9"/>
+-  <rect class="bar somatic" x="80" y="264" width="14" height="14" rx="3"/>
+-  <rect class="bar" x="98" y="264" width="14" height="14" rx="3"/>
+-  <text class="tick mono bold" x="122" y="245">10</text>
+-  <text class="tick zh" x="150" y="250">clone</text>
+-  <path class="conn somatic" d="M96,280 L96,306" marker-end="url(#arrow-sm)"/>
+-  <text class="tick somatic mono" x="104" y="300">+S2</text>
+-  <circle class="cell tumor" cx="96" cy="334" r="20"/><circle class="nucleus" cx="96" cy="334" r="9"/>
+-  <rect class="bar somatic" x="80" y="358" width="14" height="14" rx="3"/>
+-  <rect class="bar somatic" x="98" y="358" width="14" height="14" rx="3"/>
+-  <text class="tick mono bold" x="122" y="339">11</text>
+-  <text class="tick zh" x="150" y="344">subclone</text>
+-  <text class="tick zh" x="36" y="398">小方塊：左＝S1、右＝S2</text>
+-  <text class="tick zh" x="36" y="420">實心＝已經帶有這個突變</text>
++  <rect class="box plain" x="20" y="92" width="280" height="286" rx="10"/>
++  <text class="anno bold mid zh" x="160" y="124">① read-level observations</text>
++  <text class="tick mid mono somatic" x="160" y="154">S1　S2</text>
++  <g>
++    <rect class="read" x="60" y="176" width="150" height="14" rx="7"/><text class="tick mono" x="226" y="189">00</text>
++    <rect class="read" x="60" y="214" width="150" height="14" rx="7"/><text class="tick mono" x="226" y="227">10</text>
++    <rect class="read" x="60" y="252" width="150" height="14" rx="7"/><text class="tick mono" x="226" y="265">10</text>
++    <rect class="read" x="60" y="290" width="150" height="14" rx="7"/><text class="tick mono" x="226" y="303">11</text>
++  </g>
++  <text class="tick mid zh" x="160" y="344">observed = {00, 10, 11}</text>
+ 
+-  <!-- ② 每條 read 是一個 0/1 向量 -->
+-  <rect class="box plain" x="352" y="76" width="300" height="360" rx="10"/>
+-  <text class="anno bold zh mid" x="502" y="106">② read 變成向量</text>
+-  <text class="tick mid mono somatic" x="470" y="132">S1</text>
+-  <text class="tick mid mono somatic" x="514" y="132">S2</text>
+-  <rect class="read" x="372" y="142" width="200" height="14" rx="7"/>
+-  <rect class="bar" x="459" y="140" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="154">R</text>
+-  <rect class="bar" x="503" y="140" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="154">R</text>
+-  <text class="tick mono" x="586" y="154">00</text>
+-  <rect class="read" x="372" y="172" width="200" height="14" rx="7"/>
+-  <rect class="bar" x="459" y="170" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="184">R</text>
+-  <rect class="bar" x="503" y="170" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="184">R</text>
+-  <text class="tick mono" x="586" y="184">00</text>
+-  <rect class="read" x="372" y="202" width="200" height="14" rx="7"/>
+-  <rect class="bar somatic" x="459" y="200" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="214">A</text>
+-  <rect class="bar" x="503" y="200" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="214">R</text>
+-  <text class="tick mono" x="586" y="214">10</text>
+-  <rect class="read" x="372" y="232" width="200" height="14" rx="7"/>
+-  <rect class="bar somatic" x="459" y="230" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="244">A</text>
+-  <rect class="bar" x="503" y="230" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="244">R</text>
+-  <text class="tick mono" x="586" y="244">10</text>
+-  <rect class="read" x="372" y="262" width="200" height="14" rx="7"/>
+-  <rect class="bar somatic" x="459" y="260" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="274">A</text>
+-  <rect class="bar" x="503" y="260" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="274">R</text>
+-  <text class="tick mono" x="586" y="274">10</text>
+-  <rect class="read" x="372" y="292" width="200" height="14" rx="7"/>
+-  <rect class="bar somatic" x="459" y="290" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="470" y="304">A</text>
+-  <rect class="bar somatic" x="503" y="290" width="22" height="18" rx="3"/>
+-  <text class="tick mid mono bold" x="514" y="304">A</text>
+-  <text class="tick mono" x="586" y="304">11</text>
+-  <text class="tick zh" x="372" y="352">看到的狀態：00 兩條、10 三條、11 一條</text>
+-  <text class="tick zh bold" x="372" y="380">觀測狀態集合 = { 00, 10, 11 }</text>
++  <path class="flow" d="M306,232 L350,232" marker-end="url(#arrow)"/>
+ 
+-  <!-- ③ 在狀態方格上找最少步數的樹 -->
+-  <rect class="box plain" x="688" y="76" width="296" height="360" rx="10"/>
+-  <text class="anno bold zh mid" x="836" y="106">③ 找最少步數的樹</text>
+-  <path class="guide" d="M836,168 L766,232 M836,168 L906,232 M766,232 L836,296 M906,232 L836,296"/>
+-  <circle class="box plain" cx="836" cy="168" r="20"/>
+-  <text class="tick mid mono bold" x="836" y="173">00</text>
+-  <circle class="box plain" cx="766" cy="232" r="20"/>
+-  <text class="tick mid mono bold" x="766" y="237">10</text>
+-  <circle class="box ghost" cx="906" cy="232" r="20"/>
+-  <text class="tick mid mono" x="906" y="237">01</text>
+-  <circle class="box plain" cx="836" cy="296" r="20"/>
+-  <text class="tick mid mono bold" x="836" y="301">11</text>
+-  <path class="conn somatic thick" d="M822,184 L780,216" marker-end="url(#arrow-sm)"/>
+-  <path class="conn somatic thick" d="M780,248 L822,280" marker-end="url(#arrow-sm)"/>
+-  <text class="tick somatic mono end" x="770" y="192">+S1</text>
+-  <text class="tick somatic mono end" x="770" y="288">+S2</text>
+-  <text class="tick zh" x="708" y="336">實線圈＝有 read 看到的狀態</text>
+-  <text class="tick zh" x="708" y="358">虛線圈＝沒看到，走它就要多假設一個狀態</text>
+-  <text class="tick zh bold" x="708" y="386">成本＝用掉幾個箭頭，本例 2 步</text>
++  <rect class="box accent" x="358" y="92" width="284" height="286" rx="10"/>
++  <text class="anno bold mid zh" x="500" y="124">② 預先聲明技術模型</text>
++  <text class="tick mid zh" x="500" y="158">Boolean state space</text>
++  <text class="tick mid zh" x="500" y="190">recurrence allowed</text>
++  <text class="tick mid zh" x="500" y="222">directed Hamming-1 edges</text>
++  <text class="tick mid zh" x="500" y="254">minimum-cost arborescence</text>
++  <text class="tick mid zh" x="500" y="286">ties retained</text>
++  <text class="tick mid zh warn" x="500" y="336">模型限制 ≠ 生物定律</text>
+ 
+-  <path class="flow" d="M322,240 L346,240" marker-end="url(#arrow)"/>
+-  <path class="flow" d="M658,240 L682,240" marker-end="url(#arrow)"/>
++  <path class="flow" d="M648,232 L692,232" marker-end="url(#arrow)"/>
+ 
+-  <line class="axis" x1="20" y1="462" x2="980" y2="462"/>
+-  <text class="lbl bold zh" x="20" y="494">這棵樹讀起來就是一句話</text>
+-  <text class="anno zh" x="20" y="524">「先有 S1 的那群細胞是 clone；之後其中一部分又拿到 S2，那一支就是 subclone。」</text>
+-  <text class="anno zh" x="20" y="554">clone 指整個腫瘤群體共有的組合，subclone 指後來才長出來、只占一部分腫瘤細胞的分支。</text>
+-  <text class="anno zh bold warn" x="20" y="590">限制：這是<tspan class="bold">單一區域</tspan>內 read 覆蓋得到的局部順序，不是整個腫瘤的演化樹；</text>
+-  <text class="anno zh bold warn" x="20" y="618">最小成本並列時全部保留，不強行選一個。</text>
++  <rect class="box plain" x="700" y="92" width="280" height="286" rx="10"/>
++  <text class="anno bold mid zh" x="840" y="124">③ candidate family</text>
++  <path class="conn somatic" d="M840,174 L780,232" marker-end="url(#arrow-sm)"/>
++  <path class="conn somatic" d="M780,252 L840,310" marker-end="url(#arrow-sm)"/>
++  <circle class="box plain" cx="840" cy="164" r="22"/><text class="tick mid mono bold" x="840" y="169">00</text>
++  <circle class="box plain" cx="772" cy="242" r="22"/><text class="tick mid mono bold" x="772" y="247">10</text>
++  <circle class="box plain" cx="840" cy="320" r="22"/><text class="tick mid mono bold" x="840" y="325">11</text>
++  <text class="tick mid zh" x="840" y="358">一個模型相容的最小解</text>
++
++  <rect class="box warn" x="20" y="410" width="960" height="66" rx="8"/>
++  <text class="anno mid bold zh warn" x="500" y="438">輸出語義：局部、read-compatible 的數學候選</text>
++  <text class="tick mid zh" x="500" y="462">不確認 cellular clone、完整腫瘤樹或線性祖先；並列候選不可強行選一個。</text>
+ </svg>
+diff --git a/src/svg/m09-two-uses.svg b/src/svg/m09-two-uses.svg
+index 682eeea..d73a6fc 100644
+--- a/src/svg/m09-two-uses.svg
++++ b/src/svg/m09-two-uses.svg
+@@ -1,59 +1,30 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420">
+-  <title>甲基化的兩種分析角色：模型輸入或推論後描述</title>
+-  <desc>左半部：將甲基化轉為分類器輸入特徵，使其參與判斷候選是否為真變異。
+-        若要評估模型，應使用未參與訓練或搜尋的獨立資料。
+-        右半部：先僅用變異證據完成推論，再附加甲基化描述結果。
+-        在未參與推論的前提下，甲基化可作為獨立觀察。
+-        關鍵原則是：同一證據不應同時作為推論與其獨立驗證依據。</desc>
+-
+-  <!-- ══ 左：當證據 ══ -->
+-  <rect class="box warn" x="16" y="16" width="472" height="330" rx="10"/>
+-  <text class="lbl bold zh" x="38" y="48">角色一：作為模型輸入</text>
+-
+-  <rect class="box plain" x="60" y="72" width="170" height="46" rx="6"/>
+-  <text class="tick mid zh" x="145" y="101">變異本身的證據</text>
+-
+-  <rect class="box plain" x="272" y="72" width="170" height="46" rx="6"/>
+-  <text class="tick mid zh met" x="357" y="101">甲基化特徵</text>
+-
+-  <path class="flow" d="M145,120 L200,150" marker-end="url(#arrow)"/>
+-  <path class="flow" d="M357,120 L302,150" marker-end="url(#arrow)"/>
+-
+-  <rect class="box accent" x="150" y="156" width="202" height="52" rx="8"/>
+-  <text class="anno mid bold zh" x="251" y="188">分類器</text>
+-
+-  <path class="flow" d="M251,208 L251,236" marker-end="url(#arrow)"/>
+-  <rect class="box plain" x="150" y="242" width="202" height="46" rx="6"/>
+-  <text class="tick mid zh" x="251" y="271">是 / 不是真變異</text>
+-
+-  <rect class="box bad" x="38" y="302" width="428" height="34" rx="6"/>
+-  <text class="tick mid zh bad bold" x="252" y="324">甲基化已納入輸入 → 同一流程中不宜作獨立驗證</text>
+-
+-  <!-- ══ 右：當註記 ══ -->
+-  <rect class="box ok" x="512" y="16" width="472" height="330" rx="10"/>
+-  <text class="lbl bold zh" x="534" y="48">角色二：作為推論後描述</text>
+-
+-  <rect class="box plain" x="640" y="72" width="216" height="46" rx="6"/>
+-  <text class="tick mid zh" x="748" y="101">只用變異本身的證據</text>
+-
+-  <path class="flow" d="M748,120 L748,148" marker-end="url(#arrow)"/>
+-  <rect class="box accent" x="647" y="154" width="202" height="52" rx="8"/>
+-  <text class="anno mid bold zh" x="748" y="186">完成推論</text>
+-
+-  <path class="flow" d="M748,206 L748,234" marker-end="url(#arrow)"/>
+-  <rect class="box plain" x="647" y="240" width="202" height="46" rx="6"/>
+-  <text class="tick mid zh" x="748" y="269">推論結果</text>
+-
+-  <!-- 甲基化從旁邊附加 -->
+-  <rect class="box plain" x="534" y="240" width="94" height="46" rx="6"/>
+-  <text class="tick mid zh met" x="581" y="262">甲基化</text>
+-  <text class="tick mid zh met" x="581" y="280">註記</text>
+-  <path class="conn met" d="M628,263 L641,263" marker-end="url(#arrow-sm)"/>
+-
+-  <rect class="box ok" x="534" y="302" width="428" height="34" rx="6"/>
+-  <text class="tick mid zh ok bold" x="748" y="324">未參與推論 → 可作為獨立觀察</text>
+-
+-  <!-- ══ 原則 ══ -->
+-  <rect class="box accent" x="20" y="360" width="960" height="48" rx="8"/>
+-  <text class="anno mid zh bold" x="500" y="390">原則：同一證據不應同時作為推論與其獨立驗證依據。</text>
++  <title>M1 operational screen 與 formal regional association</title>
++  <desc>左邊是 M1 operational screen，在 469,849 筆 dataset-sites 中標記 102,842 筆，比例 21.8883%。
++        右邊是 formal assay：1,045 個凍結 units、811 個可評估、3 個通過 robust guardrails，比例 0.3699%。
++        兩者分母、問題與輸出不同；都不能直接確認細胞 clone、譜系或因果。</desc>
++
++  <rect class="box plain" x="20" y="18" width="450" height="314" rx="10"/>
++  <text class="lbl bold zh" x="44" y="54">M1 operational screen</text>
++  <text class="tick zh" x="44" y="84">單位：recalibrated PASS biallelic autosomal dataset-site</text>
++  <text class="anno bold mid" x="245" y="140">102,842 / 469,849</text>
++  <text class="lbl bold mid somatic" x="245" y="184">21.8883%</text>
++  <text class="tick mid zh" x="245" y="222">六個 biological cell lines 皆有 screen 資料</text>
++  <rect class="box warn" x="44" y="254" width="402" height="54" rx="7"/>
++  <text class="tick mid zh" x="245" y="277">輸出只是後續檢驗 flag</text>
++  <text class="tick mid zh" x="245" y="298">不是 biological prevalence</text>
++
++  <rect class="box accent" x="530" y="18" width="450" height="314" rx="10"/>
++  <text class="lbl bold zh" x="554" y="54">Formal regional association</text>
++  <text class="tick zh" x="554" y="84">單位：frozen exact-PS×HP×genetic-pattern unit</text>
++  <text class="anno bold mid" x="755" y="126">1,045 frozen → 811 evaluable</text>
++  <text class="anno bold mid" x="755" y="164">3 robust / 811</text>
++  <text class="lbl bold mid met" x="755" y="202">0.3699%</text>
++  <text class="tick mid zh" x="755" y="232">五個 cell lines 有 formal units；COLO829 = 0</text>
++  <rect class="box ok" x="554" y="254" width="402" height="54" rx="7"/>
++  <text class="tick mid zh" x="755" y="277">輸出為 pattern-conditioned regional association</text>
++  <text class="tick mid zh" x="755" y="298">不是 clone 或 linear ancestry</text>
++
++  <rect class="box bad" x="20" y="350" width="960" height="52" rx="8"/>
++  <text class="anno bold mid zh bad" x="500" y="381">禁止互換分母，也禁止把任一比例轉譯為細胞群、譜系或因果證據。</text>
+ </svg>
+diff --git a/src/svg/m12-haplotagging.svg b/src/svg/m12-haplotagging.svg
+index 959de8c..9a28b4b 100644
+--- a/src/svg/m12-haplotagging.svg
++++ b/src/svg/m12-haplotagging.svg
+@@ -8,8 +8,9 @@
+         只帶 germline allele 的 read 標成 HP1 或 HP2；
+         同時帶 germline 與 somatic allele、且來源可判定的標成 HP1-1 或 HP2-1；
+         帶 somatic allele 但沒有 germline 錨點可比對的（例如太短的 read）暫時標成 HP3。
+-        因此 HP1-1 的名字本身就記錄了它的來源：HP1 的 somatic 後代。
+-        HP3 不是第三條染色體，而是「證據不足以判斷來源」的暫時標籤。</desc>
++        因此 HP1-1 表示這條 read 與 HP1 背景相容且帶 somatic allele；它不是細胞後代或 clone 標籤。
++        HP3 不是第三條染色體，而是「缺少 germline 錨點」的暫時標籤。
++        所有 HP 標籤都是局部分子證據分類，不識別親源、實體 copy 或個別細胞。</desc>
+ 
+   <text class="lbl bold zh" x="20" y="32">somatic haplotagging：一條 read 為什麼被貼上某個標籤</text>
+   <text class="tick zh" x="20" y="58">判斷只用兩件事：read 上的 germline allele 屬於哪一條，以及它有沒有帶 somatic allele。</text>
+@@ -105,6 +106,6 @@
+   <text class="tick zh" x="780" y="596">帶 somatic，無錨點</text>
+ 
+   <line class="axis" x1="20" y1="622" x2="980" y2="622"/>
+-  <text class="lbl bold zh" x="20" y="654">HP1-1 的意思就是「HP1 的 somatic 後代」——名字本身記錄了來源。</text>
+-  <text class="anno zh" x="20" y="682">HP3 不是第三條染色體，是「證據還不足以判斷來源」的暫時標籤。</text>
++  <text class="lbl bold zh" x="20" y="654">HP1-1＝與 HP1 背景相容且帶 somatic allele；不是細胞後代或 clone ID。</text>
++  <text class="anno zh" x="20" y="682">HP3＝缺少 germline 錨點。所有 HP 標籤都是局部分子證據分類，不識別個別細胞。</text>
+ </svg>
+diff --git a/src/svg/m13-imbalance-fraction.svg b/src/svg/m13-imbalance-fraction.svg
+index f5d0a4a..50584ca 100644
+--- a/src/svg/m13-imbalance-fraction.svg
++++ b/src/svg/m13-imbalance-fraction.svg
+@@ -1,11 +1,9 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620">
+-  <title>從兩條 haplotype 的失衡程度，估計樣本裡有多少比例來自腫瘤</title>
++  <title>從兩條 haplotype 的分子失衡估計腫瘤 DNA 比例</title>
+   <desc>挑一個已經定相好的體細胞變異位置，只數「帶 reference allele」的 read。
+-        這個變異長在 HP2 上，所以帶 alt 的 read 全是癌細胞貢獻的；
+-        而帶 ref 的 read 有兩個來源：HP1 上的（癌細胞與正常細胞都有）
+-        與 HP2 上的（只有正常細胞才有，因為癌細胞那一份已經變成 alt 了）。
+-        三格由左到右是腫瘤佔兩成、六成、九成。
+-        腫瘤越多，正常細胞越少，HP2 這一側帶 ref 的 read 就越少，
++        在簡化的 diploid、clonal、copy-neutral 模型中，這個變異定相到 HP2；
++        三格由左到右是腫瘤來源 DNA 佔兩成、六成、九成。
++        腫瘤來源 DNA 越多，HP2 這一側帶 ref 的分子預期越少，
+         兩側的比值於是從接近 0.5 一路往 1.0 靠。
+         全基因體上每個體細胞變異都算一次這個比值，
+         再把分布的四分位數和 LOH 佔基因體的比例一起交給一條事先訓練好的迴歸式，
+@@ -16,7 +14,7 @@
+ 
+   <!-- ══ 三種混合比例 ══ -->
+   <rect class="box plain" x="20" y="76" width="306" height="300" rx="10"/>
+-  <text class="anno bold mid zh" x="173" y="106">腫瘤細胞佔 2 成</text>
++  <text class="anno bold mid zh" x="173" y="106">腫瘤 DNA 佔 2 成</text>
+   <circle class="cell tumor" cx="65" cy="136" r="9"/>
+   <circle class="cell tumor" cx="89" cy="136" r="9"/>
+   <circle class="cell normal" cx="113" cy="136" r="9"/>
+@@ -40,7 +38,7 @@
+   <text class="anno mid zh" x="173" y="348">兩邊差不多</text>
+ 
+   <rect class="box plain" x="347" y="76" width="306" height="300" rx="10"/>
+-  <text class="anno bold mid zh" x="500" y="106">腫瘤細胞佔 6 成</text>
++  <text class="anno bold mid zh" x="500" y="106">腫瘤 DNA 佔 6 成</text>
+   <circle class="cell tumor" cx="392" cy="136" r="9"/>
+   <circle class="cell tumor" cx="416" cy="136" r="9"/>
+   <circle class="cell tumor" cx="440" cy="136" r="9"/>
+@@ -64,7 +62,7 @@
+   <text class="anno mid zh" x="500" y="348">開始偏向一邊</text>
+ 
+   <rect class="box plain" x="674" y="76" width="306" height="300" rx="10"/>
+-  <text class="anno bold mid zh" x="827" y="106">腫瘤細胞佔 9 成</text>
++  <text class="anno bold mid zh" x="827" y="106">腫瘤 DNA 佔 9 成</text>
+   <circle class="cell tumor" cx="719" cy="136" r="9"/>
+   <circle class="cell tumor" cx="743" cy="136" r="9"/>
+   <circle class="cell tumor" cx="767" cy="136" r="9"/>
+@@ -89,7 +87,7 @@
+ 
+   <!-- 為什麼會這樣 -->
+   <rect class="box accent" x="20" y="390" width="960" height="46" rx="6"/>
+-  <text class="anno mid zh" x="500" y="419">HP2 這一側帶 ref 的 read <tspan class="bold">只有正常細胞才貢獻得出來</tspan> —— 腫瘤越多，它就越少。</text>
++  <text class="anno mid zh" x="500" y="419">簡化模型下，腫瘤 DNA fraction 增加 → HP2-ref 分子減少；CN／LOH 與 subclonality 會改變此關係。</text>
+ 
+   <!-- ══ 全基因體彙整 ══ -->
+   <line class="axis" x1="20" y1="460" x2="980" y2="460"/>
+diff --git a/src/svg/m13-loh-phasing.svg b/src/svg/m13-loh-phasing.svg
+index ae7e388..c1bbf25 100644
+--- a/src/svg/m13-loh-phasing.svg
++++ b/src/svg/m13-loh-phasing.svg
+@@ -2,7 +2,7 @@
+   <title>定相的結果有三條軌道，以及它們怎麼寫成 VCF 的 GT、GT2、GT3</title>
+   <desc>上半部是六個位置的定相結果。左邊四個位置在正常區，兩條 germline haplotype 都在；
+         右邊兩個位置落在 LOH 區，HP1 整段不存在，圖上畫成灰色虛線的空軌道。
+-        第三條軌道 HP2-1 是 HP2 的體細胞後代：它跟 HP2 完全一樣，只有帶紅點的兩個位置不同。
++        第三條軌道 HP2-1 是與 HP2 背景相容且帶 somatic allele 的 read pattern；它不是細胞後代。
+         下半部把其中三個位置的 VCF 欄位攤開來看。
+         一般的遺傳變異只有 GT；正常區的體細胞變異 GT 是 0 直槓 0，靠 GT2 說明它長在哪一條上；
+         LOH 區的位置 GT 有一側寫成一個點，表示那一條 haplotype 不存在，
+@@ -51,9 +51,9 @@
+   <!-- 體細胞變異：read 上方的小圓 -->
+   <circle class="mark somatic" cx="360" cy="214" r="6"/>
+   <circle class="mark somatic" cx="720" cy="214" r="6"/>
+-  <text class="anno somatic bold zh" x="736" y="266">紅點 ＝ 只有癌細胞才有的變異</text>
++  <text class="anno somatic bold zh" x="736" y="266">紅點 ＝ 候選 somatic allele</text>
+ 
+-  <text class="tick zh" x="200" y="266">HP2-1 跟 HP2 只差紅點那兩格 —— 它是 HP2 的後代</text>
++  <text class="tick zh" x="200" y="266">HP2-1 與 HP2 背景相容並帶紅點；這是 read pattern，不是細胞後代</text>
+ 
+   <!-- 引線 -->
+   <path class="guide" d="M260,246 L170,296"/>
+diff --git a/src/svg/m13-somatic-vs-artifact.svg b/src/svg/m13-somatic-vs-artifact.svg
+index 72b1e8b..f784c03 100644
+--- a/src/svg/m13-somatic-vs-artifact.svg
++++ b/src/svg/m13-somatic-vs-artifact.svg
+@@ -1,20 +1,21 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 710">
+-  <title>沒有正常樣本時，用「鄰居一不一致」分辨真變異與定序錯誤</title>
++  <title>沒有正常樣本時，以鄰居一致性評估候選的模型相容度</title>
+   <desc>上半部是同一個候選位置的兩種情況，各六條 read，而且兩邊帶候選 allele 的 read 都剛好三條 ——
+         所以光數數量分不出來，要看它們落在哪裡。
+         左邊：三條帶 T 的 read，左右鄰居都是 C 與 A，也就是三條全部落在同一條染色體（HP2）上。
+         右邊：三條帶 T 的 read，一條的鄰居是 HP1 的組合、一條是 HP2 的組合、
+         一條的組合在這個人身上根本不存在，因此無法歸屬。
+         下半部把同樣的資料畫成路徑圖：三個位置各有兩種 allele，一條 read 走出一條路徑。
+-        左邊出現第三條完整的路徑，而且它跟 HP2 只差候選這一格，符合「變異從某一條既有染色體長出來」；
+-        右邊帶 T 的 read 各走各的，沒有任何一條路徑被穩定支持。</desc>
++        左邊出現與 HP2 只差候選一格且被多條 read 支持的完整路徑，是模型相容候選；
++        右邊帶 T 的 read 各走各的，缺乏穩定路徑。這項 heuristic 改變候選可信度，不能單獨證明真值；
++        系統性 mapping 或 basecalling error、chimera 與 phasing error 仍可能模仿一致路徑。</desc>
+ 
+-  <text class="lbl bold zh" x="20" y="32">同一個候選位置：它是真的變異，還是定序錯誤？</text>
++  <text class="lbl bold zh" x="20" y="32">同一個候選位置：局部 read path 是否與技術模型相容？</text>
+   <text class="tick zh" x="20" y="58">兩邊帶 T 的 read 都是三條 —— 數量分不出來。要看的是這些 read 的<tspan class="bold">左右鄰居</tspan>。</text>
+ 
+-  <!-- ══════════ 左：真的體細胞變異 ══════════ -->
++  <!-- ══════════ 左：模型相容候選 ══════════ -->
+   <rect class="box ok" x="20" y="76" width="468" height="286" rx="10"/>
+-  <text class="anno bold zh ok" x="40" y="106">① 真的體細胞變異</text>
++  <text class="anno bold zh ok" x="40" y="106">① 模型相容候選</text>
+   <text class="tick zh" x="40" y="132">三條帶 T 的 read，鄰居組合完全一樣</text>
+ 
+   <text class="tick mid zh" x="116" y="162">左鄰居</text>
+@@ -55,11 +56,11 @@
+   <text class="anno hp2 bold" x="456" y="292">HP2</text>
+   <text class="anno hp2 bold" x="456" y="318">HP2</text>
+ 
+-  <text class="anno bold zh ok" x="40" y="348">→ 它有固定的出身：長在 HP2 上</text>
++  <text class="anno bold zh ok" x="40" y="348">→ 多條 reads 支持與 HP2 相容的局部 pattern</text>
+ 
+-  <!-- ══════════ 右：定序錯誤 ══════════ -->
++  <!-- ══════════ 右：分散候選 ══════════ -->
+   <rect class="box bad" x="512" y="76" width="468" height="286" rx="10"/>
+-  <text class="anno bold zh bad" x="532" y="106">② 定序錯誤</text>
++  <text class="anno bold zh bad" x="532" y="106">② 分散、需審查的候選</text>
+   <text class="tick zh" x="532" y="132">三條帶 T 的 read，鄰居組合各不相同</text>
+ 
+   <text class="tick mid zh" x="608" y="162">左鄰居</text>
+@@ -99,7 +100,7 @@
+   <text class="anno hp2 bold" x="946" y="266">HP2</text>
+   <text class="anno bold" x="946" y="292">？</text>
+ 
+-  <text class="anno bold zh bad" x="532" y="348">→ 它沒有固定的出身</text>
++  <text class="anno bold zh bad" x="532" y="348">→ 缺乏一致的局部 read path</text>
+ 
+   <!-- ══════════ 下半：畫成路徑圖 ══════════ -->
+   <line class="axis" x1="20" y1="382" x2="980" y2="382"/>
+@@ -135,7 +136,7 @@
+   <text class="base a mono mid" x="392" y="613" style="font-size:20px">A</text>
+ 
+   <text class="tick zh" x="40" y="652">三條 read 走出<tspan class="bold">同一條</tspan>新路徑，</text>
+-  <text class="tick zh" x="40" y="674">而它跟 HP2 只差候選這一格 —— 像是從 HP2 長出來的。</text>
++  <text class="tick zh" x="40" y="674">而它跟 HP2 只差候選這一格 —— 符合預定 triplet heuristic。</text>
+ 
+   <!-- 右 -->
+   <rect class="box plain" x="512" y="428" width="468" height="262" rx="10"/>
+@@ -169,5 +170,5 @@
+   <text class="base a mono mid" x="884" y="613" style="font-size:20px">A</text>
+ 
+   <text class="tick zh" x="532" y="652">三條 read <tspan class="bold">各走各的</tspan>，</text>
+-  <text class="tick zh" x="532" y="674">沒有哪一條新路徑被穩定支持 —— 這是隨機出現的訊號。</text>
++  <text class="tick zh" x="532" y="674">未穩定支持新路徑；需審查，不能單獨定案。</text>
+ </svg>
+diff --git a/src/svg/m14-beta-vs-epiallele.svg b/src/svg/m14-beta-vs-epiallele.svg
+index 76e2b02..a19a198 100644
+--- a/src/svg/m14-beta-vs-epiallele.svg
++++ b/src/svg/m14-beta-vs-epiallele.svg
+@@ -3,14 +3,13 @@
+   <desc>左右兩邊都是一個區域裡的四個 CpG、六條分子。
+         兩邊每一個 CpG 的甲基化比例都恰好是 0.50，所以逐位點統計的 β 值完全相同。
+         左邊六條分子各自有不同的甲基化組合，共六種不同的組合，
+-        而且每條分子甲基化的個數也不一樣，這是同一群細胞的隨機起伏。
++        而且每條分子甲基化的個數也不一樣；這只觀測到分散的分子 pattern，未識別來源細胞。
+         右邊只有兩種組合，三條分子四個 CpG 全部甲基化，另外三條全部未甲基化，
+-        這代表兩群不同的細胞。
++        這代表兩組分子 pattern，不足以證明兩群不同的細胞。
+         差別只在把同一條分子上的四個 CpG 一起看的時候才出現，
+         這種一起看的組合稱為 epiallele。
+-        要注意的是，右邊那種乾淨的兩群也可能是同一群細胞的兩條 haplotype，
+-        一條甲基化、一條不甲基化，這種情形叫 allele-specific methylation；
+-        要分開得看這兩群 epiallele 跟 HP 標籤對不對得上。
++        要注意的是，右邊那種乾淨的兩組可能是 allele-specific methylation、CN／LOH、
++        mapping／strand／batch 或其他機制；即使兩組都落在同一 HP read family 內，也仍無細胞標籤。
+         讀法是：β 值是邊際統計，跟 VAF 有一樣的限制。</desc>
+ 
+   <text class="lbl bold zh" x="20" y="32">β 值也是邊際統計</text>
+@@ -18,7 +17,7 @@
+ 
+   <!-- ══════════ 左 ══════════ -->
+   <rect class="box plain" x="20" y="100" width="470" height="336" rx="8"/>
+-  <text class="tick bold zh" x="40" y="126">組成 甲：同一群細胞的隨機起伏</text>
++  <text class="tick bold zh" x="40" y="126">組成 甲：六種分散的分子 pattern</text>
+   <text class="tick mid mono" x="110" y="152">1</text>
+   <text class="tick mid mono" x="190" y="152">2</text>
+   <text class="tick mid mono" x="270" y="152">3</text>
+@@ -71,7 +70,7 @@
+ 
+   <!-- ══════════ 右 ══════════ -->
+   <rect class="box plain" x="510" y="100" width="470" height="336" rx="8"/>
+-  <text class="tick bold zh" x="530" y="126">組成 乙：兩群細胞，各自一致</text>
++  <text class="tick bold zh" x="530" y="126">組成 乙：兩組一致的分子 pattern</text>
+   <text class="tick mid mono" x="600" y="152">1</text>
+   <text class="tick mid mono" x="680" y="152">2</text>
+   <text class="tick mid mono" x="760" y="152">3</text>
+@@ -123,6 +122,6 @@
+   <text class="tick bold zh met" x="530" y="426">不同的 epiallele：2 種</text>
+ 
+   <line class="axis" x1="20" y1="452" x2="980" y2="452"/>
+-  <text class="anno zh bold" x="20" y="482">同一條分子上的四個 CpG 一起看，才分得出「一群細胞在起伏」與「兩群細胞」。</text>
+-  <text class="anno zh" x="20" y="510">惟「兩群」亦可能為同一群細胞的兩條 haplotype，一條甲基化、一條不甲基化 —— 須與 HP 標籤比對方能區分。</text>
++  <text class="anno zh bold" x="20" y="482">同一分子的四個 CpG 可區分兩種分子組成；不能由此識別一群或兩群細胞。</text>
++  <text class="anno zh" x="20" y="510">HP 分層可檢查 allele-specific 解釋，但 read 無細胞標籤；CN／LOH、mapping、strand 與 batch 仍須排除。</text>
+ </svg>
+diff --git a/src/svg/m14-method-timeline.svg b/src/svg/m14-method-timeline.svg
+index e145938..b88a209 100644
+--- a/src/svg/m14-method-timeline.svg
++++ b/src/svg/m14-method-timeline.svg
+@@ -9,8 +9,9 @@
+         904 個腫瘤中有 323 個符合；留下的問題是 driver 變異的頻率偏向兩端，中性比例可能被高估。
+         第三列 2024 年的大規模評比，31 個程式在 51 個模擬腫瘤上跑，
+         把「答案不唯一」量化出來：換程式對結果的影響大於換腫瘤。
+-        第四列是換一種資訊來源，甲基化提供快約五個數量級的時鐘，
+-        長讀直接觀測同一分子上的共現；代價是這種觀測只在一條 read 跨得到的距離內成立。
++        第四列是換一種資訊來源：甲基化可提供受條件限制的區域關聯特徵，
++        但速率依位點、組織、選汰與 assay 而異，尚未校準成通用細胞時鐘；
++        長讀直接觀測同一分子上的共現，代價是這種觀測只在一條 read 跨得到的距離內成立。
+         讀法是：前三列都在同一份資訊裡想辦法，第四列才換掉資訊本身。</desc>
+ 
+   <text class="lbl bold zh" x="20" y="32">subclone 重建的四個轉折</text>
+@@ -54,8 +55,8 @@
+   <rect class="box accent" x="40" y="386" width="940" height="80" rx="8"/>
+   <text class="anno mono bold" x="56" y="416">2014–2025</text>
+   <text class="anno zh" x="56" y="442">換一種資訊</text>
+-  <text class="anno zh" x="250" y="416">甲基化：快約五個數量級的時鐘</text>
++  <text class="anno zh" x="250" y="416">甲基化：受條件限制的區域關聯特徵</text>
+   <text class="anno zh" x="250" y="442">長讀：同一分子上的共現是觀測值</text>
+-  <text class="anno zh warn" x="640" y="416">共現只在一條 read 跨得到</text>
+-  <text class="anno zh warn" x="640" y="442">的距離內成立</text>
++  <text class="anno zh warn" x="640" y="416">甲基化不是已校準通用時鐘；共現</text>
++  <text class="anno zh warn" x="640" y="442">只在一條 read 跨得到的距離內成立</text>
+ </svg>
+diff --git a/src/svg/rg-class-spectrum.svg b/src/svg/rg-class-spectrum.svg
+index 0f7a604..705bb53 100644
+--- a/src/svg/rg-class-spectrum.svg
++++ b/src/svg/rg-class-spectrum.svg
+@@ -8,12 +8,13 @@
+         下方列出重現性：同一個細胞株在不同機構、不同 basecaller 下的組成相似度是零點九零九，
+         同為乳癌的樣本之間是零點八四到零點九零，
+         兩個肺癌樣本之間是零點八六，跨癌別則掉到零點五九到零點七八。
+-        一個換了 basecaller 還能維持零點九零九、卻分得開癌別的統計量，帶著真的訊號。
++        零點九零九只表示該技術比較下的組成相似度；共同 coverage geometry 與 sample structure 仍可能 confound，
++        不能證明 truth、accuracy 或 biological validity。
+         最下方提醒：這張圖尚未針對覆蓋幾何做校正，所以類別比例還不能直接當成演化結論。
+         讀法是：這已經是一個可重現的全基因體單倍型頻譜，重新設計要建在它上面。</desc>
+ 
+   <text class="ttl zh" x="20" y="36">已經量到的全基因體譜</text>
+-  <text class="anno zh" x="20" y="66">七個資料集、六個生物樣本、chr1–22，每個連鎖區段是「連鎖視窗 × 單倍型家族」。</text>
++  <text class="anno zh" x="20" y="66">七個資料集、六個生物樣本、chr1–22；圖的共同分母為 71,955 ranked-eligible read groups。</text>
+ 
+   <text class="tick end" x="190" y="118">HCC1395_HKU</text>
+   <rect class="bar" x="200" y="102" width="242" height="22" rx="2"/>
+@@ -82,7 +83,7 @@
+   <!-- 重現性 -->
+   <rect class="box ok" x="24" y="418" width="952" height="60" rx="8"/>
+   <text class="anno zh" x="48" y="446">重現性：同細胞株換機構換 basecaller <tspan class="bold">0.909</tspan>；乳癌之間 0.84–0.90；</text>
+-  <text class="anno zh" x="48" y="470">兩個肺癌之間 0.86；跨癌別掉到 0.59–0.78。換了 basecaller 還守得住，代表訊號是真的。</text>
++  <text class="anno zh" x="48" y="470">兩個肺癌間 0.86；跨癌別 0.59–0.78。這是技術相似度，不是 truth 或 accuracy。</text>
+ 
+   <text class="anno zh bad" x="24" y="516">但這張圖還沒針對覆蓋幾何校正，所以類別比例還不能直接當成演化結論。</text>
+ </svg>
+diff --git a/src/svg/rg-detection-window.svg b/src/svg/rg-detection-window.svg
+index d180f16..c3f5291 100644
+--- a/src/svg/rg-detection-window.svg
++++ b/src/svg/rg-detection-window.svg
+@@ -1,60 +1,36 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450">
+-  <title>可分析的頻率連鎖視窗：傳統 VAF 擬合區間與譜系內比例區間的比較</title>
+-  <desc>兩條橫軸畫的是同一件事在兩條路線上的可用範圍，範圍都以「佔細胞的比例」為單位。
+-        上排是傳統做法：原始研究刻意只在 VAF 零點一二到零點二四之間擬合，
+-        更低的一端混著假陽性，更高的一端已經進入 clonal 峰。
+-        把它換算成細胞比例，在純度零點六的樣本上大約是零點四到零點八，是一段相當窄的區間。
+-        下排是本頁的做法：下界由每一個連鎖區段自己的深度與地板總量決定，不是一個固定常數，
+-        在每個家族六十條分子、地板總量千分之五時大約是零點零五；
+-        上界則由譜系內的 clonal 堆積決定，暫定零點五。
+-        右側的表列出下界怎麼隨分子數與地板總量變化。
+-        底下標出一個重要提醒：上界零點五是全文最弱的一個數字，必須由模擬重新推定。
+-        讀法是：把比例改成在譜系內部量，動態範圍不但沒有變窄，反而變寬了。</desc>
++  <title>Expected error background 不等於 detection limit</title>
++  <desc>delta times r 只表示候選 observation model 下的 state-specific expected background。
++        Detection limit 還取決於 molecule count、alpha、target power、multiple testing、overdispersion、
++        competing states 與 detector。必須先指定 decision rule，再用 simulation 或 power analysis 求解。</desc>
+ 
+-  <text class="ttl zh" x="20" y="36">可分析的比例連鎖視窗</text>
++  <text class="ttl zh" x="20" y="38">δ × r 是模型背景；偵測下界必須由決策規則與 power 求出</text>
+ 
+-  <!-- 上：傳統 -->
+-  <text class="lbl bold zh" x="20" y="92">傳統 VAF 擬合區間</text>
+-  <line class="axis" x1="60" y1="140" x2="620" y2="140"/>
+-  <text class="tick mid" x="60" y="166">0</text>
+-  <text class="tick mid" x="340" y="166">0.5</text>
+-  <text class="tick mid" x="620" y="166">1.0</text>
+-  <rect class="region bad" x="284" y="118" width="224" height="22" rx="4"/>
+-  <rect class="box ghost bad" x="284" y="118" width="224" height="22" rx="4"/>
+-  <text class="tick zh mid" x="396" y="112">換算成細胞比例約 0.4–0.8</text>
++  <rect class="box plain" x="20" y="82" width="250" height="188" rx="10"/>
++  <text class="lbl bold mid zh" x="145" y="118">模型背景</text>
++  <text class="anno bold mid" x="145" y="164">b = δᵥ rᵤ,ₕ</text>
++  <text class="tick mid zh" x="145" y="204">期望錯誤比例</text>
++  <text class="tick mid zh bad" x="145" y="240">不是 detection limit</text>
+ 
+-  <!-- 下：HFS -->
+-  <text class="lbl bold zh ok" x="20" y="236">HFS 譜系內比例區間</text>
+-  <line class="axis ok" x1="60" y1="284" x2="620" y2="284"/>
+-  <text class="tick mid" x="60" y="310">0</text>
+-  <text class="tick mid" x="340" y="310">0.5</text>
+-  <text class="tick mid" x="620" y="310">1.0</text>
+-  <rect class="region" x="88" y="262" width="252" height="22" rx="4"/>
+-  <rect class="box ghost ok" x="88" y="262" width="252" height="22" rx="4"/>
+-  <text class="tick zh mid" x="214" y="256">約 0.05–0.5，且下界逐連鎖區段計算</text>
++  <path class="flow" d="M276,176 L316,176" marker-end="url(#arrow)"/>
+ 
+-  <!-- 右側：下界表 -->
+-  <rect class="box" x="660" y="76" width="316" height="230" rx="8"/>
+-  <text class="lbl bold zh mid" x="818" y="106">下界隨深度變化</text>
+-  <text class="tick mid" x="712" y="136">分子數</text>
+-  <text class="tick mid" x="798" y="136">δ=0.005</text>
+-  <text class="tick mid" x="900" y="136">δ=0.01</text>
+-  <line class="guide" x1="680" y1="148" x2="956" y2="148"/>
+-  <text class="tick mono mid" x="712" y="176">20</text>
+-  <text class="tick mono mid" x="798" y="176">0.10</text>
+-  <text class="tick mono mid" x="900" y="176">0.12</text>
+-  <text class="tick mono mid" x="712" y="206">30</text>
+-  <text class="tick mono mid" x="798" y="206">0.08</text>
+-  <text class="tick mono mid" x="900" y="206">0.10</text>
+-  <text class="tick mono mid" x="712" y="236">60</text>
+-  <text class="tick mono mid ok" x="798" y="236">0.05</text>
+-  <text class="tick mono mid" x="900" y="236">0.07</text>
+-  <text class="tick mono mid" x="712" y="266">100</text>
+-  <text class="tick mono mid ok" x="798" y="266">0.04</text>
+-  <text class="tick mono mid" x="900" y="266">0.05</text>
+-  <text class="tick zh mid" x="818" y="294">下界不是常數，要逐連鎖區段算</text>
++  <rect class="box accent" x="324" y="62" width="352" height="228" rx="10"/>
++  <text class="lbl bold mid zh" x="500" y="100">先聲明 decision rule</text>
++  <text class="tick zh" x="350" y="140">• molecule count n／mask distribution</text>
++  <text class="tick zh" x="350" y="170">• type-I error α／target power 1−β</text>
++  <text class="tick zh" x="350" y="200">• multiple testing／competing states</text>
++  <text class="tick zh" x="350" y="230">• overdispersion／calibration uncertainty</text>
++  <text class="tick zh" x="350" y="260">• estimator or test statistic</text>
+ 
+-  <text class="anno zh ok" x="20" y="356">把比例改成在譜系內部量，動態範圍不但沒有變窄，反而變寬。</text>
+-  <text class="anno zh bad" x="20" y="390">但上界 0.5 是本頁最弱的一個數字：它是從傳統區間的比例類推來的，</text>
+-  <text class="anno zh bad" x="20" y="418">必須由模擬重新推定，不要當成已知常數引用。</text>
++  <path class="flow" d="M682,176 L722,176" marker-end="url(#arrow)"/>
++
++  <rect class="box ok" x="730" y="82" width="250" height="188" rx="10"/>
++  <text class="lbl bold mid zh" x="855" y="118">power analysis</text>
++  <text class="tick mid zh" x="855" y="158">simulation / analytic test</text>
++  <text class="tick mid zh" x="855" y="196">找最小可檢效應</text>
++  <text class="tick mid zh ok" x="855" y="236">輸出含 CI 與 strata</text>
++
++  <rect class="box warn" x="20" y="326" width="960" height="94" rx="10"/>
++  <text class="anno bold mid zh warn" x="500" y="362">沒有 α、power、n 與 detector，就不存在可引用的 0.05 下界。</text>
++  <text class="tick mid zh" x="500" y="392">每個 exact-PS×HP unit 需按 coverage、mask、error calibration 與 multiple testing 個別評估。</text>
+ </svg>
+diff --git a/src/svg/sr1-goal.svg b/src/svg/sr1-goal.svg
+index 5a0fd9d..98e61f5 100644
+--- a/src/svg/sr1-goal.svg
++++ b/src/svg/sr1-goal.svg
+@@ -1,103 +1,51 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540">
+-  <title>研究目標：用長讀定序把 subclone 的先後順序重建出來</title>
+-  <desc>上排三格由左到右說明這件事的形狀。
+-        第一格是腫瘤真實的樣子：同一顆腫瘤裡有好幾群細胞，每一群帶著不同的變異組合，
+-        而且群與群之間有先後關係 —— 某一群是從另一群長出來的。
+-        第二格為定序實際輸出的內容：細胞被打碎並混合，
+-        剩下的是一堆看不出來源的片段，以及每個位點各自的變異頻率，群的資訊在這一步掉了。
+-        第三格是要重建回來的東西：一棵樹，節點是一群細胞，
+-        邊代表在祖先的變異之上又多拿到一個，這棵樹叫 clone tree。
+-        中排說明長讀在這裡的角色。短讀僅能給出各位點各自的頻率，屬逐位點分離的資訊；
+-        長讀一條分子就跨過好幾個位點，因此直接看得到「這幾個變異有沒有出現在同一個分子上」，
+-        而那正是決定先後順序需要的東西。
+-        最下方是這兩頁的研究目標：用長讀把 subclone 的先後順序重建出來，
+-        並且說清楚重建到哪裡為止是可信的。
+-        讀法是：定序把群的資訊打散，重建就是把它拼回去，而長讀多帶了一種拼得回去的線索。</desc>
+-
+-  <text class="ttl zh" x="20" y="36">研究目標：把 subclone 的先後順序重建出來</text>
+-
+-  <!-- ① 真實的腫瘤 -->
+-  <rect class="box ghost" x="24" y="62" width="296" height="186" rx="8"/>
+-  <text class="lbl bold zh mid" x="172" y="92">① 腫瘤真實的樣子</text>
+-
+-  <rect class="box plain" x="44" y="108" width="80" height="56" rx="6"/>
+-  <circle class="cell tumor" cx="66" cy="128" r="10"/>
+-  <circle class="cell tumor" cx="92" cy="128" r="10"/>
+-  <circle class="cell tumor" cx="79" cy="150" r="10"/>
+-
+-  <rect class="box plain" x="136" y="108" width="80" height="56" rx="6"/>
+-  <circle class="cell clone1" cx="158" cy="128" r="10"/>
+-  <circle class="cell clone1" cx="184" cy="128" r="10"/>
+-  <circle class="cell clone1" cx="171" cy="150" r="10"/>
+-
+-  <rect class="box plain" x="228" y="108" width="80" height="56" rx="6"/>
+-  <circle class="cell clone2" cx="255" cy="128" r="10"/>
+-  <circle class="cell clone2" cx="281" cy="128" r="10"/>
+-
+-  <text class="tick mid" x="84" y="184">群 A</text>
+-  <text class="tick mid" x="176" y="184">群 B</text>
+-  <text class="tick mid" x="268" y="184">群 C</text>
+-
+-  <text class="tick zh mid" x="172" y="212">好幾群細胞，各帶不同的變異組合</text>
+-  <text class="tick zh mid" x="172" y="236">而且群之間有先後關係</text>
+-
+-  <!-- ② 定序所得 -->
+-  <rect class="box ghost" x="350" y="62" width="296" height="186" rx="8"/>
+-  <text class="lbl bold zh mid" x="498" y="92">② 定序所得</text>
+-
+-  <rect class="read hp0" x="372" y="110" width="120" height="12" rx="6"/>
+-  <rect class="read hp0" x="504" y="110" width="120" height="12" rx="6"/>
+-  <rect class="read hp0" x="386" y="128" width="120" height="12" rx="6"/>
+-  <rect class="read hp0" x="516" y="128" width="108" height="12" rx="6"/>
+-  <rect class="read hp0" x="372" y="146" width="132" height="12" rx="6"/>
+-  <rect class="read hp0" x="512" y="146" width="112" height="12" rx="6"/>
+-
+-  <text class="tick mono mid" x="498" y="184">VAF  0.31 · 0.18 · 0.29</text>
+-  <text class="tick zh mid" x="498" y="212">細胞被打碎，看不出誰跟誰同一群</text>
+-  <text class="tick zh mid bad" x="498" y="236">群的資訊在這一步掉了</text>
+-
+-  <!-- ③ 要重建的 -->
+-  <rect class="box accent" x="676" y="62" width="296" height="186" rx="8"/>
+-  <text class="lbl bold zh mid" x="824" y="92">③ 要重建回來的</text>
+-
+-  <circle class="mark ref" cx="824" cy="118" r="10"/>
+-  <line class="conn" x1="816" y1="126" x2="784" y2="152"/>
+-  <line class="conn" x1="832" y1="126" x2="864" y2="152"/>
+-  <circle class="mark somatic" cx="778" cy="160" r="10"/>
+-  <circle class="mark somatic" cx="870" cy="160" r="10"/>
+-  <line class="conn" x1="778" y1="170" x2="778" y2="188"/>
+-  <circle class="mark somatic" cx="778" cy="196" r="10"/>
+-
+-  <text class="tick zh mid" x="824" y="228">誰從誰長出來 —— 一棵 clone tree</text>
+-
+-  <path class="conn thick" d="M324,155 L346,155" marker-end="url(#arrow)"/>
+-  <path class="conn thick accent" d="M650,155 L672,155" marker-end="url(#arrow)"/>
+-  <text class="tick zh mid" x="335" y="272">定序</text>
+-  <text class="tick zh mid accent" x="661" y="272">重建</text>
+-
+-  <!-- 長讀的角色 -->
+-  <line class="guide" x1="24" y1="292" x2="976" y2="292"/>
+-  <text class="lbl bold zh" x="24" y="324">長讀在這裡的角色</text>
+-
+-  <circle class="mark somatic" cx="230" cy="352" r="6"/>
+-  <circle class="mark somatic" cx="300" cy="352" r="6"/>
+-  <circle class="mark somatic" cx="370" cy="352" r="6"/>
+-  <text class="anno zh end" x="212" y="368">短讀</text>
+-  <rect class="read hp0" x="204" y="360" width="52" height="12" rx="6"/>
+-  <rect class="read hp0" x="274" y="360" width="52" height="12" rx="6"/>
+-  <rect class="read hp0" x="344" y="360" width="52" height="12" rx="6"/>
+-  <text class="anno zh" x="430" y="368">只夠給每個位點各自的頻率</text>
+-
+-  <circle class="mark somatic" cx="230" cy="396" r="6"/>
+-  <circle class="mark somatic" cx="300" cy="396" r="6"/>
+-  <circle class="mark somatic" cx="370" cy="396" r="6"/>
+-  <text class="anno zh end" x="212" y="412">長讀</text>
+-  <rect class="read hp1" x="204" y="404" width="192" height="12" rx="6"/>
+-  <text class="anno zh ok" x="430" y="412">一條分子就跨過好幾個位點，</text>
+-  <text class="anno zh ok" x="430" y="438">因此直接看得到「這幾個變異在不在同一個分子上」</text>
+-
+-  <!-- 目標 -->
+-  <rect class="box accent" x="24" y="462" width="952" height="66" rx="8"/>
+-  <text class="anno zh" x="48" y="492">這兩頁的研究目標：<tspan class="bold">用長讀把 subclone 的先後順序重建出來</tspan>，</text>
+-  <text class="anno zh" x="48" y="518">並且說清楚重建到哪裡為止是可信的。</text>
++  <title>長期 cellular clone-tree 願景與目前局部分子候選的界線</title>
++  <desc>長期願景是重建細胞群與祖先關係，但 bulk ONT 直接觀測的是 DNA molecules。
++        現行 InterSubMod 只在 exact phase set、primary HP 與局部 genetic pattern 範圍內，
++        列舉 read-compatible minimum mutation-state candidate arborescences；read 不是 cell，
++        目前沒有 confirmed cellular clone、linear ancestry 或跨區段 cellular pairing。</desc>
++
++  <text class="ttl zh" x="20" y="38">先分清楚：研究願景、直接觀測、目前可交付結果</text>
++
++  <rect class="box accent" x="20" y="72" width="280" height="280" rx="12"/>
++  <text class="lbl bold mid zh" x="160" y="110">長期願景</text>
++  <text class="anno bold mid zh" x="160" y="150">cellular clone tree</text>
++  <circle class="mark ref" cx="160" cy="194" r="12"/>
++  <path class="conn" d="M152,205 L118,244 M168,205 L202,244"/>
++  <circle class="mark somatic" cx="110" cy="256" r="12"/>
++  <circle class="mark somatic" cx="210" cy="256" r="12"/>
++  <text class="tick mid zh" x="160" y="300">節點＝細胞群；邊＝祖先關係</text>
++  <text class="tick mid zh warn" x="160" y="330">目前尚未由 InterSubMod 驗證</text>
++
++  <path class="flow" d="M306,212 L344,212" marker-end="url(#arrow)"/>
++
++  <rect class="box plain" x="352" y="72" width="296" height="280" rx="12"/>
++  <text class="lbl bold mid zh" x="500" y="110">bulk ONT 直接觀測</text>
++  <rect class="read hp0" x="390" y="152" width="220" height="16" rx="8"/>
++  <circle class="mark somatic" cx="448" cy="160" r="6"/>
++  <circle class="mark somatic" cx="540" cy="160" r="6"/>
++  <rect class="read hp1" x="390" y="198" width="220" height="16" rx="8"/>
++  <circle class="mark somatic" cx="448" cy="206" r="6"/>
++  <rect class="read hp2" x="390" y="244" width="220" height="16" rx="8"/>
++  <circle class="mark somatic" cx="540" cy="252" r="6"/>
++  <text class="tick mid zh" x="500" y="298">同一分子上的局部 allele 共現</text>
++  <text class="tick mid zh bad" x="500" y="328">read ≠ cell；無 cell barcode</text>
++
++  <path class="flow" d="M654,212 L692,212" marker-end="url(#arrow)"/>
++
++  <rect class="box ok" x="700" y="72" width="280" height="280" rx="12"/>
++  <text class="lbl bold mid zh" x="840" y="110">目前可交付</text>
++  <text class="tick mid zh" x="840" y="146">exact PS × primary HP</text>
++  <text class="tick mid zh" x="840" y="174">local genetic patterns</text>
++  <path class="conn somatic" d="M840,208 L790,254 M840,208 L890,254"/>
++  <circle class="box plain" cx="840" cy="198" r="20"/>
++  <circle class="box plain" cx="784" cy="264" r="20"/>
++  <circle class="box plain" cx="896" cy="264" r="20"/>
++  <text class="tick mid zh" x="840" y="310">read-compatible candidate family</text>
++  <text class="tick mid zh ok" x="840" y="334">並列候選保留；read-AF 僅排序</text>
++
++  <rect class="box warn" x="20" y="390" width="960" height="122" rx="10"/>
++  <text class="anno bold zh warn" x="44" y="422">目前不可宣稱</text>
++  <text class="tick zh" x="44" y="452">cellular clone、linear ancestry、跨 HP／跨 phase set 的細胞配對、CN／LOH-aware CCF 或 calibrated likelihood</text>
++  <text class="tick zh" x="44" y="480">confirmed cellular clone = 0；confirmed linear ancestry = 0。數學候選唯一也不等於 biological truth。</text>
+ </svg>
+diff --git a/src/svg/sr1-label-or-not.svg b/src/svg/sr1-label-or-not.svg
+index 28c8908..20fb2d3 100644
+--- a/src/svg/sr1-label-or-not.svg
++++ b/src/svg/sr1-label-or-not.svg
+@@ -7,8 +7,8 @@
+         得到的峰位置跟 VAF 譜幾乎一樣，唯一的實質差別是分母：
+         VAF 的分母是該位點全部的 read，含兩個家族；單倍型頻率的分母只有同一個家族，
+         而且那個分母是就地量到的，不必用全域的純度與拷貝數換算。
+-        右邊是保留標籤：多出來的不是頻率，而是一個偏序 —— 誰包含誰、誰跟誰是兄弟。
+-        這是 VAF 譜沒有對應物的東西，兄弟還是祖孫不必再用簡約性猜。
++        右邊是保留標籤：多出來的是局部同分子相容與排斥關係。
++        在指定 state graph 中可形成候選偏序，但不能直接命名 cellular siblings 或 ancestors。
+         代價是標籤只在連鎖視窗內有定義，跨連鎖視窗匯總不了，所以全基因體的譜只能是不看標籤那一種。
+         最下方是關鍵的量化：在二十 kb 的連鎖視窗下，含變異的連鎖視窗裡有兩個以上變異的比例，
+         每 Mb 五個變異時只有百分之四點九，十個時百分之九點七，
+@@ -41,11 +41,11 @@
+   <text class="tick zh mid" x="742" y="142">HP1-1、HP1-2、HP2-1 各自是誰</text>
+ 
+   <text class="anno zh" x="532" y="180">多出來的不是頻率，是一個<tspan class="bold">偏序</tspan>：</text>
+-  <text class="tick zh" x="532" y="206">誰包含誰、誰跟誰是兄弟。</text>
++  <text class="tick zh" x="532" y="206">哪些 read patterns 相容或互斥。</text>
+   <text class="tick mono" x="532" y="228">HP1-1 ⊂ HP1　HP1-1 ∥ HP1-2</text>
+ 
+   <text class="anno bold zh" x="532" y="262">這是 VAF 譜沒有對應物的東西</text>
+-  <text class="tick zh" x="532" y="290">兄弟還是祖孫，不必再用簡約性猜。</text>
++  <text class="tick zh" x="532" y="290">可縮小數學候選；不確認 cellular lineage。</text>
+   <text class="tick zh bad" x="532" y="320">代價：標籤只在連鎖視窗內有定義，跨連鎖視窗匯總不了</text>
+   <text class="tick zh bad" x="532" y="342">（重要區分 #13）。全基因體的譜只能用 ①。</text>
+ 
+diff --git a/src/svg/sr1-longread-resolves.svg b/src/svg/sr1-longread-resolves.svg
+index b177aa1..c48911a 100644
+--- a/src/svg/sr1-longread-resolves.svg
++++ b/src/svg/sr1-longread-resolves.svg
+@@ -1,5 +1,5 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620">
+-  <title>同樣的兩個 VAF，短讀留下兩棵樹，長讀只剩一棵</title>
++  <title>同樣的兩個 VAF，長讀共現可縮小局部數學候選</title>
+   <desc>左右兩半用的是同一顆腫瘤、同樣兩個 somatic 位點、同樣十條分子，
+         兩邊算出來的 VAF 也完全一樣：A 是零點五零，B 是零點三零。
+         差別只在讀長。
+@@ -10,13 +10,13 @@
+         右半是長讀：一條分子就跨過兩個位點，所以每條 read 在兩個位點上都有值，
+         可以直接數出組合。十條裡面，兩個位點都是參考型的有五條，
+         只帶 A 的有兩條，兩個都帶的有三條，而只帶 B 的一條也沒有。
+-        只帶 B 的分子不存在這件事，直接排除掉「兩者各自長出」那棵樹，
+-        因為那棵樹必須要有只帶 B 的細胞。於是只剩下一棵。
++        只帶 B 的分子未被觀察到，在指定 toy model 與足夠 detection power 下可排除一種 pattern。
++        這不證明只帶 B 的細胞不存在，也不確認 cellular ancestry。
+         最下方點出關鍵：多出來的不是精度，是一種新的觀測 ——
+         邊際頻率不提供哪一格為空的資訊，而該空缺的一格正是決定樹形者。
+         讀法是：兩邊的 VAF 刻意做成一模一樣，所以差別只可能來自組合。</desc>
+ 
+-  <text class="ttl zh" x="20" y="36">同樣的兩個 VAF，短讀留下兩棵樹，長讀只剩一棵</text>
++  <text class="ttl zh" x="20" y="36">同樣的兩個 VAF，長讀共現可縮小局部數學候選</text>
+   <text class="anno zh" x="20" y="64">兩側為同一顆腫瘤、同樣十條分子。VAF 刻意設為相同，故差異僅可能來自組合是否可觀測。</text>
+ 
+   <!-- ══ 左：短讀 ══ -->
+@@ -159,7 +159,7 @@
+   <circle class="mark somatic" cx="822" cy="470" r="9"/>
+   <circle class="box ghost bad" cx="898" cy="470" r="9"/>
+   <text class="lbl bold bad" x="924" y="474">✗</text>
+-  <text class="tick zh mid bad" x="860" y="502">這棵樹需要「只帶 B」的細胞</text>
++  <text class="tick zh mid bad" x="860" y="502">toy model 預期有「只帶 B」</text>
+   <text class="tick zh mid bad" x="860" y="522">但一條分子也沒有</text>
+ 
+   <!-- ══ 關鍵 ══ -->
+diff --git a/src/svg/sr1-six-snv-reads.svg b/src/svg/sr1-six-snv-reads.svg
+index 7cb99fb..3551dd3 100644
+--- a/src/svg/sr1-six-snv-reads.svg
++++ b/src/svg/sr1-six-snv-reads.svg
+@@ -10,7 +10,7 @@
+         D、E、F 都是四除以二十等於零點二。
+         第二種逐單倍型數，得到沒有變異的那群佔九除以二十等於零點四五，
+         帶 A B C 的那群佔零點三五，帶 D E F 的那群佔零點二。
+-        最下方指出：因為沒有分子同時帶兩組，帶 A B C 與帶 D E F 的兩群是兄弟不是祖孫，
++        最下方指出：因為沒有分子同時帶兩組，在指定 toy state graph 下可排除串接候選；
+         而這件事只有在一條分子跨得過這六個位點時才數得出來。
+         讀法是：兩種頻率譜的數字都從這一張圖來，差別只在數的時候把什麼當成一個連鎖區段。</desc>
+ 
+@@ -187,5 +187,5 @@
+   <text class="tick zh" x="532" y="472">三條單倍型 → 三個數字</text>
+ 
+   <rect class="box accent" x="24" y="486" width="952" height="36" rx="8"/>
+-  <text class="tick zh" x="48" y="510">沒有分子同時帶 A B C 與 D E F，所以 HP1-1 與 HP1-2 是<tspan class="bold">兄弟</tspan> —— 而這只有在一條分子跨得過這六個位點時才數得出來。</text>
++  <text class="tick zh" x="48" y="510">沒有分子同時帶 A B C 與 D E F；在指定 toy model 下可排除串接候選，但不能確認 cellular siblings。</text>
+ </svg>
+diff --git a/src/svg/sr1-two-spectra.svg b/src/svg/sr1-two-spectra.svg
+index 153b453..3244937 100644
+--- a/src/svg/sr1-two-spectra.svg
++++ b/src/svg/sr1-two-spectra.svg
+@@ -1,5 +1,5 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700">
+-  <title>同一組 SNV，兩種頻率譜：VAF 譜留下兩棵樹，單倍型頻率譜只剩一棵</title>
++  <title>同一組 SNV 的位點邊際與局部分子 pattern 頻率</title>
+   <desc>同一個連鎖視窗、同一組六個 somatic SNV，兩種把它們整理成直方圖的方式，橫軸都是頻率。
+         這個連鎖視窗的分子組成是：四成五沒有任何體細胞變異，三成五帶著 A、B、C 三個變異，
+         兩成帶著 D、E、F 三個變異，而且沒有任何一條分子同時帶著這兩組。
+@@ -8,15 +8,13 @@
+         讀出來是「有兩群，各佔零點三五與零點二」，
+         但這兩個數字同時相容於兩棵樹：零點二可以是零點三五的後代，也可以是它的兄弟，
+         因為兩種都通過那條算術檢查，所以分不出來。
+-        右邊是單倍型頻率譜：每一個數字來自一條單倍型，所以只有三個點，每根長條高度都是一。
++        右邊是局部分子 pattern 頻率：每一個數字來自一種 read pattern，所以只有三個點，每根長條高度都是一。
+         三根分別是 HP1-2 佔零點二、HP1-1 佔零點三五、HP1 佔零點四五。
+-        注意零點四五那一根在左邊完全不存在，因為那群細胞在這個連鎖視窗沒有任何變異，
++        注意零點四五那一根在左邊完全不存在，因為那種分子 pattern 在這個連鎖視窗沒有任何變異，
+         沒有變異就沒有 VAF。
+-        而且標籤說明 HP1-1 與 HP1-2 都直接掛在 HP1 底下，是兄弟不是祖孫，
+-        於是分支那棵樹是唯一解。
+-        最下方指出兩項本質差異：左側每根長條計數的是變異，右側計數的是細胞群；
+-        左邊的頻率是邊際，右邊的頻率帶著隸屬關係。
+-        讀法是：同一組 SNV，換掉頻率的連鎖區段之後，連樹的形狀都跟著定下來了。</desc>
++        在指定 toy state graph 內，共現資料可排除一種數學候選。
++        最下方指出兩項本質差異：左側每根長條計數變異，右側計數局部分子 patterns；
++        左邊是邊際，右邊保留同一分子共現。read pattern 不是細胞群，數學唯一候選也不是 biological truth。</desc>
+ 
+   <text class="ttl zh" x="20" y="36">同一組 SNV，兩種頻率譜</text>
+   <text class="anno zh" x="20" y="64">一個連鎖視窗、六個 somatic SNV。組成：<tspan class="mono">45%</tspan> 沒有變異、<tspan class="mono">35%</tspan> 帶 A B C、<tspan class="mono">20%</tspan> 帶 D E F，且沒有分子同時帶兩組。</text>
+@@ -65,8 +63,8 @@
+ 
+   <!-- ══ 右：單倍型頻率譜 ══ -->
+   <rect class="box ghost ok" x="508" y="84" width="468" height="530" rx="8"/>
+-  <text class="lbl bold zh mid" x="742" y="116">單倍型頻率譜</text>
+-  <text class="tick zh mid" x="742" y="140">每一根：有幾<tspan class="bold">條單倍型</tspan>落在這個頻率</text>
++  <text class="lbl bold zh mid" x="742" y="116">局部分子 pattern 頻率</text>
++  <text class="tick zh mid" x="742" y="140">每一根：有幾種<tspan class="bold">read pattern</tspan>落在這個頻率</text>
+ 
+   <text class="tick mono mid" x="702" y="248">HP1-2</text>
+   <text class="tick mono mid" x="813" y="248">HP1-1</text>
+@@ -81,7 +79,7 @@
+   <text class="tick mid" x="813" y="310">0.35</text>
+   <text class="tick mid" x="887" y="310">0.45</text>
+ 
+-  <text class="tick zh mid" x="742" y="338">三條單倍型 → 三個點，每根高度都是 1</text>
++  <text class="tick zh mid" x="742" y="338">三種 read pattern → 三個點，每根高度都是 1</text>
+ 
+   <line class="guide" x1="532" y1="358" x2="952" y2="358"/>
+ 
+@@ -89,7 +87,7 @@
+   <text class="tick zh" x="532" y="414">標籤說明 HP1-1 與 HP1-2 都掛在 HP1 底下，</text>
+   <text class="tick zh" x="532" y="438">而且沒有分子同時帶 A B C 與 D E F。</text>
+ 
+-  <text class="tick zh mid" x="634" y="472">後代</text>
++  <text class="tick zh mid" x="634" y="472">串接候選</text>
+   <circle class="mark ref" cx="634" cy="492" r="8"/>
+   <line class="conn bad" x1="634" y1="500" x2="634" y2="516"/>
+   <circle class="mark somatic" cx="634" cy="524" r="8"/>
+@@ -97,7 +95,7 @@
+   <circle class="box ghost bad" cx="634" cy="556" r="8"/>
+   <text class="lbl bold bad" x="668" y="528">✗</text>
+ 
+-  <text class="tick zh mid" x="854" y="472">兄弟</text>
++  <text class="tick zh mid" x="854" y="472">分岔候選</text>
+   <circle class="mark ref" cx="854" cy="492" r="8"/>
+   <line class="conn" x1="846" y1="500" x2="826" y2="518"/>
+   <line class="conn" x1="862" y1="500" x2="882" y2="518"/>
+@@ -105,10 +103,10 @@
+   <circle class="mark somatic" cx="888" cy="526" r="8"/>
+   <text class="lbl bold ok" x="912" y="528">✓</text>
+ 
+-  <text class="anno zh ok mid" x="742" y="594">只剩一棵 —— 樹定下來了</text>
++  <text class="anno zh ok mid" x="742" y="594">toy model 內只剩一個數學候選</text>
+ 
+   <!-- ══ 兩個根本差別 ══ -->
+   <rect class="box accent" x="24" y="634" width="952" height="60" rx="8"/>
+-  <text class="anno zh" x="48" y="662">① 左側每根長條計數的是<tspan class="bold">變異</tspan>，右側計數的是<tspan class="bold">細胞群</tspan>。0.45 一根在左側無法繪出 —— 無變異即無 VAF。</text>
+-  <text class="anno zh" x="48" y="686">② 左邊的頻率是邊際，右邊的頻率<tspan class="bold">帶著隸屬關係</tspan>，所以「兄弟還是祖孫」不必再猜。</text>
++  <text class="anno zh" x="48" y="662">① 左側計數<tspan class="bold">變異</tspan>，右側計數<tspan class="bold">局部分子 patterns</tspan>。0.45 一根在左側無法繪出 —— 無變異即無 VAF。</text>
++  <text class="anno zh" x="48" y="686">② 右側保留同分子共現，可縮小模型候選；read pattern 不是細胞群，數學唯一也不是 biological truth。</text>
+ </svg>
+diff --git a/src/svg/sr2-two-topologies.svg b/src/svg/sr2-two-topologies.svg
+index 04f493b..0addaf7 100644
+--- a/src/svg/sr2-two-topologies.svg
++++ b/src/svg/sr2-two-topologies.svg
+@@ -1,5 +1,5 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 990">
+-  <title>三份證據如何把相容的候選樹砍到只剩一棵：頻率譜給一棵部分決定的樹，兩個連鎖區段各給一個局部拓撲</title>
++  <title>Toy model 中三份證據如何縮小數學候選集合</title>
+   <desc>本圖延續前一個數值例，純度零點六、二倍體，A、B、C 的細胞比例是一點零零、
+         零點四零、零點四零，另加第四群 D，細胞比例零點二零，是 B 的後代。
+         上排是三份證據各自說了什麼。
+@@ -27,11 +27,11 @@
+         下排是候選樹的數量如何被砍下來。只用頻率譜時群數估成三，候選兩棵，
+         而且群數本身是錯的。加入甲之後群數修正為四；在四群的狀態空間裡
+         若沒有任何關係約束，候選會有七棵，甲的互不包含把它砍成三棵。
+-        再加入乙的巢狀關係，候選只剩一棵，也就是最右邊那棵樹。
+-        最後標注：樹的形狀是唯一的，但那兩群頻率相同，
++        再加入乙的巢狀關係，在指定 toy candidate space 內只剩一棵。
++        這是模型內數學唯一，不是 biological truth；最後標注兩群頻率相同，
+         所以它們的標號可以整組對調，編號本來就是任意的。</desc>
+ 
+-  <text class="ttl zh" x="20" y="38">三份證據，各補上樹的一部分</text>
++  <text class="ttl zh" x="20" y="38">Toy example：三份證據縮小模型內候選集合</text>
+   <text class="anno zh" x="20" y="66">延續前例：ρ ＝ 0.60、二倍體、μ ＝ 1；A ＝ 1.00、B ＝ C ＝ 0.40，另加 D ＝ 0.20（B 的後代）。</text>
+   <line class="axis" x1="20" y1="86" x2="980" y2="86"/>
+ 
+@@ -158,7 +158,7 @@
+ 
+   <!-- ═══════════ 候選樹被砍到只剩一棵 ═══════════ -->
+   <line class="axis" x1="20" y1="820" x2="980" y2="820"/>
+-  <text class="lbl bold zh" x="20" y="854">合起來：相容的候選樹被砍到只剩一棵</text>
++  <text class="lbl bold zh" x="20" y="854">合起來：指定 toy candidate space 內剩一個數學候選</text>
+ 
+   <rect class="box bad" x="20" y="870" width="190" height="96" rx="8"/>
+   <text class="tick bold zh mid bad" x="115" y="894">只用頻率譜</text>
+@@ -179,7 +179,7 @@
+   <rect class="box ok" x="568" y="870" width="176" height="96" rx="8"/>
+   <text class="tick bold zh mid ok" x="656" y="894">再加巢狀關係</text>
+   <text class="lbl bold mid ok" x="656" y="926">1 棵</text>
+-  <text class="tick zh mid" x="656" y="952">唯一解</text>
++  <text class="tick zh mid" x="656" y="952">模型內唯一</text>
+ 
+   <rect class="box ok" x="762" y="870" width="218" height="96" rx="8"/>
+   <circle class="mark germline" cx="812" cy="890" r="12"/><text class="tick mid" x="812" y="895">A</text>
+@@ -189,7 +189,7 @@
+   <circle class="mark hp2" cx="846" cy="921" r="12"/><text class="tick mid" x="846" y="926">Q</text>
+   <path class="conn thick" d="M778,933 L778,944" marker-end="url(#arrow-sm)"/>
+   <circle class="mark artifact" cx="778" cy="952" r="12"/><text class="tick mid" x="778" y="957">D</text>
+-  <text class="tick zh" x="866" y="916">形狀唯一；</text>
++  <text class="tick zh" x="866" y="916">模型內形狀唯一；</text>
+   <text class="tick zh" x="866" y="938">P、Q 標號</text>
+   <text class="tick zh" x="866" y="960">可整組對調</text>
+ </svg>
+diff --git a/src/svg/sr2b-emission.svg b/src/svg/sr2b-emission.svg
+index 3dfbe74..064c39a 100644
+--- a/src/svg/sr2b-emission.svg
++++ b/src/svg/sr2b-emission.svg
+@@ -1,10 +1,10 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720">
+-  <title>生成模型：從全域的 clone 一路長到一條 read 上看到的字母</title>
++  <title>已取代的候選生成鏈：從全域假設到 read observation</title>
+   <desc>五層，上排三格下排兩格，每一層只做一件事，中間沒有自由參數。
+         第一層是全域物件：一棵 clone tree、每個 clone 的細胞比例，以及每個突變掛在哪個 clone 上。
+         全基因體只有這一份，所有連鎖區段共用。
+-        第二層把全域物件投影到一個連鎖區段上。一個連鎖區段是一個連鎖視窗乘一個單倍型家族，
+-        所以只看得到一條染色體拷貝，另一條拷貝屬於另一個連鎖區段。
++        第二層把全域物件投影到一個連鎖區段上；單倍型家族是觀測 HP read group，
++        只有在 diploid、CN-neutral、phasing 正確時才近似一個 homologous background，不識別實體 copy。
+         投影的結果是每個 clone 在這個連鎖區段上的局部基因型，
+         例如全參考、只帶第二個突變、三個都帶。
+         第三層把細胞比例換成分子比例：一個細胞貢獻幾條分子，取決於它在這裡有幾份拷貝，
+@@ -21,7 +21,7 @@
+         而局部表格不是第二批資料，同一批 read 不可以在兩邊各算一次。
+         讀法是：局部看到的每一個數字，都是同一組全域參數投影下來的。</desc>
+ 
+-  <text class="ttl zh" x="20" y="36">生成模型：全域 clone → 連鎖區段 → 分子 → 通道 → 一條 read</text>
++  <text class="ttl zh" x="20" y="36">SUPERSEDED 候選鏈：全域假設 → read group → 通道 → observation</text>
+ 
+   <!-- ① 全域 -->
+   <rect class="box accent" x="18" y="58" width="308" height="212" rx="8"/>
+@@ -51,8 +51,8 @@
+   <rect class="read hp1" x="362" y="190" width="180" height="20" rx="10"/>
+   <text class="tick mono" x="370" y="205">111</text>
+   <text class="tick zh" x="556" y="205">clone B</text>
+-  <text class="tick bold zh" x="362" y="238">只看得到一條拷貝</text>
+-  <text class="tick zh" x="362" y="260">另一條在另一個連鎖區段裡</text>
++  <text class="tick bold zh" x="362" y="238">只觀察到一個 HP read group</text>
++  <text class="tick zh" x="362" y="260">不保證是單一實體 chromosome copy</text>
+ 
+   <!-- ③ 分子 -->
+   <rect class="box" x="674" y="58" width="308" height="212" rx="8"/>
+@@ -106,7 +106,7 @@
+   <text class="lbl bold zh" x="528" y="546">合併在哪裡發生</text>
+   <text class="tick zh" x="528" y="576">每個連鎖區段各自跑完 ②③④⑤，</text>
+   <text class="tick zh" x="528" y="600">但都由同一組 ① 算出來，</text>
+-  <text class="tick bold zh accent" x="528" y="624">相乘即完成，不需要對齊步驟。</text>
++  <text class="tick bold zh accent" x="528" y="624">只有條件獨立成立時才可相乘；尚待驗證。</text>
+ 
+   <text class="anno bold zh bad" x="18" y="678">局部表格不是第二批資料：它與 95% 連鎖視窗的 VAF 由同一組參數產生。</text>
+   <text class="tick zh" x="18" y="706">所以同一批 read 不可以在兩邊各算一次 —— 多變異連鎖區段的邊際 VAF 已含在它的聯合表裡。</text>
+diff --git a/src/svg/sr2b-error-two-sources.svg b/src/svg/sr2b-error-two-sources.svg
+index d9ab45e..057b733 100644
+--- a/src/svg/sr2b-error-two-sources.svg
++++ b/src/svg/sr2b-error-two-sources.svg
+@@ -1,68 +1,41 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500">
+-  <title>平台固定住的是逐位點錯誤，不是家族誤標</title>
+-  <desc>圖比較同一台機器、同一個 basecaller 在兩個不同區域的行為。
+-        上排是雜合位點密集的區域：定相有很多錨點，phase block 長，
+-        分子被標到正確家族的把握高，所以家族誤標率低。
+-        下排是雜合位點稀疏的區域：錨點少，phase block 短，
+-        同一台機器下的家族誤標率可以高一個數量級。
+-        兩排的逐位點錯誤率則幾乎一樣，因為它由平台與 basecaller 決定。
+-        結論寫在下方：把逐位點錯誤當成校準過的已知量大致無害，
+-        因為它隨差異位點數以指數下降；
+-        但家族誤標與位點數無關，在多位點時它幾乎單獨決定錯誤地板，
+-        而它衡量的是定相品質而不是定序品質，所以平台固定完全不決定它。</desc>
+-
+-  <text class="ttl zh" x="20" y="38">同一台機器，兩個區域，兩種行為</text>
+-
+-  <!-- ── 上排：雜合位點密集 ─────────────────────────────────────── -->
+-  <rect class="box" x="20" y="62" width="960" height="150" rx="10"/>
+-  <text class="lbl bold zh" x="40" y="94">雜合位點<tspan class="bold">密集</tspan>的區域</text>
+-
+-  <line class="axis" x1="40" y1="122" x2="600" y2="122"/>
+-  <circle class="mark germline" cx="70" cy="122" r="6"/>
+-  <circle class="mark germline" cx="118" cy="122" r="6"/>
+-  <circle class="mark germline" cx="172" cy="122" r="6"/>
+-  <circle class="mark germline" cx="228" cy="122" r="6"/>
+-  <circle class="mark germline" cx="286" cy="122" r="6"/>
+-  <circle class="mark germline" cx="342" cy="122" r="6"/>
+-  <circle class="mark germline" cx="404" cy="122" r="6"/>
+-  <circle class="mark germline" cx="462" cy="122" r="6"/>
+-  <circle class="mark germline" cx="524" cy="122" r="6"/>
+-  <circle class="mark germline" cx="578" cy="122" r="6"/>
+-  <text class="tick zh" x="40" y="150">錨點多 → phase block 長 → 家族標得準</text>
+-
+-  <rect class="box ok" x="628" y="86" width="160" height="106" rx="8"/>
+-  <text class="tick zh mid" x="708" y="114">ε　逐位點</text>
+-  <text class="lbl bold zh ok mid" x="708" y="148">基準值</text>
+-  <text class="tick zh mid" x="708" y="174">由平台決定</text>
+-
+-  <rect class="box ok" x="808" y="86" width="152" height="106" rx="8"/>
+-  <text class="tick zh mid" x="884" y="114">ξ　家族誤標</text>
+-  <text class="lbl bold zh ok mid" x="884" y="148">低</text>
+-  <text class="tick zh mid" x="884" y="174">錨點充足</text>
+-
+-  <!-- ── 下排：雜合位點稀疏 ─────────────────────────────────────── -->
+-  <rect class="box" x="20" y="228" width="960" height="150" rx="10"/>
+-  <text class="lbl bold zh" x="40" y="260">雜合位點<tspan class="bold">稀疏</tspan>的區域</text>
+-
+-  <line class="axis" x1="40" y1="288" x2="600" y2="288"/>
+-  <circle class="mark germline" cx="96" cy="288" r="6"/>
+-  <circle class="mark germline" cx="304" cy="288" r="6"/>
+-  <circle class="mark germline" cx="536" cy="288" r="6"/>
+-  <text class="tick zh" x="40" y="316">錨點少 → phase block 短 → 家族容易標錯</text>
+-
+-  <rect class="box ok" x="628" y="252" width="160" height="106" rx="8"/>
+-  <text class="tick zh mid" x="708" y="280">ε　逐位點</text>
+-  <text class="lbl bold zh ok mid" x="708" y="314">幾乎不變</text>
+-  <text class="tick zh mid" x="708" y="340">機器沒換</text>
+-
+-  <rect class="box bad" x="808" y="252" width="152" height="106" rx="8"/>
+-  <text class="tick zh mid" x="884" y="280">ξ　家族誤標</text>
+-  <text class="lbl bold zh bad mid" x="884" y="314">高一個級距</text>
+-  <text class="tick zh mid" x="884" y="340">錨點不足</text>
+-
+-  <!-- ── 底部結論 ───────────────────────────────────────────────── -->
+-  <rect class="box warn" x="20" y="394" width="960" height="92" rx="10"/>
+-  <text class="lbl bold zh warn" x="40" y="426">ξ 衡量的是<tspan class="bold">定相</tspan>品質，不是<tspan class="bold">定序</tspan>品質</text>
+-  <text class="tick zh" x="40" y="456">所以「平台固定所以錯誤率已知」對 ε 大致成立，對 ξ 完全不成立 ——</text>
+-  <text class="tick zh" x="40" y="478">而多位點時錯誤地板幾乎由 ξ 單獨決定，因為 ε 隨差異位點數以指數掉下去。</text>
++  <title>觀測錯誤是多通道問題，主導來源需校準</title>
++  <desc>逐位點 allele error、family-label transition、mapping/reference bias、chimera 與 partial coverage
++        都可能產生錯誤 pattern。epsilon 與 xi 都不是平台一固定就已知的常數；它們的相對量級、
++        region dependence 與 identifiability 必須以 known-truth simulation、ablation 與 calibration curve 驗證。</desc>
++
++  <text class="ttl zh" x="20" y="40">錯誤地板不是 ε 與 ξ 的口號：需要完整通道與 calibration</text>
++
++  <rect class="box plain" x="20" y="76" width="220" height="250" rx="10"/>
++  <text class="lbl bold mid zh" x="130" y="112">allele error ε</text>
++  <text class="tick mid zh" x="130" y="150">basecaller</text>
++  <text class="tick mid zh" x="130" y="180">sequence context</text>
++  <text class="tick mid zh" x="130" y="210">correlated errors</text>
++  <text class="tick mid zh warn" x="130" y="278">不一定是 εʳ</text>
++
++  <rect class="box plain" x="260" y="76" width="220" height="250" rx="10"/>
++  <text class="lbl bold mid zh" x="370" y="112">family transition ξ</text>
++  <text class="tick mid zh" x="370" y="150">anchor density</text>
++  <text class="tick mid zh" x="370" y="180">phase confidence</text>
++  <text class="tick mid zh" x="370" y="210">mask／state distance</text>
++  <text class="tick mid zh warn" x="370" y="278">量級尚未估計</text>
++
++  <rect class="box plain" x="500" y="76" width="220" height="250" rx="10"/>
++  <text class="lbl bold mid zh" x="610" y="112">alignment channels</text>
++  <text class="tick mid zh" x="610" y="150">mapping／reference bias</text>
++  <text class="tick mid zh" x="610" y="180">chimera</text>
++  <text class="tick mid zh" x="610" y="210">local repeats</text>
++  <text class="tick mid zh warn" x="610" y="278">不能省略</text>
++
++  <rect class="box plain" x="740" y="76" width="240" height="250" rx="10"/>
++  <text class="lbl bold mid zh" x="860" y="112">sampling／coverage</text>
++  <text class="tick mid zh" x="860" y="150">partial masks</text>
++  <text class="tick mid zh" x="860" y="180">PCR／duplicates</text>
++  <text class="tick mid zh" x="860" y="210">overdispersion</text>
++  <text class="tick mid zh warn" x="860" y="278">影響背景與 power</text>
++
++  <rect class="box accent" x="20" y="358" width="960" height="108" rx="10"/>
++  <text class="anno bold mid zh" x="500" y="394">所需驗證：known-truth simulation × region strata × ablation</text>
++  <text class="tick mid zh" x="500" y="424">比較 calibration、false-positive pattern、coverage dependence 與參數可識別性</text>
++  <text class="tick mid zh bad" x="500" y="450">驗證前不得宣稱 ξ 高一個數量級、ξ 主導 k≥2，或固定 ε 大致無害。</text>
+ </svg>
+diff --git a/src/svg/sr2b-infinite-sites.svg b/src/svg/sr2b-infinite-sites.svg
+index 5a8088b..70049f4 100644
+--- a/src/svg/sr2b-infinite-sites.svg
++++ b/src/svg/sr2b-infinite-sites.svg
+@@ -1,7 +1,7 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520">
+   <title>無限位點假設違反時，錯的不是節點而是拓撲</title>
+   <desc>圖分成三欄。左欄是假設成立的情形：每個突變在整棵樹上只發生一次，
+-        所以兩個細胞群共同帶有某個突變，就真的代表它們共享一個祖先，重建出來的樹是對的。
++        在該 toy assumption 下，共享突變被模型解讀為共享祖先；這不是生物真值證明。
+         中欄是重複突變：同一個位點在兩支各自獨立發生一次，
+         資料上看起來和共享祖先完全一樣，於是兩支被錯誤地併到同一個祖先之下。
+         右欄是突變遺失：某支的突變被刪除或因雜合性缺失而消失，
+@@ -9,7 +9,7 @@
+         三欄的觀測都不會產生任何錯誤訊息，差別只在重建出來的樹是對是錯。
+         重點是這兩種違反改動的是樹的形狀本身，不是多補一個潛在節點就能修掉的問題。</desc>
+ 
+-  <text class="ttl zh" x="20" y="38">違反時，錯的是樹的形狀</text>
++  <text class="ttl zh" x="20" y="38">Infinite-sites 限制候選形狀；現行局部模型允許 recurrence</text>
+ 
+   <!-- ── 左欄：假設成立 ─────────────────────────────────────────── -->
+   <rect class="box ok" x="20" y="62" width="306" height="330" rx="10"/>
+@@ -26,7 +26,8 @@
+   <rect class="box sunken" x="40" y="272" width="266" height="102" rx="8"/>
+   <text class="tick zh" x="58" y="300">共同帶有某突變</text>
+   <text class="tick zh" x="58" y="324">＝ 真的共享祖先</text>
+-  <text class="tick zh ok" x="58" y="356">→ 重建出來的樹是對的</text>
++  <text class="tick zh ok" x="58" y="348">→ toy model 內相容</text>
++  <text class="tick zh ok" x="58" y="370">≠ biological truth</text>
+ 
+   <!-- ── 中欄：重複突變 ─────────────────────────────────────────── -->
+   <rect class="box bad" x="346" y="62" width="306" height="330" rx="10"/>
+diff --git a/src/svg/sr2b-read-partition.svg b/src/svg/sr2b-read-partition.svg
+index 858becb..2351d69 100644
+--- a/src/svg/sr2b-read-partition.svg
++++ b/src/svg/sr2b-read-partition.svg
+@@ -10,8 +10,8 @@
+         兩個以上變異的視窗，每條 read 覆蓋的位點各不相同，
+         所以要保留逐條 read 的聯合狀態與覆蓋遮罩，形成多位點因子，
+         而同一個視窗的兩條單倍型家族在這個因子內一起計算。
+-        兩路沒有共用任何一條 read，因此兩個因子是相乘而不是相加，也就不需要權重。
+-        相乘得到完整的 likelihood，再扣掉複雜度、加上群數先驗，才是目標函數 Score。
++        歷史提案假設兩路沒有共用 read，並進一步假設給定參數後條件獨立；只有兩條件皆成立才可相乘。
++        相乘得到候選 data factorization，再扣掉複雜度、加上群數先驗形成候選 Score；尚未校準或驗證。
+         最後跨不同的 K 比較 Score，取最大者。
+         右側的回頭箭頭是整個流程的關鍵：這不是一次算完，
+         外層換一組 K 與離散結構，內層調細胞比例，重算分數再比一次。</desc>
+@@ -88,15 +88,15 @@
+ 
+   <!-- 互斥保證 -->
+   <rect class="box warn" x="60" y="566" width="640" height="50" rx="8"/>
+-  <text class="tick zh mid" x="380" y="596">兩路沒有共用任何一條 read —— 所以是相乘，不是相加，也就不需要權重</text>
++  <text class="tick zh mid" x="380" y="596">無 read 重疊仍不夠：還須證明給定參數後條件獨立與 observation model 完整</text>
+ 
+   <path class="conn thick" d="M380,616 L380,648" marker-end="url(#arrow-sm)"/>
+ 
+   <!-- ══ ③ likelihood ═════════════════════════════════════════════ -->
+   <rect class="box" x="60" y="650" width="640" height="76" rx="10"/>
+-  <text class="lbl bold zh" x="80" y="682">③ 相乘就是完整的 likelihood</text>
++  <text class="lbl bold zh" x="80" y="682">③ 候選 factorization（尚未驗證）</text>
+   <text class="tick zh" x="80" y="710">L<tspan style="font-size:11px" dy="3">data</tspan><tspan dy="-3"> ＝ Σ log P</tspan><tspan style="font-size:11px" dy="3">BB</tspan><tspan dy="-3"> ＋ Σ log P</tspan><tspan style="font-size:11px" dy="3">v</tspan></text>
+-  <text class="tick zh" x="400" y="710">每條 read 恰好計算一次</text>
++  <text class="tick zh" x="400" y="710">需以 simulation 驗證 coverage 與條件獨立</text>
+ 
+   <path class="conn thick" d="M380,726 L380,752" marker-end="url(#arrow-sm)"/>
+ 
+diff --git a/src/svg/sr2b-two-factors.svg b/src/svg/sr2b-two-factors.svg
+index b984a1d..fd4e72a 100644
+--- a/src/svg/sr2b-two-factors.svg
++++ b/src/svg/sr2b-two-factors.svg
+@@ -12,7 +12,8 @@
+         兩條細帶因此不再上下重疊。
+         圖最下方用讀圖示表示兩段各留下什麼資料：左段只留一個位點的 alt 與 ref 計數，
+         右段留下逐條 read 跨越多個位點的聯合狀態與覆蓋遮罩。
+-        因此兩個因子可以直接相乘得到完整的 likelihood，權重也就不需要存在。</desc>
++        資料不重疊只是乘積成立的必要條件之一；仍須給定參數後條件獨立、完整 observation model 與 calibration。
++        因此下半只能稱候選 factorization，不能稱完整 likelihood。</desc>
+ 
+   <text class="ttl zh" x="20" y="42">相加為什麼不是 likelihood：看取用範圍就知道</text>
+ 
+@@ -73,5 +74,5 @@
+   <circle class="mark ref" cx="860" cy="553" r="6"/>
+   <text class="tick zh end" x="950" y="578">留逐條 read 的聯合狀態與遮罩</text>
+ 
+-  <text class="lbl bold zh ok" x="20" y="616">兩段沒有交集 → 相乘就是完整的 likelihood → 權重不必存在</text>
++  <text class="lbl bold zh ok" x="20" y="616">兩段沒有交集 ＋ 條件獨立 ＋ 模型完整 → 才能相乘；目前仍是未驗證候選</text>
+ </svg>
+diff --git a/src/svg/sr2b-two-loops.svg b/src/svg/sr2b-two-loops.svg
+index 33b3f4e..666329f 100644
+--- a/src/svg/sr2b-two-loops.svg
++++ b/src/svg/sr2b-two-loops.svg
+@@ -9,12 +9,12 @@
+         正是在這裡先把不相容的全域結構排除掉。
+         最內層是連續參數的最佳化：結構固定之後只剩細胞比例 w，
+         自由度只有 K 個，定義域是一個 simplex，
+-        直接用受限最佳化即可，不需要 EM 或 MCMC。
+-        下方標出成本的分布：幾乎全部落在中間那層，內層是幾毫秒的事。
++        可先評估受限最佳化，但演算法選擇取決於 latent variables 與 uncertainty 目標。
++        成本分布與 runtime 目前沒有 benchmark，不能先宣稱中層主導或內層達到毫秒級。
+         右側標出兩個必須誠實記住的保留：內層不保證凹，需要多起點；
+         以及 EM 與 MCMC 各自真正該出場的時機。</desc>
+ 
+-  <text class="ttl zh" x="20" y="38">難的是離散那一半，連續那一半小到可以直接解</text>
++  <text class="ttl zh" x="20" y="38">離散與連續兩層都需以實作 benchmark 確認成本</text>
+ 
+   <!-- ── 外層：K 迴圈 ────────────────────────────────────────────── -->
+   <rect class="box" x="20" y="60" width="640" height="400" rx="12"/>
+@@ -36,17 +36,17 @@
+   <rect class="box ok" x="62" y="342" width="556" height="100" rx="10"/>
+   <text class="lbl bold zh ok" x="82" y="372">內層：連續最佳化</text>
+   <text class="tick zh" x="82" y="398">只剩細胞比例 w，K 個自由度，w_g ≥ 0 且總和為 1</text>
+-  <text class="tick zh" x="82" y="422">受限最佳化直接解 —— 幾毫秒，不需要 EM 或 MCMC</text>
++  <text class="tick zh" x="82" y="422">候選：受限最佳化；需測 objective cost、multi-start 與 convergence</text>
+ 
+   <!-- 迴圈回頭的箭頭 -->
+   <path class="conn" d="M634,392 C654,392 654,240 640,230" marker-end="url(#arrow-sm)"/>
+ 
+   <!-- ── 右欄：成本與保留 ───────────────────────────────────────── -->
+   <rect class="box accent" x="680" y="60" width="300" height="128" rx="10"/>
+-  <text class="lbl bold zh accent" x="700" y="92">成本落在哪裡</text>
+-  <text class="tick zh" x="700" y="120">中層　幾乎全部</text>
+-  <text class="tick zh" x="700" y="144">內層　幾毫秒</text>
+-  <text class="tick zh" x="700" y="170">所以要少列舉，不是把內層解得更快</text>
++  <text class="lbl bold zh accent" x="700" y="92">成本：尚未量測</text>
++  <text class="tick zh" x="700" y="120">報 wall time／iterations</text>
++  <text class="tick zh" x="700" y="144">convergence／multi-start</text>
++  <text class="tick zh" x="700" y="170">memory／hardware／problem size</text>
+ 
+   <rect class="box bad" x="680" y="204" width="300" height="124" rx="10"/>
+   <text class="lbl bold zh bad" x="700" y="236">內層不保證凹</text>
+@@ -63,5 +63,5 @@
+   <!-- ── 底部 ───────────────────────────────────────────────────── -->
+   <rect class="box sunken" x="20" y="484" width="960" height="76" rx="10"/>
+   <text class="lbl bold zh mid" x="500" y="516">外層定結構，內層估比例</text>
+-  <text class="tick zh mid" x="500" y="544">看到 likelihood 就想用 EM 或 MCMC，在這個內層問題上是殺雞用牛刀</text>
++  <text class="tick zh mid" x="500" y="544">沒有實作 benchmark 前，不宣稱毫秒級、不宣稱哪一層主導，也不排除替代推論法</text>
+ </svg>
+diff --git a/src/svg/sr2b-window-vs-family.svg b/src/svg/sr2b-window-vs-family.svg
+index 4574c66..1a39bf4 100644
+--- a/src/svg/sr2b-window-vs-family.svg
++++ b/src/svg/sr2b-window-vs-family.svg
+@@ -1,99 +1,32 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 402">
+-  <title>兩條家族被兩件東西綁在一起，所以拆不開</title>
+-  <desc>左右並排比較同一個連鎖視窗的兩種寫法。
+-        每一邊都畫成兩條泳道，上面一條是家族一，下面一條是家族二，泳道裡是該家族的 read。
+-        兩件把兩族綁在一起的東西都畫了出來。
+-        第一件是家族誤標：家族一的泳道裡混進一條顏色屬於家族二的 read，
+-        並有一支箭頭從家族二的泳道指過來，表示這條分子實際來自隔壁，只是標籤標錯了。
+-        第二件是方向開關：左邊只有一個開關，兩條接線分別接到兩條泳道，
+-        所以撥動它會同時翻轉兩族。
+-        左邊因此只輸出一個因子，方向也只被邊際化一次。
+-        右邊是錯誤的寫法：兩條泳道之間築了一道牆當成互相獨立，
+-        那條被誤標的分子於是在兩條泳道各留下一份，用紅圈標出「同一條算了兩次」；
+-        方向開關也變成各自獨立的兩個。
+-        右邊因此輸出兩個相乘的因子，證據量被高估，方向的不確定性也被算掉一半。</desc>
+-
+-  <text class="ttl zh" x="20" y="40">兩族被兩件東西綁在一起，所以拆不開</text>
+-
+-  <!-- ════════════ 左：正確 ════════════ -->
+-  <rect class="box ok" x="20" y="60" width="460" height="326" rx="12"/>
+-  <text class="lbl bold zh ok" x="40" y="92">✓ 綁在一起 → 一個因子</text>
+-
+-  <!-- 泳道：家族 u₁ -->
+-  <rect class="box sunken" x="40" y="106" width="290" height="72" rx="8"/>
+-  <text class="lbl bold zh hp1" x="54" y="132">家族 u₁</text>
+-  <rect class="read hp1" x="150" y="114" width="158" height="14" rx="7"/>
+-  <rect class="read hp1" x="162" y="136" width="158" height="14" rx="7"/>
+-  <rect class="read hp2" x="150" y="158" width="158" height="14" rx="7"/>
+-
+-  <!-- 泳道：家族 u₂ -->
+-  <rect class="box sunken" x="40" y="206" width="290" height="72" rx="8"/>
+-  <text class="lbl bold zh hp2" x="54" y="232">家族 u₂</text>
+-  <rect class="read hp2" x="150" y="214" width="158" height="14" rx="7"/>
+-  <rect class="read hp2" x="162" y="236" width="158" height="14" rx="7"/>
+-  <rect class="read hp2" x="150" y="258" width="158" height="14" rx="7"/>
+-
+-  <!-- ① 誤標：一條分子從下面那條泳道被搬上來 -->
+-  <path class="conn warn thick" d="M262,206 C262,194 262,186 262,178" marker-end="url(#arrow-sm)"/>
+-  <text class="tick zh warn" x="54" y="200">① 誤標 ξ<tspan style="font-size:11px" dy="3">v</tspan><tspan dy="-3">：這條來自 u₂</tspan></text>
+-
+-  <!-- ② 方向：一個開關，兩條接線 -->
+-  <path class="conn accent" d="M330,142 L358,142 L358,190"/>
+-  <path class="conn accent" d="M330,242 L358,242 L358,206"/>
+-  <rect class="box accent" x="358" y="184" width="58" height="28" rx="14"/>
+-  <rect class="bar ok" x="364" y="190" width="20" height="16" rx="8"/>
+-  <text class="lbl bold zh accent mid" x="410" y="248">σ<tspan style="font-size:15px" dy="4">v</tspan></text>
+-  <text class="tick zh mid" x="410" y="270">一個開關</text>
+-  <text class="tick zh mid" x="410" y="290">兩族共用</text>
+-
+-  <path class="conn thick" d="M185,278 L185,306" marker-end="url(#arrow-sm)"/>
+-
+-  <rect class="box ok" x="40" y="310" width="420" height="64" rx="10"/>
+-  <text class="lbl bold zh ok mid" x="250" y="340">P<tspan style="font-size:15px" dy="4">v</tspan><tspan dy="-4">(D</tspan><tspan style="font-size:15px" dy="4">v</tspan><tspan dy="-4"> ∣ Θ</tspan><tspan style="font-size:15px" dy="4">K</tspan><tspan dy="-4">)</tspan></text>
+-  <text class="tick zh mid" x="250" y="364">兩族一起算，方向只邊際化一次</text>
+-
+-
+-  <!-- ════════════ 右：錯誤 ════════════ -->
+-  <rect class="box bad" x="520" y="60" width="460" height="326" rx="12"/>
+-  <text class="lbl bold zh bad" x="540" y="92">✗ 當成獨立 → 兩個因子</text>
+-
+-  <rect class="box sunken" x="540" y="106" width="290" height="72" rx="8"/>
+-  <text class="lbl bold zh hp1" x="554" y="132">家族 u₁</text>
+-  <rect class="read hp1" x="650" y="114" width="158" height="14" rx="7"/>
+-  <rect class="read hp1" x="662" y="136" width="158" height="14" rx="7"/>
+-  <rect class="read hp2" x="650" y="158" width="158" height="14" rx="7"/>
+-
+-  <rect class="box sunken" x="540" y="206" width="290" height="72" rx="8"/>
+-  <text class="lbl bold zh hp2" x="554" y="232">家族 u₂</text>
+-  <rect class="read hp2" x="650" y="214" width="158" height="14" rx="7"/>
+-  <rect class="read hp2" x="662" y="236" width="158" height="14" rx="7"/>
+-  <rect class="read hp2 ghost" x="650" y="258" width="158" height="14" rx="7"/>
+-
+-  <!-- 中間那道牆：假設兩族互相獨立 -->
+-  <line class="guide bad" x1="546" y1="192" x2="824" y2="192"/>
+-
+-  <!-- 同一條分子在兩邊各留下一份 -->
+-  <rect class="box ghost bad" x="644" y="152" width="170" height="26" rx="8"/>
+-  <rect class="box ghost bad" x="644" y="252" width="170" height="26" rx="8"/>
+-  
+-  <text class="tick zh bad" x="836" y="205">同一條算了兩次</text>
+-
+-  <!-- 兩個各自獨立的開關 -->
+-  <path class="conn bad" d="M830,128 L858,128"/>
+-  <rect class="box bad" x="858" y="114" width="58" height="28" rx="14"/>
+-  <rect class="bar bad" x="864" y="120" width="20" height="16" rx="8"/>
+-
+-  <path class="conn bad" d="M830,228 L858,228"/>
+-  <rect class="box bad" x="858" y="214" width="58" height="28" rx="14"/>
+-  <rect class="bar bad" x="894" y="220" width="20" height="16" rx="8"/>
+-
+-  
+-  <text class="tick zh bad mid" x="887" y="272">兩個獨立開關</text>
+-
+-  <path class="conn thick bad" d="M685,278 L685,306" marker-end="url(#arrow-sm)"/>
+-
+-  <rect class="box bad" x="540" y="310" width="420" height="64" rx="10"/>
+-  <text class="lbl bold zh bad mid" x="750" y="340">P<tspan style="font-size:15px" dy="4">u₁</tspan><tspan dy="-4"> × P</tspan><tspan style="font-size:15px" dy="4">u₂</tspan></text>
+-  <text class="tick zh mid" x="750" y="364">兩個因子各自獨立</text>
+-
++  <title>Family-level 與 window-level factorization 都需要生成模型驗證</title>
++  <desc>phase-tag read groups 可分表保存，但 likelihood 如何 factorize 取決於 latent true family、
++        observed HP label、共同方向變數與完整的 observation process。被誤標的 read 在資料中仍只出現一次，
++        不會自動在兩邊各留一份。window-level joint factor 是歷史提案，family-level product 是 composite 候選；
++        兩者偏誤方向與 calibration 必須以已知 truth 的 simulation 驗證。</desc>
++
++  <text class="ttl zh" x="20" y="40">Factorization 不是由 family 名稱決定，而是由生成模型決定</text>
++
++  <rect class="box plain" x="20" y="72" width="460" height="250" rx="12"/>
++  <text class="lbl bold zh" x="44" y="108">資料層：兩張 phase-tag read tables</text>
++  <rect class="box sunken" x="44" y="132" width="390" height="64" rx="8"/>
++  <text class="tick bold zh hp1" x="60" y="158">observed family 1</text>
++  <rect class="read hp1" x="210" y="146" width="180" height="14" rx="7"/>
++  <rect class="box sunken" x="44" y="218" width="390" height="64" rx="8"/>
++  <text class="tick bold zh hp2" x="60" y="244">observed family 2</text>
++  <rect class="read hp2" x="210" y="232" width="180" height="14" rx="7"/>
++  <text class="tick mid zh" x="250" y="306">每條 observed read 在資料中只出現一次</text>
++
++  <path class="flow" d="M486,196 L522,196" marker-end="url(#arrow)"/>
++
++  <rect class="box accent" x="530" y="72" width="450" height="250" rx="12"/>
++  <text class="lbl bold zh" x="554" y="108">模型層：需明確聲明 latent structure</text>
++  <text class="tick zh" x="566" y="150">• true family → observed HP 的 transition</text>
++  <text class="tick zh" x="566" y="184">• 共同或已固定的方向變數 σ</text>
++  <text class="tick zh" x="566" y="218">• mapping／chimera／partial coverage channels</text>
++  <text class="tick zh" x="566" y="252">• 給定參數後是否條件獨立</text>
++  <text class="tick zh warn" x="566" y="294">未聲明這些條件，就不能判定哪個乘積「正確」</text>
++
++  <rect class="box warn" x="20" y="342" width="960" height="44" rx="8"/>
++  <text class="anno bold mid zh warn" x="500" y="371">歷史提案：joint-window factor；替代：composite family product。兩者都須 simulation／calibration。</text>
+ </svg>
+diff --git a/src/svg/sr2c-estimand.svg b/src/svg/sr2c-estimand.svg
+index f200ec1..47850be 100644
+--- a/src/svg/sr2c-estimand.svg
++++ b/src/svg/sr2c-estimand.svg
+@@ -8,8 +8,8 @@
+         輸出<b>一棵</b>細胞層級的樹。這棵樹的一個節點是一群細胞，
+         解析度的連鎖區段是一個全基因體共用的細胞比例位置，
+         所以細胞比例相同的兩支 lineage 必然被併成同一個節點。
+-        最下方是本規格：每一個框起來的連鎖視窗，各自依兩條染色體拷貝再切成兩個連鎖區段，
+-        每個連鎖區段各輸出一棵小樹，因此圖上有八棵彼此獨立的小樹。
++        最下方是本規格：每一個框起來的連鎖視窗，依 phase set 內的 HP read label 切成技術 read families，
++        每個 family 各輸出一個候選局部結構，因此圖上有八個彼此獨立的候選。
+         八棵的形狀各不相同：有的只有一條邊，有的是一條鏈，有的分岔，
+         而且同一個連鎖視窗的兩個家族可以是不同的形狀 —— 這是資料決定的輸出，不是設定。
+         沒有被連鎖起來的變異不產生任何小樹。
+@@ -75,9 +75,9 @@
+   <text class="tick zh" x="640" y="298">解析度：全基因體共用的 CCF</text>
+   <text class="tick zh bad" x="640" y="326">CCF 相同的兩支必然併成一個節點</text>
+ 
+-  <!-- ── 本規格：每個連鎖視窗 × 每條拷貝各一棵 ── -->
++  <!-- ── 本規格：每個連鎖視窗 × 每個 HP read family 一個候選 ── -->
+   <rect class="box accent" x="18" y="410" width="964" height="272" rx="8"/>
+-  <text class="lbl bold zh" x="34" y="444">本規格：每個連鎖視窗 × 每條染色體拷貝各一棵</text>
++  <text class="lbl bold zh" x="34" y="444">候選規格：每個連鎖視窗 × 每個 HP read family</text>
+ 
+   <text class="tick mono mid" x="145" y="472">R₁</text>
+   <text class="tick mono mid" x="360" y="472">R₂</text>
+@@ -130,10 +130,10 @@
+   <circle class="cell tumor" cx="825" cy="606" r="9"/>
+   <circle class="cell tumor" cx="825" cy="632" r="9"/>
+ 
+-  <text class="tick zh" x="34" y="664">形狀各不相同，同一個連鎖視窗的兩個家族也可以不同；沒有連鎖的變異不產生小樹。</text>
++  <text class="tick zh" x="34" y="664">各 family 可有不同候選；HP label 不識別實體 copy、親源或細胞，也不跨連鎖區段連接。</text>
+ 
+   <!-- ── 結論 ── -->
+   <rect class="box sunken" x="18" y="702" width="964" height="88" rx="8"/>
+   <text class="anno bold zh" x="34" y="736">兩邊看的是同一批 read，差別只在摘要成什麼。</text>
+-  <text class="anno zh" x="34" y="768">左是每個變異的邊際計數；右是同一條分子上的共現。小樹不接成一棵大樹 —— 標籤只在連鎖區段內有定義。</text>
++  <text class="anno zh" x="34" y="768">左是邊際計數；右是分子共現。候選結構不接成細胞樹 —— 標籤只在 exact PS × HP 內有定義。</text>
+ </svg>
+diff --git a/src/svg/sr2c-unit-build.svg b/src/svg/sr2c-unit-build.svg
+index d959e3e..e84e013 100644
+--- a/src/svg/sr2c-unit-build.svg
++++ b/src/svg/sr2c-unit-build.svg
+@@ -6,7 +6,8 @@
+         中格是可歸因的體細胞改變：HP1-1 與 HP2-1，
+         表示該分子的體細胞改變可歸因於第一個數字所指的那條單倍型，詞彙到此為止。
+         右格是無法歸因的 HP3：兩條單倍型都歸不上去，
+-        所以「一個連鎖區段只看得到一條染色體拷貝」這個假設對它並不成立。
++        所以「phase-tag read family 可近似單一 homolog background」這個條件對它並不成立；
++        即使其他 family 可近似 homolog background，標籤也不識別實體 copy、親源或細胞。
+         中排說明連鎖視窗的定義：在同一個 phase set 內，
+         只要有某一條讀序同時覆蓋至少兩個體細胞變異，該段就構成一個連鎖視窗；
+         若另一條讀序疊到已連鎖的位點又碰到新的位點，兩段就合併成更長的連鎖視窗。
+@@ -45,8 +46,8 @@
+   <rect class="box plain" x="688" y="110" width="90" height="36" rx="6"/>
+   <text class="tick mono mid" x="733" y="133">HP3</text>
+   <text class="tick zh" x="688" y="176">兩條都歸不上去</text>
+-  <text class="tick zh warn" x="688" y="204">「一個連鎖區段只看得到</text>
+-  <text class="tick zh warn" x="688" y="232">一條拷貝」對它不成立</text>
++  <text class="tick zh warn" x="688" y="204">無法套用單一 homolog</text>
++  <text class="tick zh warn" x="688" y="232">background 的近似條件</text>
+ 
+   <!-- 連鎖視窗 -->
+   <rect class="box accent" x="18" y="270" width="964" height="200" rx="8"/>
+diff --git a/src/svg/sr2c-unit-verdict.svg b/src/svg/sr2c-unit-verdict.svg
+index 9bd7bb0..ccd2d25 100644
+--- a/src/svg/sr2c-unit-verdict.svg
++++ b/src/svg/sr2c-unit-verdict.svg
+@@ -4,7 +4,7 @@
+         有哪幾種狀態，這裡是全參考、只帶第一個變異、以及兩個雙變異狀態共四種；
+         誰在誰之前，只帶第一個變異的那個狀態是另外兩個的祖先；
+         以及每一種各佔多少分子，依序是 0.66、0.19、0.05、0.07。
+-        三件事都落在「一個連鎖視窗、一條染色體拷貝」之內。
++        三件事都落在「一個連鎖視窗、一個 HP read family」之內；HP label 不識別實體 copy 或細胞。
+         右格是同一個連鎖區段定不下來的四件事，每一項後面掛著承接它的旗標：
+         某一支對應到哪一個全域群，掛 UNLINKED_TO_GLOBAL；
+         分子比例換算成細胞比例是多少，缺純度與拷貝數，掛 CELL_SCALE_UNAVAILABLE；
+@@ -39,7 +39,7 @@
+   <text class="tick zh" x="228" y="286">各佔多少分子</text>
+   <text class="tick mono" x="228" y="310">.66 · .19 · .05 · .07</text>
+ 
+-  <text class="tick bold zh" x="34" y="356">三件事都在「一個連鎖視窗、一條拷貝」之內 ——</text>
++  <text class="tick bold zh" x="34" y="356">三件事都在「一個連鎖視窗、一個 HP read family」內 ——</text>
+   <text class="tick bold zh" x="34" y="376">沒有用到任何連鎖區段以外的東西</text>
+ 
+   <!-- 定不下來 -->
+diff --git a/tools/build.mjs b/tools/build.mjs
+index 70df378..6984a57 100644
+--- a/tools/build.mjs
++++ b/tools/build.mjs
+@@ -850,8 +850,8 @@ function writeIndex(modules, shell) {
+     `<div class="home-hook">` +
+     `<p class="home-hook__q">這個實驗室做的事，是寫程式分析 DNA 定序資料。</p>` +
+     `<p>定序機把一管檢體裡的 DNA 打斷成片段、逐條讀出，產出幾百萬條帶著錯誤的字串。` +
+-    `麻煩的是：這管檢體裡同時有正常細胞和癌細胞，而字串上沒有標記誰是誰。` +
+-    `把它還原回來，就是我們寫的軟體要做的事。</p>` +
++    `麻煩的是：這管檢體裡同時有正常與腫瘤來源的 DNA，而字串上沒有現成的細胞來源標籤。` +
++    `軟體能做的是依局部證據分配 haplotype，找出支持 somatic 變異的分子，並估計腫瘤 DNA 比例；它不能從單條 read 還原其所屬細胞。</p>` +
+     `</div>` +
+ 
+     whatFig +

@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="InterSubMod GitHub 公開文件與 CCU lab-tutorial P0 disposition、本地 source 修正驗證、線上待辦及資料補件。">
+  <title>InterSubMod 與 CCU 教學｜P0 disposition 與本地驗證</title>
+  <style>
+    :root {
+      --ink: #18201d;
+      --muted: #59645f;
+      --paper: #fbfaf6;
+      --panel: #ffffff;
+      --line: #d8ded9;
+      --navy: #173b57;
+      --navy-soft: #e8f0f5;
+      --green: #21734a;
+      --green-soft: #e7f4ec;
+      --amber: #9a6508;
+      --amber-soft: #fff4d8;
+      --red: #a63a2b;
+      --red-soft: #fbe9e5;
+      --violet: #64508f;
+      --violet-soft: #f0ecf8;
+      --ff-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif;
+      --ff-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--ff-body);
+      font-size: 16px;
+      line-height: 1.68;
+    }
+    a { color: var(--navy); text-underline-offset: 3px; }
+    a:hover { color: var(--red); }
+    .skip-link {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      z-index: 10;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      background: var(--ink);
+      color: white;
+    }
+    .skip-link:focus {
+      width: auto;
+      height: auto;
+      padding: 8px 12px;
+      overflow: visible;
+      clip-path: none;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .hero-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 44px 28px 30px;
+    }
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--red);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 900px;
+      margin: 0;
+      color: var(--navy);
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(2rem, 5vw, 3.45rem);
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+    }
+    .lede {
+      max-width: 960px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 3px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .badge-local { border-color: #9bc7ad; background: var(--green-soft); color: var(--green); }
+    .badge-pending { border-color: #e5c67f; background: var(--amber-soft); color: #72500d; }
+    .verdict-banner {
+      margin-top: 24px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--amber);
+      background: var(--amber-soft);
+    }
+    .verdict-banner strong { color: #664704; }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+    .stat {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .stat .value {
+      display: block;
+      color: var(--navy);
+      font-family: var(--ff-mono);
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .stat .label { display: block; margin-top: 6px; color: var(--muted); font-size: 0.84rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 34px;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 30px 28px 64px;
+    }
+    aside.toc {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      padding: 15px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .toc-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    aside.toc a {
+      display: block;
+      padding: 6px 7px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-decoration: none;
+    }
+    aside.toc a:hover { border-left-color: var(--red); color: var(--ink); background: var(--red-soft); }
+    main { min-width: 0; }
+    section { margin-bottom: 46px; scroll-margin-top: 18px; }
+    h2 {
+      margin: 0 0 16px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--navy);
+      color: var(--navy);
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+      line-height: 1.25;
+    }
+    h3 { margin: 25px 0 9px; color: var(--ink); font-size: 1.08rem; }
+    p { margin: 0 0 13px; }
+    ul, ol { padding-left: 1.35rem; }
+    li + li { margin-top: 6px; }
+    code {
+      padding: 0.1em 0.35em;
+      border: 1px solid #e0e3df;
+      background: #f3f4f1;
+      font-family: var(--ff-mono);
+      font-size: 0.86em;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      max-width: 100%;
+      overflow: auto;
+      padding: 15px;
+      border: 1px solid var(--line);
+      background: #f4f6f3;
+      font-family: var(--ff-mono);
+      font-size: 0.84rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .callout {
+      margin: 16px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--navy);
+      background: var(--navy-soft);
+    }
+    .callout-critical { border-left-color: var(--red); background: var(--red-soft); }
+    .callout-success { border-left-color: var(--green); background: var(--green-soft); }
+    .callout strong { display: block; margin-bottom: 4px; }
+    .table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
+    table { width: 100%; border-collapse: collapse; min-width: 690px; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    th { background: var(--navy-soft); color: var(--navy); font-size: 0.82rem; }
+    td { font-size: 0.88rem; }
+    tr:last-child td { border-bottom: 0; }
+    .status-ok { color: var(--green); font-weight: 800; }
+    .status-warn { color: var(--amber); font-weight: 800; }
+    .status-open { color: var(--red); font-weight: 800; }
+    details {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      color: var(--navy);
+      font-weight: 800;
+    }
+    .card-body { padding: 2px 15px 15px; }
+    .svg-figure {
+      margin: 20px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .svg-figure svg { display: block; width: 100%; height: auto; }
+    figcaption { margin-top: 9px; color: var(--muted); font-size: 0.8rem; }
+    .mono { font-family: var(--ff-mono); }
+    .source-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .source-links a {
+      display: block;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      overflow-wrap: anywhere;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .footer-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 28px 36px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 900px) {
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout { grid-template-columns: minmax(0, 1fr); padding: 24px 18px 50px; }
+      aside.toc { display: none; }
+      .hero-inner { padding: 32px 18px 24px; }
+      .source-links { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .stat-grid { grid-template-columns: minmax(0, 1fr); }
+      h1 { font-size: 2rem; }
+      .meta { align-items: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    @media print {
+      body { background: white; font-size: 10.5pt; }
+      .hero-inner, .layout, .footer-inner { max-width: none; padding-left: 0; padding-right: 0; }
+      aside.toc, .skip-link { display: none !important; }
+      .layout { display: block; }
+      section { break-inside: avoid; margin-bottom: 26px; }
+      .table-wrap { overflow: visible; }
+      table { min-width: 0; }
+      details > .card-body { display: block !important; }
+      details { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+      .svg-figure { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="kicker">Comprehensive validation continuation · 2026-08-13</p>
+      <h1>P0 disposition 已閉合；33 個本地 source 已修，live 尚未發布</h1>
+      <p class="lede">用 SCQA + Claim–Evidence–Disposition：InterSubMod 34/34 P0 均已分流，33 個本地 source claim 通過 fail-closed guard，GitHub About 仍須外部修改；CCU 13/13 個 OLD-P0／REGRESSED finding 已形成並在 pinned clone 驗證可套用的 patch，但正式 CCU repo 尚未 apply/deploy。</p>
+      <div class="meta">
+        <span class="badge badge-local">LOCAL SOURCE VALIDATED</span>
+        <span class="badge badge-pending">LIVE PUBLICATION PENDING</span>
+        <span class="badge">Task B · G2/G3/G4/G5</span>
+        <span class="badge">UNCOMMITTED · MANIFEST PINNED</span>
+      </div>
+      <div class="verdict-banner">
+        <strong>裁決：</strong>P0 disposition 與本地 source 修正可接受；整體公開修復尚未完成。工程 PASS 不等於 cellular clone／lineage truth，source PASS 也不等於 GitHub／CCU live bytes 已更新。
+      </div>
+      <div class="stat-grid" aria-label="核心統計">
+        <div class="stat"><span class="value">34/34</span><span class="label">InterSubMod P0 有 disposition</span></div>
+        <div class="stat"><span class="value">13/13</span><span class="label">CCU target patch validated；未 apply/deploy</span></div>
+        <div class="stat"><span class="value">24 + 16</span><span class="label">InterSubMod P1/P2 + CCU remaining</span></div>
+        <div class="stat"><span class="value">0</span><span class="label">本輪經 publication gate 關閉的 claims</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="toc" aria-label="本頁目錄">
+      <p class="toc-title">Contents</p>
+      <a href="#verdict">1. 核心判定</a>
+      <a href="#denominators">2. 分母與問題母體</a>
+      <a href="#ceiling">3. 科學證據 ceiling</a>
+      <a href="#corrections">4. InterSubMod 修正</a>
+      <a href="#ccu">5. CCU 修正與剩餘</a>
+      <a href="#validation">6. 實際驗證</a>
+      <a href="#data-gaps">7. 必須補的資料</a>
+      <a href="#publication">8. 線上發布 gate</a>
+      <a href="#handoff">9. 交付與限制</a>
+    </aside>
+
+    <main id="main-content">
+      <section id="verdict">
+        <h2>1. 核心判定</h2>
+        <div class="callout callout-success">
+          <strong>本地可接受</strong>
+          33 個可控的 InterSubMod P0 source claims 已修；C108 GitHub About 保留 external-only disposition。CCU 13 個指定 finding 的 patch 已在暫存 pinned clean clone 套用並驗證；正式 repo 尚未 apply/deploy。
+        </div>
+        <div class="callout callout-critical">
+          <strong>線上仍未完成</strong>
+          main、develop、Wiki、Pages 與 CCU live refs／hash 未變；繁中 README endpoint 缺失（HTTP 404），About 仍含 <code>subclone resolution</code>。因此不能標示 <code>LIVE_RESOLVED</code>。
+        </div>
+        <p>最大風險是證據層級被升格：read/alignment 上的 allele、HP/PS、MM/ML 是受測序、比對與 tag-calling error 影響的 recorded/called molecular evidence，不是 originating cell 的無誤差真值；local candidate graph 不是 confirmed clone tree；methylation 是 genetic grouping 後的 bounded association，不是獨立 cellular confirmation。</p>
+        <details>
+          <summary>證據層級 L1–L5 與 publication 狀態</summary>
+          <div class="card-body">
+            <p><strong>L1</strong> 完全佐證（多 dataset、機制／反例／重現鏈完整）；<strong>L2</strong> 部分佐證；<strong>L3</strong> 間接推論；<strong>L4</strong> 待驗假設；<strong>L5</strong> 有反例或矛盾。L1/L2 是證據強度，不代表 live bytes 已發布。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="denominators">
+        <h2>2. 分母與問題母體</h2>
+        <figure class="svg-figure">
+          <svg viewBox="0 0 800 280" role="img" aria-labelledby="inventory-title inventory-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="inventory-title">158 個 InterSubMod claim families 的判定與本輪範圍</title>
+            <desc id="inventory-desc">158 個 claims 中 69 confirmed、31 confirmed with limits、28 needs correction、26 contradicted、4 unverifiable。問題集合 58 中本輪處理 34 個 P0，另有 24 個 P1/P2。</desc>
+            <g font-family="var(--ff-body)" font-size="14">
+              <text x="20" y="28" fill="#173b57" font-weight="700">原始全面稽核：158 claim families</text>
+              <rect x="20" y="48" width="332" height="34" fill="#21734a"/>
+              <rect x="352" y="48" width="149" height="34" fill="#64508f"/>
+              <rect x="501" y="48" width="135" height="34" fill="#9a6508"/>
+              <rect x="636" y="48" width="125" height="34" fill="#a63a2b"/>
+              <rect x="761" y="48" width="19" height="34" fill="#59645f"/>
+              <text x="186" y="70" fill="white" text-anchor="middle" font-weight="700">confirmed 69</text>
+              <text x="426" y="70" fill="white" text-anchor="middle" font-weight="700">limits 31</text>
+              <text x="569" y="70" fill="white" text-anchor="middle" font-weight="700">needs 28</text>
+              <text x="699" y="70" fill="white" text-anchor="middle" font-weight="700">contra 26</text>
+              <text x="780" y="104" fill="#59645f" text-anchor="end">unverifiable 4</text>
+
+              <text x="20" y="138" fill="#173b57" font-weight="700">問題集合：58 = 28 + 26 + 4</text>
+              <rect x="20" y="158" width="440" height="42" fill="#a63a2b"/>
+              <rect x="460" y="158" width="310" height="42" fill="#fff4d8" stroke="#9a6508" stroke-width="1.5"/>
+              <text x="240" y="184" fill="white" text-anchor="middle" font-weight="700">P0 34：本輪完整 disposition</text>
+              <text x="615" y="184" fill="#72500d" text-anchor="middle" font-weight="700">P1/P2 24：仍待處理</text>
+              <text x="20" y="236" fill="#59645f">注意：34/34 P0 PASS 不等於 58/58 全站問題已清零。</text>
+              <text x="20" y="260" fill="#59645f">158 是去重 proposition 家族，不是句子數或網站錯誤百分比。</text>
+            </g>
+          </svg>
+          <figcaption>圖 1：原始稽核母體與本輪 P0 scope。每個數字使用明示分母。</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>母體</th><th>精確結果</th><th>正確解讀</th><th>常見誤讀</th></tr></thead>
+            <tbody>
+              <tr><td>158 claim families</td><td>69 / 31 / 28 / 26 / 4</td><td>去重後 atomic propositions</td><td>不是「36.71% 句子都錯」</td></tr>
+              <tr><td>58 problem claims</td><td>P0 34 + P1 20 + P2 4</td><td>needs correction + contradicted + unverifiable</td><td>不能用 P0 numerator 吞掉 P1/P2</td></tr>
+              <tr><td>CCU 32 findings</td><td>target 13 + remaining 16 + prior resolved 3</td><td>problem-focused finding registry</td><td>不是全站內容正確率</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary>為什麼 66.52% 與 36.21% 都正確，但不能互換？</summary>
+          <div class="card-body">
+            <p><code>170,131 / 255,752 = 66.5219%</code> 的單位是 strict read-linkage components；<code>170,131 / 469,849 = 36.2097%</code> 的母體是 dataset records。若把第一個比例稱為「全部 mutations 的三分之二」，即使 numerator 相同，科學敘述仍錯。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="ceiling">
+        <h2>3. 科學證據 ceiling</h2>
+        <figure class="svg-figure">
+          <svg viewBox="0 0 800 330" role="img" aria-labelledby="ceiling-title ceiling-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="ceiling-title">從 molecule 觀測到 cellular truth 的證據階梯</title>
+            <desc id="ceiling-desc">read record 上的 allele 與 methylation 是受測序、比對與 tag-calling error 影響的 recorded/called evidence；經模型形成局部 mutation-state candidate，再形成分組後 methylation association。缺 CN、LOH、純度、multiplicity 與 cellular truth，不能跨越到 confirmed clone 或 lineage。</desc>
+            <defs>
+              <marker id="arrow-ceiling" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#173b57"/>
+              </marker>
+            </defs>
+            <g font-family="var(--ff-body)" font-size="13">
+              <rect x="35" y="45" width="190" height="72" rx="8" fill="#e8f0f5" stroke="#173b57" stroke-width="1.5"/>
+              <text x="130" y="74" text-anchor="middle" fill="#173b57" font-weight="700">recorded/called [L1]</text>
+              <text x="130" y="96" text-anchor="middle" fill="#173b57">read record 上 allele / HP / MM</text>
+              <rect x="305" y="45" width="190" height="72" rx="8" fill="#f0ecf8" stroke="#64508f" stroke-width="1.5"/>
+              <text x="400" y="74" text-anchor="middle" fill="#4c3d70" font-weight="700">條件推論 [L2]</text>
+              <text x="400" y="96" text-anchor="middle" fill="#4c3d70">local recurrence-allowed candidate</text>
+              <rect x="575" y="45" width="190" height="72" rx="8" fill="#e7f4ec" stroke="#21734a" stroke-width="1.5"/>
+              <text x="670" y="74" text-anchor="middle" fill="#165637" font-weight="700">分組後關聯 [L2]</text>
+              <text x="670" y="96" text-anchor="middle" fill="#165637">regional methylation association</text>
+              <line x1="225" y1="81" x2="298" y2="81" stroke="#173b57" stroke-width="1.7" marker-end="url(#arrow-ceiling)"/>
+              <line x1="495" y1="81" x2="568" y2="81" stroke="#173b57" stroke-width="1.7" marker-end="url(#arrow-ceiling)"/>
+
+              <line x1="50" y1="166" x2="750" y2="166" stroke="#a63a2b" stroke-width="4" stroke-dasharray="10 7"/>
+              <text x="400" y="153" text-anchor="middle" fill="#a63a2b" font-weight="800">目前不可跨越的 evidence barrier</text>
+              <text x="400" y="190" text-anchor="middle" fill="#59645f">缺 allele-specific CN/LOH、purity/ploidy/multiplicity、獨立 cellular truth</text>
+
+              <rect x="140" y="225" width="520" height="72" rx="8" fill="#fbe9e5" stroke="#a63a2b" stroke-width="1.8"/>
+              <text x="400" y="254" text-anchor="middle" fill="#7f2c21" font-weight="800">尚不可確認 [L4/L5]</text>
+              <text x="400" y="278" text-anchor="middle" fill="#7f2c21">cellular clone · biological lineage · whole-sample phylogeny · gene function</text>
+            </g>
+          </svg>
+          <figcaption>圖 2：工程資料可支持 molecule-level 觀測與 bounded candidate；沒有獨立真值時，不能升格為 cellular claim。</figcaption>
+        </figure>
+
+        <div class="callout">
+          <strong>可保留的核心說法</strong>
+          同一 read record 上的 allele 共現是 recorded/called molecular evidence，不是無誤差 cellular truth；98,955 → 85,941 → 75,224 → 71,955 是可重算 funnel；63,506/71,955=88.2579% 是唯一 rooted-unlabeled topology signature，其中可包含多個並列 labeled trees；3/811=0.3699% 是 formal methylation association。
+        </div>
+        <div class="callout callout-critical">
+          <strong>必須撤回或加限定</strong>
+          confirmed cellular clone、linear ancestry、canonical CCF、methylation 獨立確認、correct rescue tag、gene silencing 與唯一 whole-sample phylogeny。
+        </div>
+        <details>
+          <summary>四個常用術語的操作定義</summary>
+          <div class="card-body">
+            <p><code>family-complete</code>：minimum candidate vertex-set family 已完整枚舉且未撞 <code>SEARCH_NODE_GUARD</code>。<code>ranked-complete</code>：再要求 read-AF 可用且通過 recurrence screen。<code>robust</code>：只指 frozen methyl manifest 保留的 association 類別，不代表因果。<code>normal-ASM-screen-negative</code>：只表示未命中既定 normal ASM screen，不證明 normal ASM 不存在，也不證明 tumor-acquired／clone-specific。</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="corrections">
+        <h2>4. InterSubMod 修正</h2>
+        <figure class="svg-figure">
+          <svg viewBox="0 0 800 300" role="img" aria-labelledby="planes-title planes-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="planes-title">本地 source 與 live publication 是兩個獨立平面</title>
+            <desc id="planes-desc">本地 33 個 source claims 已修且一個 GitHub About 外部 claim 已分流，但 main、Wiki、Pages 與 About 尚未發布；CCU 13 個 target 為 pinned-clone patch validated，正式 repo 未 apply/deploy。</desc>
+            <defs>
+              <marker id="arrow-plane" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#9a6508"/>
+              </marker>
+            </defs>
+            <g font-family="var(--ff-body)" font-size="13">
+              <text x="30" y="28" fill="#173b57" font-weight="800">Local correction plane</text>
+              <rect x="30" y="48" width="320" height="82" rx="8" fill="#e7f4ec" stroke="#21734a" stroke-width="1.6"/>
+              <text x="190" y="78" text-anchor="middle" fill="#165637" font-weight="800">InterSubMod 34/34 disposition</text>
+              <text x="190" y="102" text-anchor="middle" fill="#165637">33 source fixed + C108 external only</text>
+              <rect x="30" y="154" width="320" height="82" rx="8" fill="#e7f4ec" stroke="#21734a" stroke-width="1.6"/>
+              <text x="190" y="184" text-anchor="middle" fill="#165637" font-weight="800">CCU 13/13 patch validated</text>
+              <text x="190" y="208" text-anchor="middle" fill="#165637">official repo not applied/deployed</text>
+
+              <text x="450" y="28" fill="#173b57" font-weight="800">Live publication plane</text>
+              <rect x="450" y="48" width="320" height="188" rx="8" fill="#fff4d8" stroke="#9a6508" stroke-width="1.6"/>
+              <text x="610" y="79" text-anchor="middle" fill="#72500d" font-weight="800">0 claims closed by publication gate</text>
+              <text x="610" y="109" text-anchor="middle" fill="#72500d">main / develop：舊 refs</text>
+              <text x="610" y="134" text-anchor="middle" fill="#72500d">Wiki / Pages：舊 bytes</text>
+              <text x="610" y="159" text-anchor="middle" fill="#72500d">About：舊 subclone resolution</text>
+              <text x="610" y="184" text-anchor="middle" fill="#72500d">CCU live：仍是 9eb1618</text>
+              <text x="610" y="213" text-anchor="middle" fill="#a63a2b" font-weight="700">publish + live re-fetch 才能關閉</text>
+              <line x1="350" y1="142" x2="441" y2="142" stroke="#9a6508" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-plane)"/>
+              <text x="396" y="129" text-anchor="middle" fill="#9a6508">未授權</text>
+            </g>
+          </svg>
+          <figcaption>圖 3：source 修正與 live 發布不可合併計數；本輪沒有 push、merge、About edit 或 deploy。</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>類別</th><th>校正前</th><th>校正後 source contract</th><th>狀態</th></tr></thead>
+            <tbody>
+              <tr><td>Claim ceiling</td><td>same cell lineage、subclone tree</td><td>physical molecule；local recurrence-allowed mutation-state candidate</td><td class="status-ok">LOCAL FIXED</td></tr>
+              <tr><td>Methylation</td><td>tumor-acquired、independent confirmation</td><td>tumor-associated、normal-ASM-screen-negative、conditioned association</td><td class="status-ok">LOCAL FIXED</td></tr>
+              <tr><td>Denominator</td><td>66.52% of all mutations</td><td>170,131/255,752 strict components；/469,849=36.21%</td><td class="status-ok">LOCAL FIXED</td></tr>
+              <tr><td>Schema/default</td><td>193 columns；BERNOULLI default</td><td>199 columns + component versions；effective default NHD</td><td class="status-ok">LOCAL FIXED</td></tr>
+              <tr><td>Reproducibility</td><td>fresh clone 約 10 分鐘 end-to-end</td><td>internal-only boundary；public fixture missing</td><td class="status-warn">WORDING FIXED / DATA MISSING</td></tr>
+              <tr><td>Remote</td><td>舊 About／README／Wiki／Pages</td><td>尚未發布</td><td class="status-open">EXTERNAL ACTION</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary>34 個 P0 claim IDs 的閉合檢查</summary>
+          <div class="card-body">
+            <p><code>C043, C059, C107, C108, C109, C112, C113, C124–C131, C134–C144, C148–C155</code>，展開後共 34 個唯一 ID。特別補列先前摘要表漏掉的 <code>C136</code>；34/34 是 disposition，並非 34/34 已發布。</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Page-07 generator 防復發閉環</summary>
+          <div class="card-body">
+            <ul>
+              <li>Generator 與 generated HTML 同時修正，不再把 <code>CLEAN</code> 當 acquired／clone-specific。</li>
+              <li>歷史 TVAF transform 明標 noncanonical，不作 CN/LOH-corrected CCF 或 clone corroboration。</li>
+              <li>3 個 SVG 補齊 title、desc、aria-labelledby；單頁 QA 為 0 FAIL。</li>
+              <li>C125/C127/C128 增加 3 個 generator rules：6 required、5 forbidden。</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="ccu">
+        <h2>5. CCU 修正與剩餘</h2>
+        <figure class="svg-figure">
+          <svg viewBox="0 0 800 230" role="img" aria-labelledby="ccu-title ccu-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="ccu-title">CCU 32 個 findings 的目前狀態分割</title>
+            <desc id="ccu-desc">32 個 findings 中 13 個為本輪 target 且 patch-local correction 已驗證但未正式 apply/deploy，16 個仍 unresolved，3 個在本輪前已 resolved。</desc>
+            <g font-family="var(--ff-body)" font-size="13">
+              <text x="20" y="30" fill="#173b57" font-weight="800">CCU current-delta：32 findings</text>
+              <rect x="20" y="54" width="309" height="52" fill="#21734a"/>
+              <rect x="329" y="54" width="380" height="52" fill="#a63a2b"/>
+              <rect x="709" y="54" width="71" height="52" fill="#64508f"/>
+              <text x="174" y="85" text-anchor="middle" fill="white" font-weight="800">13 target：patch validated</text>
+              <text x="519" y="85" text-anchor="middle" fill="white" font-weight="800">16 remaining unresolved</text>
+              <text x="744" y="131" text-anchor="end" fill="#4c3d70" font-weight="700">3 prior resolved</text>
+              <text x="20" y="158" fill="#165637">7 OLD-P0 + 6 REGRESSED：13/13 assertions PASS</text>
+              <text x="20" y="184" fill="#7f2c21">11 OLD-P1 + 5 non-target delta：另開 correction cycle</text>
+              <text x="20" y="210" fill="#59645f">分割檢查：13 + 16 + 3 = 32；三集合無重疊。</text>
+            </g>
+          </svg>
+          <figcaption>圖 4：CCU 目前狀態分割；本輪完成 13 個 target 的 pinned-clone patch 驗證，不是所有 32 findings，也尚未套到正式 repo。</figcaption>
+        </figure>
+
+        <p>狀態為 <code>PATCH_VALIDATED_ON_PINNED_CLONE / NOT_APPLIED / NOT_DEPLOYED</code>。Patch 釘定 baseline <code>9eb1618d359e602d9c528675952b20d051fb2346</code>；38 authoritative source files，260,072 bytes，SHA-256 <code>aee944790ad8b60634818fca8888b0f980b3c1e5522ef64c00015a0a21d6c3e6</code>，fresh detached baseline <code>git apply --check</code> exit 0。</p>
+
+        <details>
+          <summary>已修的 13 個 finding</summary>
+          <div class="card-body">
+            <p><strong>OLD-P0：</strong>INDEX、PRINTALL、M09、M12、M13、SR1、SR2B。</p>
+            <p><strong>REGRESSED：</strong>DELTA-NEW-001、002、004、005、006、008。</p>
+            <p>修正涵蓋 read≠cell、HP family≠實體 copy／親源、DNA fraction≠cellular purity、proposal likelihood、未校準 error floor／detection limit／runtime，以及 methylation／topology claim ceiling。</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>仍待處理的 16 個 finding</summary>
+          <div class="card-body">
+            <p><strong>OLD-P1：</strong>GLOSSARY、M02、M03、M05、M06、M07、M11、SR2、SR2C、SR4、SR6。</p>
+            <p><strong>Delta：</strong>DELTA-NEW-003、007、009、010、011。</p>
+            <p>優先釐清 64.89% 無來源、n=60→0.07 缺 detector/α/power、H2009 k=12 與 19× cost 缺 profile，以及 LOH 必然「quietly wrong」的過強語氣。</p>
+          </div>
+        </details>
+        <p><strong>本輪前已 resolved：</strong>OLD-P1-SR5、DELTA-NUM-012、DELTA-NUM-013。因此三集合可逐 ID 查核，<code>13 + 16 + 3 = 32</code> 且無重疊。</p>
+      </section>
+
+      <section id="validation">
+        <h2>6. 實際驗證</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Gate</th><th>實際命令／範圍</th><th>結果</th><th>證據邊界</th></tr></thead>
+            <tbody>
+              <tr><td>Target bytes</td><td><code>sha256sum -c validated_target_manifest.sha256</code></td><td class="status-ok">33/33 entries OK；manifest <code>4c7b0e...f6e1</code></td><td>固定未 commit correction target／guard／patch bytes</td></tr>
+              <tr><td>P0 guard</td><td><code>validate_public_p0_claims.py</code></td><td class="status-ok">34/34；27 docs；77 rules；140 required / 79 forbidden anchors；exit 0</td><td>本地 source contract</td></tr>
+              <tr><td>Mutation probe</td><td><code>--simulate-drop-claim C155</code></td><td class="status-ok">33/34；errors=1；exit 1</td><td>Fail closed</td></tr>
+              <tr><td>Build/tests</td><td><code>cmake --build</code>、GoogleTest、CTest</td><td class="status-ok">build exit 0；270 tests / 39 suites；CTest 270/270</td><td>工程，不是 biological truth</td></tr>
+              <tr><td>Wiki</td><td>target parser、links、<code>bash -n</code></td><td class="status-ok">9 files（7 content + sidebar 已修；README 未改）；115 headings；86 links；13 blocks；0 errors</td><td>source 結構與語法</td></tr>
+              <tr><td>Pages structural</td><td><code>explain_page_qa.py</code> 17 頁</td><td class="status-ok">37 SVG；0 structural FAIL</td><td>static structure PASS</td></tr>
+              <tr><td>Pages accessibility</td><td>SVG title/desc census</td><td class="status-warn">OPEN/WARN：26 歷史 SVG 缺 title + desc</td><td>不可稱 WCAG 全通過</td></tr>
+              <tr><td>CCU</td><td>build、verify、DOM/link、SVG、finding assertions</td><td class="status-ok">23 modules；26 HTML；2,119 refs；163 SVG；13/13</td><td>pinned clean clone；正式 repo 未 apply/deploy</td></tr>
+              <tr><td>Remote</td><td><code>git ls-remote</code> + HTTP/hash</td><td class="status-open">refs/hash 未變；zh-TW 404</td><td>確認尚未發布</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre>Positive guard: inventory=34, registry=34, errors=0, verdict=PASS
+Negative probe: inventory=34, registry=33, errors=1, verdict=FAIL
+GoogleTest: 270 tests from 39 suites passed
+CTest: 270/270 passed in 7.55 seconds</pre>
+        <div class="callout">
+          <strong>Run-evaluator gate</strong>
+          本輪是文件 correction，不是具 hypothesis、pilot、generalize artifacts 的 P4 scientific cycle；正確判定為 <code>NOT_APPLICABLE / NOT_RUN</code>，沒有虛構六項分數或星級。
+        </div>
+      </section>
+
+      <section id="data-gaps">
+        <h2>7. 必須補的資料</h2>
+        <p>以下依「能否改變 claim ceiling」排序，而不是依取得容易度排序；前三項是本輪 top 3，其餘為後續升級 gate。</p>
+        <ol>
+          <li><strong>Allele-specific CN／LOH + purity／ploidy／multiplicity + CCF uncertainty。</strong>每 locus/block 保留 caller、version、segment、normal contamination 與 confidence。</li>
+          <li><strong>獨立 cellular truth。</strong>優先 single-cell DNA 或 joint DNA-methylation、single-cell-derived colonies；次選 spatial／multi-region／longitudinal。不可仍由同一 bulk reads 派生。</li>
+          <li><strong>Known-truth simulation／physical mixtures。</strong>預先固定 genotype/tree/frequency、CN/LOH、coverage、MM/ML error，報 topology、frequency、abstention 與 calibration。</li>
+          <li><strong>Next gate — 跨 biological samples replication。</strong>HCC1395 與 DORADO 只是 technical pair；至少需第二 biological sample 與預註冊 gate。</li>
+          <li><strong>Methylation rescue truth。</strong>需 per-read truth、coverage strata、confusion matrix、abstention、calibration、false-rescue rate 與 held-out validation。</li>
+          <li><strong>Functional assay。</strong>gene regulation／silencing 需 RNA、chromatin 或 perturbation；local methylation alone 不足。</li>
+        </ol>
+
+        <h3>公開重現性最小補件</h3>
+        <ul>
+          <li>有授權的 tiny BAM/CRAM + index、FASTA + index、VCF fixture。</li>
+          <li>SHA-256、license、reference build、tool/container lockfile。</li>
+          <li>Fresh-clone CI：build → fixture run → schema/hash acceptance。</li>
+          <li>跨 README／Wiki／Pages／CCU 的統一 version manifest。</li>
+        </ul>
+
+        <h3>文件與可存取性</h3>
+        <ul>
+          <li>修完 InterSubMod P1=20、P2=4；不可把 P0 PASS 當成總修復率。</li>
+          <li>補 7 頁共 26 個歷史 SVG 的 title/desc；page-07 的 3 個 SVG 已完成。</li>
+          <li>將 claim registry、generator guard 與 generated-output QA 納入 CI。</li>
+        </ul>
+      </section>
+
+      <section id="publication">
+        <h2>8. 線上發布 gate</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Surface</th><th>Locked live state</th><th>必要動作</th></tr></thead>
+            <tbody>
+              <tr><td>InterSubMod main</td><td><code>635437a65a33f8ba698acf85b22ebb069455c6cc</code></td><td>原子合併 EN/ZH README、Quickstart、Summary</td></tr>
+              <tr><td>InterSubMod develop</td><td><code>ddd8909a838318d8a77969313e9561c8ff9d01c2</code></td><td>review 後正常 push/merge</td></tr>
+              <tr><td>README.zh-TW endpoint</td><td>HTTP 404（缺失）</td><td>與 EN README 原子發布後重抓</td></tr>
+              <tr><td>GitHub About</td><td>仍含 <code>subclone resolution</code></td><td>Owner 改為 read-level co-occurrence + bounded association</td></tr>
+              <tr><td>Wiki</td><td><code>6cfc990f1fbe0b0aa76b8adbe56bbe645ef7ee7b</code></td><td>同步 8 個已修 source files（含 sidebar）並 publish</td></tr>
+              <tr><td>Pages</td><td><code>fbdf7c7d229b0b37930778cbcd928cf9e15ecb17</code></td><td>正式 deploy 17 頁</td></tr>
+              <tr><td>CCU main/live</td><td><code>9eb1618d359e602d9c528675952b20d051fb2346</code></td><td><code>PATCH_VALIDATED</code>；正式 apply、review、deploy</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ol>
+          <li>Review target diff 與 CCU patch。</li>
+          <li>Commit／merge／publish 各平面；About 另由 owner 修改。</li>
+          <li>逐 endpoint 重抓 HTTP、ref/commit、SHA-256 與 bounded anchors。</li>
+          <li>只有 live-byte re-fetch 通過，才能改成 <code>PUBLISHED_VERIFIED</code>。</li>
+        </ol>
+      </section>
+
+      <section id="handoff">
+        <h2>9. 交付與限制</h2>
+        <div class="source-links">
+          <a href="20260813_公開文件P0修正與驗證_01.md">完整 Markdown 主報告</a>
+          <a href="20260812_InterSubMod_GitHub公開說明與教學完整驗證_01.md">2026-08-12 原始完整稽核</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/00_INDEX.md">本輪 cycle index</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/claim_guard_receipt.md">P0 claim guard receipt</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/validated_target_manifest.sha256">Validated target SHA-256 manifest</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/final_report_manifest.sha256">Final MD/HTML SHA-256 sidecar</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/ccu_correction_receipt.md">CCU correction receipt</a>
+          <a href="../../../../../research/20260813_public_docs_p0_correction/remote_state_receipt.md">Remote publication state</a>
+        </div>
+
+        <h3>限制</h3>
+        <ul>
+          <li>本輪沒有修改 core biological algorithm，也沒有重跑 7-sample BAM pipeline。</li>
+          <li>270/270 tests 是工程證據，不是 cellular truth。</li>
+          <li>Guard 只防登記的 anchors/residuals；新同義 overclaim 仍需科學 review。</li>
+          <li>CCU patch 只對 pinned baseline 保證 apply-check；upstream 前進後須重驗。</li>
+          <li>本 HTML、Markdown 與 cycle 工件尚未 commit；<code>HEAD 95d420f6</code> 不能識別其 bytes。33-entry manifest 固定 correction target／guard／patch；<a href="../../../../../research/20260813_public_docs_p0_correction/final_report_manifest.sha256">獨立 sidecar</a> 固定最終 MD／HTML。</li>
+          <li>本輪沒有 commit、push、merge、PR、About edit 或 deploy。</li>
+        </ul>
+        <div class="verdict-banner">
+          <strong>最終結論：</strong>先完成 publication gate 與剩餘 P1/P2；最先能改變 claim ceiling 的 top 3 是 CN/LOH／purity／multiplicity 與 CCF uncertainty、獨立 cellular truth、known-truth calibration，biological replication 是後續升級 gate。目前不得新增更強的 clone／lineage 文案。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <strong>Provenance</strong> · Task B comprehensive validation continuation · UNCOMMITTED WORKSPACE ARTIFACT · target manifest <code>4c7b0e…f6e1</code> · <a href="../../../../../research/20260813_public_docs_p0_correction/final_report_manifest.sha256">final report hash sidecar</a> · base HEAD 95d420f6 · 2026-08-13 Asia/Taipei · Remote publication NOT PERFORMED · Standalone HTML，無外部 runtime dependency。
+    </div>
+  </footer>
+</body>
+</html>
