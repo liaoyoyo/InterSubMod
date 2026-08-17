@@ -189,13 +189,53 @@ cmake --build build -j$(nproc)
 # 3. Python dependencies
 pip install -r requirements.txt
 
-# 4. Supply your own indexed, licensed inputs. The public repository currently ships no
-#    runnable BAM/FASTA/VCF fixture, so these are placeholders, not copy-paste data paths.
+# 4. Run once on a fully synthetic fixture, to confirm the build works end to end.
+#    Needs pysam + samtools + bgzip + tabix. Roughly 14 KB of generated input.
+#    Verified 2026-08-17: exit 0, 2 regions, 244 CpG sites, 24 reads per region.
+python3 scripts/make_synthetic_fixture.py
+bash tests/fixtures/synthetic/RUN.sh
+
+# 5. Then supply your own indexed, licensed inputs. The repository ships no *real*
+#    BAM/FASTA/VCF, so these remain placeholders, not copy-paste data paths.
 ./build/bin/inter_sub_mod \
   --tumor-bam /path/to/tumor.mm_ml.bam \
   --reference /path/to/reference.fa \
   --vcf       /path/to/candidates.vcf \
   --output-dir out_min
+```
+
+> The synthetic fixture carries **no biological meaning**. Its only job is to give you a
+> known-good baseline, so that when your own data produces nothing you can tell
+> "my data has no signal" apart from "my environment is broken".
+> See [`tests/fixtures/synthetic/README.md`](tests/fixtures/synthetic/README.md) — it also
+> documents a silent-failure trap: `inter_sub_mod` only recognises the `C+m?` flavour of the
+> MM tag, and any other flavour yields `Total CpG sites found: 0` with **exit code 0**.
+
+### Running this together with LongLineage
+
+The two engines build independently and neither references the other in CMake, but they
+compose at run time in **one direction**:
+
+```
+upstream (neither repo): dorado (MM/ML) → align → LongPhase haplotag → somatic VCF
+      ↓
+LongLineage   scripts/run_sample.sh   →  writes BAM aux tags lc:Z lu:Z lv:Z ls:A
+      ↓
+InterSubMod   inter_sub_mod --tumor-bam <tagged.bam> ...
+```
+
+**InterSubMod runs perfectly well without LongLineage.** If the BAM never went through
+`longlineage-tag-bam`, the lineage axes are simply skipped rather than collapsed into one
+group (`include/core/Stats.hpp`, lineage-axis comment). The reverse direction —
+LongLineage reading an InterSubMod manifest in `src/compat/regional_crosswalk.cpp` — is a
+*validation crosswalk*, not a dependency, so do not assume you must run InterSubMod first.
+
+Companion repository and full run order:
+[**LongLineage**](https://github.com/liaoyoyo/LongLineage#與-intersubmod-的關係先讀這節再決定要不要裝).
+To check that the version recorded in this README still matches LongLineage's public `main`:
+
+```bash
+python3 scripts/handoff/check_companion_version.py
 ```
 
 <details>

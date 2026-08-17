@@ -173,13 +173,51 @@ cmake --build build -j$(nproc)
 # 3. Python 依賴
 pip install -r requirements.txt
 
-# 4. 請自行提供有授權且已建立索引的輸入。公開 repo 目前沒有 runnable
-#    BAM/FASTA/VCF fixture；以下是 placeholder，不是可直接複製的資料路徑。
+# 4. 先用完全合成的 fixture 跑一次，確認建置能端到端運作。
+#    需要 pysam + samtools + bgzip + tabix，產生的輸入約 14 KB。
+#    2026-08-17 實測：exit 0、2 個 region、244 個 CpG、每 region 24 條 read。
+python3 scripts/make_synthetic_fixture.py
+bash tests/fixtures/synthetic/RUN.sh
+
+# 5. 接著才提供你自己有授權且已建立索引的輸入。repo 不附**真實**的
+#    BAM/FASTA/VCF；以下仍是 placeholder，不是可直接複製的資料路徑。
 ./build/bin/inter_sub_mod \
   --tumor-bam /path/to/tumor.mm_ml.bam \
   --reference /path/to/reference.fa \
   --vcf       /path/to/candidates.vcf \
   --output-dir out_min
+```
+
+> 合成 fixture **沒有任何生物學意義**。它唯一的用途是給你一個已知會成功的基準，
+> 這樣當你自己的資料跑不出東西時，才能區分「我的資料沒有訊號」與「我的環境壞了」。
+> 見 [`tests/fixtures/synthetic/README.md`](tests/fixtures/synthetic/README.md) ——
+> 裡面也記錄了一個靜默失敗的坑：`inter_sub_mod` 只認 MM 標籤的 `C+m?` flavor，
+> 其他 flavor 會得到 `Total CpG sites found: 0` 而 **exit code 仍是 0**。
+
+### 和 LongLineage 一起跑
+
+兩個引擎各自獨立建置、CMake 互不引用，但執行期以**單一方向**銜接：
+
+```
+上游（不屬於這兩個 repo）：dorado（MM/ML）→ 比對 → LongPhase haplotag → somatic VCF
+      ↓
+LongLineage   scripts/run_sample.sh   →  寫入 BAM aux tag lc:Z lu:Z lv:Z ls:A
+      ↓
+InterSubMod   inter_sub_mod --tumor-bam <tagged.bam> ...
+```
+
+**InterSubMod 沒有 LongLineage 也完全跑得起來。** 輸入 BAM 若沒經過 `longlineage-tag-bam`，
+lineage 軸會被直接跳過，而不是把所有 read 併成一個大群組
+（見 `include/core/Stats.hpp` 的 lineage 軸註解）。反方向 —— LongLineage 在
+`src/compat/regional_crosswalk.cpp` 讀取 InterSubMod 的 manifest —— 是**驗證用的
+crosswalk，不是相依**，所以不要以為必須先跑 InterSubMod。
+
+搭檔 repository 與完整執行順序：
+[**LongLineage**](https://github.com/liaoyoyo/LongLineage#與-intersubmod-的關係先讀這節再決定要不要裝)。
+確認本 README 記載的版本是否仍等於 LongLineage 公開 `main`：
+
+```bash
+python3 scripts/handoff/check_companion_version.py
 ```
 
 <details>
