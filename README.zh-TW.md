@@ -137,16 +137,27 @@ assay 才能突破限制。推論出的內部節點一律標為 `inferred`。
 | `longlineage dataset-gate` | ⚠️ 受限 | 在 candidate `b9aaa12` 的 frozen HCC1395 receipt 中，唯一觀察到能產生 research artifacts 的介面；**硬編碼綁死單一資料集**，不是 production science validation |
 | `longlineage run` / `probe` | 🔴 被鎖 | 依設計回 `KernelBlocked` |
 | `longlineage` 拓撲產出 | 🔴 一份 frozen receipt 為 0 個 candidate units | 只限 candidate `b9aaa12` 的 HCC1395 dataset-gate；見[下方說明](#關於-longlineage) |
-| 輸出帶標籤的 BAM | ⚠️ 版本限定 | `inter_sub_mod` 不寫 BAM；LongLineage private baseline/main snapshot `5daf50f` 不支援，private public-preview candidate `b9aaa12` 提供 `longlineage-tag-bam`（NOT_READY／non-production） |
-| 串起兩支引擎的單一腳本 | 🔴 沒有 | 目前是兩條各自獨立的線 |
+| 輸出帶標籤的 BAM | ✅ 可跑，但仍非 production | `inter_sub_mod` 不寫 BAM。LongLineage **公開** `main` `583e03e` 已建出 `longlineage-tag-bam`（`CMakeLists.txt:221`），2026-08-17 併入 —— 較早的 baseline snapshot `5daf50f` 沒有。可用不等於已釋出：LongLineage 自己的 gate 仍回報 FAIL，見下 |
+| 串起兩支引擎的單一腳本 | ⚠️ 只有單引擎的 | LongLineage 有 `scripts/run_sample.sh`（partition → tagged BAM）。尚無單一腳本同時串起 LongLineage **與** `inter_sub_mod`；執行順序見[和 LongLineage 一起跑](#和-longlineage-一起跑) |
 
 ### 關於 LongLineage
 
-LongLineage 目前是 **PRIVATE research-preview candidate**。Source-origin、license 與 dependency
-audit 尚待完成，因此本交接不先宣稱 clean-room 起源或可公開 redistribution。Immutable
-`b9aaa12` 是 public-preview candidate、不是已發布 build；狀態為 `NOT_READY`／non-production，
-`P3/P4/P5/P7/P8` 仍 **BLOCKED**。Production `run` 刻意 fail-closed；目前沒有 production tag
-或 GitHub Release。`5daf50f` 是 private baseline/main capability snapshot。其契約以 schema 與
+<!-- companion-version: LongLineage public main = 583e03e -->
+
+LongLineage 已於 **2026-08-17 轉為公開 repository**，其 `main` 同日收斂：三條
+`agent/public-preview-*` 分支與 tag-bam／solver commit 全部併入，`main` = `583e03e`，
+`SBOM.spdx.json`、`THIRD_PARTY_NOTICES.md`、`docs/release/PUBLIC_SAFETY_RECEIPT.json` 皆已在其上。
+該樹於隔離 worktree 重建重測：build exit 0、**ctest 49/49**。
+
+**公開且可建置，不等於已釋出。** LongLineage 自己的
+`scripts/ci/check_public_preview_gate.sh HEAD` 仍回報 `FAIL`，5 個未結案 blocker：
+授權審查未結案、4 筆 `NO_GO` 來源對應、21 筆授權未核准、11 個相依項 `NOASSERTION`、
+歷史中 4 個 blob 含開發機絕對路徑（其現行工作樹是乾淨的，路徑只殘留在歷史）。
+`P3/P4/P5/P7/P8` 仍 **BLOCKED**，production `run` 刻意 fail-closed，也沒有 production tag
+或 GitHub Release。可讀、可建置、可跑其測試 —— **不要當作已完成授權清算的釋出版重新散布**。
+
+歷史版本註記：`b9aaa12` 曾是 public-preview candidate，`5daf50f` 是較早的 baseline／main
+snapshot；下文中限定於這些 commit 的敘述仍限定於它們。其契約以 schema 與
 SHA-256 receipt 鎖定 artifacts，並記錄具名 abstention；這些契約本身不證明生物正確性。
 
 在 candidate `b9aaa12` 的 frozen **HCC1395 dataset-gate receipt** 中，它輸出 0 個 candidate topology units；
@@ -201,6 +212,32 @@ export PATH="$PYTHON_ENV/bin:$PATH"
 tiny fixture 追蹤 synthetic FASTA／VCF／SAM source，並在新的暫存目錄建立 BAM與index。
 PASS receipt 只證明 clone→build→run→schema 的接線可用；scope 是 **DEMO**，不可支持
 生物結論、benchmark或release science claim。
+
+### 和 LongLineage 一起跑
+
+兩支引擎各自獨立建置 —— 雙方的 CMake 都不引用對方 —— 但執行期以**單一方向**銜接：
+
+```
+上游（不屬於這兩個 repo）：dorado（MM/ML）→ 比對 → LongPhase haplotag → somatic VCF
+      ↓
+LongLineage   scripts/run_sample.sh   →  寫入 BAM aux tag lc:Z lu:Z lv:Z ls:A
+      ↓
+InterSubMod   inter_sub_mod --tumor-bam <tagged.bam> ...
+```
+
+**InterSubMod 沒有 LongLineage 也完全跑得起來。** 輸入 BAM 若沒經過 `longlineage-tag-bam`，
+lineage 軸會被直接跳過，而不是併成一個大群組 —— 見 `include/core/Stats.hpp` 的 lineage 軸註解。
+反方向 —— LongLineage 在其 `src/compat/regional_crosswalk.cpp` 讀取 InterSubMod 的 manifest
+（`schema_name = intersubmod.layered_sample_output_manifest`）—— 是**驗證用的 crosswalk，
+不是相依**，所以不要以為必須先跑 InterSubMod。
+
+搭檔 repository 及其自身的執行順序與誠實 gate 狀態：
+[**LongLineage**](https://github.com/liaoyoyo/LongLineage)。確認本 README 引用的 LongLineage
+commit 是否仍等於其公開 `main`：
+
+```bash
+python3 scripts/handoff/check_companion_version.py
+```
 
 <details>
 <summary><b>三個一定會咬到你的地方</b>（皆已對照原始碼確認）</summary>

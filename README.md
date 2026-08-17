@@ -151,17 +151,30 @@ the stated audit version; it is not a blanket guarantee for every public command
 | `longlineage dataset-gate` | ⚠️ constrained | In candidate `b9aaa12`'s frozen HCC1395 receipt, the only observed interface producing research artifacts; **hardcoded to one dataset**, not production science validation |
 | `longlineage run` / `probe` | 🔴 blocked | `KernelBlocked` by design |
 | `longlineage` topology output | 🔴 0 candidate units in one frozen receipt | Candidate `b9aaa12`, HCC1395 dataset-gate scope only; see [caveat](#a-note-on-longlineage) |
-| Writing a tagged BAM | ⚠️ version-scoped | `inter_sub_mod` does not write BAM; LongLineage private baseline/main snapshot `5daf50f` does not, while private public-preview candidate `b9aaa12` provides `longlineage-tag-bam` (NOT_READY/non-production) |
-| Single script spanning both engines | 🔴 none | The two lines are currently independent |
+| Writing a tagged BAM | ✅ runnable, still non-production | `inter_sub_mod` does not write BAM. LongLineage **public** `main` `583e03e` builds `longlineage-tag-bam` (`CMakeLists.txt:221`), merged 2026-08-17 — the earlier baseline snapshot `5daf50f` did not. Availability is not a release claim: LongLineage's own gate still reports FAIL, see below |
+| Single script spanning both engines | ⚠️ per-engine only | LongLineage ships `scripts/run_sample.sh` (partition → tagged BAM). No single script yet spans LongLineage **and** `inter_sub_mod`; the run order is documented under [Running this together with LongLineage](#running-this-together-with-longlineage) |
 
 ### A note on LongLineage
 
-LongLineage is currently a **PRIVATE research-preview candidate**. Its source-origin, license,
-and dependency audits are still pending, so this handoff does not claim that clean-room origin
-or public redistribution has been established. Immutable `b9aaa12` is the public-preview
-candidate, not a published build: status is `NOT_READY` / non-production and
-`P3/P4/P5/P7/P8` remain **BLOCKED**. Production `run` is intentionally fail-closed; no
-production tag or GitHub Release exists. `5daf50f` is a private baseline/main capability snapshot.
+<!-- companion-version: LongLineage public main = 583e03e -->
+
+LongLineage became a **public repository on 2026-08-17**, and its `main` was consolidated the
+same day: the three `agent/public-preview-*` branches plus the tag-bam/solver commits were
+merged, giving `main` = `583e03e` with `SBOM.spdx.json`, `THIRD_PARTY_NOTICES.md` and
+`docs/release/PUBLIC_SAFETY_RECEIPT.json` present. That tree was rebuilt and re-tested in an
+isolated worktree: build exit 0, **ctest 49/49**.
+
+**Public and buildable is not the same as released.** LongLineage's own
+`scripts/ci/check_public_preview_gate.sh HEAD` still reports `FAIL` with five open blockers:
+license review pending, 4 `NO_GO` source rows, 21 unapproved source-license rows,
+11 `NOASSERTION` dependencies, and 4 historical blobs carrying developer absolute paths
+(its current working tree is clean; the paths survive only in history). `P3/P4/P5/P7/P8`
+remain **BLOCKED**, production `run` is intentionally fail-closed, and no production tag or
+GitHub Release exists. Read it, build it, run its tests — do not redistribute it as a
+license-cleared release.
+
+Historical version notes: `b9aaa12` was the public-preview candidate and `5daf50f` the earlier
+baseline/main snapshot; statements below that are scoped to those commits stay scoped to them.
 Its contracts schema-lock artifacts with SHA-256 receipts, and `topology_unit` records named
 abstention states; those contracts do not establish biological correctness.
 
@@ -233,6 +246,34 @@ eval "$("$REPO_ROOT/scripts/site/site_profile.py" shell --profile "$SITE_PROFILE
 The tiny fixture contains tracked synthetic FASTA/VCF/SAM sources and builds BAM/index files
 in a new temporary directory. A passing receipt proves clone→build→run→schema plumbing only;
 it is **DEMO scope** and cannot support biological, benchmark, or release-science claims.
+
+### Running this together with LongLineage
+
+The two engines build independently — neither CMake file references the other — but they
+compose at run time in **one direction**:
+
+```
+upstream (neither repo): dorado (MM/ML) → align → LongPhase haplotag → somatic VCF
+      ↓
+LongLineage   scripts/run_sample.sh   →  writes BAM aux tags lc:Z lu:Z lv:Z ls:A
+      ↓
+InterSubMod   inter_sub_mod --tumor-bam <tagged.bam> ...
+```
+
+**InterSubMod runs perfectly well without LongLineage.** If the BAM never went through
+`longlineage-tag-bam`, the lineage axes are simply skipped rather than collapsed into a single
+group — see the lineage-axis comment in `include/core/Stats.hpp`. The reverse direction,
+LongLineage reading an InterSubMod manifest in its `src/compat/regional_crosswalk.cpp`
+(`schema_name = intersubmod.layered_sample_output_manifest`), is a *validation crosswalk* and
+**not** a dependency, so do not assume InterSubMod has to run first.
+
+Companion repository, with its own run order and honest gate status:
+[**LongLineage**](https://github.com/liaoyoyo/LongLineage). To check that the LongLineage
+commit quoted in this README still matches its public `main`:
+
+```bash
+python3 scripts/handoff/check_companion_version.py
+```
 
 <details>
 <summary><b>Three things that will bite you</b> (all verified against source)</summary>
