@@ -50,7 +50,7 @@
 
 | 部件 | 說明 |
 |---|---|
-| `tumor BAM`（ONT） | HCC1395 = 283,071,595,503 bytes（2026-08-13 `stat -L`） |
+| `tumor BAM`（ONT） | HCC1395 = 292 GB |
 | `normal BAM` | 配對正常組織 |
 | `reference FASTA` | GRCh38 + `.fai` 必備 |
 

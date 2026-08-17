@@ -197,26 +197,6 @@ pre code,
 .gate li b{color:var(--c-text)} .gate li .src{font-family:var(--mono);font-size:.74rem;color:var(--c-text-soft)}
 @media(max-width:720px){.track2{grid-template-columns:1fr}}
 </style>
-<style>
-/* 2026-08-13 responsive overflow correction: reflow long evidence paths and dense tables. */
-html,body{max-width:100%}
-.wrap,.topbar .in,section,header,footer,details,.card,.grid,.split,.track2,.table-wrap,pre{min-width:0;max-width:100%}
-p code,li code,td code,summary code,footer code,.prov code,.src,.path,.rname,.kv .v,.kv .note{overflow-wrap:anywhere;word-break:break-word}
-code{white-space:normal;overflow-wrap:anywhere;word-break:break-all}
-pre{overflow-x:auto}
-pre code{display:block;white-space:pre;word-break:normal}
-.evi{min-width:0;max-width:100%;overflow-x:auto}
-@media(max-width:680px){
-  .wrap,.topbar .in{padding-left:12px;padding-right:12px}
-  .grid,.cards,.grid3,.split,.track2{grid-template-columns:minmax(0,1fr)!important}
-  .kpis{display:grid;grid-template-columns:minmax(0,1fr)}
-  .kpi,.step>.head h4{min-width:0}
-  .kpi .v,.kpi .k{min-width:0;overflow-wrap:anywhere;word-break:break-word}
-  .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
-  table{width:100%;max-width:100%;table-layout:fixed;font-size:.76rem}
-  th,td{min-width:0;padding:5px 6px;overflow-wrap:anywhere;word-break:break-word}
-}
-</style>
 </head>
 <body>
 
@@ -307,9 +287,7 @@ pre code{display:block;white-space:pre;word-break:normal}
 
   <figure>
     <div class="figtitle">圖 2‑1　一條 read 的甲基訊號怎麼變成矩陣裡的一格（示意）</div>
-    <svg viewBox="0 0 980 380" role="img" aria-labelledby="p03-svg1-title p03-svg1-desc">
-      <title id="p03-svg1-title">MM/ML 甲基標記解析管線</title>
-      <desc id="p03-svg1-desc">從 BAM 的 MM/ML tags 解析修飾位置與機率，經 CIGAR 對位與 CpG context 驗證後建立 read-level 甲基呼叫。</desc>
+    <svg viewBox="0 0 980 380" role="img" aria-label="MM/ML 解析管線">
       <defs>
         <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#D97757"/></marker>
       </defs>
@@ -400,9 +378,7 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
 
   <figure>
     <div class="figtitle">圖 3‑1　二值化的三個區間（門檻 0.2 / 0.8）</div>
-    <svg viewBox="0 0 940 230" role="img" aria-labelledby="p03-svg2-title p03-svg2-desc">
-      <title id="p03-svg2-title">甲基機率的二值化門檻</title>
-      <desc id="p03-svg2-desc">機率不大於 0.2 記為未甲基、不小於 0.8 記為甲基；中間灰帶在二值路徑當作缺失。</desc>
+    <svg viewBox="0 0 940 230" role="img" aria-label="二值化門檻數線">
       <!-- number line -->
       <line x1="60" y1="120" x2="880" y2="120" stroke="#5C5A54" stroke-width="2"/>
       <!-- ticks -->
@@ -454,9 +430,7 @@ delta=0 → 跳過 0 個 → 標記 <b>C5</b>，機率 = 200/255 = <span class="
 
   <figure>
     <div class="figtitle">圖 4‑1　read 進入甲基矩陣的漏斗（每關都可能淘汰）</div>
-    <svg viewBox="0 0 720 360" role="img" aria-labelledby="p03-svg3-title p03-svg3-desc">
-      <title id="p03-svg3-title">read QC 與甲基矩陣建立漏斗</title>
-      <desc id="p03-svg3-desc">示意 read 經比對品質、長度、突變覆蓋、去重與 MM/ML 條件後，進入 read 乘 CpG 矩陣的處理層流程。</desc>
+    <svg viewBox="0 0 720 360" role="img" aria-label="read QC 漏斗">
       <g font-size="12" font-family="-apple-system,sans-serif">
         <rect x="60" y="20" width="600" height="38" rx="6" fill="#E2ECF3" stroke="#2F6690"/><text x="360" y="44" text-anchor="middle" font-weight="700" fill="#2F6690">該區所有 BAM reads（tumor + normal）</text>
         <polygon points="60,58 660,58 600,98 120,98" fill="#fff" stroke="#2F6690"/><text x="360" y="84" text-anchor="middle" fill="#1c1b19">G1 FLAG：丟 secondary / supplementary / duplicate / unmapped</text>

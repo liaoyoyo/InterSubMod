@@ -53,7 +53,7 @@ test -x "$BUILD_ROOT/bin/run_tests"
 ctest --test-dir "$BUILD_ROOT" --output-on-failure
 ```
 
-**版本限定的稽核輸出**（tracked core `73afaeac`，2026-08-12；未來 commit 請以實際輸出為準）：
+**本輪實跑的真實輸出**：
 
 ```text
 [==========] <N> tests from <S> test suites ran.

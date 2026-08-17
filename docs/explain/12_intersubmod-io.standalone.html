@@ -1,6 +1,3 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>InterSubMod 部件 — 吃什麼、做什麼、吐什麼</title>
@@ -133,8 +130,6 @@ pre code,
   word-break:break-word;
 }
 </style>
-</head>
-<body>
 
 <div class="topbar"><div class="in">
   <span class="brand">解釋中心</span>
@@ -288,7 +283,7 @@ pre code,
       <title id="g1t">InterSubMod 內部八階段處理鏈</title>
       <desc id="g1d">從 VCF 載入突變錨點開始，依序為：以突變為中心開視窗、從 BAM 抓取 read、
       read 過濾與單倍型解析、解析甲基化標記組成 read 乘 CpG 矩陣、二值化、計算 read 兩兩距離矩陣、
-      剔除含缺失值的 read 後建立 read-level methylation dendrogram（階層分群，非 cellular phylogeny）、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
+      剔除含缺失值的 read 後做階層分群建樹、以輪廓係數決定群數、最後跑四類顯著性檢定並輸出檔案。</desc>
       <g font-family="system-ui,-apple-system,'Noto Sans CJK TC',sans-serif" fill="#1c1b19">
         <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill="#8a8578"/></marker></defs>
@@ -324,7 +319,7 @@ pre code,
         <text x="716" y="246" font-size="9.5" font-weight="700" fill="#5B3FA0">HP 標籤實測值域（6 種）</text>
         <text x="716" y="260" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">1:7864  2:6453  1-1:3856</text>
         <text x="716" y="273" font-family="ui-monospace,monospace" font-size="9" fill="#3f2c70">2-1:3161  0:1658  3:374</text>
-        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = somatic-supporting haplotag/read family</text>
+        <text x="716" y="284" font-size="8.5" fill="#9A3B3B">1-1／2-1 = 帶體細胞突變的單倍型</text>
         <path d="M470,292 L470,312" stroke="#8a8578" stroke-width="1.6" marker-end="url(#a1)" fill="none"/>
 
         <!-- S5 -->
@@ -669,5 +664,3 @@ NTumorReads=85 · NNormalReads=25 · NormalBaseline_Mean=0.0890 · SampleASM_Del
   </p>
 </footer>
 </div>
-</body>
-</html>

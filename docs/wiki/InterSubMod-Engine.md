@@ -192,7 +192,7 @@ RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,GlobalP_HPFamily,...
 0,chr1,877772,G,C,46,17,2.990000e-01,0.0000,3.065000e-01,0.0000,...
 ```
 
-> 🔴 **欄數會隨 producing binary 版本改變，且仍沒有單一 whole-file layout version**
+> 🔴 **欄數會隨 binary 版本改變，而且檔案裡沒有版本欄位**
 >
 > 歷史磁碟輸出實測到 **59 / 114 / 117 / 157 / 180** 五種欄數；frozen release baseline `ddd8909a` 的 source header 是 **199 欄**。歷史 `73afaeac-dirty` runtime audit 與 baseline 的 C++／CMake inputs byte-equivalent，但不是 release source。現行檔案雖含 component-level schema 欄，仍沒有單一 whole-file layout version。不同時期的欄位位置會錯開，固定欄號解析可能靜默讀錯；**務必用欄名讀，並記錄 producer commit。**
 

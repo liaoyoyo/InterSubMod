@@ -17,8 +17,6 @@ LongLineage 把 ONT 資料算成「**哪些 candidate somatic variants 共同出
 
 **它與 InterSubMod 的根本差異**：ISM 輸出是 **per-region**（每個位點一包結果），LL 輸出是 **per-read**（每條 read 一列）；ISM 從 BAM 直接讀單倍型標籤，LL **明文禁止讀 BAM tag**，只認 sidecar 檔案。
 
-下表全部只屬 frozen HCC1395-only dataset-gate（chr1–22，79,687 loci）：
-
 | 指標 | 數值 | 意義 |
 |---|---|---|
 | 輸入的體細胞突變位點 | **79,687** | 凍結的體細胞突變位點（chr1–22） |
@@ -59,7 +57,7 @@ LongLineage 把 ONT 資料算成「**哪些 candidate somatic variants 共同出
 
 ---
 
-## 02 · 為什麼 frozen HCC1395 dataset-gate 輸出是 0？—— 甲基化是總開關，不是輔助
+## 02 · 為什麼輸出是 0？—— 甲基化是總開關，不是輔助
 
 這是本頁最重要的一節。答案不在程式效能或資料量，而在**科學設計的一個前提**。
 
@@ -111,7 +109,7 @@ LongLineage 把 ONT 資料算成「**哪些 candidate somatic variants 共同出
 | `m1_assignments` | — | 78,629 | 哪些 read 被分到哪一群。**注意：這是甲基化的群，不是亞群譜系標籤。** |
 | `cooccurrence_pairs` | 74 | 134,278 | 兩個位點在同一條 read 上的共現統計。 |
 | `cooccurrence_sites` | 24 | 79,687 | 每個位點的共現彙總。 |
-| `topology_units` | 34 必填鍵 | **0**<br>（28 bytes） | Frozen HCC1395-only dataset-gate 的檔案為空；不代表每個 real-data run 或所有版本都為 0。 |
+| `topology_units` | 34 必填鍵 | **0**<br>（28 bytes） | 本來要放拓撲解的地方。目前是空的。 |
 
 > **一個設計上的亮點值得學習**
 > `topology_unit` 的 schema 把「解到什麼程度」拆成**四個獨立狀態欄位**（用哪條求解路徑／目標函數狀態／候選家族狀態／排序狀態），並且**每種放棄都有具名的理由**。這讓「沒解出來」不會被誤讀成「解出來是空的」—— 值得在自己的輸出格式裡沿用。

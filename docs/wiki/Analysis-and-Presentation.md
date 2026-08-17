@@ -157,13 +157,7 @@ sSNV 總數 35,332（TP 30,490 / FP 4,842）      ✓
 
 - **腳本可用性**：主力腳本的 `--help` 本輪實跑取 exit code；`verify_pipeline_numbers.py` 完整跑完並讀回 historical 35,332-site 輸出。此驗證不涵蓋其他 claim family。
 - **拒絕渲染行為**：以自建的最小 spec（故意缺一個必填指標）實測，確認退出碼為 3。
-- **檔案大小與腳本計數**：Python inventory 鎖定 audited deploy `fbdf7c7`，以以下 exact command
-  計算所有 tracked `.py`（不排除 tests 或 generated-named sources）：
-
-  ```bash
-  git ls-tree -r --name-only fbdf7c7 | rg -c '\.py$'                 # 2147
-  git ls-tree -r --name-only fbdf7c7 -- scripts | rg -c '\.py$'      # 291
-  ```
+- **檔案大小與腳本計數**：實際 `ls` 與遞迴統計，非估計值。
 - **python 版本問題**：以預設 `python3` 實跑重現崩潰，再以 3.10 實跑確認正常。
 
 **路徑**：`InterSubMod/docs/explain/15_python-html-layer.standalone.html` · 分支 `research/subclonal-reconstruction-202606` · 建立於 2026-08-06
