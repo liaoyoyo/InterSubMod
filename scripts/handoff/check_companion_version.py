@@ -44,9 +44,15 @@ COMPANION_URL = "https://github.com/liaoyoyo/LongLineage.git"
 
 README_FILES = ["README.md", "README.zh-TW.md"]
 
-# README 裡宣告搭檔版本的寫法。兩種語言各一種，都抓 7-40 位的十六進位 commit。
+# README 用一個機器可讀的標記宣告搭檔版本：
+#     <!-- companion-version: LongLineage public main = 583e03e -->
+#
+# 刻意不從散文抓。第一版用 regex 去比對「public main `<sha>`」這種句式，結果雙語
+# README 一改寫法（改成「LongLineage **公開** `main` `583e03e`」）就整個對不上，
+# 腳本回報 SKIP —— 而 SKIP 看起來像「沒問題」，等於偵測能力靜默消失。
+# 用標記則散文可自由改寫，契約仍然成立。
 RECORDED_RE = re.compile(
-    r"[Pp]ublic\s+main\s+[``]([0-9a-f]{7,40})[``]"
+    r"<!--\s*companion-version:\s*LongLineage\s+public\s+main\s*=\s*([0-9a-f]{7,40})\s*-->"
 )
 
 
@@ -74,17 +80,29 @@ def actual_companion_main() -> tuple[str | None, str]:
     return None, "取不到（本機 repo 不存在且 ls-remote 失敗）"
 
 
-def recorded_versions() -> list[tuple[str, int, str]]:
-    """從 README 抽出所有被記載的搭檔版本，回傳 [(檔名, 行號, sha)]。"""
-    found = []
+def recorded_versions() -> tuple[list[tuple[str, int, str]], list[str]]:
+    """從每份 README 抽出被記載的搭檔版本。
+
+    回傳 (命中清單, 缺標記的檔案清單)。
+
+    缺標記要逐檔回報，不能只看「整體有沒有找到」—— 第一版就是那樣寫的，
+    結果把 README.md 的標記刪掉、而 README.zh-TW.md 還留著時，腳本回報通過。
+    雙語 README 各自對外，任一份漏掉都是真實的偵測缺口。
+    """
+    found: list[tuple[str, int, str]] = []
+    missing: list[str] = []
     for name in README_FILES:
         path = REPO / name
         if not path.is_file():
+            missing.append(f"{name}（檔案不存在）")
             continue
+        hits_before = len(found)
         for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             for m in RECORDED_RE.finditer(line):
                 found.append((name, lineno, m.group(1)))
-    return found
+        if len(found) == hits_before:
+            missing.append(name)
+    return found, missing
 
 
 def main() -> int:
@@ -97,11 +115,15 @@ def main() -> int:
         if not args.quiet:
             print(*a)
 
-    recorded = recorded_versions()
-    if not recorded:
-        say("SKIP  README 中找不到任何 `public main <sha>` 形式的搭檔版本宣告。")
-        say("      若 README 改了寫法，請同步更新本腳本的 RECORDED_RE。")
-        return 0
+    recorded, missing = recorded_versions()
+    if missing:
+        # 這不是 SKIP 而是 FAIL：標記消失代表偵測機制本身壞了，
+        # 而「沒有偵測到漂移」與「無法偵測漂移」必須是不同的結果。
+        say("FAIL  下列檔案缺少 companion-version 標記：")
+        for m in missing:
+            say(f"        {m}")
+        say("      預期格式：<!-- companion-version: LongLineage public main = <sha> -->")
+        return 1
 
     actual, source = actual_companion_main()
     if actual is None:

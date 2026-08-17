@@ -467,9 +467,3 @@ drilldown.paths.json
 !docs/images/*.png
 !docs/images/*.svg
 
-# 合成 fixture 全部是衍生產物 —— 只有產生器進 git。
-# 把產物也提交會多出一個真值來源，日後改了產生器卻忘了重產，
-# committed fixture 就會和它宣稱的產生方式不一致。
-# 產生方式：python3 scripts/make_synthetic_fixture.py（固定亂數種子，結果可重現）
-tests/fixtures/synthetic/*
-!tests/fixtures/synthetic/README.md
